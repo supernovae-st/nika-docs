@@ -1,154 +1,248 @@
 ---
 title: "The five verbs"
-description: "exec · fetch · invoke · infer · agent. Five verbs, closed set. Everything else is data."
+description: "exec · fetch · invoke · infer · agent. Five verbs, closed set, typed contracts. Everything else is data."
 sidebarTitle: "Verbs"
-icon: "code"
+icon: "play"
 ---
 
-Five verbs. No sixth. Each has a narrow job and a typed contract.
+import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-<Note>
-  The verb set is **closed**. Adding a sixth verb requires a schema version
-  bump and the 12-gate admission process. We would rather say no.
-</Note>
+A Nika workflow is a list of **tasks**. Each task picks exactly one of
+**five verbs** — `exec`, `fetch`, `invoke`, `infer`, `agent` — and
+supplies its required fields. The set is closed: the parser's verb
+dispatcher is exhaustive at compile time, so adding a sixth verb is a
+schema-version bump, not a patch release.
+
+<Info>
+  **Target design banner.** Verb grammar is locked by `nika-schema` raw
+  AST (`RawAction` enum). The YAML parser is WIP — scaffolding lives at
+  `crates/nika-schema/` and graduates in **Round 4** admission. Snippets
+  below reflect the target shape, not what executes end-to-end at v{STATUS.version}.
+</Info>
+
+## Why five?
+
+Every workflow decomposes into one of these moves:
+
+| Verb | One-line intent |
+|---|---|
+| `exec` | Run a local command. |
+| `fetch` | Pull data from the world (HTTP/URL). |
+| `invoke` | Call an MCP tool or resource. |
+| `infer` | Ask an LLM. |
+| `agent` | Delegate to an agent loop (LLM + tools + iteration budget). |
+
+Anything else we considered — "transform", "map", "branch", "retry" —
+was a special case of one of these five, or workflow-level machinery
+(dependencies, `for_each`, `condition`) that lives on the task envelope,
+not as a new verb.
 
 ## `exec` — run a local command
 
+Spawns a subprocess, captures stdout/stderr, returns exit code + output.
+
+**Required**: `command` (string).
+**Optional**: `shell` (bool), `cwd` (path), `env` (map), `timeout_ms` (int), `max_stdout` (bytes cap).
+
 ```yaml
-- id: build
+- name: build
   exec:
-    cmd: cargo build --release
+    command: cargo build --release
     cwd: ./crates/engine
-    timeout: 300s
+    timeout_ms: 300000
     env:
       RUSTFLAGS: "-C target-cpu=native"
 ```
 
-What it does: spawn a subprocess. Capture stdout/stderr. Return exit code and output. Kills on timeout or parent drop.
+**Invariants** (from `nika-kernel::process::ShellExecutor`):
 
-**Invariants**:
-- Always sets `kill_on_drop(true)` (no leaked processes)
-- Concurrent pipe reading via `tokio::try_join!`
-- Exit code ≠ 0 is a task failure by default (override with `allow_nonzero: true`)
+- `Command::new` MUST set `kill_on_drop(true)` — no leaked child processes (INV-011).
+- Concurrent pipe reading uses `tokio::try_join!` (INV-012).
+- Non-zero exit is a task failure by default. Sanitize untrusted
+  interpolation through the `shell_quote` filter before the command
+  reaches L1.
 
-## `fetch` — HTTP, URL, file, GitHub
+Cross-link: [`ShellExecutor` trait](/architecture/kernel#shell-executor) (L0.5 kernel contract).
+
+## `fetch` — HTTP request
+
+Issues an HTTP request (GET/POST/etc.), returns bytes or parsed JSON.
+
+**Required**: `url` (string).
+**Optional**: `method` (string, default `GET`), `headers` (map), `body`
+(string), `json` (any), `timeout_ms` (int), `follow_redirects` (bool),
+`response` (hint: `text` | `json` | `bytes`), `extract` + `selector`
+(CSS/JSONPath extraction), `session` (bool), `cache` (bool).
 
 ```yaml
-- id: pull_readme
+- name: pull_readme
   fetch:
     url: https://api.github.com/repos/supernovae-st/nika/readme
+    method: GET
     headers:
       Accept: application/vnd.github.raw
-    auth:
-      bearer: ${env.GITHUB_TOKEN}
-    timeout: 30s
-    retry:
-      max_attempts: 3
-      backoff: 2.0
+      Authorization: "Bearer {{ env.GITHUB_TOKEN }}"
+    timeout_ms: 30000
 ```
 
-What it does: auto-detects URL type (HTTP, file://, github://, s3://) and routes to the right effect crate. Returns bytes or parsed JSON.
+**Invariants** (from `nika-kernel::http::HttpClient`):
 
-**Invariants**:
-- Tainted output by default (external input = untrusted)
-- Status code ≥ 400 is a failure (override with `allow_status:` list)
-- Retries with exponential backoff
+- Output is **tainted** by default (external input is untrusted, T3:A).
+- Transient statuses (429, 5xx) are retried per `retry:` on the task.
+- Authentication headers never appear in events — they pass through
+  `SecretResolver` + `AuditSink::SecretRedacted`.
 
-## `invoke` — built-in tool or MCP tool
+## `invoke` — call an MCP tool or resource
+
+Calls a tool or reads a resource exposed by a connected **Model Context
+Protocol** server. Aliases are declared in the workflow's `mcp:` block.
+
+**Required**: exactly one of `tool` (string) or `resource` (URI string).
+**Optional**: `params` (JSON), `mcp` (server alias), `timeout_ms` (int).
 
 ```yaml
-# Built-in
-- id: extract_entities
-  invoke:
-    tool: text.extract_entities
-    input:
-      text: "{{ tasks.pull_readme.output }}"
+mcp:
+  chroma:
+    command: chroma-mcp
+    args: ["--collection", "nika_docs"]
 
-# MCP server
-- id: search_vectordb
-  invoke:
-    tool: mcp://chroma/query
-    input:
-      collection: nika_docs
-      query: "{{ tasks.summarize.output }}"
+tasks:
+  - name: search_vectordb
+    invoke:
+      mcp: chroma
+      tool: query
+      params:
+        query: "{{ tasks.summarize.output }}"
+        top_k: 5
 ```
 
-What it does: calls one of 63 built-in tools (text processing, image manipulation, data transformation) or any MCP-compliant tool. Same verb, different tool routing.
+Routing goes through `ToolExecutor` + `ToolExecute::execute(ToolCall)`
+at L0.5 — the same trait the `agent` verb uses to dispatch in-loop
+tool calls (`crates/nika-kernel/src/runtime/tool_executor.rs`).
 
 ## `infer` — LLM inference
 
+Single-shot call to a language model. One `InferRequest` shape covers
+all {STATUS.providers} providers in the catalog.
+
+**Required**: `prompt` (string).
+**Optional**: `system` (string), `temperature` (0.0–2.0), `max_tokens`
+(u32), `extended_thinking` (bool), `thinking_budget` (u32), `content`
+(multi-modal parts), `response_format` (hint), `provider` + `model`
+(overrides of workflow defaults).
+
 ```yaml
-- id: summarize
+- name: summarize
   infer:
     provider: anthropic
-    model: claude-opus-4-6
+    model: <model-id>                    # see /reference/providers-catalog
+    system: "You are a technical writer."
     prompt: |
       Summarize this in one sentence:
       {{ tasks.pull_readme.output }}
-    structured:
-      type: object
-      properties:
-        summary:
-          type: string
-          maxLength: 200
-      required: [summary]
-    max_tokens: 1000
     temperature: 0.3
+    max_tokens: 500
 ```
 
-What it does: unified API across 9 providers. Structured output validated against JSON Schema. Streaming supported via events.
+<Note>
+  Model identifiers are catalog-validated at parse time. See the
+  [Providers catalog](/reference/providers-catalog) for live IDs — we
+  never hard-code them in concept docs because model names drift faster
+  than the docs refresh cycle.
+</Note>
 
-**Invariants**:
-- Single `InferRequest` shape regardless of provider
-- Structured output uses native provider API where available (Anthropic tool use, OpenAI JSON mode, etc.)
-- All providers emit the same event shape
+**Invariants** (from `nika-kernel::provider::Provider`):
 
-## `agent` — loop with tools (ReAct)
+- Unified `InferRequest` (INV-017) — one DTO, 7 API dialects below.
+- Capability rules ([{STATUS.capabilityRules} rules](/reference/capabilities))
+  run **before** dispatch. Sending `tools` to a model whose capability
+  rule says `tool_calling = false` fails with NIKA-13x before the
+  network round-trip.
+- Every provider emits the same `InferEvent` stream — `Delta`,
+  `ToolUseStart`, `ToolUseDelta`, `Thinking`, `Usage`, `Done`.
+
+Cross-link: [Providers](/concepts/providers) · [`Provider` trait](/architecture/kernel#provider) · ADR-035 (telemetry seams).
+
+## `agent` — multi-turn loop with tools
+
+A model-driven loop: the agent calls tools, observes results, iterates
+until a completion signal fires or a budget exhausts.
+
+**Required**: `prompt` (string).
+**Optional**: `tools` (list), `max_turns` (u32), `max_tokens` (u32),
+`from` (agent preset reference), `skills` (list), `provider` + `model`,
+`mcp` (list of server aliases), `temperature`, `token_budget` (u32),
+`system` (string), `extended_thinking` (bool), `thinking_budget` (u32),
+`depth_limit` (u32), `tool_choice` (string), `stop_sequences` (list),
+`scope` (string).
 
 ```yaml
-- id: investigate
+- name: investigate
   agent:
     provider: anthropic
-    model: claude-opus-4-6
+    model: <model-id>
     system: |
-      You are investigating a GitHub issue. Use the tools to gather
+      You are investigating a GitHub issue. Use tools to gather
       context before answering.
     tools:
       - fetch
       - invoke
-    max_iterations: 10
-    budget:
-      max_tokens: 100000
-      max_wall_time: 120s
-    task: |
-      Investigate issue #{{ inputs.issue_number }} and summarize root cause.
+    max_turns: 10
+    token_budget: 100000
+    prompt: |
+      Investigate issue #{{ inputs.issue_number }} and summarise
+      the root cause in under 200 words.
 ```
 
-What it does: multi-turn loop. Agent calls tools, observes results, iterates until done or budget exhausted. Returns final output plus full iteration trace in events.
+**Invariants** (from `nika-kernel::runtime::agent`):
 
-**Invariants**:
-- Budget hard-stops loop (tokens OR wall time, whichever first)
-- Every tool call tainted-checked
-- Iteration trace emitted as events for audit
+- `AgentLoopConfig` bounds the loop: `max_turns`, `token_budget`,
+  `depth_limit`. The first ceiling hit stops the loop (`AgentStopReason`).
+- Every tool call is **taint-checked** — untrusted data cannot reach
+  dangerous verbs without an explicit sanitizer.
+- The iteration trace (`ToolCallRecord` + `CheckpointMessage`) is
+  emitted as events for audit and, optionally, checkpoint resume.
 
-## Why only five?
+Cross-link: [`AgentLoopConfig`](/architecture/kernel#agent-loop) · ADR-016 (cancellation model).
 
-Because any workflow you can imagine decomposes into:
-- **Do something locally** (`exec`)
-- **Get data from the world** (`fetch`)
-- **Use a tool** (`invoke`)
-- **Ask a model** (`infer`)
-- **Delegate to an agent** (`agent`)
+## Verb selection is exhaustive
 
-Every other "verb" we considered was a special case of one of these.
+The `nika-schema` parser enforces "exactly one verb key per task" at
+compile time — the `Verb` enum in
+`crates/nika-schema/src/parser/tasks.rs` has five variants, and the
+action builder has exactly five match arms. Adding a sixth verb
+requires:
+
+1. Extending `RawAction` + the `Verb` enum.
+2. Wiring a new action builder arm.
+3. Bumping `SchemaVersion` (currently `v1`).
+4. Running all 12 admission gates on the consuming L2 verb crate.
+
+This is the single hardest number in the Nika grammar to change. We'd
+rather say no.
+
+<Info>
+  **Implementation status.** Current verb executors ship as design-only
+  kernel traits; the L2 verb crates (`nika-verb-exec`, `nika-verb-fetch`,
+  `nika-verb-invoke`, `nika-verb-infer`, `nika-verb-agent`) are admitted
+  in Rounds 5–8 (see [Constellation](/reference/constellation)). The
+  verb grammar is locked. Implementation tracked via `nika-schema` crate
+  (Round 4 admission).
+</Info>
 
 ## Read next
 
 <CardGroup cols={2}>
   <Card title="Workflows" icon="diagram-project" href="/concepts/workflows">
-    How verbs compose into DAGs.
+    How verbs compose into a DAG.
   </Card>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
-    How data flows between verbs.
+    How values flow between tasks.
+  </Card>
+  <Card title="Providers" icon="server" href="/concepts/providers">
+    The {STATUS.providers}-provider catalog behind `infer` and `agent`.
+  </Card>
+  <Card title="Events" icon="signal" href="/concepts/events">
+    Every verb emits typed events.
   </Card>
 </CardGroup>

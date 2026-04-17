@@ -1,13 +1,30 @@
 ---
 title: "Bindings"
-description: "Template expressions that flow data between tasks. Typed, tainted, evaluated at runtime."
+description: "Template expressions that move values between tasks. Scoped, typed, taint-tracked, evaluated at runtime."
 sidebarTitle: "Bindings"
 icon: "link"
 ---
 
-A binding is a template expression wrapped in `{{ }}`. It's resolved at
-runtime against a typed scope containing inputs, context, task outputs,
-and environment variables.
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
+A **binding** is a template expression wrapped in `{{ … }}`. It resolves
+at runtime against a typed scope — inputs, context constants, task
+outputs, environment variables — and flows through a filter chain
+before substitution.
+
+The parser preserves both forms of every templatable field through the
+AST: either a literal value or a `Templatable::Template(String)` holding
+the unresolved expression. See
+`crates/nika-schema/src/types/templatable.rs` for the exact types.
+
+<Info>
+  **Target design banner.** Filter chains, taint propagation, and typed
+  scope lookup are **target design — nika-schema admission Round 4**.
+  Today's WIP parser accepts `Templatable<T>` at every templatable
+  field; the analyzer that evaluates the expressions lands with Round
+  4. Syntax shown below is stable (locked in the `Templatable` type);
+  semantics mature across Round 4 → Round 9.
+</Info>
 
 ## Shape
 
@@ -15,31 +32,42 @@ and environment variables.
 {{ <expression> }}
 ```
 
-Examples:
+Four examples, each a valid `Templatable::Template`:
 
 ```yaml
 prompt: "{{ inputs.target }}"
 prompt: "{{ tasks.fetch_issue.output.title }}"
 prompt: "{{ context.model_family }}"
-cmd: "echo {{ env.HOME }}/output.txt"
+command: "echo {{ env.HOME }}/output.txt"
 ```
+
+Whitespace inside `{{ }}` is ignored. Nested `{{ }}` is rejected at
+parse time.
 
 ## Scopes
 
-| Scope | What's in it | Example |
+Every binding resolves against one of six named scopes. The resolver
+refuses unknown top-level names at validation time, so `{{ tsaks.foo }}`
+is caught before the run starts.
+
+| Scope | Source | Example |
 |---|---|---|
-| `inputs.*` | Parameters from `--input key=value` | `inputs.target` |
-| `context.*` | Top-level constants in the workflow | `context.model_family` |
-| `tasks.<id>.output` | Output of a completed task | `tasks.greet.output` |
-| `tasks.<id>.events` | Events emitted by a task | `tasks.greet.events` |
-| `env.*` | Environment variables | `env.HOME` |
-| `nika.*` | Built-in metadata | `nika.version`, `nika.run_id` |
+| `inputs.*` | `--input key=value` flags at CLI, typed per workflow-level `inputs:` declarations | `inputs.target` |
+| `context.*` | Top-level `context:` block — constants shared across tasks | `context.model_family` |
+| `tasks.<name>.output` | Structured output of a completed task | `tasks.greet.output` |
+| `tasks.<name>.events` | Events emitted by a task (filterable by kind) | `tasks.greet.events` |
+| `env.*` | Environment variables, whitelisted at workflow level | `env.HOME`, `env.GITHUB_TOKEN` |
+| `nika.*` | Built-in metadata: version, run ID, timestamp | `nika.run_id`, `nika.version` |
+
+Task names are validated at parse time (`snake_case`, unique). A
+binding that references a task not present in the file fails with a
+miette diagnostic pointing at the exact byte range.
 
 ## Typed resolution
 
-Nika knows the type of each binding target at parse time. If `inputs.target`
-is declared as `string` and you use it where an `integer` is expected, Nika
-fails at validation, not runtime.
+Nika knows the expected type of every binding target. If `inputs.count`
+is declared `integer` and you drop it into a field typed as a list,
+validation fails *before* the run starts.
 
 ```yaml
 inputs:
@@ -47,58 +75,101 @@ inputs:
     type: integer
 
 tasks:
-  - id: loop
-    for_each: "{{ inputs.count }}"   # ❌ fails — for_each needs a list
+  - name: loop
+    for_each: "{{ inputs.count }}"   # fails — for_each needs a list
+    infer:
+      provider: anthropic
+      model: <model-id>
+      prompt: "Iteration {{ item }}"
 ```
 
-## Taint tracking
+Type-checking is the analyzer's job (Round 4+). The parser's
+`Templatable<T>` carries `T` as a phantom type so downstream stages
+can't conflate `Templatable<u32>` with `Templatable<bool>`.
 
-External data (from `fetch`, `exec`, `infer`) is **tainted** by default.
-Passing tainted data to a sensitive verb (e.g. `exec.cmd`) triggers a
-validation error:
+## Taint tracking (target design — Phase D)
+
+External data is tainted by default. The taint set is maintained by
+the analyzer and propagates through bindings:
+
+- `fetch` output → tainted (HTTP body, third-party controlled).
+- `exec` stdout → tainted (subshell could have been influenced).
+- `infer` / `agent` output → tainted (prompt injection vector).
+- `invoke` output → tainted (MCP servers are third-party).
+- `inputs.*` from the CLI → tainted (user-provided at runtime).
+- `context.*`, `env.*`, `nika.*` → **trusted** (workflow author owns
+  them).
+
+Passing tainted data to a *privileged sink* (notably `exec.command`)
+without an explicit sanitizer raises **NIKA-384** (see
+`dx/.claude/rules/security.md` — Shield error table):
 
 ```yaml
-- id: pull_user_input
+- name: pull_user_input
   fetch:
     url: https://api.example.com/comment
 
-- id: run_it
+- name: run_it
+  depends_on: [pull_user_input]
   exec:
-    cmd: "{{ tasks.pull_user_input.output }}"   # ❌ taint violation
+    command: "{{ tasks.pull_user_input.output }}"   # NIKA-384 taint violation
 ```
 
-Fix: sanitize explicitly.
+Fix — sanitize explicitly:
 
 ```yaml
-- id: run_it
+- name: run_it
+  depends_on: [pull_user_input]
   exec:
-    cmd: "echo {{ tasks.pull_user_input.output | shell_quote }}"
+    command: "echo {{ tasks.pull_user_input.output | shell_quote }}"
 ```
 
-See the [taint rules in reference](/reference/schema#taint) for the full list.
+Taint is a property of **data**, not of a principal (T3:A design from
+`InferResponse.trust_level`). Cross-link: ADR-014 (sealed kernel
+traits), `nika-error::trust::TrustLevel`.
 
-## Filters
+## Filters (target design)
 
-Pipe bindings through filters:
+Filters transform values along a pipeline:
 
 ```yaml
 prompt: "{{ tasks.fetch.output | json | truncate(2000) }}"
 ```
 
-Built-in filters: `json`, `trim`, `upper`, `lower`, `truncate(n)`,
-`lines`, `shell_quote`, `yaml`, `base64`.
+Planned built-ins:
+
+| Filter | Purpose |
+|---|---|
+| `json` | Serialize to JSON string. |
+| `yaml` | Serialize to YAML string. |
+| `trim` | Strip leading/trailing whitespace. |
+| `upper` / `lower` | Case change. |
+| `truncate(n)` | Cut to `n` characters, append `…` if cut. |
+| `lines` | Split on `\n`, return a list. |
+| `shell_quote` | Escape for safe `exec.command` interpolation. |
+| `base64` | Base64 encode. |
+| `default('x')` | Fall back to `'x'` if the binding is `null`. |
+
+Filter resolution is left-to-right. Each filter is registered in the
+analyzer and type-checked against the value flowing through.
 
 ## Multi-line
 
+YAML block scalars compose cleanly with bindings:
+
 ```yaml
 prompt: |
-  You are reviewing the following pull request:
+  You are reviewing the following pull request.
 
   Title: {{ tasks.fetch_pr.output.title }}
   Body:  {{ tasks.fetch_pr.output.body }}
 
   Provide three concrete improvements.
 ```
+
+The parser preserves indentation and line breaks — the prompt reaches
+the provider exactly as you typed it, minus the leading YAML block
+indentation.
 
 ## Null handling
 
@@ -108,15 +179,33 @@ Missing bindings fail at validation unless declared optional:
 prompt: "{{ inputs.optional_field | default('(none)') }}"
 ```
 
-## What bindings are NOT
+If `inputs.optional_field` is absent and has no `default:`, the
+workflow fails to load — a miette diagnostic points at the declaration
+site and the usage site.
 
-- ❌ Not a full scripting language. No loops, no conditionals inside the expression.
-- ❌ Not JavaScript. No arbitrary code execution.
-- ❌ Not Jinja2 / Liquid (no `for`/`if` blocks inside `{{ }}`).
-- ✅ Just: scope lookup + filter chain + validation.
+## What bindings are **not**
 
-Workflow-level control flow (loops, conditionals) lives at the **task level**
-(`for_each:`, `when:`), not inside bindings.
+- ❌ Not a scripting language. No loops, no conditionals inside `{{ }}`.
+- ❌ Not arbitrary JavaScript / Python eval. No dynamic code.
+- ❌ Not Jinja2 / Liquid in full — `for` and `if` blocks are **not**
+  supported inside expressions.
+- ✅ Scope lookup + filter chain + type check + taint propagation.
+
+Workflow-level control flow (`for_each:`, `condition:`,
+`depends_on:`) lives on the **task envelope**, not inside bindings.
+This is deliberate: the DAG is a static artifact, inspectable by the
+analyzer and renderable in the Olympus visualizer; bindings are local
+decorations.
+
+## Related ADRs
+
+- **ADR-010** — miette as the L4 diagnostic presentation layer. Every
+  binding error points at the exact byte range in the source file.
+- **ADR-014** — sealed kernel traits. The resolver runs at L3 and never
+  crosses into arbitrary user-provided evaluator code.
+- **ADR-021** — YAML envelope convention. `{{ }}` bindings appear
+  inside `spec:` (workflow) or inside reusable skill / agent documents,
+  and resolve against the same scope shape.
 
 ## Read next
 
@@ -124,7 +213,13 @@ Workflow-level control flow (loops, conditionals) lives at the **task level**
   <Card title="Events" icon="signal" href="/concepts/events">
     What gets emitted, when.
   </Card>
-  <Card title="YAML syntax reference" icon="file-code" href="/reference/yaml-syntax">
-    Complete schema documentation.
+  <Card title="Workflows" icon="diagram-project" href="/concepts/workflows">
+    The envelope that holds the `tasks:` bindings operate on.
+  </Card>
+  <Card title="Verbs" icon="play" href="/concepts/verbs">
+    Each verb's taint classification and sanitizer expectations.
+  </Card>
+  <Card title="YAML reference" icon="file-code" href="/reference/yaml-syntax">
+    Full binding grammar and filter catalog.
   </Card>
 </CardGroup>

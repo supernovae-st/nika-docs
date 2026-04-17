@@ -1,130 +1,259 @@
 ---
 title: "Events"
-description: "The NDJSON event stream. Every verb emits typed events you can pipe, filter, replay."
+description: "Five observability channels. Every run emits typed events, metrics, traces, billing records, and append-only audit entries."
 sidebarTitle: "Events"
 icon: "signal"
 ---
 
-Every run of Nika emits a structured stream of events. One event per line,
-each line a valid JSON object. The stream is deterministic, typed, and
-versioned.
+import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-## Enable events
+Every Nika run emits a structured stream of **events**. One event is one
+`Event` struct from `nika-kernel::infra::event_sink`, carried as one
+line of NDJSON on stdout (or any other sink you wire in). Events are
+deterministic, typed, and carry source IDs that correlate to the trace
+stack.
 
-```bash
-nika run workflow.nika.yaml --events ndjson
-```
+The observability surface has **five sibling channels**, each a separate
+kernel trait — so impls can be swapped, sampled, or persisted
+independently:
 
-Events go to stdout by default. Redirect to a file:
+| Channel | Trait | Semantics |
+|---|---|---|
+| Events | `EventSink` | Structured telemetry. **May be sampled or dropped** under load. |
+| Metrics | `MetricsExporter` | Counters / histograms. Aggregated, low-cardinality. |
+| Traces | `TracerProvider` | W3C-compatible spans. Sampled per-head. |
+| Billing | `BillingSink` | Token + cost ledger. **Never dropped, never sampled.** |
+| Audit | `AuditSink` | Append-only, persist-or-fail. Compliance (GDPR, EU AI Act, Shield). |
 
-```bash
-nika run workflow.nika.yaml --events ndjson > run.log
-```
+<Info>
+  **Target design banner.** The `EventSink`, `AuditSink`, `BillingSink`,
+  `MetricsExporter`, and `TracerProvider` traits are all defined today
+  in `nika-kernel` (L0.5). End-to-end emission from admitted L2 verb
+  crates is **target design — tracked via Rounds 5–9 of verb crate
+  admissions**. The event shapes below are stable; the per-verb emission
+  sites mature across the constellation.
+</Info>
 
-Or send to a collector:
+## `Event` shape
 
-```bash
-nika run workflow.nika.yaml --events ndjson | jq -c . | nc 127.0.0.1 9000
-```
-
-## Event shape
-
-Every event has:
-
-```json
-{
-  "ts": "T+00:00:01.42",
-  "run_id": "r_01JF9Z7K2H8Q5X4Y3W2V1U0T",
-  "kind": "task_complete",
-  "task": "greet",
-  "...": "..."
+```rust
+#[non_exhaustive]
+pub struct Event {
+    pub id: EventId,                    // ULID
+    pub run_id: RunId,                  // ULID of the current run
+    pub trace_id: Option<TraceId>,      // W3C trace context
+    pub kind: String,                   // e.g. "task.started"
+    pub timestamp_ms: u64,              // Unix epoch milliseconds
+    pub payload: serde_json::Value,     // kind-specific fields
 }
 ```
 
-Fields vary by `kind`. All events share: `ts`, `run_id`, `kind`.
+Source: `crates/nika-kernel/src/infra/event_sink.rs`. Every event shares
+`id`, `run_id`, `kind`, and `timestamp_ms`; `payload` shape depends on
+the `kind` discriminator.
 
-## Kinds
+## `EventSink` trait (L0.5)
 
-<Note>
-  The full event kind catalog lives at [/reference/ndjson](/reference/ndjson).
-  Below is a selection of the most common.
-</Note>
+```rust
+#[trait_variant::make(EventSinkDyn: Send)]
+pub trait EventSink: Send + Sync + crate::sealed::Sealed {
+    async fn emit(&self, event: Event) -> Result<(), NikaError>;
+}
+```
+
+**Cancel-safety contract** (from the source): impls MUST NOT maintain
+cross-emission state. Dropping a future mid-emit is semantically
+identical to a sampled-away event. Batched sinks flush on a separate
+task that owns the batch — the `emit` call itself is atomic or
+all-nothing.
+
+The trait is `Sealed` (ADR-014): external crates cannot implement it
+directly; they route through the workspace-controlled adapter path.
+
+## Event kinds
+
+Every kind is emitted from **exactly one call site** in the codebase
+(INV-024). No ambiguous duplicates — if you see `infer.chunk` on the
+wire, you know exactly which crate produced it.
 
 ### Workflow-level
 
-- `workflow_start` — a run begins
-- `workflow_complete` — run ends (success or failure)
-- `workflow_skipped` — `when:` at the top level evaluated to false
+- `workflow.started` — a run begins.
+- `workflow.completed` — run ends, with status.
+- `workflow.skipped` — top-level `condition:` evaluated to false.
 
 ### Task-level
 
-- `task_start` — a task begins
-- `task_complete` — a task ends successfully
-- `task_failed` — a task ends with error
-- `task_skipped` — `when:` on the task evaluated to false
-- `task_retry` — a retry attempt begins
+- `task.started` — a task begins executing.
+- `task.completed` — a task ends successfully.
+- `task.failed` — a task errored out; payload carries the NikaCode.
+- `task.skipped` — task-level `condition:` evaluated to false.
+- `task.retry` — a retry attempt begins (emitted before `task.started` of the retry).
 
 ### Verb-level
 
-- `infer_chunk` — streaming token from a provider
-- `infer_tool_call` — agent called a tool
-- `fetch_request` — HTTP request initiated
-- `fetch_response` — HTTP response received
-- `exec_output` — a line of stdout/stderr
+From `nika-kernel::provider::InferEvent`:
+
+- `infer.delta` — streaming text chunk (`Delta { text }`).
+- `infer.tool_use_start` — agent called a tool (`ToolUseStart { id, name }`).
+- `infer.tool_use_delta` — streaming partial JSON input (`ToolUseDelta { id, partial_json }`).
+- `infer.thinking` — extended thinking chunk (`Thinking { text }`).
+- `infer.usage` — token usage update (`Usage(TokenUsage)`).
+- `infer.done` — stream completed (`Done { stop_reason, request_id, finish_reason_raw }`).
+
+From the other verbs:
+
+- `fetch.request` — HTTP request sent.
+- `fetch.response` — HTTP response received.
+- `exec.output` — a line of stdout/stderr.
+- `invoke.call` — tool invoked.
+- `invoke.result` — tool returned.
+- `agent.iteration` — one loop turn completed.
 
 ### Meta
 
-- `checkpoint` — serializable snapshot for resumption
-- `taint_violation` — binding crossed a taint boundary
-- `budget_warning` — nearing a budget ceiling
-- `budget_exceeded` — budget hard-stop triggered
+- `checkpoint` — serializable snapshot (`AgentCheckpoint` — used for resume).
+- `taint.violation` — binding crossed a taint boundary (mirrors `AuditRecord::TaintViolation`).
+- `budget.warning` — nearing a `BudgetDirective` ceiling.
+- `budget.exceeded` — budget hard-stop triggered.
 
-## One site emits each kind
+## OTel `GenAI` semconv bridge (Q13)
 
-Each event kind is emitted from exactly one call site in the codebase. No
-ambiguous duplicates. The `nika-event` crate owns this invariant.
+Every `InferRequest` and `InferResponse` carries a `GenAiAttrs` struct
+that maps directly to the OpenTelemetry `gen_ai.*` semantic conventions:
 
-This matters for tooling: if you see `infer_chunk`, you know it came from the
-single inference path. No "sometimes it emits, sometimes it doesn't."
+```rust
+#[non_exhaustive]
+pub struct GenAiAttrs {
+    pub system: GenAiSystem,             // anthropic | open_ai | google | …
+    pub operation: GenAiOperation,       // chat | embedding | image_generation | …
+    pub response_id: Option<String>,     // gen_ai.response.id
+    pub response_model: Option<String>,  // gen_ai.response.model
+    pub encoding_formats: Vec<String>,   // gen_ai.request.encoding_formats
+    pub conversation_id: Option<String>, // gen_ai.conversation.id
+    pub agent_id: Option<String>,        // gen_ai.agent.id
+    pub agent_name: Option<String>,      // gen_ai.agent.name
+}
+```
 
-## Replay
+Source: `crates/nika-kernel/src/ai/genai.rs`. This enforces
+**cross-provider parity** (Pre-launch Gate 2): no provider can silently
+drop an attribute the kernel exports. When Nika emits an `infer.done`
+event, the `payload.gen_ai` block is identical in shape across all
+{STATUS.providers} providers.
 
-Events are a complete record. You can replay them:
+Cross-link: OTel GenAI spec at <https://opentelemetry.io/docs/specs/semconv/gen-ai/>.
+
+## `AuditSink` — the fifth channel (Q12)
+
+`AuditSink` is **separate** from `EventSink`. Audit records are
+**append-only, persist-or-fail** — they MUST persist durably (fsync on a
+local log, synchronous HTTP POST to an append-only endpoint) before the
+trait method returns `Ok`. Buffering in memory is forbidden by contract.
+
+```rust
+#[non_exhaustive]
+pub enum AuditRecord {
+    CapabilityOverride { tenant_id, capability, reason },
+    TaintViolation    { tenant_id, path, severity },
+    CanaryLeaked      { tenant_id, canary_id },
+    BudgetExhausted   { tenant_id, dimension, cap, observed },
+    PolicyDenied      { tenant_id, rule_id, target },
+    KeyUsed           { tenant_id, key_id },
+    SecretRedacted    { tenant_id, location },
+    Extension         { ns, name, payload },   // forward-compat escape hatch
+}
+```
+
+Every variant carries a `TenantId` for multi-tenant routing. `Extension`
+is the forward-compat path (ADR-028) — new categories land there first
+and get promoted to a first-class variant once the namespace stabilises.
+
+Severity is separate: `Info`, `Warn`, `Critical`. A `TaintViolation`
+with `Severity::Critical` should kill the run; a `CapabilityOverride`
+with `Severity::Info` is an operator trail, not a failure.
+
+<Note>
+  `AuditSink` replaced an earlier `ObservabilitySink` design during the
+  Q12 L0.5 architecture sweep (locked 2026-04-16, see
+  `docs/architecture/l0-l05-architecture-decisions.md`). The separation
+  matters: telemetry is best-effort; audit is compliance — different
+  persistence guarantees, different failure modes, different sinks.
+</Note>
+
+## `BillingSink` — the ledger (separate trait)
+
+Token + cost accounting uses its own trait because it has different
+dropping semantics than `EventSink`. Billing records are **never
+dropped**. Implementations persist on every call and surface failures
+to the caller, who kills the run if persistence fails (revenue
+integrity > workflow liveness).
+
+See `nika-kernel::infra::billing::BillingSink` + ADR-028 §4.
+
+## Telemetry seams (ADR-035)
+
+Two reservations on the trace layer make the kernel OTel-ready without
+breaking any v0.8x caller:
+
+1. `SpanGuard.parent_span_id: Option<SpanId>` — explicit parent link so
+   nested spans can be stitched into a tree without a thread-local
+   stack (which tokio's multi-thread runtime breaks).
+2. `SpanRef { trace_id, span_id }` — a copyable handle that propagates
+   span identity across `tokio::mpsc` boundaries and spawned tasks
+   without cloning the full `SpanGuard`.
+
+Both land as additive, `#[non_exhaustive]` extensions. At v0.100 they
+bridge zero-copy into OTel's `SpanContext` when
+`nika-observability-otel` admits.
+
+## Enable the stream (target CLI)
 
 ```bash
-nika replay run.log --show tasks
+nika run workflow.nika.yaml --events ndjson               # stdout
+nika run workflow.nika.yaml --events ndjson > run.log     # file
+nika run workflow.nika.yaml --events otlp://localhost:4317 # OTLP gRPC
 ```
 
-Replay respects `checkpoint` events — restart mid-workflow.
+The `nika-serve` L4 interface crate admits in Round 11 and exposes
+NDJSON / OTLP / SSE over HTTP. The CLI flag is target design; today
+`EventSink` only has a mock implementation in `nika-kernel-mock`.
 
-## Example stream
+## Why five channels, not one
 
-```ndjson
-{"ts":"T+00:00:00.00","kind":"workflow_start","workflow":"hello","run_id":"r_01JF9..."}
-{"ts":"T+00:00:00.01","kind":"task_start","task":"greet","verb":"infer"}
-{"ts":"T+00:00:00.02","kind":"infer_request","task":"greet","provider":"anthropic","model":"claude-opus-4-6"}
-{"ts":"T+00:00:00.45","kind":"infer_chunk","task":"greet","delta":"Rust"}
-{"ts":"T+00:00:00.51","kind":"infer_chunk","task":"greet","delta":" is"}
-{"ts":"T+00:00:00.57","kind":"infer_chunk","task":"greet","delta":" a"}
-{"ts":"T+00:00:00.62","kind":"infer_chunk","task":"greet","delta":" systems language."}
-{"ts":"T+00:00:01.42","kind":"task_complete","task":"greet","status":"ok","duration_ms":1415}
-{"ts":"T+00:00:01.43","kind":"workflow_complete","status":"ok","run_id":"r_01JF9..."}
-```
+Because they have incompatible guarantees:
 
-## Why NDJSON
+- **Events** want volume + sampling. Dropping is fine.
+- **Metrics** want aggregation + low cardinality. Pre-aggregated.
+- **Traces** want causal structure + head sampling.
+- **Billing** wants durability + no drops. Every token metered.
+- **Audit** wants persist-or-fail + append-only. Compliance contract.
 
-- ✅ Line-delimited → `jq`, `grep`, `awk` friendly
-- ✅ Streaming → don't wait for the run to finish
-- ✅ No schema changes in-flight → each line self-describes
-- ✅ Cheap to parse in any language
+Forcing them through one sink loses either the sampling headroom (makes
+the hot path slow) or the compliance contract (drops records under
+load, fails the audit).
+
+## Related ADRs
+
+- **ADR-021** — YAML envelope. `EventSink` emits events that correlate
+  to tasks inside `spec.tasks`, tagged with the workflow's `metadata.name`.
+- **ADR-028** — forward-compat reservation policy. `Extension` variants
+  in `AuditRecord` + `StopReason::Unknown(String)` in `InferResponse`.
+- **ADR-035** — telemetry seams (SpanGuard parent + SpanRef).
 
 ## Read next
 
 <CardGroup cols={2}>
   <Card title="NDJSON reference" icon="file-code" href="/reference/ndjson">
-    Complete event catalog with schemas.
+    Full event kind catalog with per-kind payload schemas.
   </Card>
-  <Card title="Providers" icon="cloud" href="/concepts/providers">
-    How each provider maps to unified events.
+  <Card title="Providers" icon="server" href="/concepts/providers">
+    How the unified `InferEvent` stream maps to {STATUS.providers} providers.
+  </Card>
+  <Card title="Bindings" icon="link" href="/concepts/bindings">
+    Reading `tasks.<id>.events` from other tasks.
+  </Card>
+  <Card title="Architecture" icon="layer-group" href="/concepts/architecture">
+    L0.5 kernel traits the observability channels live in.
   </Card>
 </CardGroup>

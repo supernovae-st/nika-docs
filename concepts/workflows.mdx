@@ -1,105 +1,200 @@
 ---
 title: "Workflows"
-description: "How tasks compose into a DAG. Dependencies, fan-out, for_each, retries, conditional execution."
+description: "A .nika.yaml file: schema · metadata · tasks. Parsed into a DAG, executed with structured concurrency."
 sidebarTitle: "Workflows"
 icon: "diagram-project"
 ---
 
-A workflow is a list of tasks. Tasks have `id`, one verb, and optional
-`depends_on` declarations. Together they form a directed acyclic graph
-(DAG) that Nika executes in topological order, parallelizing what it can.
+import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-## Shape of a workflow
+A **workflow** is a YAML document that names a goal, lists one or more
+tasks, and declares how values flow between them. Nika parses the file
+with source spans, validates it against the catalog, compiles it to a
+DAG, and executes tasks in topological order — parallelizing whatever
+the dependency graph allows.
+
+<Info>
+  **Target design banner.** The envelope described below (`apiVersion` +
+  `kind` + `metadata` + `spec`) is **target design — nika-schema
+  admission Round 4**. Today's WIP parser at `crates/nika-schema/` still
+  accepts the flat form (`schema: v1` + `name:` + `tasks:` at top
+  level) — ADR-021 locks the envelope migration for Phase D. Both
+  shapes are covered here, flagged explicitly.
+</Info>
+
+## Minimal workflow
+
+Current WIP parser accepts this flat shape:
 
 ```yaml
-schema: nika/workflow@0.12
-workflow: hello
+schema: v1
+name: hello
 description: "A minimal workflow."
 
-# Optional top-level blocks
-inputs: {}      # parameters passed at runtime (--input key=value)
-context: {}     # constants available to all tasks
-skills: {}      # skill references
-artifacts: {}   # declared outputs
-include: []     # reusable sub-workflows
-
 tasks:
-  - id: greet
+  - name: greet
     infer:
       provider: anthropic
-      prompt: "Hi"
+      model: <model-id>
+      prompt: "Say hi in one line."
 ```
 
-## Dependencies
+`schema: v1` is the only schema version today
+(`nika-schema::types::SchemaVersion::V1`). Fields carry source spans
+through `Spanned<T>` so diagnostics point at the exact byte range.
+
+## Envelope shape (ADR-021 target)
+
+Phase D migrates every user-facing document to the K8s-style envelope:
+
+```yaml target design — Phase D
+apiVersion: nika.sh/v1
+kind: Workflow                         # closed enum
+metadata:
+  name: hello
+  description: "A minimal workflow."
+spec:
+  defaults:
+    model: anthropic/<model-id>        # provider/model, LiteLLM-style
+  tasks:
+    - name: greet
+      infer:
+        prompt: "Say hi in one line."
+```
+
+Rationale (ADR-021 §Context): every workflow DSL with more than two
+document kinds (Argo, Tekton, Flux, Helm) converged on this envelope
+after flat-form regret migrations. Nika has **9 user-facing doc kinds**
+at v0.90 — Workflow, Skill, Agent, Provider, MCP, Eval, Recipe, Shield,
+Lints — plus Memory (reserved v0.95) and Plugin (reserved v0.100). One
+envelope, nine kinds, zero identity reinvention.
+
+Multi-document YAML is supported: one file may declare Workflow + Skill
++ Agent separated by `---`, parsed into `Vec<RawDocument>`.
+
+## Anatomy of a workflow
+
+The workflow AST (`nika-schema::raw::RawWorkflow`) models these fields:
+
+| Field | Type | Purpose |
+|---|---|---|
+| `schema` | `SchemaVersion` | Locked to `v1` today. |
+| `name` | `String` | Workflow identifier (within `metadata:` in the envelope). |
+| `description` | `String` | Human-readable purpose. |
+| `goal` | `String` (optional) | Agent-driven workflow goal — moving to `spec.orchestrate.goal` per ADR-021. |
+| `provider` / `model` | `String` | Defaults applied to every `infer` / `agent` task. |
+| `mcp` | `RawMcpConfig` | MCP server aliases usable from `invoke` / `agent`. |
+| `context` | `ContextConfig` | Top-level constants available to all tasks. |
+| `include` | `Vec<IncludeSpec>` | Reusable sub-workflows inlined at parse time. |
+| `inputs` | `Vec<(String, Value)>` | Runtime parameters (`--input key=value`). |
+| `logging` | `LogConfig` | Event verbosity per task kind. |
+| `orchestrate` | `OrchestrateConfig` | Agentic orchestration (depth, concurrency). |
+| `routing` | `RoutingConfig` | Fallback + cost routing. |
+| `schedule` | `ScheduleConfig` | Cron / interval triggers. |
+| `max_duration_secs` | `u64` | Hard wall-clock ceiling. |
+| `tasks` | `Vec<RawTask>` | The DAG payload. |
+
+Every optional field is `Option<Spanned<T>>` — source spans survive
+all the way into the diagnostic layer (ADR-010 miette bridge).
+
+## Execution pipeline
+
+```
+         ┌───────────────┐
+ .yaml   │  nika-schema  │   RawWorkflow
+  ─────► │     parser    │ ──────────────┐
+         │ (marked-yaml) │               │
+         └───────────────┘               ▼
+                                 ┌────────────────┐
+                                 │ nika-schema    │   DAG · typed
+                                 │    analyzer    │   scope · taint
+                                 │  (Round 4+)    │
+                                 └────────────────┘
+                                          │
+                                          ▼
+                                 ┌────────────────┐
+                                 │  nika-runtime  │
+                                 │ (L3, Round 9+) │
+                                 │                │
+                                 │ topo-sort ──►  │   ┌─ exec   L2
+                                 │ dispatch  ──►  │   ├─ fetch  L2
+                                 │ events    ──►  │   ├─ invoke L2
+                                 │ checkpoint ──► │   ├─ infer  L2
+                                 │                │   └─ agent  L2
+                                 └────────────────┘
+                                          │
+                                          ▼
+                                  EventSink · BillingSink · AuditSink
+```
+
+ASCII by intent — Mintlify renders fine, but the diagram above is plain
+text and pastes into terminals and issue trackers without a renderer.
+
+## Tasks, dependencies, fan-out
+
+Tasks declare dependencies explicitly through `depends_on:`. Nika builds
+the DAG, topologically sorts, and runs tasks in parallel where the graph
+allows.
 
 ```yaml
 tasks:
-  - id: fetch_data
+  - name: fetch_data
     fetch:
       url: https://example.com/data.json
 
-  - id: analyze
-    depends_on: [fetch_data]     # fetch_data must complete first
-    infer:
-      prompt: "{{ tasks.fetch_data.output }}"
-
-  - id: notify
-    depends_on: [analyze]
-    exec:
-      cmd: echo "{{ tasks.analyze.output }}"
-```
-
-Nika builds the DAG, topologically sorts, and runs tasks in parallel where
-dependencies allow.
-
-## Fan-out with `for_each`
-
-```yaml
-tasks:
-  - id: list_files
-    exec:
-      cmd: find src -name '*.rs'
-
-  - id: analyze_each
-    depends_on: [list_files]
-    for_each: "{{ tasks.list_files.output.lines }}"
+  - name: analyze
+    depends_on: [fetch_data]
     infer:
       provider: anthropic
-      prompt: "Review this file: {{ item }}"
+      model: <model-id>
+      prompt: "{{ tasks.fetch_data.output }}"
+
+  - name: notify
+    depends_on: [analyze]
+    exec:
+      command: "echo {{ tasks.analyze.output | shell_quote }}"
 ```
 
-`for_each` iterates over a list. Each iteration runs in parallel (bounded
-by `concurrency:`). Per-iteration errors are captured individually — one
-failure does not abort siblings unless `fail_fast: true`.
-
-## Retries
+Fan-out over a collection:
 
 ```yaml
-- id: flaky_api
+- name: analyze_each
+  depends_on: [list_files]
+  for_each: "{{ tasks.list_files.output.lines }}"
+  infer:
+    provider: anthropic
+    model: <model-id>
+    prompt: "Review this file: {{ item }}"
+```
+
+Conditional execution:
+
+```yaml
+- name: deploy
+  depends_on: [tests]
+  condition: "{{ tasks.tests.output.passed == true }}"
+  exec:
+    command: ./deploy.sh
+```
+
+Retry on failure:
+
+```yaml
+- name: flaky_api
   fetch:
     url: https://example.com/api
-  retry:
-    max_attempts: 5
-    delay_ms: 1000
-    backoff: 2.0
-    on: [timeout, 5xx, network_error]
+  max_retries: 5
 ```
 
-Exponential backoff with jitter. Retries only on listed error kinds.
+<Note>
+  `depends_on`, `condition`, `for_each`, and `max_retries` land in
+  Rounds 2e–2f of the `nika-schema` parser. All four fields already
+  exist in `RawTask` (`crates/nika-schema/src/raw/task.rs`) with source
+  spans — the analyzer and runtime stages consume them starting at
+  Round 4 admission.
+</Note>
 
-## Conditional execution
-
-```yaml
-- id: deploy
-  when: "{{ tasks.tests.output.passed == true }}"
-  exec:
-    cmd: ./deploy.sh
-```
-
-`when` evaluates an expression at runtime. If falsy, the task is skipped
-(not failed). Skipped tasks produce a `task_skipped` event.
-
-## Inputs and context
+## Inputs, context, includes
 
 ```yaml
 inputs:
@@ -110,69 +205,56 @@ inputs:
     type: boolean
     default: false
 
+context:
+  model_family: claude
+
+include:
+  - path: ./common/setup.nika.yaml
+
 tasks:
-  - id: greet
+  - name: greet
+    depends_on: [setup]
     infer:
-      prompt: "Say hi to {{ inputs.target }}"
+      provider: anthropic
+      model: <model-id>
+      prompt: "Say hi to {{ inputs.target }}."
 ```
+
+Runtime invocation:
 
 ```bash
 nika run workflow.nika.yaml --input target=world
 ```
 
-## Skills (reusable blocks)
+## Outputs and events
 
-```yaml
-skills:
-  - id: writer
-    source: github://supernovae-st/nika-registry/skills/writer@main
+Every task emits a structured `Event` stream during execution
+(`nika-kernel::infra::event_sink::Event`). Consumers subscribe via
+`EventSink` and receive one JSON object per line (NDJSON on stdout by
+default). See [Events](/concepts/events) for the event model and
+[Bindings](/concepts/bindings) for how the DAG propagates values.
 
-tasks:
-  - id: draft
-    use: writer
-    with:
-      topic: "Nika's 12 gates"
-```
-
-Skills are versioned, reusable sub-workflows fetched from the registry or
-a local path.
-
-## Artifacts
-
-```yaml
-artifacts:
-  summary:
-    path: ./out/summary.md
-    source: "{{ tasks.summarize.output }}"
-```
-
-Declared outputs with known paths. Useful for CI pipelines.
-
-## Include
-
-```yaml
-include:
-  - ./common/setup.nika.yaml
-
-tasks:
-  - id: main
-    depends_on: [setup]
-    ...
-```
-
-Sub-workflows are inlined at parse time. The included file's tasks become
-part of the parent DAG.
+<Info>
+  The workflow grammar is locked. Implementation is tracked via the
+  `nika-schema` crate — Round 4 admission adds the envelope, the
+  analyzer, and semantic validation (type-checked bindings, taint
+  propagation, cycle detection). Today the raw AST is complete; the
+  analyzer is scaffolded.
+</Info>
 
 ## Read next
 
 <CardGroup cols={2}>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
-    Template expressions in depth.
+    Template expressions — `{{ }}` syntax, scopes, filters, taint.
   </Card>
   <Card title="Events" icon="signal" href="/concepts/events">
-    The NDJSON event stream.
+    The typed event stream every run emits.
   </Card>
-  <Card title="Examples" icon="folder-open" href="/examples">
-    Full workflows you can copy.
+  <Card title="Verbs" icon="play" href="/concepts/verbs">
+    The five verbs each task picks from.
+  </Card>
+  <Card title="YAML reference" icon="file-code" href="/reference/yaml-syntax">
+    Full schema specification (generated from AST).
   </Card>
 </CardGroup>
