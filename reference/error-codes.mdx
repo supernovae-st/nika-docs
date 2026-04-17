@@ -1,58 +1,257 @@
 ---
 title: "Error codes"
-description: "Every NIKA-XXX code Nika emits, with cause and fix."
+description: "Every error code emitted by Nika. Generated from the source of truth in crates/nika-error/src/codes.rs."
 sidebarTitle: "Error codes"
 icon: "triangle-exclamation"
 ---
 
-Every error Nika emits carries a unique `NIKA-XXX` code. The canonical,
-always-up-to-date list lives at
-**[https://nika.sh/errors](https://nika.sh/errors)**.
+import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Each code is addressable:
+Every error Nika emits carries a unique `NIKA-XXX` code. The wire format
+is `NIKA-{num:03}` (3-digit zero-padded under 1000, more otherwise) —
+stable across versions, machine-parseable, serde-serializable.
 
-- `https://nika.sh/errors/NIKA-001/` — detail page
-- `https://nika.sh/errors/catalog.json` — machine-readable catalog
-- Every message printed by `nika` includes the code and a link
+<Info>
+  **Canonical source:** [`crates/nika-error/src/codes.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-error/src/codes.rs)
+  defines the `NikaCode` type and the 14 codes owned by `nika-error` itself;
+  downstream crates (`nika-kernel`, `nika-catalog`, `nika-schema`, …)
+  register their own codes via the [`NikaErrorCode`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-error/src/traits.rs)
+  trait. This page enumerates every code defined by crates admitted at
+  v{STATUS.version}. Snapshot: 2026-04-17.
+</Info>
 
-## Current categories
+## Anatomy of a code
 
-| Category | Range | Example |
+Each code is a `NikaCode` struct with four fields:
+
+| Field | Type | Purpose |
 |---|---|---|
-| Workflow parse | NIKA-001 to NIKA-050 | `NIKA-001` — YAML parse error |
-| Bindings | NIKA-051 to NIKA-100 | `NIKA-051` — unknown binding |
-| Verbs / exec | NIKA-101 to NIKA-200 | |
-| Verbs / fetch | NIKA-201 to NIKA-300 | |
-| Verbs / infer | NIKA-301 to NIKA-400 | |
-| Verbs / agent | NIKA-401 to NIKA-500 | |
-| Providers | NIKA-501 to NIKA-600 | |
-| Config / keys | NIKA-601 to NIKA-700 | |
-| Runtime | NIKA-701 to NIKA-800 | |
+| `num` | `u16` | Numeric identifier, unique across the registry (1..=9999) |
+| `category` | `Category` | Functional grouping — routes to the right handler |
+| `severity` | `Severity` | `Error` or `Warning` |
+| `slug` | `&'static str` | Kebab-case identifier for docs URLs (e.g., `validation-failed`) |
 
-## Always fresh
+Codes that flow through transient-aware handlers also answer
+`is_transient() -> bool` — `true` for rate-limited, 5xx, and timeout
+variants; callers use this to decide whether to retry.
 
-This reference is generated from the `nika-error` crate at build time. The
-numbers and wording may drift between dev logs — see
-[nika.sh/errors](https://nika.sh/errors) for truth.
+## Category ranges
 
-## Common codes
+Ranges are a documented convention in `codes.rs`. They are **not enforced
+at the type level**: any crate can define a code in any range as long as
+the number is unique.
 
-### NIKA-001 — Workflow parse error
+| Range | Category | Owner crate | Notes |
+|---|---|---|---|
+| 001–049 | `Core` | `nika-error`, `nika-catalog` | Input validation, catalog parse, pricing, context-window |
+| 050–099 | `Shell` | `nika-kernel` | Process spawn, timeout, cancel, security block |
+| 100–139 | `FileIo` | `nika-kernel` | Blob not-found, I/O, size limits |
+| 140–189 | `Http` | `nika-kernel` | Timeout, connection, SSRF, size, unsupported |
+| 190–229 | `Auth` | reserved | — |
+| 230–279 | `Mcp` | `nika-kernel` | Tool lookup + execution |
+| 280–329 | `Schema` | `nika-schema` (WIP) | YAML parse, DAG validation, structured-output checks |
+| 330–379 | `Binding` | reserved | — |
+| 380–429 | `Provider` | `nika-kernel` | Provider API, rate limit, auth, model lookup |
+| 430–479 | `Verb` | reserved | — |
+| 480–529 | `Runtime` | reserved | — |
+| 600–649 | `Memory` | `nika-kernel` | Store unavailable, embedding, storage |
+| 700–749 | `WasmPlugin` | `nika-kernel` | Plugin host errors (v0.100 seam) |
+| 750–799 | `Sandbox` | `nika-kernel` | Capability denial, platform support |
+| 800–819 | `Observability` | reserved | v0.100 OTel seam |
+| 999 | `Core` | `nika-error` | Internal catch-all — [file an issue](https://github.com/supernovae-st/nika/issues) |
 
-The `.nika.yaml` file could not be parsed. Check YAML indentation, quoting,
-and that top-level `schema:` and `tasks:` keys are present.
+<Note>
+  Ranges marked **reserved** are carved out in `codes.rs` for future
+  crates but have no concrete codes at v{STATUS.version}. See the
+  [crate constellation](/reference/constellation) for admission progress.
+</Note>
 
-### NIKA-042 — Missing provider key
+## Core — `nika-error` (001–049)
 
-You wrote `provider: anthropic` but no `ANTHROPIC_API_KEY` is set. Run
-`nika doctor` for full diagnosis, or `nika keys add anthropic` to save one
-in your system keychain.
+Defined in [`crates/nika-error/src/codes.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-error/src/codes.rs).
+These 9 codes are owned by `nika-error` itself; the rest of the
+`Core` range is filled in by `nika-catalog` (NIKA-010..015) via the
+`NikaErrorCode` trait.
 
-### NIKA-107 — Taint violation
+| Code | Slug | Owner | Transient | Meaning |
+|---|---|---|---|---|
+| `NIKA-001` | `validation-failed` | nika-error | no | Input validation failed — check your workflow YAML syntax and field values. |
+| `NIKA-002` | `not-found` | nika-error | no | Referenced item not found in catalogs or task outputs. |
+| `NIKA-003` | `unsupported` | nika-error | no | Feature not supported in current configuration. |
+| `NIKA-010` | `catalog-toml-parse` | nika-catalog | no | Catalog TOML is malformed. Check syntax near the reported line and column. |
+| `NIKA-011` | `catalog-schema-mismatch` | nika-catalog | no | Catalog schema version does not match the expected version. Update the `schema` field. |
+| `NIKA-012` | `capability-rule-conflict` | nika-catalog | no | Two capability rules conflict for the same scope. Check rule ordering in `model-capabilities.toml`. |
+| `NIKA-013` | `pricing-axis-out-of-range` | nika-catalog | no | A pricing axis value is out of valid range. Ensure rates are non-negative and finite. |
+| `NIKA-014` | `context-window-invariant` | nika-catalog | no | `max_output_tokens` exceeds `context_window_tokens`. Fix the model capability rule. |
+| `NIKA-015` | `json-mode-unknown` | nika-catalog | no | Unrecognised `json_mode` value. Valid values: `none`, `object`, `schema`. |
 
-A binding from an external source (fetch output, infer output, user input)
-is being passed to a sensitive sink (exec command, HTTP URL) without an
-explicit sanitization filter. Add `| shell_quote` or declare the task
-`trusted: true` (if you know what you're doing).
+<Note>
+  Range 016–049 is reserved for additional core/catalog codes as new
+  validation rules land.
+</Note>
 
-...full catalog at [nika.sh/errors](https://nika.sh/errors).
+## Shell — `nika-kernel` (050–099)
+
+Defined in [`crates/nika-kernel/src/errors.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-kernel/src/errors.rs)
+as the `NikaErrorCode` impl for `ShellError`.
+
+| Code | Slug | Transient | Meaning |
+|---|---|---|---|
+| `NIKA-050` | `shell-not-found` | no | Program not found on PATH. |
+| `NIKA-051` | `shell-timeout` | no | Shell execution timed out. |
+| `NIKA-052` | `shell-cancelled` | no | Shell execution cancelled (parent drop, Ctrl-C). |
+| `NIKA-053` | `shell-blocked` | no | Command blocked by security policy. |
+| `NIKA-059` | `shell-other` | no | Other shell error — see message. |
+
+Range 054–058 + 060–099 reserved for future concrete codes.
+
+## File I/O — `nika-kernel` (100–139)
+
+`NikaErrorCode` impl for `BlobError`.
+
+| Code | Slug | Transient | Meaning |
+|---|---|---|---|
+| `NIKA-100` | `blob-not-found` | no | Blob not found (by hash or path). |
+| `NIKA-101` | `blob-io` | no | Blob I/O failure — see message. |
+| `NIKA-102` | `blob-too-large` | no | Blob exceeds configured size limit. |
+
+## HTTP — `nika-kernel` (140–189)
+
+`NikaErrorCode` impl for `HttpError`.
+
+| Code | Slug | Transient | Meaning |
+|---|---|---|---|
+| `NIKA-140` | `http-timeout` | no | HTTP request timed out. |
+| `NIKA-141` | `http-connection` | no | HTTP connection failed (DNS, TLS, network). |
+| `NIKA-142` | `http-ssrf-blocked` | no | Request blocked by SSRF allowlist. |
+| `NIKA-143` | `http-too-large` | no | HTTP response exceeds configured size limit. |
+| `NIKA-144` | `http-unsupported` | no | Unsupported HTTP feature (scheme, method, encoding). |
+| `NIKA-149` | `http-other` | no | Other HTTP error — see message. |
+
+## MCP — `nika-kernel` (230–279)
+
+`NikaErrorCode` impl for `ToolExecError`.
+
+| Code | Slug | Transient | Meaning |
+|---|---|---|---|
+| `NIKA-230` | `tool-not-found` | no | MCP tool not found on any connected server. |
+| `NIKA-231` | `tool-timeout` | no | Tool call timed out. |
+| `NIKA-232` | `tool-exec-failed` | no | Tool execution returned an error. |
+| `NIKA-233` | `tool-not-available` | no | Tool exists but is not currently available (server disconnected). |
+
+## Schema — `nika-schema` WIP (280–329)
+
+Defined in [`crates/nika-schema/src/error.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-schema/src/error.rs).
+`nika-schema` is WIP at v{STATUS.version} — these 11 codes are already
+registered and wire-stable, even though the crate is not yet admitted to
+the workspace.
+
+| Code | Slug | Transient | Meaning |
+|---|---|---|---|
+| `NIKA-280` | `yaml-syntax` | no | YAML parse error (malformed indentation, quoting, braces). |
+| `NIKA-281` | `unknown-verb` | no | Unknown or invalid task action verb. |
+| `NIKA-282` | `missing-field` | no | Missing required field in a task or workflow. |
+| `NIKA-283` | `invalid-task-id` | no | Invalid task identifier (not `snake_case` or reserved). |
+| `NIKA-284` | `duplicate-task` | no | Duplicate task name in the same workflow. |
+| `NIKA-285` | `cycle` | no | Dependency cycle detected in the task DAG. |
+| `NIKA-286` | `unknown-dependency` | no | Reference to unknown task in `depends_on`. |
+| `NIKA-287` | `invalid-structured-output` | no | Invalid structured output configuration. |
+| `NIKA-288` | `invalid-guardrail` | no | Guardrail configuration error. |
+| `NIKA-289` | `unsupported-version` | no | Schema version mismatch or unsupported. |
+| `NIKA-290` | `validation` | no | Generic validation error (catch-all). |
+
+## Provider — `nika-kernel` (380–429)
+
+`NikaErrorCode` impl for `ProviderError`. Provider errors are the only
+range that flags `is_transient()` for retries.
+
+| Code | Slug | Transient | Meaning |
+|---|---|---|---|
+| `NIKA-380` | `provider-api` | yes (5xx only) | Provider API returned an error. Transient for 500..=599. |
+| `NIKA-381` | `provider-model-not-found` | no | Model not declared in the provider catalog. |
+| `NIKA-382` | `provider-rate-limited` | **yes** | Provider rate-limited the request. Retry after `retry_after_ms`. |
+| `NIKA-383` | `provider-auth-failed` | no | Authentication failed — check API key + org/project id. |
+| `NIKA-389` | `provider-other` | no | Other provider error — see message. |
+
+<Tip>
+  `is_transient() == true` is the signal callers use to retry with
+  backoff. Everything else is a caller-side bug or a misconfiguration —
+  retrying won't help.
+</Tip>
+
+## Memory — `nika-kernel` (600–649)
+
+`NikaErrorCode` impl for `MemoryError`. Memory subsystem trait
+reservations plumb through to the v0.95 Cortex rewrite without breaking
+this wire format.
+
+| Code | Slug | Transient | Meaning |
+|---|---|---|---|
+| `NIKA-600` | `memory-unavailable` | no | Memory store unavailable (not configured, backend down). |
+| `NIKA-601` | `memory-not-found` | no | Memory id not found in store. |
+| `NIKA-602` | `memory-embedding-failed` | no | Embedding provider call failed. |
+| `NIKA-603` | `memory-storage` | no | Backing storage error (disk, quota, write failure). |
+
+## Reserved ranges (placeholders only)
+
+These range sentinels exist in `codes.rs` so `lookup("NIKA-700")` returns
+a usable `NikaCode`, even though the owning crates are not yet admitted.
+
+| Code | Slug | Range | Status |
+|---|---|---|---|
+| `NIKA-700` | `wasm-plugin` | 700–749 | Placeholder — `WasmPluginError` codes land with `nika-plugin` (v0.100 seam). |
+| `NIKA-750` | `sandbox` | 750–799 | Placeholder — `SandboxError` codes land with sandbox crates. |
+| `NIKA-800` | `observability` | 800–819 | Placeholder — reserved for v0.100 OTel adapter. |
+| `NIKA-999` | `internal` | 999 | Catch-all internal error. [File an issue.](https://github.com/supernovae-st/nika/issues) |
+
+## Looking up codes programmatically
+
+<CodeGroup>
+```rust From the wire
+use nika_error::codes::{lookup, NIKA_001};
+
+assert_eq!(lookup("NIKA-001"), Some(NIKA_001));
+assert_eq!(lookup("NIKA-042"), None); // not yet defined
+```
+
+```rust From the trait
+use nika_error::traits::NikaErrorCode;
+use nika_kernel::provider::ProviderError;
+
+let err = ProviderError::RateLimited { retry_after_ms: Some(1200) };
+assert_eq!(err.nika_code().num, 382);
+assert!(err.is_transient()); // → retry
+```
+
+```rust Serde
+use nika_error::codes::NIKA_001;
+
+let wire = serde_json::to_string(&NIKA_001).unwrap();
+assert_eq!(wire, "\"NIKA-001\"");
+```
+</CodeGroup>
+
+<Warning>
+  `nika_error::codes::lookup()` only resolves codes owned by
+  `nika-error` itself (the Core range). Codes owned by downstream crates
+  resolve via `NikaErrorCode::nika_code(&err)` directly. A
+  workspace-level registry is tracked as future work — see the comment
+  block in `codes.rs`.
+</Warning>
+
+## See also
+
+<CardGroup cols={2}>
+  <Card title="Foundations" icon="cube" href="/architecture/foundations">
+    How `nika-error` fits into the L0 foundation crates.
+  </Card>
+  <Card title="Layers" icon="layer-group" href="/architecture/layers">
+    Why error ownership follows the layer model.
+  </Card>
+  <Card title="Constellation" icon="diagram-project" href="/reference/constellation">
+    Which crates have landed and which reserve ranges for later.
+  </Card>
+  <Card title="CLI" icon="terminal" href="/reference/cli">
+    How `nika` surfaces codes in terminal output.
+  </Card>
+</CardGroup>

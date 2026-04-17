@@ -1,0 +1,352 @@
+---
+title: "MCP catalog"
+description: "105 MCP server entries Nika knows about by id. Registry schema + stdio/HTTP packages, snapshot 2026-04-17."
+sidebarTitle: "MCP catalog"
+icon: "plug"
+---
+
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
+Nika ships with **105 MCP server entries** in its catalog, aligned with
+the official [MCP Registry schema](https://registry.modelcontextprotocol.io/)
+(`v2025-12-11`). Each entry declares one or more local-install
+`packages` (npm / pypi / oci / cargo / mcpb) and/or `remotes`
+(streamable-http / sse endpoints). The workflow YAML `invoke:` verb
+references servers by id — Nika handles the rest.
+
+<Info>
+  **Canonical source:** [`crates/nika-catalog/data/mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-catalog/data/mcp-servers.toml).
+  Schema: `nika/mcp-servers@1.0`. Snapshot 2026-04-17 — `grep -c '^\[\[servers\]\]'`
+  = **105**. Build-time invariants (enforced in `build.rs`): unique ids,
+  packages+remotes non-empty, known category, pricing ∈ {free, freemium,
+  paid}, alias non-collision.
+</Info>
+
+## Overview
+
+<CardGroup cols={3}>
+  <Card title="Servers" icon="plug">
+    **105** entries
+  </Card>
+  <Card title="Categories" icon="folder">
+    **17** — from `anthropic` to `vectordb`
+  </Card>
+  <Card title="Invocation" icon="bolt">
+    `invoke:` verb with `server: <id>`
+  </Card>
+</CardGroup>
+
+## How to invoke one
+
+<CodeGroup>
+```yaml workflow.nika.yaml
+schema: nika/workflow@0.12
+workflow: scrape-and-summarise
+
+tasks:
+  - id: crawl
+    invoke:
+      server: firecrawl        # id from the catalog below
+      tool: scrape
+      input:
+        url: https://example.com
+
+  - id: summarise
+    depends_on: [crawl]
+    infer:
+      provider: anthropic
+      model: claude-sonnet-4-20250514
+      prompt: "Summarise: {{ tasks.crawl.output.content }}"
+```
+
+```bash Required env
+# Each server declares its env_var in mcp-servers.toml.
+# Firecrawl needs FIRECRAWL_API_KEY — read mcp-servers.toml for the full
+# list or run `nika doctor` once the verb-invoke crate is admitted.
+export FIRECRAWL_API_KEY=fc-...
+nika run workflow.nika.yaml
+```
+</CodeGroup>
+
+<Note>
+  Verb `invoke:` lands with the `nika-verb-invoke` crate admission
+  (Round 7). At v{STATUS.version} the YAML above is the target design —
+  see the [constellation](/reference/constellation) for progress.
+</Note>
+
+## By category
+
+<Tabs>
+  <Tab title="Anthropic official (3)">
+    Shipped by the Model Context Protocol project itself.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `filesystem` | Filesystem | npm | `@modelcontextprotocol/server-filesystem` |
+    | `memory` | Memory | npm | `@modelcontextprotocol/server-memory` |
+    | `pdf` | PDF | npm | `@modelcontextprotocol/server-pdf` |
+
+    One-liners:
+    - **filesystem** — read and write local files with path-based access control.
+    - **memory** — persistent key/value memory store.
+    - **pdf** — PDF text + structure extraction.
+  </Tab>
+
+  <Tab title="Developer tools (17)">
+    Build systems, browser automation, error trackers, CI / CD.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `aws` | AWS | npm | `aws-mcp` |
+    | `bitbucket` | Bitbucket | npm | `@nexus2520/bitbucket-mcp-server` |
+    | `browserbase` | Browserbase | npm | `@browserbasehq/mcp` |
+    | `browserstack` | BrowserStack | npm | `@browserstack/mcp-server` |
+    | `chrome-devtools` | Chrome DevTools | npm | `chrome-devtools-mcp` |
+    | `circleci` | CircleCI | npm | `@circleci/mcp-server-circleci` |
+    | `cloudflare` | Cloudflare | npm | `@cloudflare/mcp-server-cloudflare` |
+    | `eslint` | ESLint | npm | `@eslint/mcp` |
+    | `figma` | Figma | npm | `figma-developer-mcp` |
+    | `launchdarkly` | LaunchDarkly | npm | `@launchdarkly/mcp-server` |
+    | `linear` | Linear | npm | `mcp-server-linear` |
+    | `nx` | Nx | npm | `nx-mcp` |
+    | `playwright` | Playwright (browser automation) | npm | `@playwright/mcp` |
+    | `postman` | Postman | npm | `@postman/postman-mcp-server` |
+    | `sentry` | Sentry | npm | `@sentry/mcp-server` |
+    | `vercel` | Vercel | npm | `vercel-mcp` |
+    | `xcode` | Xcode (build + simulator) | npm | `xcodebuildmcp` |
+  </Tab>
+
+  <Tab title="Productivity (12)">
+    Calendars, project trackers, note-taking, knowledge bases.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `airtable` | Airtable | npm | `airtable-mcp-server` |
+    | `clickup` | ClickUp | npm | `@taazkareem/clickup-mcp-server` |
+    | `excel` | Excel | npm | `@negokaz/excel-mcp-server` |
+    | `google-calendar` | Google Calendar | npm | `@cocal/google-calendar-mcp` |
+    | `google-drive` | Google Drive | npm | `@modelcontextprotocol/server-gdrive` |
+    | `jira` | Jira | npm | `jira-mcp` |
+    | `monday` | Monday | npm | `@mondaydotcomorg/monday-api-mcp` |
+    | `n8n` | n8n | npm | `n8n-mcp` |
+    | `notion` | Notion | npm | `@notionhq/notion-mcp-server` |
+    | `obsidian` | Obsidian (vault access) | npm | `obsidian-mcp` |
+    | `slack` | Slack | npm | `@modelcontextprotocol/server-slack` |
+    | `zendesk` | Zendesk | npm | `zendesk-mcp` |
+  </Tab>
+
+  <Tab title="AI & specialized (8)">
+    Embeddings, agents, sandboxes, documentation lookup.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `21st` | 21st.dev Magic | npm | `@21st-dev/magic` |
+    | `ahrefs` | Ahrefs | npm | `@ahrefs/mcp` |
+    | `context7` | Context7 | npm | `@upstash/context7-mcp` |
+    | `dataforseo` | DataForSEO | npm | `dataforseo-mcp-server` |
+    | `e2b` | E2B | npm | `@e2b/mcp-server` |
+    | `langchain` | Langchain | npm | `langchain-mcp` |
+    | `sequential-thinking` | Sequential Thinking | npm | `@modelcontextprotocol/server-sequential-thinking` |
+    | `supadata` | Supadata | npm | `@supadata/mcp` |
+  </Tab>
+
+  <Tab title="Search & web (7)">
+    Scrapers, search APIs, crawlers.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `apify` | Apify | npm | `@apify/actors-mcp-server` |
+    | `exa` | Exa | npm | `exa-mcp-server` |
+    | `firecrawl` | Firecrawl (scrape + crawl) | npm | `firecrawl-mcp` |
+    | `perplexity` | Perplexity (search + sonar) | npm | `perplexity-mcp` |
+    | `searchapi` | Searchapi | npm | `searchapi-mcp` |
+    | `serper` | Serper | npm | `mcp-server-serper` |
+    | `tavily` | Tavily | npm | `tavily-mcp` |
+  </Tab>
+
+  <Tab title="Databases (7)">
+    Relational, document, key-value, graph stores.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `mongodb` | MongoDB | npm | `mongodb-mcp-server` |
+    | `mysql` | MySQL | npm | `mcp-server-mysql` |
+    | `neo4j` | Neo4j | npm | `@johnymontana/neo4j-mcp` |
+    | `redis` | Redis | npm | `redis-mcp` |
+    | `supabase` | Supabase | npm | `supabase-mcp` |
+    | `turso` | Turso | npm | `mcp-server-turso` |
+    | `upstash` | Upstash | npm | `@upstash/mcp-server` |
+  </Tab>
+
+  <Tab title="Analytics & monitoring (7)">
+    Dashboards, metrics, product analytics.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `axiom` | Axiom | npm | `mcp-server-axiom` |
+    | `datadog` | Datadog | npm | `@winor30/mcp-server-datadog` |
+    | `dynatrace` | Dynatrace | npm | `@dynatrace-oss/dynatrace-mcp-server` |
+    | `grafana` | Grafana (Go binary via OCI) | oci | `ghcr.io/grafana/mcp-grafana` |
+    | `mixpanel` | Mixpanel | npm | `mixpanel-mcp-server` |
+    | `plausible` | Plausible | npm | `plausible-mcp` |
+    | `prometheus` | Prometheus | npm | `prometheus-mcp` |
+  </Tab>
+
+  <Tab title="CMS & content (6)">
+    Headless content platforms, blogs, marketing ops.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `contentful` | Contentful | npm | `@contentful/mcp-server` |
+    | `ghost` | Ghost | npm | `ghost-mcp` |
+    | `hubspot` | HubSpot | npm | `@hubspot/mcp-server` |
+    | `sanity` | Sanity | npm | `@sanity/mcp-server` |
+    | `strapi` | Strapi | npm | `strapi-mcp` |
+    | `wordpress` | Wordpress | npm | `wordpress-mcp` |
+  </Tab>
+
+  <Tab title="Communication (6)">
+    Chat, customer messaging, transactional email, SMS.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `discord` | Discord | npm | `discord-mcp` |
+    | `intercom` | Intercom (remote OAuth) | remote | `(HTTP)` |
+    | `resend` | Resend | npm | `resend-mcp` |
+    | `sendgrid` | SendGrid | npm | `sendgrid-mcp` |
+    | `telegram` | Telegram | npm | `telegram-mcp` |
+    | `twilio` | Twilio | npm | `twilio-mcp` |
+  </Tab>
+
+  <Tab title="E-commerce & finance (6)">
+    Payment processors, marketplaces, market data.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `alpaca` | Alpaca | npm | `alpaca-mcp` |
+    | `paypal` | PayPal | npm | `@paypal/mcp` |
+    | `polygon` | Polygon | npm | `polygon-mcp` |
+    | `salesforce` | Salesforce | npm | `@salesforce/mcp` |
+    | `shopify` | Shopify | npm | `shopify-mcp` |
+    | `stripe` | Stripe | npm | `@stripe/mcp` |
+  </Tab>
+
+  <Tab title="Infrastructure & DevOps (6)">
+    Containers, clusters, IaC, PaaS.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `docker` | Docker (daemon control) | npm | `docker-mcp` |
+    | `heroku` | Heroku | npm | `@heroku/mcp-server` |
+    | `kubernetes` | Kubernetes (cluster API) | npm | `mcp-server-kubernetes` |
+    | `pulumi` | Pulumi | npm | `@pulumi/mcp-server` |
+    | `railway` | Railway | npm | `@railway/mcp-server` |
+    | `terraform` | Terraform | npm | `terraform-mcp-server` |
+  </Tab>
+
+  <Tab title="Social media (5)">
+    Public posting + metadata lookup.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `linkedin` | LinkedIn | npm | `linkedin-mcp` |
+    | `reddit` | Reddit | npm | `reddit-mcp` |
+    | `tiktok` | TikTok | npm | `tiktok-mcp` |
+    | `twitter` | Twitter | npm | `twitter-mcp` |
+    | `youtube` | YouTube | npm | `youtube-mcp` |
+  </Tab>
+
+  <Tab title="Lifestyle (5)">
+    Weather, recipes, news, music, general knowledge.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `news-api` | NewsAPI | npm | `newsapi-mcp` |
+    | `openweather` | OpenWeather | npm | `openweather-mcp` |
+    | `recipe` | Recipe | npm | `recipe-mcp` |
+    | `spotify` | Spotify | npm | `spotify-mcp` |
+    | `wolfram` | Wolfram | npm | `wolfram-mcp` |
+  </Tab>
+
+  <Tab title="AI image generation (3)">
+    Text-to-image, model inference for images.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `comfyui` | ComfyUI | npm | `comfyui-mcp` |
+    | `fal` | Fal | npm | `fal-mcp` |
+    | `replicate` | Replicate | npm | `replicate-mcp` |
+  </Tab>
+
+  <Tab title="Vector DB (3)">
+    Embeddings stores + ANN search.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `pinecone` | Pinecone | npm | `@pinecone-database/mcp` |
+    | `qdrant` | Qdrant (Python via uvx) | pypi | `mcp-server-qdrant` |
+    | `turbopuffer` | Turbopuffer | npm | `@turbopuffer/turbopuffer-mcp` |
+  </Tab>
+
+  <Tab title="Marketing (3)">
+    Ad platforms + email marketing.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `google-ads` | Google Ads | npm | `google-ads-mcp` |
+    | `mailchimp` | Mailchimp | npm | `mailchimp-mcp` |
+    | `meta-ads` | Meta Ads | npm | `meta-ads-mcp` |
+  </Tab>
+
+  <Tab title="Maps (1)">
+    Geospatial + routing.
+
+    | Id | Title | Registry | Identifier |
+    |---|---|---|---|
+    | `mapbox` | Mapbox | npm | `@mapbox/mcp-server` |
+  </Tab>
+</Tabs>
+
+## Distribution mix
+
+Of the 105 entries:
+
+- **102** ship as `npm` packages (stdio via `npx`).
+- **1** ships as `pypi` (`qdrant`, runs via `uvx`).
+- **1** ships as `oci` (`grafana`, Go binary in a container image).
+- **1** is a pure `remote` endpoint (`intercom`, OAuth streamable-http).
+
+The catalog's `registry_type` field is validated at build time — `runner`
+is required for pypi packages and forbidden for every other registry
+type.
+
+## Authentication
+
+Every server that needs credentials declares at least one
+`[[servers.env_vars]]` entry with `is_secret = true` or `false`. The
+env var names are visible in [`mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-catalog/data/mcp-servers.toml) —
+search for `^name = ` under your chosen server.
+
+<Warning>
+  Nika never stores API tokens in workflow YAML. Secrets are read from
+  environment variables at run time; `nika keys add <env>` saves them in
+  your OS keychain (macOS Keychain, Linux Secret Service, Windows
+  Credential Manager).
+</Warning>
+
+## See also
+
+<CardGroup cols={2}>
+  <Card title="Verbs" icon="code" href="/concepts/verbs">
+    How `invoke:` routes to MCP tools + built-ins at runtime.
+  </Card>
+  <Card title="Builtins" icon="toolbox" href="/reference/builtins">
+    The 63 engine-native tools under `nika:*`.
+  </Card>
+  <Card title="Providers catalog" icon="server" href="/reference/providers-catalog">
+    LLM providers for the `infer:` and `agent:` verbs.
+  </Card>
+  <Card title="Error codes" icon="triangle-exclamation" href="/reference/error-codes">
+    MCP errors — `NIKA-230..279` range.
+  </Card>
+</CardGroup>
