@@ -6,7 +6,7 @@ icon: "shield-halved"
 ---
 
 Nika is **forever-v0.x**. Features ship incrementally over years. The architecture at
-v0.90 must accommodate v0.95 (Cortex, agent-v2), v0.100 (WASM plugins, observability),
+v0.90 must accommodate v0.95 (Nika Memory, agent-v2), v0.100 (WASM plugins, observability),
 and features we haven't imagined **without breaking changes to the public API**.
 
 <Info>
@@ -39,7 +39,7 @@ and features we haven't imagined **without breaking changes to the public API**.
     `WasmPluginHost`, `MetricsExporter` + `TracerProvider` + `AuditSink` +
     `EventSink` + `BillingSink`, `Sandbox`. Stubs in `src/plugin/`, `src/infra/`.
 
-    **Impact:** v0.95 ships Cortex by adding `nika-memory-oxigraph` that implements
+    **Impact:** v0.95 ships Nika Memory by adding `nika-memory-oxigraph` that implements
     `MemoryStore`. **Zero v0.90 code modification.**
   </Accordion>
 
