@@ -106,8 +106,10 @@ without an explicit sanitizer raises **NIKA-384** (see
 
 ```yaml
 - name: pull_user_input
-  fetch:
-    url: https://api.example.com/comment
+  invoke:
+    tool: nika:fetch
+    args:
+      url: https://api.example.com/comment
 
 - name: run_it
   depends_on: [pull_user_input]

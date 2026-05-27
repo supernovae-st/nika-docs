@@ -42,20 +42,18 @@ tasks: [ ... ]               # required
   retry: { ... }             # optional retry policy
 
   # exactly one verb block:
-  exec: { ... }
-  fetch: { ... }
-  invoke: { ... }
   infer: { ... }
+  exec: { ... }
+  invoke: { ... }
   agent: { ... }
 ```
 
 ## Verbs
 
 See individual pages:
-- [`exec`](/concepts/verbs#exec) — shell commands
-- [`fetch`](/concepts/verbs#fetch) — HTTP / URL / file / GitHub
-- [`invoke`](/concepts/verbs#invoke) — built-in or MCP tool
 - [`infer`](/concepts/verbs#infer) — LLM call
+- [`exec`](/concepts/verbs#exec) — shell commands
+- [`invoke`](/concepts/verbs#invoke) — built-in or MCP tool (HTTP fetch is `invoke: nika:fetch`)
 - [`agent`](/concepts/verbs#agent) — tool-calling loop
 
 ## Full schema

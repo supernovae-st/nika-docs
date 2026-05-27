@@ -75,7 +75,7 @@ See [live state](/reference/status) for the authoritative snapshot.
 
     - **All {STATUS.cratesTarget} crates admitted** past 12 gates.
     - `nika` binary admitted (L5, &lt;500 LOC composition root).
-    - 5 verbs live: `exec`, `fetch`, `invoke`, `infer`, `agent`.
+    - 4 verbs live: `infer`, `exec`, `invoke`, `agent` (HTTP fetch is the `nika:fetch` builtin under `invoke`).
     - {STATUS.providers} providers routed through 1 unified InferRequest,
       {STATUS.capabilityRules} capability rules enforced.
     - 7 shadow zones closed (nika serve input trust · cross-provider

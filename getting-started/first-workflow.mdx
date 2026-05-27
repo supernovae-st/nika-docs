@@ -153,7 +153,7 @@ nika run hello.nika.yaml
 
 - Workflows are YAML files — `.nika.yaml`.
 - Tasks are units of work, identified by `id`.
-- Five verbs — `exec`, `fetch`, `invoke`, `infer`, `agent` — define what each task does.
+- Four verbs — `infer`, `exec`, `invoke`, `agent` — define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
 - `depends_on:` builds a DAG.
 - `{{ tasks.X.output }}` bindings flow data between tasks, with taint tracking.
 - `response_format:` enforces JSON schemas on AI output.
@@ -178,8 +178,8 @@ nika run hello.nika.yaml
 ## Read next
 
 <CardGroup cols={2}>
-  <Card title="The five verbs" icon="play" href="/concepts/verbs">
-    Deep dive on `exec`, `fetch`, `invoke`, `infer`, `agent`.
+  <Card title="The 4 verbs" icon="play" href="/concepts/verbs">
+    Deep dive on `infer`, `exec`, `invoke`, `agent`.
   </Card>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
     How data flows between tasks with taint tracking.

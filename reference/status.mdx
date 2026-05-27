@@ -135,10 +135,11 @@ git diff --exit-code docs/mintlify/snippets/_status-snapshot.mdx \
     coercion. Depends on `nika-transform` (Q8 rev.2). Targeted for Round 5
     admission.
   </Accordion>
-  <Accordion title="Verbs — exec / fetch / invoke / infer / agent">
-    Five L2 verb crates that consume kernel traits. Provider routing,
+  <Accordion title="Verbs — infer / exec / invoke / agent">
+    Four L2 verb crates that consume kernel traits. Provider routing,
     structured output parity, trust propagation. Admission across
-    Rounds 6-10.
+    Rounds 6-10. (HTTP fetch is the `nika:fetch` builtin under `invoke`,
+    not a verb crate.)
   </Accordion>
   <Accordion title="Memory subsystem (v0.95) — post-v0.90">
     **Separate count** from the {STATUS.cratesTarget} Diamond crates.

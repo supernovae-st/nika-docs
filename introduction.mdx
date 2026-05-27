@@ -8,7 +8,7 @@ icon: "house"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika reads `.nika.yaml` files and executes them as AI pipelines. One binary.
-Five verbs. Semantic YAML that is the contract, not a wrapper around one.
+Four verbs. Semantic YAML that is the contract, not a wrapper around one.
 
 <Info>
   Nika is in the middle of a ground-up rewrite — **Diamond**. Each crate is
@@ -44,9 +44,10 @@ Five verbs. Semantic YAML that is the contract, not a wrapper around one.
 ## What Nika is
 
 A workflow engine that reads `.nika.yaml` files and executes them as AI pipelines.
-Five verbs (`exec`, `fetch`, `invoke`, `infer`, `agent`), a catalog of LLM
+Four verbs (`infer`, `exec`, `invoke`, `agent`), a catalog of LLM
 providers and capability rules, MCP server integration, a layered kernel,
-and a package manager.
+and a package manager. (Fetching a URL is the `nika:fetch` builtin under
+`invoke` — a tool, not a verb.)
 
 ```yaml workflow.nika.yaml
 schema: nika/workflow@1
@@ -54,9 +55,11 @@ workflow: summarize
 
 tasks:
   - id: read
-    fetch:
-      url: https://example.com/post.md
-      as: text
+    invoke:
+      tool: nika:fetch
+      args:
+        url: https://example.com/post.md
+        mode: text
 
   - id: summarize
     infer:

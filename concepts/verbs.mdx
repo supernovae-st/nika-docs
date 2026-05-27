@@ -1,6 +1,6 @@
 ---
-title: "The five verbs"
-description: "exec · fetch · invoke · infer · agent. Five verbs, closed set, typed contracts. Everything else is data."
+title: "The 4 verbs"
+description: "infer · exec · invoke · agent. Four verbs, closed set, typed contracts. Everything else is data."
 sidebarTitle: "Verbs"
 icon: "play"
 ---
@@ -8,9 +8,9 @@ icon: "play"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 A Nika workflow is a list of **tasks**. Each task picks exactly one of
-**five verbs** — `exec`, `fetch`, `invoke`, `infer`, `agent` — and
+**four verbs** — `infer`, `exec`, `invoke`, `agent` — and
 supplies its required fields. The set is closed: the parser's verb
-dispatcher is exhaustive at compile time, so adding a sixth verb is a
+dispatcher is exhaustive at compile time, so adding a fifth verb is a
 schema-version bump, not a patch release.
 
 <Info>
@@ -20,22 +20,28 @@ schema-version bump, not a patch release.
   below reflect the target shape, not what executes end-to-end at v{STATUS.version}.
 </Info>
 
-## Why five?
+## Why four?
 
-Every workflow decomposes into one of these moves:
+A verb is a **distinct native execution model** the engine itself
+implements. Every workflow decomposes into one of these moves:
 
 | Verb | One-line intent |
 |---|---|
-| `exec` | Run a local command. |
-| `fetch` | Pull data from the world (HTTP/URL). |
-| `invoke` | Call an MCP tool or resource. |
 | `infer` | Ask an LLM. |
+| `exec` | Run a local command. |
+| `invoke` | Call a builtin tool OR an MCP tool. |
 | `agent` | Delegate to an agent loop (LLM + tools + iteration budget). |
 
 Anything else we considered — "transform", "map", "branch", "retry" —
-was a special case of one of these five, or workflow-level machinery
+was a special case of one of these four, or workflow-level machinery
 (dependencies, `for_each`, `condition`) that lives on the task envelope,
 not as a new verb.
+
+> **Where did `fetch` go?** Fetching a URL is *calling a tool*, not a
+> distinct execution model — so it is the `nika:fetch` builtin, reached
+> through `invoke:` (the extract modes become its `mode` argument). Same
+> reason a DB query (`invoke: mcp:postgres/query`) or a file write
+> (`invoke: nika:write`) is not its own verb.
 
 ## `exec` — run a local command
 
@@ -64,25 +70,24 @@ Spawns a subprocess, captures stdout/stderr, returns exit code + output.
 
 Cross-link: [`ShellExecutor` trait](/architecture/kernel#shell-executor) (L0.5 kernel contract).
 
-## `fetch` — HTTP request
+## HTTP fetch — `invoke: nika:fetch` (a builtin, not a verb)
 
-Issues an HTTP request (GET/POST/etc.), returns bytes or parsed JSON.
-
-**Required**: `url` (string).
-**Optional**: `method` (string, default `GET`), `headers` (map), `body`
-(string), `json` (any), `timeout_ms` (int), `follow_redirects` (bool),
-`response` (hint: `text` | `json` | `bytes`), `extract` + `selector`
-(CSS/JSONPath extraction), `session` (bool), `cache` (bool).
+Fetching a URL is *calling a tool*, so it is the **`nika:fetch` builtin**
+reached through `invoke:` — not its own verb. Issues an HTTP request
+(GET/POST/etc.), returns bytes or parsed/extracted data; the old extract
+modes become the builtin's `mode` argument.
 
 ```yaml
 - name: pull_readme
-  fetch:
-    url: https://api.github.com/repos/supernovae-st/nika/readme
-    method: GET
-    headers:
-      Accept: application/vnd.github.raw
-      Authorization: "Bearer {{ env.GITHUB_TOKEN }}"
-    timeout_ms: 30000
+  invoke:
+    tool: nika:fetch
+    args:
+      url: https://api.github.com/repos/supernovae-st/nika/readme
+      method: GET
+      headers:
+        Accept: application/vnd.github.raw
+        Authorization: "Bearer {{ env.GITHUB_TOKEN }}"
+      timeout_ms: 30000
 ```
 
 **Invariants** (from `nika-kernel::http::HttpClient`):
@@ -92,10 +97,14 @@ Issues an HTTP request (GET/POST/etc.), returns bytes or parsed JSON.
 - Authentication headers never appear in events — they pass through
   `SecretResolver` + `AuditSink::SecretRedacted`.
 
-## `invoke` — call an MCP tool or resource
+See the [builtins catalog](/reference/constellation) for `nika:fetch`'s
+full argument schema (extract modes, session, cache).
 
-Calls a tool or reads a resource exposed by a connected **Model Context
-Protocol** server. Aliases are declared in the workflow's `mcp:` block.
+## `invoke` — call a builtin or MCP tool
+
+Calls a builtin (`nika:` namespace) or a tool/resource exposed by a
+connected **Model Context Protocol** server. MCP server aliases are
+declared in the workflow's `mcp:` block.
 
 **Required**: exactly one of `tool` (string) or `resource` (URI string).
 **Optional**: `params` (JSON), `mcp` (server alias), `timeout_ms` (int).
@@ -185,8 +194,8 @@ until a completion signal fires or a budget exhausts.
       You are investigating a GitHub issue. Use tools to gather
       context before answering.
     tools:
-      - fetch
-      - invoke
+      - nika:fetch
+      - mcp:browser/*
     max_turns: 10
     token_budget: 100000
     prompt: |
@@ -209,8 +218,8 @@ Cross-link: [`AgentLoopConfig`](/architecture/kernel#agent-loop) · ADR-016 (can
 
 The `nika-schema` parser enforces "exactly one verb key per task" at
 compile time — the `Verb` enum in
-`crates/nika-schema/src/parser/tasks.rs` has five variants, and the
-action builder has exactly five match arms. Adding a sixth verb
+`crates/nika-schema/src/parser/tasks.rs` has four variants, and the
+action builder has exactly four match arms. Adding a fifth verb
 requires:
 
 1. Extending `RawAction` + the `Verb` enum.
@@ -223,10 +232,11 @@ rather say no.
 
 <Info>
   **Implementation status.** Current verb executors ship as design-only
-  kernel traits; the L2 verb crates (`nika-verb-exec`, `nika-verb-fetch`,
-  `nika-verb-invoke`, `nika-verb-infer`, `nika-verb-agent`) are admitted
-  in Rounds 5–8 (see [Constellation](/reference/constellation)). The
-  verb grammar is locked. Implementation tracked via `nika-schema` crate
+  kernel traits; the L2 verb crates (`nika-verb-infer`, `nika-verb-exec`,
+  `nika-verb-invoke`, `nika-verb-agent`) are admitted in Rounds 5–8 (see
+  [Constellation](/reference/constellation)). `fetch` is not a verb crate
+  — it is the `nika:fetch` builtin reached through `invoke`. The verb
+  grammar is locked. Implementation tracked via `nika-schema` crate
   (Round 4 admission).
 </Info>
 

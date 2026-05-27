@@ -139,8 +139,10 @@ allows.
 ```yaml
 tasks:
   - name: fetch_data
-    fetch:
-      url: https://example.com/data.json
+    invoke:
+      tool: nika:fetch
+      args:
+        url: https://example.com/data.json
 
   - name: analyze
     depends_on: [fetch_data]
@@ -181,8 +183,10 @@ Retry on failure:
 
 ```yaml
 - name: flaky_api
-  fetch:
-    url: https://example.com/api
+  invoke:
+    tool: nika:fetch
+    args:
+      url: https://example.com/api
   max_retries: 5
 ```
 
@@ -252,7 +256,7 @@ default). See [Events](/concepts/events) for the event model and
     The typed event stream every run emits.
   </Card>
   <Card title="Verbs" icon="play" href="/concepts/verbs">
-    The five verbs each task picks from.
+    The 4 verbs each task picks from.
   </Card>
   <Card title="YAML reference" icon="file-code" href="/reference/yaml-syntax">
     Full schema specification (generated from AST).

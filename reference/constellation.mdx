@@ -48,7 +48,7 @@ flowchart TB
 
   subgraph L2["L2 · verbs + services"]
     VE["nika-verb-exec 🧭"]:::planned
-    VF["nika-verb-fetch 🧭"]:::planned
+    VF["nika:fetch builtin 🧭"]:::planned
     VI["nika-verb-invoke 🧭"]:::planned
     VIF["nika-verb-infer 🧭"]:::planned
     VA["nika-verb-agent 🧭"]:::planned
@@ -124,7 +124,7 @@ flowchart TB
 | **L0** | nika-types, nika-error, nika-catalog | nika-schema | codegen, event, binding, transform, pck-manifest | Pure sync, zero I/O. 9 crates total per Q1-Q13 |
 | **L0.5** | nika-kernel, nika-kernel-mock | — | — | Trait definitions + mock companion. Async OK |
 | **L1** | — | — | fs, http, process, git, keys-\*, provider-\*, pck-registry, pck-store, memory-satellites (v0.95) | Effect impls. Each declares capability axes |
-| **L2** | — | — | verb-exec, verb-fetch, verb-invoke, verb-infer, verb-agent, pck, memory (v0.95), observability, builtin-{github,cloud,workspace} | Verbs + domain services |
+| **L2** | — | — | verb-infer, verb-exec, verb-invoke, verb-agent, pck, memory (v0.95), observability, builtin-{github,cloud,workspace} | Verbs + domain services (`fetch` is the `nika:fetch` builtin, not a verb crate) |
 | **L3** | — | — | runtime, shield, wasm-host (v0.100), sandbox (v0.100) | Runtime + policy |
 | **L4** | nika-catalog-verify | — | cli, serve, mcp, lsp, sdk | Interfaces, libraries |
 | **L5** | — | — | nika | The &lt;500 LOC binary, sole `[[bin]]` root |
