@@ -7,8 +7,20 @@ icon: "toolbox"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika ships with **63 built-in tools across 10 categories**. They are
-engine-native — no MCP round-trip, no subprocess — and invoked under the
+<Warning>
+  **⚠️ 2026-05-27 catalog reconciliation in progress** · This page documents the
+  **brouillon `nikab` binary catalog** (63 builtins · 10 categories · Sprint-2
+  legacy snapshot). The **canonical Nika v0.1 spec set is 22 builtins ·
+  5 categories** (core 6 · file 5 · data 8 · introspection 1 · network 2) ·
+  reconciled via D-2026-05-26-N5/N6 stdlib collapse (42 → 26 via jq subsumption)
+  + ADR-086/087/088 Rams sweep 2026-05-27 (csv_to_json→convert · sleep+wait_until
+  →wait · 4 introspection→inspect). For the canonical v0.1 stdlib reference see
+  [`nika-spec/stdlib/builtins-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/builtins-v0.1.md).
+  A full Mintlify rewrite to the canonical 22-builtin shape is queued post-v0.81 ship.
+</Warning>
+
+Nika (legacy `nikab` binary) ships with **63 built-in tools across 10 categories**.
+They are engine-native — no MCP round-trip, no subprocess — and invoked under the
 `nika:*` namespace from workflow YAML via the `invoke:` verb.
 
 <Info>
