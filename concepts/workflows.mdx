@@ -14,63 +14,49 @@ DAG, and executes tasks in topological order — parallelizing whatever
 the dependency graph allows.
 
 <Info>
-  **Target design banner.** The envelope described below (`apiVersion` +
-  `kind` + `metadata` + `spec`) is **target design — nika-schema
-  admission Round 4**. Today's WIP parser at `crates/nika-schema/` still
-  accepts the flat form (`schema: v1` + `name:` + `tasks:` at top
-  level) — ADR-021 locks the envelope migration for Phase D. Both
-  shapes are covered here, flagged explicitly.
+  **Implementation status.** The envelope below is the canonical spec
+  contract (`nika-spec` · [01-envelope](https://github.com/supernovae-st/nika-spec/blob/main/spec/01-envelope.md)).
+  The WIP parser at `crates/nika-schema/` is converging to it — see
+  [live state](/reference/status) for what executes end-to-end at the
+  current version.
 </Info>
 
 ## Minimal workflow
 
-Current WIP parser accepts this flat shape:
-
 ```yaml
-schema: v1
-name: hello
+nika: v1
+workflow: hello
 description: "A minimal workflow."
 
 tasks:
-  - name: greet
+  - id: greet
     infer:
-      provider: anthropic
-      model: <model-id>
       prompt: "Say hi in one line."
+      model: anthropic/<model-id>      # <provider>/<name>
 ```
 
-`schema: v1` is the only schema version today
-(`nika-schema::types::SchemaVersion::V1`). Fields carry source spans
-through `Spanned<T>` so diagnostics point at the exact byte range.
+Two required lines (`nika:` + `workflow:`) and a non-empty `tasks:` — the
+whole minimum to be a valid workflow. Fields carry source spans through
+`Spanned<T>` so diagnostics point at the exact byte range.
 
-## Envelope shape (ADR-021 target)
+## Why one version marker (not a K8s envelope)
 
-Phase D migrates every user-facing document to the K8s-style envelope:
+The envelope is **one header line** · `nika: v1`. Earlier drafts explored a
+Kubernetes-style `apiVersion` + `kind` + `metadata` + `spec` envelope, but
+the spec rejected it: that is two version-ish fields and ceremony a workflow
+file does not need. Modern specs converge on a single version marker —
+OpenAPI writes `openapi: 3.1.0`, Docker Compose dropped its `version:` field
+entirely. Nika takes the proven path: **the language name as the key, the
+contract version as the value.**
 
-```yaml target design — Phase D
-apiVersion: nika.sh/v1
-kind: Workflow                         # closed enum
-metadata:
-  name: hello
-  description: "A minimal workflow."
-spec:
-  defaults:
-    model: anthropic/<model-id>        # provider/model, LiteLLM-style
-  tasks:
-    - name: greet
-      infer:
-        prompt: "Say hi in one line."
-```
+- No separate `kind:` field — the presence of `workflow:` is itself the
+  document-type discriminator. Future document types (if any ever ship) use
+  their own top-level key.
+- The engine's internal canonical URI stays `https://nika.sh/spec/v1` for
+  RDF / conformance tooling — but the author never types a URL.
 
-Rationale (ADR-021 §Context): every workflow DSL with more than two
-document kinds (Argo, Tekton, Flux, Helm) converged on this envelope
-after flat-form regret migrations. Nika has **9 user-facing doc kinds**
-at v0.90 — Workflow, Skill, Agent, Provider, MCP, Eval, Recipe, Shield,
-Lints — plus Memory (reserved v0.95) and Plugin (reserved v0.100). One
-envelope, nine kinds, zero identity reinvention.
-
-Multi-document YAML is supported: one file may declare Workflow + Skill
-+ Agent separated by `---`, parsed into `Vec<RawDocument>`.
+Multi-document YAML is supported: one file may declare multiple documents
+separated by `---`, parsed into `Vec<RawDocument>`.
 
 ## Anatomy of a workflow
 

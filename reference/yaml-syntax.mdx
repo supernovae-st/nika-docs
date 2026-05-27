@@ -14,7 +14,7 @@ icon: "file-code"
 ## Top level
 
 ```yaml
-schema: nika/workflow@0.12   # required, pinned version
+nika: v1                     # required · language + contract version (single marker)
 workflow: <identifier>       # required, unique within a project
 description: <string>        # optional
 
@@ -62,10 +62,11 @@ The canonical JSON Schema is at
 [https://nika.sh/schema/workflow.json](https://nika.sh/schema/workflow.json).
 It's 100% machine-authoritative. This doc is a readable summary.
 
-## Schema version policy
+## Contract version policy
 
-`schema: nika/workflow@<major>.<minor>` — `minor` bumps are non-breaking,
-`major` bumps require migration via `nika migrate`.
-
-Current: `nika/workflow@0.12` (chrysalis). Stable: `nika/workflow@1.0`
-at v0.90 engine emergence.
+`nika: v1` is a **single version marker** — `v1` is the only value for the
+entire lifetime of the v1 contract. Minor additions (a new optional field, a
+new builtin) are **additive** and never change it (no `@minor` bumps, no
+`nika migrate` for them). A future `nika: v2` would be a deliberate
+breaking-change generation with its own spec — per `forever-v0.x`,
+effectively never.

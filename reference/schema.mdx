@@ -12,17 +12,23 @@ The canonical schema lives at:
 It's a standard [JSON Schema draft 2020-12](https://json-schema.org/)
 document. Your editor's YAML LSP can consume it directly.
 
-## Current version
+## Contract version
 
-`nika/workflow@0.12`
+`nika: v1` — the first line of every workflow. A **single version marker**:
+the key `nika` declares "this is a Nika workflow", the value `v1` pins the
+language contract version. There is no separate `schema:` or `apiVersion:`
+field (the engine's internal canonical URI stays `https://nika.sh/spec/v1`
+for RDF / conformance tooling, but the author never types a URL).
 
 ## Point your editor
 
-Add this line at the top of any `.nika.yaml`:
+Add the LSP modeline at the top of any `.nika.yaml` so your editor's YAML
+language server consumes the JSON Schema directly:
 
 ```yaml
 # yaml-language-server: $schema=https://nika.sh/schema/workflow.json
-schema: nika/workflow@0.12
+nika: v1
+workflow: my-workflow-id
 ```
 
 See [editor setup](/getting-started/editors) for per-IDE instructions.
@@ -30,12 +36,15 @@ See [editor setup](/getting-started/editors) for per-IDE instructions.
 ## Local validation
 
 ```bash
-nika check workflow.nika.yaml   # validates against current schema
+nika check workflow.nika.yaml   # validates against the v1 contract
 nika check workflow.nika.yaml --strict   # + extra lints
 ```
 
 ## Versioning policy
 
-- Minor bumps (`0.11 → 0.12`) are additive, backward-compatible.
-- Major bumps (`0.12 → 1.0`) may break. Always accompanied by `nika migrate`.
-- Stable milestone: `nika/workflow@1.0` shipped at engine v0.90 emergence.
+- `v1` is the **only value for the entire lifetime** of the v1 contract.
+- Minor additions (a new optional field, a new builtin) are **additive**
+  and never change the marker — no `@minor` bumps, no `nika migrate` for them.
+- A future `nika: v2` would be a deliberate breaking-change generation with
+  its own spec — and per `forever-v0.x`, that is effectively never.
+- Anti-pattern: `nika: v1.0` · `nika: "1"` · `nika: 1.0`. The value is exactly `v1`.

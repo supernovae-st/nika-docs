@@ -41,7 +41,7 @@ All provider env vars listed in [Providers catalog](/reference/providers-catalog
 Create `hello.nika.yaml`:
 
 ```yaml hello.nika.yaml
-schema: nika/workflow@1
+nika: v1
 workflow: hello
 
 tasks:
@@ -56,8 +56,8 @@ tasks:
 
 Three things to notice:
 
-- **`schema:`** declares the workflow-language version. `nika/workflow@1` is the locked v0.90 shape.
-- **`workflow:`** is a human-readable name.
+- **`nika: v1`** declares the workflow language + pins the contract version (a single version marker · `v1` forever).
+- **`workflow:`** is a human-readable name (kebab-case · the document-type discriminator).
 - **`tasks:`** is a list; each task has an `id` and one verb (here, `infer`).
 
 ## 3 — Run it
@@ -79,7 +79,7 @@ Target output:
 ## 4 — Add a second task that depends on the first
 
 ```yaml hello.nika.yaml
-schema: nika/workflow@1
+nika: v1
 workflow: hello
 
 tasks:
@@ -111,7 +111,7 @@ with explicit taint tracking and pipe filters.
 ## 5 — Get structured output
 
 ```yaml hello.nika.yaml
-schema: nika/workflow@1
+nika: v1
 workflow: hello-structured
 
 tasks:
