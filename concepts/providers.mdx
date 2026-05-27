@@ -8,8 +8,8 @@ icon: "server"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika ships with **{STATUS.providers} LLM providers** in its catalog,
-orchestrated behind one unified `InferRequest`. The `infer:` verb takes
-a `provider` + `model` pair, looks up capability rules
+orchestrated behind one unified `InferRequest`. The `infer:` verb takes a
+`model: <provider>/<name>` string, looks up capability rules
 ([{STATUS.capabilityRules} rules](/reference/capabilities)), and dispatches
 through the right API dialect.
 
@@ -57,9 +57,8 @@ Switching provider is **one line** in YAML:
 tasks:
   - id: first
     infer:
-      provider: anthropic                    # ← change to openai, gemini, groq, ...
-      model: claude-sonnet-4-20250514        # ← change to matching model
-      messages: [{ role: user, content: "Hello." }]
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name> · swap to openai/… · gemini/… · groq/…
+      prompt: "Hello."
 ```
 
 ## API dialects (7)
@@ -113,12 +112,11 @@ When a provider fails, Nika can route to a fallback:
 tasks:
   - id: primary
     infer:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      messages: [...]
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      prompt: "..."
     fallback:
-      - { provider: openai, model: gpt-4o }
-      - { provider: groq,   model: llama-3.3-70b-versatile }
+      - { model: openai/gpt-4o }
+      - { model: groq/llama-3.3-70b-versatile }
 ```
 
 <Warning>
@@ -171,7 +169,7 @@ tasks:
     Resolution algorithm and {STATUS.capabilityRules}-rule contract.
   </Card>
   <Card title="Concepts · Verbs" icon="play" href="/concepts/verbs">
-    The `infer:` verb and its four siblings (exec / fetch / invoke / agent).
+    The `infer:` verb and its three siblings (exec / invoke / agent) — fetch is the `nika:fetch` builtin under `invoke:`.
   </Card>
   <Card title="L0 decisions" icon="list-check" href="/architecture/l0-decisions">
     Why capability rules use prefix matching, not regex (Q1).
