@@ -173,7 +173,8 @@ Current admission order (per Q5 decision, rev.2):
     Template engine + package manifest. Binding depends on transform.
   </Step>
   <Step title="Rounds 7-10 — verbs">
-    One verb per round: exec → fetch → invoke → infer → agent.
+    One verb per round: infer → exec → invoke → agent (fetch is the
+    `nika:fetch` builtin under `invoke`, not a verb crate).
   </Step>
   <Step title="Rounds 11-15 — effects + runtime">
     L1 effect crates (fs, http, process, keys, provider-\*) and L3 runtime.
