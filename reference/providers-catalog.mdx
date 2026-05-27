@@ -179,20 +179,14 @@ workflow: multi-provider
 tasks:
   - id: primary
     infer:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      messages:
-        - role: user
-          content: "Explain linear algebra in one sentence."
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      prompt: "Explain linear algebra in one sentence."
 
   - id: fallback
     when: "{{ tasks.primary.failed }}"
     infer:
-      provider: openai
-      model: gpt-4o
-      messages:
-        - role: user
-          content: "Explain linear algebra in one sentence."
+      model: openai/gpt-4o
+      prompt: "Explain linear algebra in one sentence."
 ```
 
 ```bash Required env

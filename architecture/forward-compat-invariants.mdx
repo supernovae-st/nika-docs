@@ -65,19 +65,24 @@ and features we haven't imagined **without breaking changes to the public API**.
     Invariant #19: every `#[non_exhaustive]` struct ships a `new()` constructor.
   </Accordion>
 
-  <Accordion title="FCI-003 — Versioned file formats with explicit `schema:` field" icon="file-code">
-    Every on-disk artifact (workflows, catalogs, manifests, events) declares
-    `schema: "nika/<kind>@<major>"`. Parsers reject unknown schemas with a
-    clear error and a migration pointer.
+  <Accordion title="FCI-003 — Single version marker per on-disk artifact" icon="file-code">
+    A workflow pins its contract with **one header line** · `nika: v1` (a
+    single version marker · the language name as key, the contract version
+    as value · supersedes the older K8s `apiVersion:` and `schema:
+    nika/workflow@X` forms). Parsers reject any other value (`v1.0` · `v2` …)
+    with a clear error.
 
     ```yaml
-    schema: nika/workflow@1
+    nika: v1
     workflow: my-flow
     tasks: [...]
     ```
 
-    Migration between majors goes through `nika migrate <file>`. v1 stays
-    supported for N ≥ 2 major versions.
+    `v1` is the only value for the lifetime of the v1 contract — minor
+    additions are **additive** and never change it. A `nika: v2` would be a
+    deliberate breaking generation (per forever-v0.x · effectively never).
+    Non-workflow artifacts (package manifests, events) carry their own
+    schema version field.
   </Accordion>
 
   <Accordion title="FCI-004 — Extension namespaces (`nika.*` core + `x-*` community)" icon="plug">
@@ -86,7 +91,7 @@ and features we haven't imagined **without breaking changes to the public API**.
     stability guarantee, no collision with core).
 
     ```yaml
-    schema: nika/workflow@1
+    nika: v1
     workflow: my-flow
     nika.cache: { ttl: 3600 }      # core extension, validated
     x-my-org-metric: 42             # community, passthrough

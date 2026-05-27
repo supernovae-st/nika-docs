@@ -35,9 +35,9 @@ the unresolved expression. See
 Four examples, each a valid `Templatable::Template`:
 
 ```yaml
-prompt: "{{ inputs.target }}"
+prompt: "{{ vars.target }}"
 prompt: "{{ tasks.fetch_issue.output.title }}"
-prompt: "{{ context.model_family }}"
+prompt: "{{ with.model_family }}"
 command: "echo {{ env.HOME }}/output.txt"
 ```
 
@@ -46,18 +46,17 @@ parse time.
 
 ## Scopes
 
-Every binding resolves against one of six named scopes. The resolver
+Every binding resolves against one of five named scopes. The resolver
 refuses unknown top-level names at validation time, so `{{ tsaks.foo }}`
 is caught before the run starts.
 
 | Scope | Source | Example |
 |---|---|---|
-| `inputs.*` | `--input key=value` flags at CLI, typed per workflow-level `inputs:` declarations | `inputs.target` |
-| `context.*` | Top-level `context:` block — constants shared across tasks | `context.model_family` |
-| `tasks.<name>.output` | Structured output of a completed task | `tasks.greet.output` |
-| `tasks.<name>.events` | Events emitted by a task (filterable by kind) | `tasks.greet.events` |
-| `env.*` | Environment variables, whitelisted at workflow level | `env.HOME`, `env.GITHUB_TOKEN` |
-| `nika.*` | Built-in metadata: version, run ID, timestamp | `nika.run_id`, `nika.version` |
+| `vars.*` | Workflow inputs, declared in the envelope `vars:` block (typed or untyped) | `vars.target` |
+| `with.*` | Task-level scope, declared in a per-task `with:` block (pre-bind + alias) | `with.model_family` |
+| `tasks.<name>.output` | The result record of a completed task (`.output` · `.status` · `.error` · `.duration_ms`) | `tasks.greet.output` |
+| `env.*` | Non-sensitive runtime config, declared in the envelope `env:` block | `env.HOME`, `env.REGION` |
+| `secrets.*` | Vault/env/file-backed secret references (masked in logs) | `secrets.api_key` |
 
 Task names are validated at parse time (`snake_case`, unique). A
 binding that references a task not present in the file fails with a
@@ -65,21 +64,20 @@ miette diagnostic pointing at the exact byte range.
 
 ## Typed resolution
 
-Nika knows the expected type of every binding target. If `inputs.count`
+Nika knows the expected type of every binding target. If `vars.count`
 is declared `integer` and you drop it into a field typed as a list,
 validation fails *before* the run starts.
 
 ```yaml
-inputs:
+vars:
   count:
     type: integer
 
 tasks:
   - name: loop
-    for_each: "{{ inputs.count }}"   # fails — for_each needs a list
+    for_each: "{{ vars.count }}"      # fails — for_each needs a list
     infer:
-      provider: anthropic
-      model: <model-id>
+      model: anthropic/<model-id>     # <provider>/<name>
       prompt: "Iteration {{ item }}"
 ```
 
@@ -96,7 +94,7 @@ the analyzer and propagates through bindings:
 - `exec` stdout → tainted (subshell could have been influenced).
 - `infer` / `agent` output → tainted (prompt injection vector).
 - `invoke` output → tainted (MCP servers are third-party).
-- `inputs.*` from the CLI → tainted (user-provided at runtime).
+- `vars.*` from the CLI → tainted (user-provided at runtime).
 - `context.*`, `env.*`, `nika.*` → **trusted** (workflow author owns
   them).
 
@@ -178,10 +176,10 @@ indentation.
 Missing bindings fail at validation unless declared optional:
 
 ```yaml
-prompt: "{{ inputs.optional_field | default('(none)') }}"
+prompt: "{{ vars.optional_field | default('(none)') }}"
 ```
 
-If `inputs.optional_field` is absent and has no `default:`, the
+If `vars.optional_field` is absent and has no `default:`, the
 workflow fails to load — a miette diagnostic points at the declaration
 site and the usage site.
 

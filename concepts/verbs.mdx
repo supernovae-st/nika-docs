@@ -48,14 +48,15 @@ not as a new verb.
 Spawns a subprocess, captures stdout/stderr, returns exit code + output.
 
 **Required**: `command` (string).
-**Optional**: `shell` (bool), `cwd` (path), `env` (map), `timeout_ms` (int), `max_stdout` (bytes cap).
+**Optional**: `cwd` (path), `env` (map · OS env for this subprocess), `stdin` (string), `capture` (`stdout` default · `stderr` · `combined` · `structured`). Task-level `timeout:` applies (not a verb field).
 
 ```yaml
 - name: build
+  timeout: "300s"                  # task-level (applies to any verb)
   exec:
     command: cargo build --release
     cwd: ./crates/engine
-    timeout_ms: 300000
+    capture: structured            # { stdout, stderr, exit_code }
     env:
       RUSTFLAGS: "-C target-cpu=native"
 ```
@@ -107,24 +108,21 @@ Calls a builtin (`nika:` namespace) or a tool/resource exposed by a
 connected **Model Context Protocol** server. MCP server aliases are
 declared in the workflow's `mcp:` block.
 
-**Required**: exactly one of `tool` (string) or `resource` (URI string).
-**Optional**: `params` (JSON), `mcp` (server alias), `timeout_ms` (int).
+**Required**: `tool` (string · `nika:<path>` for a builtin OR `mcp:<server>/<tool>` for an MCP tool).
+**Optional**: `args` (object · tool-specific schema). Task-level `timeout:` applies (not a verb field).
 
 ```yaml
-mcp:
-  chroma:
-    command: chroma-mcp
-    args: ["--collection", "nika_docs"]
-
-tasks:
-  - name: search_vectordb
-    invoke:
-      mcp: chroma
-      tool: query
-      params:
-        query: "{{ tasks.summarize.output }}"
-        top_k: 5
+- name: search_vectordb
+  invoke:
+    tool: "mcp:chroma/query"          # mcp:<server>/<tool> · one colon, then a slash
+    args:
+      query: "{{ tasks.summarize.output }}"
+      top_k: 5
 ```
+
+The MCP server `chroma` is configured in the engine's MCP server registry
+(engine config · out of scope of the workflow file). Builtins use the
+`nika:` namespace, e.g. `tool: "nika:read"`.
 
 Routing goes through `ToolExecutor` + `ToolExecute::execute(ToolCall)`
 at L0.5 — the same trait the `agent` verb uses to dispatch in-loop
@@ -136,16 +134,15 @@ Single-shot call to a language model. One `InferRequest` shape covers
 all {STATUS.providers} providers in the catalog.
 
 **Required**: `prompt` (string).
-**Optional**: `system` (string), `temperature` (0.0–2.0), `max_tokens`
-(u32), `extended_thinking` (bool), `thinking_budget` (u32), `content`
-(multi-modal parts), `response_format` (hint), `provider` + `model`
-(overrides of workflow defaults).
+**Optional**: `system` (string), `model` (`<provider>/<name>` · overrides the
+workflow default), `temperature` (0.0–2.0), `max_tokens` (u32), `schema`
+(JSON Schema · structured output), `thinking` (`{ enabled, budget_tokens }`),
+`vision` (image inputs).
 
 ```yaml
 - name: summarize
   infer:
-    provider: anthropic
-    model: <model-id>                    # see /reference/providers-catalog
+    model: anthropic/<model-id>          # <provider>/<name> · see /reference/providers-catalog
     system: "You are a technical writer."
     prompt: |
       Summarize this in one sentence:
@@ -178,36 +175,33 @@ Cross-link: [Providers](/concepts/providers) · [`Provider` trait](/architecture
 A model-driven loop: the agent calls tools, observes results, iterates
 until a completion signal fires or a budget exhausts.
 
-**Required**: `prompt` (string).
-**Optional**: `tools` (list), `max_turns` (u32), `max_tokens` (u32),
-`from` (agent preset reference), `skills` (list), `provider` + `model`,
-`mcp` (list of server aliases), `temperature`, `token_budget` (u32),
-`system` (string), `extended_thinking` (bool), `thinking_budget` (u32),
-`depth_limit` (u32), `tool_choice` (string), `stop_sequences` (list),
-`scope` (string).
+**Required**: `prompt` (string · initial user message).
+**Optional**: `system` (string), `model` (`<provider>/<name>`), `tools`
+(whitelist · glob patterns · **default-deny**), `max_turns` (u32 · default 10),
+`max_tokens_total` (u32 · cumulative token budget), `temperature` (0.0–2.0),
+`schema` (JSON Schema · validates the final message).
 
 ```yaml
 - name: investigate
   agent:
-    provider: anthropic
-    model: <model-id>
+    model: anthropic/<model-id>          # <provider>/<name>
     system: |
       You are investigating a GitHub issue. Use tools to gather
       context before answering.
-    tools:
+    tools:                               # default-deny · grant explicitly
       - nika:fetch
       - mcp:browser/*
     max_turns: 10
-    token_budget: 100000
+    max_tokens_total: 100000
     prompt: |
-      Investigate issue #{{ inputs.issue_number }} and summarise
+      Investigate issue #{{ vars.issue_number }} and summarise
       the root cause in under 200 words.
 ```
 
 **Invariants** (from `nika-kernel::runtime::agent`):
 
-- `AgentLoopConfig` bounds the loop: `max_turns`, `token_budget`,
-  `depth_limit`. The first ceiling hit stops the loop (`AgentStopReason`).
+- `AgentLoopConfig` bounds the loop: `max_turns`, `max_tokens_total`.
+  The first ceiling hit stops the loop (`AgentStopReason`).
 - Every tool call is **taint-checked** — untrusted data cannot reach
   dangerous verbs without an explicit sanitizer.
 - The iteration trace (`ToolCallRecord` + `CheckpointMessage`) is

@@ -97,10 +97,8 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      messages:
-        - { role: user, content: "..." }
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      prompt: "..."
 ```
 
 ## What tier 1 gets you

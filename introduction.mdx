@@ -63,11 +63,10 @@ tasks:
 
   - id: summarize
     infer:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      messages:
-        - role: user
-          content: "Summarize in one sentence:\n{{ tasks.read.output }}"
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      prompt: |
+        Summarize in one sentence:
+        {{ tasks.read.output }}
 
   - id: save
     exec:

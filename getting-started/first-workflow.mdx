@@ -47,11 +47,8 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      messages:
-        - role: user
-          content: "Say hi to the chrysalis. Be brief."
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      prompt: "Say hi to the chrysalis. Be brief."
 ```
 
 Three things to notice:
@@ -85,23 +82,17 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      messages:
-        - role: user
-          content: "Say hi to the chrysalis. Be brief."
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      prompt: "Say hi to the chrysalis. Be brief."
 
   - id: critique
     depends_on: [greet]
     infer:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      messages:
-        - role: user
-          content: |
-            The greeting was: {{ tasks.greet.output }}
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      prompt: |
+        The greeting was: {{ tasks.greet.output }}
 
-            Rewrite it shorter and more enigmatic.
+        Rewrite it shorter and more enigmatic.
 ```
 
 Notice `{{ tasks.greet.output }}` — that's a [binding](/concepts/bindings).
@@ -117,25 +108,20 @@ workflow: hello-structured
 tasks:
   - id: names
     infer:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      messages:
-        - role: user
-          content: "Generate three names for a butterfly."
-      response_format:
-        type: json_schema
-        json_schema:
-          type: object
-          properties:
-            names:
-              type: array
-              items:
-                type: string
-                minLength: 3
-                maxLength: 20
-              minItems: 3
-              maxItems: 3
-          required: [names]
+      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      prompt: "Generate three names for a butterfly."
+      schema:                          # structured output · JSON Schema
+        type: object
+        properties:
+          names:
+            type: array
+            items:
+              type: string
+              minLength: 3
+              maxLength: 20
+            minItems: 3
+            maxItems: 3
+        required: [names]
 ```
 
 Nika takes the JSON Schema, asks the provider for output that conforms
@@ -156,7 +142,7 @@ nika run hello.nika.yaml
 - Four verbs — `infer`, `exec`, `invoke`, `agent` — define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
 - `depends_on:` builds a DAG.
 - `{{ tasks.X.output }}` bindings flow data between tasks, with taint tracking.
-- `response_format:` enforces JSON schemas on AI output.
+- `schema:` enforces JSON schemas on AI output.
 
 ## What you can do today
 

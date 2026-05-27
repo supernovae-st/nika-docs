@@ -15,19 +15,18 @@ icon: "file-code"
 
 ```yaml
 nika: v1                     # required · language + contract version (single marker)
-workflow: <identifier>       # required, unique within a project
-description: <string>        # optional
+workflow: <identifier>       # required · kebab-case · unique within file
+description: <string>        # optional · human-readable
 
-provider: <name>             # default provider for all tasks
-model: <id>                  # default model for all tasks
+model: <provider>/<name>     # optional · default model for infer/agent tasks
 
-inputs: { ... }              # schema for runtime inputs
-context: { ... }             # constants
-skills: { ... }              # reusable blocks
-artifacts: { ... }           # declared outputs
-include: [ ... ]             # sub-workflows
+vars: { ... }                # optional · inputs (typed or untyped) · ${{ vars.* }}
+env: { ... }                 # optional · non-sensitive config · ${{ env.* }}
+secrets: { ... }             # optional · vault/env/file references · ${{ secrets.* }}
 
-tasks: [ ... ]               # required
+tasks: [ ... ]               # required · non-empty
+
+outputs: { ... }             # optional · the workflow's return value
 ```
 
 ## A task

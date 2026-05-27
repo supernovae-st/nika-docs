@@ -133,8 +133,7 @@ tasks:
   - name: analyze
     depends_on: [fetch_data]
     infer:
-      provider: anthropic
-      model: <model-id>
+      model: anthropic/<model-id>      # <provider>/<name>
       prompt: "{{ tasks.fetch_data.output }}"
 
   - name: notify
@@ -150,8 +149,7 @@ Fan-out over a collection:
   depends_on: [list_files]
   for_each: "{{ tasks.list_files.output.lines }}"
   infer:
-    provider: anthropic
-    model: <model-id>
+    model: anthropic/<model-id>        # <provider>/<name>
     prompt: "Review this file: {{ item }}"
 ```
 
@@ -184,31 +182,36 @@ Retry on failure:
   Round 4 admission.
 </Note>
 
-## Inputs, context, includes
+## Inputs · `vars`
+
+Workflow inputs live in `vars:` (typed or untyped), available in every task
+via `${{ vars.<name> }}`. Untyped constants and typed, validated inputs use
+the same block — the typed form powers schema generation for callable
+workflows (`nika.run_workflow` over MCP).
 
 ```yaml
-inputs:
-  target:
+vars:
+  target:                          # typed · validated + schema-gen
     type: string
     required: true
   verbose:
     type: boolean
     default: false
-
-context:
-  model_family: claude
-
-include:
-  - path: ./common/setup.nika.yaml
+  model_family: claude             # untyped · the value is the default
 
 tasks:
   - name: greet
-    depends_on: [setup]
     infer:
-      provider: anthropic
-      model: <model-id>
-      prompt: "Say hi to {{ inputs.target }}."
+      model: anthropic/<model-id>  # <provider>/<name>
+      prompt: "Say hi to {{ vars.target }}."
 ```
+
+<Note>
+  v1 workflows are **single-file** — there is no `include:` / `import:`
+  (static composition is a candidate for a later additive minor · see the
+  spec's out-of-scope list). To reuse a sub-DAG today, call it with
+  `invoke: nika:run_workflow`.
+</Note>
 
 Runtime invocation:
 
