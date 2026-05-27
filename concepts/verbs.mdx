@@ -79,15 +79,16 @@ modes become the builtin's `mode` argument.
 
 ```yaml
 - name: pull_readme
+  timeout: "30s"                       # task-level (applies to any verb)
   invoke:
     tool: nika:fetch
     args:
       url: https://api.github.com/repos/supernovae-st/nika/readme
       method: GET
+      mode: text                       # extraction mode · see extract-modes
       headers:
         Accept: application/vnd.github.raw
         Authorization: "Bearer {{ env.GITHUB_TOKEN }}"
-      timeout_ms: 30000
 ```
 
 **Invariants** (from `nika-kernel::http::HttpClient`):
