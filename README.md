@@ -59,8 +59,7 @@ There is no `package.json` — Mintlify's CLI runs standalone via `npx`.
 repo. **Do not hand-edit it** — your changes will be overwritten on the next
 refresh.
 
-To regenerate it (from the `supernovae-hq` monorepo root, with both the engine
-and docs checked out as submodules):
+To regenerate it (from a checkout that has both the engine and docs available):
 
 ```bash
 cd nika/engine && bash scripts/mintlify-snapshot.sh
