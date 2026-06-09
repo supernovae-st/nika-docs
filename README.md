@@ -102,6 +102,7 @@ Pull requests are welcome.
 | Repo | Purpose |
 |---|---|
 | [`supernovae-st/nika`](https://github.com/supernovae-st/nika) | Rust engine — the workflow runtime itself (AGPL) |
+| [`supernovae-st/nika-spec`](https://github.com/supernovae-st/nika-spec) | The open workflow language spec (Apache-2.0) — the language the engine implements |
 | [`supernovae-st/nika.sh`](https://github.com/supernovae-st/nika.sh) | Marketing site (Astro) — [nika.sh](https://nika.sh) |
 | [`supernovae-st/nika-client`](https://github.com/supernovae-st/nika-client) | TypeScript SDK for consuming the Nika daemon |
 | [`supernovae-st/nika-design-skill`](https://github.com/supernovae-st/nika-design-skill) | Claude skill for authoring workflows |
