@@ -1,6 +1,6 @@
 ---
 title: "Roadmap"
-description: "Forever-v0.x. No v1.0 target. Quality over speed. v0.81 seams → v0.90 foundation → v0.95 memory subsystem → v0.100 ecosystem."
+description: "Forever-v0.x. No v1.0 target. Quality over speed. First usable ship: v0.81, summer 2026. Milestones tag when truly green."
 sidebarTitle: "Roadmap"
 icon: "map"
 ---
@@ -52,8 +52,15 @@ See [live state](/reference/status) for the authoritative snapshot.
 ## Milestones
 
 <AccordionGroup>
-  <Accordion title="v0.81 — Forward-compat seams + hygiene hardening" icon="shield">
-    **Target state when shipped:**
+  <Accordion title="v0.81 — First usable ship (language v0.1 + vertical slice)" icon="rocket">
+    **The first public ship — language and engine announced together,
+    summer 2026.** The language spec (`nika: v1` envelope, Apache-2.0)
+    goes public with a usable vertical slice of the engine: a binary you
+    launch, `infer` + `exec` + `nika run` at minimum, `serve`/MCP if
+    cadence holds. The rest of the verb surface hardens in v0.8x minors
+    after the announce. The communicated version is always the real tag.
+
+    **Engine target state at the tag:**
 
     - 14-crate foundation admitted (types, error, catalog, kernel,
       kernel-mock, catalog-verify, schema, codegen, event, binding,
@@ -67,7 +74,7 @@ See [live state](/reference/status) for the authoritative snapshot.
     - `release-plz` wired for per-crate semver on publishable crates.
     - Public-API + semver-checks CI live.
 
-    **No date.** Ships when ready.
+    **Summer 2026.** Ships when green, not when the calendar says.
   </Accordion>
 
   <Accordion title="v0.90 — Diamond Foundation" icon="diamond">
@@ -91,16 +98,17 @@ See [live state](/reference/status) for the authoritative snapshot.
     **No date.** This is the v0.x "stable foundation" tag.
   </Accordion>
 
-  <Accordion title="v0.95 — Memory subsystem complete" icon="brain">
+  <Accordion title="The Connectome — sovereign memory" icon="brain">
     **Target state when shipped:**
 
-    - `nika-memory` L2 orchestrator admitted.
-    - **8 L1 memory satellites** admitted: `nika-hnsw`, `nika-bm25`,
+    - `nika-connectome` L2 orchestrator admitted.
+    - **9 L1 memory satellites** admitted: `nika-hnsw`, `nika-bm25`,
       `nika-rrf`, `nika-fsrs`, `nika-rdfs-reasoner`, `nika-temporal`,
-      `nika-graph-algos`, `nika-autodesc`.
+      `nika-graph-algos`, `nika-autodesc-minimal`, `nika-autodesc-full`.
     - `MemoryStore` + `EmbeddingProvider` trait impls live (reservations
       from v0.80 → real implementations).
-    - `nika-memory-oxigraph` as default backend (ADR-004 Option B).
+    - Oxigraph as the default backend (ADR-004 Option B) — RDF/SPARQL,
+      W3C-standard, exportable, yours.
     - Agent-v2 with memory-backed recall (FSRS spaced repetition,
       multi-vector HNSW, RRF hybrid search).
 
@@ -108,7 +116,7 @@ See [live state](/reference/status) for the authoritative snapshot.
     memory crates add on top. No date.
   </Accordion>
 
-  <Accordion title="v0.100 — Ecosystem" icon="box">
+  <Accordion title="Ecosystem tier — plugins + observability" icon="box">
     **Target state when shipped:**
 
     - `nika-wasm-host` (L3) + `nika-sandbox` (L3) admitted.
@@ -121,11 +129,12 @@ See [live state](/reference/status) for the authoritative snapshot.
     - `pck` registry fully live — community workflow packages,
       signature verification, overlay precedence (User > Pck > Core).
 
-    **No date.** The ecosystem tier.
+    **No date.** Versions stay honest v0.x tags — there is no marketing
+    version axis.
   </Accordion>
 
-  <Accordion title="v0.110+ — Ongoing" icon="infinity">
-    Beyond v0.100, Nika continues incrementally:
+  <Accordion title="Ongoing" icon="infinity">
+    Beyond the ecosystem tier, Nika continues incrementally:
 
     - Language bindings (`nika-napi`, `nika-py`) — rebuild if demand
       materializes (currently deferred per POST_AUDIT).
@@ -151,7 +160,7 @@ See [live state](/reference/status) for the authoritative snapshot.
 - **Proc macros in L0** — Q1 LOCKED. Manual impl + `macro_rules!` forever.
 - **`Box<dyn Error>` in public API** — hygiene vector 19 bans.
 - **`anyhow::Error` in library code** — ADR-005. Binary only.
-- **Plugins as proc macros** — WASM boundary (v0.100) is the plugin story.
+- **Plugins as proc macros** — the WASM boundary (ecosystem tier) is the plugin story.
 
 ## Governance
 

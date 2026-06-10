@@ -1,6 +1,6 @@
 ---
 title: "Builtins catalog"
-description: "63 engine-native nika:* tools across 10 categories. Invoked via the invoke: verb."
+description: "The canonical stdlib: engine-native nika:* tools across 5 categories, all reached through the invoke: verb."
 sidebarTitle: "Builtins"
 icon: "toolbox"
 ---
@@ -8,255 +8,147 @@ icon: "toolbox"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 import { CANON } from "/snippets/_canon.mdx";
 
-<Warning>
-  **⚠️ 2026-05-27 catalog reconciliation in progress** · This page documents the
-  **brouillon `nikab` binary catalog** (63 builtins · 10 categories · Sprint-2
-  legacy snapshot). The **canonical Nika v0.1 spec set is {CANON.builtins} builtins ·
-  5 categories** (core 6 · file 5 · data 8 · introspection 1 · network 2) ·
-  reconciled via D-2026-05-26-N5/N6 stdlib collapse (42 → 26 via jq subsumption)
-  + ADR-086/087/088 Rams sweep 2026-05-27 (csv_to_json→convert · sleep+wait_until
-  →wait · 4 introspection→inspect). For the canonical v0.1 stdlib reference see
-  [`nika-spec/stdlib/builtins-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/builtins-v0.1.md).
-  A full Mintlify rewrite to the canonical 22-builtin shape is queued post-v0.81 ship.
-</Warning>
+The language stays {CANON.verbs} verbs. Everything else is a tool — and the
+standard library ships **{CANON.builtins} builtins** under the `nika:*`
+namespace, engine-native (no MCP round-trip, no subprocess), all invoked
+the same way:
 
-Nika (legacy `nikab` binary) ships with **63 built-in tools across 10 categories**.
-They are engine-native — no MCP round-trip, no subprocess — and invoked under the
-`nika:*` namespace from workflow YAML via the `invoke:` verb.
+```yaml
+- id: read_config
+  invoke:
+    tool: "nika:read"
+    args: { path: "./config.yaml" }
+```
 
 <Info>
-  **Canonical source:** [`crates/nika-catalog/src/data/builtins.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-catalog/src/data/builtins.rs) —
-  the `ALL_BUILTINS` static array is sorted alphabetically and served
-  via `O(log n)` binary search. Snapshot 2026-04-17.
-  Invariants (checked by unit tests): array length = 63, strictly
-  sorted, case-sensitive, `Core` = 7, `File` = 5, `Data` = 13.
+  **Canonical source:** [`nika-spec/stdlib/builtins-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/builtins-v0.1.md) —
+  the Apache-2.0 language spec. The set was curated by the Rams
+  "less but better" sweep (ADR-086/087/088): one super-powerful builtin
+  with mode args beats five single-purpose ones.
 </Info>
 
 ## Overview
 
 <CardGroup cols={3}>
   <Card title="Builtins" icon="toolbox">
-    **63** tools
+    **{CANON.builtins}** tools · 5 categories
   </Card>
-  <Card title="Categories" icon="folder">
-    **10** — Core · File · Data · DataSprint2 · Introspection · CostRecords · Agent · MediaAlwaysOn · MediaCore · MediaOptIn
+  <Card title="Extract modes" icon="filter">
+    **{CANON.extractModes}** on `nika:fetch`
   </Card>
-  <Card title="Namespace" icon="at">
-    `nika:<name>` — reserved, always lowercase
+  <Card title="Namespace" icon="tag">
+    `nika:*` · engine-native
   </Card>
 </CardGroup>
 
-## How to invoke one
+## Core (6)
 
-<CodeGroup>
-```yaml workflow.nika.yaml
-nika: v1
-workflow: read-and-transform
+The workflow-control family: speak, signal, guard, ask, finish, pause.
 
-tasks:
-  - id: load
-    invoke:
-      tool: nika:read        # builtin under nika:*
-      input:
-        path: ./data.json
+| Builtin | What it does |
+|---|---|
+| `nika:log` | Emit a log entry (`debug`/`info`/`warn`/`error`) to the event stream — human-readable diagnostic. |
+| `nika:emit` | Emit a custom machine event (consumed by subscribers and the journal). `log` is for humans, `emit` is for machines. |
+| `nika:assert` | Fail the task if a CEL `${{ }}` condition is false — the fail-fast guard (`when:` is the skip-guard). |
+| `nika:prompt` | Interactive human confirm — blocks until answered; engines may use `default` in CI. |
+| `nika:done` | Mark the current `agent:` loop complete and exit — valid only inside an agent tool whitelist. |
+| `nika:wait` | Temporal pause — relative `duration:` XOR absolute `until:` (ISO 8601), validated at parse time. |
 
-  - id: shape
-    depends_on: [load]
-    invoke:
-      tool: nika:jq
-      input:
-        expr: ".records[] | select(.active)"
-        data: "{{ tasks.load.output }}"
+```yaml
+- id: gate
+  invoke:
+    tool: "nika:assert"
+    args:
+      condition: "${{ tasks.fetch_data.output.count > 0 }}"
+      message: "Expected non-empty result"
 ```
 
-```rust Lookup from Rust
-use nika_catalog::{find_builtin, is_known_builtin};
+## File (5)
 
-assert!(is_known_builtin("jq"));
-let b = find_builtin("pipeline").unwrap();
-assert_eq!(b.name, "pipeline");
-```
-</CodeGroup>
-
-<Note>
-  The `invoke:` verb crate lands in Round 7 — at v{STATUS.version} the
-  YAML above is the target design. Catalog lookup (`find_builtin`) is
-  already public API on the admitted `nika-catalog` crate.
-</Note>
-
-## Core — primitive control flow (7)
-
-Sequencing, logging, assertions, and timing primitives.
-
-| Tool | Purpose |
+| Builtin | What it does |
 |---|---|
-| `nika:assert` | Assert a predicate; fail the task on violation. |
-| `nika:complete` | Mark the current task complete (explicit terminator). |
-| `nika:emit` | Emit a structured event into the run log. |
-| `nika:log` | Write to the run log at a chosen level. |
-| `nika:prompt` | Prompt the user interactively (TUI / serve only). |
-| `nika:run` | Run a nested workflow or skill. |
-| `nika:sleep` | Pause for a duration (test-safe; backed by injectable `Clock`). |
+| `nika:read` | Read a file — returns string content. |
+| `nika:write` | Write a file — returns the path; binary upstream values are written as-is. |
+| `nika:edit` | In-place find/replace — returns the modified path. |
+| `nika:glob` | Glob match — returns an array of paths. |
+| `nika:grep` | Recursive grep — returns an array of `{ path, line, match }`. |
 
-## File — local I/O (5)
+## Data (8)
 
-Path-based filesystem access, mediated by the `Fs` kernel trait.
+`jq` is THE data language — map, filter, reshape, merge. The other seven
+cover what jq genuinely cannot do: diff, validate, delete-on-null merge,
+format conversion, generation, time, hashing.
 
-| Tool | Purpose |
+| Builtin | What it does |
 |---|---|
-| `nika:edit` | Edit a file in place with a patch or diff. |
-| `nika:glob` | Glob-match files under a directory. |
-| `nika:grep` | Ripgrep-style content search across files. |
-| `nika:read` | Read a file (text or blob). |
-| `nika:write` | Write a file atomically. |
+| `nika:jq` | Run a jq expression — the single transform-and-extraction language, same jq as `output:` bindings. |
+| `nika:json_diff` | JSON diff — returns RFC 6902 JSON Patch (jq can't diff). |
+| `nika:validate` | Validate data against a JSON Schema — `format: json \| yaml`, returns `{ valid, errors }`. |
+| `nika:json_merge_patch` | RFC 7396 merge patch — `null` deletes a key, the semantics jq's `*` merge does not provide. |
+| `nika:convert` | Universal format converter — `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. |
+| `nika:uuid` | Generate a UUID — `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
+| `nika:date` | Timestamp arithmetic — op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
+| `nika:hash` | Content hashing — default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
 
-## Data — collection and JSON shaping (13)
-
-Everything-is-data transformations that run in-memory.
-
-| Tool | Purpose |
-|---|---|
-| `nika:chunk` | Split a sequence into fixed-size or token-aware chunks. |
-| `nika:enrich` | Add fields to each record via lookup or computation. |
-| `nika:filter` | Keep records that match a predicate. |
-| `nika:group_by` | Partition records by a key. |
-| `nika:inject` | Merge a value into a path inside a document. |
-| `nika:jq` | Run a jq expression over JSON. |
-| `nika:json_diff` | Diff two JSON documents into RFC 6902 patches. |
-| `nika:json_merge` | Merge two JSON documents (shallow or deep). |
-| `nika:map` | Apply a transform to each record. |
-| `nika:set_diff` | Set difference between two sequences. |
-| `nika:token_count` | Count tokens for a given tokenizer. |
-| `nika:tree_data` | Walk or shape a nested document. |
-| `nika:zip` | Zip two or more sequences into tuples. |
-
-## DataSprint2 — validation + structural operations (6)
-
-Added in Sprint 2; focused on validation and flattening.
-
-| Tool | Purpose |
-|---|---|
-| `nika:aggregate` | Reduce a sequence into summary statistics. |
-| `nika:json_flatten` | Flatten a nested JSON document into dotted keys. |
-| `nika:json_unflatten` | Inverse of `json_flatten`. |
-| `nika:json_verify` | Validate JSON against a schema. |
-| `nika:locale_lookup` | Resolve locale metadata (language, region, script). |
-| `nika:yaml_validate` | Validate a YAML document against a schema. |
-
-## Introspection — inspect the running workflow (4)
-
-Surface DAG structure, task state, and orchestration info.
-
-| Tool | Purpose |
-|---|---|
-| `nika:dag_info` | Return the task DAG (nodes, edges, status). |
-| `nika:orchestrate` | Inspect orchestration state (parallelism, queues). |
-| `nika:task_status` | Return status + telemetry of a named task. |
-| `nika:threads` | List currently running task threads. |
-
-## CostRecords — observability of spend (2)
-
-Reveal per-run cost + usage records accumulated during inference.
-
-| Tool | Purpose |
-|---|---|
-| `nika:cost` | Return cumulative USD cost for the current run. |
-| `nika:records` | Return per-task usage records (tokens, latency, cache hits). |
-
-## Agent — higher-level agent helpers (1)
-
-Helpers that wrap kernel I/O for the `agent:` verb.
-
-| Tool | Purpose |
-|---|---|
-| `nika:fetch` | Fetch a URL with SSRF + size guards (backed by the `Http` kernel trait). |
-
-## MediaAlwaysOn — media primitives compiled by default (5)
-
-Media features that have zero heavy dependencies and ship with every
-build.
-
-| Tool | Purpose |
-|---|---|
-| `nika:decode` | Decode an image or audio file to raw bytes. |
-| `nika:dimensions` | Return image/video dimensions. |
-| `nika:dominant_color` | Extract dominant-color swatches from an image. |
-| `nika:import` | Import a media asset into the run scope. |
-| `nika:thumbhash` | Compute a [ThumbHash](https://evanw.github.io/thumbhash/) placeholder. |
-
-## MediaCore — core media transforms (3)
-
-Resize, format-convert, strip metadata. Always available; no opt-in.
-
-| Tool | Purpose |
-|---|---|
-| `nika:convert` | Convert between image formats (jpeg / webp / avif / png). |
-| `nika:strip` | Strip EXIF / XMP / provenance metadata. |
-| `nika:thumbnail` | Generate a thumbnail at a target size. |
-
-## MediaOptIn — heavy media + content extraction (17)
-
-Feature-gated at build time; pull in larger dependencies (pdf parsing,
-c2pa, readability, svg rasterisation).
-
-| Tool | Purpose |
-|---|---|
-| `nika:chart` | Render a chart from structured data. |
-| `nika:compare` | Compare two images (pHash, SSIM, visual diff). |
-| `nika:css_select` | Select nodes from HTML via CSS selectors. |
-| `nika:extract_links` | Extract all links from HTML or Markdown. |
-| `nika:extract_metadata` | Extract media metadata (EXIF, ID3, XMP). |
-| `nika:html_to_md` | Convert HTML to Markdown. |
-| `nika:metadata` | Read structured media metadata records. |
-| `nika:optimize` | Optimise an image/video for size vs quality. |
-| `nika:pdf_extract` | Extract text + structure from a PDF. |
-| `nika:phash` | Perceptual hash of an image (near-dup detection). |
-| `nika:pipeline` | Run a media pipeline (chained transforms). |
-| `nika:provenance` | Read + verify C2PA provenance claims. |
-| `nika:qr_validate` | Validate a QR-code image (size, error-correction, content). |
-| `nika:quality` | Compute perceptual quality score. |
-| `nika:readability` | Extract main article content ("reader mode"). |
-| `nika:svg_render` | Rasterise an SVG to PNG/JPEG/WebP. |
-| `nika:verify` | Verify signatures, hashes, or provenance chains. |
-
-## Category counts (grep-verified)
-
-```bash
-$ grep -E 'category: [A-Z]' crates/nika-catalog/src/data/builtins.rs \
-    | sort | uniq -c | sort -rn
-  17   category: MediaOptIn,
-  13   category: Data,
-   7   category: Core,
-   6   category: DataSprint2,
-   5   category: MediaAlwaysOn,
-   5   category: File,
-   4   category: Introspection,
-   3   category: MediaCore,
-   2   category: CostRecords,
-   1   category: Agent,
+```yaml
+# recursive deep-merge of two task outputs — pure jq, no extra builtin
+- id: merged
+  invoke:
+    tool: "nika:jq"
+    args:
+      input: ["${{ tasks.base.output }}", "${{ tasks.overlay.output }}"]
+      expression: ".[0] * .[1]"
 ```
 
-17 + 13 + 7 + 6 + 5 + 5 + 4 + 3 + 2 + 1 = **63**, matching
-`ALL_BUILTINS.len() == 63` asserted by `builtin_count`.
+## Network (2)
 
-<Tip>
-  The builtin set is intentionally curated. The bar for a new entry is
-  high: it must be a pure function of inputs + kernel traits (no hidden
-  I/O), serialize deterministically, and justify why it cannot be a
-  skill or an MCP tool instead.
-</Tip>
+| Builtin | What it does |
+|---|---|
+| `nika:fetch` | HTTP request + content extraction — {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`). Fetching a URL is *calling a tool*, not a verb. |
+| `nika:notify` | Send notifications — `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms`), one builtin not five. |
+
+<Warning>
+  Engines MUST ship SSRF defense on `nika:fetch`: private-network and
+  cloud-metadata targets are rejected unless explicitly configured, and
+  self-signed TLS is rejected by default.
+</Warning>
+
+## Introspection (1)
+
+| Builtin | What it does |
+|---|---|
+| `nika:inspect` | Workflow introspection — one builtin, four `view:` modes: `cost` (running USD by task/provider), `records` (full execution record), `dag_info` (nodes/edges/waves), `threads` (engine pool state, advisory). |
+
+```yaml
+- id: budget_check
+  invoke:
+    tool: "nika:inspect"
+    args: { view: cost }
+```
+
+## Design rules the set obeys
+
+- **One super-powerful builtin, multi-mode args** — `fetch`+extract,
+  `jq`, `convert`, `wait`, `date`, `inspect` all follow the same pattern.
+  No per-direction or per-shape builtin slots.
+- **jq subsumes** — anything that is a pure JSON transform is a jq
+  expression, not a builtin. A builtin earns its slot only by doing what
+  jq cannot.
+- **Additive forever** — new builtins may join in stdlib v0.x; existing
+  arg shapes never break (the language envelope `nika: v1` is frozen).
 
 ## See also
 
 <CardGroup cols={2}>
+  <Card title="Full stdlib spec" icon="book-open" href="https://github.com/supernovae-st/nika-spec/blob/main/stdlib/builtins-v0.1.md">
+    Per-builtin args, error codes (`NIKA-BUILTIN-*`), trust classes, and
+    what jq subsumed out of v0.1.
+  </Card>
   <Card title="Verbs" icon="code" href="/concepts/verbs">
     How `invoke:` dispatches `nika:*` builtins vs MCP tools.
   </Card>
   <Card title="MCP catalog" icon="plug" href="/reference/mcp-catalog">
-    External tools — 105 MCP server entries.
-  </Card>
-  <Card title="Providers catalog" icon="server" href="/reference/providers-catalog">
-    LLM providers for `infer:` / `agent:`.
+    External tools — the MCP server registry Nika knows by id.
   </Card>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
     Templating that pipes output from one `invoke:` to the next.
