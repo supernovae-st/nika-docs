@@ -79,7 +79,7 @@ flowchart TB
 | **L2** | Verbs + domain services — orchestrates L1 impls behind kernel traits | via L1 traits only | L0, L0.5, L1 | `nika-pck`, `nika-verb-*`, `nika-policy`, `nika-memory`, `nika-observability`, `nika-builtin-{github,cloud,workspace}` |
 | **L3** | Runtime + policy + sandbox — enforces execution contracts | via L2 | L0..L2 | `nika-runtime`, `nika-shield`, `nika-wasm-host` (v0.100), `nika-sandbox` (v0.100) |
 | **L4** | Interfaces — transport / UI surfaces (libraries) | via L3 | L0..L3 | `nika-cli`, `nika-serve`, `nika-mcp`, `nika-lsp`, `nika-sdk`, `nika-catalog-verify` |
-| **L5** | The binary — sole `[[bin]]` composition root | via L4 | L0..L4 | `nika` (<500 LOC) |
+| **L5** | The binary — sole `[[bin]]` composition root | via L4 | L0..L4 | `nika` (&lt;500 LOC) |
 
 <Tip>
   `nika-http` is the **L1 HTTP client** (used by `fetch` / catalog sync).
