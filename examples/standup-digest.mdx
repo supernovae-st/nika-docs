@@ -1,0 +1,111 @@
+---
+title: "Standup digest"
+sidebarTitle: "Standup digest"
+description: "T1 starter · engineering — the standup note writes itself from what you actually committed."
+icon: "sunrise"
+---
+
+> **T1 starter · engineering / any team** — two data sources gathered in
+> parallel, one model call, one file on disk. Your first taste of « the
+> boring parts run themselves ».
+
+## The job
+
+Every morning you reconstruct yesterday from memory. Your git history
+already knows. This workflow reads the commits since yesterday, stamps
+the date from a builtin (not from the model's imagination), and writes
+the three standup bullets in your tone.
+
+## The shape
+
+```mermaid
+flowchart LR
+  today["today · nika:date"]:::invoke --> digest["digest"]:::infer
+  history["history · git log"]:::exec --> digest
+  digest --> save["save · nika:write"]:::invoke
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+
+## The file
+
+{/* showcase:begin t1-standup-digest.nika.yaml */}
+```yaml t1-standup-digest.nika.yaml
+nika: v1
+workflow: standup-digest
+description: "Read yesterday's commits, write today's standup note"
+
+model: mock/echo            # deterministic · swap for anthropic/claude-haiku-4-5
+
+tasks:
+  # No deps between these two → the engine runs them in parallel.
+  - id: today
+    invoke:
+      tool: "nika:date"
+      args: { op: now }
+
+  - id: history
+    exec:
+      command: "git log --since=yesterday --oneline --no-merges"
+
+  - id: digest
+    depends_on: [today, history]
+    infer:
+      prompt: |
+        Date · ${{ tasks.today.output }}
+        Commits since yesterday ·
+        ${{ tasks.history.output }}
+
+        Write my standup note · 3 bullets · done / doing / blocked.
+        Plain words · no fluff.
+
+  - id: save
+    depends_on: [digest]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./standup-note.md"
+        content: "${{ tasks.digest.output }}"
+
+outputs:
+  note: ${{ tasks.digest.output }}
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="Two tasks start together">
+    `today` and `history` declare no `depends_on` — the engine runs them
+    in parallel. Parallelism is the default, not an option you switch on.
+  </Step>
+  <Step title="The digest waits for both">
+    `depends_on: [today, history]` makes `digest` the merge point. Its
+    prompt interpolates both outputs with `${{ tasks.X.output }}`.
+  </Step>
+  <Step title="The note lands on disk">
+    `nika:write` takes an explicit `content:` — a write without content
+    writes nothing. The workflow also returns the note via `outputs:`.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| implicit parallelism | `today` + `history` | [DAG shape](/concepts/workflows) |
+| `exec:` | `history` | [The 4 verbs](/concepts/verbs) |
+| `nika:date` · `nika:write` | `today` · `save` | [Builtins](/reference/builtins) |
+| `outputs:` | envelope tail | [YAML syntax](/reference/yaml-syntax) |
+
+## Make it yours
+
+- Point `--since` at your sprint cadence (`--since=friday` for Monday standups).
+- Swap `mock/echo` for `anthropic/claude-haiku-4-5` — a one-liner job wants a fast model.
+- Add a `nika:notify` task to post the note straight into your team channel — see [Release notes](/examples/release-notes) for the pattern.
+
+<Card title="Next · Meeting actions" icon="list-check" href="/examples/meeting-actions">
+  Same tier, one new idea: structured output — the model returns typed
+  JSON, not prose.
+</Card>

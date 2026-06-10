@@ -1,0 +1,133 @@
+---
+title: "Meeting actions"
+sidebarTitle: "Meeting actions"
+description: "T1 starter · every office job — transcript in, tracker-ready typed action items out."
+icon: "list-check"
+---
+
+> **T1 starter · every office job** — the first example with
+> `infer.schema:` — the model doesn't get to answer in prose. It returns
+> the JSON shape you declared, or the engine rejects it.
+
+## The job
+
+The meeting ended an hour ago and nobody remembers who owns what. The
+transcript is sitting in a file. This workflow extracts every action
+item as `{owner, task, due}` — typed, validated, importable by whatever
+tracker you use.
+
+## The shape
+
+```mermaid
+flowchart LR
+  transcript["transcript · nika:read"]:::invoke --> extract["extract · schema"]:::infer
+  extract --> save["save · nika:write"]:::invoke
+  extract --> trace["trace · nika:log"]:::invoke
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+
+## The file
+
+{/* showcase:begin t1-meeting-actions.nika.yaml */}
+```yaml t1-meeting-actions.nika.yaml
+nika: v1
+workflow: meeting-actions
+description: "Transcript → typed action items {owner, task, due}"
+
+model: mock/echo            # swap for openai/gpt-5.2 or any of the 14 providers
+
+vars:
+  transcript_path:
+    type: string
+    required: true
+    description: "Path to the raw meeting transcript"
+
+tasks:
+  - id: transcript
+    invoke:
+      tool: "nika:read"
+      args: { path: "${{ vars.transcript_path }}" }
+
+  - id: extract
+    depends_on: [transcript]
+    infer:
+      prompt: |
+        Extract every action item from this meeting transcript ·
+        ${{ tasks.transcript.output }}
+      schema:                          # the contract the model must satisfy
+        type: object
+        required: [actions]
+        properties:
+          actions:
+            type: array
+            items:
+              type: object
+              required: [owner, task]
+              properties:
+                owner: { type: string }
+                task: { type: string }
+                due: { type: string }
+
+  - id: save
+    depends_on: [extract]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./action-items.json"
+        content: "${{ tasks.extract.output.actions }}"
+
+  - id: trace
+    depends_on: [extract]
+    invoke:
+      tool: "nika:log"
+      args:
+        level: info
+        message: "Action items extracted to ./action-items.json"
+
+outputs:
+  actions:
+    value: ${{ tasks.extract.output.actions }}
+    type: array
+    description: "Typed action items, tracker-ready"
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="A required, typed input">
+    `transcript_path` is declared with `type: string · required: true` —
+    the engine validates inputs before any task runs, and the workflow
+    becomes callable with a real contract.
+  </Step>
+  <Step title="The schema IS the contract">
+    `infer.schema:` is standard JSON Schema. The model must return a
+    matching object — on violation the engine rejects (and may retry).
+    Downstream tasks index into it directly: `${{ tasks.extract.output.actions }}`.
+  </Step>
+  <Step title="Two consumers, no extra ceremony">
+    `save` writes the JSON, `trace` logs a human-readable line — both
+    depend on `extract`, both run in parallel.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| typed `vars:` | `transcript_path` | [YAML syntax](/reference/yaml-syntax) |
+| `infer.schema:` | `extract` | [The 4 verbs](/concepts/verbs) |
+| schema-path indexing | `save.args.content` | [Bindings](/concepts/bindings) |
+| `nika:log` | `trace` | [Builtins](/reference/builtins) |
+
+## Make it yours
+
+- Add `due` to the `required:` list if your team always sets deadlines.
+- Chain a `nika:notify` task that posts each owner their items.
+- Swap the transcript file for a `nika:fetch` of your meeting tool's export API — the schema doesn't change.
+
+<Card title="Next · Price watch" icon="tag" href="/examples/price-watch">
+  The next starter has zero model calls — pure tools, bindings and one
+  CEL comparison.
+</Card>

@@ -1,0 +1,146 @@
+---
+title: "Competitor radar"
+sidebarTitle: "Competitor radar"
+description: "T3 fan-out · strategy — everything they shipped last week, read in parallel, one Monday brief."
+icon: "satellite-dish"
+---
+
+> **T3 fan-out · strategy / product marketing** — the flagship
+> `for_each`. The number of pages is decided at RUNTIME by the
+> competitor's sitemap; `max_parallel` keeps the crawl polite,
+> `fail_fast: false` keeps one dead page from killing the radar,
+> `retry:` absorbs the flaky web.
+
+## The job
+
+Monday 8am: what did they ship? Instead of 40 tabs, the sitemap is
+mapped, the 8 freshest pages are read concurrently, and one brief tells
+you what it signals. Every page that survives lands in the fan-in; every
+page that doesn't is reported, not fatal.
+
+## The shape
+
+```mermaid
+flowchart LR
+  map["map · fetch sitemap"]:::invoke --> pages["pages · for_each ×8 · max_parallel 4"]:::invoke
+  pages --> digest["digest"]:::infer
+  digest --> save["save · nika:write"]:::invoke
+  save --> ping["ping · nika:notify"]:::invoke
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+
+## The file
+
+{/* showcase:begin t3-competitor-radar.nika.yaml */}
+```yaml t3-competitor-radar.nika.yaml
+nika: v1
+workflow: competitor-radar
+description: "Sitemap → parallel page reads → one competitive brief + ping"
+
+model: mock/echo            # swap for anthropic/claude-sonnet-4-6
+
+vars:
+  competitor_sitemap: "https://competitor.example.com/sitemap.xml"
+
+secrets:
+  team_webhook:
+    source: env
+    key: TEAM_WEBHOOK_URL
+
+tasks:
+  - id: map
+    invoke:
+      tool: "nika:fetch"
+      args:
+        url: "${{ vars.competitor_sitemap }}"
+        mode: sitemap
+    output:
+      recent: ".urls[:8]"             # cap the radar at the 8 freshest pages
+
+  - id: pages
+    depends_on: [map]
+    for_each: ${{ tasks.map.recent }}
+    max_parallel: 4                    # be polite · 4 fetches in flight max
+    fail_fast: false                   # one dead page must not kill the radar
+    timeout: "30s"
+    retry:
+      max_attempts: 3
+      backoff_strategy: exponential
+      jitter: true
+    invoke:
+      tool: "nika:fetch"
+      args:
+        url: "${{ item }}"
+        mode: article
+
+  - id: digest
+    depends_on: [pages]
+    infer:
+      prompt: |
+        These are the pages a competitor published recently ·
+        ${{ tasks.pages.output }}
+        Write the Monday brief · what they shipped · what it signals ·
+        what we should watch. One page, plain words.
+
+  - id: save
+    depends_on: [digest]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./radar/competitor-brief.md"
+        content: "${{ tasks.digest.output }}"
+        create_dirs: true
+
+  - id: ping
+    depends_on: [save]
+    invoke:
+      tool: "nika:notify"
+      args:
+        channel: webhook
+        target: "${{ secrets.team_webhook }}"
+        message: "Competitor radar is ready · ./radar/competitor-brief.md"
+        severity: info
+
+outputs:
+  brief: ${{ tasks.digest.output }}
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="The collection is computed, not hardcoded">
+    `for_each: ${{ tasks.map.recent }}` — eight URLs this week, three
+    next week. The DAG doesn't change.
+  </Step>
+  <Step title="Resilience is per-iteration">
+    `retry:` (exponential + jitter) and `timeout: "30s"` apply to EACH
+    page fetch. `fail_fast: false` collects errors instead of aborting
+    the batch.
+  </Step>
+  <Step title="The fan-in is just a reference">
+    `${{ tasks.pages.output }}` is the ARRAY of per-page outputs, in
+    input order. One prompt consumes the whole crawl.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| `for_each` over a binding | `pages` | [Workflows](/concepts/workflows) |
+| `max_parallel` + `fail_fast` | `pages` | [Workflows](/concepts/workflows) |
+| per-iteration `retry:` + `timeout:` | `pages` | [Error model](/reference/error-codes) |
+| `${{ item }}` loop-local | `pages.args.url` | [Bindings](/concepts/bindings) |
+
+## Make it yours
+
+- Track THREE competitors: lift the sitemap URL into a list and nest the pattern — or run the workflow per competitor and merge the briefs.
+- Filter the sitemap by date with a sharper jq binding before fanning out.
+- Schedule it for Monday 07:30 from your host's cron — the brief is on your desk before standup.
+
+<Card title="Next · Localization factory" icon="language" href="/examples/localization-factory">
+  Chained fan-outs and the jq `transpose` zip — the whole docs tree,
+  translated.
+</Card>

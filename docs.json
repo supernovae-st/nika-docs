@@ -163,6 +163,54 @@
         "icon": "book-open"
       },
       {
+        "tab": "Examples",
+        "icon": "rocket",
+        "groups": [
+          {
+            "group": "Start here",
+            "pages": [
+              "examples/overview"
+            ]
+          },
+          {
+            "group": "T1 · Starters",
+            "pages": [
+              "examples/standup-digest",
+              "examples/meeting-actions",
+              "examples/price-watch",
+              "examples/social-repurpose"
+            ]
+          },
+          {
+            "group": "T2 · Chains",
+            "pages": [
+              "examples/release-notes",
+              "examples/seo-content-brief",
+              "examples/invoice-chaser",
+              "examples/support-triage",
+              "examples/contract-guard"
+            ]
+          },
+          {
+            "group": "T3 · Fan-out",
+            "pages": [
+              "examples/competitor-radar",
+              "examples/localization-factory",
+              "examples/config-drift-sentinel",
+              "examples/pr-review-fanout"
+            ]
+          },
+          {
+            "group": "T4 · Epic",
+            "pages": [
+              "examples/deep-research-brief",
+              "examples/incident-war-room",
+              "examples/ceo-monday-brief"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Architecture",
         "groups": [
           {

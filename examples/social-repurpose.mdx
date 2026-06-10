@@ -1,0 +1,131 @@
+---
+title: "Social repurpose"
+sidebarTitle: "Social repurpose"
+description: "T1 starter · marketing — one post becomes a thread, a LinkedIn post and a newsletter blurb, in parallel."
+icon: "share-nodes"
+---
+
+> **T1 starter · marketing / creators** — the diamond DAG. One read fans
+> into three rewrites that run **concurrently**, and a single write
+> merges the bundle. The craft lives in the prompts; the engine handles
+> the choreography.
+
+## The job
+
+You wrote the post. Now it needs to be a thread, a LinkedIn version and
+a newsletter blurb — same ideas, three voices. Sequential chatbot
+sessions drift; this file keeps one source and rewrites it three ways at
+once.
+
+## The shape
+
+```mermaid
+flowchart LR
+  post["post · nika:read"]:::invoke --> thread["thread"]:::infer
+  post --> linkedin["linkedin"]:::infer
+  post --> newsletter["newsletter"]:::infer
+  thread --> bundle["bundle · nika:write"]:::invoke
+  linkedin --> bundle
+  newsletter --> bundle
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+
+## The file
+
+{/* showcase:begin t1-social-repurpose.nika.yaml */}
+```yaml t1-social-repurpose.nika.yaml
+nika: v1
+workflow: social-repurpose
+description: "One post → thread + LinkedIn + newsletter, in parallel"
+
+model: mock/echo            # swap for mistral/mistral-large or any provider
+
+vars:
+  post_path: "./blog/launch-post.md"
+
+tasks:
+  - id: post
+    invoke:
+      tool: "nika:read"
+      args: { path: "${{ vars.post_path }}" }
+
+  # Three rewrites · no deps between them · they run concurrently.
+  - id: thread
+    depends_on: [post]
+    infer:
+      prompt: "Turn this post into a 6-tweet thread · keep the voice · ${{ tasks.post.output }}"
+
+  - id: linkedin
+    depends_on: [post]
+    infer:
+      prompt: "Rewrite this post for LinkedIn · hook first · ${{ tasks.post.output }}"
+
+  - id: newsletter
+    depends_on: [post]
+    infer:
+      prompt: "Write a 3-sentence newsletter blurb for this post · ${{ tasks.post.output }}"
+
+  - id: bundle
+    depends_on: [thread, linkedin, newsletter]
+    with:
+      t: ${{ tasks.thread.output }}
+      l: ${{ tasks.linkedin.output }}
+      n: ${{ tasks.newsletter.output }}
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./social-bundle.md"
+        content: |
+          # Social bundle
+
+          ## Thread
+          ${{ with.t }}
+
+          ## LinkedIn
+          ${{ with.l }}
+
+          ## Newsletter
+          ${{ with.n }}
+
+outputs:
+  bundle_path: ${{ tasks.bundle.output }}
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="Fan-out by omission">
+    `thread`, `linkedin` and `newsletter` each depend only on `post` —
+    no deps between them, so the engine runs all three at the same time.
+  </Step>
+  <Step title="with: keeps the merge readable">
+    `bundle` aliases the three outputs to one-letter names. `with:` is
+    optional sugar — but a template interpolating three long task paths
+    is where you want it.
+  </Step>
+  <Step title="One multi-line write">
+    The `content:` is a YAML block scalar with three interpolations —
+    the bundle file is assembled by the engine, no model needed for glue.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| diamond fan-out / fan-in | the whole DAG | [Workflows](/concepts/workflows) |
+| `with:` aliasing | `bundle` | [Bindings](/concepts/bindings) |
+| block-scalar `content:` | `bundle.args` | [YAML syntax](/reference/yaml-syntax) |
+
+## Make it yours
+
+- Add a fourth branch (YouTube description, Mastodon, press blurb) — it's three lines and it runs in the same wave.
+- Pin a glossary: put your brand terms in a `vars:` entry and interpolate it into each prompt.
+- Want every language too? Chain this into [Localization factory](/examples/localization-factory).
+
+<Card title="Level up · T2 chains" icon="rocket" href="/examples/release-notes">
+  Next tier: typed outputs, in-place file edits and a webhook ping —
+  release day, automated.
+</Card>

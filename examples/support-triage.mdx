@@ -1,0 +1,155 @@
+---
+title: "Support triage"
+sidebarTitle: "Support triage"
+description: "T2 chain · support — the overnight queue classified, first replies drafted, urgent ones escalated."
+icon: "headset"
+---
+
+> **T2 chain · customer support** — one schema-typed call classifies the
+> WHOLE queue (enums keep the categories honest), jq slices the urgent
+> ones, and the escalation fires only when there's something to escalate.
+
+## The job
+
+It's 8:55. There are 40 tickets from overnight. Someone reads them all,
+tags them, writes first replies, and pages on-call if anything's on
+fire. This file does the reading, tagging and drafting — under a
+sortable v7 batch id — and pages only when `urgent` is non-empty.
+
+## The shape
+
+```mermaid
+flowchart LR
+  batch["batch · nika:uuid"]:::invoke --> escalate["escalate · nika:notify"]:::invoke
+  queue["queue · nika:read"]:::invoke --> triage["triage · schema"]:::infer
+  triage --> urgent["urgent · nika:jq"]:::invoke
+  urgent -->|"when size &gt; 0"| escalate
+  triage --> board["board · nika:write"]:::invoke
+  batch --> board
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+
+## The file
+
+{/* showcase:begin t2-support-triage.nika.yaml */}
+```yaml t2-support-triage.nika.yaml
+nika: v1
+workflow: support-triage
+description: "Ticket queue → typed triage → urgent escalation → triage board"
+
+model: mock/echo            # swap for groq/llama-3.3-70b — triage wants speed
+
+vars:
+  queue_path: "./support/overnight-queue.json"
+
+secrets:
+  oncall_webhook:
+    source: env
+    key: ONCALL_WEBHOOK_URL
+
+tasks:
+  - id: batch
+    invoke:
+      tool: "nika:uuid"
+      args: { version: v7 }
+
+  - id: queue
+    invoke:
+      tool: "nika:read"
+      args: { path: "${{ vars.queue_path }}" }
+
+  - id: triage
+    depends_on: [queue]
+    infer:
+      prompt: |
+        Triage every ticket in this queue ·
+        ${{ tasks.queue.output }}
+        For each · classify category and urgency, draft a 2-sentence first reply.
+      schema:
+        type: object
+        required: [tickets]
+        properties:
+          tickets:
+            type: array
+            items:
+              type: object
+              required: [id, category, urgency, first_reply]
+              properties:
+                id: { type: string }
+                category: { type: string, enum: [billing, bug, how-to, account, other] }
+                urgency: { type: string, enum: [low, normal, high, critical] }
+                first_reply: { type: string }
+
+  - id: urgent
+    depends_on: [triage]
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: "${{ tasks.triage.output.tickets }}"
+        expression: 'map(select(.urgency == "high" or .urgency == "critical"))'
+
+  - id: escalate
+    depends_on: [urgent, batch]
+    when: ${{ size(tasks.urgent.output) > 0 }}
+    invoke:
+      tool: "nika:notify"
+      args:
+        channel: webhook
+        target: "${{ secrets.oncall_webhook }}"
+        message: "Urgent tickets in triage batch ${{ tasks.batch.output }} · ${{ tasks.urgent.output }}"
+        severity: warning
+
+  - id: board
+    depends_on: [triage, batch]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./support/triage-${{ tasks.batch.output }}.json"
+        content: "${{ tasks.triage.output.tickets }}"
+
+outputs:
+  tickets:
+    value: ${{ tasks.triage.output.tickets }}
+    type: array
+    description: "The classified queue with drafted first replies"
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="Enums make classification honest">
+    `category` and `urgency` are schema enums — the model cannot invent
+    a « kinda-urgent » tier. Typed output means the jq filter downstream
+    can trust the values.
+  </Step>
+  <Step title="jq slices, the model doesn't re-read">
+    `urgent` filters `urgency == "high" or "critical"` out of the typed
+    list — no second model call to ask « which ones were urgent? ».
+  </Step>
+  <Step title="v7 uuids sort by time">
+    `nika:uuid version: v7` is timestamped — triage boards land on disk
+    already in chronological order.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| schema enums over a list | `triage` | [The 4 verbs](/concepts/verbs) |
+| `nika:jq` post-filter | `urgent` | [Builtins](/reference/builtins) |
+| `nika:uuid` v7 | `batch` | [Builtins](/reference/builtins) |
+| conditional `notify` | `escalate` | [Workflows](/concepts/workflows) |
+
+## Make it yours
+
+- Push the first replies as DRAFTS into your helpdesk via its API (`nika:fetch method: POST`) — humans still hit send.
+- Track sentiment over time: append each batch's stats to a CSV with `nika:write`.
+- Speed matters at 9am: `groq/llama-3.3-70b` triages a 40-ticket queue in seconds.
+
+<Card title="Next · Contract guard" icon="scale-balanced" href="/examples/contract-guard">
+  The sovereignty example — a LOCAL model reads the contract, and a
+  validate + assert pair refuses bad extractions.
+</Card>

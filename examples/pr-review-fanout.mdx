@@ -1,0 +1,170 @@
+---
+title: "PR review fan-out"
+sidebarTitle: "PR review fan-out"
+description: "T3 · engineering — one read-only review agent per changed file. A swarm with a leash."
+icon: "code-pull-request"
+---
+
+> **T3 · engineering** — `for_each` + `agent:` is the swarm pattern.
+> Every changed file gets its own mini-agent with **read-only tools**
+> (default-deny means exactly that), a turn budget and a token budget.
+> jq flattens the typed findings; one model writes the summary.
+
+## The job
+
+Big PRs get shallow reviews because attention doesn't scale. Here it
+does: each changed file is reviewed in isolation by an agent that can
+READ and nothing else, in parallel, four at a time. A deterministic
+`nika:grep` sweep counts the TODO debt beside the LLM pass — and the
+final REVIEW.md ends with a verdict.
+
+## The shape
+
+```mermaid
+flowchart LR
+  changed["changed · git diff"]:::exec --> files["files · jq split"]:::invoke
+  files --> reviews["reviews · for_each agent ×N"]:::agent
+  todo["todo_sweep · nika:grep"]:::invoke --> summary["summary"]:::infer
+  reviews --> merged["merged · jq flatten"]:::invoke
+  merged --> summary
+  summary --> save["save · REVIEW.md"]:::invoke
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+  classDef agent fill:#b07bff22,stroke:#b07bff,color:#b07bff
+```
+
+## The file
+
+{/* showcase:begin t3-pr-review-fanout.nika.yaml */}
+```yaml t3-pr-review-fanout.nika.yaml
+nika: v1
+workflow: pr-review-fanout
+description: "changed files → one read-only review agent each → merged REVIEW.md"
+
+model: anthropic/claude-sonnet-4-6   # agent loops want a tool-calling model
+
+vars:
+  base_ref: "main"
+
+tasks:
+  - id: changed
+    exec:
+      command: "git diff --name-only ${{ vars.base_ref }}...HEAD"
+
+  - id: files
+    depends_on: [changed]
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: "${{ tasks.changed.output }}"
+        expression: 'split("\n") | map(select(length > 0))'
+
+  - id: todo_sweep
+    invoke:
+      tool: "nika:grep"
+      args:
+        pattern: "TODO|FIXME|HACK"
+        path: "./src"
+
+  - id: reviews
+    depends_on: [files]
+    for_each: ${{ tasks.files.output }}
+    max_parallel: 4
+    fail_fast: false
+    agent:
+      system: "You are a precise code reviewer. Read the file, then report findings."
+      prompt: "Review ${{ item }} · bugs first, then risky patterns. Read it before judging."
+      tools:
+        - "nika:read"                  # read-only swarm · least privilege
+        - "nika:done"
+      max_turns: 6
+      max_tokens_total: 30000
+      schema:
+        type: object
+        required: [file, findings]
+        properties:
+          file: { type: string }
+          findings:
+            type: array
+            items:
+              type: object
+              required: [severity, message]
+              properties:
+                severity: { type: string, enum: [blocker, high, med, low] }
+                message: { type: string }
+                line: { type: integer }
+
+  - id: merged
+    depends_on: [reviews]
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: "${{ tasks.reviews.output }}"
+        expression: 'map(.findings[] + {file: .file}) | sort_by(.severity)'
+
+  - id: summary
+    depends_on: [merged, todo_sweep]
+    infer:
+      prompt: |
+        Merge these review findings into REVIEW.md · blockers first ·
+        ${{ tasks.merged.output }}
+        Open TODO debt found by grep ·
+        ${{ tasks.todo_sweep.output }}
+        End with a verdict · ship / fix-first / redesign.
+
+  - id: save
+    depends_on: [summary]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./REVIEW.md"
+        content: "${{ tasks.summary.output }}"
+
+outputs:
+  findings:
+    value: ${{ tasks.merged.output }}
+    type: array
+    description: "All findings, severity-sorted, with file attribution"
+  review: ${{ tasks.summary.output }}
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="exec output becomes a collection">
+    `git diff --name-only` is a string; the jq `split("\n")` turns it
+    into the array the fan-out iterates. Workflows turn ANY tool output
+    into a collection this way.
+  </Step>
+  <Step title="Each agent is least-privilege">
+    `tools: ["nika:read", "nika:done"]` — the reviewer can read source
+    and end its loop. It cannot write, fetch, or wander. Budgets
+    (`max_turns: 6`, `max_tokens_total: 30000`) bound the worst case.
+  </Step>
+  <Step title="Typed findings merge deterministically">
+    Every agent returns `{file, findings[]}` per its schema. The jq
+    fan-in flattens and sorts — blockers surface first in REVIEW.md.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| `for_each` + `agent:` | `reviews` | [The 4 verbs](/concepts/verbs) |
+| default-deny `tools:` | `reviews.agent.tools` | [The 4 verbs](/concepts/verbs) |
+| `agent.schema:` | `reviews` | [The 4 verbs](/concepts/verbs) |
+| `nika:grep` sweep | `todo_sweep` | [Builtins](/reference/builtins) |
+
+## Make it yours
+
+- Specialize the swarm: route `*.rs` files to a Rust-prompted agent and `*.sql` to a migrations-prompted one with two filtered fan-outs.
+- Add `mcp:git/*` to the tools to let reviewers read blame and history — still no write.
+- Fail CI on blockers: end with `nika:assert` on `size()` of the blocker slice.
+
+<Card title="Level up · T4 epic" icon="microscope" href="/examples/deep-research-brief">
+  Final tier: multi-stage pipelines — plan, budgeted agent, thinking
+  synthesis, self-reporting runs.
+</Card>

@@ -1,0 +1,145 @@
+---
+title: "Examples"
+sidebarTitle: "All examples"
+description: "16 real-job workflows, tiered from a 4-task starter to a multi-agent swarm — every file conformance-validated, every industry covered."
+icon: "rocket"
+---
+
+import { CANON } from "/snippets/_canon.mdx";
+
+Every example on these pages is a **complete, validated workflow** — not
+a fragment. The YAML you read here is projected verbatim from
+[`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),
+where each file passes the same conformance gate as the spec's own test
+suite: JSON Schema, DAG cross-references, CEL resolution, stdlib surface.
+If it's on this page, it parses.
+
+Across the corpus the examples exercise **all {CANON.builtins} builtins**,
+the {CANON.verbs} verbs, and {CANON.providers} providers — cloud, local
+and mock.
+
+## How to read a workflow diagram
+
+Tasks are colored by verb, the same palette everywhere in the Nika
+universe:
+
+```mermaid
+flowchart LR
+  A["infer · call a model"]:::infer --> B["exec · run a process"]:::exec
+  B --> C["invoke · call a tool"]:::invoke --> D["agent · drive a loop"]:::agent
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+  classDef agent fill:#b07bff22,stroke:#b07bff,color:#b07bff
+```
+
+## T1 · Starters — your first wow
+
+≤4 tasks. One chain or one diamond. Run one of these in your first five
+minutes.
+
+<Columns cols={2}>
+  <Card title="Standup digest" icon="sunrise" href="/examples/standup-digest">
+    **Engineering** — your standup note writes itself from what you
+    actually committed yesterday.
+  </Card>
+  <Card title="Meeting actions" icon="list-check" href="/examples/meeting-actions">
+    **Every office** — transcript in, tracker-ready typed action items
+    out.
+  </Card>
+  <Card title="Price watch" icon="tag" href="/examples/price-watch">
+    **E-commerce** — a price-drop alert with **zero** model calls. Not
+    everything needs an LLM.
+  </Card>
+  <Card title="Social repurpose" icon="share-nodes" href="/examples/social-repurpose">
+    **Marketing** — one post becomes a thread, a LinkedIn post and a
+    newsletter blurb, in parallel.
+  </Card>
+</Columns>
+
+## T2 · Chains — real work, typed
+
+4–6 tasks. Structured outputs, human gates, the data builtins.
+
+<Columns cols={2}>
+  <Card title="Release notes" icon="rocket" href="/examples/release-notes">
+    **Engineering / DevRel** — git log → typed notes → CHANGELOG edited
+    in place → team pinged.
+  </Card>
+  <Card title="SEO content brief" icon="magnifying-glass-chart" href="/examples/seo-content-brief">
+    **SEO / Content** — a brief grounded in what your competitor
+    actually published.
+  </Card>
+  <Card title="Invoice chaser" icon="file-invoice-dollar" href="/examples/invoice-chaser">
+    **Finance / Freelance** — reminders drafted, and NOTHING goes out
+    until a human says yes.
+  </Card>
+  <Card title="Support triage" icon="headset" href="/examples/support-triage">
+    **Customer support** — the overnight queue classified, first replies
+    drafted, urgent ones escalated.
+  </Card>
+  <Card title="Contract guard" icon="scale-balanced" href="/examples/contract-guard">
+    **Legal** — clause extraction on a LOCAL model. The contract never
+    leaves the machine.
+  </Card>
+</Columns>
+
+## T3 · Fan-out — runtime collections
+
+`for_each` over collections the workflow discovers at runtime — with
+retry, bounded parallelism and jq fan-ins.
+
+<Columns cols={2}>
+  <Card title="Competitor radar" icon="satellite-dish" href="/examples/competitor-radar">
+    **Strategy / PMM** — everything they shipped last week, read in
+    parallel, one Monday brief.
+  </Card>
+  <Card title="Localization factory" icon="language" href="/examples/localization-factory">
+    **Product / i18n** — the whole docs tree translated, voice intact,
+    zero copy-paste.
+  </Card>
+  <Card title="Config drift sentinel" icon="shield-halved" href="/examples/config-drift-sentinel">
+    **SRE / Platform** — only UNSANCTIONED prod drift wakes anyone. jq
+    decides; the model explains.
+  </Card>
+  <Card title="PR review fan-out" icon="code-pull-request" href="/examples/pr-review-fanout">
+    **Engineering** — a read-only review agent per changed file. A
+    swarm with a leash.
+  </Card>
+</Columns>
+
+## T4 · Epic — pipelines that run a department
+
+Multi-stage, agentic, budgeted, self-reporting.
+
+<Columns cols={2}>
+  <Card title="Deep research brief" icon="microscope" href="/examples/deep-research-brief">
+    **Research / VC** — plan → budgeted research agent → thinking-model
+    synthesis. Auditable end to end.
+  </Card>
+  <Card title="Incident war room" icon="fire-extinguisher" href="/examples/incident-war-room">
+    **SRE / On-call** — the postmortem drafts itself, after recovery is
+    PROVEN, not assumed.
+  </Card>
+  <Card title="CEO Monday brief" icon="briefcase" href="/examples/ceo-monday-brief">
+    **Founders / Execs** — market + engineering + KPIs synthesized — and
+    the ping tells you what the run cost.
+  </Card>
+</Columns>
+
+## The rules every example obeys
+
+- **One verb per task** — `infer`, `exec`, `invoke` or `agent`. Always.
+- **Every reference is an edge** — `${{ tasks.X }}` anywhere requires
+  `depends_on: [X]`. The DAG has no invisible edges.
+- **`mock/echo` by default** — files run with zero API keys wherever the
+  job allows; real providers only where the job demands one; local
+  models where the data is sensitive.
+- **Projection, not copy-paste** — these pages and the
+  [nika.sh use-cases explorer](https://nika.sh/#use-cases) render the
+  same files, projected by `showcase-projector.py`. Drift is a CI
+  failure, not a maybe.
+
+<Card title="Write your first workflow" icon="pen" href="/getting-started/first-workflow">
+  Ready to write your own? Start from the guided first-workflow walk.
+</Card>

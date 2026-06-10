@@ -1,0 +1,139 @@
+---
+title: "Invoice chaser"
+sidebarTitle: "Invoice chaser"
+description: "T2 chain · finance — overdue reminders drafted, and NOTHING goes out until a human says yes."
+icon: "file-invoice-dollar"
+---
+
+> **T2 chain · finance / freelance** — the human-in-the-loop example.
+> `nika:prompt` blocks the workflow until someone answers; the
+> drafting is automated, the **sending decision never is**.
+
+## The job
+
+Friday: open the ledger, find who's late, write polite-but-firm
+reminders, don't send the awkward one to the client who paid this
+morning. This file filters the CSV deterministically (jq, not an LLM
+guessing at numbers), drafts every reminder, then stops and asks you.
+
+## The shape
+
+```mermaid
+flowchart LR
+  ledger["ledger · nika:read"]:::invoke --> rows["rows · nika:convert"]:::invoke
+  rows --> overdue["overdue · nika:jq"]:::invoke
+  overdue -->|"when size &gt; 0"| drafts["drafts"]:::infer
+  drafts --> approve["approve · nika:prompt"]:::invoke
+  approve -->|"when yes"| save["save · nika:write"]:::invoke
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+
+## The file
+
+{/* showcase:begin t2-invoice-chaser.nika.yaml */}
+```yaml t2-invoice-chaser.nika.yaml
+nika: v1
+workflow: invoice-chaser
+description: "Ledger CSV → overdue filter → drafted reminders → human gate → drafts file"
+
+model: mock/echo            # swap for groq/llama-3.3-70b — drafting is a fast-model job
+
+vars:
+  ledger_csv: "./finance/invoices.csv"
+
+tasks:
+  - id: ledger
+    invoke:
+      tool: "nika:read"
+      args: { path: "${{ vars.ledger_csv }}" }
+
+  - id: rows
+    depends_on: [ledger]
+    invoke:
+      tool: "nika:convert"
+      args:
+        input: "${{ tasks.ledger.output }}"
+        from: csv
+        to: json
+        has_header: true
+
+  - id: overdue
+    depends_on: [rows]
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: "${{ tasks.rows.output }}"
+        expression: 'map(select(.status == "overdue"))'
+
+  - id: drafts
+    depends_on: [overdue]
+    when: ${{ size(tasks.overdue.output) > 0 }}
+    infer:
+      prompt: |
+        Draft one short, polite payment reminder per overdue invoice ·
+        ${{ tasks.overdue.output }}
+        Markdown · one section per client · firm but warm.
+
+  - id: approve
+    depends_on: [drafts]
+    invoke:
+      tool: "nika:prompt"
+      args:
+        message: "Save the reminder drafts for sending?"
+        default: false
+
+  - id: save
+    depends_on: [approve, drafts]
+    when: ${{ tasks.approve.output == true }}
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./finance/reminders-to-send.md"
+        content: "${{ tasks.drafts.output }}"
+
+outputs:
+  overdue:
+    value: ${{ tasks.overdue.output }}
+    type: array
+    description: "The overdue rows the reminders were drafted for"
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="Data work is jq work">
+    CSV → JSON via `nika:convert`, then `map(select(.status == "overdue"))`
+    in `nika:jq`. No model touches the numbers — deterministic, free,
+    auditable.
+  </Step>
+  <Step title="size() gates the whole tail">
+    `when: ${{ size(tasks.overdue.output) > 0 }}` — the canonical
+    empty-check. No overdue invoices → the rest of the file skips.
+  </Step>
+  <Step title="The approval gate">
+    `nika:prompt` blocks until answered (CI can use `default:`). The
+    save runs only `when: ${{ tasks.approve.output == true }}`.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| `nika:convert` from/to | `rows` | [Builtins](/reference/builtins) |
+| `nika:jq` filtering | `overdue` | [Builtins](/reference/builtins) |
+| CEL `size()` | `drafts.when` | [Workflows](/concepts/workflows) |
+| `nika:prompt` human gate | `approve` | [Builtins](/reference/builtins) |
+
+## Make it yours
+
+- Per-client emails instead of one file: `for_each` over the overdue rows ([fan-out tier](/examples/competitor-radar)).
+- Escalate 60-days-late differently: a second jq filter + a sterner prompt.
+- Wire the approved drafts to your mail API with `nika:fetch method: POST`.
+
+<Card title="Next · Support triage" icon="headset" href="/examples/support-triage">
+  Classify a whole queue in one schema-typed call, then let jq slice the
+  urgent ones out.
+</Card>

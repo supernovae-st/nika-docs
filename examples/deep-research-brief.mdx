@@ -1,0 +1,154 @@
+---
+title: "Deep research brief"
+sidebarTitle: "Deep research brief"
+description: "T4 epic · research — plan → budgeted research agent → thinking-model synthesis. Auditable end to end."
+icon: "microscope"
+---
+
+> **T4 epic · research / consulting / VC** — plan-then-execute. A fast
+> model writes the plan, an agent works the web **under explicit
+> budgets**, a thinking model synthesizes. Three stages, three different
+> cost profiles, every intermediate on disk.
+
+## The job
+
+« Get me up to speed on X by Thursday » is two days of tabs, or it's
+this pipeline: four sharp queries planned, researched with verbatim
+quotes and source tracking, synthesized into an executive brief that
+separates what's true from what's contested.
+
+## The shape
+
+```mermaid
+flowchart LR
+  plan["plan · fast model · schema"]:::infer --> investigate["investigate · agent · budgets"]:::agent
+  investigate --> brief["brief · thinking budget"]:::infer
+  brief --> save["save · nika:write"]:::invoke
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+  classDef agent fill:#b07bff22,stroke:#b07bff,color:#b07bff
+```
+
+## The file
+
+{/* showcase:begin t4-deep-research-brief.nika.yaml */}
+```yaml t4-deep-research-brief.nika.yaml
+nika: v1
+workflow: deep-research-brief
+description: "plan → budgeted research agent → thinking synthesis → brief on disk"
+
+model: anthropic/claude-sonnet-4-6
+
+vars:
+  topic:
+    type: string
+    required: true
+    description: "What to research"
+
+tasks:
+  - id: plan
+    infer:
+      model: anthropic/claude-haiku-4-5    # planning is a fast-model job
+      prompt: "Break '${{ vars.topic }}' into 4 sharp research queries · no overlap."
+      schema:
+        type: object
+        required: [queries]
+        properties:
+          queries:
+            type: array
+            items: { type: string }
+
+  - id: investigate
+    depends_on: [plan]
+    agent:
+      system: |
+        You are a rigorous researcher. Work the queries one by one ·
+        fetch sources · keep verbatim quotes · note what each source
+        actually supports. Call nika:done when the plan is exhausted.
+      prompt: "Research plan · ${{ tasks.plan.output.queries }}"
+      tools:
+        - "nika:fetch"                 # the web
+        - "nika:write"                 # scratch notes
+        - "nika:done"                  # the loop-completion sentinel
+      max_turns: 25
+      max_tokens_total: 150000
+      schema:
+        type: object
+        required: [findings, sources]
+        properties:
+          findings:
+            type: array
+            items: { type: string }
+          sources:
+            type: array
+            items: { type: string }
+
+  - id: brief
+    depends_on: [investigate]
+    infer:
+      prompt: |
+        Findings · ${{ tasks.investigate.output.findings }}
+        Sources · ${{ tasks.investigate.output.sources }}
+        Write the executive brief · what's true · what's contested ·
+        what it means · what to do. Two pages max.
+      thinking:
+        enabled: true
+        budget_tokens: 8000
+
+  - id: save
+    depends_on: [brief]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./research/${{ vars.topic }}.md"
+        content: "${{ tasks.brief.output }}"
+        create_dirs: true
+
+outputs:
+  brief: ${{ tasks.brief.output }}
+  sources:
+    value: ${{ tasks.investigate.output.sources }}
+    type: array
+    description: "Every source the agent actually used"
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="Right model, right stage">
+    Planning is a haiku-class job (`model:` override on the task);
+    synthesis gets a `thinking:` budget. The envelope default covers the
+    middle. One file, three cost profiles.
+  </Step>
+  <Step title="The agent has a leash">
+    `max_turns: 25` + `max_tokens_total: 150000` bound the loop;
+    `nika:done` lets it exit cleanly when the plan is exhausted. The
+    final message must match the schema — findings AND sources.
+  </Step>
+  <Step title="Callable by other workflows">
+    The typed `outputs:` (`brief`, `sources`) make this a building
+    block — a parent workflow can consume the contract without parsing
+    prose.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| per-task `model:` override | `plan` | [Providers](/concepts/providers) |
+| agent budgets + `nika:done` | `investigate` | [The 4 verbs](/concepts/verbs) |
+| `thinking:` | `brief` | [The 4 verbs](/concepts/verbs) |
+| typed `outputs:` | envelope tail | [YAML syntax](/reference/yaml-syntax) |
+
+## Make it yours
+
+- Force source-grounding harder: have `brief` cite `${{ tasks.investigate.output.sources }}` inline per claim.
+- Competitive variant: seed `plan` with [Competitor radar](/examples/competitor-radar)'s digest instead of a bare topic.
+- Weekly cadence: pair with your scheduler and diff this week's brief against last week's with `nika:json_diff`.
+
+<Card title="Next · Incident war room" icon="fire-extinguisher" href="/examples/incident-war-room">
+  Parallel evidence gathering, a settle-and-recheck loop, and a
+  postmortem that refuses to claim recovery it can't prove.
+</Card>
