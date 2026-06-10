@@ -1,0 +1,25 @@
+name: gate
+
+# The docs repo's own drift gate — runs the same checks the monorepo
+# prober enforces, but at PUSH TIME (detection latency ≈ 0 instead of
+# "whenever someone runs the full hygiene sweep from the monorepo").
+# Checks: internal links resolve · every page in docs.json nav ·
+# no dead-branch refs (nika-diamond → main) · no legacy {{ }} bindings.
+# No untrusted event input is interpolated anywhere in this workflow.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  link-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: link + canon audit
+        run: python3 scripts/link-audit.py
