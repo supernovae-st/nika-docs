@@ -1,15 +1,59 @@
-/* Nika Diamond — Mintlify global styles */
+/* Nika — Mintlify global styles · cosmos/ember theme companion
+   (colors + fonts live in docs.json · this file = the polish layer) */
 
-/* Make Mermaid diagram SVG backgrounds transparent so they
-   blend with the dark page (#0B0D17) rather than showing a white box. */
+/* ── Mermaid · transparent over the warm near-black page ── */
 .mermaid svg,
 [data-mermaid] svg,
 .prose .mermaid svg {
   background: transparent !important;
 }
-
-/* Mermaid diagram container — match page background */
 pre.mermaid,
 div.mermaid {
   background: transparent !important;
+}
+
+/* Mermaid edges + labels · soften the default grey on dark */
+.mermaid .edgePaths path {
+  stroke: #4a4540 !important;
+}
+.mermaid .edgeLabel {
+  background-color: transparent !important;
+  color: #b8b2aa !important;
+}
+.mermaid .flowchart-link {
+  stroke: #4a4540 !important;
+}
+
+/* ── DAG diagrams · give the generated workflow shapes a stage ──
+   (the verb palette itself ships inline per-diagram · classDefs) */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0;
+}
+
+/* ── Cards · quieter borders · ember glow on hover ── */
+.card,
+[class*="card"] a {
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.card:hover {
+  border-color: rgba(255, 107, 26, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+/* ── Code blocks · slightly warmer canvas than pure component grey ── */
+.dark pre {
+  background-color: #121110 !important;
+}
+
+/* ── Banner · ember wash instead of the default blue ── */
+#banner,
+[data-component="banner"] {
+  background: linear-gradient(90deg, #2a1505, #1a0e04) !important;
+  color: #ffd9bf !important;
+}
+#banner a,
+[data-component="banner"] a {
+  color: #ffa266 !important;
 }

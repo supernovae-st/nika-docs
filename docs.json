@@ -10,9 +10,9 @@
   },
   "favicon": "/images/favicon.svg",
   "colors": {
-    "primary": "#3F7DFF",
-    "light": "#7FE9FF",
-    "dark": "#3F7DFF"
+    "primary": "#FF6B1A",
+    "light": "#FFA266",
+    "dark": "#E85D0F"
   },
   "customCss": "/global.css",
   "modeToggle": {
@@ -23,13 +23,15 @@
     "default": "dark"
   },
   "background": {
+    "decoration": "gradient",
     "color": {
-      "dark": "#050A1C",
-      "light": "#F4F6FC"
+      "dark": "#0B0A09",
+      "light": "#FAF8F5"
     }
   },
   "styling": {
-    "eyebrows": "section"
+    "eyebrows": "section",
+    "codeblocks": "system"
   },
   "layout": {
     "tocPosition": "right",
@@ -289,5 +291,8 @@
       "chatgpt",
       "claude"
     ]
+  },
+  "fonts": {
+    "family": "Inter"
   }
 }
