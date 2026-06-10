@@ -28,7 +28,7 @@ for f in glob.glob('**/*.mdx', recursive=True):
     if 'nika-diamond' in s and 'renamed' not in s.split('nika-diamond')[0][-200:]:
         for i, line in enumerate(s.splitlines(), 1):
             if 'nika-diamond' in line and 'renamed' not in line:
-                findings.append(f'{f}:{i}: dead-branch ref (nika-diamond → main)')
+                findings.append(f'{f}:{i}: dead-branch ref (nika-diamond renamed → main)')
     for i, line in enumerate(s.splitlines(), 1):
         if re.search(r'(?<!\$)\{\{ (tasks|vars|with|env|secrets)\b', line):
             findings.append(f'{f}:{i}: legacy binding syntax (use ${{{{ … }}}})')
