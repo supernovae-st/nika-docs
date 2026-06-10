@@ -148,7 +148,8 @@
               "getting-started/installation",
               "getting-started/first-workflow",
               "getting-started/editors",
-              "guides/patterns"
+              "guides/patterns",
+              "guides/agent-authoring"
             ]
           },
           {
