@@ -1,0 +1,132 @@
+---
+title: "Security model"
+description: "What protects a Nika workflow: SSRF defense on by default, a shell blocklist, taint-tracked trust levels, typed security errors, and a hardened Rust supply chain."
+sidebarTitle: "Security"
+icon: "shield-halved"
+---
+
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
+Workflows run attacker-influenced inputs by nature: they fetch URLs,
+shell out, and feed model output into tools. Nika's position is that the
+**mechanism must be safe before policy makes it configurable** — the
+dangerous primitives ship hardened by default, and a violation is a
+typed `NIKA-SEC-*` error your workflow can read, not a stack trace.
+
+## The threat model in one table
+
+| You write | The attacker controls | The defense |
+|---|---|---|
+| `invoke: nika:fetch` | the URL (or a page that redirects) | 3-layer SSRF defense, on by default |
+| `exec:` | argument values flowing from upstream tasks | shell blocklist + data-channel pattern |
+| `infer:` → tool use | the fetched content the model reads | trust levels + spotlight + injection scanning |
+| `secrets.*` bindings | log access | masked at the binding layer, never logged |
+
+## SSRF defense (on by default)
+
+`nika:fetch` refuses to be bounced into private space. Three layers,
+verbatim from the engine (`nika-http`):
+
+<Steps>
+  <Step title="Static checks (pure)">
+    Scheme allow-list (`http`/`https` only), blocked hostnames
+    (`localhost`, cloud metadata), literal-IP range checks — loopback,
+    RFC 1918, link-local/metadata (`169.254.169.254`), CGN, IPv6 local
+    ranges, v4-mapped v6.
+  </Step>
+  <Step title="DNS resolution check">
+    Non-literal hosts are resolved and **every address** is
+    range-checked — this kills decimal-IP tricks (`http://2130706433/`)
+    and public names that resolve to private addresses.
+  </Step>
+  <Step title="Per-hop redirect re-check">
+    Client-level redirects are disabled; the engine follows redirects
+    itself and re-runs layers 1+2 on **every hop**. A public host
+    cannot 302 the client into your VPC.
+  </Step>
+</Steps>
+
+Response sizes are capped (64 MiB default) and self-signed TLS is
+rejected by default. Private-network access is opt-in configuration,
+never the default.
+
+## exec: the data-channel rule
+
+`exec` in shell mode runs every command against a blocklist before
+spawn. But the structural defense is in how you write workflows —
+**tainted data goes through data channels, never code channels**:
+
+```yaml
+# ❌ tainted output interpolated into a command string
+- id: bad
+  exec:
+    command: "echo ${{ tasks.fetch_comment.output }}"
+
+# ✅ tainted output passed as data
+- id: good
+  exec:
+    command: tee
+    args: ["/tmp/comment.txt"]
+    stdin: "${{ tasks.fetch_comment.output }}"
+```
+
+Passing tainted data to a privileged sink without going through a data
+channel raises a typed taint violation — taint is a property of the
+**data**, not of who runs the workflow.
+
+## Trust levels + prompt injection
+
+Content entering a workflow carries a trust level. Untrusted content
+(fetched pages, user comments) is tracked as it flows into prompts and
+tools:
+
+| Error | Defense layer |
+|---|---|
+| `NIKA-380` | dangerous tool invoked on untrusted data → blocked |
+| `NIKA-381` | strict-mode trust-level violation |
+| `NIKA-382` | exfiltration canary token found in output |
+| `NIKA-383` | prompt-injection scanner (+ ML detection) |
+| `NIKA-384` | untrusted data reached a prompt without spotlight wrapping |
+| `NIKA-386` / `NIKA-387` | workflow recursion depth / cycle blocked |
+
+Every failure is a [typed error](/reference/error-codes) with a stable
+code and a `transient` flag — your `on_error:` can act on it.
+
+## Secrets
+
+`${{ secrets.* }}` is a first-class namespace (vault/env/file-backed).
+Secret values are **masked in logs and traces** at the binding layer —
+they never appear in the event stream, and they are not readable back
+from a task's recorded output.
+
+## Supply-chain hardening (the engine itself)
+
+- `unsafe_code = "forbid"` workspace-wide · zero `.unwrap()` in `src/` (CI-enforced)
+- `cargo deny` on every PR · `cargo audit` on every dependency change
+- Sealed kernel traits — external code cannot impersonate engine I/O
+- {STATUS.libTests} lib tests · {STATUS.clippyWarnings} clippy warnings · every crate passes 12 admission gates
+- AGPL-3.0-or-later — the source travels with the binary, always auditable
+
+## Reporting a vulnerability
+
+**security@supernovae.studio** — please not via public issues.
+Acknowledgement ≤72h, triage ≤7 days, disclosure ≤90 days. Full policy,
+disclosure process and the out-of-scope list:
+[SECURITY.md](https://github.com/supernovae-st/nika/blob/main/SECURITY.md).
+
+## See also
+
+<CardGroup cols={2}>
+  <Card title="Error codes" icon="triangle-exclamation" href="/reference/error-codes">
+    The `NIKA-SEC` namespace + every typed failure.
+  </Card>
+  <Card title="Bindings" icon="link" href="/concepts/bindings">
+    Taint, scopes, and the `secrets.*` namespace.
+  </Card>
+  <Card title="Builtins — fetch" icon="globe" href="/reference/builtins">
+    The `nika:fetch` contract (engines MUST ship SSRF defense).
+  </Card>
+  <Card title="SECURITY.md" icon="shield" href="https://github.com/supernovae-st/nika/blob/main/SECURITY.md">
+    Reporting, disclosure timeline, hall of fame.
+  </Card>
+</CardGroup>

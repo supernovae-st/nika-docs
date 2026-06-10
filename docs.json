@@ -160,7 +160,8 @@
               "concepts/verbs",
               "concepts/bindings",
               "concepts/events",
-              "concepts/providers"
+              "concepts/providers",
+              "concepts/security"
             ]
           }
         ],
