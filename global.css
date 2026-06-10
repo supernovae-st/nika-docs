@@ -1,5 +1,7 @@
-/* Nika — Mintlify global styles · cosmos/ember theme companion
-   (colors + fonts live in docs.json · this file = the polish layer) */
+/* Nika — Mintlify global styles · cosmos blue+black theme companion
+   (colors + fonts live in docs.json · derived from the nika.sh palette ·
+   --bg #050a1c · --brand oklch(0.62 0.195 258)=#2d82f8 · butterfly ice
+   #9fd0ff · this file = the polish layer) */
 
 /* ── Mermaid · transparent over the warm near-black page ── */
 .mermaid svg,
@@ -32,28 +34,28 @@ div.mermaid {
   padding: 0.75rem 0;
 }
 
-/* ── Cards · quieter borders · ember glow on hover ── */
+/* ── Cards · quieter borders · ice glow on hover ── */
 .card,
 [class*="card"] a {
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 .card:hover {
-  border-color: rgba(255, 107, 26, 0.45) !important;
+  border-color: rgba(159, 208, 255, 0.45) !important;
   transform: translateY(-1px);
 }
 
-/* ── Code blocks · slightly warmer canvas than pure component grey ── */
+/* ── Code blocks · cool cosmos canvas (site --bg-2 family) ── */
 .dark pre {
-  background-color: #121110 !important;
+  background-color: #0a1226 !important;
 }
 
-/* ── Banner · ember wash instead of the default blue ── */
+/* ── Banner · deep-space wash (no saturated AI-blue strip) ── */
 #banner,
 [data-component="banner"] {
-  background: linear-gradient(90deg, #2a1505, #1a0e04) !important;
-  color: #ffd9bf !important;
+  background: linear-gradient(90deg, #0a1226, #04050d) !important;
+  color: #cfe6ff !important;
 }
 #banner a,
 [data-component="banner"] a {
-  color: #ffa266 !important;
+  color: #9fd0ff !important;
 }
