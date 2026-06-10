@@ -13,6 +13,11 @@ record exists today. Three steps, two owners.
    `supernovae-st/nika-docs` (root · `docs.json` is auto-detected). The
    first deployment publishes to a `*.mintlify.app` preview URL — verify
    the docs render there.
+
+   > ⚠️ **`nika.mintlify.app` is NOT us** (verified 2026-06-10): that
+   > subdomain belongs to an unrelated company (`nikaplanet.com`). Our
+   > project will get a different preview slug — don't be confused by
+   > the 200 on `nika.mintlify.app`.
 3. **Settings → Custom domain** → enter `docs.nika.sh`. Mintlify shows
    the exact CNAME target (typically `cname.mintlify.app`). Note it.
 
