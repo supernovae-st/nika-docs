@@ -21,23 +21,35 @@ webhook ping ending in `run cost $0.14`.
 
 ## The shape
 
+{/* showcase:dag-begin t4-ceo-monday-brief.nika.yaml */}
 ```mermaid
 flowchart LR
-  news["news · fetch jq"]:::invoke --> brief["brief · thinking"]:::infer
-  pulse["pulse · git shortlog"]:::exec --> brief
-  kpi_raw["kpi_raw · read"]:::invoke --> kpis["kpis · convert"]:::invoke
-  kpis --> revenue["revenue · jq add"]:::invoke
+  news["news · nika:fetch"]:::invoke
+  pulse["pulse · git"]:::exec
+  kpi_raw["kpi_raw · nika:read"]:::invoke
+  kpis["kpis · nika:convert"]:::invoke
+  revenue["revenue · nika:jq"]:::invoke
+  brief["brief · thinking"]:::infer
+  stamp["stamp · nika:date"]:::invoke
+  save["save · nika:write"]:::invoke
+  bill["bill · nika:inspect"]:::invoke
+  ping["ping · nika:notify"]:::invoke
+  kpi_raw --> kpis
+  kpis --> revenue
+  news --> brief
+  pulse --> brief
   kpis --> brief
   revenue --> brief
-  brief --> save["save · dated path"]:::invoke
-  stamp["stamp · nika:date"]:::invoke --> save
-  save --> bill["bill · inspect cost"]:::invoke
-  bill --> ping["ping · notify + cost"]:::invoke
+  brief --> save
+  stamp --> save
+  save --> bill
+  bill --> ping
   stamp --> ping
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

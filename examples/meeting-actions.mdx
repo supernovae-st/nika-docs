@@ -18,14 +18,20 @@ tracker you use.
 
 ## The shape
 
+{/* showcase:dag-begin t1-meeting-actions.nika.yaml */}
 ```mermaid
 flowchart LR
-  transcript["transcript · nika:read"]:::invoke --> extract["extract · schema"]:::infer
-  extract --> save["save · nika:write"]:::invoke
-  extract --> trace["trace · nika:log"]:::invoke
+  transcript["transcript · nika:read"]:::invoke
+  extract["extract · typed"]:::infer
+  save["save · nika:write"]:::invoke
+  trace["trace · nika:log"]:::invoke
+  transcript --> extract
+  extract --> save
+  extract --> trace
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

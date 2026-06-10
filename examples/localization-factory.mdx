@@ -19,18 +19,26 @@ tree appears under `i18n/fr/` with the original paths preserved.
 
 ## The shape
 
+{/* showcase:dag-begin t3-localization-factory.nika.yaml */}
 ```mermaid
 flowchart LR
-  files["files · nika:glob"]:::invoke --> texts["texts · for_each read"]:::invoke
-  files --> pairs["pairs · jq transpose"]:::invoke
+  files["files · nika:glob"]:::invoke
+  texts["texts · ∥ for_each · nika:read"]:::invoke
+  pairs["pairs · nika:jq"]:::invoke
+  translated["translated · ∥ for_each"]:::infer
+  bundle["bundle · nika:jq"]:::invoke
+  mirror["mirror · ∥ for_each · nika:write"]:::invoke
+  files --> texts
+  files --> pairs
   texts --> pairs
-  pairs --> translated["translated · for_each ×N"]:::infer
-  pairs --> bundle["bundle · jq transpose"]:::invoke
+  pairs --> translated
+  pairs --> bundle
   translated --> bundle
-  bundle --> mirror["mirror · for_each write"]:::invoke
+  bundle --> mirror
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

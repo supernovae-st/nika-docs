@@ -19,17 +19,24 @@ once.
 
 ## The shape
 
+{/* showcase:dag-begin t1-social-repurpose.nika.yaml */}
 ```mermaid
 flowchart LR
-  post["post · nika:read"]:::invoke --> thread["thread"]:::infer
-  post --> linkedin["linkedin"]:::infer
-  post --> newsletter["newsletter"]:::infer
-  thread --> bundle["bundle · nika:write"]:::invoke
+  post["post · nika:read"]:::invoke
+  thread["thread"]:::infer
+  linkedin["linkedin"]:::infer
+  newsletter["newsletter"]:::infer
+  bundle["bundle · nika:write"]:::invoke
+  post --> thread
+  post --> linkedin
+  post --> newsletter
+  thread --> bundle
   linkedin --> bundle
   newsletter --> bundle
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

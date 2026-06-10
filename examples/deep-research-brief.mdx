@@ -19,15 +19,21 @@ separates what's true from what's contested.
 
 ## The shape
 
+{/* showcase:dag-begin t4-deep-research-brief.nika.yaml */}
 ```mermaid
 flowchart LR
-  plan["plan · fast model · schema"]:::infer --> investigate["investigate · agent · budgets"]:::agent
-  investigate --> brief["brief · thinking budget"]:::infer
-  brief --> save["save · nika:write"]:::invoke
+  plan["plan · typed"]:::infer
+  investigate["investigate · 3 tools"]:::agent
+  brief["brief · thinking"]:::infer
+  save["save · nika:write"]:::invoke
+  plan --> investigate
+  investigate --> brief
+  brief --> save
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
   classDef agent fill:#b07bff22,stroke:#b07bff,color:#b07bff
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

@@ -18,16 +18,25 @@ guessing at numbers), drafts every reminder, then stops and asks you.
 
 ## The shape
 
+{/* showcase:dag-begin t2-invoice-chaser.nika.yaml */}
 ```mermaid
 flowchart LR
-  ledger["ledger · nika:read"]:::invoke --> rows["rows · nika:convert"]:::invoke
-  rows --> overdue["overdue · nika:jq"]:::invoke
-  overdue -->|"when size &gt; 0"| drafts["drafts"]:::infer
-  drafts --> approve["approve · nika:prompt"]:::invoke
-  approve -->|"when yes"| save["save · nika:write"]:::invoke
+  ledger["ledger · nika:read"]:::invoke
+  rows["rows · nika:convert"]:::invoke
+  overdue["overdue · nika:jq"]:::invoke
+  drafts["drafts"]:::infer
+  approve["approve · nika:prompt"]:::invoke
+  save["save · nika:write"]:::invoke
+  ledger --> rows
+  rows --> overdue
+  overdue -.-> drafts
+  drafts --> approve
+  approve -.-> save
+  drafts -.-> save
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

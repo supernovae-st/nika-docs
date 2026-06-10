@@ -21,21 +21,32 @@ the retro is scheduled.
 
 ## The shape
 
+{/* showcase:dag-begin t4-incident-war-room.nika.yaml */}
 ```mermaid
 flowchart LR
-  logs["logs · journalctl"]:::exec --> timeline["timeline · schema"]:::infer
-  status["status_history · fetch + retry"]:::invoke --> timeline
-  runbook["runbook · nika:read"]:::invoke --> timeline
-  timeline --> settle["settle · nika:wait 60s"]:::invoke
-  settle --> recheck["recheck · fetch state"]:::invoke
-  recheck --> confirmed["confirmed · nika:assert"]:::invoke
-  timeline --> postmortem["postmortem · thinking"]:::infer
+  logs["logs · journalctl"]:::exec
+  status_history["status_history · nika:fetch"]:::invoke
+  runbook["runbook · nika:read"]:::invoke
+  timeline["timeline · typed"]:::infer
+  settle["settle · nika:wait"]:::invoke
+  recheck["recheck · nika:fetch"]:::invoke
+  confirmed["confirmed · nika:assert"]:::invoke
+  postmortem["postmortem · thinking"]:::infer
+  save["save · nika:write"]:::invoke
+  logs --> timeline
+  status_history --> timeline
+  runbook --> timeline
+  timeline --> settle
+  settle --> recheck
+  recheck --> confirmed
+  timeline --> postmortem
   confirmed --> postmortem
-  postmortem --> save["save + on_finally"]:::invoke
+  postmortem --> save
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

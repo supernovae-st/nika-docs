@@ -18,15 +18,21 @@ your writer a typed brief: title, angle, outline, keywords.
 
 ## The shape
 
+{/* showcase:dag-begin t2-seo-content-brief.nika.yaml */}
 ```mermaid
 flowchart LR
-  map["map · fetch sitemap"]:::invoke --> top_page["top_page · fetch article"]:::invoke
-  map --> brief["brief · schema"]:::infer
+  map["map · nika:fetch"]:::invoke
+  top_page["top_page · nika:fetch"]:::invoke
+  brief["brief · typed"]:::infer
+  save["save · nika:write"]:::invoke
+  map --> top_page
+  map --> brief
   top_page --> brief
-  brief --> save["save · nika:write"]:::invoke
+  brief --> save
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

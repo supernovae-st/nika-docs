@@ -21,17 +21,25 @@ doesn't hold.
 
 ## The shape
 
+{/* showcase:dag-begin t2-contract-guard.nika.yaml */}
 ```mermaid
 flowchart LR
-  contract["contract · nika:read"]:::invoke --> clauses["clauses · local model"]:::infer
-  clauses --> check["check · nika:validate"]:::invoke
-  check --> gate["gate · nika:assert"]:::invoke
-  clauses --> memo["memo"]:::infer
+  contract["contract · nika:read"]:::invoke
+  clauses["clauses · typed"]:::infer
+  check["check · nika:validate"]:::invoke
+  gate["gate · nika:assert"]:::invoke
+  memo["memo"]:::infer
+  save["save · nika:write"]:::invoke
+  contract --> clauses
+  clauses --> check
+  check --> gate
+  clauses --> memo
   gate --> memo
-  memo --> save["save · nika:write"]:::invoke
+  memo --> save
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

@@ -20,19 +20,28 @@ final REVIEW.md ends with a verdict.
 
 ## The shape
 
+{/* showcase:dag-begin t3-pr-review-fanout.nika.yaml */}
 ```mermaid
 flowchart LR
-  changed["changed · git diff"]:::exec --> files["files · jq split"]:::invoke
-  files --> reviews["reviews · for_each agent ×N"]:::agent
-  todo["todo_sweep · nika:grep"]:::invoke --> summary["summary"]:::infer
-  reviews --> merged["merged · jq flatten"]:::invoke
+  changed["changed · git"]:::exec
+  files["files · nika:jq"]:::invoke
+  todo_sweep["todo_sweep · nika:grep"]:::invoke
+  reviews["reviews · ∥ for_each · 2 tools"]:::agent
+  merged["merged · nika:jq"]:::invoke
+  summary["summary"]:::infer
+  save["save · nika:write"]:::invoke
+  changed --> files
+  files --> reviews
+  reviews --> merged
   merged --> summary
-  summary --> save["save · REVIEW.md"]:::invoke
+  todo_sweep --> summary
+  summary --> save
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
   classDef agent fill:#b07bff22,stroke:#b07bff,color:#b07bff
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

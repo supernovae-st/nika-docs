@@ -18,11 +18,15 @@ time to buy.
 
 ## The shape
 
+{/* showcase:dag-begin t1-price-watch.nika.yaml */}
 ```mermaid
 flowchart LR
-  check["check · nika:fetch mode: jq"]:::invoke -->|"when price < target"| alert["alert · nika:notify"]:::invoke
+  check["check · nika:fetch"]:::invoke
+  alert["alert · nika:notify"]:::invoke
+  check -.-> alert
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

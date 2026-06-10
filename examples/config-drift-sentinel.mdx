@@ -20,20 +20,31 @@ first, so the diff contains only the drift nobody signed off on.
 
 ## The shape
 
+{/* showcase:dag-begin t3-config-drift-sentinel.nika.yaml */}
 ```mermaid
 flowchart LR
-  live["live · fetch + retry"]:::invoke --> drift["drift · json_diff"]:::invoke
-  baseline["baseline · nika:read"]:::invoke --> expected["expected · merge_patch"]:::invoke
+  live["live · nika:fetch"]:::invoke
+  baseline["baseline · nika:read"]:::invoke
+  expected["expected · nika:json_merge_patch"]:::invoke
+  drift["drift · nika:json_diff"]:::invoke
+  fingerprint["fingerprint · nika:hash"]:::invoke
+  explain["explain"]:::infer
+  alert["alert · nika:notify"]:::invoke
+  record["record · nika:emit"]:::invoke
+  baseline --> expected
   expected --> drift
-  live --> fingerprint["fingerprint · blake3"]:::invoke
-  drift -->|"when size &gt; 0"| explain["explain"]:::infer
-  explain --> alert["alert · nika:notify"]:::invoke
-  fingerprint --> alert
-  drift --> record["record · nika:emit"]:::invoke
+  live --> drift
+  live --> fingerprint
+  drift -.-> explain
+  explain -.-> alert
+  drift -.-> alert
+  fingerprint -.-> alert
+  drift --> record
   fingerprint --> record
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

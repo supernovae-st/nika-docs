@@ -18,17 +18,25 @@ sortable v7 batch id — and pages only when `urgent` is non-empty.
 
 ## The shape
 
+{/* showcase:dag-begin t2-support-triage.nika.yaml */}
 ```mermaid
 flowchart LR
-  batch["batch · nika:uuid"]:::invoke --> escalate["escalate · nika:notify"]:::invoke
-  queue["queue · nika:read"]:::invoke --> triage["triage · schema"]:::infer
-  triage --> urgent["urgent · nika:jq"]:::invoke
-  urgent -->|"when size &gt; 0"| escalate
-  triage --> board["board · nika:write"]:::invoke
+  batch["batch · nika:uuid"]:::invoke
+  queue["queue · nika:read"]:::invoke
+  triage["triage · typed"]:::infer
+  urgent["urgent · nika:jq"]:::invoke
+  escalate["escalate · nika:notify"]:::invoke
+  board["board · nika:write"]:::invoke
+  queue --> triage
+  triage --> urgent
+  urgent -.-> escalate
+  batch -.-> escalate
+  triage --> board
   batch --> board
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 

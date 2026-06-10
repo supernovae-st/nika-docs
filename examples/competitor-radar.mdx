@@ -20,15 +20,22 @@ page that doesn't is reported, not fatal.
 
 ## The shape
 
+{/* showcase:dag-begin t3-competitor-radar.nika.yaml */}
 ```mermaid
 flowchart LR
-  map["map · fetch sitemap"]:::invoke --> pages["pages · for_each ×8 · max_parallel 4"]:::invoke
-  pages --> digest["digest"]:::infer
-  digest --> save["save · nika:write"]:::invoke
-  save --> ping["ping · nika:notify"]:::invoke
+  map["map · nika:fetch"]:::invoke
+  pages["pages · ∥ for_each · nika:fetch"]:::invoke
+  digest["digest"]:::infer
+  save["save · nika:write"]:::invoke
+  ping["ping · nika:notify"]:::invoke
+  map --> pages
+  pages --> digest
+  digest --> save
+  save --> ping
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
+{/* showcase:dag-end */}
 
 ## The file
 
