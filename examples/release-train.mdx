@@ -1,0 +1,235 @@
+---
+title: "Release train"
+sidebarTitle: "Release train"
+description: "T4 epic · devops — parallel gates, a human GO, an absolute-time hold until the window · ship, verify, record."
+icon: "train"
+---
+
+> **T4 epic · devops / release engineering** — time is a first-class
+> citizen. The train holds with `nika:wait until:` (an absolute
+> timestamp — not a sleep), the gates' duration is computed with
+> `nika:date op: diff`, a human signs the departure, and the record
+> lands in the journal **whether the ship succeeded or not**.
+
+## The job
+
+Release day choreography: tests, lint and audit run as one parallel
+wave; an assert refuses departure on any red; the conductor signs with
+full information (« gates GREEN in 12 min — ship 1.4.0 in the 09:00Z
+window? »); the train holds until the window; ships; re-polls prod
+until it reports the new version; and `on_finally` files the departure
+record either way.
+
+## The shape
+
+{/* showcase:dag-begin t4-release-train.nika.yaml */}
+```mermaid
+flowchart LR
+  t0["t0 · nika:date"]:::invoke
+  tests["tests · cargo"]:::exec
+  lint["lint · cargo"]:::exec
+  audit["audit · cargo"]:::exec
+  gates_green["gates_green · nika:assert"]:::invoke
+  gate_time["gate_time · nika:date"]:::invoke
+  conductor["conductor · nika:prompt"]:::invoke
+  approved["approved · nika:assert"]:::invoke
+  hold["hold · nika:wait"]:::invoke
+  ship["ship · ./scripts/release.sh"]:::exec
+  verify["verify · nika:fetch"]:::invoke
+  live["live · nika:assert"]:::invoke
+  tests --> gates_green
+  lint --> gates_green
+  audit --> gates_green
+  t0 --> gate_time
+  gates_green --> gate_time
+  gates_green --> conductor
+  gate_time --> conductor
+  conductor --> approved
+  approved --> hold
+  hold --> ship
+  ship --> verify
+  verify --> live
+  classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+{/* showcase:dag-end */}
+
+## The file
+
+{/* showcase:begin t4-release-train.nika.yaml */}
+```yaml t4-release-train.nika.yaml
+nika: v1
+workflow: release-train
+description: "parallel gates → human GO → hold until the window → ship · verify · record"
+
+vars:
+  version:
+    type: string
+    required: true
+    description: "The version to ship (e.g. 1.4.0)"
+  window: "2026-07-28T09:00:00Z"
+
+secrets:
+  team_webhook:
+    source: env
+    key: TEAM_WEBHOOK_URL
+
+tasks:
+  - id: t0
+    invoke:
+      tool: "nika:date"
+      args: { op: now }
+
+  # ── the gate wave · all three run in parallel ──
+  - id: tests
+    exec:
+      command: "cargo test --workspace --quiet"
+      capture: structured
+    timeout: "15m"
+
+  - id: lint
+    exec:
+      command: "cargo clippy --workspace --all-targets -- -D warnings"
+      capture: structured
+    timeout: "10m"
+
+  - id: audit
+    exec:
+      command: "cargo audit"
+      capture: structured
+    timeout: "5m"
+    retry:
+      max_attempts: 2                  # advisory DB fetch can flake
+
+  - id: gates_green
+    depends_on: [tests, lint, audit]
+    invoke:
+      tool: "nika:assert"
+      args:
+        condition: "${{ tasks.tests.output.exit_code == 0 && tasks.lint.output.exit_code == 0 && tasks.audit.output.exit_code == 0 }}"
+        message: "A release gate is RED — the train does not depart"
+
+  - id: gate_time
+    depends_on: [t0, gates_green]
+    invoke:
+      tool: "nika:date"
+      args:
+        op: diff
+        start: "${{ tasks.t0.output }}"
+        end: "now"
+        unit: minutes
+
+  # ── the human signs the departure ──
+  - id: conductor
+    depends_on: [gates_green, gate_time]
+    invoke:
+      tool: "nika:prompt"
+      args:
+        message: "Gates GREEN in ${{ tasks.gate_time.output }} min. Ship ${{ vars.version }} in the ${{ vars.window }} window?"
+        default: false
+
+  - id: approved
+    depends_on: [conductor]
+    invoke:
+      tool: "nika:assert"
+      args:
+        condition: "${{ tasks.conductor.output == true }}"
+        message: "Departure not signed — train cancelled"
+
+  # ── hold until the window · absolute time, not a sleep ──
+  - id: hold
+    depends_on: [approved]
+    invoke:
+      tool: "nika:wait"
+      args:
+        until: "${{ vars.window }}"
+        timeout: "48h"
+
+  - id: ship
+    depends_on: [hold]
+    exec:
+      command: "./scripts/release.sh ${{ vars.version }}"
+      capture: structured
+    timeout: "30m"
+
+  - id: verify
+    depends_on: [ship]
+    invoke:
+      tool: "nika:fetch"
+      args:
+        url: "https://api.example.com/v1/version"
+        mode: jq
+        jq: ".version"
+    retry:
+      max_attempts: 5
+      backoff_strategy: exponential
+      backoff_ms: 5000
+
+  - id: live
+    depends_on: [verify]
+    invoke:
+      tool: "nika:assert"
+      args:
+        condition: "${{ tasks.verify.output == vars.version }}"
+        message: "Prod does not report the shipped version — investigate before announcing"
+    on_finally:                        # the record lands · shipped OR aborted
+      - invoke:
+          tool: "nika:emit"
+          args:
+            event_type: "release.train.departed"
+            payload:
+              version: "${{ vars.version }}"
+              status: "${{ tasks.live.status }}"
+      - invoke:
+          tool: "nika:notify"
+          args:
+            channel: webhook
+            target: "${{ secrets.team_webhook }}"
+            message: "Release train ${{ vars.version }} · ${{ tasks.live.status }}"
+            severity: info
+
+outputs:
+  shipped: ${{ tasks.verify.output }}
+```
+{/* showcase:end */}
+
+## How it works
+
+<Steps>
+  <Step title="until: is a hold, not a sleep">
+    `nika:wait` with `until: 2026-07-28T09:00:00Z` parks the train at
+    an ABSOLUTE time (capped by `timeout: 48h`). A relative `duration:`
+    would drift with however long the gates took.
+  </Step>
+  <Step title="The human signs with full information">
+    `nika:date op: diff` computes the gates' wall time, and the
+    `nika:prompt` message carries it — the conductor decides knowing
+    how fresh the green is. The assert after makes « no » terminal.
+  </Step>
+  <Step title="The record always lands">
+    `verify` re-polls prod (retry × 5, exponential) until it reports
+    the shipped version · the final assert refuses to claim success
+    otherwise · `on_finally` emits the journal event + team ping with
+    the REAL status, even on failure.
+  </Step>
+</Steps>
+
+## Constructs you just used
+
+| Construct | Where | Reference |
+|---|---|---|
+| `nika:wait` `until:` (absolute) | `hold` | [Builtins](/reference/builtins) |
+| `nika:date` `op: diff` | `gate_time` | [Builtins](/reference/builtins) |
+| parallel gate wave + asserts | `tests`/`lint`/`audit` → `gates_green` | [Workflows](/concepts/workflows) |
+| `on_finally:` departure record | `live` | [Workflows](/concepts/workflows) |
+
+## Make it yours
+
+- Generate the notes on the same train: insert [Release notes](/examples/release-notes) between `approved` and `hold`.
+- Canary first: duplicate `ship`/`verify` against staging, gate prod behind a second assert.
+- The window var makes this a scheduled artifact — your cron passes next Tuesday 09:00Z, the train handles the rest.
+
+<Card title="Back to all examples" icon="rocket" href="/examples/overview">
+  The full gallery — 20 workflows, four tiers, every construct taught
+  by a real job.
+</Card>

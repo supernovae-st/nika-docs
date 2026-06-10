@@ -147,7 +147,8 @@
             "pages": [
               "getting-started/installation",
               "getting-started/first-workflow",
-              "getting-started/editors"
+              "getting-started/editors",
+              "guides/patterns"
             ]
           },
           {
@@ -190,7 +191,9 @@
               "examples/seo-content-brief",
               "examples/invoice-chaser",
               "examples/support-triage",
-              "examples/contract-guard"
+              "examples/contract-guard",
+              "examples/etl-quarantine",
+              "examples/release-radar"
             ]
           },
           {
@@ -199,7 +202,8 @@
               "examples/competitor-radar",
               "examples/localization-factory",
               "examples/config-drift-sentinel",
-              "examples/pr-review-fanout"
+              "examples/pr-review-fanout",
+              "examples/resume-screener"
             ]
           },
           {
@@ -207,7 +211,8 @@
             "pages": [
               "examples/deep-research-brief",
               "examples/incident-war-room",
-              "examples/ceo-monday-brief"
+              "examples/ceo-monday-brief",
+              "examples/release-train"
             ]
           }
         ]

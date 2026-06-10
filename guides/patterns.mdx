@@ -1,0 +1,217 @@
+---
+title: "How to write Nika"
+sidebarTitle: "Patterns"
+description: "The twelve patterns of well-written Nika — each one taught by a canonical example, each anti-pattern named."
+icon: "compass-drafting"
+---
+
+import { CANON } from "/snippets/_canon.mdx";
+import { SHOWCASE } from "/snippets/_showcase.mdx";
+
+Nika is a small language — {CANON.verbs} verbs, {CANON.namespaces}
+namespaces, one expression surface — so *good* Nika is mostly about
+**shape**: where the determinism lives, where the model is allowed to
+think, and how data crosses task boundaries. These twelve patterns are
+how the {SHOWCASE.count} showcase workflows are written. Each links
+the canonical example that embodies it.
+
+<Tip>
+  The spec's normative cousin of this page is the
+  [one-obvious-way table](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md)
+  (linter rules `one-obvious-way/001-007`). This page is the
+  engineering judgment *around* those rules.
+</Tip>
+
+## 1 · Deterministic core, model at the edges
+
+jq decides; the model explains. Anything that can be computed —
+filtering, sums, diffs, ranking — happens in `nika:jq` or a data
+builtin, deterministically and for free. The model gets the jobs only
+a model can do: judgment, language, synthesis.
+
+```yaml
+# ✅ jq filters · the model only explains what survived
+- id: urgent
+  invoke:
+    tool: "nika:jq"
+    args: { input: "${{ tasks.triage.output.tickets }}", expression: 'map(select(.urgency == "critical"))' }
+- id: explain
+  depends_on: [urgent]
+  when: ${{ size(tasks.urgent.output) > 0 }}
+  infer: { prompt: "Explain these critical tickets · ${{ tasks.urgent.output }}" }
+```
+
+**Anti-pattern** — asking the model to « pick the urgent ones » from a
+list it already saw typed. You pay tokens for worse determinism.
+
+Taught by · [Price watch](/examples/price-watch) (zero model calls) ·
+[Config drift sentinel](/examples/config-drift-sentinel) ·
+[ETL quarantine](/examples/etl-quarantine).
+
+## 2 · Parallelism is the default — `depends_on` is the only ordering
+
+Tasks with no edge between them run together. Don't serialize out of
+habit: declare the TRUE data dependencies and let the engine schedule
+waves. If you reference `${{ tasks.X }}`, you MUST declare the edge —
+the DAG has no invisible edges (`NIKA-DAG-003`).
+
+**Anti-pattern** — a linear chain of tasks that don't read each other's
+output. You're paying wall-clock for nothing.
+
+Taught by · [Standup digest](/examples/standup-digest) ·
+[Social repurpose](/examples/social-repurpose) (the diamond) ·
+[CEO Monday brief](/examples/ceo-monday-brief) (3-branch gather).
+
+## 3 · Type the boundaries
+
+Every place data crosses from a model into the deterministic world gets
+a contract: `schema:` on `infer`/`agent` (the model MUST return that
+shape), `nika:validate` for second opinions, `nika:assert` as the hard
+gate. Enums kill « kinda-strong » ratings.
+
+**Anti-pattern** — prose in, prose out, regex in the middle. If a
+downstream task indexes into a field, the producer needs a schema.
+
+Taught by · [Meeting actions](/examples/meeting-actions) ·
+[Contract guard](/examples/contract-guard) (schema + validate + assert,
+belt-and-braces) · [Support triage](/examples/support-triage) (enums).
+
+## 4 · Fan out with a leash
+
+`for_each` over a runtime collection is the power move — bounded by
+`max_parallel` (be polite to providers and GPUs), made resilient by
+`fail_fast: false` (collect errors, don't abort the batch) and
+per-iteration `retry`/`timeout`.
+
+**Anti-pattern** — unbounded fan-out against a rate-limited API, or
+`fail_fast: true` (the default!) on a batch where one bad item is
+normal.
+
+Taught by · [Competitor radar](/examples/competitor-radar) ·
+[Localization factory](/examples/localization-factory) ·
+[Resume screener](/examples/resume-screener).
+
+## 5 · Plan, then execute
+
+For open-ended work: a fast model writes a typed plan, an `agent:`
+executes it under budgets, a thinking model synthesizes. Three stages,
+three cost profiles, every intermediate auditable on disk.
+
+**Anti-pattern** — one giant agent loop with no plan, no budget, no
+typed output: unauditable and unbounded.
+
+Taught by · [Deep research brief](/examples/deep-research-brief).
+
+## 6 · Three gates, three meanings
+
+- `when:` — the **skip** gate. Routing, not failure (skipped ≠ failed).
+- `nika:assert` — the **fail-fast** gate. The run is wrong, stop loudly.
+- `nika:prompt` — the **human** gate. Blocks until a person decides.
+
+Pick the gate that matches the meaning. A workflow that sends drafts
+without a `prompt` gate, or claims success without an `assert`, is
+lying about its guarantees.
+
+**Anti-pattern** — `when: ${{ tasks.a.status == 'success' }}` as a
+plain success-gate: `depends_on` already does that (linter
+`one-obvious-way/001`).
+
+Taught by · [Invoice chaser](/examples/invoice-chaser) (human gate) ·
+[Incident war room](/examples/incident-war-room) (assert refuses
+optimistic postmortems) · [Release train](/examples/release-train)
+(all three in one file).
+
+## 7 · Sovereignty is a `model:` line
+
+Sensitive data — contracts, CVs, medical, financial — runs on a local
+provider (`ollama/…` · `lmstudio/…`). Same file shape, zero cloud. The
+{CANON.providers} canonical providers make this a one-line decision,
+not an architecture meeting.
+
+Taught by · [Contract guard](/examples/contract-guard) ·
+[Resume screener](/examples/resume-screener).
+
+## 8 · Agents get budgets, tools get grants
+
+`agent:` is default-deny: no `tools:` means NO tools. Grant the
+minimum (`nika:read` + `nika:done` makes a read-only reviewer), cap
+the loop (`max_turns` · `max_tokens_total`), and let `nika:done` end
+it cleanly.
+
+**Anti-pattern** — `tools: ["nika:*", "mcp:*/*"]` on an agent that
+only needed to read. Least-privilege is one line cheaper.
+
+Taught by · [PR review fan-out](/examples/pr-review-fanout) (the
+read-only swarm) · [Code review](https://github.com/supernovae-st/nika-spec/blob/main/examples/23-code-review.nika.yaml)
+(foundation).
+
+## 9 · Evidence always lands — `on_finally`
+
+Journal events, notifications, cleanup: hang them on `on_finally:` so
+they fire on success, failure, timeout AND cancel. A pipeline that
+only reports when it succeeds is a pipeline you can't trust at 3am.
+
+Taught by · [Incident war room](/examples/incident-war-room) ·
+[Release train](/examples/release-train) (the departure record lands
+either way).
+
+## 10 · One data language — jq, once
+
+`output:` bindings, `nika:jq`, the fan-in zip (`transpose`), the
+state diff — it's all the same jq. Don't invent per-task string
+parsing; don't ask the model to reshape JSON. There is one transform
+language and it's already there.
+
+Taught by · [Localization factory](/examples/localization-factory)
+(the transpose zip) · [ETL quarantine](/examples/etl-quarantine)
+(group_by accounting).
+
+## 11 · Workflows are callable — type the `outputs:`
+
+A workflow with typed `outputs:` is a building block: another workflow
+(or a human, or CI) consumes a contract, not a log. Name what comes
+out, type it, describe it.
+
+Taught by · [Deep research brief](/examples/deep-research-brief)
+(`{brief, sources}`) · [Schema retry](https://github.com/supernovae-st/nika-spec/blob/main/examples/19-schema-retry.nika.yaml)
+(foundation · the typed-outputs shape).
+
+## 12 · Mock-first — runnable with zero keys
+
+`model: mock/echo` makes a workflow CI-runnable and demo-safe. Write
+it mock-first, swap the provider when it ships. Every example in this
+documentation that CAN run keyless, does.
+
+**Anti-pattern** — a workflow you can't validate without burning real
+tokens. The conformance gate runs every example on every push — yours
+should too.
+
+Taught by · the whole [examples pack](/examples/overview) — and the
+[state-file pattern](/examples/release-radar) makes even stateful
+workflows replayable.
+
+---
+
+## The shape of a well-written file
+
+```yaml
+nika: v1                      # the contract · one line · forever
+workflow: kebab-case-name     # resource name
+description: "…"              # one honest sentence
+
+model: mock/echo              # mock-first · sovereignty is one line away
+
+vars:                         # typed where it matters · required: true documents itself
+secrets:                      # vault/env-backed · never inline
+
+tasks:                        # the DAG · true dependencies only ·
+  # deterministic core (jq · builtins) · model at the edges ·
+  # gates that match their meaning · leashed fan-outs · budgeted agents
+
+outputs:                      # the callable contract · typed
+```
+
+<Card title="See every pattern live" icon="rocket" href="/examples/overview">
+  The examples gallery — 20 real jobs, every construct taught, every
+  file conformance-validated.
+</Card>
