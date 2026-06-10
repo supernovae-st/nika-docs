@@ -23,7 +23,7 @@ the retro is scheduled.
 
 {/* showcase:dag-begin t4-incident-war-room.nika.yaml */}
 ```mermaid
-flowchart LR
+flowchart TD
   logs["logs · journalctl"]:::exec
   status_history["status_history · nika:fetch"]:::invoke
   runbook["runbook · nika:read"]:::invoke

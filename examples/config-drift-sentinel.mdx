@@ -22,7 +22,7 @@ first, so the diff contains only the drift nobody signed off on.
 
 {/* showcase:dag-begin t3-config-drift-sentinel.nika.yaml */}
 ```mermaid
-flowchart LR
+flowchart TD
   live["live · nika:fetch"]:::invoke
   baseline["baseline · nika:read"]:::invoke
   expected["expected · nika:json_merge_patch"]:::invoke
