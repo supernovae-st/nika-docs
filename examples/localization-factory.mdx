@@ -129,7 +129,7 @@ outputs:
     `[{path, text}]` — and `${{ item.path }}` works, because loop-locals
     are full objects.
   </Step>
-  <Step title="The mirror writes itself">
+  <Step title="The mirror tree comes out the other end">
     The final fan-out writes `./i18n/fr/<original path>` with
     `create_dirs: true`. Path templating is plain `${{ }}` interpolation
     inside a string.

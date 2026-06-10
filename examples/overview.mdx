@@ -8,12 +8,12 @@ icon: "rocket"
 import { CANON } from "/snippets/_canon.mdx";
 import { SHOWCASE } from "/snippets/_showcase.mdx";
 
-Every example on these pages is a **complete, validated workflow** — not
-a fragment. The YAML you read here is projected verbatim from
+Every example on these pages is a complete, validated workflow, not a
+fragment. The YAML you read here is projected verbatim from
 [`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),
 where each file passes the same conformance gate as the spec's own test
-suite: JSON Schema, DAG cross-references, CEL resolution, stdlib surface.
-If it's on this page, it parses.
+suite: JSON Schema, DAG cross-references, CEL resolution, stdlib
+surface. If a file is on this page, it parses.
 
 These {SHOWCASE.count} workflows ({SHOWCASE.t1} starters · {SHOWCASE.t2} chains
 · {SHOWCASE.t3} fan-outs · {SHOWCASE.t4} epics) plus the foundation set
@@ -35,23 +35,22 @@ flowchart LR
   classDef agent fill:#b07bff22,stroke:#b07bff,color:#b07bff
 ```
 
-## T1 · Starters — your first wow
+## T1 · Starters
 
-≤4 tasks. One chain or one diamond. Run one of these in your first five
-minutes.
+Four tasks or fewer, one chain or one diamond. You can run one of these
+in your first five minutes.
 
 <Columns cols={2}>
   <Card title="Standup digest" icon="sunrise" href="/examples/standup-digest">
-    **Engineering** — your standup note writes itself from what you
-    actually committed yesterday.
+    **Engineering** — your standup note, written from what you actually
+    committed yesterday.
   </Card>
   <Card title="Meeting actions" icon="list-check" href="/examples/meeting-actions">
     **Every office** — transcript in, tracker-ready typed action items
     out.
   </Card>
   <Card title="Price watch" icon="tag" href="/examples/price-watch">
-    **E-commerce** — a price-drop alert with **zero** model calls. Not
-    everything needs an LLM.
+    **E-commerce** — a price-drop alert with zero model calls.
   </Card>
   <Card title="Social repurpose" icon="share-nodes" href="/examples/social-repurpose">
     **Marketing** — one post becomes a thread, a LinkedIn post and a
@@ -59,9 +58,10 @@ minutes.
   </Card>
 </Columns>
 
-## T2 · Chains — real work, typed
+## T2 · Chains
 
-4–6 tasks. Structured outputs, human gates, the data builtins.
+Four to six tasks. Structured outputs, human gates, and the data
+builtins start pulling their weight.
 
 <Columns cols={2}>
   <Card title="Release notes" icon="rocket" href="/examples/release-notes">
@@ -94,22 +94,22 @@ minutes.
   </Card>
 </Columns>
 
-## T3 · Fan-out — runtime collections
+## T3 · Fan-out
 
-`for_each` over collections the workflow discovers at runtime — with
+`for_each` over collections the workflow discovers at runtime, with
 retry, bounded parallelism and jq fan-ins.
 
 <Columns cols={2}>
   <Card title="Competitor radar" icon="satellite-dish" href="/examples/competitor-radar">
-    **Strategy / PMM** — everything they shipped last week, read in
-    parallel, one Monday brief.
+    **Strategy / PMM** — everything they shipped last week, read in parallel,
+    one Monday brief.
   </Card>
   <Card title="Localization factory" icon="language" href="/examples/localization-factory">
     **Product / i18n** — the whole docs tree translated, voice intact,
     zero copy-paste.
   </Card>
   <Card title="Config drift sentinel" icon="shield-halved" href="/examples/config-drift-sentinel">
-    **SRE / Platform** — only UNSANCTIONED prod drift wakes anyone. jq
+    **SRE / Platform** — only unsanctioned prod drift wakes anyone. jq
     decides; the model explains.
   </Card>
   <Card title="PR review fan-out" icon="code-pull-request" href="/examples/pr-review-fanout">
@@ -122,9 +122,10 @@ retry, bounded parallelism and jq fan-ins.
   </Card>
 </Columns>
 
-## T4 · Epic — pipelines that run a department
+## T4 · Epic
 
-Multi-stage, agentic, budgeted, self-reporting.
+Multi-stage pipelines: agents under budget, human gates, runs that
+report on themselves.
 
 <Columns cols={2}>
   <Card title="Deep research brief" icon="microscope" href="/examples/deep-research-brief">
@@ -132,8 +133,8 @@ Multi-stage, agentic, budgeted, self-reporting.
     synthesis. Auditable end to end.
   </Card>
   <Card title="Incident war room" icon="fire-extinguisher" href="/examples/incident-war-room">
-    **SRE / On-call** — the postmortem drafts itself, after recovery is
-    PROVEN, not assumed.
+    **SRE / On-call** — evidence in parallel, a typed timeline, and a
+    recovery check before the draft.
   </Card>
   <Card title="CEO Monday brief" icon="briefcase" href="/examples/ceo-monday-brief">
     **Founders / Execs** — market + engineering + KPIs synthesized — and
@@ -147,8 +148,8 @@ Multi-stage, agentic, budgeted, self-reporting.
 
 ## Find the example that teaches X
 
-Looking for one construct? This index is **generated from the workflow
-files themselves** — it can't go stale.
+Looking for one construct? This index is generated from the workflow
+files, so it cannot go stale.
 
 {/* showcase:coverage-begin */}
 | Construct | Taught by |
@@ -175,16 +176,15 @@ files themselves** — it can't go stale.
 
 ## The rules every example obeys
 
-- **One verb per task** — `infer`, `exec`, `invoke` or `agent`. Always.
-- **Every reference is an edge** — `${{ tasks.X }}` anywhere requires
+- **One verb per task** · `infer`, `exec`, `invoke` or `agent`.
+- **Every reference is an edge** · `${{ tasks.X }}` anywhere requires
   `depends_on: [X]`. The DAG has no invisible edges.
-- **`mock/echo` by default** — files run with zero API keys wherever the
+- **`mock/echo` by default** · files run with zero API keys wherever the
   job allows; real providers only where the job demands one; local
   models where the data is sensitive.
-- **Projection, not copy-paste** — these pages and the
+- **Projection, not copy-paste** · these pages and the
   [nika.sh use-cases explorer](https://nika.sh/#use-cases) render the
-  same files, projected by `showcase-projector.py`. Drift is a CI
-  failure, not a maybe.
+  same files, projected by `showcase-projector.py`. Any drift fails CI.
 
 <Card title="Write your first workflow" icon="pen" href="/getting-started/first-workflow">
   Ready to write your own? Start from the guided first-workflow walk.

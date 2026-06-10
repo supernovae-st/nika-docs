@@ -8,9 +8,9 @@ icon: "compass-drafting"
 import { CANON } from "/snippets/_canon.mdx";
 import { SHOWCASE } from "/snippets/_showcase.mdx";
 
-Nika is a small language — {CANON.verbs} verbs, {CANON.namespaces}
-namespaces, one expression surface — so *good* Nika is mostly about
-**shape**: where the determinism lives, where the model is allowed to
+Nika is a small language ({CANON.verbs} verbs, {CANON.namespaces}
+namespaces, one expression surface), so good Nika is mostly about
+shape: where the determinism lives, where the model is allowed to
 think, and how data crosses task boundaries. These twelve patterns are
 how the {SHOWCASE.count} showcase workflows are written. Each links
 the canonical example that embodies it.
@@ -24,8 +24,8 @@ the canonical example that embodies it.
 
 ## 1 · Deterministic core, model at the edges
 
-jq decides; the model explains. Anything that can be computed —
-filtering, sums, diffs, ranking — happens in `nika:jq` or a data
+jq decides; the model explains. Anything that can be computed
+(filtering, sums, diffs, ranking) happens in `nika:jq` or a data
 builtin, deterministically and for free. The model gets the jobs only
 a model can do: judgment, language, synthesis.
 
@@ -41,22 +41,22 @@ a model can do: judgment, language, synthesis.
   infer: { prompt: "Explain these critical tickets · ${{ tasks.urgent.output }}" }
 ```
 
-**Anti-pattern** — asking the model to « pick the urgent ones » from a
-list it already saw typed. You pay tokens for worse determinism.
+**Anti-pattern** · asking the model to « pick the urgent ones » from a
+list it already returned typed. You pay tokens for worse determinism.
 
 Taught by · [Price watch](/examples/price-watch) (zero model calls) ·
 [Config drift sentinel](/examples/config-drift-sentinel) ·
 [ETL quarantine](/examples/etl-quarantine).
 
-## 2 · Parallelism is the default — `depends_on` is the only ordering
+## 2 · Parallelism is the default · `depends_on` is the only ordering
 
 Tasks with no edge between them run together. Don't serialize out of
-habit: declare the TRUE data dependencies and let the engine schedule
-waves. If you reference `${{ tasks.X }}`, you MUST declare the edge —
-the DAG has no invisible edges (`NIKA-DAG-003`).
+habit: declare the real data dependencies and let the engine schedule
+the waves. If you reference `${{ tasks.X }}` you must declare the
+edge; the DAG has no invisible edges (`NIKA-DAG-003`).
 
-**Anti-pattern** — a linear chain of tasks that don't read each other's
-output. You're paying wall-clock for nothing.
+**Anti-pattern** · a linear chain of tasks that never read each
+other's output. That is wall-clock spent on nothing.
 
 Taught by · [Standup digest](/examples/standup-digest) ·
 [Social repurpose](/examples/social-repurpose) (the diamond) ·
@@ -65,11 +65,11 @@ Taught by · [Standup digest](/examples/standup-digest) ·
 ## 3 · Type the boundaries
 
 Every place data crosses from a model into the deterministic world gets
-a contract: `schema:` on `infer`/`agent` (the model MUST return that
+a contract: `schema:` on `infer`/`agent` (the model must return that
 shape), `nika:validate` for second opinions, `nika:assert` as the hard
 gate. Enums kill « kinda-strong » ratings.
 
-**Anti-pattern** — prose in, prose out, regex in the middle. If a
+**Anti-pattern** · prose in, prose out, regex in the middle. If a
 downstream task indexes into a field, the producer needs a schema.
 
 Taught by · [Meeting actions](/examples/meeting-actions) ·
@@ -78,14 +78,14 @@ belt-and-braces) · [Support triage](/examples/support-triage) (enums).
 
 ## 4 · Fan out with a leash
 
-`for_each` over a runtime collection is the power move — bounded by
-`max_parallel` (be polite to providers and GPUs), made resilient by
-`fail_fast: false` (collect errors, don't abort the batch) and
-per-iteration `retry`/`timeout`.
+`for_each` over a runtime collection is the power move. Bound it with
+`max_parallel` (providers rate-limit, GPUs thrash), make it resilient
+with `fail_fast: false` (collect errors instead of aborting the batch)
+and give each iteration its own `retry` and `timeout`.
 
-**Anti-pattern** — unbounded fan-out against a rate-limited API, or
-`fail_fast: true` (the default!) on a batch where one bad item is
-normal.
+**Anti-pattern** · an unbounded fan-out against a rate-limited API, or
+leaving `fail_fast` on its default (true) for a batch where one bad
+item is normal.
 
 Taught by · [Competitor radar](/examples/competitor-radar) ·
 [Localization factory](/examples/localization-factory) ·
@@ -97,23 +97,23 @@ For open-ended work: a fast model writes a typed plan, an `agent:`
 executes it under budgets, a thinking model synthesizes. Three stages,
 three cost profiles, every intermediate auditable on disk.
 
-**Anti-pattern** — one giant agent loop with no plan, no budget, no
-typed output: unauditable and unbounded.
+**Anti-pattern** · one giant agent loop with no plan, no budget and no
+typed output. Nothing about it can be audited or bounded.
 
 Taught by · [Deep research brief](/examples/deep-research-brief).
 
 ## 6 · Three gates, three meanings
 
-- `when:` — the **skip** gate. Routing, not failure (skipped ≠ failed).
-- `nika:assert` — the **fail-fast** gate. The run is wrong, stop loudly.
-- `nika:prompt` — the **human** gate. Blocks until a person decides.
+- `when:` · the **skip** gate. Routing, not failure (skipped ≠ failed).
+- `nika:assert` · the **fail-fast** gate. The run is wrong, stop loudly.
+- `nika:prompt` · the **human** gate. Blocks until a person decides.
 
 Pick the gate that matches the meaning. A workflow that sends drafts
 without a `prompt` gate, or claims success without an `assert`, is
-lying about its guarantees.
+promising more than it checks.
 
-**Anti-pattern** — `when: ${{ tasks.a.status == 'success' }}` as a
-plain success-gate: `depends_on` already does that (linter
+**Anti-pattern** · `when: ${{ tasks.a.status == 'success' }}` as a
+plain success gate. `depends_on` already does that (linter
 `one-obvious-way/001`).
 
 Taught by · [Invoice chaser](/examples/invoice-chaser) (human gate) ·
@@ -123,8 +123,8 @@ optimistic postmortems) · [Release train](/examples/release-train)
 
 ## 7 · Sovereignty is a `model:` line
 
-Sensitive data — contracts, CVs, medical, financial — runs on a local
-provider (`ollama/…` · `lmstudio/…`). Same file shape, zero cloud. The
+Sensitive data (contracts, CVs, medical, financial) runs on a local
+provider, `ollama/…` or `lmstudio/…`. Same file shape, zero cloud. The
 {CANON.providers} canonical providers make this a one-line decision,
 not an architecture meeting.
 
@@ -133,40 +133,40 @@ Taught by · [Contract guard](/examples/contract-guard) ·
 
 ## 8 · Agents get budgets, tools get grants
 
-`agent:` is default-deny: no `tools:` means NO tools. Grant the
+`agent:` is default-deny: no `tools:` means no tools at all. Grant the
 minimum (`nika:read` + `nika:done` makes a read-only reviewer), cap
 the loop (`max_turns` · `max_tokens_total`), and let `nika:done` end
 it cleanly.
 
-**Anti-pattern** — `tools: ["nika:*", "mcp:*/*"]` on an agent that
-only needed to read. Least-privilege is one line cheaper.
+**Anti-pattern** · `tools: ["nika:*", "mcp:*/*"]` on an agent that
+only needed to read. Least privilege costs one line less.
 
 Taught by · [PR review fan-out](/examples/pr-review-fanout) (the
 read-only swarm) · [Code review](https://github.com/supernovae-st/nika-spec/blob/main/examples/23-code-review.nika.yaml)
 (foundation).
 
-## 9 · Evidence always lands — `on_finally`
+## 9 · Evidence always lands · `on_finally`
 
 Journal events, notifications, cleanup: hang them on `on_finally:` so
-they fire on success, failure, timeout AND cancel. A pipeline that
-only reports when it succeeds is a pipeline you can't trust at 3am.
+they fire on success, failure, timeout and cancel alike. A pipeline
+that only reports when it succeeds can't be trusted at 3am.
 
 Taught by · [Incident war room](/examples/incident-war-room) ·
 [Release train](/examples/release-train) (the departure record lands
 either way).
 
-## 10 · One data language — jq, once
+## 10 · One data language · jq, once
 
 `output:` bindings, `nika:jq`, the fan-in zip (`transpose`), the
-state diff — it's all the same jq. Don't invent per-task string
-parsing; don't ask the model to reshape JSON. There is one transform
-language and it's already there.
+state diff: all of it is the same jq. Don't invent per-task string
+parsing and don't ask the model to reshape JSON. One transform
+language is already there.
 
 Taught by · [Localization factory](/examples/localization-factory)
 (the transpose zip) · [ETL quarantine](/examples/etl-quarantine)
 (group_by accounting).
 
-## 11 · Workflows are callable — type the `outputs:`
+## 11 · Workflows are callable · type the `outputs:`
 
 A workflow with typed `outputs:` is a building block: another workflow
 (or a human, or CI) consumes a contract, not a log. Name what comes
@@ -176,15 +176,15 @@ Taught by · [Deep research brief](/examples/deep-research-brief)
 (`{brief, sources}`) · [Schema retry](https://github.com/supernovae-st/nika-spec/blob/main/examples/19-schema-retry.nika.yaml)
 (foundation · the typed-outputs shape).
 
-## 12 · Mock-first — runnable with zero keys
+## 12 · Mock-first · runnable with zero keys
 
 `model: mock/echo` makes a workflow CI-runnable and demo-safe. Write
-it mock-first, swap the provider when it ships. Every example in this
-documentation that CAN run keyless, does.
+it mock-first and swap the provider when it ships. Every example in
+this documentation that can run without keys does.
 
-**Anti-pattern** — a workflow you can't validate without burning real
-tokens. The conformance gate runs every example on every push — yours
-should too.
+**Anti-pattern** · a workflow you can't validate without spending real
+tokens. The conformance gate runs every example on every push, and
+yours should pass the same way.
 
 Taught by · the whole [examples pack](/examples/overview) — and the
 [state-file pattern](/examples/release-radar) makes even stateful
