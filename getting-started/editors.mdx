@@ -1,6 +1,6 @@
 ---
 title: "Editor setup"
-description: "What IDE integration ships today and what's planned for v0.90+. Schema validation via yaml-language-server works now; full LSP lands with nika-lsp admission."
+description: "What IDE integration ships today and what's planned. Schema validation via yaml-language-server works now; the VS Code extension + LSP ride the v0.81 ship."
 sidebarTitle: "Editor setup"
 icon: "code"
 ---
@@ -9,7 +9,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika's editor story has two tiers: **(1)** generic JSON-Schema validation
 that works today with any yaml-language-server-compatible editor, and
-**(2)** a custom `nika-lsp` server (post-v0.90) with cross-task binding
+**(2)** a custom `nika-lsp` server (with the v0.81 ladder) with cross-task binding
 analysis, taint propagation warnings, and DAG preview.
 
 <Info>
@@ -19,7 +19,7 @@ analysis, taint propagation warnings, and DAG preview.
   the in-repo schema source (`crates/nika-schema/schemas/`).
 </Info>
 
-## Tier 1 — JSON schema validation (today / v0.90)
+## Tier 1 — JSON schema validation (today)
 
 Any editor with `yaml-language-server` can validate `.nika.yaml` against
 the workflow schema.
@@ -30,7 +30,7 @@ the workflow schema.
     It picks up the schema via the `# yaml-language-server` directive at
     the top of `.nika.yaml`, or via `settings.json`:
 
-    ```json settings.json — target v0.90
+    ```json settings.json
     {
       "yaml.schemas": {
         "https://docs.nika.sh/schema/workflow.json": "*.nika.yaml"
@@ -52,7 +52,7 @@ the workflow schema.
   <Tab title="Neovim">
     Wire via `nvim-lspconfig`:
 
-    ```lua target v0.90
+    ```lua
     require('lspconfig').yamlls.setup {
       settings = {
         yaml = {
@@ -118,7 +118,7 @@ tasks:
   </Card>
 </CardGroup>
 
-## Tier 2 — `nika-lsp` custom server (post-v0.90)
+## Tier 2 — `nika-lsp` custom server (v0.81 ladder · 19.6/19.7)
 
 The generic `yaml-language-server` covers structural validation. A
 custom `nika-lsp` crate (planned L4 admission) adds Nika-specific semantics:

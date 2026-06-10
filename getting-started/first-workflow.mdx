@@ -1,6 +1,6 @@
 ---
 title: "Your first workflow"
-description: "Preview of the target first-workflow experience. Five minutes from install to a workflow that talks to Claude (planned v0.90)."
+description: "Preview of the target first-workflow experience. Five minutes from install to a workflow that talks to Claude (v0.81 · the first usable ship · summer 2026)."
 sidebarTitle: "First workflow"
 icon: "play"
 ---
@@ -17,14 +17,14 @@ import { CANON } from "/snippets/_canon.mdx";
   live admission progress.
 </Warning>
 
-## Goal (v0.90 target)
+## Goal (v0.81 target · summer 2026)
 
 Write a `.nika.yaml` file, run it, get structured output. No setup
 beyond `nika` installed and one provider key.
 
 ## 1 — Make sure Nika sees a provider
 
-```bash target — v0.90
+```bash target — v0.81
 nika doctor
 ```
 
@@ -60,7 +60,7 @@ Three things to notice:
 
 ## 3 — Run it
 
-```bash target — v0.90
+```bash target — v0.81
 nika run hello.nika.yaml
 ```
 
@@ -106,7 +106,7 @@ with explicit taint tracking and pipe filters.
 %%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
 flowchart LR
     classDef task fill:#3F7DFF,color:#fff,stroke:#7FE9FF,font-weight:bold
-    G["greet<br/>infer"]:::task --> F["followup<br/>infer"]:::task
+    G["greet<br/>infer"]:::task --> F["critique<br/>infer"]:::task
 ```
 
 One `depends_on` line and the order falls out of the file. Tasks with no
@@ -144,7 +144,7 @@ rules](/reference/capabilities) allow it — schema mode, object mode, or
 JSON-mode emulation), and validates the result against your schema before
 passing it on.
 
-```bash target — v0.90
+```bash target — v0.81
 nika run hello.nika.yaml
 # Output is guaranteed to be { "names": ["...", "...", "..."] }
 ```

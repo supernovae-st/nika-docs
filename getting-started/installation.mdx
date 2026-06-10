@@ -1,6 +1,6 @@
 ---
 title: "Install Nika"
-description: "How to track Nika today (pre-release Diamond rebuild) and what the install flow looks like at the usable ship."
+description: "How to track Nika today (pre-release Diamond rebuild) and what the install flow looks like at v0.81 — the first usable ship, summer 2026."
 sidebarTitle: "Installation"
 icon: "download"
 ---
@@ -12,7 +12,8 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
   is not yet admitted — admission lands around Round 17 (L5 binary, wiring
   L4 interfaces). Until then there are no release artifacts, no
   `nika --version`, no `nika doctor`. This page shows (1) how to track
-  releases today, and (2) what the install flow will look like at v0.90.
+  releases today, and (2) what the install flow will look like at v0.81
+  — the first usable ship (language v0.1 + vertical slice · summer 2026).
 </Warning>
 
 ## How to track today
@@ -21,7 +22,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
   <Step title="Watch the GitHub repo">
     [github.com/supernovae-st/nika](https://github.com/supernovae-st/nika) —
     star + watch for releases. Every crate admission is an atomic commit
-    and (once the binary ships) a `v0.90.0-alpha.N` tag.
+    and (once the binary ships) the `v0.81.0` tag.
   </Step>
 
   <Step title="Follow the live constellation">
@@ -49,13 +50,13 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
   </Step>
 </Steps>
 
-## Target install flow (v0.90)
+## Target install flow (v0.81 · summer 2026)
 
 When the `nika` binary admits, the install flow will be:
 
 <Tabs>
   <Tab title="curl">
-    ```bash target — v0.90
+    ```bash target — v0.81
     curl -LsSf https://nika.sh/install.sh | sh
     ```
     Detects platform (macOS / Linux), prefers Homebrew if available,
@@ -63,14 +64,14 @@ When the `nika` binary admits, the install flow will be:
   </Tab>
 
   <Tab title="Homebrew">
-    ```bash target — v0.90
+    ```bash target — v0.81
     brew tap supernovae-st/nika
     brew install nika
     ```
   </Tab>
 
   <Tab title="cargo">
-    ```bash target — v0.90
+    ```bash target — v0.81
     cargo install nika --locked
     ```
     From crates.io once the binary publishes. Source install via
@@ -82,7 +83,7 @@ When the `nika` binary admits, the install flow will be:
 
 ## Target first-run verification
 
-```bash target — v0.90
+```bash target — v0.81
 nika --version
 nika doctor    # checks keys, providers, system, schema
 ```
@@ -91,7 +92,7 @@ nika doctor    # checks keys, providers, system, schema
 what's missing (provider keys, network access, write permissions,
 catalog freshness) and how to fix it.
 
-## Platforms at v0.90
+## Platforms at v0.81
 
 | Platform | Target triple | Status |
 |---|---|---|
@@ -99,7 +100,7 @@ catalog freshness) and how to fix it.
 | macOS Intel | `x86_64-apple-darwin` | 🧭 planned |
 | Linux x86_64 | `x86_64-unknown-linux-gnu` | 🧭 planned |
 | Linux aarch64 | `aarch64-unknown-linux-gnu` | 🧭 planned |
-| Windows | `x86_64-pc-windows-msvc` | 🧭 planned post-v0.90 |
+| Windows | `x86_64-pc-windows-msvc` | 🧭 planned post-v0.81 |
 | WASM (sandboxed) | `wasm32-wasip2` | 🧭 planned v0.100 |
 
 ## Trust but verify
@@ -117,9 +118,9 @@ When release artifacts ship:
 
 ## Provider keys
 
-Nika needs at least one provider API key to run inference. At v0.90:
+Nika needs at least one provider API key to run inference. At v0.81:
 
-```bash target — v0.90
+```bash target — v0.81
 # Shell env (ephemeral)
 export ANTHROPIC_API_KEY=sk-ant-...
 export OPENAI_API_KEY=sk-...
@@ -131,7 +132,7 @@ nika keys add anthropic
 See [Providers catalog](/reference/providers-catalog) for all
 {STATUS.providers} providers with their env var names.
 
-## What gets installed at v0.90
+## What gets installed at v0.81
 
 - **`nika`** — the binary (single file, no daemon, no background process)
 - **Shell completions** (bash / zsh / fish) — auto-installed by the curl script
@@ -141,7 +142,7 @@ See [Providers catalog](/reference/providers-catalog) for all
 
 ## Uninstall
 
-```bash target — v0.90
+```bash target — v0.81
 # Homebrew
 brew uninstall nika
 
@@ -160,7 +161,7 @@ rm -rf ~/.config/nika ~/.local/state/nika
     Schema validation + LSP roadmap.
   </Card>
   <Card title="Live state" icon="gauge" href="/reference/status">
-    Track admission progress toward v0.90.
+    Track admission progress toward the v0.81 ship.
   </Card>
   <Card title="Architecture" icon="layer-group" href="/architecture/layers">
     Why Nika is built this way.
