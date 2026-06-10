@@ -25,7 +25,7 @@ through the right API dialect.
 #[non_exhaustive]
 pub struct InferRequest {
     pub provider: ProviderId,          // e.g., "anthropic", "openai", "moonshot"
-    pub model: ModelId,                // e.g., "claude-sonnet-4-20250514"
+    pub model: ModelId,                // e.g., "claude-sonnet-4-6"
     pub messages: Vec<Message>,
     pub response_format: Option<ResponseFormat>,
     pub tools: Vec<ToolSpec>,
@@ -57,7 +57,7 @@ Switching provider is **one line** in YAML:
 tasks:
   - id: first
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name> · swap to openai/… · gemini/… · groq/…
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name> · swap to openai/… · gemini/… · groq/…
       prompt: "Hello."
 ```
 
@@ -112,7 +112,7 @@ When a provider fails, Nika can route to a fallback:
 tasks:
   - id: primary
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: "..."
     fallback:
       - { model: openai/gpt-4o }

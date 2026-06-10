@@ -37,6 +37,27 @@ was a special case of one of these four, or workflow-level machinery
 (dependencies, `for_each`, `condition`) that lives on the task envelope,
 not as a new verb.
 
+```mermaid
+%%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
+flowchart LR
+    classDef verb fill:#3F7DFF,color:#fff,stroke:#7FE9FF,font-weight:bold
+    classDef tool fill:#1f2937,color:#94a3b8,stroke:#475569
+    classDef out fill:#0b1530,color:#7FE9FF,stroke:#3F7DFF
+
+    Y["📄 .nika.yaml<br/>intent"]:::out --> D{verb?}
+    D -->|"think"| I["infer<br/>LLM call"]:::verb
+    D -->|"run"| E["exec<br/>subprocess"]:::verb
+    D -->|"use"| V["invoke<br/>tool dispatch"]:::verb
+    D -->|"delegate"| A["agent<br/>loop + budget"]:::verb
+    V --> B["nika:* builtins"]:::tool
+    V --> M["MCP servers"]:::tool
+    A -.->|"each turn may"| V
+    I & E & V & A --> R["typed output<br/>tasks.X.output"]:::out
+```
+
+<sub>The set is closed at four. Everything *callable* is a tool under `invoke`; everything about *ordering* is a DAG construct on the task envelope.</sub>
+
+
 > **Where did `fetch` go?** Fetching a URL is *calling a tool*, not a
 > distinct execution model — so it is the `nika:fetch` builtin, reached
 > through `invoke:` (the extract modes become its `mode` argument). Same
@@ -69,7 +90,7 @@ Spawns a subprocess, captures stdout/stderr, returns exit code + output.
   interpolation through the `shell_quote` filter before the command
   reaches L1.
 
-Cross-link: [`ShellExecutor` trait](/architecture/kernel#shell-executor) (L0.5 kernel contract).
+Cross-link: [`ShellExecutor` trait](/architecture/layers#layer-table) (L0.5 kernel contract).
 
 ## HTTP fetch — `invoke: nika:fetch` (a builtin, not a verb)
 
@@ -89,7 +110,7 @@ modes become the builtin's `mode` argument.
       mode: text                       # extraction mode · see extract-modes
       headers:
         Accept: application/vnd.github.raw
-        Authorization: "Bearer {{ env.GITHUB_TOKEN }}"
+        Authorization: "Bearer ${{ env.GITHUB_TOKEN }}"
 ```
 
 **Invariants** (from `nika-kernel::http::HttpClient`):
@@ -116,7 +137,7 @@ declared in the workflow's `mcp:` block.
   invoke:
     tool: "mcp:chroma/query"          # mcp:<server>/<tool> · one colon, then a slash
     args:
-      query: "{{ tasks.summarize.output }}"
+      query: "${{ tasks.summarize.output }}"
       top_k: 5
 ```
 
@@ -146,7 +167,7 @@ workflow default), `temperature` (0.0–2.0), `max_tokens` (u32), `schema`
     system: "You are a technical writer."
     prompt: |
       Summarize this in one sentence:
-      {{ tasks.pull_readme.output }}
+      ${{ tasks.pull_readme.output }}
     temperature: 0.3
     max_tokens: 500
 ```
@@ -168,7 +189,7 @@ workflow default), `temperature` (0.0–2.0), `max_tokens` (u32), `schema`
 - Every provider emits the same `InferEvent` stream — `Delta`,
   `ToolUseStart`, `ToolUseDelta`, `Thinking`, `Usage`, `Done`.
 
-Cross-link: [Providers](/concepts/providers) · [`Provider` trait](/architecture/kernel#provider) · ADR-035 (telemetry seams).
+Cross-link: [Providers](/concepts/providers) · [`Provider` trait](/architecture/layers#layer-table) · ADR-035 (telemetry seams).
 
 ## `agent` — multi-turn loop with tools
 
@@ -194,7 +215,7 @@ until a completion signal fires or a budget exhausts.
     max_turns: 10
     max_tokens_total: 100000
     prompt: |
-      Investigate issue #{{ vars.issue_number }} and summarise
+      Investigate issue #${{ vars.issue_number }} and summarise
       the root cause in under 200 words.
 ```
 
@@ -207,7 +228,7 @@ until a completion signal fires or a budget exhausts.
 - The iteration trace (`ToolCallRecord` + `CheckpointMessage`) is
   emitted as events for audit and, optionally, checkpoint resume.
 
-Cross-link: [`AgentLoopConfig`](/architecture/kernel#agent-loop) · ADR-016 (cancellation model).
+Cross-link: [`AgentLoopConfig`](/architecture/layers#layer-table) · ADR-016 (cancellation model).
 
 ## Verb selection is exhaustive
 

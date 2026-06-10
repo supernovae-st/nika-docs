@@ -63,16 +63,16 @@ tasks:
 
   - id: summarize
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: |
         Summarize in one sentence:
-        {{ tasks.read.output }}
+        ${{ tasks.read.output }}
 
   - id: save
     exec:
       command: tee
       args: ["/tmp/summary.txt"]
-      stdin: "{{ tasks.summarize.output.text }}"
+      stdin: "${{ tasks.summarize.output.text }}"
 ```
 
 <Note>
@@ -171,7 +171,7 @@ flowchart TB
     What ships at v{STATUS.version}, what doesn't, how to track releases.
   </Card>
   <Card title="Architecture" icon="layer-group" href="/concepts/architecture" horizontal>
-    Seven layers. Why L0 has zero async and zero I/O.
+    Six layers. Why L0 has zero async and zero I/O.
   </Card>
   <Card title="Workflows" icon="diagram-project" href="/concepts/workflows" horizontal>
     How a `.nika.yaml` file becomes an executed graph.
@@ -180,6 +180,13 @@ flowchart TB
     {STATUS.providers} LLM providers, {STATUS.capabilityRules} capability rules.
   </Card>
 </CardGroup>
+
+
+## The Nika ecosystem
+
+import { Ecosystem } from "/snippets/_ecosystem.mdx";
+
+<Ecosystem />
 
 <Visibility for="agents">
   You are reading Nika's documentation. For programmatic discovery: each

@@ -97,7 +97,7 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: "..."
 ```
 
@@ -125,7 +125,7 @@ custom `nika-lsp` crate (planned L4 admission) adds Nika-specific semantics:
 
 <AccordionGroup>
   <Accordion title="Cross-task binding analysis" icon="link">
-    Resolves `{{ tasks.X.output }}` across task boundaries. "Go to
+    Resolves `${{ tasks.X.output }}` across task boundaries. "Go to
     definition" jumps from a binding reference to the source task. Unused
     outputs flagged. Circular dependencies detected before run.
   </Accordion>

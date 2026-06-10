@@ -1,0 +1,26 @@
+{/* _ecosystem.mdx — the cross-property link mesh, one source.
+    Include on high-traffic pages: import Ecosystem from '/snippets/_ecosystem.mdx'
+    then <Ecosystem /> at the bottom. Edit HERE, never per-page. */}
+
+export const Ecosystem = () => (
+  <CardGroup cols={3}>
+    <Card title="nika.sh" icon="globe" href="https://nika.sh">
+      The site — what Nika is, in one scroll.
+    </Card>
+    <Card title="Language spec" icon="file-contract" href="https://github.com/supernovae-st/nika-spec">
+      `nika: v1`, Apache-2.0. The contract these docs explain.
+    </Card>
+    <Card title="Engine source" icon="gem" href="https://github.com/supernovae-st/nika">
+      Rust, AGPL-3.0-or-later. Every commit public.
+    </Card>
+    <Card title="TypeScript SDK" icon="cube" href="https://github.com/supernovae-st/nika-client">
+      `nika-client` — drive workflows from TS/JS.
+    </Card>
+    <Card title="Homebrew tap" icon="beer-mug-empty" href="https://github.com/supernovae-st/homebrew-tap">
+      `brew install supernovae-st/tap/nika` once the binary ships.
+    </Card>
+    <Card title="SuperNovae" icon="star" href="https://supernovae.studio">
+      The Paris studio crafting Nika. 🦋
+    </Card>
+  </CardGroup>
+)

@@ -1,6 +1,6 @@
 ---
 title: "Releases"
-description: "Every crate admission + every significant engine update. One source of truth — `CHANGELOG.md` on the nika-diamond branch."
+description: "Every crate admission + every significant engine update. One source of truth — `CHANGELOG.md` on the `main` branch."
 sidebarTitle: "Releases"
 icon: "clock-rotate-left"
 ---
@@ -12,8 +12,8 @@ Diamond started at **v0.80.0** (2026-04-13). Legacy main sits at v0.79.3,
 abandoned.
 
 <Info>
-  **Canonical source:** [`CHANGELOG.md`](https://github.com/supernovae-st/nika/blob/nika-diamond/CHANGELOG.md)
-  on the `nika-diamond` branch. This page curates milestones; the full
+  **Canonical source:** [`CHANGELOG.md`](https://github.com/supernovae-st/nika/blob/main/CHANGELOG.md)
+  on the `main` branch. This page curates milestones; the full
   history lives in the repo. Current HEAD `{STATUS.head}`.
 </Info>
 
@@ -28,7 +28,7 @@ abandoned.
 Until `nika` binary admission (Round 17), the engine ships no release
 artifact. Instead, progress is tracked via:
 
-1. **Crate admission commits** on `nika-diamond` (e.g., `feat(nika-X): admit to workspace — all 12 gates passed`).
+1. **Crate admission commits** on `main` (e.g., `feat(nika-X): admit to workspace — all 12 gates passed`).
 2. **Hygiene vector deployments** (currently {STATUS.hygieneVectors} active, {STATUS.hygieneGreen} green / {STATUS.hygieneYellow} yellow / {STATUS.hygieneRed} red).
 3. **ADR promotions** ({STATUS.adrs} total — {STATUS.adrsAccepted} Accepted, {STATUS.adrsProposed} Proposed).
 
@@ -104,7 +104,7 @@ artifact. Instead, progress is tracked via:
 </Update>
 
 <Update label="v0.80.0-alpha.0" description="2026-04-13 · Diamond begins">
-  **The beginning.** Orphan branch `nika-diamond` created from scratch.
+  **The beginning.** Orphan branch created from scratch as `nika-diamond` (renamed `main` 2026-05).
   Legacy `main` (v0.79.3) abandoned. Forever-v0.x — no v1.0 target.
   First admitted crate: `nika-types` (L0 foundation).
 </Update>
@@ -112,12 +112,12 @@ artifact. Instead, progress is tracked via:
 ## Full history
 
 <CardGroup cols={2}>
-  <Card title="CHANGELOG.md" icon="github" href="https://github.com/supernovae-st/nika/blob/nika-diamond/CHANGELOG.md">
+  <Card title="CHANGELOG.md" icon="github" href="https://github.com/supernovae-st/nika/blob/main/CHANGELOG.md">
     Every crate admission, every hygiene vector deploy, every ADR
-    promotion. Source of truth on the `nika-diamond` branch.
+    promotion. Source of truth on the `main` branch.
   </Card>
-  <Card title="Commit history" icon="code-commit" href="https://github.com/supernovae-st/nika/commits/nika-diamond">
-    Every commit on the `nika-diamond` branch — atomic, bisectable,
+  <Card title="Commit history" icon="code-commit" href="https://github.com/supernovae-st/nika/commits/main">
+    Every commit on the `main` branch — atomic, bisectable,
     Co-Authored-By Nika 🦋.
   </Card>
   <Card title="Live state" icon="gauge" href="/reference/status">

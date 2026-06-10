@@ -12,10 +12,10 @@ is `NIKA-{num:03}` (3-digit zero-padded under 1000, more otherwise) —
 stable across versions, machine-parseable, serde-serializable.
 
 <Info>
-  **Canonical source:** [`crates/nika-error/src/codes.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-error/src/codes.rs)
+  **Canonical source:** [`crates/nika-error/src/codes.rs`](https://github.com/supernovae-st/nika/blob/main/crates/nika-error/src/codes.rs)
   defines the `NikaCode` type and the 14 codes owned by `nika-error` itself;
   downstream crates (`nika-kernel`, `nika-catalog`, `nika-schema`, …)
-  register their own codes via the [`NikaErrorCode`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-error/src/traits.rs)
+  register their own codes via the [`NikaErrorCode`](https://github.com/supernovae-st/nika/blob/main/crates/nika-error/src/traits.rs)
   trait. This page enumerates every code defined by crates admitted at
   v{STATUS.version}. Snapshot: 2026-04-17.
 </Info>
@@ -68,7 +68,7 @@ the number is unique.
 
 ## Core — `nika-error` (001–049)
 
-Defined in [`crates/nika-error/src/codes.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-error/src/codes.rs).
+Defined in [`crates/nika-error/src/codes.rs`](https://github.com/supernovae-st/nika/blob/main/crates/nika-error/src/codes.rs).
 These 9 codes are owned by `nika-error` itself; the rest of the
 `Core` range is filled in by `nika-catalog` (NIKA-010..015) via the
 `NikaErrorCode` trait.
@@ -92,7 +92,7 @@ These 9 codes are owned by `nika-error` itself; the rest of the
 
 ## Shell — `nika-kernel` (050–099)
 
-Defined in [`crates/nika-kernel/src/errors.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-kernel/src/errors.rs)
+Defined in [`crates/nika-kernel/src/errors.rs`](https://github.com/supernovae-st/nika/blob/main/crates/nika-kernel/src/errors.rs)
 as the `NikaErrorCode` impl for `ShellError`.
 
 | Code | Slug | Transient | Meaning |
@@ -141,7 +141,7 @@ Range 054–058 + 060–099 reserved for future concrete codes.
 
 ## Schema — `nika-schema` WIP (280–329)
 
-Defined in [`crates/nika-schema/src/error.rs`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-schema/src/error.rs).
+Defined in [`crates/nika-schema/src/error.rs`](https://github.com/supernovae-st/nika/blob/main/crates/nika-schema/src/error.rs).
 `nika-schema` is WIP at v{STATUS.version} — these 11 codes are already
 registered and wire-stable, even though the crate is not yet admitted to
 the workspace.
@@ -242,7 +242,7 @@ assert_eq!(wire, "\"NIKA-001\"");
 ## See also
 
 <CardGroup cols={2}>
-  <Card title="Foundations" icon="cube" href="/architecture/foundations">
+  <Card title="Foundations" icon="cube" href="/architecture/layers">
     How `nika-error` fits into the L0 foundation crates.
   </Card>
   <Card title="Layers" icon="layer-group" href="/architecture/layers">

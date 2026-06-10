@@ -7,10 +7,12 @@ icon: "link"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-A **binding** is a template expression wrapped in `{{ … }}`. It resolves
-at runtime against a typed scope — inputs, context constants, task
-outputs, environment variables — and flows through a filter chain
-before substitution.
+A **binding** is a template expression wrapped in `${{ … }}`. It resolves
+at runtime against a typed scope — inputs, task outputs, environment
+variables, secrets — and substitutes into the field. What's inside
+`${{ }}` is [CEL](https://cel.dev) (Common Expression Language), the
+same expression language GitHub Actions and Kubernetes admission
+policies use. Nika does not invent a DSL.
 
 The parser preserves both forms of every templatable field through the
 AST: either a literal value or a `Templatable::Template(String)` holding
@@ -18,36 +20,37 @@ the unresolved expression. See
 `crates/nika-schema/src/types/templatable.rs` for the exact types.
 
 <Info>
-  **Target design banner.** Filter chains, taint propagation, and typed
-  scope lookup are **target design — nika-schema admission Round 4**.
-  Today's WIP parser accepts `Templatable<T>` at every templatable
-  field; the analyzer that evaluates the expressions lands with Round
-  4. Syntax shown below is stable (locked in the `Templatable` type);
-  semantics mature across Round 4 → Round 9.
+  **Two expression layers, locked by the spec:** [CEL](https://cel.dev)
+  inside `${{ }}` (conditions + value substitution) and **jq** inside
+  `output:` bindings + the `nika:jq` builtin (extraction + transform).
+  There are no template filters — anything beyond a reference or a
+  boolean is a jq expression or a task. Engine-side, taint propagation
+  and typed scope lookup mature across admission rounds; the syntax
+  below is the frozen `nika: v1` contract.
 </Info>
 
 ## Shape
 
 ```
-{{ <expression> }}
+${{ <expression> }}
 ```
 
 Four examples, each a valid `Templatable::Template`:
 
 ```yaml
-prompt: "{{ vars.target }}"
-prompt: "{{ tasks.fetch_issue.output.title }}"
-prompt: "{{ with.model_family }}"
-command: "echo {{ env.HOME }}/output.txt"
+prompt: "${{ vars.target }}"
+prompt: "${{ tasks.fetch_issue.output.title }}"
+prompt: "${{ with.model_family }}"
+command: "echo ${{ env.HOME }}/output.txt"
 ```
 
-Whitespace inside `{{ }}` is ignored. Nested `{{ }}` is rejected at
+Whitespace inside `${{ }}` is ignored. Nested `${{ }}` is rejected at
 parse time.
 
 ## Scopes
 
 Every binding resolves against one of five named scopes. The resolver
-refuses unknown top-level names at validation time, so `{{ tsaks.foo }}`
+refuses unknown top-level names at validation time, so `${{ tsaks.foo }}`
 is caught before the run starts.
 
 | Scope | Source | Example |
@@ -75,10 +78,10 @@ vars:
 
 tasks:
   - name: loop
-    for_each: "{{ vars.count }}"      # fails — for_each needs a list
+    for_each: "${{ vars.count }}"      # fails — for_each needs a list
     infer:
       model: anthropic/<model-id>     # <provider>/<name>
-      prompt: "Iteration {{ item }}"
+      prompt: "Iteration ${{ item }}"
 ```
 
 Type-checking is the analyzer's job (Round 4+). The parser's
@@ -112,46 +115,58 @@ without an explicit sanitizer raises **NIKA-384** (see
 - name: run_it
   depends_on: [pull_user_input]
   exec:
-    command: "{{ tasks.pull_user_input.output }}"   # NIKA-384 taint violation
+    command: "${{ tasks.pull_user_input.output }}"   # NIKA-384 taint violation
 ```
 
-Fix — sanitize explicitly:
+Fix — never interpolate tainted data into a command string; pass it
+as data instead:
 
 ```yaml
 - name: run_it
   depends_on: [pull_user_input]
   exec:
-    command: "echo {{ tasks.pull_user_input.output | shell_quote }}"
+    command: tee
+    args: ["/tmp/comment.txt"]
+    stdin: "${{ tasks.pull_user_input.output }}"   # data channel, not code channel
 ```
 
 Taint is a property of **data**, not of a principal (T3:A design from
 `InferResponse.trust_level`). Cross-link: ADR-014 (sealed kernel
 traits), `nika-error::trust::TrustLevel`.
 
-## Filters (target design)
+## The expression language — CEL, one small subset
 
-Filters transform values along a pipeline:
+What's inside `${{ }}` is the **v0.1 CEL subset**
+([normative grammar](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md)):
+
+| Form | Example |
+|---|---|
+| Field access | `vars.topic` · `tasks.build.status` |
+| Index access | `tasks.list.output[0]` · `obj['key-with-dash']` |
+| Comparison | `==` `!=` `<` `<=` `>` `>=` |
+| Boolean | `&&` `\|\|` `!` |
+| Membership | `status in ['success', 'skipped']` |
+| Size | `size(items) > 0` — the one v0.1 function, the empty-check idiom |
+| Literals | `true` · `42` · `3.14` · `'str'` · `null` |
+| Grouping | `( … )` |
+
+There are **no template filters** (`\| upper`, `\| truncate`, …). Anything
+that transforms data is a **jq expression** — in an `output:` binding or
+through the `nika:jq` builtin. Two layers, one job each:
 
 ```yaml
-prompt: "{{ tasks.fetch.output | json | truncate(2000) }}"
+# CEL decides · jq transforms
+- id: digest
+  when: ${{ size(tasks.fetch.output) > 0 }}      # CEL · condition
+  invoke:
+    tool: "nika:jq"
+    args:
+      input: "${{ tasks.fetch.output }}"          # CEL · reference
+      expression: ".items | map(.title) | join(\"\\n\")"   # jq · transform
 ```
 
-Planned built-ins:
-
-| Filter | Purpose |
-|---|---|
-| `json` | Serialize to JSON string. |
-| `yaml` | Serialize to YAML string. |
-| `trim` | Strip leading/trailing whitespace. |
-| `upper` / `lower` | Case change. |
-| `truncate(n)` | Cut to `n` characters, append `…` if cut. |
-| `lines` | Split on `\n`, return a list. |
-| `shell_quote` | Escape for safe `exec.command` interpolation. |
-| `base64` | Base64 encode. |
-| `default('x')` | Fall back to `'x'` if the binding is `null`. |
-
-Filter resolution is left-to-right. Each filter is registered in the
-analyzer and type-checked against the value flowing through.
+CEL macros and string functions are reserved for later minors — growth
+is additive, never breaking.
 
 ## Multi-line
 
@@ -161,8 +176,8 @@ YAML block scalars compose cleanly with bindings:
 prompt: |
   You are reviewing the following pull request.
 
-  Title: {{ tasks.fetch_pr.output.title }}
-  Body:  {{ tasks.fetch_pr.output.body }}
+  Title: ${{ tasks.fetch_pr.output.title }}
+  Body:  ${{ tasks.fetch_pr.output.body }}
 
   Provide three concrete improvements.
 ```
@@ -173,10 +188,15 @@ indentation.
 
 ## Null handling
 
-Missing bindings fail at validation unless declared optional:
+Defaults live in declarations, not in expressions. A bare `vars:` value
+IS the default; a typed var declares whether it's required:
 
 ```yaml
-prompt: "{{ vars.optional_field | default('(none)') }}"
+vars:
+  tone: "neutral"          # default — override from the CLI
+  topic:
+    type: string
+    required: true         # validated before anything runs
 ```
 
 If `vars.optional_field` is absent and has no `default:`, the
@@ -185,11 +205,11 @@ site and the usage site.
 
 ## What bindings are **not**
 
-- ❌ Not a scripting language. No loops, no conditionals inside `{{ }}`.
+- ❌ Not a scripting language. No loops, no conditionals inside `${{ }}`.
 - ❌ Not arbitrary JavaScript / Python eval. No dynamic code.
 - ❌ Not Jinja2 / Liquid in full — `for` and `if` blocks are **not**
   supported inside expressions.
-- ✅ Scope lookup + filter chain + type check + taint propagation.
+- ✅ Scope lookup + CEL evaluation + type check + taint propagation.
 
 Workflow-level control flow (`for_each:`, `condition:`,
 `depends_on:`) lives on the **task envelope**, not inside bindings.
@@ -203,7 +223,7 @@ decorations.
   binding error points at the exact byte range in the source file.
 - **ADR-014** — sealed kernel traits. The resolver runs at L3 and never
   crosses into arbitrary user-provided evaluator code.
-- **ADR-021** — YAML envelope convention. `{{ }}` bindings appear
+- **ADR-021** — YAML envelope convention. `${{ }}` bindings appear
   inside `spec:` (workflow) or inside reusable skill / agent documents,
   and resolve against the same scope shape.
 

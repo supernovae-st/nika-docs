@@ -17,7 +17,7 @@ The answer is a `ModelCapabilities` struct, computed at runtime by applying
 Zero regex, zero allocation, zero runtime deps.
 
 <Info>
-  **Canonical source:** [`crates/nika-catalog/data/model-capabilities.toml`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-catalog/data/model-capabilities.toml).
+  **Canonical source:** [`crates/nika-catalog/data/model-capabilities.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/model-capabilities.toml).
   Schema: `nika/model-capabilities@1.0`. Build-time FK checks against
   `llm-providers.toml` (unknown provider = build failure, catches typos).
 </Info>
@@ -208,7 +208,7 @@ Once `nika-cli` admits (Round 16), users can query from the command line:
 ```bash nika catalog models (planned)
 $ nika catalog models --provider anthropic
 claude-opus-4-5-20260201    streaming · tools · json=schema · cache · thinking · computer-use
-claude-sonnet-4-20250514    streaming · tools · json=schema · cache · thinking
+claude-sonnet-4-6    streaming · tools · json=schema · cache · thinking
 claude-haiku-4-5-20251001   streaming · tools · json=schema · cache
 
 $ nika catalog models --capability computer-use

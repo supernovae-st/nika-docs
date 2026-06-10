@@ -32,7 +32,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
   <Step title="Read the ADRs">
     35 architecture decision records (30 Accepted + 5 Proposed) shape
-    everything being built. [ADR directory on GitHub](https://github.com/supernovae-st/nika/tree/nika-diamond/docs/adr).
+    everything being built. [ADR directory on GitHub](https://github.com/supernovae-st/nika/tree/main/docs/adr).
   </Step>
 
   <Step title="Clone and build from source (optional)">
@@ -42,7 +42,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
     ```bash
     git clone git@github.com:supernovae-st/nika.git
     cd nika
-    git checkout nika-diamond
+    git checkout main
     cargo test --workspace --lib    # 905 tests, always --lib (avoids Keychain popup)
     cargo doc --no-deps --open      # browse the admitted crates' rustdoc
     ```
@@ -74,7 +74,7 @@ When the `nika` binary admits, the install flow will be:
     cargo install nika --locked
     ```
     From crates.io once the binary publishes. Source install via
-    `cargo install --git` works today against the `nika-diamond` branch
+    `cargo install --git` works today against the `main` branch
     (but the binary crate is `publish = false` until the workspace is
     stable).
   </Tab>
@@ -166,3 +166,9 @@ rm -rf ~/.config/nika ~/.local/state/nika
     Why Nika is built this way.
   </Card>
 </CardGroup>
+
+## The Nika ecosystem
+
+import { Ecosystem } from "/snippets/_ecosystem.mdx";
+
+<Ecosystem />

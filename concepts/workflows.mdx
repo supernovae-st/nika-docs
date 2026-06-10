@@ -134,12 +134,12 @@ tasks:
     depends_on: [fetch_data]
     infer:
       model: anthropic/<model-id>      # <provider>/<name>
-      prompt: "{{ tasks.fetch_data.output }}"
+      prompt: "${{ tasks.fetch_data.output }}"
 
   - name: notify
     depends_on: [analyze]
     exec:
-      command: "echo {{ tasks.analyze.output | shell_quote }}"
+      command: "echo ${{ tasks.analyze.output | shell_quote }}"
 ```
 
 Fan-out over a collection:
@@ -147,10 +147,10 @@ Fan-out over a collection:
 ```yaml
 - name: analyze_each
   depends_on: [list_files]
-  for_each: "{{ tasks.list_files.output.lines }}"
+  for_each: "${{ tasks.list_files.output.lines }}"
   infer:
     model: anthropic/<model-id>        # <provider>/<name>
-    prompt: "Review this file: {{ item }}"
+    prompt: "Review this file: ${{ item }}"
 ```
 
 Conditional execution:
@@ -158,7 +158,7 @@ Conditional execution:
 ```yaml
 - name: deploy
   depends_on: [tests]
-  condition: "{{ tasks.tests.output.passed == true }}"
+  condition: "${{ tasks.tests.output.passed == true }}"
   exec:
     command: ./deploy.sh
 ```
@@ -203,7 +203,7 @@ tasks:
   - name: greet
     infer:
       model: anthropic/<model-id>  # <provider>/<name>
-      prompt: "Say hi to {{ vars.target }}."
+      prompt: "Say hi to ${{ vars.target }}."
 ```
 
 <Note>
@@ -239,7 +239,7 @@ default). See [Events](/concepts/events) for the event model and
 
 <CardGroup cols={2}>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
-    Template expressions — `{{ }}` syntax, scopes, filters, taint.
+    Template expressions — `${{ }}` syntax, scopes, filters, taint.
   </Card>
   <Card title="Events" icon="signal" href="/concepts/events">
     The typed event stream every run emits.

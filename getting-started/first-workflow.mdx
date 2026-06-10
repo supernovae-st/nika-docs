@@ -48,7 +48,7 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: "Say hi to the chrysalis. Be brief."
 ```
 
@@ -67,7 +67,7 @@ nika run hello.nika.yaml
 Target output:
 
 ```
-▶ greet  infer  → anthropic/claude-sonnet-4-20250514
+▶ greet  infer  → anthropic/claude-sonnet-4-6
   ┌─ output ──────────────────
   │ Welcome inside the chrysalis. 🦋
   └───────────────────────────
@@ -83,22 +83,35 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: "Say hi to the chrysalis. Be brief."
 
   - id: critique
     depends_on: [greet]
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: |
-        The greeting was: {{ tasks.greet.output }}
+        The greeting was: ${{ tasks.greet.output }}
 
         Rewrite it shorter and more enigmatic.
 ```
 
-Notice `{{ tasks.greet.output }}` — that's a [binding](/concepts/bindings).
+Notice `${{ tasks.greet.output }}` — that's a [binding](/concepts/bindings).
 The engine injects the previous task's output into the prompt at runtime,
 with explicit taint tracking and pipe filters.
+
+### The graph you just built
+
+```mermaid
+%%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
+flowchart LR
+    classDef task fill:#3F7DFF,color:#fff,stroke:#7FE9FF,font-weight:bold
+    G["greet<br/>infer"]:::task --> F["followup<br/>infer"]:::task
+```
+
+One `depends_on` line and the order falls out of the file. Tasks with no
+dependency between them run **in parallel automatically** — you never
+schedule anything.
 
 ## 5 — Get structured output
 
@@ -109,7 +122,7 @@ workflow: hello-structured
 tasks:
   - id: names
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: "Generate three names for a butterfly."
       schema:                          # structured output · JSON Schema
         type: object
@@ -142,7 +155,7 @@ nika run hello.nika.yaml
 - Tasks are units of work, identified by `id`.
 - Four verbs — `infer`, `exec`, `invoke`, `agent` — define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
 - `depends_on:` builds a DAG.
-- `{{ tasks.X.output }}` bindings flow data between tasks, with taint tracking.
+- `${{ tasks.X.output }}` bindings flow data between tasks, with taint tracking.
 - `schema:` enforces JSON schemas on AI output.
 
 ## What you can do today

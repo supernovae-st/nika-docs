@@ -14,7 +14,7 @@ runners. Each provider is a TOML record describing its API dialect, authenticati
 default and cheap models, capability tags, and per-model token limits.
 
 <Info>
-  **Canonical source:** [`crates/nika-catalog/data/llm-providers.toml`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-catalog/data/llm-providers.toml).
+  **Canonical source:** [`crates/nika-catalog/data/llm-providers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/llm-providers.toml).
   Schema: [`nika/llm-providers@1.0`](/reference/schema). Build-time validated via
   `nika-catalog-codegen` invariants (unique IDs, alias deduplication, model
   references resolvable, tags sorted + deduplicated).
@@ -57,7 +57,7 @@ default and cheap models, capability tags, and per-model token limits.
   <Tab title="Frontier labs (7)">
     | ID | Name | Dialect | Env var | Default model |
     |---|---|---|---|---|
-    | `anthropic` | Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-4-20250514` |
+    | `anthropic` | Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-4-6` |
     | `openai` | OpenAI | `openai-chat` | `OPENAI_API_KEY` | `gpt-4o` |
     | `gemini` | Google Gemini | `gemini` | `GEMINI_API_KEY` | `gemini-2.5-flash` |
     | `mistral` | Mistral AI | `openai-chat` | `MISTRAL_API_KEY` | `mistral-large-latest` |
@@ -109,7 +109,7 @@ default and cheap models, capability tags, and per-model token limits.
   <Tab title="Routers + aggregators (5)">
     | ID | Name | Dialect | Env var | Default model |
     |---|---|---|---|---|
-    | `openrouter` | OpenRouter | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-20250514` |
+    | `openrouter` | OpenRouter | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-6` |
     | `perplexity` | Perplexity | `openai-chat` | `PERPLEXITY_API_KEY` | `sonar-pro` |
     | `nvidia-nim` | NVIDIA NIM | `openai-chat` | `NVIDIA_API_KEY` | (declared in TOML) |
     | `replicate` | Replicate | `openai-chat` | `REPLICATE_API_TOKEN` | (declared in TOML) |
@@ -180,11 +180,11 @@ workflow: multi-provider
 tasks:
   - id: primary
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: "Explain linear algebra in one sentence."
 
   - id: fallback
-    when: "{{ tasks.primary.failed }}"
+    when: "${{ tasks.primary.failed }}"
     infer:
       model: openai/gpt-4o
       prompt: "Explain linear algebra in one sentence."

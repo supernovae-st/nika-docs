@@ -15,7 +15,7 @@ the official [MCP Registry schema](https://registry.modelcontextprotocol.io/)
 references servers by id — Nika handles the rest.
 
 <Info>
-  **Canonical source:** [`crates/nika-catalog/data/mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-catalog/data/mcp-servers.toml).
+  **Canonical source:** [`crates/nika-catalog/data/mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/mcp-servers.toml).
   Schema: `nika/mcp-servers@1.0`. Snapshot 2026-04-17 — `grep -c '^\[\[servers\]\]'`
   = **105**. Build-time invariants (enforced in `build.rs`): unique ids,
   packages+remotes non-empty, known category, pricing ∈ {free, freemium,
@@ -54,8 +54,8 @@ tasks:
   - id: summarise
     depends_on: [crawl]
     infer:
-      model: anthropic/claude-sonnet-4-20250514   # <provider>/<name>
-      prompt: "Summarise: {{ tasks.crawl.output.content }}"
+      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
+      prompt: "Summarise: ${{ tasks.crawl.output.content }}"
 ```
 
 ```bash Required env
@@ -323,7 +323,7 @@ type.
 
 Every server that needs credentials declares at least one
 `[[servers.env_vars]]` entry with `is_secret = true` or `false`. The
-env var names are visible in [`mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/nika-diamond/crates/nika-catalog/data/mcp-servers.toml) —
+env var names are visible in [`mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/mcp-servers.toml) —
 search for `^name = ` under your chosen server.
 
 <Warning>

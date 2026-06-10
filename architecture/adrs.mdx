@@ -8,13 +8,13 @@ icon: "scroll"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Every significant engineering decision in Nika Diamond lives as an ADR —
-a short markdown file in [`docs/adr/`](https://github.com/supernovae-st/nika/tree/nika-diamond/docs/adr)
+a short markdown file in [`docs/adr/`](https://github.com/supernovae-st/nika/tree/main/docs/adr)
 with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 {STATUS.adrsAccepted} Accepted, {STATUS.adrsProposed} Proposed.
 
 <Info>
-  **Canonical source:** [`docs/adr/index.json`](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/index.json)
-  (machine-readable) + [`docs/adr/README.md`](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/README.md)
+  **Canonical source:** [`docs/adr/index.json`](https://github.com/supernovae-st/nika/blob/main/docs/adr/index.json)
+  (machine-readable) + [`docs/adr/README.md`](https://github.com/supernovae-st/nika/blob/main/docs/adr/README.md)
   (human index). One file per ADR, immutable once Accepted (superseded
   rather than edited).
 </Info>
@@ -41,11 +41,11 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-001](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-001-diamond-orphan-branch.md) | Diamond orphan branch rewrite instead of iterative refactor | ✅ Accepted |
-    | [ADR-002](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-002-forever-v0x.md) | Forever v0.x — no v1.0 target | ✅ Accepted |
-    | [ADR-003](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-003-12-gate-admission.md) | 12-gate crate admission protocol | ✅ Accepted |
-    | [ADR-009](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-009-adr-process.md) | ADR process and hook discipline | ✅ Accepted |
-    | [ADR-011](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-011-cargo-xtask.md) | cargo xtask as canonical automation surface | ✅ Accepted |
+    | [ADR-001](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-001-diamond-orphan-branch.md) | Diamond orphan branch rewrite instead of iterative refactor | ✅ Accepted |
+    | [ADR-002](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-002-forever-v0x.md) | Forever v0.x — no v1.0 target | ✅ Accepted |
+    | [ADR-003](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-003-12-gate-admission.md) | 12-gate crate admission protocol | ✅ Accepted |
+    | [ADR-009](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-009-adr-process.md) | ADR process and hook discipline | ✅ Accepted |
+    | [ADR-011](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-011-cargo-xtask.md) | cargo xtask as canonical automation surface | ✅ Accepted |
   </Accordion>
 
   <Accordion title="Architecture / Layering (6)" icon="layer-group">
@@ -53,12 +53,12 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-004](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-004-context-window-sized-crates.md) | Context-window-sized crate architecture | ✅ Accepted |
-    | [ADR-006](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-006-layered-kernel-isp-traits.md) | Layered architecture with kernel ISP atomic traits + `trait_variant` | ✅ Accepted |
-    | [ADR-022](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-022-foundation-crate-layout-v081.md) | Foundation crate layout v0.81: 14 crates, `publish = false` | ✅ Accepted |
-    | [ADR-023](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-023-file-modularity-discipline.md) | File modularity: 800 LOC warn / 1500 fail / 3000 fail-with-ADR | ✅ Accepted |
-    | [ADR-026](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-026-workspace-toml-ssot.md) | `workspace.toml` single source of truth + auto-generated `crate.md` | ✅ Accepted |
-    | [ADR-027](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-027-strict-l0-tiers-cargo-timings.md) | Strict L0 sublayer tiers + max 3 sibling deps | ✅ Accepted |
+    | [ADR-004](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-004-context-window-sized-crates.md) | Context-window-sized crate architecture | ✅ Accepted |
+    | [ADR-006](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-006-layered-kernel-isp-traits.md) | Layered architecture with kernel ISP atomic traits + `trait_variant` | ✅ Accepted |
+    | [ADR-022](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-022-foundation-crate-layout-v081.md) | Foundation crate layout v0.81: 14 crates, `publish = false` | ✅ Accepted |
+    | [ADR-023](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-023-file-modularity-discipline.md) | File modularity: 800 LOC warn / 1500 fail / 3000 fail-with-ADR | ✅ Accepted |
+    | [ADR-026](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-026-workspace-toml-ssot.md) | `workspace.toml` single source of truth + auto-generated `crate.md` | ✅ Accepted |
+    | [ADR-027](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-027-strict-l0-tiers-cargo-timings.md) | Strict L0 sublayer tiers + max 3 sibling deps | ✅ Accepted |
   </Accordion>
 
   <Accordion title="Forward-compat (4)" icon="shield-halved">
@@ -66,10 +66,10 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-007](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-007-forward-compat-invariants.md) | Forward-compat invariants with `#[non_exhaustive]`, `new()`, pre-planted reservations | ✅ Accepted |
-    | [ADR-014](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-014-sealed-kernel-traits.md) | Sealed kernel traits with explicit adapter registration | ✅ Accepted |
-    | [ADR-025](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-025-per-crate-semver-release-plz.md) | Per-crate semver via `release-plz` (publishable crates only) | ✅ Accepted |
-    | [ADR-028](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-028-forward-compat-reservation-policy.md) | Forward-compat reservation policy: seams now, crates later | ✅ Accepted |
+    | [ADR-007](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-007-forward-compat-invariants.md) | Forward-compat invariants with `#[non_exhaustive]`, `new()`, pre-planted reservations | ✅ Accepted |
+    | [ADR-014](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-014-sealed-kernel-traits.md) | Sealed kernel traits with explicit adapter registration | ✅ Accepted |
+    | [ADR-025](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-025-per-crate-semver-release-plz.md) | Per-crate semver via `release-plz` (publishable crates only) | ✅ Accepted |
+    | [ADR-028](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-028-forward-compat-reservation-policy.md) | Forward-compat reservation policy: seams now, crates later | ✅ Accepted |
   </Accordion>
 
   <Accordion title="Error handling + diagnostics (2)" icon="triangle-exclamation">
@@ -77,8 +77,8 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-005](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-005-error-hierarchy.md) | Trait-based error hierarchy with `NikaErrorCode` + `Box<dyn>` | ✅ Accepted |
-    | [ADR-010](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-010-miette-diagnostic-layer.md) | `miette` as the L4 diagnostic presentation layer | ✅ Accepted |
+    | [ADR-005](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-005-error-hierarchy.md) | Trait-based error hierarchy with `NikaErrorCode` + `Box<dyn>` | ✅ Accepted |
+    | [ADR-010](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-010-miette-diagnostic-layer.md) | `miette` as the L4 diagnostic presentation layer | ✅ Accepted |
   </Accordion>
 
   <Accordion title="Runtime + concurrency (5)" icon="rotate">
@@ -86,11 +86,11 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-012](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-012-typestate-runtime.md) | Typestate for `nika-runtime` workflow lifecycle | ✅ Accepted |
-    | [ADR-016](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-016-cancellation-model.md) | Cancellation model: future-drop primary + `CancelCtx` cooperative module | ✅ Accepted |
-    | [ADR-017](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-017-streaming-policy.md) | Streaming policy: bounded mpsc(32), `ReceiverStream` at kernel boundary | ✅ Accepted |
-    | [ADR-018](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-018-runtime-sync-primitives.md) | Runtime + sync primitives: single Tokio rt, `parking_lot` default | ✅ Accepted |
-    | [ADR-019](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-019-retry-timeout-ownership.md) | Retry + timeout ownership: stratified by layer | ✅ Accepted |
+    | [ADR-012](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-012-typestate-runtime.md) | Typestate for `nika-runtime` workflow lifecycle | ✅ Accepted |
+    | [ADR-016](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-016-cancellation-model.md) | Cancellation model: future-drop primary + `CancelCtx` cooperative module | ✅ Accepted |
+    | [ADR-017](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-017-streaming-policy.md) | Streaming policy: bounded mpsc(32), `ReceiverStream` at kernel boundary | ✅ Accepted |
+    | [ADR-018](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-018-runtime-sync-primitives.md) | Runtime + sync primitives: single Tokio rt, `parking_lot` default | ✅ Accepted |
+    | [ADR-019](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-019-retry-timeout-ownership.md) | Retry + timeout ownership: stratified by layer | ✅ Accepted |
   </Accordion>
 
   <Accordion title="Testing (2)" icon="flask">
@@ -98,8 +98,8 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-013](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-013-loom-concurrency-verification.md) | Loom-based concurrency verification for L0.5 + L3 | ✅ Accepted |
-    | [ADR-015](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-015-expect-test-inline-snapshots.md) | `expect-test` for inline snapshot assertions on rendered output | ✅ Accepted |
+    | [ADR-013](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-013-loom-concurrency-verification.md) | Loom-based concurrency verification for L0.5 + L3 | ✅ Accepted |
+    | [ADR-015](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-015-expect-test-inline-snapshots.md) | `expect-test` for inline snapshot assertions on rendered output | ✅ Accepted |
   </Accordion>
 
   <Accordion title="Catalog + YAML (2)" icon="book">
@@ -107,8 +107,8 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-008](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-008-toml-driven-catalog.md) | TOML-driven catalog with build-time codegen + perfect-hash lookup | ✅ Accepted |
-    | [ADR-021](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-021-yaml-envelope-convention.md) | YAML envelope: `apiVersion + kind + metadata + spec` | ✅ Accepted |
+    | [ADR-008](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-008-toml-driven-catalog.md) | TOML-driven catalog with build-time codegen + perfect-hash lookup | ✅ Accepted |
+    | [ADR-021](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-021-yaml-envelope-convention.md) | YAML envelope: `apiVersion + kind + metadata + spec` | ✅ Accepted |
   </Accordion>
 
   <Accordion title="WASM + sandbox (1)" icon="box">
@@ -116,7 +116,7 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-020](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-020-wasm-plugin-boundary.md) | WASM plugin boundary + Sandbox: trait stubs now, dual timeout later | ✅ Accepted |
+    | [ADR-020](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-020-wasm-plugin-boundary.md) | WASM plugin boundary + Sandbox: trait stubs now, dual timeout later | ✅ Accepted |
   </Accordion>
 
   <Accordion title="SOTA Rust patterns (1)" icon="crab">
@@ -124,7 +124,7 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-024](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-024-sota-rust-patterns.md) | Adopt SOTA Rust patterns: `bon` Builder, `Arc<str>`, `camino`, sealed modules | ✅ Accepted |
+    | [ADR-024](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-024-sota-rust-patterns.md) | Adopt SOTA Rust patterns: `bon` Builder, `Arc<str>`, `camino`, sealed modules | ✅ Accepted |
   </Accordion>
 
   <Accordion title="L0 foundational additions (2)" icon="cube">
@@ -132,8 +132,8 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-033](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-033-l0-foundational-types.md) | L0 foundational types: Cost, UUIDv7, TrustLevel, TokenUsage evolution | ✅ Accepted |
-    | [ADR-034](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-034-l05-kernel-traits-expansion.md) | L0.5 kernel traits expansion: 6 new traits scoped to v0.81+ | ✅ Accepted |
+    | [ADR-033](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-033-l0-foundational-types.md) | L0 foundational types: Cost, UUIDv7, TrustLevel, TokenUsage evolution | ✅ Accepted |
+    | [ADR-034](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-034-l05-kernel-traits-expansion.md) | L0.5 kernel traits expansion: 6 new traits scoped to v0.81+ | ✅ Accepted |
   </Accordion>
 
   <Accordion title="Proposed — under review (5)" icon="clock">
@@ -141,11 +141,11 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-029](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-029-embedding-spec-reservation.md) | EmbeddingSpec value-type reservation (memory subsystem seed) | 🕒 Proposed |
-    | [ADR-030](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-030-memory-frame-trust.md) | `MemoryFrameRef.trust` reservation (Shield gate seed) | 🕒 Proposed |
-    | [ADR-031](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-031-recall-query-tenant-keyspace.md) | `RecallQuery.tenant` reservation (multi-tenant keyspace seed) | 🕒 Proposed |
-    | [ADR-032](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-032-wasm-plugin-context.md) | `WasmPluginError::OutOfFuel` + `Trap` + `PluginCallContext` reservation | 🕒 Proposed |
-    | [ADR-035](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/adr/adr-035-telemetry-seams.md) | Telemetry seams: `SpanGuard.parent_span_id` + `SpanRef` (OTel-ready) | 🕒 Proposed |
+    | [ADR-029](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-029-embedding-spec-reservation.md) | EmbeddingSpec value-type reservation (memory subsystem seed) | 🕒 Proposed |
+    | [ADR-030](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-030-memory-frame-trust.md) | `MemoryFrameRef.trust` reservation (Shield gate seed) | 🕒 Proposed |
+    | [ADR-031](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-031-recall-query-tenant-keyspace.md) | `RecallQuery.tenant` reservation (multi-tenant keyspace seed) | 🕒 Proposed |
+    | [ADR-032](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-032-wasm-plugin-context.md) | `WasmPluginError::OutOfFuel` + `Trap` + `PluginCallContext` reservation | 🕒 Proposed |
+    | [ADR-035](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-035-telemetry-seams.md) | Telemetry seams: `SpanGuard.parent_span_id` + `SpanRef` (OTel-ready) | 🕒 Proposed |
   </Accordion>
 </AccordionGroup>
 
@@ -218,7 +218,7 @@ Every ADR carries rich metadata in both its frontmatter and `index.json`:
   <Card title="12-gate admission" icon="check-double" href="/architecture/admission">
     Gate 12 requires ADR alignment for breaking change.
   </Card>
-  <Card title="ADR directory on GitHub" icon="github" href="https://github.com/supernovae-st/nika/tree/nika-diamond/docs/adr">
+  <Card title="ADR directory on GitHub" icon="github" href="https://github.com/supernovae-st/nika/tree/main/docs/adr">
     Browse the full ADR tree, index.json, and README.
   </Card>
 </CardGroup>

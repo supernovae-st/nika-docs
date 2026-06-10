@@ -13,7 +13,7 @@ dependency points strictly downward. A CI script (`check-layering.sh`)
 fails the build on any upward import.
 
 <Note>
-  **Canonical source:** [`docs/architecture/crate-layer-registry.md`](https://github.com/supernovae-st/nika/blob/nika-diamond/docs/architecture/crate-layer-registry.md).
+  **Canonical source:** [`docs/architecture/crate-layer-registry.md`](https://github.com/supernovae-st/nika/blob/main/docs/architecture/crate-layer-registry.md).
   This page curates the layer model for readers; the authoritative manifest
   lives in the engine repo next to the enforcement script.
 </Note>
@@ -90,22 +90,22 @@ flowchart TB
 ## Admitted today (v{STATUS.version})
 
 <CardGroup cols={2}>
-  <Card title="nika-types" icon="cube" href="https://github.com/supernovae-st/nika/tree/nika-diamond/crates/nika-types">
+  <Card title="nika-types" icon="cube" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-types">
     **L0** · Foundation value types. Leaf of the DAG.
   </Card>
-  <Card title="nika-error" icon="triangle-exclamation" href="https://github.com/supernovae-st/nika/tree/nika-diamond/crates/nika-error">
+  <Card title="nika-error" icon="triangle-exclamation" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-error">
     **L0** · NIKA-XXX error hierarchy + `miette` integration.
   </Card>
-  <Card title="nika-catalog" icon="book" href="https://github.com/supernovae-st/nika/tree/nika-diamond/crates/nika-catalog">
+  <Card title="nika-catalog" icon="book" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-catalog">
     **L0** · Provider / capability TOML catalog, phf lookup.
   </Card>
-  <Card title="nika-kernel" icon="circuit-board" href="https://github.com/supernovae-st/nika/tree/nika-diamond/crates/nika-kernel">
+  <Card title="nika-kernel" icon="circuit-board" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-kernel">
     **L0.5** · 40 ISP traits, sealed supertrait, prelude re-export hub.
   </Card>
-  <Card title="nika-kernel-mock" icon="circuit-board" href="https://github.com/supernovae-st/nika/tree/nika-diamond/crates/nika-kernel-mock">
+  <Card title="nika-kernel-mock" icon="circuit-board" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-kernel-mock">
     **L0.5** · Pure-memory trait mocks for testing.
   </Card>
-  <Card title="nika-catalog-verify" icon="check" href="https://github.com/supernovae-st/nika/tree/nika-diamond/crates/nika-catalog-verify">
+  <Card title="nika-catalog-verify" icon="check" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-catalog-verify">
     **L4** · Build-only catalog validation tool.
   </Card>
 </CardGroup>
