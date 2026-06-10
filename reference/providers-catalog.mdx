@@ -1,11 +1,12 @@
 ---
 title: "Providers catalog"
-description: "Every LLM provider Nika knows about. 14 providers, 7 API dialects, 32 environment variables."
+description: "Every LLM provider Nika knows about — the canonical spec catalog, the extended engine catalog, API dialects, and environment variables."
 sidebarTitle: "Providers catalog"
 icon: "server"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
 Nika ships with **{STATUS.providers} LLM providers** in its catalog — frontier
 labs, fast inference services, Chinese labs, enterprise platforms, and local
@@ -156,7 +157,7 @@ default and cheap models, capability tags, and per-model token limits.
 ## Full alphabetical list
 
 <AccordionGroup>
-  <Accordion title="All extended catalog IDs (sorted · 14 canonical spec v0.1 + extended)" icon="list">
+  <Accordion title={`All extended catalog IDs (sorted · ${CANON.providers} canonical spec v0.1 + extended)`} icon="list">
     `ai21` · `anthropic` · `azure` · `bedrock` · `cerebras` · `cloudflare` ·
     `cohere` · `databricks` · `deepinfra` · `deepseek` · `fireworks` ·
     `gemini` · `groq` · `hyperbolic` · `minimax` · `mistral` · `mock` ·

@@ -1,11 +1,12 @@
 ---
 title: "Capability rules"
-description: "49 capability rules that map provider/model pairs to their feature set — modalities, tools, JSON mode, streaming, token limits."
+description: "The capability rules that map provider/model pairs to their feature set — modalities, tools, JSON mode, streaming, token limits."
 sidebarTitle: "Capability rules"
 icon: "grid"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
 Nika's capability system answers one question: **given a `provider + model`,
 what features does it support?** Tool calling? Vision input? Audio output?
@@ -242,7 +243,7 @@ assert!(caps.supported_parameters.contains(&"computer-use"));
 
 <CardGroup cols={2}>
   <Card title="Providers catalog" icon="server" href="/reference/providers-catalog">
-    The 14 providers these rules target.
+    The {CANON.providers} canonical providers these rules target.
   </Card>
   <Card title="Concepts · Providers" icon="plug" href="/concepts/providers">
     Runtime routing — how infer verb picks a provider.

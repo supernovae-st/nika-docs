@@ -6,6 +6,7 @@ icon: "play"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
 <Warning>
   **Target design — not yet runnable at v{STATUS.version}.** The YAML shown
@@ -31,7 +32,7 @@ If you see `no providers configured`, set a key:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-# or any of the 14 providers in the catalog
+# or any provider in the catalog
 ```
 
 All provider env vars listed in [Providers catalog](/reference/providers-catalog).
@@ -152,7 +153,7 @@ nika run hello.nika.yaml
     provider / fs / process / memory contracts.
   </Step>
   <Step title="Browse the catalog">
-    `cargo run -p nika-catalog-verify` — validates the 14 providers + 49
+    `cargo run -p nika-catalog-verify` — validates the {CANON.providers} canonical providers + {STATUS.capabilityRules}
     capability rules TOML at build time.
   </Step>
   <Step title="Track admission">
@@ -171,7 +172,7 @@ nika run hello.nika.yaml
     How data flows between tasks with taint tracking.
   </Card>
   <Card title="Providers" icon="server" href="/concepts/providers">
-    Why one `InferRequest` works across 14 providers.
+    Why one `InferRequest` works across {CANON.providers} providers.
   </Card>
   <Card title="Live state" icon="gauge" href="/reference/status">
     Which verbs are admitted today.
