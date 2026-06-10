@@ -6,8 +6,13 @@ icon: "server"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
-Nika ships with **{STATUS.providers} LLM providers** in its catalog,
+Two provider numbers exist, on purpose: the **language spec** locks
+**{CANON.providers} canonical providers** (what a conformant engine MUST
+ship — see the [spec catalog](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md));
+the **reference engine's catalog** goes wider. Nika ships with
+**{STATUS.providers} LLM providers** in its catalog,
 orchestrated behind one unified `InferRequest`. The `infer:` verb takes a
 `model: <provider>/<name>` string, looks up capability rules
 ([{STATUS.capabilityRules} rules](/reference/capabilities)), and dispatches
