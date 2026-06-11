@@ -32,13 +32,19 @@ outputs: { ... }             # optional · the workflow's return value
 ## A task
 
 ```yaml
-- id: <identifier>           # required, unique within workflow
-  description: <string>      # optional
+- id: <identifier>           # required, unique within workflow (snake_case)
 
   depends_on: [<id>, ...]    # optional DAG edge
-  when: <expression>         # optional conditional
-  for_each: <expression>     # optional fan-out
-  retry: { ... }             # optional retry policy
+  when: <expression>         # optional gate · ${{ }} CEL boolean OR literal true/false
+  for_each: <expression>     # optional fan-out (an array)
+  max_parallel: <int>        # optional · cap concurrent iterations
+  fail_fast: <bool>          # optional · default true · false = collect errors
+  timeout: "<duration>"      # optional · quoted Go-duration · per-iteration on for_each
+  retry: { ... }             # optional retry policy (max_attempts · backoff · on_codes)
+  on_error: { ... }          # optional recovery · recover/skip/fail_workflow + on_codes
+  with: { ... }              # optional task-scoped variables
+  output: { <name>: <jq> }   # optional named jq bindings over the raw output
+  on_finally: [ ... ]        # optional cleanup steps · run if the task STARTED
 
   # exactly one verb block:
   infer: { ... }
@@ -46,6 +52,9 @@ outputs: { ... }             # optional · the workflow's return value
   invoke: { ... }
   agent: { ... }
 ```
+
+The full per-field semantics live in the spec:
+[03 · DAG shape](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md).
 
 ## Verbs
 

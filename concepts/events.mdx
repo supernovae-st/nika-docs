@@ -80,14 +80,18 @@ wire, you know exactly which crate produced it.
 
 - `workflow.started` — a run begins.
 - `workflow.completed` — run ends, with status.
-- `workflow.skipped` — top-level `condition:` evaluated to false.
+- `workflow.skipped` — the run was gated off before any task started.
 
 ### Task-level
 
 - `task.started` — a task begins executing.
 - `task.completed` — a task ends successfully.
 - `task.failed` — a task errored out; payload carries the NikaCode.
-- `task.skipped` — task-level `condition:` evaluated to false.
+- `task.skipped` — the task's `when:` evaluated to false (or its empty
+  `for_each` collection skipped it).
+- `task.cancelled` — the task never ran because its default gate became
+  unsatisfiable (an upstream failed) or the run was cancelled — a normal
+  terminal state under gate-based propagation.
 - `task.retry` — a retry attempt begins (emitted before `task.started` of the retry).
 
 ### Verb-level

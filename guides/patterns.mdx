@@ -147,13 +147,16 @@ read-only swarm) · [Code review](https://github.com/supernovae-st/nika-spec/blo
 
 ## 9 · Evidence always lands · `on_finally`
 
-Journal events, notifications, cleanup: hang them on `on_finally:` so
-they fire on success, failure, timeout and cancel alike. A pipeline
-that only reports when it succeeds can't be trusted at 3am.
+Two tools, one rule. **`on_finally:`** is per-task cleanup — it fires
+when that task *ran* (success, failure, timeout, mid-flight cancel).
+**A terminal `when: true` task** is the always-pattern — it runs on
+EVERY outcome, including upstreams that failed or never started
+(`when: true` replaces the default success-gate). Cleanup belongs to
+the task; the record that must land at 3am belongs to a terminal task.
 
 Taught by · [Incident war room](/examples/incident-war-room) ·
-[Release train](/examples/release-train) (the departure record lands
-either way).
+[Release train](/examples/release-train) (the departure record is a
+`when: true` terminal task — it lands even when the train aborts).
 
 ## 10 · One data language · jq, once
 
@@ -254,7 +257,7 @@ Two exclusive `when:` branches, one consumer. A skipped branch's output is
     tool: nika:jq
     args:
       input: [ "${{ tasks.build_prod.output }}", "${{ tasks.build_dev.output }}" ]
-      query: "[ .[] | select(. != null) ] | first"
+      expression: "[ .[] | select(. != null) ] | first"
 ```
 
 ### Fan-out that survives partial failure
@@ -279,7 +282,7 @@ filter downstream:
     tool: nika:jq
     args:
       input: ${{ tasks.scrape_all.output }}
-      query: "[ .[] | select(. != null) ]"   # the survivors · order preserved
+      expression: "[ .[] | select(. != null) ]"   # the survivors · order preserved
 ```
 
 ### Matrix expansion
@@ -293,7 +296,7 @@ fan out over it:
     tool: nika:jq
     args:
       input: { os: ["linux", "macos"], ver: ["18", "20", "22"] }
-      query: "[ .os[] as $o | .ver[] as $v | {os: $o, ver: $v} ]"
+      expression: "[ .os[] as $o | .ver[] as $v | {os: $o, ver: $v} ]"
 
 - id: test_all
   depends_on: [build_matrix]

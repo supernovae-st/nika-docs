@@ -34,7 +34,7 @@ implements. Every workflow decomposes into one of these moves:
 
 Anything else we considered — "transform", "map", "branch", "retry" —
 was a special case of one of these four, or workflow-level machinery
-(dependencies, `for_each`, `condition`) that lives on the task envelope,
+(dependencies, `for_each`, `when`) that lives on the task envelope,
 not as a new verb.
 
 ```mermaid
@@ -86,9 +86,11 @@ Spawns a subprocess, captures stdout/stderr, returns exit code + output.
 
 - `Command::new` MUST set `kill_on_drop(true)` — no leaked child processes (INV-011).
 - Concurrent pipe reading uses `tokio::try_join!` (INV-012).
-- Non-zero exit is a task failure by default. Sanitize untrusted
-  interpolation through the `shell_quote` filter before the command
-  reaches L1.
+- Non-zero exit is a task failure (`NIKA-EXEC-001`) in the default
+  capture modes — **except `capture: structured`**, where the exit code
+  is data (`output.exit_code` · the task succeeds and the workflow
+  branches on it). Sanitize untrusted interpolation through the
+  `shell_quote` filter before the command reaches L1.
 
 Cross-link: [`ShellExecutor` trait](/architecture/layers#layer-table) (L0.5 kernel contract).
 
@@ -222,7 +224,14 @@ until a completion signal fires or a budget exhausts.
 **Invariants** (from `nika-kernel::runtime::agent`):
 
 - `AgentLoopConfig` bounds the loop: `max_turns`, `max_tokens_total`.
-  The first ceiling hit stops the loop (`AgentStopReason`).
+  A ceiling hit is a **typed failure** (`NIKA-AGENT-001` /
+  `NIKA-AGENT-002` · `budget_error`) with the last assistant message
+  preserved in `error.details.partial_output` — recover it explicitly
+  via `on_error:` if a partial is acceptable. Natural completion (or
+  `nika:done`, optionally with `result:`) is success.
+- A failing tool call feeds its typed error back to the model (the
+  loop continues against its budgets) — EXCEPT `security_error`, which
+  fails the task immediately.
 - Every tool call is **taint-checked** — untrusted data cannot reach
   dangerous verbs without an explicit sanitizer.
 - The iteration trace (`ToolCallRecord` + `CheckpointMessage`) is

@@ -80,14 +80,19 @@ Content entering a workflow carries a trust level. Untrusted content
 (fetched pages, user comments) is tracked as it flows into prompts and
 tools:
 
-| Error | Defense layer |
+| Defense layer | Error surface |
 |---|---|
-| `NIKA-380` | dangerous tool invoked on untrusted data → blocked |
-| `NIKA-381` | strict-mode trust-level violation |
-| `NIKA-382` | exfiltration canary token found in output |
-| `NIKA-383` | prompt-injection scanner (+ ML detection) |
-| `NIKA-384` | untrusted data reached a prompt without spotlight wrapping |
-| `NIKA-386` / `NIKA-387` | workflow recursion depth / cycle blocked |
+| dangerous tool invoked on untrusted data → blocked | `NIKA-SEC` family (`security_error`) |
+| strict-mode trust-level violation | `NIKA-SEC` family |
+| exfiltration canary token found in output | `NIKA-SEC` family |
+| prompt-injection scanner (+ ML detection) | `NIKA-SEC` family |
+| untrusted data reached a prompt without spotlight wrapping | `NIKA-SEC` family |
+| workflow recursion depth / self-launch blocked | `NIKA-SEC-003` (registered) |
+
+The three codes the spec REGISTERS today: `NIKA-SEC-001` (exec blocklist
+hit), `NIKA-SEC-002` (agent tool outside the whitelist), `NIKA-SEC-003`
+(run-recursion bound). The runtime trust layers above are engine-side
+(the Shield) — they emit within the `NIKA-SEC` namespace as they land.
 
 Every failure is a [typed error](/reference/error-codes) with a stable
 code and a `transient` flag — your `on_error:` can act on it.

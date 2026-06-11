@@ -33,7 +33,7 @@ flowchart LR
   screened --> ranked
   ranked --> shortlist
   shortlist -.-> brief
-  brief --> save
+  brief -.-> save
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
@@ -65,6 +65,8 @@ tasks:
     for_each: ${{ tasks.pool.output }}
     max_parallel: 2                    # local model · don't thrash the GPU
     fail_fast: false                   # one unreadable CV must not stop the batch
+    on_error:
+      recover: null                    # it yields null at its index · filtered at the fan-in
     with:
       cv_path: ${{ item }}
     infer:
@@ -89,7 +91,7 @@ tasks:
       tool: "nika:jq"
       args:
         input: "${{ tasks.screened.output }}"
-        expression: 'map(select(.fit != "weak")) | sort_by(.fit != "strong", -(.years_relevant // 0))'
+        expression: 'map(select(. != null)) | map(select(.fit != "weak")) | sort_by(.fit != "strong", -(.years_relevant // 0))'
 
   - id: shortlist
     depends_on: [ranked]
@@ -111,6 +113,7 @@ tasks:
 
   - id: save
     depends_on: [brief]
+    when: ${{ tasks.brief.output != null }}    # skip cascades by VALUE · a skipped brief is null
     invoke:
       tool: "nika:write"
       args:

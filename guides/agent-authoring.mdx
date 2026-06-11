@@ -80,8 +80,10 @@ them; knowing them just saves round-trips:
 2. **snake_case task ids** (CEL-safe) · **kebab-case `workflow:`**.
 3. **Every `${{ tasks.X }}` reference requires `depends_on: [X]`** ·
    the DAG has no invisible edges.
-4. **`when:` must be a CEL boolean** · `${{ vars.count }}` is not a
-   condition; `${{ vars.count > 0 }}` is.
+4. **`when:` is a `${{ }}` CEL boolean or the literal `true`/`false`** ·
+   `${{ vars.count }}` is not a condition; `${{ vars.count > 0 }}` is;
+   a bare string without `${{ }}` is rejected; `when: true` is the
+   always-pattern (run even when an upstream failed).
 5. **`size()` is the only CEL function** · arithmetic and string
    functions live in jq, not in `${{ }}`.
 6. **`nika:write` needs `content:`** · a write without it writes

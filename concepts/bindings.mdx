@@ -102,8 +102,8 @@ the analyzer and propagates through bindings:
   them).
 
 Passing tainted data to a *privileged sink* (notably `exec.command`)
-without an explicit sanitizer raises **NIKA-384** (see
-`dx/.claude/rules/security.md` — Shield error table):
+without an explicit sanitizer raises a `NIKA-SEC`-family error (the
+runtime taint layer · [security model](/concepts/security)):
 
 ```yaml
 - name: pull_user_input
@@ -115,7 +115,7 @@ without an explicit sanitizer raises **NIKA-384** (see
 - name: run_it
   depends_on: [pull_user_input]
   exec:
-    command: "${{ tasks.pull_user_input.output }}"   # NIKA-384 taint violation
+    command: "${{ tasks.pull_user_input.output }}"   # NIKA-SEC taint violation
 ```
 
 Fix — never interpolate tainted data into a command string; pass it

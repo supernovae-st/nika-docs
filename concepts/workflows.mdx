@@ -153,33 +153,37 @@ Fan-out over a collection:
     prompt: "Review this file: ${{ item }}"
 ```
 
-Conditional execution:
+Conditional execution — `when:` is the field (a CEL boolean, or the
+literal `true` for the always-pattern):
 
 ```yaml
-- name: deploy
+- id: deploy
   depends_on: [tests]
-  condition: "${{ tasks.tests.output.passed == true }}"
+  when: "${{ tasks.tests.output.passed == true }}"
   exec:
     command: ./deploy.sh
 ```
 
-Retry on failure:
+Retry on failure — `retry:` is the one shape (and `on_error:` catches
+what retries can't fix):
 
 ```yaml
-- name: flaky_api
+- id: flaky_api
   invoke:
     tool: nika:fetch
     args:
       url: https://example.com/api
-  max_retries: 5
+  retry:
+    max_attempts: 5
+    backoff_strategy: exponential
+    jitter: true
 ```
 
 <Note>
-  `depends_on`, `condition`, `for_each`, and `max_retries` land in
-  Rounds 2e–2f of the `nika-schema` parser. All four fields already
-  exist in `RawTask` (`crates/nika-schema/src/raw/task.rs`) with source
-  spans — the analyzer and runtime stages consume them starting at
-  Round 4 admission.
+  Field names are the spec's: `id:` (not `name:`), `when:` (not
+  `condition:`), `retry.max_attempts` (not `max_retries:`). The
+  [JSON Schema](https://nika.sh/schema/v1.json) rejects the wrong
+  names at check time.
 </Note>
 
 ## Inputs · `vars`

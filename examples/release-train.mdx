@@ -37,6 +37,7 @@ flowchart TD
   ship["ship · ./scripts/release.sh"]:::exec
   verify["verify · nika:fetch"]:::invoke
   live["live · nika:assert"]:::invoke
+  record["record · nika:emit"]:::invoke
   tests --> gates_green
   lint --> gates_green
   audit --> gates_green
@@ -49,6 +50,7 @@ flowchart TD
   hold --> ship
   ship --> verify
   verify --> live
+  live -.-> record
   classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
@@ -172,14 +174,22 @@ tasks:
       args:
         condition: "${{ tasks.verify.output == vars.version }}"
         message: "Prod does not report the shipped version — investigate before announcing"
-    on_finally:                        # the record lands · shipped OR aborted
-      - invoke:
-          tool: "nika:emit"
-          args:
-            event_type: "release.train.departed"
-            payload:
-              version: "${{ vars.version }}"
-              status: "${{ tasks.live.status }}"
+
+  # the always-pattern · `when: true` replaces the default success-gate ·
+  # this task runs whether `live` succeeded, failed, or never started
+  # (upstream abort) — a record that must land on EVERY outcome is a
+  # terminal task, not a cleanup hook (03 §Task states).
+  - id: record
+    depends_on: [live]
+    when: true
+    invoke:
+      tool: "nika:emit"
+      args:
+        event_type: "release.train.departed"
+        payload:
+          version: "${{ vars.version }}"
+          status: "${{ tasks.live.status }}"
+    on_finally:
       - invoke:
           tool: "nika:notify"
           args:

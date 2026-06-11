@@ -1,257 +1,152 @@
 ---
 title: "Error codes"
-description: "Every error code emitted by Nika. Generated from the source of truth in crates/nika-error/src/codes.rs."
+description: "The typed error model — namespaces, categories, and the 28 registered v0.1 codes. Generated from the spec registry."
 sidebarTitle: "Error codes"
 icon: "triangle-exclamation"
 ---
 
-import { STATUS } from "/snippets/_status-snapshot.mdx";
+Every error Nika emits is a **typed structure** with a stable code, a
+category, and a `transient` flag the retry machinery reads. The format is
+`NIKA-<NAMESPACE>-<NNN>` — an optional sub-namespace self-documents builtin
+errors (`NIKA-BUILTIN-WAIT-001`). The full grammar:
 
-Every error Nika emits carries a unique `NIKA-XXX` code. The wire format
-is `NIKA-{num:03}` (3-digit zero-padded under 1000, more otherwise) —
-stable across versions, machine-parseable, serde-serializable.
+```
+^NIKA-[A-Z]{2,9}(-[A-Z][A-Z0-9_]{1,15})?-[0-9]{3}$
+```
 
 <Info>
-  **Canonical source:** [`crates/nika-error/src/codes.rs`](https://github.com/supernovae-st/nika/blob/main/crates/nika-error/src/codes.rs)
-  defines the `NikaCode` type and the 14 codes owned by `nika-error` itself;
-  downstream crates (`nika-kernel`, `nika-catalog`, `nika-schema`, …)
-  register their own codes via the [`NikaErrorCode`](https://github.com/supernovae-st/nika/blob/main/crates/nika-error/src/traits.rs)
-  trait. This page enumerates every code defined by crates admitted at
-  v{STATUS.version}. Snapshot: 2026-04-17.
+  **Canonical source:** [`spec/05-errors.md`](https://github.com/supernovae-st/nika-spec/blob/main/spec/05-errors.md)
+  owns the taxonomy — engines *derive* from it, never the reverse. The
+  machine-readable registry lives in the spec's
+  [`canon.yaml`](https://github.com/supernovae-st/nika-spec/blob/main/canon.yaml)
+  and is also served as JSON at
+  [`nika.sh/errors/catalog.json`](https://nika.sh/errors/catalog.json).
+  The tables below are generated from that registry.
 </Info>
 
-## Anatomy of a code
+## The error shape
 
-Each code is a `NikaCode` struct with four fields:
+```json
+{
+  "code": "NIKA-INFER-001",
+  "category": "provider_error",
+  "message": "Anthropic API returned 503 service unavailable",
+  "transient": true,
+  "details": { "provider": "anthropic", "status_code": 503 },
+  "task_id": "research",
+  "attempt": 2
+}
+```
 
-| Field | Type | Purpose |
+`transient: true` means a retry might succeed — `retry:` only fires on
+transient errors (unless `on_codes:` widens it). `on_error:` catches the
+final error either way, and `on_error.on_codes` routes recovery by exact
+code.
+
+## Categories
+
+{/* errors-categories:begin */}
+| Category | Meaning |
+|---|---|
+| `parse_error` | Workflow YAML is malformed or invalid |
+| `validation_error` | Workflow violates a spec rule (cycle · unknown field · …) |
+| `variable_error` | Reference to undefined variable or invalid path |
+| `provider_error` | LLM provider returned an error |
+| `network_error` | Network failure (DNS · TCP · TLS · timeout) |
+| `tool_error` | Builtin or MCP tool returned an error |
+| `process_error` | exec: subprocess failure (non-zero exit · spawn) |
+| `budget_error` | An agent: loop budget exhausted (max_turns · max_tokens_total) |
+| `security_error` | SSRF · blocklist · capability denied |
+| `timeout_error` | Task or step exceeded its timeout |
+| `cancelled` | Workflow or task cancelled |
+| `internal_error` | Engine bug · unexpected state |
+{/* errors-categories:end */}
+
+## The 28 registered codes (v0.1 normative floor)
+
+A conformant engine emits exactly these codes for these failures. Engines
+may add codes within a namespace's `001-099` range — never repurpose one.
+
+{/* errors-codes:begin */}
+| Code | Failure | Category | `transient` |
+|---|---|---|---|
+| `NIKA-DAG-001` | cycle in depends_on (incl. self-dependency) | `validation_error` | false |
+| `NIKA-DAG-002` | depends_on references an undeclared task | `validation_error` | false |
+| `NIKA-DAG-003` | a tasks.X reference with no declared edge | `validation_error` | false |
+| `NIKA-DAG-004` | on_error.recover references a task downstream of the declaring task (await would deadlock) | `validation_error` | false |
+| `NIKA-VAR-001` | unresolved reference (unknown namespace entry · undeclared env/vars key) | `variable_error` | false |
+| `NIKA-VAR-002` | binding cardinality — a jq binding emitted zero or multiple values | `variable_error` | false |
+| `NIKA-VAR-003` | provably-invalid path into a declared schema (static walk) | `validation_error` | false |
+| `NIKA-VAR-004` | jq runtime error while evaluating a binding | `variable_error` | false |
+| `NIKA-VAR-005` | static expression violation — outside cel-subset/0.1 · chained relation · unknown function · non-boolean when: root · jq compile error | `validation_error` | false |
+| `NIKA-VAR-006` | expression type error at evaluation — cross-type compare · non-boolean when: value · for_each over a non-array | `variable_error` | false |
+| `NIKA-VAR-007` | bytes value substituted into a string position | `variable_error` | false |
+| `NIKA-VAR-008` | unclosed ${{ opener | `validation_error` | false |
+| `NIKA-INFER-001` | provider call failed (HTTP error · provider refusal) | `provider_error` | engine-assessed |
+| `NIKA-INFER-002` | structured output failed schema validation (after any engine-internal retries) | `validation_error` | false |
+| `NIKA-EXEC-001` | non-zero exit code (default capture modes) | `process_error` | false |
+| `NIKA-EXEC-002` | spawn failure (command not found · permission) | `process_error` | false |
+| `NIKA-INVOKE-001` | unknown tool (unresolvable nika:/mcp: id) | `validation_error` | false |
+| `NIKA-INVOKE-002` | tool args failed the tool's schema | `validation_error` | false |
+| `NIKA-AGENT-001` | max_turns exhausted before completion | `budget_error` | false |
+| `NIKA-AGENT-002` | max_tokens_total exhausted before completion | `budget_error` | false |
+| `NIKA-MCP-001` | MCP server not configured / not reachable at call time | `tool_error` | engine-assessed |
+| `NIKA-MCP-002` | MCP tool call failed (transport · tool-side error) | `tool_error` | engine-assessed |
+| `NIKA-SEC-001` | exec: blocklist hit | `security_error` | false |
+| `NIKA-SEC-002` | agent tool call outside the tools: whitelist | `security_error` | false |
+| `NIKA-SEC-003` | run-recursion bound — nested-run depth exceeded OR self-launching workflow | `security_error` | false |
+| `NIKA-TIMEOUT-001` | task (or for_each iteration) exceeded timeout: | `timeout_error` | false |
+| `NIKA-CANCEL-001` | task cancelled (workflow failure gate · user cancellation) | `cancelled` | false |
+| `NIKA-BUILTIN-DONE-001` | nika:done invoked outside an agent: loop | `validation_error` | false |
+{/* errors-codes:end */}
+
+## Namespaces
+
+{/* errors-namespaces:begin */}
+| Namespace | Scope | Range |
 |---|---|---|
-| `num` | `u16` | Numeric identifier, unique across the registry (1..=9999) |
-| `category` | `Category` | Functional grouping — routes to the right handler |
-| `severity` | `Severity` | `Error` or `Warning` |
-| `slug` | `&'static str` | Kebab-case identifier for docs URLs (e.g., `validation-failed`) |
+| `NIKA-AGENT` | agent: verb errors | 001-099 |
+| `NIKA-BUILTIN` | Builtin tool errors · per-builtin sub-namespace | 001-099 |
+| `NIKA-CANCEL` | Task or workflow cancellation | 001-099 |
+| `NIKA-DAG` | DAG topology · cycles · invalid deps | 001-099 |
+| `NIKA-EXEC` | exec: verb errors | 001-099 |
+| `NIKA-IMPL` | Engine internal errors | 001-099 |
+| `NIKA-INFER` | infer: verb errors | 001-099 |
+| `NIKA-INVOKE` | invoke: verb errors | 001-099 |
+| `NIKA-MCP` | MCP client errors | 001-099 |
+| `NIKA-PARSE` | YAML parse + envelope validation | 001-099 |
+| `NIKA-PROVIDER` | Provider adapter errors | 001-099 |
+| `NIKA-SEC` | Security policy violations (SSRF · blocklist) | 001-099 |
+| `NIKA-TIMEOUT` | Task or step timeouts | 001-099 |
+| `NIKA-VAR` | Variable resolution failures | 001-099 |
+{/* errors-namespaces:end */}
 
-Codes that flow through transient-aware handlers also answer
-`is_transient() -> bool` — `true` for rate-limited, 5xx, and timeout
-variants; callers use this to decide whether to retry.
+Builtin errors use a per-builtin sub-namespace — each builtin owns its own
+`001-099` (`NIKA-BUILTIN-FETCH-001` is the fetch tool's network/extraction
+failure). Underscore-named builtins encode naturally:
+`NIKA-BUILTIN-JSON_MERGE_PATCH-001`.
 
-## Category ranges
+## Routing on codes
 
-Ranges are a documented convention in `codes.rs`. They are **not enforced
-at the type level**: any crate can define a code in any range as long as
-the number is unique.
+```yaml
+# Retry ONLY on the fetch network error · fixed 30s backoff
+retry:
+  max_attempts: 5
+  backoff_strategy: fixed
+  backoff_ms: 30000
+  on_codes: [NIKA-BUILTIN-FETCH-001]
 
-| Range | Category | Owner crate | Notes |
-|---|---|---|---|
-| 001–049 | `Core` | `nika-error`, `nika-catalog` | Input validation, catalog parse, pricing, context-window |
-| 050–099 | `Shell` | `nika-kernel` | Process spawn, timeout, cancel, security block |
-| 100–139 | `FileIo` | `nika-kernel` | Blob not-found, I/O, size limits |
-| 140–189 | `Http` | `nika-kernel` | Timeout, connection, SSRF, size, unsupported |
-| 190–229 | `Auth` | reserved | — |
-| 230–279 | `Mcp` | `nika-kernel` | Tool lookup + execution |
-| 280–329 | `Schema` | `nika-schema` (WIP) | YAML parse, DAG validation, structured-output checks |
-| 330–379 | `Binding` | reserved | — |
-| 380–429 | `Provider` | `nika-kernel` | Provider API, rate limit, auth, model lookup |
-| 430–479 | `Verb` | reserved | — |
-| 480–529 | `Runtime` | reserved | — |
-| 600–649 | `Memory` | `nika-kernel` | Store unavailable, embedding, storage |
-| 700–749 | `WasmPlugin` | `nika-kernel` | Plugin host errors (v0.100 seam) |
-| 750–799 | `Sandbox` | `nika-kernel` | Capability denial, platform support |
-| 800–819 | `Observability` | reserved | v0.100 OTel seam |
-| 999 | `Core` | `nika-error` | Internal catch-all — [file an issue](https://github.com/supernovae-st/nika/issues) |
-
-<Note>
-  Ranges marked **reserved** are carved out in `codes.rs` for future
-  crates but have no concrete codes at v{STATUS.version}. See the
-  [crate constellation](/reference/constellation) for admission progress.
-</Note>
-
-## Core — `nika-error` (001–049)
-
-Defined in [`crates/nika-error/src/codes.rs`](https://github.com/supernovae-st/nika/blob/main/crates/nika-error/src/codes.rs).
-These 9 codes are owned by `nika-error` itself; the rest of the
-`Core` range is filled in by `nika-catalog` (NIKA-010..015) via the
-`NikaErrorCode` trait.
-
-| Code | Slug | Owner | Transient | Meaning |
-|---|---|---|---|---|
-| `NIKA-001` | `validation-failed` | nika-error | no | Input validation failed — check your workflow YAML syntax and field values. |
-| `NIKA-002` | `not-found` | nika-error | no | Referenced item not found in catalogs or task outputs. |
-| `NIKA-003` | `unsupported` | nika-error | no | Feature not supported in current configuration. |
-| `NIKA-010` | `catalog-toml-parse` | nika-catalog | no | Catalog TOML is malformed. Check syntax near the reported line and column. |
-| `NIKA-011` | `catalog-schema-mismatch` | nika-catalog | no | Catalog schema version does not match the expected version. Update the `schema` field. |
-| `NIKA-012` | `capability-rule-conflict` | nika-catalog | no | Two capability rules conflict for the same scope. Check rule ordering in `model-capabilities.toml`. |
-| `NIKA-013` | `pricing-axis-out-of-range` | nika-catalog | no | A pricing axis value is out of valid range. Ensure rates are non-negative and finite. |
-| `NIKA-014` | `context-window-invariant` | nika-catalog | no | `max_output_tokens` exceeds `context_window_tokens`. Fix the model capability rule. |
-| `NIKA-015` | `json-mode-unknown` | nika-catalog | no | Unrecognised `json_mode` value. Valid values: `none`, `object`, `schema`. |
-
-<Note>
-  Range 016–049 is reserved for additional core/catalog codes as new
-  validation rules land.
-</Note>
-
-## Shell — `nika-kernel` (050–099)
-
-Defined in [`crates/nika-kernel/src/errors.rs`](https://github.com/supernovae-st/nika/blob/main/crates/nika-kernel/src/errors.rs)
-as the `NikaErrorCode` impl for `ShellError`.
-
-| Code | Slug | Transient | Meaning |
-|---|---|---|---|
-| `NIKA-050` | `shell-not-found` | no | Program not found on PATH. |
-| `NIKA-051` | `shell-timeout` | no | Shell execution timed out. |
-| `NIKA-052` | `shell-cancelled` | no | Shell execution cancelled (parent drop, Ctrl-C). |
-| `NIKA-053` | `shell-blocked` | no | Command blocked by security policy. |
-| `NIKA-059` | `shell-other` | no | Other shell error — see message. |
-
-Range 054–058 + 060–099 reserved for future concrete codes.
-
-## File I/O — `nika-kernel` (100–139)
-
-`NikaErrorCode` impl for `BlobError`.
-
-| Code | Slug | Transient | Meaning |
-|---|---|---|---|
-| `NIKA-100` | `blob-not-found` | no | Blob not found (by hash or path). |
-| `NIKA-101` | `blob-io` | no | Blob I/O failure — see message. |
-| `NIKA-102` | `blob-too-large` | no | Blob exceeds configured size limit. |
-
-## HTTP — `nika-kernel` (140–189)
-
-`NikaErrorCode` impl for `HttpError`.
-
-| Code | Slug | Transient | Meaning |
-|---|---|---|---|
-| `NIKA-140` | `http-timeout` | no | HTTP request timed out. |
-| `NIKA-141` | `http-connection` | no | HTTP connection failed (DNS, TLS, network). |
-| `NIKA-142` | `http-ssrf-blocked` | no | Request blocked by SSRF allowlist. |
-| `NIKA-143` | `http-too-large` | no | HTTP response exceeds configured size limit. |
-| `NIKA-144` | `http-unsupported` | no | Unsupported HTTP feature (scheme, method, encoding). |
-| `NIKA-149` | `http-other` | no | Other HTTP error — see message. |
-
-## MCP — `nika-kernel` (230–279)
-
-`NikaErrorCode` impl for `ToolExecError`.
-
-| Code | Slug | Transient | Meaning |
-|---|---|---|---|
-| `NIKA-230` | `tool-not-found` | no | MCP tool not found on any connected server. |
-| `NIKA-231` | `tool-timeout` | no | Tool call timed out. |
-| `NIKA-232` | `tool-exec-failed` | no | Tool execution returned an error. |
-| `NIKA-233` | `tool-not-available` | no | Tool exists but is not currently available (server disconnected). |
-
-## Schema — `nika-schema` WIP (280–329)
-
-Defined in [`crates/nika-schema/src/error.rs`](https://github.com/supernovae-st/nika/blob/main/crates/nika-schema/src/error.rs).
-`nika-schema` is WIP at v{STATUS.version} — these 11 codes are already
-registered and wire-stable, even though the crate is not yet admitted to
-the workspace.
-
-| Code | Slug | Transient | Meaning |
-|---|---|---|---|
-| `NIKA-280` | `yaml-syntax` | no | YAML parse error (malformed indentation, quoting, braces). |
-| `NIKA-281` | `unknown-verb` | no | Unknown or invalid task action verb. |
-| `NIKA-282` | `missing-field` | no | Missing required field in a task or workflow. |
-| `NIKA-283` | `invalid-task-id` | no | Invalid task identifier (not `snake_case` or reserved). |
-| `NIKA-284` | `duplicate-task` | no | Duplicate task name in the same workflow. |
-| `NIKA-285` | `cycle` | no | Dependency cycle detected in the task DAG. |
-| `NIKA-286` | `unknown-dependency` | no | Reference to unknown task in `depends_on`. |
-| `NIKA-287` | `invalid-structured-output` | no | Invalid structured output configuration. |
-| `NIKA-288` | `invalid-guardrail` | no | Guardrail configuration error. |
-| `NIKA-289` | `unsupported-version` | no | Schema version mismatch or unsupported. |
-| `NIKA-290` | `validation` | no | Generic validation error (catch-all). |
-
-## Provider — `nika-kernel` (380–429)
-
-`NikaErrorCode` impl for `ProviderError`. Provider errors are the only
-range that flags `is_transient()` for retries.
-
-| Code | Slug | Transient | Meaning |
-|---|---|---|---|
-| `NIKA-380` | `provider-api` | yes (5xx only) | Provider API returned an error. Transient for 500..=599. |
-| `NIKA-381` | `provider-model-not-found` | no | Model not declared in the provider catalog. |
-| `NIKA-382` | `provider-rate-limited` | **yes** | Provider rate-limited the request. Retry after `retry_after_ms`. |
-| `NIKA-383` | `provider-auth-failed` | no | Authentication failed — check API key + org/project id. |
-| `NIKA-389` | `provider-other` | no | Other provider error — see message. |
-
-<Tip>
-  `is_transient() == true` is the signal callers use to retry with
-  backoff. Everything else is a caller-side bug or a misconfiguration —
-  retrying won't help.
-</Tip>
-
-## Memory — `nika-kernel` (600–649)
-
-`NikaErrorCode` impl for `MemoryError`. Memory subsystem trait
-reservations plumb through to the v0.95 memory subsystem rewrite without
-breaking this wire format.
-
-| Code | Slug | Transient | Meaning |
-|---|---|---|---|
-| `NIKA-600` | `memory-unavailable` | no | Memory store unavailable (not configured, backend down). |
-| `NIKA-601` | `memory-not-found` | no | Memory id not found in store. |
-| `NIKA-602` | `memory-embedding-failed` | no | Embedding provider call failed. |
-| `NIKA-603` | `memory-storage` | no | Backing storage error (disk, quota, write failure). |
-
-## Reserved ranges (placeholders only)
-
-These range sentinels exist in `codes.rs` so `lookup("NIKA-700")` returns
-a usable `NikaCode`, even though the owning crates are not yet admitted.
-
-| Code | Slug | Range | Status |
-|---|---|---|---|
-| `NIKA-700` | `wasm-plugin` | 700–749 | Placeholder — `WasmPluginError` codes land with `nika-plugin` (v0.100 seam). |
-| `NIKA-750` | `sandbox` | 750–799 | Placeholder — `SandboxError` codes land with sandbox crates. |
-| `NIKA-800` | `observability` | 800–819 | Placeholder — reserved for v0.100 OTel adapter. |
-| `NIKA-999` | `internal` | 999 | Catch-all internal error. [File an issue.](https://github.com/supernovae-st/nika/issues) |
-
-## Looking up codes programmatically
-
-<CodeGroup>
-```rust From the wire
-use nika_error::codes::{lookup, NIKA_001};
-
-assert_eq!(lookup("NIKA-001"), Some(NIKA_001));
-assert_eq!(lookup("NIKA-042"), None); // not yet defined
+# Recover ONLY on timeout · any other code still fails
+on_error:
+  on_codes: [NIKA-TIMEOUT-001]
+  recover: { stale: true, items: [] }
 ```
 
-```rust From the trait
-use nika_error::traits::NikaErrorCode;
-use nika_kernel::provider::ProviderError;
+`on_error.skip` preserves the original error at `tasks.X.error` — a
+downstream task can branch on `${{ tasks.X.error.code }}` while the status
+reads `skipped`.
 
-let err = ProviderError::RateLimited { retry_after_ms: Some(1200) };
-assert_eq!(err.nika_code().num, 382);
-assert!(err.is_transient()); // → retry
-```
-
-```rust Serde
-use nika_error::codes::NIKA_001;
-
-let wire = serde_json::to_string(&NIKA_001).unwrap();
-assert_eq!(wire, "\"NIKA-001\"");
-```
-</CodeGroup>
-
-<Warning>
-  `nika_error::codes::lookup()` only resolves codes owned by
-  `nika-error` itself (the Core range). Codes owned by downstream crates
-  resolve via `NikaErrorCode::nika_code(&err)` directly. A
-  workspace-level registry is tracked as future work — see the comment
-  block in `codes.rs`.
-</Warning>
-
-## See also
-
-<CardGroup cols={2}>
-  <Card title="Foundations" icon="cube" href="/architecture/layers">
-    How `nika-error` fits into the L0 foundation crates.
-  </Card>
-  <Card title="Layers" icon="layer-group" href="/architecture/layers">
-    Why error ownership follows the layer model.
-  </Card>
-  <Card title="Constellation" icon="diagram-project" href="/reference/constellation">
-    Which crates have landed and which reserve ranges for later.
-  </Card>
-  <Card title="CLI" icon="terminal" href="/reference/cli">
-    How `nika` surfaces codes in terminal output.
-  </Card>
-</CardGroup>
+<Card title="The full error model" icon="book" href="https://github.com/supernovae-st/nika-spec/blob/main/spec/05-errors.md">
+  Retry policies, backoff strategies, recovery semantics, and the
+  gate-based failure propagation rules — spec/05-errors.md.
+</Card>
