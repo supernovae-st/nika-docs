@@ -11,8 +11,10 @@ Source of [docs.nika.sh](https://docs.nika.sh) — the Mintlify-built documentat
 
 A standalone public repository whose only job is to host the Mintlify
 documentation source: a `docs.json` navigation config plus `.mdx` pages.
-Mintlify watches `main` via its GitHub App and rebuilds the live site on push —
-there is no CI or build server on our side.
+Mintlify watches `main` via its GitHub App and rebuilds the live site on push.
+The repo also runs its own drift gate in CI (`.github/workflows/gate.yml` →
+`scripts/link-audit.py`): internal links resolve · every page registered in
+`docs.json` nav · no dead-branch GitHub refs · no legacy `{{ }}` binding syntax.
 
 This repo is **not** the Nika engine source, **not** the marketing site, and
 **not** a library you install.
@@ -21,20 +23,24 @@ This repo is **not** the Nika engine source, **not** the marketing site, and
 
 ```
 nika-docs/
-├── docs.json              Mintlify config + 4-tab navigation
+├── docs.json              Mintlify config + navigation (every page MUST be registered)
 ├── introduction.mdx       Landing
 ├── getting-started/       3 pages (installation · first-workflow · editors)
-├── concepts/              6 pages (architecture · verbs · workflows · bindings · events · providers)
+├── guides/                4 pages (patterns · agent-authoring · templates · troubleshooting)
+├── concepts/              7 pages (architecture · verbs · workflows · bindings · events · providers · security)
+├── examples/              21 pages (overview + 20 tiered showcase workflows · PROJECTED)
 ├── architecture/          5 pages (layers · FCI · L0 decisions · admission · ADR index)
-├── reference/             8 pages (YAML · CLI · schema · error codes · providers catalog · capabilities · constellation · status)
+├── reference/             10 pages (YAML · CLI · schema · error codes · builtins · providers catalog · MCP catalog · capabilities · constellation · status)
 ├── changelog/             2 pages (releases · roadmap)
-├── snippets/              _status-snapshot.mdx (auto-generated — see below)
+├── snippets/              _canon · _status-snapshot · _ecosystem (auto-generated/shared — see below)
+├── scripts/link-audit.py  the repo's own drift gate (see CI)
+├── .github/workflows/     gate.yml — link-audit on every push/PR
 ├── images/                logos + favicon
 └── global.css             Mermaid transparent background
 ```
 
-33 files, ~4,300 LOC of curated MDX across four tabs: **Guide · Architecture ·
-Reference · Changelog**.
+~57 pages of curated MDX across four tabs: **Guide · Architecture ·
+Reference · Changelog** (count drifts — trust the tree, not this line).
 
 ## Local preview
 
@@ -53,22 +59,22 @@ npx mintlify@latest broken-links
 
 There is no `package.json` — Mintlify's CLI runs standalone via `npx`.
 
-## The status snapshot is auto-generated
+## Generated content — never hand-edit
 
-`snippets/_status-snapshot.mdx` is rendered by a script living in the engine
-repo. **Do not hand-edit it** — your changes will be overwritten on the next
-refresh.
+Three classes of content are PROJECTED from external sources of truth.
+Hand edits are overwritten on the next regeneration (and the projector
+`--check` gates catch drift in the monorepo audit):
 
-To regenerate it (from a checkout that has both the engine and docs available):
+| Surface | Source of truth | Regenerate |
+|---|---|---|
+| `snippets/_status-snapshot.mdx` (engine live state) | engine repo | `bash scripts/mintlify-snapshot.sh` (in the engine) |
+| `snippets/_canon.mdx` (language facts: verbs/builtins/providers counts) | `nika-spec/canon.yaml` | `python3 scripts/canon-projectors.py --write` (in the spec) |
+| `examples/*.mdx` YAML+mermaid blocks · `guides/templates.mdx` template blocks · `reference/error-codes.mdx` tables | `nika-spec` showcase/ · templates/ · error registry | `python3 scripts/showcase-projector.py --write` (in the spec) |
 
-```bash
-cd nika/engine && bash scripts/mintlify-snapshot.sh
-# Writes ../docs/snippets/_status-snapshot.mdx
-# Then commit + push from nika/docs/:
-cd ../docs && git add snippets/_status-snapshot.mdx
-git commit -m "docs(snapshot): refresh live numbers"
-git push
-```
+In page bodies, **never hardcode counts** — import `{CANON}` / `{STATUS}`
+from the snippets and reference fields (`{CANON.builtins}`,
+`{STATUS.cratesAdmitted}`). Frontmatter `description:` cannot import →
+keep volatile numbers out of descriptions entirely.
 
 ## Deploy
 
@@ -92,9 +98,11 @@ Pull requests are welcome.
 
 1. Fork + branch from `main`.
 2. Run `npx mintlify@latest dev` locally and verify your changes render.
-3. Run `npx mintlify@latest broken-links` — fix anything it reports.
+3. Run `npx mintlify@latest broken-links` AND `python3 scripts/link-audit.py`
+   — both must be clean (CI enforces the latter).
 4. One `.mdx` file per page, and every page must be listed in `docs.json`.
-5. Keep conventions above (vocabulary, headings, voice).
+5. Keep conventions above (vocabulary, headings, voice) + the generated-content
+   rules (no hand-edits to projected blocks · no hardcoded counts).
 
 ## Related repositories
 
@@ -102,7 +110,7 @@ Pull requests are welcome.
 |---|---|
 | [`supernovae-st/nika`](https://github.com/supernovae-st/nika) | Rust engine — the workflow runtime itself (AGPL) |
 | [`supernovae-st/nika-spec`](https://github.com/supernovae-st/nika-spec) | The open workflow language spec (Apache-2.0) — the language the engine implements |
-| [`supernovae-st/nika.sh`](https://github.com/supernovae-st/nika.sh) | Marketing site (Astro) — [nika.sh](https://nika.sh) |
+| [`supernovae-st/nika.sh`](https://github.com/supernovae-st/nika.sh) | The site (Vite + React + r3f) — [nika.sh](https://nika.sh) |
 | [`supernovae-st/nika-client`](https://github.com/supernovae-st/nika-client) | TypeScript SDK for consuming the Nika daemon |
 | [`supernovae-st/nika-design-skill`](https://github.com/supernovae-st/nika-design-skill) | Claude skill for authoring workflows |
 | [`supernovae-st/homebrew-tap`](https://github.com/supernovae-st/homebrew-tap) | Homebrew formula |
