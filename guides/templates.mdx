@@ -1,0 +1,419 @@
+---
+title: "Templates"
+description: "Six instantiable skeletons covering the recurring workflow shapes. Copy, fill the SLOT lines, check, ship — agents don't invent structure, they instantiate it."
+sidebarTitle: "Templates"
+icon: "copy"
+---
+
+Every recurring workflow shape has a **complete, valid skeleton** in the
+spec — gated by the conformance suite on every push, with a `# SLOT:`
+marker at every decision point. The path from intent to a correct file
+is mechanical: **route → copy → fill slots → `nika check` → repair →
+re-check.**
+
+## Route by intent
+
+| Your intent sounds like… | Template | What it locks in |
+|---|---|---|
+| « take data, produce words, save them » | [`chain`](#chain) | deterministic gather · one model job · explicit persist |
+| « watch X, act when Y » | [`gate-and-act`](#gate-and-act) | jq extraction · CEL skip-gate · often zero model calls |
+| « do this for EVERY item » | [`fanout`](#fanout) | runtime collection · the full leash (max_parallel · fail_fast · retry) |
+| « only what changed since last run » | [`etl-state`](#etl-state) | state read→diff→write · `on_error: recover:` quarantine |
+| « research / review / open-ended » | [`agent-loop`](#agent-loop) | plan-then-execute · default-deny tools · budgets · typed final message |
+| « anything irreversible (deploy · send · publish) » | [`human-gated-ship`](#human-gated-ship) | parallel gates · assert · `nika:prompt` GO · `on_finally` record |
+
+Composite jobs compose templates — a fanout whose merge feeds a
+human-gated-ship, an etl-state whose delta fans out. Start from the
+template matching the **outer** shape.
+
+<Info>
+  The YAML below is projected verbatim from
+  [`nika-spec/templates/`](https://github.com/supernovae-st/nika-spec/tree/main/templates)
+  (the source of truth, validated by the conformance runner) — these
+  copies cannot drift.
+</Info>
+
+## chain
+
+The default shape for « take real data, produce words, save them ».
+
+{/* template:begin chain.nika.yaml */}
+```yaml chain.nika.yaml
+nika: v1
+workflow: chain-template            # SLOT: kebab-case workflow id
+description: "gather → think → persist"   # SLOT: one honest sentence
+
+model: mock/echo                    # SLOT: provider/model (mock/echo = CI-safe)
+
+vars:
+  source: "./input.txt"             # SLOT: your inputs · typed where required
+
+tasks:
+  - id: gather
+    invoke:                         # SLOT: the fact source · nika:read / nika:fetch / exec
+      tool: "nika:read"
+      args: { path: "${{ vars.source }}" }
+
+  - id: think
+    depends_on: [gather]
+    infer:
+      prompt: |
+        # SLOT: the one model job · interpolate ${{ tasks.gather.output }}
+        Summarize · ${{ tasks.gather.output }}
+
+  - id: persist
+    depends_on: [think]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./output.md"         # SLOT: destination
+        content: "${{ tasks.think.output }}"   # ALWAYS pass content · a write without it writes nothing
+
+outputs:
+  result: ${{ tasks.think.output }}  # SLOT: the callable contract
+```
+{/* template:end */}
+
+## gate-and-act
+
+Watch something, act only when a condition holds — often zero model calls.
+
+{/* template:begin gate-and-act.nika.yaml */}
+```yaml gate-and-act.nika.yaml
+nika: v1
+workflow: gate-and-act-template     # SLOT: kebab-case workflow id
+description: "watch a value · act only when the condition holds"   # SLOT
+
+vars:
+  source_url: "https://api.example.com/v1/value"   # SLOT: what to watch
+  threshold: 100                    # SLOT: the trigger condition value
+
+secrets:
+  webhook:
+    source: env
+    key: ALERTS_WEBHOOK_URL         # SLOT: where the act lands
+
+tasks:
+  - id: check
+    invoke:
+      tool: "nika:fetch"
+      args:
+        url: "${{ vars.source_url }}"
+        mode: jq
+        jq: "."
+    output:
+      value: ".value"               # SLOT: the jq path to the watched field
+
+  - id: act
+    depends_on: [check]
+    when: ${{ tasks.check.value > vars.threshold }}   # SLOT: the CEL condition
+    invoke:
+      tool: "nika:notify"           # SLOT: the action · notify / write / exec
+      args:
+        channel: webhook
+        target: "${{ secrets.webhook }}"
+        message: "Threshold crossed · ${{ tasks.check.value }}"   # SLOT
+        severity: warning
+
+outputs:
+  value: ${{ tasks.check.value }}
+```
+{/* template:end */}
+
+## fanout
+
+The same work for every item of a runtime collection, fully leashed.
+
+{/* template:begin fanout.nika.yaml */}
+```yaml fanout.nika.yaml
+nika: v1
+workflow: fanout-template           # SLOT: kebab-case workflow id
+description: "discover N items · process in parallel · merge"   # SLOT
+
+model: mock/echo                    # SLOT: provider/model
+
+vars:
+  collection_source: "./items"      # SLOT: where the collection comes from
+
+tasks:
+  - id: discover
+    invoke:                         # SLOT: glob / fetch sitemap / exec + jq split
+      tool: "nika:glob"
+      args: { pattern: "${{ vars.collection_source }}/*.md" }
+
+  - id: process
+    depends_on: [discover]
+    for_each: ${{ tasks.discover.output }}
+    max_parallel: 4                 # SLOT: the polite ceiling
+    fail_fast: false
+    timeout: "60s"                  # SLOT: per-iteration bound
+    retry:
+      max_attempts: 3
+      backoff_strategy: exponential
+      jitter: true
+    on_error:
+      recover: null                 # a failed item yields null at its index · the batch lives
+    infer:                          # SLOT: the per-item job (any verb)
+      prompt: |
+        Process this item · ${{ item }}
+
+  - id: survivors
+    depends_on: [process]
+    invoke:                         # the null-aware fan-in · order preserved
+      tool: "nika:jq"
+      args:
+        input: ${{ tasks.process.output }}
+        expression: "[ .[] | select(. != null) ]"
+
+
+  - id: merge
+    depends_on: [survivors]
+    infer:
+      prompt: |
+        # SLOT: the fan-in · the survivors array (failed items filtered)
+        Merge these results into one report · ${{ tasks.survivors.output }}
+
+outputs:
+  report: ${{ tasks.merge.output }}
+```
+{/* template:end */}
+
+## etl-state
+
+Incremental runs: only what changed since last time, survive bad input.
+
+{/* template:begin etl-state.nika.yaml */}
+```yaml etl-state.nika.yaml
+nika: v1
+workflow: etl-state-template        # SLOT: kebab-case workflow id
+description: "read state · fetch fresh · diff · process the delta · save state"   # SLOT
+
+vars:
+  source_url: "https://api.example.com/v1/records"   # SLOT: the data source
+  state_path: "./state/etl-state.json"               # SLOT: the cursor file
+
+tasks:
+  # First run · no state file yet · recover to an empty list.
+  - id: empty
+    invoke:
+      tool: "nika:jq"
+      args: { input: [], expression: "." }
+
+  - id: previous
+    invoke:
+      tool: "nika:read"
+      args: { path: "${{ vars.state_path }}" }
+    on_error:
+      on_codes: [NIKA-BUILTIN-READ-001]   # not-found ONLY · a permission error still fails loudly
+      recover: ${{ tasks.empty.output }}
+
+  - id: fresh
+    invoke:
+      tool: "nika:fetch"            # SLOT: fetch / read / exec — the fresh data
+      args:
+        url: "${{ vars.source_url }}"
+        mode: jq
+        jq: ".records"
+
+  - id: delta
+    depends_on: [previous, fresh]
+    invoke:
+      tool: "nika:json_diff"        # RFC 6902 · empty patch = nothing new
+      args:
+        before: "${{ tasks.previous.output }}"
+        after: "${{ tasks.fresh.output }}"
+
+  - id: process
+    depends_on: [delta]
+    when: ${{ size(tasks.delta.output) > 0 }}
+    invoke:
+      tool: "nika:jq"               # SLOT: the delta job (jq · infer · write…)
+      args:
+        input: "${{ tasks.delta.output }}"
+        expression: "length"
+
+  - id: save_state
+    depends_on: [fresh]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "${{ vars.state_path }}"
+        content: "${{ tasks.fresh.output }}"
+        create_dirs: true
+        overwrite: true
+
+outputs:
+  changes:
+    value: ${{ tasks.delta.output }}
+    type: array
+    description: "RFC 6902 ops since last run · empty = no-op run"
+```
+{/* template:end */}
+
+## agent-loop
+
+Open-ended work: plan with a fast model, execute with a budgeted agent,
+validate the typed result. Never ship an unleashed agent.
+
+{/* template:begin agent-loop.nika.yaml */}
+```yaml agent-loop.nika.yaml
+nika: v1
+workflow: agent-loop-template       # SLOT: kebab-case workflow id
+description: "plan → budgeted agent → typed result"   # SLOT
+
+model: mock/echo                    # SLOT: agents want a tool-calling model
+
+vars:
+  goal:
+    type: string
+    required: true
+    description: "What the agent must accomplish"   # SLOT
+
+tasks:
+  - id: plan
+    infer:
+      prompt: "Break '${{ vars.goal }}' into at most 4 concrete steps."   # SLOT
+      schema:
+        type: object
+        required: [steps]
+        properties:
+          steps: { type: array, items: { type: string } }
+
+  - id: execute
+    depends_on: [plan]
+    agent:
+      system: "Work the plan step by step. Call nika:done when finished."   # SLOT
+      prompt: "Plan · ${{ tasks.plan.output.steps }}"
+      tools:                        # SLOT: the MINIMUM grant for the job
+        - "nika:read"
+        - "nika:done"
+      max_turns: 15                 # SLOT: the loop bound
+      max_tokens_total: 80000       # SLOT: the spend bound
+      schema:                       # SLOT: the typed final-message contract
+        type: object
+        required: [findings]
+        properties:
+          findings: { type: array, items: { type: string } }
+
+  - id: confirm
+    depends_on: [execute]
+    invoke:
+      tool: "nika:assert"
+      args:
+        condition: "${{ size(tasks.execute.output.findings) > 0 }}"
+        message: "Agent returned no findings — do not trust an empty run"   # SLOT
+
+outputs:
+  findings:
+    value: ${{ tasks.execute.output.findings }}
+    type: array
+    description: "The agent's typed findings"   # SLOT
+```
+{/* template:end */}
+
+## human-gated-ship
+
+Anything irreversible: parallel gates, a hard assert, a human GO, and an
+`on_finally` record whatever happens.
+
+{/* template:begin human-gated-ship.nika.yaml */}
+```yaml human-gated-ship.nika.yaml
+nika: v1
+workflow: human-gated-ship-template  # SLOT: kebab-case workflow id
+description: "verify in parallel · human GO · act · record"   # SLOT
+
+secrets:
+  webhook:
+    source: env
+    key: TEAM_WEBHOOK_URL           # SLOT: where the record lands
+
+tasks:
+  # ── the verification wave · all checks run in parallel ──
+  - id: check_a
+    exec:
+      command: "echo ok"            # SLOT: gate 1 (tests · lint · probe)
+      capture: structured
+
+  - id: check_b
+    exec:
+      command: "echo ok"            # SLOT: gate 2
+      capture: structured
+
+  - id: gates
+    depends_on: [check_a, check_b]
+    invoke:
+      tool: "nika:assert"
+      args:
+        condition: "${{ tasks.check_a.output.exit_code == 0 && tasks.check_b.output.exit_code == 0 }}"
+        message: "A gate is RED — refusing to proceed"   # SLOT
+
+  - id: human
+    depends_on: [gates]
+    invoke:
+      tool: "nika:prompt"
+      args:
+        message: "All gates GREEN. Proceed?"   # SLOT: the decision, fully informed
+        default: false
+
+  - id: act
+    depends_on: [human]
+    when: ${{ tasks.human.output == true }}
+    exec:
+      command: "echo shipped"       # SLOT: the irreversible action
+      # default capture · a failing ship fails LOUDLY (NIKA-EXEC-001) —
+      # never `capture: structured` on the irreversible step (exit codes
+      # would become data and a red ship would read as success)
+
+  - id: record
+    depends_on: [act]
+    when: true                      # the always-pattern · runs on success, failure, OR refusal
+    invoke:
+      tool: "nika:notify"
+      args:
+        channel: webhook
+        target: "${{ secrets.webhook }}"
+        message: "Run finished · act=${{ tasks.act.status }}"   # SLOT · success | failure | skipped
+        severity: info
+
+outputs:
+  acted: ${{ tasks.act.status }}
+```
+{/* template:end */}
+
+## The instantiation protocol
+
+<Steps>
+  <Step title="Route">
+    Pick the template whose intent row matches — never free-form a
+    workflow when a template routes.
+  </Step>
+  <Step title="Copy + fill">
+    Copy the skeleton, change ONLY the `# SLOT:` lines. Everything else
+    is locked structure.
+  </Step>
+  <Step title="Check">
+    `nika check workflow.nika.yaml` — the validator names the exact rule
+    on every error.
+  </Step>
+  <Step title="Repair from the error">
+    Fix exactly what the named rule says, re-check until clean. Don't
+    fix what the validator didn't name.
+  </Step>
+</Steps>
+
+## See also
+
+<CardGroup cols={2}>
+  <Card title="Writing Nika as an agent" icon="robot" href="/guides/agent-authoring">
+    The deterministic protocol these templates anchor.
+  </Card>
+  <Card title="Patterns" icon="diagram-project" href="/guides/patterns">
+    The 8 composition patterns the templates lock in.
+  </Card>
+  <Card title="Examples" icon="grid" href="/examples/overview">
+    20 full tiered workflows built from these shapes.
+  </Card>
+  <Card title="Templates source" icon="github" href="https://github.com/supernovae-st/nika-spec/tree/main/templates">
+    The skeletons in the spec repo, conformance-gated.
+  </Card>
+</CardGroup>
