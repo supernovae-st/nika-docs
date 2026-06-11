@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Docs gate · run `lefthook install` once per clone.
+#
+# pre-push runs the two checks that actually catch docs breakage:
+#   mint broken-links — the ONLY check that parses MDX for real (a bare
+#     brace in a generated table killed the build once · 2026-06-11) ·
+#     soft-skips when the mint CLI is absent (CI installs it · a clone
+#     without it still pushes, with a warning).
+#   link-audit — fast internal-link + asset audit (python3 · always on).
+
+pre-push:
+  parallel: false
+  commands:
+    mint-broken-links:
+      run: >
+        sh -c 'command -v mint >/dev/null 2>&1
+        && mint broken-links
+        || echo "⚠ mint CLI absent — MDX-parse gate SKIPPED (install: npm i -g mint)"'
+    link-audit:
+      run: python3 scripts/link-audit.py
