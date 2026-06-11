@@ -99,13 +99,13 @@ and features we haven't imagined **without breaking changes to the public API**.
   </Accordion>
 
   <Accordion title="FCI-005 — Reserved error code ranges" icon="triangle-exclamation">
-    `NIKA-XXX` codes are reserved **per crate** in 10-wide blocks in `nika-error`.
-    Each crate owns its block, versioned forever. Unused codes inside a block
-    are marked `// reserved for <purpose>` — never reassigned.
-
-    Example ranges: catalog `NIKA-100..109`, kernel `NIKA-110..129`, binding
-    `NIKA-200..229`, verb-exec `NIKA-300..319`. Full map in
-    [`reference/error-codes`](/reference/error-codes).
+    Two error surfaces, one rule each. The WORKFLOW-VISIBLE surface is the
+    spec's `NIKA-<NAMESPACE>-<NNN>` taxonomy (28 registered v0.1 codes ·
+    [`reference/error-codes`](/reference/error-codes)) — namespaces own
+    `001-099` ranges, codes are never repurposed. The ENGINE-INTERNAL
+    registry (`nika_error::codes` · `NIKA-1000+` blocks per L1 effect
+    crate) is diagnostics machinery — reserved per crate, never
+    reassigned, and never leaked into workflow-visible errors.
   </Accordion>
 
   <Accordion title="FCI-006 — Sealed traits for core, open traits for extension" icon="seal">

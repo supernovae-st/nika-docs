@@ -86,7 +86,7 @@ wire, you know exactly which crate produced it.
 
 - `task.started` — a task begins executing.
 - `task.completed` — a task ends successfully.
-- `task.failed` — a task errored out; payload carries the NikaCode.
+- `task.failed` — a task errored out; payload carries the typed error (`code` · `category` · `transient` · the spec error shape). On the wire the engine's event slugs are snake_case (`task_failed`) — the dot-form here is the documentation vocabulary.
 - `task.skipped` — the task's `when:` evaluated to false (or its empty
   `for_each` collection skipped it).
 - `task.cancelled` — the task never ran because its default gate became

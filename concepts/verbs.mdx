@@ -183,11 +183,11 @@ workflow default), `temperature` (0.0–2.0), `max_tokens` (u32), `schema`
 
 **Invariants** (from `nika-kernel::provider::Provider`):
 
-- Unified `InferRequest` (INV-017) — one DTO, 7 API dialects below.
+- Unified `InferRequest` (INV-017) — one DTO · per-provider wire dialects below (3 implemented today: anthropic · gemini · openai-compat — the openai-compatible dialect carries most of the 14-provider catalog · plus mock).
 - Capability rules ([{STATUS.capabilityRules} rules](/reference/capabilities))
   run **before** dispatch. Sending `tools` to a model whose capability
-  rule says `tool_calling = false` fails with NIKA-13x before the
-  network round-trip.
+  rule says `tool_calling = false` fails with a typed validation error
+  before the network round-trip.
 - Every provider emits the same `InferEvent` stream — `Delta`,
   `ToolUseStart`, `ToolUseDelta`, `Thinking`, `Usage`, `Done`.
 
@@ -223,7 +223,11 @@ until a completion signal fires or a budget exhausts.
 
 **Invariants** (from `nika-kernel::runtime::agent`):
 
-- `AgentLoopConfig` bounds the loop: `max_turns`, `max_tokens_total`.
+- The loop is budget-bounded. The LANGUAGE contract (`max_turns` ·
+  `max_tokens_total` · spec 02-verbs) is what workflows declare; the
+  engine's `AgentLoopConfig` carries `max_turns` today plus its
+  planning/reflection/compression knobs — `max_tokens_total` wires in
+  with the runtime milestone.
   A ceiling hit is a **typed failure** (`NIKA-AGENT-001` /
   `NIKA-AGENT-002` · `budget_error`) with the last assistant message
   preserved in `error.details.partial_output` — recover it explicitly

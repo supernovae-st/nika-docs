@@ -74,9 +74,9 @@ flowchart TB
 | Layer | Role | Allowed I/O | Allowed deps | Example crates |
 |---|---|---|---|---|
 | **L0** | Pure types, lookup tables, sync-only APIs | none | (leaf) | `nika-types`, `nika-error`, `nika-catalog`, `nika-schema`, `nika-event`, `nika-binding`, `nika-transform`, `nika-pck-manifest`, `nika-catalog-codegen` |
-| **L0.5** | Kernel trait definitions + companions (mock) — async OK | none (traits only) | L0 | `nika-kernel`, `nika-kernel-mock` |
+| **L0.5** | Kernel trait definitions + companions (mock) — async OK | none (traits only) | L0 | `nika-kernel` (facade hub), `nika-kernel-core`, `nika-kernel-ai`, `nika-kernel-runtime`, `nika-kernel-plugin`, `nika-kernel-mock` |
 | **L1** | Effect implementations — async, per-crate capability axis | declared axes only (fs / net / exec / env) | L0, L0.5 | `nika-fs`, `nika-http`, `nika-process`, `nika-git`, `nika-keys-*`, `nika-pck-registry`, `nika-pck-store`, `nika-<provider>-*` |
-| **L2** | Verbs + domain services — orchestrates L1 impls behind kernel traits | via L1 traits only | L0, L0.5, L1 | `nika-pck`, `nika-verb-*`, `nika-policy`, `nika-memory`, `nika-observability`, `nika-builtin-{github,cloud,workspace}` |
+| **L2** | Verbs + domain services — orchestrates L1 impls behind kernel traits | via L1 traits only | L0, L0.5, L1 | `nika-pck`, `nika-verb-*`, `nika-policy`, `nika-connectome`, `nika-observability`, `nika-builtin-{github,cloud,workspace}` |
 | **L3** | Runtime + policy + sandbox — enforces execution contracts | via L2 | L0..L2 | `nika-runtime`, `nika-shield`, `nika-wasm-host` (v0.100), `nika-sandbox` (v0.100) |
 | **L4** | Interfaces — transport / UI surfaces (libraries) | via L3 | L0..L3 | `nika-cli`, `nika-serve`, `nika-mcp`, `nika-lsp`, `nika-sdk`, `nika-catalog-verify` |
 | **L5** | The binary — sole `[[bin]]` composition root | via L4 | L0..L4 | `nika` (&lt;500 LOC) |
@@ -148,7 +148,7 @@ today and forbids its silent later use.
 
 ## Forward compatibility
 
-- **v0.95 memory subsystem** — 1 L2 orchestrator (`nika-memory`) + 8 L1 satellites (hnsw, bm25, rrf, fsrs, rdfs-reasoner, temporal, graph-algos, autodesc). No renumber — they slot into L1 / L2 naturally.
+- **The Connectome** — 1 L2 orchestrator (`nika-connectome`) + 10 L1 satellites (hnsw, bm25, rrf, rerank, fsrs, rdfs-reasoner, temporal, graph-algos, autodesc-minimal, autodesc-full). No renumber — they slot into L1 / L2 naturally.
 - **v0.100 WASM** plugin host + sandbox — L3 crates alongside `nika-runtime`. No renumber.
 
 ## Anti-patterns

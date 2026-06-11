@@ -53,7 +53,7 @@ flowchart TB
     VIF["nika-verb-infer 🧭"]:::planned
     VA["nika-verb-agent 🧭"]:::planned
     PCK["nika-pck 🧭"]:::planned
-    MEM["nika-memory 🧭 v0.95"]:::planned
+    MEM["nika-connectome 🧭 v0.85+"]:::planned
     OBS["nika-observability 🧭"]:::planned
     BGH["nika-builtin-github 🧭"]:::planned
     BCL["nika-builtin-cloud 🧭"]:::planned
@@ -122,7 +122,7 @@ flowchart TB
 | Layer | Admitted | WIP | Planned | Notes |
 |---|---|---|---|---|
 | **L0** | nika-types, nika-error, nika-catalog | nika-schema | codegen, event, binding, transform, pck-manifest | Pure sync, zero I/O. 9 crates total per Q1-Q13 |
-| **L0.5** | nika-kernel, nika-kernel-mock | — | — | Trait definitions + mock companion. Async OK |
+| **L0.5** | nika-kernel (facade), nika-kernel-core, nika-kernel-ai, nika-kernel-runtime, nika-kernel-plugin, nika-kernel-mock | — | — | Trait definitions (4-way split + facade hub) + mock companion. Async OK |
 | **L1** | — | — | fs, http, process, git, keys-\*, provider-\*, pck-registry, pck-store, memory-satellites (v0.95) | Effect impls. Each declares capability axes |
 | **L2** | — | — | verb-infer, verb-exec, verb-invoke, verb-agent, pck, memory (v0.95), observability, builtin-{github,cloud,workspace} | Verbs + domain services (`fetch` is the `nika:fetch` builtin, not a verb crate) |
 | **L3** | — | — | runtime, shield, wasm-host (v0.100), sandbox (v0.100) | Runtime + policy |
@@ -138,7 +138,7 @@ in the {STATUS.cratesTarget} target. It lands post-v0.90 via the
 
 <AccordionGroup>
   <Accordion title="L2 orchestrator" icon="brain">
-    `nika-memory` — ties the 8 satellites together behind the `MemoryStore`
+    `nika-connectome` — ties the 10 satellites together behind the `MemoryStore`
     trait. Exposes unified put / query / forget / recall API.
   </Accordion>
   <Accordion title="L1 satellites (8)" icon="satellite-dish">
