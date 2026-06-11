@@ -46,9 +46,8 @@ workflow: scrape-and-summarise
 tasks:
   - id: crawl
     invoke:
-      server: firecrawl        # id from the catalog below
-      tool: scrape
-      input:
+      tool: "mcp:firecrawl/scrape"   # mcp:<server>/<tool> · server id from the catalog below
+      args:
         url: https://example.com
 
   - id: summarise

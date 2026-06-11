@@ -179,12 +179,14 @@ workflow: multi-provider
 
 tasks:
   - id: primary
+    on_error: { skip: true }   # a dead provider skips (error preserved) · the gate below reads it
     infer:
       model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: "Explain linear algebra in one sentence."
 
   - id: fallback
-    when: "${{ tasks.primary.failed }}"
+    depends_on: [primary]
+    when: "${{ tasks.primary.error != null }}"   # skip preserves the error · the fallback reads it
     infer:
       model: openai/gpt-4o
       prompt: "Explain linear algebra in one sentence."

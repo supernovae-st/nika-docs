@@ -62,6 +62,7 @@ tasks:
         mode: text
 
   - id: summarize
+    depends_on: [read]
     infer:
       model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: |
@@ -69,10 +70,12 @@ tasks:
         ${{ tasks.read.output }}
 
   - id: save
-    exec:
-      command: tee
-      args: ["/tmp/summary.txt"]
-      stdin: "${{ tasks.summarize.output.text }}"
+    depends_on: [summarize]
+    invoke:
+      tool: nika:write
+      args:
+        path: "/tmp/summary.txt"
+        content: "${{ tasks.summarize.output }}"
 ```
 
 <Note>

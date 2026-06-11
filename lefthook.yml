@@ -18,3 +18,10 @@ pre-push:
         || echo "⚠ mint CLI absent — MDX-parse gate SKIPPED (install: npm i -g mint)"'
     link-audit:
       run: python3 scripts/link-audit.py
+    oracle-sweep:
+      # every full yaml workflow block must validate against the spec oracle
+      # (needs the sibling spec clone · soft-skip when absent)
+      run: >
+        sh -c '[ -d ../spec/conformance ]
+        && python3 scripts/oracle-sweep.py
+        || echo "⚠ sibling spec clone absent — oracle-sweep SKIPPED"'
