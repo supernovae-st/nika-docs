@@ -28,11 +28,18 @@ beyond `nika` installed and one provider key.
 nika doctor
 ```
 
-If you see `no providers configured`, set a key:
+The zero-key path · have [Ollama](https://ollama.com) running locally — no API
+key needed:
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-# or any provider in the catalog
+ollama pull llama3.1
+```
+
+Or use a cloud provider — set any key:
+
+```bash
+export MISTRAL_API_KEY=...
+# or export ANTHROPIC_API_KEY=... · any provider in the catalog
 ```
 
 All provider env vars listed in [Providers catalog](/reference/providers-catalog).
@@ -48,7 +55,7 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
+      model: ollama/llama3.1               # <provider>/<name> · local · swap for any cloud provider
       prompt: "Say hi to the chrysalis. Be brief."
 ```
 
@@ -67,7 +74,7 @@ nika run hello.nika.yaml
 Target output:
 
 ```
-▶ greet  infer  → anthropic/claude-sonnet-4-6
+▶ greet  infer  → ollama/llama3.1
   ┌─ output ──────────────────
   │ Welcome inside the chrysalis. 🦋
   └───────────────────────────
@@ -83,13 +90,13 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
+      model: ollama/llama3.1               # <provider>/<name> · local · swap for any cloud provider
       prompt: "Say hi to the chrysalis. Be brief."
 
   - id: critique
     depends_on: [greet]
     infer:
-      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
+      model: ollama/llama3.1               # <provider>/<name> · local · swap for any cloud provider
       prompt: |
         The greeting was: ${{ tasks.greet.output }}
 
@@ -122,7 +129,7 @@ workflow: hello-structured
 tasks:
   - id: names
     infer:
-      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
+      model: ollama/llama3.1               # <provider>/<name> · local · swap for any cloud provider
       prompt: "Generate three names for a butterfly."
       schema:                          # structured output · JSON Schema
         type: object

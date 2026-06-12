@@ -64,7 +64,7 @@ tasks:
   - id: summarize
     depends_on: [read]
     infer:
-      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
+      model: ollama/llama3.1               # <provider>/<name> · local · zero key
       prompt: |
         Summarize in one sentence:
         ${{ tasks.read.output }}

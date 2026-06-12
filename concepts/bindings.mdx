@@ -80,7 +80,7 @@ tasks:
   - name: loop
     for_each: "${{ vars.count }}"      # fails — for_each needs a list
     infer:
-      model: anthropic/<model-id>     # <provider>/<name>
+      model: ollama/<model>     # <provider>/<name>
       prompt: "Iteration ${{ item }}"
 ```
 

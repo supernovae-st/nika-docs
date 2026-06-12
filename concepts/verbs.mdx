@@ -165,7 +165,7 @@ workflow default), `temperature` (0.0–2.0), `max_tokens` (u32), `schema`
 ```yaml
 - name: summarize
   infer:
-    model: anthropic/<model-id>          # <provider>/<name> · see /reference/providers-catalog
+    model: mistral/<model>          # <provider>/<name> · see /reference/providers-catalog
     system: "You are a technical writer."
     prompt: |
       Summarize this in one sentence:
@@ -207,7 +207,7 @@ until a completion signal fires or a budget exhausts.
 ```yaml
 - name: investigate
   agent:
-    model: anthropic/<model-id>          # <provider>/<name>
+    model: mistral/<model>          # <provider>/<name>
     system: |
       You are investigating a GitHub issue. Use tools to gather
       context before answering.

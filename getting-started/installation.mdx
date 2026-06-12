@@ -118,15 +118,18 @@ When release artifacts ship:
 
 ## Provider keys
 
-Nika needs at least one provider API key to run inference. At v0.81:
+Nika needs a provider to run inference — local needs no key at all. At v0.81:
 
 ```bash target — v0.81
-# Shell env (ephemeral)
-export ANTHROPIC_API_KEY=sk-ant-...
-export OPENAI_API_KEY=sk-...
+# Local · zero key (Ollama daemon)
+ollama pull llama3.1
 
-# System keychain (persistent, recommended)
-nika keys add anthropic
+# Or export any cloud provider key (ephemeral)
+export MISTRAL_API_KEY=...
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# System keychain (persistent, recommended for cloud)
+nika keys add mistral
 ```
 
 See [Providers catalog](/reference/providers-catalog) for all

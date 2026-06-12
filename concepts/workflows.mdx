@@ -32,7 +32,7 @@ tasks:
   - id: greet
     infer:
       prompt: "Say hi in one line."
-      model: anthropic/<model-id>      # <provider>/<name>
+      model: ollama/<model>      # <provider>/<name>
 ```
 
 Two required lines (`nika:` + `workflow:`) and a non-empty `tasks:` — the
@@ -133,7 +133,7 @@ tasks:
   - name: analyze
     depends_on: [fetch_data]
     infer:
-      model: anthropic/<model-id>      # <provider>/<name>
+      model: ollama/<model>      # <provider>/<name>
       prompt: "${{ tasks.fetch_data.output }}"
 
   - name: notify
@@ -149,7 +149,7 @@ Fan-out over a collection:
   depends_on: [list_files]
   for_each: "${{ tasks.list_files.output.lines }}"
   infer:
-    model: anthropic/<model-id>        # <provider>/<name>
+    model: ollama/<model>        # <provider>/<name>
     prompt: "Review this file: ${{ item }}"
 ```
 
@@ -206,7 +206,7 @@ vars:
 tasks:
   - name: greet
     infer:
-      model: anthropic/<model-id>  # <provider>/<name>
+      model: ollama/<model>  # <provider>/<name>
       prompt: "Say hi to ${{ vars.target }}."
 ```
 
