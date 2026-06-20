@@ -76,5 +76,5 @@ It's 100% machine-authoritative. This doc is a readable summary.
 entire lifetime of the v1 contract. Minor additions (a new optional field, a
 new builtin) are **additive** and never change it (no `@minor` bumps, no
 `nika migrate` for them). A future `nika: v2` would be a deliberate
-breaking-change generation with its own spec — per `forever-v0.x`,
-effectively never.
+breaking-change generation with its own spec — and since the `v1` envelope
+is frozen, effectively never.

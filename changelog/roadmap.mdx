@@ -1,16 +1,17 @@
 ---
 title: "Roadmap"
-description: "Forever-v0.x. No v1.0 target. Quality over speed. First usable ship: v0.81, summer 2026. Milestones tag when truly green."
+description: "Real semver toward 1.0. Quality over speed. First public release: 1.0.0, 1 Aug 2026. Milestones tag when truly green."
 sidebarTitle: "Roadmap"
 icon: "map"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika is **forever-v0.x**. There is no v1.0 target, no marketing tick-tock,
-no ship-by date. Each version is a quality milestone earned by crate
-admissions + hygiene vector deploys + ADR promotions. When a milestone is
-truly green, it tags.
+Nika follows **real semver toward 1.0**. The first public release is **1.0.0**
+(1 Aug 2026); the current pre-release is {STATUS.version} (release-candidate).
+Features arrive in 1.x minors. Each version is a quality milestone earned by
+crate admissions + hygiene vector deploys + ADR promotions. When a milestone
+is truly green, it tags.
 
 <Info>
   **Canonical source:** [`ROADMAP.md`](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md)
@@ -18,13 +19,13 @@ truly green, it tags.
   the full roadmap lives in the repo alongside ADRs.
 </Info>
 
-## Why forever-v0.x
+## Why real semver toward 1.0
 
 <CardGroup cols={2}>
-  <Card title="No v1.0 pressure" icon="infinity">
-    Shipping v1.0 locks API surface prematurely. Nika is new code paths
-    every quarter — stabilising a v1 now freezes decisions we'd regret
-    in 18 months.
+  <Card title="1.0 means we stand behind it" icon="circle-check">
+    1.0.0 is the first public release — a usable engine we commit to,
+    not a marketing tick. Pre-1.0 the surface is still hardening; 1.0
+    is the line where the public API is stable and additive from there.
   </Card>
   <Card title="Quality bar stays high" icon="medal">
     Every crate admits with 12 gates. {STATUS.cratesAdmitted} of
@@ -43,7 +44,7 @@ truly green, it tags.
   </Card>
 </CardGroup>
 
-## Current state — v{STATUS.version}.x
+## Current state — v{STATUS.version} (release-candidate)
 
 **{STATUS.cratesAdmitted} / {STATUS.cratesTarget} crates admitted** · **{STATUS.libTests} lib tests** · **{STATUS.hygieneVectors}** hygiene vectors ({STATUS.hygieneGreen} green) · **{STATUS.adrs}** ADRs.
 
@@ -52,12 +53,12 @@ See [live state](/reference/status) for the authoritative snapshot.
 ## Milestones
 
 <AccordionGroup>
-  <Accordion title="v0.81 — First usable ship (language v0.1 + vertical slice)" icon="rocket">
-    **The first public ship — language and engine announced together,
-    summer 2026.** The language spec (`nika: v1` envelope, Apache-2.0)
+  <Accordion title="1.0.0 — First public release (language v1 + vertical slice)" icon="rocket">
+    **The first public release — language and engine announced together,
+    1 Aug 2026.** The language spec (`nika: v1` envelope, Apache-2.0)
     goes public with a usable vertical slice of the engine: a binary you
     launch, `infer` + `exec` + `nika run` at minimum, `serve`/MCP if
-    cadence holds. The rest of the verb surface hardens in v0.8x minors
+    cadence holds. The rest of the verb surface hardens across 1.x minors
     after the announce. The communicated version is always the real tag.
 
     **Engine target state at the tag:**
@@ -74,11 +75,11 @@ See [live state](/reference/status) for the authoritative snapshot.
     - `release-plz` wired for per-crate semver on publishable crates.
     - Public-API + semver-checks CI live.
 
-    **Summer 2026.** Ships when green, not when the calendar says.
+    **1 Aug 2026.** Ships when green.
   </Accordion>
 
-  <Accordion title="v0.90 — Diamond Foundation" icon="diamond">
-    **Target state when shipped:**
+  <Accordion title="1.x minors — Diamond Foundation complete" icon="diamond">
+    **Target state, reached additively across 1.x minors:**
 
     - **All {STATUS.cratesTarget} crates admitted** past 12 gates.
     - `nika` binary admitted (L5, &lt;500 LOC composition root).
@@ -95,10 +96,10 @@ See [live state](/reference/status) for the authoritative snapshot.
       propagation warnings + DAG preview.
     - Sigstore keyless signing on release artifacts.
 
-    **No date.** This is the v0.x "stable foundation" tag.
+    **No date.** The 42-crate architecture, complete across 1.x minors.
   </Accordion>
 
-  <Accordion title="The Connectome — sovereign memory" icon="brain">
+  <Accordion title="2.0 — The Connectome era (sovereign memory)" icon="brain">
     **Target state when shipped:**
 
     - `nika-connectome` L2 orchestrator admitted.
@@ -129,8 +130,8 @@ See [live state](/reference/status) for the authoritative snapshot.
     - `pck` registry fully live — community workflow packages,
       signature verification, overlay precedence (User > Pck > Core).
 
-    **No date.** Versions stay honest v0.x tags — there is no marketing
-    version axis.
+    **No date.** Versions stay honest real-semver tags — there is no
+    marketing version axis.
   </Accordion>
 
   <Accordion title="Ongoing" icon="infinity">
@@ -144,7 +145,7 @@ See [live state](/reference/status) for the authoritative snapshot.
     - Community catalogs (`nika-catalog-cn`, `nika-catalog-eu`) via
       pck admission gates.
 
-    **Forever-v0.x.** No v1.0.
+    **Real semver.** Additive across minors, toward 2.0.
   </Accordion>
 </AccordionGroup>
 

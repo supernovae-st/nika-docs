@@ -1,6 +1,6 @@
 ---
 title: "Editor setup"
-description: "What IDE integration ships today and what's planned. Schema validation via yaml-language-server works now; the VS Code extension + LSP ride the v0.81 ship."
+description: "What IDE integration ships today and what's planned. Schema validation via yaml-language-server works now; the VS Code extension + LSP ride the 1.0.0 release."
 sidebarTitle: "Editor setup"
 icon: "code"
 ---
@@ -9,7 +9,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika's editor story has two tiers: **(1)** generic JSON-Schema validation
 that works today with any yaml-language-server-compatible editor, and
-**(2)** a custom `nika-lsp` server (with the v0.81 ladder) with cross-task binding
+**(2)** a custom `nika-lsp` server (with the 1.0 ladder) with cross-task binding
 analysis, taint propagation warnings, and DAG preview.
 
 <Info>
@@ -118,7 +118,7 @@ tasks:
   </Card>
 </CardGroup>
 
-## Tier 2 — `nika-lsp` custom server (v0.81 ladder · 19.6/19.7)
+## Tier 2 — `nika-lsp` custom server (1.0 ladder · 19.6/19.7)
 
 The generic `yaml-language-server` covers structural validation. A
 custom `nika-lsp` crate (planned L4 admission) adds Nika-specific semantics:

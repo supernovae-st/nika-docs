@@ -46,5 +46,5 @@ nika check workflow.nika.yaml --strict   # + extra lints
 - Minor additions (a new optional field, a new builtin) are **additive**
   and never change the marker — no `@minor` bumps, no `nika migrate` for them.
 - A future `nika: v2` would be a deliberate breaking-change generation with
-  its own spec — and per `forever-v0.x`, that is effectively never.
+  its own spec — and since the `v1` envelope is frozen, that is effectively never.
 - Anti-pattern: `nika: v1.0` · `nika: "1"` · `nika: 1.0`. The value is exactly `v1`.

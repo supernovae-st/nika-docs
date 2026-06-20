@@ -113,8 +113,8 @@ git diff --exit-code docs/mintlify/snippets/_status-snapshot.mdx \
 
 ## What's locked (decisions the project won't revisit)
 
-- **{STATUS.cratesTarget} crate target for v0.90** — confirmed by POST_AUDIT_REVISIONS 2026-04-14.
-- **Forever v0.x** — no v1.0 target. Quality over speed.
+- **{STATUS.cratesTarget} crate architecture** — confirmed by POST_AUDIT_REVISIONS 2026-04-14; reached additively across 1.x minors.
+- **Real semver toward 1.0** — first public release 1.0.0 (1 Aug 2026). Quality over speed.
 - **Layer discipline** — L0 zero I/O, L0.5 traits only, strict downward deps, cargo-deny enforced. See [Layers](/architecture/layers).
 - **12 gates per crate** — no exceptions. See [Admission](/architecture/admission).
 - **Zero `.unwrap()` / `.expect(` in `src/`** — `?` propagation; `workspace.lints.clippy.unwrap_used = "deny"`.
@@ -158,7 +158,7 @@ Explicitly removed or deferred by POST_AUDIT_REVISIONS 2026-04-14:
 |---|---|---|
 | `nika-sdk` | 0 consumers, speculative | Deleted |
 | `nika-napi` / `nika-py` | W1 speculative, rebuild Act 3 if needed | Deferred |
-| `nika-tui` | W1 speculative | Deferred to post-v0.90 |
+| `nika-tui` | W1 speculative | Deferred to post-1.0 |
 | `nika-macros` | No proc macros in L0 (Q1 locked) | Never a crate |
 | `nika-lsp-core` | Merged into `nika-lsp` | Module, not crate |
 | `nika-policy` / `nika-cache` | Modules in `nika-runtime` | Not crates |

@@ -5,8 +5,8 @@ sidebarTitle: "Forward-compat"
 icon: "shield-halved"
 ---
 
-Nika is **forever-v0.x**. Features ship incrementally over years. The architecture at
-v0.90 must accommodate v0.95 (memory subsystem, agent-v2), v0.100 (WASM plugins, observability),
+Nika follows **real semver toward 1.0**. Features ship incrementally across 1.x minors over years.
+The 1.0 architecture must accommodate later minors (memory subsystem, agent-v2; WASM plugins, observability),
 and features we haven't imagined **without breaking changes to the public API**.
 
 <Info>
@@ -80,7 +80,7 @@ and features we haven't imagined **without breaking changes to the public API**.
 
     `v1` is the only value for the lifetime of the v1 contract — minor
     additions are **additive** and never change it. A `nika: v2` would be a
-    deliberate breaking generation (per forever-v0.x · effectively never).
+    deliberate breaking generation (the `v1` envelope is frozen · effectively never).
     Non-workflow artifacts (package manifests, events) carry their own
     schema version field.
   </Accordion>

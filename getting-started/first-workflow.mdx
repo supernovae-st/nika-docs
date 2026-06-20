@@ -1,6 +1,6 @@
 ---
 title: "Your first workflow"
-description: "Preview of the target first-workflow experience. Five minutes from install to a workflow that talks to Claude (v0.81 · the first usable ship · summer 2026)."
+description: "Preview of the target first-workflow experience. Five minutes from install to a workflow that talks to Claude (1.0.0 · the first public release · 1 Aug 2026)."
 sidebarTitle: "First workflow"
 icon: "play"
 ---
@@ -17,14 +17,14 @@ import { CANON } from "/snippets/_canon.mdx";
   live admission progress.
 </Warning>
 
-## Goal (v0.81 target · summer 2026)
+## Goal (1.0.0 target · 1 Aug 2026)
 
 Write a `.nika.yaml` file, run it, get structured output. No setup
 beyond `nika` installed and one provider key.
 
 ## 1 — Make sure Nika sees a provider
 
-```bash target — v0.81
+```bash target — 1.0.0
 nika doctor
 ```
 
@@ -67,7 +67,7 @@ Three things to notice:
 
 ## 3 — Run it
 
-```bash target — v0.81
+```bash target — 1.0.0
 nika run hello.nika.yaml
 ```
 
@@ -151,7 +151,7 @@ rules](/reference/capabilities) allow it — schema mode, object mode, or
 JSON-mode emulation), and validates the result against your schema before
 passing it on.
 
-```bash target — v0.81
+```bash target — 1.0.0
 nika run hello.nika.yaml
 # Output is guaranteed to be { "names": ["...", "...", "..."] }
 ```

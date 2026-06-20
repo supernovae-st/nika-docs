@@ -12,17 +12,17 @@ import { CANON } from "/snippets/_canon.mdx";
 
 <AccordionGroup>
   <Accordion title="Can I run Nika today?" icon="play">
-    Not yet — the engine is mid-rebuild (Diamond). The **first usable
-    release is v0.81** (language v0.1 + a vertical slice you can launch),
-    summer 2026. What works today: the JSON schema validates your
+    Not yet — the engine is mid-rebuild (Diamond). The **first public
+    release is 1.0.0** (language v1 + a vertical slice you can launch),
+    1 Aug 2026. What works today: the JSON schema validates your
     `.nika.yaml` in any editor ([editors guide](/getting-started/editors)),
     and every example in these docs is conformance-validated YAML you can
     write against now.
   </Accordion>
-  <Accordion title="Why does the language say v1 but the engine v0.x?" icon="code-branch">
+  <Accordion title="Why is the language v1 but the engine pre-1.0?" icon="code-branch">
     Two independent axes. The **language envelope `nika: v1` is frozen
-    forever** — files you write never break. The **engine** versions
-    honestly (`v0.81`, `v0.82`, …, forever-v0.x — no fake-stable v1.0).
+    forever** — files you write never break. The **engine** follows real
+    semver toward 1.0 (`0.90` release-candidate today, then `1.0.0`, `1.1`, …).
     Same model as SQL or GraphQL: the contract is stable, implementations
     iterate.
   </Accordion>

@@ -1,14 +1,15 @@
 ---
 title: "Crate constellation"
-description: "Visual map of every Nika Diamond crate across six layers. Live admission status. Target 42 crates (locked target) at v0.90."
+description: "Visual map of every Nika Diamond crate across six layers. Live admission status. The 42-crate architecture (locked target), reached additively across 1.x minors."
 sidebarTitle: "Constellation"
 icon: "diagram-project"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika Diamond targets **{STATUS.cratesTarget} crates** at v0.90, organized
-across six layers. Today **{STATUS.cratesAdmitted} are admitted**,
+Nika Diamond targets the **{STATUS.cratesTarget}-crate** architecture,
+reached additively across 1.x minors, organized across six layers.
+Today **{STATUS.cratesAdmitted} are admitted**,
 {STATUS.wipCrates.length} is WIP ({STATUS.wipCrates.join(", ")}), the rest
 are planned through Rounds 3-20+.
 
@@ -129,12 +130,12 @@ flowchart TB
 | **L4** | nika-catalog-verify | — | cli, serve, mcp, lsp, sdk | Interfaces, libraries |
 | **L5** | — | — | nika | The &lt;500 LOC binary, sole `[[bin]]` root |
 
-## Memory subsystem (v0.95) — separate count
+## Memory subsystem (the 2.0 Connectome era) — separate count
 
 The 8-crate memory subsystem (plus 1 orchestrator at L2) is **not counted**
-in the {STATUS.cratesTarget} target. It lands post-v0.90 via the
-`MemoryStore` + `EmbeddingProvider` trait reservations already in
-`nika-kernel`.
+in the {STATUS.cratesTarget} target. It lands in the 2.0 Connectome era,
+after the 42-crate foundation, via the `MemoryStore` + `EmbeddingProvider`
+trait reservations already in `nika-kernel`.
 
 <AccordionGroup>
   <Accordion title="L2 orchestrator" icon="brain">
@@ -185,9 +186,9 @@ Current admission order (per Q5 decision, rev.2):
 </Steps>
 
 <Note>
-  No hard timeline per admission round. Forever-v0.x: quality over speed.
-  Each admission = 1 atomic commit = 1 per-admission alpha tag
-  (`v0.8x.0-alpha.N` · e.g. `v0.80.0-alpha.4`).
+  No hard timeline per admission round. Real semver toward 1.0: quality
+  over speed. Each admission = 1 atomic commit = 1 per-admission pre-release
+  tag (`v0.90.0-rc.N` on the way to `1.0.0`).
 </Note>
 
 ## See also
