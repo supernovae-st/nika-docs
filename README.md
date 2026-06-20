@@ -86,7 +86,7 @@ triggers an automatic rebuild (typically ~30 seconds) and updates
 
 - **Narrative vocabulary** (locked): "organ" not "module", "admitted" not
   "added", "grew" not "shipped", "chrysalis" not "beta", "emerge" reserved for
-  v0.90.
+  the 1.0 release.
 - **Butterfly** 🦋 is used sparingly — only in `introduction.mdx`'s closing
   line, never in nav, chrome, or headings.
 - **Headings**: sentence case, never title case.
