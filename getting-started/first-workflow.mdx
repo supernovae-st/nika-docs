@@ -1,30 +1,26 @@
 ---
 title: "Your first workflow"
-description: "Preview of the target first-workflow experience. Five minutes from install to a workflow that talks to Claude (1.0.0 · the first public release · 1 Aug 2026)."
+description: "Five minutes from install to a checked and runnable Nika workflow."
 sidebarTitle: "First workflow"
 icon: "play"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
-import { CANON } from "/snippets/_canon.mdx";
 
-<Warning>
-  **Target design — not yet runnable at v{STATUS.version}.** The YAML shown
-  below is the workflow shape being built toward. Admitted today are the
-  foundation crates ({STATUS.cratesAdmitted} of {STATUS.cratesTarget}) —
-  the verb runtime lands progressively through Rounds 7-10. Read on for
-  the shape of things; follow [/reference/status](/reference/status) for
-  live admission progress.
-</Warning>
+<Info>
+  **v{STATUS.version}:** `nika check`, `nika run`, `nika doctor`, `nika lsp`,
+  and `nika mcp` ship in the binary. Run `nika init` once per repo for schema
+  and agent rules.
+</Info>
 
-## Goal (1.0.0 target · 1 Aug 2026)
+## Goal
 
 Write a `.nika.yaml` file, run it, get structured output. No setup
 beyond `nika` installed and one provider key.
 
 ## 1 — Make sure Nika sees a provider
 
-```bash target — 1.0.0
+```bash
 nika doctor
 ```
 
@@ -67,11 +63,11 @@ Three things to notice:
 
 ## 3 — Run it
 
-```bash target — 1.0.0
+```bash
 nika run hello.nika.yaml
 ```
 
-Target output:
+Example output:
 
 ```
 ▶ greet  infer  → ollama/llama3.1
@@ -151,12 +147,12 @@ rules](/reference/capabilities) allow it — schema mode, object mode, or
 JSON-mode emulation), and validates the result against your schema before
 passing it on.
 
-```bash target — 1.0.0
+```bash
 nika run hello.nika.yaml
 # Output is guaranteed to be { "names": ["...", "...", "..."] }
 ```
 
-## What you just previewed
+## What you just built
 
 - Workflows are YAML files — `.nika.yaml`.
 - Tasks are units of work, identified by `id`.
@@ -165,20 +161,17 @@ nika run hello.nika.yaml
 - `${{ tasks.X.output }}` bindings flow data between tasks, with taint tracking.
 - `schema:` enforces JSON schemas on AI output.
 
-## What you can do today
+## Next checks
 
 <Steps>
-  <Step title="Read the kernel traits">
-    `cargo doc -p nika-kernel --open` — see the 40 ISP traits that define
-    provider / fs / process / memory contracts.
+  <Step title="Check before running">
+    `nika check hello.nika.yaml` — static audit before any token or effect.
   </Step>
-  <Step title="Browse the catalog">
-    `cargo run -p nika-catalog-verify` — validates the {CANON.providers} canonical providers + {STATUS.capabilityRules}
-    capability rules TOML at build time.
+  <Step title="Inspect the DAG">
+    `nika inspect hello.nika.yaml` or `nika graph hello.nika.yaml --format mermaid`.
   </Step>
-  <Step title="Track admission">
-    [Live state](/reference/status) and [Constellation](/reference/constellation)
-    show what's admitted / WIP / planned for each round.
+  <Step title="Wire your agent">
+    `nika wire cursor` or `nika wire all` — explicit MCP setup for supported clients.
   </Step>
 </Steps>
 

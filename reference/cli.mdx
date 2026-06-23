@@ -5,52 +5,57 @@ sidebarTitle: "CLI"
 icon: "terminal"
 ---
 
-<Warning>
-  **Draft — the full CLI reference is auto-generated from the engine at
-  build time and will replace this stub at the 1.0.0 release.**
-</Warning>
+<Info>
+  This page mirrors the shipped 0.90 operator surface. `nika --help` remains
+  the executable source of truth.
+</Info>
 
 ## Core commands
 
 | Command | What it does |
 |---|---|
-| `nika run <file>` | Execute a workflow |
-| `nika check <file>` | Validate without running |
-| `nika explain <file>` | Show the DAG |
-| `nika doctor` | Diagnose setup (keys, providers, system) |
-| `nika keys` | Manage provider keys in system keychain |
-| `nika models` | List / inspect model catalog |
-| `nika replay <log>` | Replay a previous run from its NDJSON log |
-| `nika migrate` | Upgrade an older-schema workflow file |
-| `nika version` | Version + build info |
+| `nika check <file>` | Static pre-flight audit before any run |
+| `nika run <file>` | Execute a checked workflow |
+| `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits |
+| `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT |
+| `nika explain <code>` | Explain a `NIKA-XXXX` error code |
+| `nika doctor` | Diagnose providers plus editor/agent readiness |
+| `nika init [dir]` | Scaffold schema wiring, `AGENTS.md`, and Cursor rules |
+| `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, or `all` |
+| `nika spec [--canon]` | Print the embedded spec or canon |
+| `nika schema` | Print the embedded JSON Schema |
+| `nika examples list|show|run` | Browse or run embedded examples |
+| `nika new --from <template> <dest>` | Instantiate an embedded workflow template |
+| `nika completions <shell>` | Generate shell completions |
+| `nika trace replay|show` | Replay or summarize a recorded run |
+| `nika lsp` | Run the language server over stdio |
+| `nika mcp` | Run the read-only MCP server (`nika_check`, `nika_explain`) |
 
 ## Global flags
 
-| Flag | Default | Description |
+| Flag | Command | Description |
 |---|---|---|
-| `--events <format>` | off | `ndjson` \| `pretty` \| `off` |
-| `--output <path>` | stdout | Final output destination |
-| `--timeout <dur>` | none | Workflow-level wall-time limit |
-| `--input <key=val>` | — | Pass workflow inputs |
-| `--context <key=val>` | — | Override workflow context |
-| `--provider <name>` | from YAML | Override provider |
-| `--model <id>` | from YAML | Override model |
-| `--dry-run` | false | Validate + plan, do not execute |
-| `-v`, `-vv`, `-vvv` | info | Verbosity |
+| `--json` | `check`, `run` | Machine-readable output |
+| `--infer-permits` | `check` | Print the tightest inferred `permits:` boundary |
+| `--output json` | `run` | Print typed workflow outputs as one JSON object |
+| `--dry-run` | `run` | Plan only; execute zero effects |
+| `--no-progress` | `run` | Deterministic non-animated render |
+| `--quiet` | `run` | Compact final verdict card |
+| `--format json|mermaid|dot` | `graph` | Choose graph projection |
+| `--force` | `init`, `new` | Overwrite existing generated files |
 
 ## Environment variables
 
 | Var | Description |
 |---|---|
-| `NIKA_CONFIG_DIR` | Config location (default `~/.config/nika`) |
-| `NIKA_CACHE_DIR` | Cache (default `~/.cache/nika`) |
 | `ANTHROPIC_API_KEY` | Anthropic provider |
 | `OPENAI_API_KEY` | OpenAI provider |
-| `GOOGLE_API_KEY` | Google (Gemini) provider |
+| `GEMINI_API_KEY` | Google Gemini provider |
 | `MISTRAL_API_KEY` | Mistral provider |
-| `COHERE_API_KEY` | Cohere provider |
 | `GROQ_API_KEY` | Groq provider |
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
-| `OLLAMA_HOST` | Ollama base URL (default `http://localhost:11434`) |
+| `XAI_API_KEY` | xAI provider |
+| `OPENROUTER_API_KEY` | OpenRouter provider |
 
-Full auto-generated reference lands with the 1.0.0 binary.
+The MCP server is intentionally read-only. It lets agents call `nika_check`
+and `nika_explain`; effectful execution stays behind `nika run`.

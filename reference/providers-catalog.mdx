@@ -126,7 +126,7 @@ your machine unless a cloud provider is explicitly selected.
 ## Example: invoke a provider
 
 <CodeGroup>
-```yaml workflow.nika.yaml (target design)
+```yaml workflow.nika.yaml
 nika: v1
 workflow: multi-provider
 
@@ -152,11 +152,10 @@ nika run workflow.nika.yaml
 ```
 </CodeGroup>
 
-<Warning>
-  At v{STATUS.version} the `infer:` verb crate is not yet admitted — the
-  YAML above is the target design. Follow [constellation](/reference/constellation)
-  for verb-infer admission progress (Round 8).
-</Warning>
+<Info>
+  `infer:` is live in v{STATUS.version}. Run `nika doctor` first to see
+  which provider keys or local servers are available without printing secrets.
+</Info>
 
 ## See also
 

@@ -9,9 +9,10 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika Diamond targets the **{STATUS.cratesTarget}-crate** architecture,
 reached additively across 1.x minors, organized across six layers.
-Today **{STATUS.cratesAdmitted} are admitted**,
-{STATUS.wipCrates.length} is WIP ({STATUS.wipCrates.join(", ")}), the rest
-are planned through Rounds 3-20+.
+Today **{STATUS.cratesAdmitted} are admitted** and {STATUS.wipCrates.length}
+are WIP ({STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}).
+The remaining crates are future 1.x expansion, not required for the first-run
+CLI/LSP/MCP path.
 
 <Tip>
   Live state: [`/reference/status`](/reference/status). Layer model:
@@ -30,29 +31,29 @@ flowchart TB
   classDef binary fill:#a78bfa,color:#000,stroke:#7c3aed,font-weight:bold
 
   subgraph L5["L5 · binary"]
-    NIKA["nika 🧭"]:::planned
+    NIKA["nika ✅"]:::admitted
   end
 
   subgraph L4["L4 · interfaces"]
-    CLI["nika-cli 🧭"]:::planned
+    CLI["nika-cli ✅"]:::admitted
     SERVE["nika-serve 🧭"]:::planned
-    MCP["nika-mcp 🧭"]:::planned
-    LSP["nika-lsp 🧭"]:::planned
+    MCP["nika-mcp ✅"]:::admitted
+    LSP["nika-lsp ✅"]:::admitted
     SDK["nika-sdk 🧭"]:::planned
     CV["nika-catalog-verify ✅"]:::admitted
   end
 
   subgraph L3["L3 · runtime"]
-    RT["nika-runtime 🧭"]:::planned
+    RT["nika-runtime ✅"]:::admitted
     SH["nika-shield 🧭"]:::planned
   end
 
   subgraph L2["L2 · verbs + services"]
-    VE["nika-verb-exec 🧭"]:::planned
-    VF["nika:fetch builtin 🧭"]:::planned
-    VI["nika-verb-invoke 🧭"]:::planned
-    VIF["nika-verb-infer 🧭"]:::planned
-    VA["nika-verb-agent 🧭"]:::planned
+    VE["nika-verb-exec ✅"]:::admitted
+    VF["nika:fetch builtin ✅"]:::admitted
+    VI["nika-verb-invoke ✅"]:::admitted
+    VIF["nika-verb-infer ✅"]:::admitted
+    VA["nika-verb-agent ✅"]:::admitted
     PCK["nika-pck 🧭"]:::planned
     MEM["nika-connectome 🧭 v0.85+"]:::planned
     OBS["nika-observability 🧭"]:::planned
@@ -62,12 +63,12 @@ flowchart TB
   end
 
   subgraph L1["L1 · effects"]
-    FS["nika-fs 🧭"]:::planned
-    HTTP["nika-http 🧭"]:::planned
-    PROC["nika-process 🧭"]:::planned
+    FS["nika-fs ✅"]:::admitted
+    HTTP["nika-http ✅"]:::admitted
+    PROC["nika-exec-runner ✅"]:::admitted
     GIT["nika-git 🧭"]:::planned
     KEYS["nika-keys-* 🧭"]:::planned
-    PROV["nika-provider-* 🧭"]:::planned
+    PROV["nika-providers ✅"]:::admitted
     PREG["nika-pck-registry 🧭"]:::planned
     PSTR["nika-pck-store 🧭"]:::planned
   end
@@ -81,9 +82,9 @@ flowchart TB
     T["nika-types ✅"]:::admitted
     E["nika-error ✅"]:::admitted
     C["nika-catalog ✅"]:::admitted
-    CG["nika-catalog-codegen 🧭"]:::planned
-    S["nika-schema 🟡"]:::wip
-    EV["nika-event 🧭"]:::planned
+    CG["nika-catalog-codegen ✅"]:::admitted
+    S["nika-schema ✅"]:::admitted
+    EV["nika-event ✅"]:::admitted
     BN["nika-binding 🧭"]:::planned
     TR["nika-transform 🧭"]:::planned
     PM["nika-pck-manifest 🧭"]:::planned
@@ -122,13 +123,13 @@ flowchart TB
 
 | Layer | Admitted | WIP | Planned | Notes |
 |---|---|---|---|---|
-| **L0** | nika-types, nika-error, nika-catalog | nika-schema | codegen, event, binding, transform, pck-manifest | Pure sync, zero I/O. 9 crates total per Q1-Q13 |
+| **L0** | nika-types, nika-error, nika-catalog, nika-catalog-codegen, nika-schema, nika-event | — | binding, transform, pck-manifest | Pure sync, zero I/O. |
 | **L0.5** | nika-kernel (facade), nika-kernel-core, nika-kernel-ai, nika-kernel-runtime, nika-kernel-plugin, nika-kernel-mock | — | — | Trait definitions (4-way split + facade hub) + mock companion. Async OK |
-| **L1** | — | — | fs, http, process, git, keys-\*, provider-\*, pck-registry, pck-store, memory-satellites (v0.95) | Effect impls. Each declares capability axes |
-| **L2** | — | — | verb-infer, verb-exec, verb-invoke, verb-agent, pck, memory (v0.95), observability, builtin-{github,cloud,workspace} | Verbs + domain services (`fetch` is the `nika:fetch` builtin, not a verb crate) |
-| **L3** | — | — | runtime, shield, wasm-host (v0.100), sandbox (v0.100) | Runtime + policy |
-| **L4** | nika-catalog-verify | — | cli, serve, mcp, lsp, sdk | Interfaces, libraries |
-| **L5** | — | — | nika | The &lt;500 LOC binary, sole `[[bin]]` root |
+| **L1** | nika-fs, nika-http, nika-exec-runner, nika-clock, nika-providers | — | git, keys-\*, pck-registry, pck-store, memory-satellites (v0.95) | Effect impls. Each declares capability axes |
+| **L2** | nika-verb-infer, nika-verb-exec, nika-verb-invoke, nika-verb-agent, nika-builtin | — | pck, memory (v0.95), observability, builtin-{github,cloud,workspace} | Verbs + domain services (`fetch` is the `nika:fetch` builtin, not a verb crate) |
+| **L3** | nika-runtime | — | shield, wasm-host (v0.100), sandbox (v0.100) | Runtime + policy |
+| **L4** | nika-catalog-verify, nika-cli, nika-mcp, nika-lsp | — | serve, sdk | Interfaces, libraries |
+| **L5** | nika | — | — | The public binary surface |
 
 ## Memory subsystem (the 2.0 Connectome era) — separate count
 

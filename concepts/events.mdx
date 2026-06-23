@@ -26,12 +26,10 @@ independently:
 | Audit | `AuditSink` | Append-only, persist-or-fail. Compliance (GDPR, EU AI Act, Shield). |
 
 <Info>
-  **Target design banner.** The `EventSink`, `AuditSink`, `BillingSink`,
-  `MetricsExporter`, and `TracerProvider` traits are all defined today
-  in `nika-kernel` (L0.5). End-to-end emission from admitted L2 verb
-  crates is **target design — tracked via Rounds 5–9 of verb crate
-  admissions**. The event shapes below are stable; the per-verb emission
-  sites mature across the constellation.
+  `nika run --json` streams the local event lane today. The kernel traits
+  (`EventSink`, `AuditSink`, `BillingSink`, `MetricsExporter`, and
+  `TracerProvider`) keep the interface stable while HTTP/SSE/OTLP exporters
+  remain future interface work.
 </Info>
 
 ## `Event` shape
@@ -214,14 +212,12 @@ bridge zero-copy into OTel's `SpanContext` when
 ## Enable the stream (target CLI)
 
 ```bash
-nika run workflow.nika.yaml --events ndjson               # stdout
-nika run workflow.nika.yaml --events ndjson > run.log     # file
-nika run workflow.nika.yaml --events otlp://localhost:4317 # OTLP gRPC
+nika run workflow.nika.yaml --json             # stdout NDJSON
+nika run workflow.nika.yaml --json > run.log   # file
 ```
 
-The `nika-serve` L4 interface crate admits in Round 11 and exposes
-NDJSON / OTLP / SSE over HTTP. The CLI flag is target design; today
-`EventSink` only has a mock implementation in `nika-kernel-mock`.
+The CLI JSON lane is live. HTTP/SSE/OTLP export belongs to the future
+`nika-serve` interface; today the local binary owns the run stream.
 
 ## Why five channels, not one
 

@@ -79,11 +79,10 @@ tasks:
 ```
 
 <Note>
-  The `nika` CLI and the verbs shown above are the target design. At
-  v{STATUS.version} only foundation crates (types, error, catalog,
-  kernel, kernel-mock, catalog-verify) are admitted. Verb runtime lands
-  progressively — follow the [constellation](/reference/constellation)
-  for what's live.
+  The `nika` CLI, `nika check`, `nika run`, `nika lsp`, and read-only
+  `nika mcp` are live in v{STATUS.version}. Use `nika init` once per repo
+  for schema + agent rules, then `nika wire <client>` when you want an
+  agent client to call the real Nika oracle.
 </Note>
 
 ## What Nika is not
@@ -139,7 +138,7 @@ flowchart TB
 
     subgraph L4 ["L4 — interfaces"]
       CV["nika-catalog-verify ✅"]:::admitted
-      CLI["nika-cli 🧭 planned"]:::planned
+      CLI["nika-cli ✅"]:::admitted
       SRV["nika-serve 🧭 planned"]:::planned
     end
 
@@ -152,7 +151,7 @@ flowchart TB
       T["nika-types ✅"]:::admitted
       E["nika-error ✅"]:::admitted
       C["nika-catalog ✅"]:::admitted
-      SCH["nika-schema 🟡 WIP"]:::wip
+      SCH["nika-schema ✅"]:::admitted
     end
 
     T --> E

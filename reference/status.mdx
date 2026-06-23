@@ -52,7 +52,7 @@ it verbatim (MEMORY.md, CLAUDE.md, ROADMAP.md, this page).
 | workspace version | v{STATUS.version} |
 | crates (workspace) | {STATUS.cratesWorkspace} |
 | crates (admitted) | {STATUS.cratesAdmitted} / {STATUS.cratesTarget} |
-| crates (WIP) | {STATUS.wipCrates.length} — {STATUS.wipCrates.join(", ")} |
+| crates (WIP) | {STATUS.wipCrates.length} — {STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"} |
 | library tests | {STATUS.libTests} passed, 0 failed |
 | clippy | {STATUS.clippyWarnings} warnings |
 | ADRs | {STATUS.adrs} ({STATUS.adrsAccepted} Accepted + {STATUS.adrsProposed} Proposed) |
@@ -109,7 +109,7 @@ git diff --exit-code docs/mintlify/snippets/_status-snapshot.mdx \
   </Card>
 </CardGroup>
 
-**WIP:** `{STATUS.wipCrates[0]}` — parser + DAG scaffolding, admission Round 4.
+**WIP:** {STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}.
 
 ## What's locked (decisions the project won't revisit)
 

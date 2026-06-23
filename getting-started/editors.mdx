@@ -1,6 +1,6 @@
 ---
 title: "Editor setup"
-description: "What IDE integration ships today and what's planned. Schema validation via yaml-language-server works now; the VS Code extension + LSP ride the 1.0.0 release."
+description: "Schema validation, nika-lsp, the VS Code/Cursor extension, and MCP agent wiring."
 sidebarTitle: "Editor setup"
 icon: "code"
 ---
@@ -8,15 +8,14 @@ icon: "code"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika's editor story has two tiers: **(1)** generic JSON-Schema validation
-that works today with any yaml-language-server-compatible editor, and
-**(2)** a custom `nika-lsp` server (with the 1.0 ladder) with cross-task binding
-analysis, taint propagation warnings, and DAG preview.
+that works with any yaml-language-server-compatible editor, and **(2)** the
+`nika lsp` server plus the VS Code/Cursor extension for deeper workflow
+intelligence.
 
 <Info>
-  **v{STATUS.version} state:** `nika-schema` is WIP (parser + DAG through
-  Round 4). The canonical JSON Schema artifact ships with the
-  `nika-schema` admission commit. Until then, wire any editor against
-  the in-repo schema source (`crates/nika-schema/schemas/`).
+  **v{STATUS.version} state:** the binary ships `nika schema`, `nika lsp`,
+  and `nika mcp`. Use `nika init` for repo-local schema/rules and
+  `nika wire <client>` for explicit MCP client setup.
 </Info>
 
 ## Tier 1 — JSON schema validation (today)
@@ -33,12 +32,12 @@ the workflow schema.
     ```json settings.json
     {
       "yaml.schemas": {
-        "https://docs.nika.sh/schema/workflow.json": "*.nika.yaml"
+        "https://nika.sh/spec/v1/workflow.schema.json": "*.nika.yaml"
       }
     }
     ```
 
-    At v{STATUS.version} pin the schema via the local file until the public URL publishes:
+    Or let `nika init` write this wiring for the current repo.
 
     ```json settings.json — today
     {
@@ -57,7 +56,7 @@ the workflow schema.
       settings = {
         yaml = {
           schemas = {
-            ["https://docs.nika.sh/schema/workflow.json"] = "*.nika.yaml",
+            ["https://nika.sh/spec/v1/workflow.schema.json"] = "*.nika.yaml",
           },
         },
       },
@@ -78,7 +77,7 @@ the workflow schema.
 
   <Tab title="Zed / Cursor / JetBrains">
     Any editor supporting `yaml-language-server` will validate
-    `.nika.yaml` against `https://docs.nika.sh/schema/workflow.json`
+    `.nika.yaml` against `https://nika.sh/spec/v1/workflow.schema.json`
     once it publishes. Zed has native LSP; JetBrains supports via the
     YAML plugin.
   </Tab>
@@ -90,7 +89,7 @@ Add one comment at the top of any `.nika.yaml` so the schema works with
 zero editor configuration:
 
 ```yaml
-# yaml-language-server: $schema=https://docs.nika.sh/schema/workflow.json
+# yaml-language-server: $schema=https://nika.sh/spec/v1/workflow.schema.json
 nika: v1
 workflow: hello
 
@@ -118,10 +117,10 @@ tasks:
   </Card>
 </CardGroup>
 
-## Tier 2 — `nika-lsp` custom server (1.0 ladder · 19.6/19.7)
+## Tier 2 — `nika lsp` + extension
 
 The generic `yaml-language-server` covers structural validation. A
-custom `nika-lsp` crate (planned L4 admission) adds Nika-specific semantics:
+custom `nika-lsp` crate adds Nika-specific semantics:
 
 <AccordionGroup>
   <Accordion title="Cross-task binding analysis" icon="link">
@@ -158,10 +157,10 @@ custom `nika-lsp` crate (planned L4 admission) adds Nika-specific semantics:
 
 | Capability | Status | Admission |
 |---|---|---|
-| JSON Schema (yaml-language-server) | 🟡 WIP with nika-schema | Round 4 |
-| Published schema at `docs.nika.sh/schema/workflow.json` | 🧭 planned | Post-schema admission |
-| `nika-lsp` L4 crate | 🧭 planned | Round 16+ |
-| VS Code extension | 🧭 planned | Post-lsp admission |
+| JSON Schema (yaml-language-server) | shipped | `nika schema` + public schema URL |
+| `nika lsp` L4 crate | shipped | `nika lsp` |
+| VS Code / Cursor extension | shipped | Marketplace + OpenVSX |
+| MCP agent oracle | shipped, read-only | `nika mcp` (`nika_check`, `nika_explain`) |
 | Zed / Neovim native integrations | 🧭 planned | Community + v1.0 |
 
 ## Next

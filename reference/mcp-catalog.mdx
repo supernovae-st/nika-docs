@@ -60,16 +60,16 @@ tasks:
 ```bash Required env
 # Each server declares its env_var in mcp-servers.toml.
 # Firecrawl needs FIRECRAWL_API_KEY — read mcp-servers.toml for the full
-# list or run `nika doctor` once the verb-invoke crate is admitted.
+# list. Run `nika doctor` to inspect provider readiness.
 export FIRECRAWL_API_KEY=fc-...
 nika run workflow.nika.yaml
 ```
 </CodeGroup>
 
 <Note>
-  Verb `invoke:` lands with the `nika-verb-invoke` crate admission
-  (Round 7). At v{STATUS.version} the YAML above is the target design —
-  see the [constellation](/reference/constellation) for progress.
+  Verb `invoke:` is live in v{STATUS.version}. The Nika MCP catalog here is
+  about workflows calling external MCP tools; Nika's own agent-facing MCP
+  server remains read-only (`nika_check`, `nika_explain`).
 </Note>
 
 ## By category
@@ -327,9 +327,9 @@ search for `^name = ` under your chosen server.
 
 <Warning>
   Nika never stores API tokens in workflow YAML. Secrets are read from
-  environment variables at run time; `nika keys add <env>` saves them in
-  your OS keychain (macOS Keychain, Linux Secret Service, Windows
-  Credential Manager).
+  environment variables at run time. Use `nika doctor` to see which provider
+  variables are present or missing; it reports presence only and never prints
+  values.
 </Warning>
 
 ## See also
