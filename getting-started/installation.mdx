@@ -33,9 +33,14 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
   <Tab title="source">
     ```bash
-    git clone git@github.com:supernovae-st/nika.git
+    git clone https://github.com/supernovae-st/nika.git
     cd nika
     cargo test --workspace --lib
+    cargo build --release -p nika-cli
+    mkdir -p ~/.nika/bin
+    ln -sf "$PWD/target/release/nika-cli" ~/.nika/bin/nika
+    export PATH="$HOME/.nika/bin:$PATH"
+    nika --version
     ```
   </Tab>
 </Tabs>
@@ -45,13 +50,13 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 ```bash
 nika --version
 nika doctor    # providers + editor/agent readiness + exact fixes
-nika init      # repo-local schema + agent rules
-nika wire all  # explicit MCP wiring for supported clients
+nika init      # repo-local schema + AGENTS.md
+nika --help    # if `wire` is listed, run: nika wire all
 ```
 
-`nika init` scaffolds repo-local schema wiring, `AGENTS.md`, and Cursor rules.
-`nika wire cursor` or `nika wire all` explicitly wires MCP clients. Installers
-do not mutate editor configs automatically.
+`nika init` scaffolds repo-local schema wiring and agent context. Newer
+binaries also expose `nika wire cursor` / `nika wire all` for explicit MCP
+client setup. Installers do not mutate editor configs automatically.
 
 ## Platforms
 
@@ -68,7 +73,7 @@ do not mutate editor configs automatically.
 
 <Check>
   The install script lives at [nika.sh/install.sh](https://nika.sh/install.sh).
-  **Read it before piping to `sh`.** It's ~80 lines of pure POSIX.
+  **Read it before piping to `sh`.** It's a small POSIX shell script.
 
   Release binaries are published at
   [github.com/supernovae-st/nika/releases](https://github.com/supernovae-st/nika/releases)

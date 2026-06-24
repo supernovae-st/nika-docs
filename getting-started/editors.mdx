@@ -6,6 +6,7 @@ icon: "code"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
 Nika's editor story has two tiers: **(1)** generic JSON-Schema validation
 that works with any yaml-language-server-compatible editor, and **(2)** the
@@ -14,8 +15,9 @@ intelligence.
 
 <Info>
   **v{STATUS.version} state:** the binary ships `nika schema`, `nika lsp`,
-  and `nika mcp`. Use `nika init` for repo-local schema/rules and
-  `nika wire <client>` for explicit MCP client setup.
+  and `nika mcp`. Use `nika init` for repo-local schema/rules. If your
+  `nika --help` lists `wire`, use `nika wire <client>` for explicit MCP
+  client setup.
 </Info>
 
 ## Tier 1 — JSON schema validation (today)
@@ -141,7 +143,7 @@ custom `nika-lsp` crate adds Nika-specific semantics:
   </Accordion>
 
   <Accordion title="Provider / model completion" icon="server">
-    Types `provider: ` → autocompletes from the catalog (13 canonical per spec v0.1 · plus extended catalog IDs).
+    Types `provider: ` → autocompletes from the catalog ({CANON.providers} canonical providers · plus extended catalog IDs).
     Types `model: ` after a provider → autocompletes from that
     provider's models. Invalid pairs flagged inline.
   </Accordion>

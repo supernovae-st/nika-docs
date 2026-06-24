@@ -27,8 +27,8 @@ shipped from.
   no hidden work.
 </Check>
 
-Until `nika` binary admission (Round 17), the engine ships no release
-artifact. Instead, progress is tracked via:
+Since v0.90.0, Nika ships tagged CLI release artifacts. Between release tags,
+progress is tracked via:
 
 1. **Crate admission commits** on `main` (e.g., `feat(nika-X): admit to workspace — all 12 gates passed`).
 2. **Hygiene vector deployments** (currently {STATUS.hygieneVectors} active, {STATUS.hygieneGreen} green / {STATUS.hygieneYellow} yellow / {STATUS.hygieneRed} red).
@@ -126,8 +126,8 @@ artifact. Instead, progress is tracked via:
     Current test counts, clippy, hygiene, admitted crate inventory.
   </Card>
   <Card title="Roadmap" icon="map" href="/changelog/roadmap">
-    What's next — 1.0.0 first public release (language v1 + vertical slice,
-    1 Aug 2026), 1.x minors completing the 42-crate foundation, then the
+    What's next — 1.0.0 public API lock after the release gates are green,
+    1.x minors completing the 42-crate foundation, then the
     2.0 Connectome era and the ecosystem tier.
   </Card>
 </CardGroup>

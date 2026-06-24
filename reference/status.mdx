@@ -64,7 +64,8 @@ it verbatim (MEMORY.md, CLAUDE.md, ROADMAP.md, this page).
 
 <CodeGroup>
 ```bash Local
-cd nika/engine
+git clone https://github.com/supernovae-st/nika.git
+cd nika
 bash scripts/refresh-status.sh                  # full refresh (runs cargo test + clippy)
 bash scripts/refresh-status.sh --quick          # skip cargo
 bash scripts/mintlify-snapshot.sh --quick       # regenerate _status-snapshot.mdx
@@ -88,33 +89,17 @@ git diff --exit-code docs/mintlify/snippets/_status-snapshot.mdx \
 
 ## What's admitted today
 
-<CardGroup cols={2}>
-  <Card title="nika-types" icon="cube" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-types">
-    **L0** · Foundation value types. Timestamp + canonical-JSON modules.
-  </Card>
-  <Card title="nika-error" icon="triangle-exclamation" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-error">
-    **L0** · Typed `NIKA-XXX` error hierarchy + miette integration.
-  </Card>
-  <Card title="nika-catalog" icon="book" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-catalog">
-    **L0** · {STATUS.providers}-provider + {STATUS.capabilityRules}-rule catalog, phf lookup.
-  </Card>
-  <Card title="nika-kernel" icon="circuit-board" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-kernel">
-    **L0.5** · 40 ISP traits, sealed supertrait, prelude hub.
-  </Card>
-  <Card title="nika-kernel-mock" icon="circuit-board" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-kernel-mock">
-    **L0.5** · Pure-memory trait mocks for test hermeticity.
-  </Card>
-  <Card title="nika-catalog-verify" icon="check" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-catalog-verify">
-    **L4** · Build-only catalog validation tool.
-  </Card>
-</CardGroup>
-
-**WIP:** {STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}.
+The generated snapshot above is the source of truth: **{STATUS.cratesAdmitted}
+/ {STATUS.cratesTarget}** Diamond crates are admitted, with WIP
+**{STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}**. The
+admitted set spans the foundation crates, kernel traits, local/effect crates,
+providers, all four verbs, runtime, LSP, MCP, and CLI surfaces needed for the
+first public release candidate.
 
 ## What's locked (decisions the project won't revisit)
 
 - **{STATUS.cratesTarget} crate architecture** — confirmed by POST_AUDIT_REVISIONS 2026-04-14; reached additively across 1.x minors.
-- **Real semver toward 1.0** — first public release 1.0.0 (1 Aug 2026). Quality over speed.
+- **Real semver toward 1.0** — 0.90.0 is the first public release-candidate; 1.0 ships when release gates are green. Quality over speed.
 - **Layer discipline** — L0 zero I/O, L0.5 traits only, strict downward deps, cargo-deny enforced. See [Layers](/architecture/layers).
 - **12 gates per crate** — no exceptions. See [Admission](/architecture/admission).
 - **Zero `.unwrap()` / `.expect(` in `src/`** — `?` propagation; `workspace.lints.clippy.unwrap_used = "deny"`.
@@ -122,24 +107,18 @@ git diff --exit-code docs/mintlify/snippets/_status-snapshot.mdx \
 - **TDD with mutation ≥ 90%** — RED before GREEN; `cargo mutants -p <crate>` gates admission.
 - **`#[non_exhaustive]` on every public type** — see [Forward-compat invariants](/architecture/forward-compat-invariants).
 
-## What's designed, not yet locked
+## What's next
 
 <AccordionGroup>
-  <Accordion title="nika-schema — parser + DAG (~12k LOC)">
-    WIP through Round 4. Covers AST, parser, DAG builder, taint analysis,
-    ariadne diagnostics. The biggest L0 crate. Round 2e part 1 landed;
-    admission after Rounds 3 + 4 (canary + legacy parity).
+  <Accordion title="L0-completion crates">
+    The remaining Diamond target crates are additive hardening work, not
+    prerequisites for the shipped 0.90 release-candidate surface. See the
+    roadmap for the exact current sequence.
   </Accordion>
-  <Accordion title="nika-binding — template engine (~8k LOC)">
-    Template expression parser, scope resolution, 64 pipe filters, type
-    coercion. Depends on `nika-transform` (Q8 rev.2). Targeted for Round 5
-    admission.
-  </Accordion>
-  <Accordion title="Verbs — infer / exec / invoke / agent">
-    Four L2 verb crates that consume kernel traits. Provider routing,
-    structured output parity, trust propagation. Admission across
-    Rounds 6-10. (HTTP fetch is the `nika:fetch` builtin under `invoke`,
-    not a verb crate.)
+  <Accordion title="1.0 release hardening">
+    The user-facing front door is already installable. The 1.0 work is about
+    proving the release checklist, docs, editor setup, and shadow-zone gates
+    stay true end-to-end.
   </Accordion>
   <Accordion title="The Connectome (sovereign memory) — post-foundation">
     **Separate count** from the {STATUS.cratesTarget} Diamond crates.

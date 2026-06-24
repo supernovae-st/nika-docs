@@ -47,7 +47,7 @@ your machine unless a cloud provider is explicitly selected.
     All 5 local providers + most cloud providers speak `openai-chat` — same request shape, differing base URL. `anthropic` and `gemini` have native dialects.
   </Step>
   <Step title="Verify the backend is reachable">
-    Local providers need their server running (e.g. the Ollama daemon on `localhost:11434`) — no key. Cloud providers declare an `env_var` (e.g., `MISTRAL_API_KEY`). `nika doctor` will check presence before run (once admitted).
+    Local providers need their server running (e.g. the Ollama daemon on `localhost:11434`) — no key. Cloud providers declare an `env_var` (e.g., `MISTRAL_API_KEY`). `nika doctor` checks provider readiness before run.
   </Step>
   <Step title="Pick default vs cheap model">
     Every provider declares both. `default_model` is the capable tier; `cheap_model` is the cost-optimized tier. Capability rules in `model-capabilities.toml` determine which models support vision / tools / streaming / structured output.

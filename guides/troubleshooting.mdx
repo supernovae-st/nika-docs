@@ -12,12 +12,10 @@ import { CANON } from "/snippets/_canon.mdx";
 
 <AccordionGroup>
   <Accordion title="Can I run Nika today?" icon="play">
-    Not yet — the engine is mid-rebuild (Diamond). The **first public
-    release is 1.0.0** (language v1 + a vertical slice you can launch),
-    1 Aug 2026. What works today: the JSON schema validates your
-    `.nika.yaml` in any editor ([editors guide](/getting-started/editors)),
-    and every example in these docs is conformance-validated YAML you can
-    write against now.
+    Yes. Install the latest tagged release with Homebrew or `install.sh`,
+    then run `nika check` and `nika run` locally. The engine is still
+    pre-1.0 and hardening toward the 1.0 launch, but the `nika: v1`
+    language envelope is already stable.
   </Accordion>
   <Accordion title="Why is the language v1 but the engine pre-1.0?" icon="code-branch">
     Two independent axes. The **language envelope `nika: v1` is frozen
