@@ -8,9 +8,10 @@ icon: "download"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 <Warning>
-  **v{STATUS.version} is a pre-1.0 engine release candidate.** The `nika: v1`
-  language envelope is stable; the engine and editor surfaces continue to
-  harden toward the 1.0 launch.
+  **Docs track main: v{STATUS.version}.** Homebrew installs the latest tagged
+  release, which may intentionally lag main. Run `nika --version` and
+  `nika --help` after install; those commands are the executable source of truth
+  for your local binary. The `nika: v1` language envelope is stable.
 </Warning>
 
 ## Install today
@@ -26,8 +27,8 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
     ```bash
     curl -LsSf https://nika.sh/install.sh | sh
     ```
-    Detects platform (macOS / Linux), prefers Homebrew if available,
-    then falls back to the GitHub release binary.
+    Detects platform (macOS / Linux), prefers Homebrew when `NIKA_VERSION=latest`
+    and Homebrew is available, then falls back to the GitHub release binary.
   </Tab>
 
   <Tab title="source">
@@ -56,10 +57,10 @@ do not mutate editor configs automatically.
 
 | Platform | Release asset | Status |
 |---|---|---|
-| macOS Apple Silicon | `nika-macos-arm64-{STATUS.version}.tar.gz` | shipped |
-| macOS Intel | `nika-macos-x64-{STATUS.version}.tar.gz` | shipped |
-| Linux x86_64 | `nika-linux-x64-{STATUS.version}.tar.gz` | shipped |
-| Linux aarch64 | `nika-linux-arm64-{STATUS.version}.tar.gz` | shipped |
+| macOS Apple Silicon | `nika-macos-arm64-<release>.tar.gz` | shipped |
+| macOS Intel | `nika-macos-x64-<release>.tar.gz` | shipped |
+| Linux x86_64 | `nika-linux-x64-<release>.tar.gz` | shipped |
+| Linux aarch64 | `nika-linux-arm64-<release>.tar.gz` | shipped |
 | Windows | `x86_64-pc-windows-msvc` | 🧭 planned post-1.0 |
 | WASM (sandboxed) | `wasm32-wasip2` | 🧭 planned v0.100 |
 
