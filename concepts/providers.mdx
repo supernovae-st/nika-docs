@@ -1,6 +1,6 @@
 ---
 title: "Providers"
-description: "32 LLM providers, one unified InferRequest, capability-aware routing. Switch provider = change one field."
+description: "14 canonical providers, local-first — plus a wider engine catalog — behind one unified InferRequest. Switch provider = change one field."
 sidebarTitle: "Providers"
 icon: "server"
 ---
@@ -38,7 +38,7 @@ pub struct InferRequest {
     pub top_p: Option<f32>,
     pub max_tokens: Option<u32>,
     pub stream: bool,
-    // reserved for v0.95+ memory subsystem: memory, budget, baggage, trust_level, trace_id
+    // reserved for future minors: memory, budget, baggage, trust_level, trace_id
 }
 ```
 
@@ -113,7 +113,7 @@ algorithm (defaults → scan rules in file order → apply matches).
 
 When a provider fails, Nika can route to a fallback:
 
-```yaml target design — v0.85+
+```yaml target design — a future minor
 tasks:
   - id: primary
     infer:
@@ -159,9 +159,9 @@ tasks:
     with the correct base URL + auth. If new dialect, new L1 crate
     `nika-provider-<name>`.
   </Step>
-  <Step title="Run the 12 gates">
+  <Step title="Pass the engine's admission checklist">
     Property test against the provider's API contract. Criterion bench for
-    token throughput. Capability parity test. [Admission →](/architecture/admission).
+    token throughput. Capability parity test. [How admission works →](/architecture/admission).
   </Step>
 </Steps>
 
