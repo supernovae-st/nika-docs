@@ -205,7 +205,7 @@ breaking any v0.8x caller:
    span identity across `tokio::mpsc` boundaries and spawned tasks
    without cloning the full `SpanGuard`.
 
-Both land as additive, `#[non_exhaustive]` extensions. At v0.100 they
+Both land as additive, `#[non_exhaustive]` extensions. In a future minor they
 bridge zero-copy into OTel's `SpanContext` when
 `nika-observability-otel` admits.
 
