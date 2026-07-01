@@ -3,9 +3,8 @@
 Source of [docs.nika.sh](https://docs.nika.sh) — the Mintlify-built documentation for
 [Nika](https://github.com/supernovae-st/nika), the AGPL Rust workflow engine for AI.
 
-> **Mintlify deployment pending.** DNS `docs.nika.sh` and the Mintlify GitHub App
-> are being wired up — the site will go live once the custom domain lands. In
-> the meantime, preview locally (see below).
+> **Live at [docs.nika.sh](https://docs.nika.sh).** Every merge to `main`
+> deploys via the Mintlify GitHub App. Preview locally with the steps below.
 
 ## What this repo is
 
