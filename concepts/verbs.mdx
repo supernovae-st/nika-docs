@@ -14,10 +14,9 @@ dispatcher is exhaustive at compile time, so adding a fifth verb is a
 schema-version bump, not a patch release.
 
 <Info>
-  **Target design banner.** Verb grammar is locked by `nika-schema` raw
-  AST (`RawAction` enum). The YAML parser is WIP — scaffolding lives at
-  `crates/nika-schema/` and graduates in **Round 4** admission. Snippets
-  below reflect the target shape, not what executes end-to-end at v{STATUS.version}.
+  All four verbs execute end-to-end today — every snippet on this page is
+  runnable with `nika run` at v{STATUS.version}. Verb grammar is frozen by
+  the `nika: v1` language envelope: these four, forever.
 </Info>
 
 ## Why four?
@@ -261,12 +260,12 @@ rather say no.
 
 <Info>
   **Implementation status.** Current verb executors ship as design-only
-  kernel traits; the L2 verb crates (`nika-verb-infer`, `nika-verb-exec`,
-  `nika-verb-invoke`, `nika-verb-agent`) are admitted in Rounds 5–8 (see
+  kernel traits; the four L2 verb crates (`nika-verb-infer`,
+  `nika-verb-exec`, `nika-verb-invoke`, `nika-verb-agent`) are all
+  admitted and execute end-to-end (see
   [Constellation](/reference/constellation)). `fetch` is not a verb crate
   — it is the `nika:fetch` builtin reached through `invoke`. The verb
-  grammar is locked. Implementation tracked via `nika-schema` crate
-  (Round 4 admission).
+  grammar is locked and shipped (`nika-schema`).
 </Info>
 
 ## Read next

@@ -16,9 +16,8 @@ the dependency graph allows.
 <Info>
   **Implementation status.** The envelope below is the canonical spec
   contract (`nika-spec` · [01-envelope](https://github.com/supernovae-st/nika-spec/blob/main/spec/01-envelope.md)).
-  The WIP parser at `crates/nika-schema/` is converging to it — see
-  [live state](/reference/status) for what executes end-to-end at the
-  current version.
+  The engine implements it end-to-end today — `nika check` parses and
+  audits it, `nika run` executes it. [Live state →](/reference/status)
 </Info>
 
 ## Minimal workflow
@@ -94,13 +93,13 @@ all the way into the diagnostic layer (ADR-010 miette bridge).
                                  ┌────────────────┐
                                  │ nika-schema    │   DAG · typed
                                  │    analyzer    │   scope · taint
-                                 │  (Round 4+)    │
+                                 │   (admitted)   │
                                  └────────────────┘
                                           │
                                           ▼
                                  ┌────────────────┐
                                  │  nika-runtime  │
-                                 │ (L3, Round 9+) │
+                                 │  (L3 · live)   │
                                  │                │
                                  │ topo-sort ──►  │   ┌─ exec   L2
                                  │ dispatch  ──►  │   ├─ fetch  L2
@@ -232,11 +231,10 @@ default). See [Events](/concepts/events) for the event model and
 [Bindings](/concepts/bindings) for how the DAG propagates values.
 
 <Info>
-  The workflow grammar is locked. Implementation is tracked via the
-  `nika-schema` crate — Round 4 admission adds the envelope, the
-  analyzer, and semantic validation (type-checked bindings, taint
-  propagation, cycle detection). Today the raw AST is complete; the
-  analyzer is scaffolded.
+  The workflow grammar is locked and implemented: the `nika-schema`
+  crate ships the envelope, the analyzer and semantic validation
+  (type-checked bindings, secret-flow audit, cycle detection) — that is
+  exactly what `nika check` runs on your file today.
 </Info>
 
 ## Read next

@@ -84,7 +84,8 @@ tasks:
       prompt: "Iteration ${{ item }}"
 ```
 
-Type-checking is the analyzer's job (Round 4+). The parser's
+Type-checking is the analyzer's job — live today in `nika check`
+(every deep output reference is validated against its declared shape). The parser's
 `Templatable<T>` carries `T` as a phantom type so downstream stages
 can't conflate `Templatable<u32>` with `Templatable<bool>`.
 

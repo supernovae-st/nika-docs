@@ -15,27 +15,39 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 ## Goal
 
-Write a `.nika.yaml` file, run it, get structured output. No setup
-beyond `nika` installed and one provider key.
+Write a `.nika.yaml` file, run it, get structured output. No setup beyond
+`nika` installed — **your first run needs no API key and no model server.**
 
-## 1 — Make sure Nika sees a provider
+## 1 — Pick how the AI step runs
 
-```bash
-nika doctor
+Three paths, from zero-setup to production:
+
+**Instant (no model at all)** — the built-in `mock/echo` model returns a
+deterministic response, so you can see a workflow's shape right now:
+
+```yaml
+model: mock/echo
 ```
 
-The zero-key path · have [Ollama](https://ollama.com) running locally — no API
-key needed:
+**Local (free · private)** — have [Ollama](https://ollama.com) running —
+no API key, nothing leaves your machine:
 
 ```bash
 ollama pull llama3.1
 ```
 
-Or use a cloud provider — set any key:
+**Cloud** — set any provider key:
 
 ```bash
 export MISTRAL_API_KEY=...
 # or export ANTHROPIC_API_KEY=... · any provider in the catalog
+```
+
+At any point, `nika doctor` tells you exactly what's wired and how to fix
+what isn't:
+
+```bash
+nika doctor
 ```
 
 All provider env vars listed in [Providers catalog](/reference/providers-catalog).
@@ -61,11 +73,17 @@ Three things to notice:
 - **`workflow:`** is a human-readable name (kebab-case · the document-type discriminator).
 - **`tasks:`** is a list; each task has an `id` and one verb (here, `infer`).
 
-## 3 — Run it
+## 3 — Check it, then run it
 
 ```bash
+nika check hello.nika.yaml   # the static audit — plan · cost · secrets · types · before a single token is spent
 nika run hello.nika.yaml
 ```
+
+<Tip>
+  No provider handy? Swap the `model:` line for `mock/echo` — both commands
+  work fully offline, and you can wire a real model later.
+</Tip>
 
 Example output:
 
