@@ -1,0 +1,90 @@
+---
+title: "Agents"
+description: "Claude Code, Cursor, Codex, Windsurf — your agent does the work once, Nika keeps the workflow. Two commands wire any of them."
+sidebarTitle: "Agents"
+icon: "robot"
+---
+
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
+Your agent already does the work — a PR review in Claude Code, a research
+brief in Codex, a triage pass in Cursor. Then the chat scrolls away and the
+procedure is gone. Nika's job is to keep it: the agent writes the workflow
+**as a `.nika.yaml` file**, you review it, the runtime enforces it, and it
+runs again next week without re-prompting.
+
+Two commands wire any agent:
+
+```sh
+nika init            # writes AGENTS.md + .vscode/settings.json (schema wiring)
+nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
+```
+
+## `nika init` — teach the repo
+
+`nika init` drops two files at the repo root (idempotent — existing files are
+skipped, `--force` overwrites):
+
+- **`AGENTS.md`** — the agent operating guide: the four verbs, the authoring
+  loop (`nika new --from <template>` → fill → `nika check` → repair from the
+  error), and the rules that keep generated workflows valid. Read natively by
+  **Codex**, **Claude Code**, **Cursor**, **Jules** and every AGENTS.md-aware
+  tool.
+- **`.vscode/settings.json`** — maps `*.nika.yaml` to the canonical JSON
+  schema, so completions and validation work in any YAML-aware editor.
+
+## `nika wire` — give the agent the real oracle
+
+`nika wire` patches your client's MCP config to add Nika's **read-only**
+oracle — the agent can *check* and *explain*, never execute (`nika run`
+stays in your hands):
+
+| Client | Command | What it patches |
+|---|---|---|
+| Claude Code | `nika wire claude` | `~/.claude.json` → `mcpServers.nika` |
+| Cursor | `nika wire cursor` | `~/.cursor/mcp.json` |
+| Windsurf | `nika wire windsurf` | `~/.codeium/windsurf/mcp_config.json` |
+| VS Code | `nika wire vscode` | `.vscode/mcp.json` (project-local) |
+| Everything | `nika wire all` | all of the above |
+
+The server exposes two tools:
+
+- **`nika_check`** — the full static audit (plan · cost ceiling · secret
+  flows · types · tool args · schema) as structured JSON. The agent fixes
+  its own file before you ever see it.
+- **`nika_explain`** — any `NIKA-XXX` error code, explained.
+
+<Note>
+  Codex has no `wire` target yet — it doesn't need one to author well:
+  it reads `AGENTS.md` natively, and any MCP-capable client can add the
+  oracle manually (`command: nika`, `args: ["mcp"]`, stdio).
+</Note>
+
+## The loop
+
+```text
+agent writes review.nika.yaml        (from AGENTS.md + a template)
+  → nika check review.nika.yaml      (agent self-repairs from the findings)
+  → you read the file                (it's YAML — review it like code)
+  → nika run review.nika.yaml        (you, or your CI — not the agent)
+```
+
+The division of labor is the point: the **agent authors**, the **file is
+the contract**, the **human approves**, the **runtime enforces**.
+
+## Editor surface
+
+The [VS Code / Cursor / Windsurf extension](https://marketplace.visualstudio.com/items?itemName=supernovae.nika-lang)
+adds check-as-you-type, cost inlay hints, DAG visualization and trace replay
+on top — see [Editors](/getting-started/editors).
+
+## Read next
+
+<CardGroup cols={2}>
+  <Card title="Agent authoring protocol" icon="robot" href="/guides/agent-authoring">
+    The deterministic path: template → fill → check → repair.
+  </Card>
+  <Card title="Templates" icon="clone" href="/guides/templates">
+    Six valid skeletons `nika new --from` instantiates.
+  </Card>
+</CardGroup>
