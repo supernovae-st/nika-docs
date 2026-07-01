@@ -8,12 +8,18 @@ icon: "rocket"
 import { CANON } from "/snippets/_canon.mdx";
 import { SHOWCASE } from "/snippets/_showcase.mdx";
 
-Every example on these pages is a complete, validated workflow, not a
-fragment. The YAML you read here is projected verbatim from
+If you do the same AI task twice, make it a workflow. Every example on
+these pages is a complete one you can run right now — the whole gallery
+ships inside the binary:
+
+```bash
+nika examples run showcase/t1-meeting-actions --model mock/echo   # offline · zero key
+```
+
+The YAML you read here is projected verbatim from
 [`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),
 where each file passes the same conformance gate as the spec's own test
-suite: JSON Schema, DAG cross-references, CEL resolution, stdlib
-surface. If a file is on this page, it parses.
+suite. If a file is on this page, it parses — and it runs.
 
 These {SHOWCASE.count} workflows ({SHOWCASE.t1} starters · {SHOWCASE.t2} chains
 · {SHOWCASE.t3} fan-outs · {SHOWCASE.t4} epics) plus the foundation set
