@@ -1,0 +1,99 @@
+---
+title: "Traces & replay"
+description: "Every run can leave a replayable record: one NDJSON file that proves what ran, in what order, at what cost."
+sidebarTitle: "Traces"
+icon: "clock-rotate-left"
+---
+
+You ran a workflow an hour ago. It worked (or it didn't), and now someone
+asks: *what exactly happened?* With most AI tooling the answer scrolled
+away. With Nika the run itself is a file: every event the engine emitted,
+one JSON line each, in order, with timestamps. Save it, share it, replay
+it. The run is evidence, not a memory.
+
+## Record a run
+
+`nika run` renders a live storyboard for humans. Add `--json` and the
+same run streams machine events instead, one NDJSON line per event:
+
+```bash
+nika run review.nika.yaml --json > .nika/traces/review.ndjson
+```
+
+That single redirect is the whole recorder. The stream is designed for
+CI and agents (stdout stays pure NDJSON; nothing else is printed there),
+so capturing it live costs nothing. By convention, project traces live
+under `.nika/traces/` next to the workflows they record; the CLI reads a
+trace from any path you give it.
+
+## The event stream
+
+A trace is the run's lifecycle spine. Each line is one event with a
+unique id, a nanosecond timestamp, a `kind`, and typed fields:
+
+- `workflow_started`, then one `task_scheduled` per task
+- `task_started` when a task's dependencies clear
+- `task_completed` (with `duration_ms`), or `task_failed`, or
+  `task_skipped` (a `when:` gate said no)
+- `workflow_completed`, or `workflow_failed`
+
+Here is a real capture, verbatim, from a two-task exec workflow:
+
+```json
+{"id":{"uuid":"019f23fb-af22-76b0-a124-4fc91d3166e9"},"timestamp":1783015124770000000,"kind":"workflow_started","run":null,"correlation":null,"fields":[{"key":"workflow","value":"version-stamp"},{"key":"permits","value":"engine floor (no boundary declared)"}]}
+{"id":{"uuid":"019f23fb-af22-76b0-a124-4fd5aa792ff9"},"timestamp":1783015124770000000,"kind":"task_scheduled","run":null,"correlation":null,"fields":[{"key":"task","value":"stamp"}]}
+{"id":{"uuid":"019f23fb-af3d-7331-807d-3ec787e872c3"},"timestamp":1783015124797000000,"kind":"task_started","run":null,"correlation":null,"fields":[{"key":"task","value":"stamp"},{"key":"note","value":"exec · date"}]}
+{"id":{"uuid":"019f23fb-af3d-7331-807d-3ed6051694b4"},"timestamp":1783015124797000000,"kind":"task_completed","run":null,"correlation":null,"fields":[{"key":"task","value":"stamp"},{"key":"note","value":"exec · date"},{"key":"duration_ms","value":26}]}
+{"id":{"uuid":"019f23fb-af5a-70d3-a7e2-1cfd58fbaed3"},"timestamp":1783015124826000000,"kind":"workflow_completed","run":null,"correlation":null,"fields":[{"key":"workflow","value":"version-stamp"}]}
+```
+
+The spine is not the whole vocabulary. Deeper kinds record retries
+(`task_retrying`), cancellation (`task_cancelled`,
+`workflow_cancelled`), money (`cost_incurred`), security checks
+(`permit_checked`), streaming (`infer_chunk`) and the agent loop
+(`agent_tools_selected`, `agent_budget_checkpoint`, and friends). The
+full event system, including the durability checkpoints that make runs
+resumable, is documented in [Concepts · Events](/concepts/events).
+
+## Replay, never re-execute
+
+Two commands read a trace back:
+
+```bash
+nika trace replay .nika/traces/review.ndjson   # re-render the run, live
+nika trace show   .nika/traces/review.ndjson   # print the final card only
+```
+
+`replay` plays the recorded events through the same renderer that drew
+the original run: same storyboard, same timing, same verdict card.
+`show` skips the animation and prints the summary.
+
+<Warning>
+  **Replay = re-render, never re-execute.** Replaying a trace calls no
+  model, runs no command, touches no file. Zero tokens, zero effects.
+  It is a projection of what already happened, safe to run on any
+  machine, any number of times.
+</Warning>
+
+## Why this matters
+
+- **The run is auditable.** Which tasks ran, in what order, how long
+  each took, what it cost, which permits were checked: it is all in the
+  file, not in someone's scrollback.
+- **The run is shareable.** Attach the `.ndjson` to a PR or an issue.
+  A reviewer replays it locally and sees exactly what you saw, without
+  credentials and without re-running anything.
+- **The demos are honest.** The replays on [nika.sh](https://nika.sh)
+  ("Press play. It really ran.") are exactly these files: recorded runs
+  played back through the same renderer, not screenshots and not
+  mockups.
+
+## Related
+
+- [Reference · CLI](/reference/cli): every `nika run` and `nika trace`
+  flag, including `--json` and `--output json` (the typed `outputs:`
+  export, a different surface from the event stream).
+- [Concepts · Events](/concepts/events): the full event vocabulary and
+  the durability model behind it.
+- [Concepts · Workflows](/concepts/workflows): how a file becomes the
+  executed graph the trace records.

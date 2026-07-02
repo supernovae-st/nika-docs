@@ -164,6 +164,7 @@
               "concepts/bindings",
               "concepts/events",
               "concepts/providers",
+              "concepts/traces",
               "concepts/security"
             ]
           }
