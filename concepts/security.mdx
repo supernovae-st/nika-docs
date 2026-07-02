@@ -22,6 +22,16 @@ typed `NIKA-SEC-*` error your workflow can read, not a stack trace.
 | `infer:` → tool use | the fetched content the model reads | trust levels + spotlight + injection scanning |
 | `secrets.*` bindings | log access | masked at the binding layer, never logged |
 
+On top of the hardened mechanisms, a `permits:` block makes the file
+itself declare its blast radius — hosts, paths, programs, tools, all
+default-deny once declared. A task reaching beyond the boundary is
+caught by `nika check`, statically, with the exact fix:
+
+<video autoPlay muted loop playsInline poster="/images/posters/permits-audit.png" style={{ borderRadius: "0.75rem" }}>
+  <source src="/videos/permits-audit.webm" type="video/webm" />
+  <source src="/videos/permits-audit.mp4" type="video/mp4" />
+</video>
+
 ## SSRF defense (on by default)
 
 `nika:fetch` refuses to be bounced into private space. Three layers,

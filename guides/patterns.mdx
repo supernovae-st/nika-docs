@@ -264,7 +264,14 @@ Two exclusive `when:` branches, one consumer. A skipped branch's output is
 
 A failed iteration contributes `null` at its index: positions stay aligned
 with the input. Recover per-iteration when a placeholder is acceptable,
-filter downstream:
+filter downstream. The same `on_error: recover:` mechanism also degrades a
+single task to a declared fallback — the run completes and the output says
+what it is:
+
+<video autoPlay muted loop playsInline poster="/images/posters/on-error-recover.png" style={{ borderRadius: "0.75rem" }}>
+  <source src="/videos/on-error-recover.webm" type="video/webm" />
+  <source src="/videos/on-error-recover.mp4" type="video/mp4" />
+</video>
 
 ```yaml
 - id: scrape_all
