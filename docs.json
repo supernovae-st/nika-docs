@@ -10,9 +10,9 @@
   },
   "favicon": "/images/favicon.svg",
   "colors": {
-    "primary": "#2D82F8",
-    "light": "#9FD0FF",
-    "dark": "#2D82F8"
+    "primary": "#2f6bff",
+    "light": "#8db4ff",
+    "dark": "#2f6bff"
   },
   "customCss": "/global.css",
   "modeToggle": {
@@ -25,7 +25,7 @@
   "background": {
     "decoration": "gradient",
     "color": {
-      "dark": "#04050D",
+      "dark": "#08090b",
       "light": "#F4F6FC"
     }
   },
