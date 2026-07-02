@@ -16,14 +16,14 @@ runs again next week without re-prompting.
 Two commands wire any agent:
 
 ```sh
-nika init            # writes AGENTS.md + .vscode/settings.json (schema wiring)
+nika init            # AGENTS.md + schema wiring + Cursor rule + agent skill
 nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
 ```
 
 ## `nika init`: teach the repo
 
-`nika init` drops three files at the repo root (idempotent: existing files are
-skipped, `--force` overwrites):
+`nika init` scaffolds the repo (idempotent: existing files are skipped,
+`--force` overwrites):
 
 - **`AGENTS.md`**, the agent operating guide: the four verbs, the authoring
   loop (`nika new --from <template>` → fill → `nika check` → repair from the
@@ -35,6 +35,26 @@ skipped, `--force` overwrites):
 - **`.cursor/rules/nika.mdc`**, the Cursor rules file (globs `*.nika.yaml`):
   the syntax floor + the check loop, auto-attached whenever the agent touches
   a workflow file.
+- **`.agents/skills/nika-authoring/SKILL.md`** (on `main` · next release): a
+  repo-level [agent skill](https://agentskills.io) — Codex and every
+  `.agents`-aware client discover it automatically and can invoke it as
+  `$nika-authoring`. Same author → check → repair loop, packaged as a skill.
+
+## Codex: install the plugin
+
+Codex users can skip per-repo setup entirely — the engine repo hosts a
+Codex plugin bundling the authoring skill **and** the MCP oracle:
+
+```sh
+codex plugin marketplace add supernovae-st/nika
+codex plugin add nika@nika
+```
+
+One install: the `nika-authoring` skill appears in `/skills` (invoke it
+with `$nika-authoring`, or let it auto-trigger on `.nika.yaml` work), and
+the read-only oracle (`nika_check` + `nika_explain`) is wired. The plugin
+expects the `nika` binary on your PATH
+(`brew install supernovae-st/tap/nika`).
 
 ## `nika wire`: give the agent the real oracle
 
