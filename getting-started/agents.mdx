@@ -40,21 +40,26 @@ nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
   `.agents`-aware client discover it automatically and can invoke it as
   `$nika-authoring`. Same author → check → repair loop, packaged as a skill.
 
-## Codex: install the plugin
+## Or: install the plugin (Codex · Claude Code)
 
-Codex users can skip per-repo setup entirely — the engine repo hosts a
-Codex plugin bundling the authoring skill **and** the MCP oracle:
+Codex and Claude Code users can skip per-repo setup entirely — the engine
+repo hosts one plugin (authoring skill **and** MCP oracle) for both
+ecosystems:
 
 ```sh
+# Codex
 codex plugin marketplace add supernovae-st/nika
 codex plugin add nika@nika
+
+# Claude Code
+claude plugin marketplace add supernovae-st/nika
+claude plugin install nika@nika
 ```
 
-One install: the `nika-authoring` skill appears in `/skills` (invoke it
-with `$nika-authoring`, or let it auto-trigger on `.nika.yaml` work), and
-the read-only oracle (`nika_check` + `nika_explain`) is wired. The plugin
-expects the `nika` binary on your PATH
-(`brew install supernovae-st/tap/nika`).
+One install: the `nika-authoring` skill lands (invoke it explicitly, or
+let it auto-trigger on `.nika.yaml` work), and the read-only oracle
+(`nika_check` + `nika_explain`) is wired. The plugin expects the `nika`
+binary on your PATH (`brew install supernovae-st/tap/nika`).
 
 ## `nika wire`: give the agent the real oracle
 
