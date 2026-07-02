@@ -43,6 +43,15 @@ flowchart LR
 ```
 {/* showcase:dag-end */}
 
+Watch the graph execute — independent branches in parallel, the agent
+fan-out at wave 3, and the join that waits for both branches before
+`summary`:
+
+<video autoPlay muted loop playsInline poster="/images/posters/dag-execution.png" style={{ borderRadius: "0.75rem" }}>
+  <source src="/videos/dag-execution.webm" type="video/webm" />
+  <source src="/videos/dag-execution.mp4" type="video/mp4" />
+</video>
+
 ## The file
 
 {/* showcase:begin t3-pr-review-fanout.nika.yaml */}
@@ -51,7 +60,7 @@ nika: v1
 workflow: pr-review-fanout
 description: "changed files → one read-only review agent each → merged REVIEW.md"
 
-model: anthropic/claude-sonnet-4-6   # agent loops want a tool-calling model
+model: ollama/llama3.2:3b   # local tool-calling model · swap for anthropic/claude-sonnet-4-6 for depth
 
 vars:
   base_ref: "main"
