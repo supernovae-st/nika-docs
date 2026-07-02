@@ -82,9 +82,11 @@ OpenAI-compatible family that covers ~22 providers.
 | `voyage` | voyage | Embeddings-only |
 
 <Note>
-  **Local runner:** the `native` provider uses `mistral.rs` to load GGUF
-  models on CPU / Metal / CUDA without any HTTP round-trip. Feature-gated
-  in `nika-provider-native`, off by default.
+  **In-process runner:** `nika-infer-local` is the sovereign local
+  sidecar (candle-based, per ADR-091): quantized generation without an
+  external server. Most users take the simpler path first: a local server
+  (Ollama, LM Studio, llama.cpp, vLLM) per the [local models
+  guide](/guides/local-models).
 </Note>
 
 ## Capability-aware routing

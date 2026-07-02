@@ -1,0 +1,124 @@
+---
+title: "Local models"
+description: "Get a model onto your machine in one command: Ollama, any Hugging Face GGUF, LM Studio, llama.cpp or vLLM. Nothing leaves your laptop."
+sidebarTitle: "Local models"
+icon: "microchip"
+---
+
+Nika is local-first: point `model:` at a local server and your data never
+leaves the machine. This page is the ladder, from the one-command path to
+production servers.
+
+## 1. The one-command path: Ollama
+
+Install [Ollama](https://ollama.com), then:
+
+```bash
+ollama pull llama3.2:3b
+```
+
+That's it. In any workflow:
+
+```yaml
+model: ollama/llama3.2:3b
+```
+
+`nika doctor` confirms the wiring (it detects the running Ollama server and
+prints the exact fix if something is off).
+
+<Tip>
+  `llama3.2:3b` is the showcase default: small enough for most laptops,
+  good enough for structured extraction. Swap the tag for anything in the
+  [Ollama library](https://ollama.com/library): `qwen2.5`, `mistral`,
+  `phi4`, larger llama variants.
+</Tip>
+
+## 2. Any Hugging Face GGUF, still one command
+
+Ollama pulls directly from the Hugging Face Hub. Any public GGUF repo
+works, no account needed:
+
+```bash
+ollama run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF
+```
+
+Pick a quantization explicitly with a tag:
+
+```bash
+ollama run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M
+```
+
+Then reference it in the workflow exactly as pulled:
+
+```yaml
+model: ollama/hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M
+```
+
+Rule of thumb for quantizations: `Q4_K_M` is the sane default (quality per
+GB), `Q8_0` when you have RAM to spare, `Q2/Q3` only when memory is tight.
+The [Hub's GGUF filter](https://huggingface.co/models?library=gguf) lists
+every compatible repo.
+
+## 3. LM Studio: the visual browser
+
+Prefer a GUI? [LM Studio](https://lmstudio.ai) browses Hugging Face,
+downloads models with a click, and serves an OpenAI-compatible endpoint.
+Start its server, then:
+
+```yaml
+model: lmstudio/<the-model-id-shown-in-lm-studio>
+```
+
+## 4. Servers: llama.cpp and vLLM
+
+For shared machines and production:
+
+- [llama.cpp](https://github.com/ggml-org/llama.cpp) `llama-server` serves
+  any GGUF: `model: llamacpp/<model>`
+- [vLLM](https://docs.vllm.ai) serves full-precision Hub models at
+  datacenter throughput: `model: vllm/<hub-repo-id>`
+
+Both speak the same OpenAI-compatible dialect; the prefix picks the
+provider, nothing else in the file changes.
+
+## Checking what's wired
+
+```bash
+nika doctor
+```
+
+Doctor reports every provider (local servers detected, cloud keys present)
+with a fix-form per missing piece. The audit before a run prices local
+models at $0.000:
+
+```bash
+nika check my-workflow.nika.yaml
+```
+
+## Swapping between local and cloud
+
+The file does not change shape. One line moves the workflow between a
+laptop and an API:
+
+```yaml
+model: ollama/llama3.2:3b        # local · free · private
+# model: mistral/mistral-small   # EU cloud
+# model: anthropic/claude-haiku-4-5
+```
+
+<Note>
+  The permits boundary applies either way: a `permits:` block with no
+  `net.http` entry means the workflow cannot reach the network even if the
+  model could. Local model + closed permits = fully air-gapped AI work.
+</Note>
+
+## Read next
+
+<CardGroup cols={2}>
+  <Card title="Providers" icon="server" href="/concepts/providers">
+    The full catalog and how one InferRequest speaks every dialect.
+  </Card>
+  <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
+    Five minutes from install to a checked, runnable file.
+  </Card>
+</CardGroup>
