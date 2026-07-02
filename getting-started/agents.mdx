@@ -48,6 +48,7 @@ stays in your hands):
 | Cursor | `nika wire cursor` | `~/.cursor/mcp.json` |
 | Windsurf | `nika wire windsurf` | `~/.codeium/windsurf/mcp_config.json` |
 | VS Code | `nika wire vscode` | `.vscode/mcp.json` (project-local) |
+| Codex CLI | `nika wire codex` | `~/.codex/config.toml` → `[mcp_servers.nika]` |
 | Everything | `nika wire all` | all of the above |
 
 The server exposes two tools:
@@ -58,9 +59,11 @@ The server exposes two tools:
 - **`nika_explain`**: any `NIKA-XXX` error code, explained.
 
 <Note>
-  Codex has no `wire` target yet. It doesn't need one to author well:
-  it reads `AGENTS.md` natively, and any MCP-capable client can add the
-  oracle manually (`command: nika`, `args: ["mcp"]`, stdio).
+  The `codex` target is on `main` and ships with the next release. On the
+  current release, add the oracle to `~/.codex/config.toml` manually
+  (`[mcp_servers.nika]` · `command = "nika"` · `args = ["mcp"]`) — Codex
+  also reads `AGENTS.md` natively, so `nika init` alone already teaches it
+  the authoring loop.
 </Note>
 
 ## The loop
