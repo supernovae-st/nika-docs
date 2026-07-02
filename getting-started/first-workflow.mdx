@@ -16,27 +16,27 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 ## Goal
 
 Write a `.nika.yaml` file, run it, get structured output. No setup beyond
-`nika` installed — **your first run needs no API key and no model server.**
+`nika` installed. **Your first run needs no API key and no model server.**
 
-## 1 — Pick how the AI step runs
+## 1. Pick how the AI step runs
 
 Three paths, from zero-setup to production:
 
-**Instant (no model at all)** — the built-in `mock/echo` model returns a
+**Instant (no model at all)**: the built-in `mock/echo` model returns a
 deterministic response, so you can see a workflow's shape right now:
 
 ```yaml
 model: mock/echo
 ```
 
-**Local (free · private)** — have [Ollama](https://ollama.com) running —
+**Local (free · private)**: have [Ollama](https://ollama.com) running,
 no API key, nothing leaves your machine:
 
 ```bash
 ollama pull llama3.1
 ```
 
-**Cloud** — set any provider key:
+**Cloud**: set any provider key:
 
 ```bash
 export MISTRAL_API_KEY=...
@@ -52,7 +52,7 @@ nika doctor
 
 All provider env vars listed in [Providers catalog](/reference/providers-catalog).
 
-## 2 — Write the workflow
+## 2. Write the workflow
 
 Create `hello.nika.yaml`:
 
@@ -73,15 +73,15 @@ Three things to notice:
 - **`workflow:`** is a human-readable name (kebab-case · the document-type discriminator).
 - **`tasks:`** is a list; each task has an `id` and one verb (here, `infer`).
 
-## 3 — Check it, then run it
+## 3. Check it, then run it
 
 ```bash
-nika check hello.nika.yaml   # the static audit — plan · cost · secrets · types · before a single token is spent
+nika check hello.nika.yaml   # the static audit: plan · cost · secrets · types · before a single token is spent
 nika run hello.nika.yaml
 ```
 
 <Tip>
-  No provider handy? Swap the `model:` line for `mock/echo` — both commands
+  No provider handy? Swap the `model:` line for `mock/echo`. Both commands
   work fully offline, and you can wire a real model later.
 </Tip>
 
@@ -95,7 +95,7 @@ Example output:
 ✓ greet  T+00:00:01.42  OK
 ```
 
-## 4 — Add a second task that depends on the first
+## 4. Add a second task that depends on the first
 
 ```yaml hello.nika.yaml
 nika: v1
@@ -117,7 +117,7 @@ tasks:
         Rewrite it shorter and more enigmatic.
 ```
 
-Notice `${{ tasks.greet.output }}` — that's a [binding](/concepts/bindings).
+Notice `${{ tasks.greet.output }}`. That's a [binding](/concepts/bindings).
 The engine injects the previous task's output into the prompt at runtime,
 with explicit taint tracking and pipe filters.
 
@@ -131,10 +131,10 @@ flowchart LR
 ```
 
 One `depends_on` line and the order falls out of the file. Tasks with no
-dependency between them run **in parallel automatically** — you never
+dependency between them run **in parallel automatically**. You never
 schedule anything.
 
-## 5 — Get structured output
+## 5. Get structured output
 
 ```yaml hello.nika.yaml
 nika: v1
@@ -161,7 +161,7 @@ tasks:
 
 Nika takes the JSON Schema, asks the provider for output that conforms
 (using each provider's native structured-output API where the [capability
-rules](/reference/capabilities) allow it — schema mode, object mode, or
+rules](/reference/capabilities) allow it: schema mode, object mode, or
 JSON-mode emulation), and validates the result against your schema before
 passing it on.
 
@@ -172,9 +172,9 @@ nika run hello.nika.yaml
 
 ## What you just built
 
-- Workflows are YAML files — `.nika.yaml`.
+- Workflows are YAML files: `.nika.yaml`.
 - Tasks are units of work, identified by `id`.
-- Four verbs — `infer`, `exec`, `invoke`, `agent` — define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
+- Four verbs (`infer`, `exec`, `invoke`, `agent`) define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
 - `depends_on:` builds a DAG.
 - `${{ tasks.X.output }}` bindings flow data between tasks, with taint tracking.
 - `schema:` enforces JSON schemas on AI output.
@@ -183,7 +183,7 @@ nika run hello.nika.yaml
 
 <Steps>
   <Step title="Check before running">
-    `nika check hello.nika.yaml` — static audit before any token or effect.
+    `nika check hello.nika.yaml`: static audit before any token or effect.
   </Step>
   <Step title="Inspect the DAG">
     `nika inspect hello.nika.yaml` or `nika graph hello.nika.yaml --format mermaid`.
@@ -198,11 +198,11 @@ nika run hello.nika.yaml
 
 <CardGroup cols={2}>
   <Card title="Examples · real jobs" icon="rocket" href="/examples/overview">
-    Climb the ladder — starter chains to multi-agent swarms, every file
+    Climb the ladder: starter chains to multi-agent swarms, every file
     conformance-validated.
   </Card>
   <Card title="How to write Nika" icon="compass-drafting" href="/guides/patterns">
-    The twelve patterns — where the determinism lives, where the model
+    The twelve patterns: where the determinism lives, where the model
     is allowed to think.
   </Card>
   <Card title="The 4 verbs" icon="play" href="/concepts/verbs">
