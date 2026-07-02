@@ -52,7 +52,7 @@
     "twitter:card": "summary_large_image"
   },
   "banner": {
-    "content": "🦋 Chrysalis — language v0.1 + the first usable engine ship: summer 2026. [Live state →](/reference/status)",
+    "content": "🦋 Nika is out: `brew install supernovae-st/tap/nika` runs today. 1.0 + Product Hunt: August 1. [Changelog →](/reference/status)",
     "dismissible": true
   },
   "navbar": {
