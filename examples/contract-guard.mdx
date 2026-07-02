@@ -5,7 +5,7 @@ description: "T2 chain · legal — clause extraction on a LOCAL model. The cont
 icon: "scale-balanced"
 ---
 
-> **T2 chain · legal / compliance** — `model: ollama/llama3.1` at the
+> **T2 chain · legal / compliance** — `model: ollama/llama3.2:3b` at the
 > envelope means **every** model call in this file runs on your own
 > hardware. For a contract, that's not a preference — it's the
 > requirement. Belt-and-braces: `schema:` at infer time, `nika:validate`
@@ -49,7 +49,7 @@ nika: v1
 workflow: contract-guard
 description: "Local-model clause extraction → schema gate → risk memo"
 
-model: ollama/llama3.1      # the whole review runs offline · zero cloud
+model: ollama/llama3.2:3b   # the whole review runs offline · zero cloud
 
 vars:
   contract_path:

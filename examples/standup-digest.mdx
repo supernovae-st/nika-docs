@@ -42,7 +42,7 @@ nika: v1
 workflow: standup-digest
 description: "Read yesterday's commits, write today's standup note"
 
-model: mock/echo            # deterministic · swap for ollama/llama3.1 (local · zero key)
+model: ollama/llama3.2:3b   # local · zero key · swap for anthropic/claude-haiku-4-5 (fast one-liner job)
 
 tasks:
   # No deps between these two → the engine runs them in parallel.
@@ -108,7 +108,7 @@ outputs:
 ## Make it yours
 
 - Point `--since` at your sprint cadence (`--since=friday` for Monday standups).
-- Swap `mock/echo` for `anthropic/claude-haiku-4-5` — a one-liner job wants a fast model.
+- Swap `ollama/llama3.2:3b` for `anthropic/claude-haiku-4-5`: a one-liner job wants a fast model.
 - Add a `nika:notify` task to post the note straight into your team channel — see [Release notes](/examples/release-notes) for the pattern.
 
 <Card title="Next · Meeting actions" icon="list-check" href="/examples/meeting-actions">

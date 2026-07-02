@@ -33,7 +33,7 @@ model: mock/echo
 no API key, nothing leaves your machine:
 
 ```bash
-ollama pull llama3.1
+ollama pull llama3.2:3b
 ```
 
 **Cloud**: set any provider key:
@@ -63,7 +63,7 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      model: ollama/llama3.1               # <provider>/<name> · local · swap for any cloud provider
+      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: "Say hi to the chrysalis. Be brief."
 ```
 
@@ -96,7 +96,7 @@ problems before any model is called — and points at the exact fix:
 Example output:
 
 ```
-▶ greet  infer  → ollama/llama3.1
+▶ greet  infer  → ollama/llama3.2:3b
   ┌─ output ──────────────────
   │ Welcome inside the chrysalis. 🦋
   └───────────────────────────
@@ -112,13 +112,13 @@ workflow: hello
 tasks:
   - id: greet
     infer:
-      model: ollama/llama3.1               # <provider>/<name> · local · swap for any cloud provider
+      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: "Say hi to the chrysalis. Be brief."
 
   - id: critique
     depends_on: [greet]
     infer:
-      model: ollama/llama3.1               # <provider>/<name> · local · swap for any cloud provider
+      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: |
         The greeting was: ${{ tasks.greet.output }}
 
@@ -151,7 +151,7 @@ workflow: hello-structured
 tasks:
   - id: names
     infer:
-      model: ollama/llama3.1               # <provider>/<name> · local · swap for any cloud provider
+      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: "Generate three names for a butterfly."
       schema:                          # structured output · JSON Schema
         type: object

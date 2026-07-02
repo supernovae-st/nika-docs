@@ -13,8 +13,11 @@ these pages is a complete one you can run right now — the whole gallery
 ships inside the binary:
 
 ```bash
-nika examples run showcase/t1-meeting-actions --model mock/echo   # offline · zero key
+nika examples run showcase/t1-meeting-actions     # local · ollama/llama3.2:3b · zero key
 ```
+
+No Ollama on this machine yet? Add `--model mock/echo` to preview any
+example offline with zero setup, then come back with the real model.
 
 The YAML you read here is projected verbatim from
 [`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),
@@ -177,7 +180,7 @@ files, so it cannot go stale.
 | [typed workflow outputs (callable)](/reference/yaml-syntax) | [meeting-actions](/examples/meeting-actions) · [price-watch](/examples/price-watch) · [social-repurpose](/examples/social-repurpose) · [standup-digest](/examples/standup-digest) · [contract-guard](/examples/contract-guard) · [etl-quarantine](/examples/etl-quarantine) · [invoice-chaser](/examples/invoice-chaser) · [release-notes](/examples/release-notes) · [release-radar](/examples/release-radar) · [seo-content-brief](/examples/seo-content-brief) · [support-triage](/examples/support-triage) · [competitor-radar](/examples/competitor-radar) · [config-drift-sentinel](/examples/config-drift-sentinel) · [localization-factory](/examples/localization-factory) · [pr-review-fanout](/examples/pr-review-fanout) · [resume-screener](/examples/resume-screener) · [ceo-monday-brief](/examples/ceo-monday-brief) · [deep-research-brief](/examples/deep-research-brief) · [incident-war-room](/examples/incident-war-room) · [release-train](/examples/release-train) |
 | [default-deny tool grants](/concepts/verbs) | [pr-review-fanout](/examples/pr-review-fanout) · [deep-research-brief](/examples/deep-research-brief) |
 | [structured exec capture](/concepts/verbs) | [incident-war-room](/examples/incident-war-room) · [release-train](/examples/release-train) |
-| [sovereign local model](/concepts/providers) | [contract-guard](/examples/contract-guard) · [resume-screener](/examples/resume-screener) |
+| [sovereign local model](/concepts/providers) | [meeting-actions](/examples/meeting-actions) · [social-repurpose](/examples/social-repurpose) · [standup-digest](/examples/standup-digest) · [contract-guard](/examples/contract-guard) · [invoice-chaser](/examples/invoice-chaser) · [release-notes](/examples/release-notes) · [release-radar](/examples/release-radar) · [seo-content-brief](/examples/seo-content-brief) · [support-triage](/examples/support-triage) · [competitor-radar](/examples/competitor-radar) · [config-drift-sentinel](/examples/config-drift-sentinel) · [localization-factory](/examples/localization-factory) · [pr-review-fanout](/examples/pr-review-fanout) · [resume-screener](/examples/resume-screener) · [ceo-monday-brief](/examples/ceo-monday-brief) · [deep-research-brief](/examples/deep-research-brief) · [incident-war-room](/examples/incident-war-room) |
 {/* showcase:coverage-end */}
 
 ## The rules every example obeys
@@ -185,9 +188,9 @@ files, so it cannot go stale.
 - **One verb per task** · `infer`, `exec`, `invoke` or `agent`.
 - **Every reference is an edge** · `${{ tasks.X }}` anywhere requires
   `depends_on: [X]`. The DAG has no invisible edges.
-- **`mock/echo` by default** · files run with zero API keys wherever the
-  job allows; real providers only where the job demands one; local
-  models where the data is sensitive.
+- **Local by default** · every file leads `ollama/llama3.2:3b`: zero
+  API keys, nothing leaves your machine. Cloud providers appear only as
+  per-task overrides or swap hints, never as the envelope default.
 - **Projection, not copy-paste** · these pages and the
   [nika.sh use-cases explorer](https://nika.sh/#use-cases) render the
   same files, projected by `showcase-projector.py`. Any drift fails CI.

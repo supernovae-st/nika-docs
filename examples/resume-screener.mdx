@@ -52,7 +52,7 @@ nika: v1
 workflow: resume-screener
 description: "glob CVs → local-model rubric per candidate → deterministic shortlist"
 
-model: ollama/llama3.1      # PII stays on the machine · the whole screen is offline
+model: ollama/llama3.2:3b   # PII stays on the machine · the whole screen is offline
 
 permits:                    # the file IS the blast radius · no net category at all —
   fs:                       # CVs cannot leave this machine even if a prompt is hijacked
@@ -165,7 +165,7 @@ outputs:
 
 <Steps>
   <Step title="Sovereignty is the requirement, not a preference">
-    `model: ollama/llama3.1` at the envelope — candidate data never
+    `model: ollama/llama3.2:3b` at the envelope — candidate data never
     touches a cloud API. Same file shape as any other workflow.
   </Step>
   <Step title="One rubric, enforced by schema">

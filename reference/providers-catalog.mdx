@@ -68,7 +68,7 @@ your machine unless a cloud provider is explicitly selected.
 
     <Tip>
       **The sovereign default.** No API key, no cloud egress —
-      `model: ollama/llama3.1` runs offline / air-gapped. Any other
+      `model: ollama/llama3.2:3b` runs offline / air-gapped. Any other
       OpenAI-compatible local server (Jan · llamafile · KoboldCpp) routes
       through the `openai` + `base_url` escape hatch.
     </Tip>
@@ -134,7 +134,7 @@ tasks:
   - id: primary
     on_error: { skip: true }   # a dead provider skips (error preserved) · the gate below reads it
     infer:
-      model: ollama/llama3.1                 # local · zero key
+      model: ollama/llama3.2:3b              # local · zero key
       prompt: "Explain linear algebra in one sentence."
 
   - id: fallback
@@ -146,7 +146,7 @@ tasks:
 ```
 
 ```bash Required env
-ollama pull llama3.1            # local primary · no key
+ollama pull llama3.2:3b         # local primary · no key
 export MISTRAL_API_KEY=...      # cloud fallback only
 nika run workflow.nika.yaml
 ```
