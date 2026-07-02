@@ -306,5 +306,11 @@
   },
   "fonts": {
     "family": "Inter"
+  },
+  "seo": {
+    "metatags": {
+      "og:image": "https://docs.nika.sh/images/og-card.png",
+      "twitter:card": "summary_large_image"
+    }
   }
 }
