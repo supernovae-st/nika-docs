@@ -22,7 +22,7 @@ nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
 
 ## `nika init` — teach the repo
 
-`nika init` drops two files at the repo root (idempotent — existing files are
+`nika init` drops three files at the repo root (idempotent — existing files are
 skipped, `--force` overwrites):
 
 - **`AGENTS.md`** — the agent operating guide: the four verbs, the authoring
@@ -32,6 +32,9 @@ skipped, `--force` overwrites):
   tool.
 - **`.vscode/settings.json`** — maps `*.nika.yaml` to the canonical JSON
   schema, so completions and validation work in any YAML-aware editor.
+- **`.cursor/rules/nika.mdc`** — the Cursor rules file (globs `*.nika.yaml`):
+  the syntax floor + the check loop, auto-attached whenever the agent touches
+  a workflow file.
 
 ## `nika wire` — give the agent the real oracle
 
