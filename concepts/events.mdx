@@ -14,7 +14,7 @@ deterministic, typed, and carry source IDs that correlate to the trace
 stack.
 
 The observability surface has **five sibling channels**, each a separate
-kernel trait — so impls can be swapped, sampled, or persisted
+kernel trait, so impls can be swapped, sampled, or persisted
 independently:
 
 | Channel | Trait | Semantics |
@@ -62,7 +62,7 @@ pub trait EventSink: Send + Sync + crate::sealed::Sealed {
 **Cancel-safety contract** (from the source): impls MUST NOT maintain
 cross-emission state. Dropping a future mid-emit is semantically
 identical to a sampled-away event. Batched sinks flush on a separate
-task that owns the batch — the `emit` call itself is atomic or
+task that owns the batch: the `emit` call itself is atomic or
 all-nothing.
 
 The trait is `Sealed` (ADR-014): external crates cannot implement it
@@ -71,53 +71,53 @@ directly; they route through the workspace-controlled adapter path.
 ## Event kinds
 
 Every kind is emitted from **exactly one call site** in the codebase
-(INV-024). No ambiguous duplicates — if you see `infer.chunk` on the
+(INV-024). No ambiguous duplicates: if you see `infer.chunk` on the
 wire, you know exactly which crate produced it.
 
 ### Workflow-level
 
-- `workflow.started` — a run begins.
-- `workflow.completed` — run ends, with status.
-- `workflow.skipped` — the run was gated off before any task started.
+- `workflow.started`: a run begins.
+- `workflow.completed`: run ends, with status.
+- `workflow.skipped`: the run was gated off before any task started.
 
 ### Task-level
 
-- `task.started` — a task begins executing.
-- `task.completed` — a task ends successfully.
-- `task.failed` — a task errored out; payload carries the typed error (`code` · `category` · `transient` · the spec error shape). On the wire the engine's event slugs are snake_case (`task_failed`) — the dot-form here is the documentation vocabulary.
-- `task.skipped` — the task's `when:` evaluated to false (or its empty
+- `task.started`: a task begins executing.
+- `task.completed`: a task ends successfully.
+- `task.failed`: a task errored out; payload carries the typed error (`code` · `category` · `transient` · the spec error shape). On the wire the engine's event slugs are snake_case (`task_failed`). The dot-form here is the documentation vocabulary.
+- `task.skipped`: the task's `when:` evaluated to false (or its empty
   `for_each` collection skipped it).
-- `task.cancelled` — the task never ran because its default gate became
-  unsatisfiable (an upstream failed) or the run was cancelled — a normal
-  terminal state under gate-based propagation.
-- `task.retry` — a retry attempt begins (emitted before `task.started` of the retry).
+- `task.cancelled`: the task never ran because its default gate became
+  unsatisfiable (an upstream failed) or the run was cancelled (a normal
+  terminal state under gate-based propagation).
+- `task.retry`: a retry attempt begins (emitted before `task.started` of the retry).
 
 ### Verb-level
 
 From `nika-kernel::provider::InferEvent`:
 
-- `infer.delta` — streaming text chunk (`Delta { text }`).
-- `infer.tool_use_start` — agent called a tool (`ToolUseStart { id, name }`).
-- `infer.tool_use_delta` — streaming partial JSON input (`ToolUseDelta { id, partial_json }`).
-- `infer.thinking` — extended thinking chunk (`Thinking { text }`).
-- `infer.usage` — token usage update (`Usage(TokenUsage)`).
-- `infer.done` — stream completed (`Done { stop_reason, request_id, finish_reason_raw }`).
+- `infer.delta`: streaming text chunk (`Delta { text }`).
+- `infer.tool_use_start`: agent called a tool (`ToolUseStart { id, name }`).
+- `infer.tool_use_delta`: streaming partial JSON input (`ToolUseDelta { id, partial_json }`).
+- `infer.thinking`: extended thinking chunk (`Thinking { text }`).
+- `infer.usage`: token usage update (`Usage(TokenUsage)`).
+- `infer.done`: stream completed (`Done { stop_reason, request_id, finish_reason_raw }`).
 
 From the other verbs:
 
-- `fetch.request` — HTTP request sent.
-- `fetch.response` — HTTP response received.
-- `exec.output` — a line of stdout/stderr.
-- `invoke.call` — tool invoked.
-- `invoke.result` — tool returned.
-- `agent.iteration` — one loop turn completed.
+- `fetch.request`: HTTP request sent.
+- `fetch.response`: HTTP response received.
+- `exec.output`: a line of stdout/stderr.
+- `invoke.call`: tool invoked.
+- `invoke.result`: tool returned.
+- `agent.iteration`: one loop turn completed.
 
 ### Meta
 
-- `checkpoint` — serializable snapshot (`AgentCheckpoint` — used for resume).
-- `taint.violation` — binding crossed a taint boundary (mirrors `AuditRecord::TaintViolation`).
-- `budget.warning` — nearing a `BudgetDirective` ceiling.
-- `budget.exceeded` — budget hard-stop triggered.
+- `checkpoint`: serializable snapshot (`AgentCheckpoint`, used for resume).
+- `taint.violation`: binding crossed a taint boundary (mirrors `AuditRecord::TaintViolation`).
+- `budget.warning`: nearing a `BudgetDirective` ceiling.
+- `budget.exceeded`: budget hard-stop triggered.
 
 ## OTel `GenAI` semconv bridge (Q13)
 
@@ -146,10 +146,10 @@ event, the `payload.gen_ai` block is identical in shape across all
 
 Cross-link: [OTel GenAI spec](https://opentelemetry.io/docs/specs/semconv/gen-ai/).
 
-## `AuditSink` — the fifth channel (Q12)
+## `AuditSink`: the fifth channel (Q12)
 
 `AuditSink` is **separate** from `EventSink`. Audit records are
-**append-only, persist-or-fail** — they MUST persist durably (fsync on a
+**append-only, persist-or-fail**: they MUST persist durably (fsync on a
 local log, synchronous HTTP POST to an append-only endpoint) before the
 trait method returns `Ok`. Buffering in memory is forbidden by contract.
 
@@ -168,7 +168,7 @@ pub enum AuditRecord {
 ```
 
 Every variant carries a `TenantId` for multi-tenant routing. `Extension`
-is the forward-compat path (ADR-028) — new categories land there first
+is the forward-compat path (ADR-028): new categories land there first
 and get promoted to a first-class variant once the namespace stabilises.
 
 Severity is separate: `Info`, `Warn`, `Critical`. A `TaintViolation`
@@ -179,11 +179,11 @@ with `Severity::Info` is an operator trail, not a failure.
   `AuditSink` replaced an earlier `ObservabilitySink` design during the
   Q12 L0.5 architecture sweep (locked 2026-04-16, see
   `docs/architecture/l0-l05-architecture-decisions.md`). The separation
-  matters: telemetry is best-effort; audit is compliance — different
+  matters: telemetry is best-effort; audit is compliance. Different
   persistence guarantees, different failure modes, different sinks.
 </Note>
 
-## `BillingSink` — the ledger (separate trait)
+## `BillingSink`: the ledger (separate trait)
 
 Token + cost accounting uses its own trait because it has different
 dropping semantics than `EventSink`. Billing records are **never
@@ -198,10 +198,10 @@ See `nika-kernel::infra::billing::BillingSink` + ADR-028 §4.
 Two reservations on the trace layer make the kernel OTel-ready without
 breaking any v0.8x caller:
 
-1. `SpanGuard.parent_span_id: Option<SpanId>` — explicit parent link so
+1. `SpanGuard.parent_span_id: Option<SpanId>`, an explicit parent link so
    nested spans can be stitched into a tree without a thread-local
    stack (which tokio's multi-thread runtime breaks).
-2. `SpanRef { trace_id, span_id }` — a copyable handle that propagates
+2. `SpanRef { trace_id, span_id }`, a copyable handle that propagates
    span identity across `tokio::mpsc` boundaries and spawned tasks
    without cloning the full `SpanGuard`.
 
@@ -235,17 +235,17 @@ load, fails the audit).
 
 ## Related ADRs
 
-- **ADR-021** — YAML envelope. `EventSink` emits events that correlate
+- **ADR-021**: YAML envelope. `EventSink` emits events that correlate
   to tasks inside `spec.tasks`, tagged with the workflow's `metadata.name`.
-- **ADR-028** — forward-compat reservation policy. `Extension` variants
+- **ADR-028**: forward-compat reservation policy. `Extension` variants
   in `AuditRecord` + `StopReason::Unknown(String)` in `InferResponse`.
-- **ADR-035** — telemetry seams (SpanGuard parent + SpanRef).
+- **ADR-035**: telemetry seams (SpanGuard parent + SpanRef).
 
 ## Read next
 
 <CardGroup cols={2}>
   <Card title="Event source" icon="file-code" href="https://github.com/supernovae-st/nika/blob/main/crates/nika-event">
-    The `nika-event` crate — every kind + payload schema in source.
+    The `nika-event` crate: every kind + payload schema in source.
   </Card>
   <Card title="Providers" icon="server" href="/concepts/providers">
     How the unified `InferEvent` stream maps to {STATUS.providers} providers.

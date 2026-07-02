@@ -1,11 +1,11 @@
 ---
 title: "Release radar"
 sidebarTitle: "Release radar"
-description: "T2 chain · devops — dependency release feeds diffed against last run · only the NEW ships reach you."
+description: "T2 chain · devops: dependency release feeds diffed against last run · only the NEW ships reach you."
 icon: "signal"
 ---
 
-> **T2 chain · devops / dependency hygiene** — `mode: feed` parses
+> **T2 chain · devops / dependency hygiene**: `mode: feed` parses
 > RSS/Atom natively, and the **state-file pattern** (read last run →
 > diff → write next state) means you only hear about what's new.
 
@@ -13,7 +13,7 @@ icon: "signal"
 
 « Did anything we depend on ship this week? » Checking releases pages
 is a robot's job. This workflow reads the Atom feed, diffs it against
-what it saw last run (RFC 6902 — empty patch means silence), digests
+what it saw last run (RFC 6902: empty patch means silence), digests
 only the new entries, and saves the state for next time. First run?
 The missing state file recovers to an empty list.
 
@@ -118,7 +118,7 @@ outputs:
 
 <Steps>
   <Step title="feed mode does the parsing">
-    `mode: feed` turns RSS/Atom into structured items — no scraping,
+    `mode: feed` turns RSS/Atom into structured items: no scraping,
     no XML wrangling. The `output:` binding keeps just title/url/date.
   </Step>
   <Step title="State makes it incremental">
@@ -127,7 +127,7 @@ outputs:
     entries · `save_state` overwrites for next time.
   </Step>
   <Step title="Silence is the feature">
-    The digest runs `when: size(...) > 0` — nothing new, no model
+    The digest runs `when: size(...) > 0`: nothing new, no model
     call, no noise. Schedule it daily and forget it.
   </Step>
 </Steps>
@@ -145,9 +145,9 @@ outputs:
 
 - Watch N dependencies: lift the feed URL into a list and `for_each` the fetch ([Competitor radar](/examples/competitor-radar) shows the leash).
 - Pipe breaking-change suspects into [PR review fan-out](/examples/pr-review-fanout)'s reviewer prompt.
-- Swap the feed for your vendor's changelog RSS — the shape doesn't change.
+- Swap the feed for your vendor's changelog RSS. The shape doesn't change.
 
 <Card title="Next · Resume screener" icon="user-check" href="/examples/resume-screener">
-  PII never leaves the machine — a local-model rubric per candidate,
+  PII never leaves the machine: a local-model rubric per candidate,
   ranked deterministically.
 </Card>

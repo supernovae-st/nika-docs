@@ -1,11 +1,11 @@
 ---
 title: "Competitor radar"
 sidebarTitle: "Competitor radar"
-description: "T3 fan-out · strategy — everything they shipped last week, read in parallel, one Monday brief."
+description: "T3 fan-out · strategy: everything they shipped last week, read in parallel, one Monday brief."
 icon: "satellite-dish"
 ---
 
-> **T3 fan-out · strategy / product marketing** — the flagship
+> **T3 fan-out · strategy / product marketing**: the flagship
 > `for_each`. The number of pages is decided at RUNTIME by the
 > competitor's sitemap; `max_parallel` keeps the crawl polite,
 > `fail_fast: false` keeps one dead page from killing the radar,
@@ -123,7 +123,7 @@ outputs:
 
 <Steps>
   <Step title="The collection is computed, not hardcoded">
-    `for_each: ${{ tasks.map.recent }}` — eight URLs this week, three
+    `for_each: ${{ tasks.map.recent }}`: eight URLs this week, three
     next week. The DAG doesn't change.
   </Step>
   <Step title="Resilience is per-iteration">
@@ -148,11 +148,11 @@ outputs:
 
 ## Make it yours
 
-- Track THREE competitors: lift the sitemap URL into a list and nest the pattern — or run the workflow per competitor and merge the briefs.
+- Track THREE competitors: lift the sitemap URL into a list and nest the pattern, or run the workflow per competitor and merge the briefs.
 - Filter the sitemap by date with a sharper jq binding before fanning out.
-- Schedule it for Monday 07:30 from your host's cron — the brief is on your desk before standup.
+- Schedule it for Monday 07:30 from your host's cron. The brief is on your desk before standup.
 
 <Card title="Next · Localization factory" icon="language" href="/examples/localization-factory">
-  Chained fan-outs and the jq `transpose` zip — the whole docs tree,
+  Chained fan-outs and the jq `transpose` zip: the whole docs tree,
   translated.
 </Card>

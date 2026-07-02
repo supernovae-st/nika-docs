@@ -1,7 +1,7 @@
 ---
 title: "Writing Nika as an agent"
 sidebarTitle: "Agent authoring"
-description: "The deterministic protocol — route to a template, fill the slots, check, repair from the error. A weak model on this path beats a strong model improvising."
+description: "The deterministic protocol: route to a template, fill the slots, check, repair from the error. A weak model on this path beats a strong model improvising."
 icon: "robot"
 ---
 
@@ -30,7 +30,7 @@ flowchart LR
 ```
 
 <Steps>
-  <Step title="Route — one intent, one template">
+  <Step title="Route: one intent, one template">
     The [templates](https://github.com/supernovae-st/nika-spec/tree/main/templates)
     are six complete, valid skeletons (conformance-gated on every
     push). Match the outer shape of the job:
@@ -44,30 +44,30 @@ flowchart LR
     | research / review / open-ended | `agent-loop` |
     | anything irreversible | `human-gated-ship` |
   </Step>
-  <Step title="Instantiate — structure is copied, never invented">
+  <Step title="Instantiate: structure is copied, never invented">
     Copy the template, rename the workflow, fill every `# SLOT:` line.
     Creativity belongs only in prompts, jq expressions and paths. If
     the job needs a construct the template lacks, the
     [coverage matrix](/examples/overview#find-the-example-that-teaches-x)
-    names the canonical example that exercises it — read it, don't
+    names the canonical example that exercises it: read it, don't
     guess.
   </Step>
-  <Step title="Check — never ship unchecked">
+  <Step title="Check: never ship unchecked">
     `nika check workflow.nika.yaml` (engine) or
     `python conformance/runner.py validate <file>` (spec oracle).
     Editors get the same truth live via the
     [JSON Schema](https://github.com/supernovae-st/nika-spec/blob/main/schemas/workflow.schema.json).
   </Step>
-  <Step title="Repair — the error names its fix">
+  <Step title="Repair: the error names its fix">
     Fix exactly what the code says, nothing else, then re-check:
 
     | Error | The fix |
     |---|---|
-    | `NIKA-DAG-003` | you referenced `${{ tasks.X }}` — add `depends_on: [X]` |
-    | `NIKA-DAG-001` | cycle — remove the back-edge |
-    | `NIKA-VAR-001` | undeclared name — declare it in `vars:`/`secrets:` or fix the typo |
+    | `NIKA-DAG-003` | you referenced `${{ tasks.X }}`: add `depends_on: [X]` |
+    | `NIKA-DAG-001` | cycle: remove the back-edge |
+    | `NIKA-VAR-001` | undeclared name: declare it in `vars:`/`secrets:` or fix the typo |
     | `NIKA-PROVIDER` | `model:` must be `<provider>/<name>` with a canonical prefix |
-    | `NIKA-PARSE` (duplicate id) | two tasks share an id — rename one |
+    | `NIKA-PARSE` (duplicate id) | two tasks share an id: rename one |
   </Step>
 </Steps>
 

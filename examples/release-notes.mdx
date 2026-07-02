@@ -1,11 +1,11 @@
 ---
 title: "Release notes"
 sidebarTitle: "Release notes"
-description: "T2 chain · engineering — git log → typed notes → CHANGELOG edited in place → team pinged."
+description: "T2 chain · engineering: git log → typed notes → CHANGELOG edited in place → team pinged."
 icon: "rocket"
 ---
 
-> **T2 chain · engineering / devrel** — the release-day ritual as one
+> **T2 chain · engineering / devrel**: the release-day ritual as one
 > file: history in, a typed notes object out, the CHANGELOG updated
 > **in place** with `nika:edit`, the team pinged with the headline.
 
@@ -110,17 +110,17 @@ outputs:
 
 <Steps>
   <Step title="The range is a var, not a hardcode">
-    `${{ vars.since_tag }}..HEAD` — next release you change one input,
+    `${{ vars.since_tag }}..HEAD`: next release you change one input,
     or pass it at run time.
   </Step>
   <Step title="Typed notes · headline + breaking + body">
     The schema means `${{ tasks.notes.output.headline }}` is a real
-    field downstream — in the CHANGELOG insert AND in the ping. One
+    field downstream: in the CHANGELOG insert AND in the ping. One
     source, two consumers, no drift.
   </Step>
   <Step title="Edit-in-place, not overwrite">
     `nika:edit` finds the `# Changelog` heading and replaces it with
-    itself + the new section — the file's history stays intact below.
+    itself + the new section: the file's history stays intact below.
   </Step>
 </Steps>
 
@@ -135,11 +135,11 @@ outputs:
 
 ## Make it yours
 
-- Gate the announce behind a human: add a `nika:prompt` task between `changelog` and `announce` — the pattern is in [Invoice chaser](/examples/invoice-chaser).
+- Gate the announce behind a human: add a `nika:prompt` task between `changelog` and `announce`. The pattern is in [Invoice chaser](/examples/invoice-chaser).
 - Add `breaking:` to the ping when `size(tasks.notes.output.breaking) > 0`.
 - Render a public version too: a second `infer` task with a "user-facing tone" prompt, writing `docs/changelog/`.
 
 <Card title="Next · SEO content brief" icon="magnifying-glass-chart" href="/examples/seo-content-brief">
-  Chained fetch extractions — sitemap mode, then article mode — and CEL
+  Chained fetch extractions (sitemap mode, then article mode) and CEL
   indexing into a binding.
 </Card>

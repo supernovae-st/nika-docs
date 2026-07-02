@@ -1,19 +1,19 @@
 ---
 title: "Meeting actions"
 sidebarTitle: "Meeting actions"
-description: "T1 starter · every office job — transcript in, tracker-ready typed action items out."
+description: "T1 starter · every office job: transcript in, tracker-ready typed action items out."
 icon: "list-check"
 ---
 
-> **T1 starter · every office job** — the first example with
-> `infer.schema:` — the model doesn't get to answer in prose. It returns
+> **T1 starter · every office job**: the first example with
+> `infer.schema:`. The model doesn't get to answer in prose. It returns
 > the JSON shape you declared, or the engine rejects it.
 
 ## The job
 
 The meeting ended an hour ago and nobody remembers who owns what. The
 transcript is sitting in a file. This workflow extracts every action
-item as `{owner, task, due}` — typed, validated, importable by whatever
+item as `{owner, task, due}`: typed, validated, importable by whatever
 tracker you use.
 
 ## The shape
@@ -103,17 +103,17 @@ outputs:
 
 <Steps>
   <Step title="A required, typed input">
-    `transcript_path` is declared with `type: string · required: true` —
+    `transcript_path` is declared with `type: string · required: true`:
     the engine validates inputs before any task runs, and the workflow
     becomes callable with a real contract.
   </Step>
   <Step title="The schema IS the contract">
     `infer.schema:` is standard JSON Schema. The model must return a
-    matching object — on violation the engine rejects (and may retry).
+    matching object. On violation the engine rejects (and may retry).
     Downstream tasks index into it directly: `${{ tasks.extract.output.actions }}`.
   </Step>
   <Step title="Two consumers, no extra ceremony">
-    `save` writes the JSON, `trace` logs a human-readable line — both
+    `save` writes the JSON, `trace` logs a human-readable line. Both
     depend on `extract`, both run in parallel.
   </Step>
 </Steps>
@@ -131,9 +131,9 @@ outputs:
 
 - Add `due` to the `required:` list if your team always sets deadlines.
 - Chain a `nika:notify` task that posts each owner their items.
-- Swap the transcript file for a `nika:fetch` of your meeting tool's export API — the schema doesn't change.
+- Swap the transcript file for a `nika:fetch` of your meeting tool's export API. The schema doesn't change.
 
 <Card title="Next · Price watch" icon="tag" href="/examples/price-watch">
-  The next starter has zero model calls — pure tools, bindings and one
+  The next starter has zero model calls: pure tools, bindings and one
   CEL comparison.
 </Card>

@@ -1,11 +1,11 @@
 ---
 title: "Support triage"
 sidebarTitle: "Support triage"
-description: "T2 chain · support — the overnight queue classified, first replies drafted, urgent ones escalated."
+description: "T2 chain · support: the overnight queue classified, first replies drafted, urgent ones escalated."
 icon: "headset"
 ---
 
-> **T2 chain · customer support** — one schema-typed call classifies the
+> **T2 chain · customer support**: one schema-typed call classifies the
 > WHOLE queue (enums keep the categories honest), jq slices the urgent
 > ones, and the escalation fires only when there's something to escalate.
 
@@ -13,8 +13,8 @@ icon: "headset"
 
 It's 8:55. There are 40 tickets from overnight. Someone reads them all,
 tags them, writes first replies, and pages on-call if anything's on
-fire. This file does the reading, tagging and drafting — under a
-sortable v7 batch id — and pages only when `urgent` is non-empty.
+fire. This file does the reading, tagging and drafting (under a
+sortable v7 batch id) and pages only when `urgent` is non-empty.
 
 ## The shape
 
@@ -131,16 +131,16 @@ outputs:
 
 <Steps>
   <Step title="Enums make classification honest">
-    `category` and `urgency` are schema enums — the model cannot invent
+    `category` and `urgency` are schema enums: the model cannot invent
     a « kinda-urgent » tier. Typed output means the jq filter downstream
     can trust the values.
   </Step>
   <Step title="jq slices, the model doesn't re-read">
     `urgent` filters `urgency == "high" or "critical"` out of the typed
-    list — no second model call to ask « which ones were urgent? ».
+    list: no second model call to ask « which ones were urgent? ».
   </Step>
   <Step title="v7 uuids sort by time">
-    `nika:uuid version: v7` is timestamped — triage boards land on disk
+    `nika:uuid version: v7` is timestamped: triage boards land on disk
     already in chronological order.
   </Step>
 </Steps>
@@ -156,11 +156,11 @@ outputs:
 
 ## Make it yours
 
-- Push the first replies as DRAFTS into your helpdesk via its API (`nika:fetch method: POST`) — humans still hit send.
+- Push the first replies as DRAFTS into your helpdesk via its API (`nika:fetch method: POST`): humans still hit send.
 - Track sentiment over time: append each batch's stats to a CSV with `nika:write`.
 - Speed matters at 9am: `groq/llama-3.3-70b` triages a 40-ticket queue in seconds.
 
 <Card title="Next · Contract guard" icon="scale-balanced" href="/examples/contract-guard">
-  The sovereignty example — a LOCAL model reads the contract, and a
+  The sovereignty example: a LOCAL model reads the contract, and a
   validate + assert pair refuses bad extractions.
 </Card>

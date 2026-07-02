@@ -1,11 +1,11 @@
 ---
 title: "SEO content brief"
 sidebarTitle: "SEO content brief"
-description: "T2 chain · SEO — a content brief grounded in what your competitor actually published, not vibes."
+description: "T2 chain · SEO: a content brief grounded in what your competitor actually published, not vibes."
 icon: "magnifying-glass-chart"
 ---
 
-> **T2 chain · SEO / content marketing** — two `nika:fetch` extractions
+> **T2 chain · SEO / content marketing**: two `nika:fetch` extractions
 > chained (`sitemap` mode, then `article` mode), a jq slice binding, CEL
 > indexing, and a schema-typed brief at the end.
 
@@ -111,16 +111,16 @@ outputs:
 <Steps>
   <Step title="Sitemap mode + a jq slice">
     `mode: sitemap` returns the URL list; the `output:` binding
-    `top: ".urls[:5]"` keeps just the head of it. Bindings are jq —
+    `top: ".urls[:5]"` keeps just the head of it. Bindings are jq:
     slices, filters, everything.
   </Step>
   <Step title="CEL indexes into the binding">
-    The second fetch reads `${{ tasks.map.top[0] }}` — index access is
+    The second fetch reads `${{ tasks.map.top[0] }}`: index access is
     part of the CEL subset. The reference also requires
     `depends_on: [map]`: every reference is a visible edge.
   </Step>
   <Step title="The brief is a contract">
-    title · angle · outline · keywords — your writer (or your next
+    title · angle · outline · keywords: your writer (or your next
     workflow) consumes fields, not a wall of prose.
   </Step>
 </Steps>
@@ -136,7 +136,7 @@ outputs:
 
 ## Make it yours
 
-- Brief the top THREE pages instead of one: `for_each: ${{ tasks.map.top }}` — the fan-out tier shows how ([Competitor radar](/examples/competitor-radar)).
+- Brief the top THREE pages instead of one: `for_each: ${{ tasks.map.top }}`. The fan-out tier shows how ([Competitor radar](/examples/competitor-radar)).
 - Feed your own sitemap too and ask the model for internal-linking opportunities.
 - Pipe the brief straight into a draft: a second `infer` consuming `${{ tasks.brief.output.outline }}`.
 

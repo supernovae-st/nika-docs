@@ -1,13 +1,13 @@
 ---
 title: "ADR index"
-description: "35 Architecture Decision Records — 30 Accepted, 5 Proposed. Every significant engineering decision in Nika Diamond, versioned + auditable."
+description: "35 Architecture Decision Records: 30 Accepted, 5 Proposed. Every significant engineering decision in Nika Diamond, versioned + auditable."
 sidebarTitle: "ADR index"
 icon: "scroll"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Every significant engineering decision in Nika Diamond lives as an ADR —
+Every significant engineering decision in Nika Diamond lives as an ADR,
 a short markdown file in [`docs/adr/`](https://github.com/supernovae-st/nika/tree/main/docs/adr)
 with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 {STATUS.adrsAccepted} Accepted, {STATUS.adrsProposed} Proposed.
@@ -37,12 +37,12 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
 <AccordionGroup>
   <Accordion title="Meta / Process (5)" icon="gavel">
-    How Nika runs itself as a project — version cadence, admission, ADRs-on-ADRs.
+    How Nika runs itself as a project: version cadence, admission, ADRs-on-ADRs.
 
     | ID | Title | Status |
     |---|---|---|
     | [ADR-001](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-001-diamond-orphan-branch.md) | Diamond orphan branch rewrite instead of iterative refactor | ✅ Accepted |
-    | [ADR-002](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-002-forever-v0x.md) | Real semver toward 1.0 — 0.91.0 release-candidate, 1.0 public API lock when gates are green | 🔄 amended (D-2026-06-20-N1) |
+    | [ADR-002](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-002-forever-v0x.md) | Real semver toward 1.0: 0.91.0 release-candidate, 1.0 public API lock when gates are green | 🔄 amended (D-2026-06-20-N1) |
     | [ADR-003](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-003-12-gate-admission.md) | 12-gate crate admission protocol | ✅ Accepted |
     | [ADR-009](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-009-adr-process.md) | ADR process and hook discipline | ✅ Accepted |
     | [ADR-011](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-011-cargo-xtask.md) | cargo xtask as canonical automation surface | ✅ Accepted |
@@ -136,7 +136,7 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
     | [ADR-034](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-034-l05-kernel-traits-expansion.md) | L0.5 kernel traits expansion: 6 new traits scoped to v0.81+ | ✅ Accepted |
   </Accordion>
 
-  <Accordion title="Proposed — under review (5)" icon="clock">
+  <Accordion title="Proposed: under review (5)" icon="clock">
     Seed-level reservations ahead of their implementing crates.
 
     | ID | Title | Status |
@@ -153,7 +153,7 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
 <Steps>
   <Step title="Propose">
-    Any significant engineering decision starts as a Proposed ADR —
+    Any significant engineering decision starts as a Proposed ADR: a
     short markdown file in `docs/adr/adr-NNN-<slug>.md` with
     frontmatter: `id`, `title`, `status: Proposed`, `date`, `tags`,
     `related`. Writer describes the context, options considered, and
@@ -167,10 +167,10 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
   <Step title="Accept">
     Once Accepted, the ADR is **immutable**. Any revision happens via a
     new ADR that `supersedes:` the old one. This keeps decision history
-    auditable — `git log` tells you when and why a given rule came in.
+    auditable: `git log` tells you when and why a given rule came in.
   </Step>
   <Step title="Supersede">
-    Rare — but when a decision proves wrong, a new Accepted ADR
+    Rare, but when a decision proves wrong, a new Accepted ADR
     supersedes it. The superseded ADR stays in the tree with
     `status: Superseded-by: ADR-XXX`. Examples: none yet (all 30 Accepted
     ADRs remain authoritative).
@@ -183,13 +183,13 @@ Every ADR carries rich metadata in both its frontmatter and `index.json`:
 
 | Field | Purpose |
 |---|---|
-| `id` | `ADR-001`..`ADR-035` — monotonic, gap-free |
+| `id` | `ADR-001`..`ADR-035` · monotonic, gap-free |
 | `title` | One-line decision summary |
 | `status` | `Proposed` / `Accepted` / `Rejected` / `Superseded` |
 | `date` | ISO date of last status change |
 | `tags` | Free-form (e.g., `architecture`, `runtime`, `forward-compat`) |
 | `affects_crates` | List of crate names the decision constrains |
-| `affects_layers` | `L0`..`L5` — which layers feel the effect |
+| `affects_layers` | `L0`..`L5` · which layers feel the effect |
 | `supersedes` | IDs this ADR replaces |
 | `superseded_by` | ID that replaces this ADR |
 | `related` | Sibling ADRs in the same design arc |
@@ -213,7 +213,7 @@ Every ADR carries rich metadata in both its frontmatter and `index.json`:
     The 8 patterns that keep most ADRs additive.
   </Card>
   <Card title="L0 decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13 — the foundation decisions that became ADRs 033, 034 + others.
+    Q1-Q13: the foundation decisions that became ADRs 033, 034 + others.
   </Card>
   <Card title="12-gate admission" icon="check-double" href="/architecture/admission">
     Gate 12 requires ADR alignment for breaking change.

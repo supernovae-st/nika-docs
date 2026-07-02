@@ -1,6 +1,6 @@
 ---
 title: "L0 foundation decisions"
-description: "Q1-Q13 — the 13 architectural decisions that lock the L0 + L0.5 layer shape."
+description: "Q1-Q13: the 13 architectural decisions that lock the L0 + L0.5 layer shape."
 sidebarTitle: "L0 decisions"
 icon: "list-check"
 ---
@@ -9,7 +9,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Thirteen questions, thirteen locks. These decisions shape the **L0 foundation**
 ({STATUS.cratesAdmitted} admitted + remaining through Round 4) and the
-**L0.5 kernel contract**. Revised twice by swarm audit — current state is
+**L0.5 kernel contract**. Revised twice by swarm audit: current state is
 rev. 3.
 
 <Info>
@@ -21,7 +21,7 @@ rev. 3.
 
 | Q | Decision | Status |
 |---|---|---|
-| **Q1** | No proc macros in L0 — manual impl + `macro_rules!` | LOCKED |
+| **Q1** | No proc macros in L0 · manual impl + `macro_rules!` | LOCKED |
 | **Q2** | No `nika-stdx`; split `nika-error` → `nika-types` + `nika-error` | LOCKED · executed |
 | **Q3** | Extract `nika-catalog-codegen` NOW (testable + reusable) | LOCKED |
 | **Q4** | `nika-event`: 3-layer split (L0 types + L1 store + L2 export) | LOCKED |
@@ -47,7 +47,7 @@ rev. 3.
 ## Deep dives
 
 <AccordionGroup>
-  <Accordion title="Q1 — No proc macros in L0" icon="ban">
+  <Accordion title="Q1: No proc macros in L0" icon="ban">
     **Rationale.** Proc macros add compile-time dependency on `syn` + `quote`
     + `proc-macro2` (~50 MLOC compile graph). L0 crates must compile in
     seconds for CI parity testing. Manual `impl Trait for Struct` +
@@ -60,7 +60,7 @@ rev. 3.
     don't pay proc-macro cost transitively.
   </Accordion>
 
-  <Accordion title="Q2 — nika-types is the foundation, not nika-stdx" icon="cube">
+  <Accordion title="Q2: nika-types is the foundation, not nika-stdx" icon="cube">
     **Rationale.** A generic `nika-stdx` crate devolves into a kitchen-sink
     (anti-pattern #1 from layer-registry). Instead, foundation types live in
     `nika-types` (splitable when cohesion demands), error infra in
@@ -71,7 +71,7 @@ rev. 3.
     Cow-heavy). `nika-error` re-exports the subset it needs.
   </Accordion>
 
-  <Accordion title="Q3 — Extract nika-catalog-codegen as standalone L0" icon="hammer">
+  <Accordion title="Q3: Extract nika-catalog-codegen as standalone L0" icon="hammer">
     **Rationale.** TOML → Rust codegen is testable logic that today lives
     in `build.rs`. Extract it so:
     - `build.rs` remains &lt;50 LOC (delegates).
@@ -81,7 +81,7 @@ rev. 3.
     Targets admission Round 3 post-nika-schema.
   </Accordion>
 
-  <Accordion title="Q4 — nika-event 3-layer split" icon="bell">
+  <Accordion title="Q4: nika-event 3-layer split" icon="bell">
     **Rationale.** Event emission (L0 types + scoped sub-enums) is concept
     separate from storage (L1 `nika-event-store` writes NDJSON / SQLite)
     which is separate from export (L2 `nika-event-export` pushes OTel /
@@ -91,7 +91,7 @@ rev. 3.
     L1 `nika-event-store` (~3k LOC, future) · L2 `nika-event-export` (~2k LOC, future).
   </Accordion>
 
-  <Accordion title="Q5 — Admission order for L0" icon="arrow-right">
+  <Accordion title="Q5: Admission order for L0" icon="arrow-right">
     **Order.** schema → catalog-codegen → event → binding → pck-manifest.
 
     **Why this order.**
@@ -99,10 +99,10 @@ rev. 3.
     - `catalog-codegen` independent (purely build-time).
     - `nika-event` needs types (done) and schema (for correlation IDs).
     - `nika-binding` needs event + transform.
-    - `nika-pck-manifest` is standalone — can run in parallel with any of the above.
+    - `nika-pck-manifest` is standalone and can run in parallel with any of the above.
   </Accordion>
 
-  <Accordion title="Q6 — EventKind scoped sub-enums (not mega-enum)" icon="tags">
+  <Accordion title="Q6: EventKind scoped sub-enums (not mega-enum)" icon="tags">
     **Rationale.** A single `EventKind` enum with 22 variants becomes a
     merge-conflict magnet and bloats every consumer's match arm. Instead,
     ~22 sub-enums grouped by emission site (`ExecEvent`, `InferEvent`,
@@ -113,40 +113,40 @@ rev. 3.
     match on the category they care about; rest are transparent.
   </Accordion>
 
-  <Accordion title="Q7 — nika-kernel prelude re-export hub" icon="star">
+  <Accordion title="Q7: nika-kernel prelude re-export hub" icon="star">
     **Rationale.** L2+ verb crates today `use nika_types::*; use nika_error::*;
-    use nika_kernel::traits::*;` — 3 imports every file. Instead,
+    use nika_kernel::traits::*;` (3 imports every file). Instead,
     `nika-kernel` ships `pub mod prelude` that re-exports from `nika-types`
     + `nika-error` + its own traits. Verb crates: `use nika_kernel::prelude::*;`.
 
     **Cost.** 4 lines of code. Zero new deps (already transitive).
   </Accordion>
 
-  <Accordion title="Q8 — nika-transform = standalone L0 crate (REVERTED rev.2)" icon="rotate-left">
+  <Accordion title="Q8: nika-transform = standalone L0 crate (REVERTED rev.2)" icon="rotate-left">
     **Original decision.** Inline `nika-transform` into `nika-binding` (single
     consumer).
 
     **Reversion rationale.** Swarm audit found a **second consumer**:
     `nika-builtin-*` crates need `nika-transform` filters (json, base64,
     shell_quote) for `invoke:builtin:` parameter processing. Inlining would
-    force `nika-binding` dependency on every builtin crate — wrong coupling.
+    force `nika-binding` dependency on every builtin crate (wrong coupling).
 
     **Final.** `nika-transform` stays L0, 65 transforms in 7 sub-modules,
     two consumers (binding + builtin-*).
   </Accordion>
 
-  <Accordion title="Q9-Q10 — Timestamp + canonical-JSON = modules in nika-types" icon="clock">
+  <Accordion title="Q9-Q10: Timestamp + canonical-JSON = modules in nika-types" icon="clock">
     **Rationale rev.2.** Both were initially planned as standalone L0 crates
     (`nika-time`, `nika-canonical`). Audit found each has zero
     non-foundation dependencies and tight coupling to core types. They
     become modules inside `nika-types`:
-    - `nika_types::timestamp` — `Timestamp` + `WallDuration` (monotonic + RFC3339)
-    - `nika_types::hash::canonical` — RFC 8785 canonical-JSON for hash stability
+    - `nika_types::timestamp`: `Timestamp` + `WallDuration` (monotonic + RFC3339)
+    - `nika_types::hash::canonical`: RFC 8785 canonical-JSON for hash stability
 
     **Impact.** `nika-types` gains ~300 LOC, stays well under 15k crate cap.
   </Accordion>
 
-  <Accordion title="Q11 — Token-streaming delta-batching" icon="wave-square">
+  <Accordion title="Q11: Token-streaming delta-batching" icon="wave-square">
     **Rationale.** Emitting 1 `InferEvent::Token` per LLM token would flood
     the event bus (2k tokens/s on fast providers). Instead, batch into
     deltas: emit `InferEvent::Delta { text, token_count, duration }` every
@@ -155,29 +155,29 @@ rev. 3.
     **Impact.** Event rate capped at ~20 Hz regardless of provider speed.
   </Accordion>
 
-  <Accordion title="Q12 — 5 sibling sinks (not 1 ObservabilitySink)" icon="diagram-project">
+  <Accordion title="Q12: 5 sibling sinks (not 1 ObservabilitySink)" icon="diagram-project">
     **Rationale rev.3.** The original `ObservabilitySink` god-trait would have
     forced every sink implementation to handle 5 concerns at once. Instead,
     5 sibling traits live alongside each other:
 
-    - `EventSink` — structured events (NDJSON, OpenTelemetry)
-    - `MetricsExporter` — Prometheus / StatsD / OTel metrics
-    - `TracerProvider` — OTel traces (W3C TraceContext)
-    - `AuditSink` — compliance audit log (tamper-evident, separate from EventSink)
-    - `BillingSink` — cost accounting ($ per provider call)
+    - `EventSink`: structured events (NDJSON, OpenTelemetry)
+    - `MetricsExporter`: Prometheus / StatsD / OTel metrics
+    - `TracerProvider`: OTel traces (W3C TraceContext)
+    - `AuditSink`: compliance audit log (tamper-evident, separate from EventSink)
+    - `BillingSink`: cost accounting ($ per provider call)
 
     **Impact.** Each sink tested independently. Implementations can mix-and-match
     (e.g., Honeycomb for trace, Prometheus for metrics, local NDJSON for audit).
   </Accordion>
 
-  <Accordion title="Q13 — OTel GenAI semconv via typed GenAiAttrs" icon="link">
+  <Accordion title="Q13: OTel GenAI semconv via typed GenAiAttrs" icon="link">
     **Rationale rev.3.** OpenTelemetry defines [GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
     for LLM attributes (`gen_ai.system`, `gen_ai.request.model`, etc.).
     Rather than stuff strings into a `HashMap<String, String>`, expose a
     typed `GenAiAttrs` struct on `InferRequest` / `InferResponse`.
 
     **Impact.** Consumers get IDE completion + compile-time safety.
-    Non-breaking: `GenAiAttrs` is `#[non_exhaustive]` — new attrs are additive.
+    Non-breaking: `GenAiAttrs` is `#[non_exhaustive]`. New attrs are additive.
   </Accordion>
 </AccordionGroup>
 
@@ -194,6 +194,6 @@ rev. 3.
     How each L0 crate earns its seat.
   </Card>
   <Card title="Constellation" icon="diagram-project" href="/reference/constellation">
-    Live state — which L0 crates are admitted today.
+    Live state: which L0 crates are admitted today.
   </Card>
 </CardGroup>

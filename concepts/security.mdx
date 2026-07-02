@@ -9,7 +9,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Workflows run attacker-influenced inputs by nature: they fetch URLs,
 shell out, and feed model output into tools. Nika's position is that the
-**mechanism must be safe before policy makes it configurable** — the
+**mechanism must be safe before policy makes it configurable**: the
 dangerous primitives ship hardened by default, and a violation is a
 typed `NIKA-SEC-*` error your workflow can read, not a stack trace.
 
@@ -30,13 +30,13 @@ verbatim from the engine (`nika-http`):
 <Steps>
   <Step title="Static checks (pure)">
     Scheme allow-list (`http`/`https` only), blocked hostnames
-    (`localhost`, cloud metadata), literal-IP range checks — loopback,
+    (`localhost`, cloud metadata), literal-IP range checks: loopback,
     RFC 1918, link-local/metadata (`169.254.169.254`), CGN, IPv6 local
     ranges, v4-mapped v6.
   </Step>
   <Step title="DNS resolution check">
     Non-literal hosts are resolved and **every address** is
-    range-checked — this kills decimal-IP tricks (`http://2130706433/`)
+    range-checked: this kills decimal-IP tricks (`http://2130706433/`)
     and public names that resolve to private addresses.
   </Step>
   <Step title="Per-hop redirect re-check">
@@ -53,8 +53,8 @@ never the default.
 ## exec: the data-channel rule
 
 `exec` in shell mode runs every command against a blocklist before
-spawn. But the structural defense is in how you write workflows —
-**tainted data goes through data channels, never code channels**:
+spawn. But the structural defense is in how you write workflows:
+**tainted data goes through data channels, never code channels**.
 
 ```yaml
 # ❌ tainted output interpolated into a command string
@@ -71,7 +71,7 @@ spawn. But the structural defense is in how you write workflows —
 ```
 
 Passing tainted data to a privileged sink without going through a data
-channel raises a typed taint violation — taint is a property of the
+channel raises a typed taint violation: taint is a property of the
 **data**, not of who runs the workflow.
 
 ## Trust levels + prompt injection
@@ -92,15 +92,15 @@ tools:
 The three codes the spec REGISTERS today: `NIKA-SEC-001` (exec blocklist
 hit), `NIKA-SEC-002` (agent tool outside the whitelist), `NIKA-SEC-003`
 (run-recursion bound). The runtime trust layers above are engine-side
-(the Shield) — they emit within the `NIKA-SEC` namespace as they land.
+(the Shield): they emit within the `NIKA-SEC` namespace as they land.
 
 Every failure is a [typed error](/reference/error-codes) with a stable
-code and a `transient` flag — your `on_error:` can act on it.
+code and a `transient` flag. Your `on_error:` can act on it.
 
 ## Secrets
 
 `${{ secrets.* }}` is a first-class namespace (vault/env/file-backed).
-Secret values are **masked in logs and traces** at the binding layer —
+Secret values are **masked in logs and traces** at the binding layer:
 they never appear in the event stream, and they are not readable back
 from a task's recorded output.
 
@@ -108,13 +108,13 @@ from a task's recorded output.
 
 - `unsafe_code = "forbid"` workspace-wide · zero `.unwrap()` in `src/` (CI-enforced)
 - `cargo deny` on every PR · `cargo audit` on every dependency change
-- Sealed kernel traits — external code cannot impersonate engine I/O
+- Sealed kernel traits · external code cannot impersonate engine I/O
 - {STATUS.libTests} lib tests · {STATUS.clippyWarnings} clippy warnings · every crate passes 12 admission gates
-- AGPL-3.0-or-later — the source travels with the binary, always auditable
+- AGPL-3.0-or-later · the source travels with the binary, always auditable
 
 ## Reporting a vulnerability
 
-**security@supernovae.studio** — please not via public issues.
+**security@supernovae.studio** (please not via public issues).
 Acknowledgement ≤72h, triage ≤7 days, disclosure ≤90 days. Full policy,
 disclosure process and the out-of-scope list:
 [SECURITY.md](https://github.com/supernovae-st/nika/blob/main/SECURITY.md).
@@ -128,7 +128,7 @@ disclosure process and the out-of-scope list:
   <Card title="Bindings" icon="link" href="/concepts/bindings">
     Taint, scopes, and the `secrets.*` namespace.
   </Card>
-  <Card title="Builtins — fetch" icon="globe" href="/reference/builtins">
+  <Card title="Builtins · fetch" icon="globe" href="/reference/builtins">
     The `nika:fetch` contract (engines MUST ship SSRF defense).
   </Card>
   <Card title="SECURITY.md" icon="shield" href="https://github.com/supernovae-st/nika/blob/main/SECURITY.md">

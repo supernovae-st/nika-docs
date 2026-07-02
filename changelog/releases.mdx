@@ -1,6 +1,6 @@
 ---
 title: "Releases"
-description: "Every crate admission + every significant engine update. One source of truth — `CHANGELOG.md` on the `main` branch."
+description: "Every crate admission + every significant engine update. One source of truth: `CHANGELOG.md` on the `main` branch."
 sidebarTitle: "Releases"
 icon: "clock-rotate-left"
 ---
@@ -9,7 +9,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Diamond started at **v0.80.0** (2026-04-13). The legacy exploration era
-(v0.79.3) lives on the private `brouillon` archive — read-only, never
+(v0.79.3) lives on the private `brouillon` archive: read-only, never
 shipped from.
 
 <Info>
@@ -32,7 +32,7 @@ progress is tracked via:
 
 1. **Crate admission commits** on `main` (e.g., `feat(nika-X): admit to workspace — all 12 gates passed`).
 2. **Hygiene vector deployments** (currently {STATUS.hygieneVectors} active, {STATUS.hygieneGreen} green / {STATUS.hygieneYellow} yellow / {STATUS.hygieneRed} red).
-3. **ADR promotions** ({STATUS.adrs} total — {STATUS.adrsAccepted} Accepted, {STATUS.adrsProposed} Proposed).
+3. **ADR promotions** ({STATUS.adrs} total: {STATUS.adrsAccepted} Accepted, {STATUS.adrsProposed} Proposed).
 
 ## Recent milestones
 
@@ -42,22 +42,22 @@ progress is tracked via:
   - **4 new hygiene vectors** (30-33): `check-cancel-safety.sh`,
     `check-owned-strings.sh`, `check-unsafe-count.sh`, `check-layer-deps.sh`.
     Brings the suite to {STATUS.hygieneVectors} active vectors.
-  - **Wave 3A post-commit hook** — engine commits now trigger Olympus
+  - **Wave 3A post-commit hook**: engine commits now trigger Olympus
     `xtask.ts` in background, live-refreshing `/timeline`, `/graph/diff`,
     `/graph/fitness`, `/hygiene`.
-  - **Wave 4A reservations** — 5 forward-compat seams for v0.95 memory subsystem
+  - **Wave 4A reservations**: 5 forward-compat seams for v0.95 memory subsystem
     + v0.100 WASM: `EmbeddingSpec`, `MemoryFrameRef.trust`,
     `RecallQuery.tenant`, `WasmPluginError::OutOfFuel` +
     `PluginCallContext`, `MemoryLifecycle` trait.
-  - **Wave 4B telemetry seeds** — `SpanGuard.parent_span_id` + W3C
+  - **Wave 4B telemetry seeds**: `SpanGuard.parent_span_id` + W3C
     Trace Context linkage; `Timestamp(i64 unix_ns)` + `WallDuration`
     in `nika-types::timestamp` with RFC 3339 Display (inlined
     Hinnant civil-from-days).
-  - **Batch II test depth** — 14 new proptest properties (TrustLevel
+  - **Batch II test depth**: 14 new proptest properties (TrustLevel
     lattice invariants, ID serde roundtrip); Loom `#[cfg(loom)]`
     interleaving tests for `CancelCtx` (INV-029); mutation baseline
     for `nika-error` (60 mutants, 31 caught, 13 missed).
-  - **5 new ADRs** — ADR-029 EmbeddingSpec, ADR-030 MemoryFrameRef
+  - **5 new ADRs**: ADR-029 EmbeddingSpec, ADR-030 MemoryFrameRef
     trust, ADR-031 RecallQuery tenant, ADR-032 WasmPluginContext,
     ADR-035 Telemetry seams (all Proposed, arming vector 19).
 
@@ -68,7 +68,7 @@ progress is tracked via:
   - `ObservabilitySink` dropped → 5 sibling channels (Event · Metrics ·
     Trace · Audit · Billing) per Q12 rev.3.
   - Engine hygiene now enforces RED as fail / YELLOW as suggestion for
-    routine pushes (was YELLOW-as-fail — too strict).
+    routine pushes (was YELLOW-as-fail, too strict).
 
   ### Fixed
 
@@ -80,7 +80,7 @@ progress is tracked via:
 
 <Update label="v0.80.0-alpha.4" description="2026-04-14 · nika-catalog-verify admitted">
   **Crate admitted:** `nika-catalog-verify` (L4, 600 LOC, 9 tests, all 12
-  gates green). The first L4 interface crate — validates all catalog
+  gates green). The first L4 interface crate: validates all catalog
   TOMLs at build time via `cargo run -p nika-catalog-verify`.
 </Update>
 
@@ -107,7 +107,7 @@ progress is tracked via:
 
 <Update label="v0.80.0-alpha.0" description="2026-04-13 · Diamond begins">
   **The beginning.** Orphan branch created from scratch as `nika-diamond` (renamed `main` 2026-05).
-  Legacy `main` (v0.79.3) abandoned. Forever-v0.x — no v1.0 target.
+  Legacy `main` (v0.79.3) abandoned. Forever-v0.x: no v1.0 target.
   First admitted crate: `nika-types` (L0 foundation).
 </Update>
 
@@ -119,14 +119,14 @@ progress is tracked via:
     promotion. Source of truth on the `main` branch.
   </Card>
   <Card title="Commit history" icon="code-commit" href="https://github.com/supernovae-st/nika/commits/main">
-    Every commit on the `main` branch — atomic, bisectable,
+    Every commit on the `main` branch: atomic, bisectable,
     Co-Authored-By Nika 🦋.
   </Card>
   <Card title="Live state" icon="gauge" href="/reference/status">
     Current test counts, clippy, hygiene, admitted crate inventory.
   </Card>
   <Card title="Roadmap" icon="map" href="/changelog/roadmap">
-    What's next — 1.0.0 public API lock after the release gates are green,
+    What's next: 1.0.0 public API lock after the release gates are green,
     1.x minors completing the 42-crate foundation, then the
     2.0 Connectome era and the ecosystem tier.
   </Card>

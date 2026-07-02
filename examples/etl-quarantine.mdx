@@ -1,11 +1,11 @@
 ---
 title: "ETL quarantine"
 sidebarTitle: "ETL quarantine"
-description: "T2 chain · data engineering — bad batches degrade to a quarantine file instead of killing the pipeline."
+description: "T2 chain · data engineering: bad batches degrade to a quarantine file instead of killing the pipeline."
 icon: "filter"
 ---
 
-> **T2 chain · data engineering** — the `on_error: recover:` example.
+> **T2 chain · data engineering**: the `on_error: recover:` example.
 > The difference between « re-run the whole night » and « fix three
 > rows tomorrow morning » is one block: bad data is **data**, not an
 > exception.
@@ -15,7 +15,7 @@ icon: "filter"
 The nightly batch dies at row 14,203 and the whole pipeline dies with
 it. Here the malformed-CSV case recovers to an empty batch, the schema
 gate splits good from bad, rejects land in a quarantine file with
-their validation errors, and the good rows aggregate per currency —
+their validation errors, and the good rows aggregate per currency,
 in jq, deterministically.
 
 ## The shape
@@ -134,17 +134,17 @@ outputs:
 
 <Steps>
   <Step title="recover: is the safety net">
-    `on_error: recover: ${{ tasks.empty_batch.output }}` — when the
+    `on_error: recover: ${{ tasks.empty_batch.output }}`: when the
     CSV won't parse, the task yields the fallback instead of failing.
     Downstream sees an empty batch, not a dead pipeline.
   </Step>
   <Step title="The gate splits, when: routes">
     `nika:validate` returns `{valid, errors}` · two `when:` branches
-    route the run — good rows aggregate, bad batches quarantine WITH
+    route the run: good rows aggregate, bad batches quarantine WITH
     their error report.
   </Step>
   <Step title="jq does the accounting">
-    `group_by(.currency)` + `add` — totals are arithmetic, not model
+    `group_by(.currency)` + `add`: totals are arithmetic, not model
     output. No LLM call anywhere in this workflow.
   </Step>
 </Steps>
@@ -160,11 +160,11 @@ outputs:
 
 ## Make it yours
 
-- Add a `nika:notify` task on the quarantine branch — data-quality alerts only when something was actually rejected.
+- Add a `nika:notify` task on the quarantine branch: data-quality alerts only when something was actually rejected.
 - Chain [Release notes](/examples/release-notes)' pattern to post the daily totals to your team channel.
-- Validate against your real row schema — the gate is just JSON Schema.
+- Validate against your real row schema: the gate is just JSON Schema.
 
 <Card title="Next · Release radar" icon="signal" href="/examples/release-radar">
-  The feed-mode example — RSS/Atom parsed natively, diffed against
+  The feed-mode example: RSS/Atom parsed natively, diffed against
   last run's state.
 </Card>

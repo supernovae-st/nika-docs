@@ -7,7 +7,7 @@ icon: "layer-group"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika is a single Rust binary — `nika` at **L5** — composed of
+Nika is a single Rust binary (`nika` at **L5**) composed of
 **{STATUS.cratesTarget} crates** across six layers. Each crate has one job.
 Together they parse `.nika.yaml`, resolve templates, route to providers,
 execute verbs, and emit a structured event stream.
@@ -64,22 +64,22 @@ foundation types. **Upward imports are a CI hard failure.**
 ## Why layers matter
 
 <AccordionGroup>
-  <Accordion title="Mechanical sorting — no debate" icon="layer-group">
+  <Accordion title="Mechanical sorting · no debate" icon="layer-group">
     New crate? Answer the [mechanical sort test](/architecture/layers#mechanical-sort-test)
     in under 10 seconds. No meetings, no "where should this live", no
     spiral into abstraction-first design.
   </Accordion>
-  <Accordion title="Trustable L0 — no hidden I/O" icon="shield">
+  <Accordion title="Trustable L0 · no hidden I/O" icon="shield">
     L0 has **zero I/O, zero async, zero runtime deps**. Your build script
     can safely `use nika_types::*` without pulling in tokio. Property tests
     against L0 types run in milliseconds.
   </Accordion>
-  <Accordion title="Swappable effects — test hermetically" icon="rotate">
+  <Accordion title="Swappable effects · test hermetically" icon="rotate">
     Every I/O crate implements a kernel trait with a mock twin. Unit tests
-    use `nika-kernel-mock::MockClock`, `MockFs`, `MockProvider` — no
+    use `nika-kernel-mock::MockClock`, `MockFs`, `MockProvider`: no
     network, no disk, no wall-clock flakiness. Invariant #27.
   </Accordion>
-  <Accordion title="Capped blast radius — per-axis capabilities" icon="explosion">
+  <Accordion title="Capped blast radius · per-axis capabilities" icon="explosion">
     Every L1 crate declares its capability axes in
     `docs/architecture/security-axes.toml` (e.g., `net-egress` for HTTP,
     `rw-fs` for filesystem). Silent axis escalation fails CI.
@@ -100,7 +100,7 @@ foundation types. **Upward imports are a CI hard failure.**
   <Card title="nika-catalog-verify" icon="check">**L4** · Catalog validation tool</Card>
 </CardGroup>
 
-`nika-schema` (parser · analyzer · static check) is admitted and live — it is what `nika check` runs.
+`nika-schema` (parser · analyzer · static check) is admitted and live: it is what `nika check` runs.
 
 [Live constellation →](/reference/constellation) · [12-gate admission →](/architecture/admission)
 
@@ -140,7 +140,7 @@ fixes. One crate = one atomic commit.
     The 8 patterns that keep the public API stable across years.
   </Card>
   <Card title="L0 decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13 — why no proc macros in L0, why sibling sinks not god-trait.
+    Q1-Q13: why no proc macros in L0, why sibling sinks not god-trait.
   </Card>
   <Card title="Admission" icon="check-double" href="/architecture/admission">
     The 12 gates with rationale per gate.

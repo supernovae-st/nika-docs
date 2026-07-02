@@ -1,6 +1,6 @@
 ---
 title: "Capability rules"
-description: "The capability rules that map provider/model pairs to their feature set — modalities, tools, JSON mode, streaming, token limits."
+description: "The capability rules that map provider/model pairs to their feature set: modalities, tools, JSON mode, streaming, token limits."
 sidebarTitle: "Capability rules"
 icon: "grid"
 ---
@@ -43,7 +43,7 @@ Zero regex, zero allocation, zero runtime deps.
 
   <Step title="Apply the rule's `caps` fields">
     Fields set by a rule **overwrite** earlier values. Fields absent from
-    the rule **preserve** the accumulated state. No merging of lists —
+    the rule **preserve** the accumulated state. No merging of lists:
     assignment is wholesale.
   </Step>
 
@@ -56,7 +56,7 @@ Zero regex, zero allocation, zero runtime deps.
 ## The 4 match kinds
 
 <AccordionGroup>
-  <Accordion title="`any` — matches every model" icon="asterisk">
+  <Accordion title="`any`: matches every model" icon="asterisk">
     ```toml
     [[rules]]
     match = { kind = "any" }
@@ -65,7 +65,7 @@ Zero regex, zero allocation, zero runtime deps.
     Used for provider-wide defaults (e.g., "every xAI model supports streaming").
   </Accordion>
 
-  <Accordion title="`exact` — matches one model id" icon="equals">
+  <Accordion title="`exact`: matches one model id" icon="equals">
     ```toml
     [[rules]]
     match = { kind = "exact", model = "deepseek-reasoner" }
@@ -74,7 +74,7 @@ Zero regex, zero allocation, zero runtime deps.
     Used for per-model overrides that deviate from a sibling family.
   </Accordion>
 
-  <Accordion title="`exact_any` — matches a set of model ids" icon="list">
+  <Accordion title="`exact_any`: matches a set of model ids" icon="list">
     ```toml
     [[rules]]
     match = { kind = "exact_any", models = ["o1", "o3", "o4"] }
@@ -83,14 +83,14 @@ Zero regex, zero allocation, zero runtime deps.
     Used for explicit model enumeration when ids don't share a prefix.
   </Accordion>
 
-  <Accordion title="`prefix_any` — matches models whose id starts with any prefix" icon="arrow-right">
+  <Accordion title="`prefix_any`: matches models whose id starts with any prefix" icon="arrow-right">
     ```toml
     [[rules]]
     match = { kind = "prefix_any", prefixes = ["gpt-4o", "gpt-4.1"] }
     caps.input_modalities = ["text", "image"]
     caps.json_mode = "schema"
     ```
-    Most common. Covers entire model families in one rule. **No regex** —
+    Most common. Covers entire model families in one rule. **No regex**:
     prefix match only (keeps zero runtime deps in L0).
   </Accordion>
 </AccordionGroup>
@@ -114,7 +114,7 @@ What a rule can set:
 ### Supported parameter vocabulary (13)
 
 <Check>
-  The vocabulary is **closed** — adding a new parameter is a `nika-catalog` schema change.
+  The vocabulary is **closed**: adding a new parameter is a `nika-catalog` schema change.
 </Check>
 
 | Parameter | Meaning |
@@ -215,7 +215,7 @@ $ nika catalog models --capability computer-use
 anthropic/claude-opus-4-5-20260201
 ```
 
-```rust Rust API (shipped — nika-catalog)
+```rust Rust API (shipped · nika-catalog)
 use nika_catalog::model_capabilities;
 
 let caps = model_capabilities("anthropic", "claude-opus-4-5-20260201");
@@ -246,12 +246,12 @@ assert!(caps.supported_parameters.contains(&"computer-use"));
     The {CANON.providers} canonical providers these rules target.
   </Card>
   <Card title="Concepts · Providers" icon="plug" href="/concepts/providers">
-    Runtime routing — how infer verb picks a provider.
+    Runtime routing: how infer verb picks a provider.
   </Card>
   <Card title="Schema" icon="file-code" href="/reference/schema">
     `.nika.yaml` envelope + workflow schema reference.
   </Card>
   <Card title="L0 decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13 — why no regex, why manual impl, why prefix-only matching.
+    Q1-Q13: why no regex, why manual impl, why prefix-only matching.
   </Card>
 </CardGroup>

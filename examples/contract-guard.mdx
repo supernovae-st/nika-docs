@@ -1,13 +1,13 @@
 ---
 title: "Contract guard"
 sidebarTitle: "Contract guard"
-description: "T2 chain · legal — clause extraction on a LOCAL model. The contract never leaves the machine."
+description: "T2 chain · legal: clause extraction on a LOCAL model. The contract never leaves the machine."
 icon: "scale-balanced"
 ---
 
-> **T2 chain · legal / compliance** — `model: ollama/llama3.2:3b` at the
+> **T2 chain · legal / compliance**: `model: ollama/llama3.2:3b` at the
 > envelope means **every** model call in this file runs on your own
-> hardware. For a contract, that's not a preference — it's the
+> hardware. For a contract, that's not a preference. It's the
 > requirement. Belt-and-braces: `schema:` at infer time, `nika:validate`
 > after, `nika:assert` as the hard gate.
 
@@ -15,7 +15,7 @@ icon: "scale-balanced"
 
 Outside counsel takes a week. Pasting the contract into a cloud chatbot
 takes your confidentiality with it. This workflow extracts every
-risk-bearing clause — verbatim quotes, typed risk levels — locally,
+risk-bearing clause (verbatim quotes, typed risk levels) locally,
 re-validates the extraction, and refuses to write the memo if the data
 doesn't hold.
 
@@ -138,17 +138,17 @@ outputs:
 <Steps>
   <Step title="Sovereignty is one line">
     The envelope `model:` points at Ollama. Same file, same schema, same
-    everything — just no cloud. Swap back to a cloud provider for
+    everything, just no cloud. Swap back to a cloud provider for
     non-sensitive documents; the workflow doesn't change shape.
   </Step>
   <Step title="validate re-checks what schema promised">
     `nika:validate` runs the extraction against a second, stricter
-    schema (`minItems: 1`) and returns `{valid, errors}` — belt and
+    schema (`minItems: 1`) and returns `{valid, errors}`: belt and
     braces for legal-grade output.
   </Step>
   <Step title="assert is the fail-fast guard">
     `when:` skips; `nika:assert` FAILS. A memo built on a bad extraction
-    is worse than no memo — so the gate throws, loudly.
+    is worse than no memo, so the gate throws, loudly.
   </Step>
 </Steps>
 
@@ -165,7 +165,7 @@ outputs:
 
 - Compare against your clause playbook: `nika:read` the playbook + a second `infer` that flags deviations.
 - Batch a folder of NDAs: `nika:glob` + `for_each` ([Localization factory](/examples/localization-factory) shows the chained fan-out).
-- HR version: same shape over candidate agreements or policy docs — sensitive data, local model, typed findings.
+- HR version: same shape over candidate agreements or policy docs. Sensitive data, local model, typed findings.
 
 <Card title="Level up · T3 fan-out" icon="satellite-dish" href="/examples/competitor-radar">
   Next tier: collections the workflow discovers at runtime, processed in

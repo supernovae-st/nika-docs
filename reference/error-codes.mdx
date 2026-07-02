@@ -1,13 +1,13 @@
 ---
 title: "Error codes"
-description: "The typed error model — namespaces, categories, and the 28 registered v0.1 codes. Generated from the spec registry."
+description: "The typed error model: namespaces, categories, and the 28 registered v0.1 codes. Generated from the spec registry."
 sidebarTitle: "Error codes"
 icon: "triangle-exclamation"
 ---
 
 Every error Nika emits is a **typed structure** with a stable code, a
 category, and a `transient` flag the retry machinery reads. The format is
-`NIKA-<NAMESPACE>-<NNN>` — an optional sub-namespace self-documents builtin
+`NIKA-<NAMESPACE>-<NNN>`. An optional sub-namespace self-documents builtin
 errors (`NIKA-BUILTIN-WAIT-001`). The full grammar:
 
 ```
@@ -16,7 +16,7 @@ errors (`NIKA-BUILTIN-WAIT-001`). The full grammar:
 
 <Info>
   **Canonical source:** [`spec/05-errors.md`](https://github.com/supernovae-st/nika-spec/blob/main/spec/05-errors.md)
-  owns the taxonomy — engines *derive* from it, never the reverse. The
+  owns the taxonomy: engines *derive* from it, never the reverse. The
   machine-readable registry lives in the spec's
   [`canon.yaml`](https://github.com/supernovae-st/nika-spec/blob/main/canon.yaml)
   and is also served as JSON at
@@ -38,7 +38,7 @@ errors (`NIKA-BUILTIN-WAIT-001`). The full grammar:
 }
 ```
 
-`transient: true` means a retry might succeed — `retry:` only fires on
+`transient: true` means a retry might succeed. `retry:` only fires on
 transient errors (unless `on_codes:` widens it). `on_error:` catches the
 final error either way, and `on_error.on_codes` routes recovery by exact
 code.
@@ -65,7 +65,7 @@ code.
 ## The 28 registered codes (v0.1 normative floor)
 
 A conformant engine emits exactly these codes for these failures. Engines
-may add codes within a namespace's `001-099` range — never repurpose one.
+may add codes within a namespace's `001-099` range. Never repurpose one.
 
 {/* errors-codes:begin */}
 | Code | Failure | Category | `transient` |
@@ -143,7 +143,7 @@ may add codes within a namespace's `001-099` range — never repurpose one.
 | `NIKA-VAR` | Variable resolution failures | 001-099 |
 {/* errors-namespaces:end */}
 
-Builtin errors use a per-builtin sub-namespace — each builtin owns its own
+Builtin errors use a per-builtin sub-namespace: each builtin owns its own
 `001-099` (`NIKA-BUILTIN-FETCH-001` is the fetch tool's network/extraction
 failure). Underscore-named builtins encode naturally:
 `NIKA-BUILTIN-JSON_MERGE_PATCH-001`.
@@ -164,11 +164,11 @@ on_error:
   recover: { stale: true, items: [] }
 ```
 
-`on_error.skip` preserves the original error at `tasks.X.error` — a
+`on_error.skip` preserves the original error at `tasks.X.error`: a
 downstream task can branch on `${{ tasks.X.error.code }}` while the status
 reads `skipped`.
 
 <Card title="The full error model" icon="book" href="https://github.com/supernovae-st/nika-spec/blob/main/spec/05-errors.md">
   Retry policies, backoff strategies, recovery semantics, and the
-  gate-based failure propagation rules — spec/05-errors.md.
+  gate-based failure propagation rules. See spec/05-errors.md.
 </Card>

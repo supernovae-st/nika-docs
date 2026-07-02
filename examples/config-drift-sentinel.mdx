@@ -1,20 +1,20 @@
 ---
 title: "Config drift sentinel"
 sidebarTitle: "Config drift sentinel"
-description: "T3 · SRE — only unsanctioned prod drift wakes anyone. jq decides; the model explains."
+description: "T3 · SRE: only unsanctioned prod drift wakes anyone. jq decides; the model explains."
 icon: "shield-halved"
 ---
 
-> **T3 · SRE / platform** — the deterministic-core pattern at its
+> **T3 · SRE / platform**: the deterministic-core pattern at its
 > sharpest. Approved overrides merge into the baseline (RFC 7396), the
 > live config diffs against THAT (RFC 6902), blake3 fingerprints the
-> evidence — and the LLM's only job is explaining the patch to a human
+> evidence, and the LLM's only job is explaining the patch to a human
 > at 3am.
 
 ## The job
 
 « Did anyone change prod config without telling us? » Pure-diff
-monitors page you for every sanctioned change too — alert fatigue. This
+monitors page you for every sanctioned change too: alert fatigue. This
 sentinel knows what was approved: it reconstructs the EXPECTED state
 first, so the diff contains only the drift nobody signed off on.
 
@@ -158,17 +158,17 @@ outputs:
 <Steps>
   <Step title="RFC 7396 reconstructs the sanctioned state">
     `nika:json_merge_patch` applies the approved overrides to the
-    baseline — `null` deletes a key, exactly per the RFC. This is the
+    baseline: `null` deletes a key, exactly per the RFC. This is the
     builtin jq's recursive merge can't replace.
   </Step>
   <Step title="RFC 6902 names what actually changed">
-    `nika:json_diff` returns a standard JSON Patch — machine-readable
+    `nika:json_diff` returns a standard JSON Patch: machine-readable
     operations, not a text diff. Empty patch = healthy prod = total
     silence.
   </Step>
   <Step title="Evidence travels with the alert">
     The blake3 fingerprint of the live config rides in the alert AND in
-    the `nika:emit` journal event — when you investigate later, you know
+    the `nika:emit` journal event. When you investigate later, you know
     exactly which state fired.
   </Step>
 </Steps>
@@ -189,6 +189,6 @@ outputs:
 - Auto-remediate the SAFE class: a `when:` branch that opens a revert PR via your MCP git server.
 
 <Card title="Next · PR review fan-out" icon="code-pull-request" href="/examples/pr-review-fanout">
-  One read-only agent per changed file — the swarm pattern, with a
+  One read-only agent per changed file: the swarm pattern, with a
   deterministic grep sweep beside it.
 </Card>

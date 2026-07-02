@@ -1,12 +1,12 @@
 ---
 title: "Templates"
-description: "Six instantiable skeletons covering the recurring workflow shapes. Copy, fill the SLOT lines, check, ship — agents don't invent structure, they instantiate it."
+description: "Six instantiable skeletons covering the recurring workflow shapes. Copy, fill the SLOT lines, check, ship: agents don't invent structure, they instantiate it."
 sidebarTitle: "Templates"
 icon: "copy"
 ---
 
 Every recurring workflow shape has a **complete, valid skeleton** in the
-spec — gated by the conformance suite on every push, with a `# SLOT:`
+spec, gated by the conformance suite on every push, with a `# SLOT:`
 marker at every decision point. The path from intent to a correct file
 is mechanical: **route → copy → fill slots → `nika check` → repair →
 re-check.**
@@ -22,14 +22,14 @@ re-check.**
 | « research / review / open-ended » | [`agent-loop`](#agent-loop) | plan-then-execute · default-deny tools · budgets · typed final message |
 | « anything irreversible (deploy · send · publish) » | [`human-gated-ship`](#human-gated-ship) | parallel gates · assert · `nika:prompt` GO · `on_finally` record |
 
-Composite jobs compose templates — a fanout whose merge feeds a
+Composite jobs compose templates: a fanout whose merge feeds a
 human-gated-ship, an etl-state whose delta fans out. Start from the
 template matching the **outer** shape.
 
 <Info>
   The YAML below is projected verbatim from
   [`nika-spec/templates/`](https://github.com/supernovae-st/nika-spec/tree/main/templates)
-  (the source of truth, validated by the conformance runner) — these
+  (the source of truth, validated by the conformance runner). These
   copies cannot drift.
 </Info>
 
@@ -76,7 +76,7 @@ outputs:
 
 ## gate-and-act
 
-Watch something, act only when a condition holds — often zero model calls.
+Watch something, act only when a condition holds (often zero model calls).
 
 {/* template:begin gate-and-act.nika.yaml */}
 ```yaml gate-and-act.nika.yaml
@@ -395,7 +395,7 @@ outputs:
 
 <Steps>
   <Step title="Route">
-    Pick the template whose intent row matches — never free-form a
+    Pick the template whose intent row matches. Never free-form a
     workflow when a template routes.
   </Step>
   <Step title="Copy + fill">
@@ -403,7 +403,7 @@ outputs:
     is locked structure.
   </Step>
   <Step title="Check">
-    `nika check workflow.nika.yaml` — the validator names the exact rule
+    `nika check workflow.nika.yaml`: the validator names the exact rule
     on every error.
   </Step>
   <Step title="Repair from the error">

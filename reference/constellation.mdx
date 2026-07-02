@@ -117,7 +117,7 @@ flowchart TB
   CLI --> NIKA
 ```
 
-<sub>✅ admitted (12 gates green) · 🟡 WIP · 🧭 planned. Colors by state: green admitted, amber WIP, slate planned, purple binary root. Arrows read "depends on" — all point downward.</sub>
+<sub>✅ admitted (12 gates green) · 🟡 WIP · 🧭 planned. Colors by state: green admitted, amber WIP, slate planned, purple binary root. Arrows read "depends on": all point downward.</sub>
 
 ## Layer breakdown
 
@@ -131,7 +131,7 @@ flowchart TB
 | **L4** | nika-catalog-verify, nika-cli, nika-mcp, nika-lsp | — | serve, sdk | Interfaces, libraries |
 | **L5** | nika | — | — | The public binary surface |
 
-## Memory subsystem (the 2.0 Connectome era) — separate count
+## Memory subsystem (the 2.0 Connectome era): separate count
 
 The 8-crate memory subsystem (plus 1 orchestrator at L2) is **not counted**
 in the {STATUS.cratesTarget} target. It lands in the 2.0 Connectome era,
@@ -140,18 +140,18 @@ trait reservations already in `nika-kernel`.
 
 <AccordionGroup>
   <Accordion title="L2 orchestrator" icon="brain">
-    `nika-connectome` — ties the 10 satellites together behind the `MemoryStore`
+    `nika-connectome` ties the 10 satellites together behind the `MemoryStore`
     trait. Exposes unified put / query / forget / recall API.
   </Accordion>
   <Accordion title="L1 satellites (8)" icon="satellite-dish">
-    - `nika-hnsw` — approximate nearest neighbor (HNSW index)
-    - `nika-bm25` — sparse full-text ranking
-    - `nika-rrf` — reciprocal-rank fusion (hybrid search)
-    - `nika-fsrs` — Free Spaced Repetition Scheduler (memory decay)
-    - `nika-rdfs-reasoner` — RDFS inference for knowledge triples
-    - `nika-temporal` — time-aware recency + decay
-    - `nika-graph-algos` — graph traversal (shortest-path, community)
-    - `nika-autodesc` — auto-description generation (embed-and-label)
+    - `nika-hnsw`, approximate nearest neighbor (HNSW index)
+    - `nika-bm25`, sparse full-text ranking
+    - `nika-rrf`, reciprocal-rank fusion (hybrid search)
+    - `nika-fsrs`, Free Spaced Repetition Scheduler (memory decay)
+    - `nika-rdfs-reasoner`, RDFS inference for knowledge triples
+    - `nika-temporal`, time-aware recency + decay
+    - `nika-graph-algos`, graph traversal (shortest-path, community)
+    - `nika-autodesc`, auto-description generation (embed-and-label)
   </Accordion>
 </AccordionGroup>
 
@@ -160,28 +160,28 @@ trait reservations already in `nika-kernel`.
 Current admission order (per Q5 decision, rev.2):
 
 <Steps>
-  <Step title="Round 3 — nika-catalog-codegen">
+  <Step title="Round 3: nika-catalog-codegen">
     Extract TOML → Rust codegen to its own L0 crate. Independent of other
     crates; unblocks faster iteration on catalog data.
   </Step>
-  <Step title="Round 4 — nika-schema">
+  <Step title="Round 4: nika-schema">
     Complete parser + DAG + ariadne diagnostics. Unblocks verb crates
     (they need to parse `.nika.yaml` step shapes).
   </Step>
-  <Step title="Round 5 — nika-event + nika-transform">
+  <Step title="Round 5: nika-event + nika-transform">
     Event envelope + 65 transforms. Can run in parallel.
   </Step>
-  <Step title="Round 6 — nika-binding + nika-pck-manifest">
+  <Step title="Round 6: nika-binding + nika-pck-manifest">
     Template engine + package manifest. Binding depends on transform.
   </Step>
-  <Step title="Rounds 7-10 — verbs">
+  <Step title="Rounds 7-10: verbs">
     One verb per round: infer → exec → invoke → agent (fetch is the
     `nika:fetch` builtin under `invoke`, not a verb crate).
   </Step>
-  <Step title="Rounds 11-15 — effects + runtime">
+  <Step title="Rounds 11-15: effects + runtime">
     L1 effect crates (fs, http, process, keys, provider-\*) and L3 runtime.
   </Step>
-  <Step title="Rounds 16+ — interfaces + binary">
+  <Step title="Rounds 16+: interfaces + binary">
     L4 cli / serve / mcp / lsp / sdk and the L5 `nika` binary.
   </Step>
 </Steps>
@@ -196,7 +196,7 @@ Current admission order (per Q5 decision, rev.2):
 
 <CardGroup cols={2}>
   <Card title="Live state" icon="gauge" href="/reference/status">
-    HEAD, tests, hygiene — drift-proof snapshot.
+    HEAD, tests, hygiene: the drift-proof snapshot.
   </Card>
   <Card title="Layer registry" icon="layer-group" href="/architecture/layers">
     Six layers, mechanical sort test, security axes.

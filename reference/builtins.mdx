@@ -8,7 +8,7 @@ icon: "toolbox"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 import { CANON } from "/snippets/_canon.mdx";
 
-The language stays {CANON.verbs} verbs. Everything else is a tool — and the
+The language stays {CANON.verbs} verbs. Everything else is a tool, and the
 standard library ships **{CANON.builtins} builtins** under the `nika:*`
 namespace, engine-native (no MCP round-trip, no subprocess), all invoked
 the same way:
@@ -21,7 +21,7 @@ the same way:
 ```
 
 <Info>
-  **Canonical source:** [`nika-spec/stdlib/builtins-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/builtins-v0.1.md) —
+  **Canonical source:** [`nika-spec/stdlib/builtins-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/builtins-v0.1.md),
   the Apache-2.0 language spec. The set was curated by the Rams
   "less but better" sweep (ADR-086/087/088): one super-powerful builtin
   with mode args beats five single-purpose ones.
@@ -47,12 +47,12 @@ The workflow-control family: speak, signal, guard, ask, finish, pause.
 
 | Builtin | What it does |
 |---|---|
-| `nika:log` | Emit a log entry (`debug`/`info`/`warn`/`error`) to the event stream — human-readable diagnostic. |
+| `nika:log` | Emit a log entry (`debug`/`info`/`warn`/`error`) to the event stream: the human-readable diagnostic. |
 | `nika:emit` | Emit a custom machine event (consumed by subscribers and the journal). `log` is for humans, `emit` is for machines. |
-| `nika:assert` | Fail the task if a CEL `${{ }}` condition is false — the fail-fast guard (`when:` is the skip-guard). |
-| `nika:prompt` | Interactive human confirm — blocks until answered; engines may use `default` in CI. |
-| `nika:done` | Mark the current `agent:` loop complete and exit — valid only inside an agent tool whitelist. |
-| `nika:wait` | Temporal pause — relative `duration:` XOR absolute `until:` (ISO 8601), validated at parse time. |
+| `nika:assert` | Fail the task if a CEL `${{ }}` condition is false: the fail-fast guard (`when:` is the skip-guard). |
+| `nika:prompt` | Interactive human confirm: blocks until answered; engines may use `default` in CI. |
+| `nika:done` | Mark the current `agent:` loop complete and exit. Valid only inside an agent tool whitelist. |
+| `nika:wait` | Temporal pause: relative `duration:` XOR absolute `until:` (ISO 8601), validated at parse time. |
 
 ```yaml
 - id: gate
@@ -67,28 +67,28 @@ The workflow-control family: speak, signal, guard, ask, finish, pause.
 
 | Builtin | What it does |
 |---|---|
-| `nika:read` | Read a file — returns string content. |
-| `nika:write` | Write a file — returns the path; binary upstream values are written as-is. |
-| `nika:edit` | In-place find/replace — returns the modified path. |
-| `nika:glob` | Glob match — returns an array of paths. |
-| `nika:grep` | Recursive grep — returns an array of `{ path, line, match }`. |
+| `nika:read` | Read a file. Returns string content. |
+| `nika:write` | Write a file. Returns the path; binary upstream values are written as-is. |
+| `nika:edit` | In-place find/replace. Returns the modified path. |
+| `nika:glob` | Glob match. Returns an array of paths. |
+| `nika:grep` | Recursive grep. Returns an array of `{ path, line, match }`. |
 
 ## Data (8)
 
-`jq` is THE data language — map, filter, reshape, merge. The other seven
+`jq` is THE data language: map, filter, reshape, merge. The other seven
 cover what jq genuinely cannot do: diff, validate, delete-on-null merge,
 format conversion, generation, time, hashing.
 
 | Builtin | What it does |
 |---|---|
-| `nika:jq` | Run a jq expression — the single transform-and-extraction language, same jq as `output:` bindings. |
-| `nika:json_diff` | JSON diff — returns RFC 6902 JSON Patch (jq can't diff). |
-| `nika:validate` | Validate data against a JSON Schema — `format: json \| yaml`, returns `{ valid, errors }`. |
-| `nika:json_merge_patch` | RFC 7396 merge patch — `null` deletes a key, the semantics jq's `*` merge does not provide. |
-| `nika:convert` | Universal format converter — `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. |
-| `nika:uuid` | Generate a UUID — `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
-| `nika:date` | Timestamp arithmetic — op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
-| `nika:hash` | Content hashing — default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
+| `nika:jq` | Run a jq expression: the single transform-and-extraction language, same jq as `output:` bindings. |
+| `nika:json_diff` | JSON diff. Returns RFC 6902 JSON Patch (jq can't diff). |
+| `nika:validate` | Validate data against a JSON Schema: `format: json \| yaml`, returns `{ valid, errors }`. |
+| `nika:json_merge_patch` | RFC 7396 merge patch: `null` deletes a key, the semantics jq's `*` merge does not provide. |
+| `nika:convert` | Universal format converter: `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. |
+| `nika:uuid` | Generate a UUID: `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
+| `nika:date` | Timestamp arithmetic: op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
+| `nika:hash` | Content hashing: default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
 
 ```yaml
 # recursive deep-merge of two task outputs — pure jq, no extra builtin
@@ -104,8 +104,8 @@ format conversion, generation, time, hashing.
 
 | Builtin | What it does |
 |---|---|
-| `nika:fetch` | HTTP request + content extraction — {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`). Fetching a URL is *calling a tool*, not a verb. |
-| `nika:notify` | Send notifications — `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms`), one builtin not five. |
+| `nika:fetch` | HTTP request + content extraction: {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`). Fetching a URL is *calling a tool*, not a verb. |
+| `nika:notify` | Send notifications: `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms`), one builtin not five. |
 
 <Warning>
   Engines MUST ship SSRF defense on `nika:fetch`: private-network and
@@ -117,7 +117,7 @@ format conversion, generation, time, hashing.
 
 | Builtin | What it does |
 |---|---|
-| `nika:inspect` | Workflow introspection — one builtin, four `view:` modes: `cost` (running USD by task/provider), `records` (full execution record), `dag_info` (nodes/edges/waves), `threads` (engine pool state, advisory). |
+| `nika:inspect` | Workflow introspection. One builtin, four `view:` modes: `cost` (running USD by task/provider), `records` (full execution record), `dag_info` (nodes/edges/waves), `threads` (engine pool state, advisory). |
 
 ```yaml
 - id: budget_check
@@ -128,13 +128,13 @@ format conversion, generation, time, hashing.
 
 ## Design rules the set obeys
 
-- **One super-powerful builtin, multi-mode args** — `fetch`+extract,
+- **One super-powerful builtin, multi-mode args**: `fetch`+extract,
   `jq`, `convert`, `wait`, `date`, `inspect` all follow the same pattern.
   No per-direction or per-shape builtin slots.
-- **jq subsumes** — anything that is a pure JSON transform is a jq
+- **jq subsumes**: anything that is a pure JSON transform is a jq
   expression, not a builtin. A builtin earns its slot only by doing what
   jq cannot.
-- **Additive forever** — new builtins may join in stdlib v0.x; existing
+- **Additive forever**: new builtins may join in stdlib v0.x; existing
   arg shapes never break (the language envelope `nika: v1` is frozen).
 
 ## See also
@@ -148,7 +148,7 @@ format conversion, generation, time, hashing.
     How `invoke:` dispatches `nika:*` builtins vs MCP tools.
   </Card>
   <Card title="MCP catalog" icon="plug" href="/reference/mcp-catalog">
-    External tools — the MCP server registry Nika knows by id.
+    External tools: the MCP server registry Nika knows by id.
   </Card>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
     Templating that pipes output from one `invoke:` to the next.

@@ -12,11 +12,11 @@ the official [MCP Registry schema](https://registry.modelcontextprotocol.io/)
 (`v2025-12-11`). Each entry declares one or more local-install
 `packages` (npm / pypi / oci / cargo / mcpb) and/or `remotes`
 (streamable-http / sse endpoints). The workflow YAML `invoke:` verb
-references servers by id — Nika handles the rest.
+references servers by id: Nika handles the rest.
 
 <Info>
   **Canonical source:** [`crates/nika-catalog/data/mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/mcp-servers.toml).
-  Schema: `nika/mcp-servers@1.0`. Snapshot 2026-04-17 — `grep -c '^\[\[servers\]\]'`
+  Schema: `nika/mcp-servers@1.0`. Snapshot 2026-04-17: `grep -c '^\[\[servers\]\]'`
   = **105**. Build-time invariants (enforced in `build.rs`): unique ids,
   packages+remotes non-empty, known category, pricing ∈ {free, freemium,
   paid}, alias non-collision.
@@ -29,7 +29,7 @@ references servers by id — Nika handles the rest.
     **105** entries
   </Card>
   <Card title="Categories" icon="folder">
-    **17** — from `anthropic` to `vectordb`
+    **17**: from `anthropic` to `vectordb`
   </Card>
   <Card title="Invocation" icon="bolt">
     `invoke:` verb with `server: <id>`
@@ -85,9 +85,9 @@ nika run workflow.nika.yaml
     | `pdf` | PDF | npm | `@modelcontextprotocol/server-pdf` |
 
     One-liners:
-    - **filesystem** — read and write local files with path-based access control.
-    - **memory** — persistent key/value memory store.
-    - **pdf** — PDF text + structure extraction.
+    - **filesystem**: read and write local files with path-based access control.
+    - **memory**: persistent key/value memory store.
+    - **pdf**: PDF text + structure extraction.
   </Tab>
 
   <Tab title="Developer tools (17)">
@@ -314,7 +314,7 @@ Of the 105 entries:
 - **1** ships as `oci` (`grafana`, Go binary in a container image).
 - **1** is a pure `remote` endpoint (`intercom`, OAuth streamable-http).
 
-The catalog's `registry_type` field is validated at build time — `runner`
+The catalog's `registry_type` field is validated at build time: `runner`
 is required for pypi packages and forbidden for every other registry
 type.
 
@@ -322,8 +322,8 @@ type.
 
 Every server that needs credentials declares at least one
 `[[servers.env_vars]]` entry with `is_secret = true` or `false`. The
-env var names are visible in [`mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/mcp-servers.toml) —
-search for `^name = ` under your chosen server.
+env var names are visible in [`mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/mcp-servers.toml).
+Search for `^name = ` under your chosen server.
 
 <Warning>
   Nika never stores API tokens in workflow YAML. Secrets are read from
@@ -345,6 +345,6 @@ search for `^name = ` under your chosen server.
     LLM providers for the `infer:` and `agent:` verbs.
   </Card>
   <Card title="Error codes" icon="triangle-exclamation" href="/reference/error-codes">
-    MCP errors — the spec's `NIKA-MCP` namespace (`NIKA-MCP-001` server unreachable · `NIKA-MCP-002` call failed); the engine's internal diagnostics registry stays engine-side.
+    MCP errors: the spec's `NIKA-MCP` namespace (`NIKA-MCP-001` server unreachable · `NIKA-MCP-002` call failed); the engine's internal diagnostics registry stays engine-side.
   </Card>
 </CardGroup>

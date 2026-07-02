@@ -10,13 +10,13 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 A **workflow** is a YAML document that names a goal, lists one or more
 tasks, and declares how values flow between them. Nika parses the file
 with source spans, validates it against the catalog, compiles it to a
-DAG, and executes tasks in topological order — parallelizing whatever
+DAG, and executes tasks in topological order, parallelizing whatever
 the dependency graph allows.
 
 <Info>
   **Implementation status.** The envelope below is the canonical spec
   contract (`nika-spec` · [01-envelope](https://github.com/supernovae-st/nika-spec/blob/main/spec/01-envelope.md)).
-  The engine implements it end-to-end today — `nika check` parses and
+  The engine implements it end-to-end today: `nika check` parses and
   audits it, `nika run` executes it. [Live state →](/reference/status)
 </Info>
 
@@ -34,7 +34,7 @@ tasks:
       model: ollama/<model>      # <provider>/<name>
 ```
 
-Two required lines (`nika:` + `workflow:`) and a non-empty `tasks:` — the
+Two required lines (`nika:` + `workflow:`) and a non-empty `tasks:`, the
 whole minimum to be a valid workflow. Fields carry source spans through
 `Spanned<T>` so diagnostics point at the exact byte range.
 
@@ -43,16 +43,16 @@ whole minimum to be a valid workflow. Fields carry source spans through
 The envelope is **one header line** · `nika: v1`. Earlier drafts explored a
 Kubernetes-style `apiVersion` + `kind` + `metadata` + `spec` envelope, but
 the spec rejected it: that is two version-ish fields and ceremony a workflow
-file does not need. Modern specs converge on a single version marker —
+file does not need. Modern specs converge on a single version marker:
 OpenAPI writes `openapi: 3.1.0`, Docker Compose dropped its `version:` field
 entirely. Nika takes the proven path: **the language name as the key, the
 contract version as the value.**
 
-- No separate `kind:` field — the presence of `workflow:` is itself the
+- No separate `kind:` field: the presence of `workflow:` is itself the
   document-type discriminator. Future document types (if any ever ship) use
   their own top-level key.
 - The engine's internal canonical URI stays `https://nika.sh/spec/v1` for
-  RDF / conformance tooling — but the author never types a URL.
+  RDF / conformance tooling, but the author never types a URL.
 
 Multi-document YAML is supported: one file may declare multiple documents
 separated by `---`, parsed into `Vec<RawDocument>`.
@@ -66,7 +66,7 @@ The workflow AST (`nika-schema::raw::RawWorkflow`) models these fields:
 | `schema` | `SchemaVersion` | Locked to `v1` today. |
 | `name` | `String` | Workflow identifier (within `metadata:` in the envelope). |
 | `description` | `String` | Human-readable purpose. |
-| `goal` | `String` (optional) | Agent-driven workflow goal — moving to `spec.orchestrate.goal` per ADR-021. |
+| `goal` | `String` (optional) | Agent-driven workflow goal (moving to `spec.orchestrate.goal` per ADR-021). |
 | `provider` / `model` | `String` | Defaults applied to every `infer` / `agent` task. |
 | `mcp` | `RawMcpConfig` | MCP server aliases usable from `invoke` / `agent`. |
 | `context` | `ContextConfig` | Top-level constants available to all tasks. |
@@ -79,7 +79,7 @@ The workflow AST (`nika-schema::raw::RawWorkflow`) models these fields:
 | `max_duration_secs` | `u64` | Hard wall-clock ceiling. |
 | `tasks` | `Vec<RawTask>` | The DAG payload. |
 
-Every optional field is `Option<Spanned<T>>` — source spans survive
+Every optional field is `Option<Spanned<T>>`: source spans survive
 all the way into the diagnostic layer (ADR-010 miette bridge).
 
 ## Execution pipeline
@@ -112,7 +112,7 @@ all the way into the diagnostic layer (ADR-010 miette bridge).
                                   EventSink · BillingSink · AuditSink
 ```
 
-ASCII by intent — Mintlify renders fine, but the diagram above is plain
+ASCII by intent: Mintlify renders fine, but the diagram above is plain
 text and pastes into terminals and issue trackers without a renderer.
 
 ## Tasks, dependencies, fan-out
@@ -152,7 +152,7 @@ Fan-out over a collection:
     prompt: "Review this file: ${{ item }}"
 ```
 
-Conditional execution — `when:` is the field (a CEL boolean, or the
+Conditional execution: `when:` is the field (a CEL boolean, or the
 literal `true` for the always-pattern):
 
 ```yaml
@@ -163,7 +163,7 @@ literal `true` for the always-pattern):
     command: ./deploy.sh
 ```
 
-Retry on failure — `retry:` is the one shape (and `on_error:` catches
+Retry on failure: `retry:` is the one shape (and `on_error:` catches
 what retries can't fix):
 
 ```yaml
@@ -189,7 +189,7 @@ what retries can't fix):
 
 Workflow inputs live in `vars:` (typed or untyped), available in every task
 via `${{ vars.<name> }}`. Untyped constants and typed, validated inputs use
-the same block — the typed form powers schema generation for callable
+the same block: the typed form powers schema generation for callable
 workflows (`nika.run_workflow` over MCP).
 
 ```yaml
@@ -210,7 +210,7 @@ tasks:
 ```
 
 <Note>
-  v1 workflows are **single-file** — there is no `include:` / `import:`
+  v1 workflows are **single-file**: there is no `include:` / `import:`
   (static composition is a candidate for a later additive minor · see the
   spec's out-of-scope list). To reuse a sub-DAG today, call it with
   `invoke: nika:run_workflow`.
@@ -233,7 +233,7 @@ default). See [Events](/concepts/events) for the event model and
 <Info>
   The workflow grammar is locked and implemented: the `nika-schema`
   crate ships the envelope, the analyzer and semantic validation
-  (type-checked bindings, secret-flow audit, cycle detection) — that is
+  (type-checked bindings, secret-flow audit, cycle detection). That is
   exactly what `nika check` runs on your file today.
 </Info>
 
@@ -241,7 +241,7 @@ default). See [Events](/concepts/events) for the event model and
 
 <CardGroup cols={2}>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
-    Template expressions — `${{ }}` syntax, scopes, filters, taint.
+    Template expressions: `${{ }}` syntax, scopes, filters, taint.
   </Card>
   <Card title="Events" icon="signal" href="/concepts/events">
     The typed event stream every run emits.

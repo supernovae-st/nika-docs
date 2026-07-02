@@ -1,20 +1,20 @@
 ---
 title: "Resume screener"
 sidebarTitle: "Resume screener"
-description: "T3 fan-out · HR — a local-model rubric per candidate, ranked deterministically. PII never leaves the machine."
+description: "T3 fan-out · HR: a local-model rubric per candidate, ranked deterministically. PII never leaves the machine."
 icon: "user-check"
 ---
 
-> **T3 fan-out · HR / recruiting** — CVs are PII, so the **whole
+> **T3 fan-out · HR / recruiting**: CVs are PII, so the **whole
 > screen runs on a local model**. One schema-enforced rubric for every
 > candidate (enums kill « kinda-strong »), evidence quotes required,
-> and the ranking is jq — deterministic, not model mood.
+> and the ranking is jq: deterministic, not model mood.
 
 ## The job
 
 Forty CVs and a Friday deadline means the rubric drifts by CV #12.
 Here glob discovers the pool, every candidate gets the SAME typed
-rubric — fit enum, evidence quotes mandatory — two at a time so the
+rubric (fit enum, evidence quotes mandatory), two at a time so the
 GPU breathes, weak fits drop, and jq sorts strong-first then by
 relevant years. The shortlist brief quotes its evidence.
 
@@ -165,16 +165,16 @@ outputs:
 
 <Steps>
   <Step title="Sovereignty is the requirement, not a preference">
-    `model: ollama/llama3.2:3b` at the envelope — candidate data never
+    `model: ollama/llama3.2:3b` at the envelope: candidate data never
     touches a cloud API. Same file shape as any other workflow.
   </Step>
   <Step title="One rubric, enforced by schema">
-    `fit: enum [strong, possible, weak]` + required evidence arrays —
+    `fit: enum [strong, possible, weak]` + required evidence arrays:
     candidate #1 and #40 are judged on the same axes, and a rating
     without a quote fails validation.
   </Step>
   <Step title="The ORDER is deterministic">
-    `sort_by(.fit != "strong", -(.years_relevant // 0))` — strong fits
+    `sort_by(.fit != "strong", -(.years_relevant // 0))`: strong fits
     first, then by years. Re-run it: same input, same shortlist.
   </Step>
 </Steps>
@@ -190,11 +190,11 @@ outputs:
 
 ## Make it yours
 
-- Anonymize first: a pre-pass `infer` that strips names/photos before scoring — bias mitigation in one task.
+- Anonymize first: a pre-pass `infer` that strips names/photos before scoring. Bias mitigation in one task.
 - Wire the shortlist into [Meeting actions](/examples/meeting-actions)' pattern to draft interview invites.
-- The same shape screens vendor proposals, grant applications, conference talks — any « N documents, one rubric » job.
+- The same shape screens vendor proposals, grant applications, conference talks: any « N documents, one rubric » job.
 
 <Card title="Next · Release train" icon="train" href="/examples/release-train">
-  Time as a first-class citizen — parallel gates, a human GO, and an
+  Time as a first-class citizen: parallel gates, a human GO, and an
   absolute-time hold until the window.
 </Card>

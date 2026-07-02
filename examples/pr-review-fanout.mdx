@@ -1,11 +1,11 @@
 ---
 title: "PR review fan-out"
 sidebarTitle: "PR review fan-out"
-description: "T3 · engineering — one read-only review agent per changed file. A swarm with a leash."
+description: "T3 · engineering: one read-only review agent per changed file. A swarm with a leash."
 icon: "code-pull-request"
 ---
 
-> **T3 · engineering** — `for_each` + `agent:` is the swarm pattern.
+> **T3 · engineering**: `for_each` + `agent:` is the swarm pattern.
 > Every changed file gets its own mini-agent with **read-only tools**
 > (default-deny means exactly that), a turn budget and a token budget.
 > jq flattens the typed findings; one model writes the summary.
@@ -15,7 +15,7 @@ icon: "code-pull-request"
 Big PRs get shallow reviews because attention doesn't scale. Here it
 does: each changed file is reviewed in isolation by an agent that can
 READ and nothing else, in parallel, four at a time. A deterministic
-`nika:grep` sweep counts the TODO debt beside the LLM pass — and the
+`nika:grep` sweep counts the TODO debt beside the LLM pass, and the
 final REVIEW.md ends with a verdict.
 
 ## The shape
@@ -43,7 +43,7 @@ flowchart LR
 ```
 {/* showcase:dag-end */}
 
-Watch the graph execute — independent branches in parallel, the agent
+Watch the graph execute: independent branches in parallel, the agent
 fan-out at wave 3, and the join that waits for both branches before
 `summary`:
 
@@ -159,13 +159,13 @@ outputs:
     into a collection this way.
   </Step>
   <Step title="Each agent is least-privilege">
-    `tools: ["nika:read", "nika:done"]` — the reviewer can read source
+    `tools: ["nika:read", "nika:done"]`: the reviewer can read source
     and end its loop. It cannot write, fetch, or wander. Budgets
     (`max_turns: 6`, `max_tokens_total: 30000`) bound the worst case.
   </Step>
   <Step title="Typed findings merge deterministically">
     Every agent returns `{file, findings[]}` per its schema. The jq
-    fan-in flattens and sorts — blockers surface first in REVIEW.md.
+    fan-in flattens and sorts: blockers surface first in REVIEW.md.
   </Step>
 </Steps>
 
@@ -181,10 +181,10 @@ outputs:
 ## Make it yours
 
 - Specialize the swarm: route `*.rs` files to a Rust-prompted agent and `*.sql` to a migrations-prompted one with two filtered fan-outs.
-- Add `mcp:git/*` to the tools to let reviewers read blame and history — still no write.
+- Add `mcp:git/*` to the tools to let reviewers read blame and history (still no write).
 - Fail CI on blockers: end with `nika:assert` on `size()` of the blocker slice.
 
 <Card title="Level up · T4 epic" icon="microscope" href="/examples/deep-research-brief">
-  Final tier: multi-stage pipelines — plan, budgeted agent, thinking
+  Final tier: multi-stage pipelines. Plan, budgeted agent, thinking
   synthesis, self-reporting runs.
 </Card>

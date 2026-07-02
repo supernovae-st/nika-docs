@@ -1,11 +1,11 @@
 ---
 title: "Standup digest"
 sidebarTitle: "Standup digest"
-description: "T1 starter · engineering — the standup note writes itself from what you actually committed."
+description: "T1 starter · engineering: the standup note writes itself from what you actually committed."
 icon: "sunrise"
 ---
 
-> **T1 starter · engineering / any team** — two data sources gathered in
+> **T1 starter · engineering / any team**: two data sources gathered in
 > parallel, one model call, one file on disk. Your first taste of « the
 > boring parts run themselves ».
 
@@ -83,7 +83,7 @@ outputs:
 
 <Steps>
   <Step title="Two tasks start together">
-    `today` and `history` declare no `depends_on` — the engine runs them
+    `today` and `history` declare no `depends_on`: the engine runs them
     in parallel. Parallelism is the default, not an option you switch on.
   </Step>
   <Step title="The digest waits for both">
@@ -91,7 +91,7 @@ outputs:
     prompt interpolates both outputs with `${{ tasks.X.output }}`.
   </Step>
   <Step title="The note lands on disk">
-    `nika:write` takes an explicit `content:` — a write without content
+    `nika:write` takes an explicit `content:`. A write without content
     writes nothing. The workflow also returns the note via `outputs:`.
   </Step>
 </Steps>
@@ -109,9 +109,9 @@ outputs:
 
 - Point `--since` at your sprint cadence (`--since=friday` for Monday standups).
 - Swap `ollama/llama3.2:3b` for `anthropic/claude-haiku-4-5`: a one-liner job wants a fast model.
-- Add a `nika:notify` task to post the note straight into your team channel — see [Release notes](/examples/release-notes) for the pattern.
+- Add a `nika:notify` task to post the note straight into your team channel. See [Release notes](/examples/release-notes) for the pattern.
 
 <Card title="Next · Meeting actions" icon="list-check" href="/examples/meeting-actions">
-  Same tier, one new idea: structured output — the model returns typed
+  Same tier, one new idea: structured output. The model returns typed
   JSON, not prose.
 </Card>

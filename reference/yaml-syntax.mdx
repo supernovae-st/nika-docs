@@ -8,7 +8,7 @@ icon: "file-code"
 <Warning>
   The machine-readable schema is at
   [https://nika.sh/schema/workflow.json](https://nika.sh/schema/workflow.json).
-  Point your editor at it for live validation — see [editor setup](/getting-started/editors).
+  Point your editor at it for live validation. See [editor setup](/getting-started/editors).
 </Warning>
 
 ## Top level
@@ -59,10 +59,10 @@ The full per-field semantics live in the spec:
 ## Verbs
 
 See individual pages:
-- [`infer`](/concepts/verbs#infer) — LLM call
-- [`exec`](/concepts/verbs#exec) — shell commands
-- [`invoke`](/concepts/verbs#invoke) — built-in or MCP tool (HTTP fetch is `invoke: nika:fetch`)
-- [`agent`](/concepts/verbs#agent) — tool-calling loop
+- [`infer`](/concepts/verbs#infer): LLM call
+- [`exec`](/concepts/verbs#exec): shell commands
+- [`invoke`](/concepts/verbs#invoke): built-in or MCP tool (HTTP fetch is `invoke: nika:fetch`)
+- [`agent`](/concepts/verbs#agent): tool-calling loop
 
 ## Full schema
 
@@ -72,9 +72,9 @@ It's 100% machine-authoritative. This doc is a readable summary.
 
 ## Contract version policy
 
-`nika: v1` is a **single version marker** — `v1` is the only value for the
+`nika: v1` is a **single version marker**: `v1` is the only value for the
 entire lifetime of the v1 contract. Minor additions (a new optional field, a
 new builtin) are **additive** and never change it (no `@minor` bumps, no
 `nika migrate` for them). A future `nika: v2` would be a deliberate
-breaking-change generation with its own spec — and since the `v1` envelope
+breaking-change generation with its own spec, and since the `v1` envelope
 is frozen, effectively never.

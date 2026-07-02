@@ -1,11 +1,11 @@
 ---
 title: "Price watch"
 sidebarTitle: "Price watch"
-description: "T1 starter · e-commerce — a price-drop alert with zero model calls."
+description: "T1 starter · e-commerce: a price-drop alert with zero model calls."
 icon: "tag"
 ---
 
-> **T1 starter · e-commerce / personal** — no `infer:` anywhere in this
+> **T1 starter · e-commerce / personal**: no `infer:` anywhere in this
 > file. A workflow engine is not an LLM wrapper: the DAG, the tools and
 > one CEL comparison do the whole job, deterministically, for free.
 
@@ -81,7 +81,7 @@ outputs:
 <Steps>
   <Step title="Fetch ONE field, not a page">
     `mode: jq` extracts structured JSON from the API response, and the
-    `output:` block binds named fields — `${{ tasks.check.price }}` is a
+    `output:` block binds named fields: `${{ tasks.check.price }}` is a
     number, not a blob of HTML.
   </Step>
   <Step title="CEL gates the alert">
@@ -90,7 +90,7 @@ outputs:
   </Step>
   <Step title="The webhook stays secret">
     `secrets:` declares a vault/env-backed reference. The URL is masked
-    in logs — `${{ secrets.alerts_webhook }}` never appears in a trace.
+    in logs: `${{ secrets.alerts_webhook }}` never appears in a trace.
   </Step>
 </Steps>
 
@@ -105,11 +105,11 @@ outputs:
 
 ## Make it yours
 
-- Watch N products: lift the URL into a list var and `for_each` over it — see [Competitor radar](/examples/competitor-radar) for the fan-out pattern.
-- Schedule it: workflow files describe a run — your host's cron (or `nika serve`) decides when runs start.
+- Watch N products: lift the URL into a list var and `for_each` over it. See [Competitor radar](/examples/competitor-radar) for the fan-out pattern.
+- Schedule it: workflow files describe a run. Your host's cron (or `nika serve`) decides when runs start.
 - Add a second `when:` branch that notifies on price INCREASES above a ceiling.
 
 <Card title="Next · Social repurpose" icon="share-nodes" href="/examples/social-repurpose">
-  The last starter introduces the diamond — one source fanning into
+  The last starter introduces the diamond: one source fanning into
   three parallel rewrites.
 </Card>

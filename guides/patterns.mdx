@@ -1,7 +1,7 @@
 ---
 title: "How to write Nika"
 sidebarTitle: "Patterns"
-description: "The twelve patterns of well-written Nika — each one taught by a canonical example, each anti-pattern named."
+description: "The twelve patterns of well-written Nika: each one taught by a canonical example, each anti-pattern named."
 icon: "compass-drafting"
 ---
 
@@ -147,16 +147,16 @@ read-only swarm) · [Code review](https://github.com/supernovae-st/nika-spec/blo
 
 ## 9 · Evidence always lands · `on_finally`
 
-Two tools, one rule. **`on_finally:`** is per-task cleanup — it fires
+Two tools, one rule. **`on_finally:`** is per-task cleanup: it fires
 when that task *ran* (success, failure, timeout, mid-flight cancel).
-**A terminal `when: true` task** is the always-pattern — it runs on
+**A terminal `when: true` task** is the always-pattern: it runs on
 EVERY outcome, including upstreams that failed or never started
 (`when: true` replaces the default success-gate). Cleanup belongs to
 the task; the record that must land at 3am belongs to a terminal task.
 
 Taught by · [Incident war room](/examples/incident-war-room) ·
 [Release train](/examples/release-train) (the departure record is a
-`when: true` terminal task — it lands even when the train aborts).
+`when: true` terminal task: it lands even when the train aborts).
 
 ## 10 · One data language · jq, once
 
@@ -189,7 +189,7 @@ this documentation that can run without keys does.
 tokens. The conformance gate runs every example on every push, and
 yours should pass the same way.
 
-Taught by · the whole [examples pack](/examples/overview) — and the
+Taught by · the whole [examples pack](/examples/overview), and the
 [state-file pattern](/examples/release-radar) makes even stateful
 workflows replayable.
 
@@ -219,12 +219,12 @@ outputs:                      # the callable contract · typed
 ## Four recipes the patterns compose into
 
 The 12 patterns are the values; these are the moves you reach for when a
-real integration pushes back. Each is canonical in the spec — linked, not
+real integration pushes back. Each is canonical in the spec: linked, not
 improvised.
 
 ### Poll until ready
 
-`retry:` fires on errors, never on values — so make « not ready » an error
+`retry:` fires on errors, never on values, so make « not ready » an error
 *inside* the task. A jq-mode fetch whose program errors on the pending shape
 turns polling into typed, bounded retry:
 
@@ -242,8 +242,8 @@ turns polling into typed, bounded retry:
     backoff_ms: 30000          # every 30s · 20 attempts · 10-minute ceiling
 ```
 
-Bounded, deterministic, zero LLM. (`retry_when:` — retrying on a value
-condition directly — is reserved for a future minor.)
+Bounded, deterministic, zero LLM. (`retry_when:`, retrying on a value
+condition directly, is reserved for a future minor.)
 
 ### Diamond join
 
@@ -262,7 +262,7 @@ Two exclusive `when:` branches, one consumer. A skipped branch's output is
 
 ### Fan-out that survives partial failure
 
-A failed iteration contributes `null` at its index — positions stay aligned
+A failed iteration contributes `null` at its index: positions stay aligned
 with the input. Recover per-iteration when a placeholder is acceptable,
 filter downstream:
 
@@ -306,10 +306,10 @@ fan out over it:
     command: "./test.sh --os ${{ item.os }} --node ${{ item.ver }}"
 ```
 
-Include/exclude rules are jq filters on the product — no second syntax to
+Include/exclude rules are jq filters on the product: no second syntax to
 learn.
 
 <Card title="See every pattern live" icon="rocket" href="/examples/overview">
-  The examples gallery — 20 real jobs, every construct taught, every
+  The examples gallery: 20 real jobs, every construct taught, every
   file conformance-validated.
 </Card>

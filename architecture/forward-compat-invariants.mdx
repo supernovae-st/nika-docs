@@ -20,7 +20,7 @@ and features we haven't imagined **without breaking changes to the public API**.
 ## The 8 patterns
 
 <AccordionGroup>
-  <Accordion title="FCI-001 — Kernel traits upfront, implementations deferred" icon="key">
+  <Accordion title="FCI-001: Kernel traits upfront, implementations deferred" icon="key">
     Define traits in `nika-kernel` at v0.90 for subsystems that ship later.
     Default methods return `Err(Unsupported)` until real implementations land.
 
@@ -43,7 +43,7 @@ and features we haven't imagined **without breaking changes to the public API**.
     `MemoryStore`. **Zero v0.90 code modification.**
   </Accordion>
 
-  <Accordion title="FCI-002 — `#[non_exhaustive]` on every public struct, enum, error variant" icon="lock">
+  <Accordion title="FCI-002: `#[non_exhaustive]` on every public struct, enum, error variant" icon="lock">
     Every public type carries `#[non_exhaustive]` so adding a field or variant
     is always additive. `new()` constructors provide ergonomic construction
     without exposing struct literal syntax.
@@ -65,7 +65,7 @@ and features we haven't imagined **without breaking changes to the public API**.
     Invariant #19: every `#[non_exhaustive]` struct ships a `new()` constructor.
   </Accordion>
 
-  <Accordion title="FCI-003 — Single version marker per on-disk artifact" icon="file-code">
+  <Accordion title="FCI-003: Single version marker per on-disk artifact" icon="file-code">
     A workflow pins its contract with **one header line** · `nika: v1` (a
     single version marker · the language name as key, the contract version
     as value · supersedes the older K8s `apiVersion:` and `schema:
@@ -78,18 +78,18 @@ and features we haven't imagined **without breaking changes to the public API**.
     tasks: [...]
     ```
 
-    `v1` is the only value for the lifetime of the v1 contract — minor
+    `v1` is the only value for the lifetime of the v1 contract: minor
     additions are **additive** and never change it. A `nika: v2` would be a
     deliberate breaking generation (the `v1` envelope is frozen · effectively never).
     Non-workflow artifacts (package manifests, events) carry their own
     schema version field.
   </Accordion>
 
-  <Accordion title="FCI-004 — Extension namespaces (`nika.*` core + `x-*` community)" icon="plug">
+  <Accordion title="FCI-004: Extension namespaces (`nika.*` core + `x-*` community)" icon="plug">
     Public schemas reserve two namespaces: **`nika.*`** for core additions
     (authoritative, versioned) and **`x-*`** for community overlays (no
     stability guarantee, no collision with core). **Scope note** · in the
-    workflow language both are RESERVED, not current — unknown top-level
+    workflow language both are RESERVED, not current: unknown top-level
     fields are rejected at v0.1, and the tool namespace set is closed at
     `nika:` / `mcp:` (engine-specific tools route through `mcp:`). The
     live `x-*` surface today is the pck registry.
@@ -102,19 +102,19 @@ and features we haven't imagined **without breaking changes to the public API**.
     ```
   </Accordion>
 
-  <Accordion title="FCI-005 — Reserved error code ranges" icon="triangle-exclamation">
+  <Accordion title="FCI-005: Reserved error code ranges" icon="triangle-exclamation">
     Two error surfaces, one rule each. The WORKFLOW-VISIBLE surface is the
     spec's `NIKA-<NAMESPACE>-<NNN>` taxonomy (28 registered v0.1 codes ·
-    [`reference/error-codes`](/reference/error-codes)) — namespaces own
+    [`reference/error-codes`](/reference/error-codes)). Namespaces own
     `001-099` ranges, codes are never repurposed. The ENGINE-INTERNAL
     registry (`nika_error::codes` · `NIKA-1000+` blocks per L1 effect
-    crate) is diagnostics machinery — reserved per crate, never
+    crate) is diagnostics machinery: reserved per crate, never
     reassigned, and never leaked into workflow-visible errors.
   </Accordion>
 
-  <Accordion title="FCI-006 — Sealed traits for core, open traits for extension" icon="seal">
+  <Accordion title="FCI-006: Sealed traits for core, open traits for extension" icon="seal">
     Core kernel traits (e.g., `Provider`, `EventSink`, `Sandbox`) are
-    **sealed** via a private supertrait — only Nika-owned crates can
+    **sealed** via a private supertrait: only Nika-owned crates can
     implement them. Extension traits (e.g., `MemoryStore`) are open for
     community crates to implement.
 
@@ -126,10 +126,10 @@ and features we haven't imagined **without breaking changes to the public API**.
     Enforced by ADR-014.
   </Accordion>
 
-  <Accordion title="FCI-007 — Feature flags with stable defaults" icon="flag">
+  <Accordion title="FCI-007: Feature flags with stable defaults" icon="flag">
     New capability = new `feature` flag, OFF by default. After 1-2 minor
     cycles of stability, flips to default-ON. Never remove a default feature
-    (breaking change) — deprecate and redirect.
+    (breaking change): deprecate and redirect.
 
     ```toml
     [features]
@@ -139,12 +139,12 @@ and features we haven't imagined **without breaking changes to the public API**.
     ```
   </Accordion>
 
-  <Accordion title="FCI-008 — Public API discipline via CI" icon="robot">
+  <Accordion title="FCI-008: Public API discipline via CI" icon="robot">
     Three tools on every CI run:
 
-    - **`cargo public-api`** — detects API surface changes per crate.
-    - **`cargo semver-checks`** — verifies SemVer compatibility.
-    - **`cargo deny`** — enforces license + advisories + layer bans.
+    - **`cargo public-api`**: detects API surface changes per crate.
+    - **`cargo semver-checks`**: verifies SemVer compatibility.
+    - **`cargo deny`**: enforces license + advisories + layer bans.
 
     Gate 12 fails on any unintentional public API drift. `.public-api.json`
     snapshots are checked into the repo per crate.
@@ -159,7 +159,7 @@ and features we haven't imagined **without breaking changes to the public API**.
 | **FCI-010** | `InferRequest` / `InferResponse` fields reserved: `memory`, `budget`, `baggage`, `trust_level`, `trace_id` | v0.95 adds memory without touching kernel |
 | **FCI-011** | `schema:` field mandatory day-1 | Every on-disk artifact versioned from v0.90 forward |
 | **FCI-012** | `Provider` trait shape frozen (4 methods, 1 sealed supertrait) | Cross-provider parity testable (shadow zone 2 + 7) |
-| **FCI-013** | Telemetry = 5 sibling sinks (Event, Metrics, Trace, Audit, Billing) | OTel GenAI semconv bridged via typed `GenAiAttrs` — Q13 rev.3 |
+| **FCI-013** | Telemetry = 5 sibling sinks (Event, Metrics, Trace, Audit, Billing) | OTel GenAI semconv bridged via typed `GenAiAttrs` (Q13 rev.3) |
 
 ## The 10 rules
 
@@ -175,7 +175,7 @@ and features we haven't imagined **without breaking changes to the public API**.
 5. All error types expose a `NIKA-XXX` code via `NikaError::code()`.
 6. All on-disk schemas carry `schema: "nika/<kind>@<major>"`.
 7. All DTO fields reserve forward-compat extension slots (see FCI-010).
-8. All feature flags default to a stable subset — new caps ship OFF.
+8. All feature flags default to a stable subset: new caps ship OFF.
 9. All public API changes emit a `cargo public-api` diff in the PR.
 10. All breaking changes require ADR Accepted before merge.
 
@@ -186,10 +186,10 @@ and features we haven't imagined **without breaking changes to the public API**.
     Six layers + L0.5, mechanical sort test, security axes.
   </Card>
   <Card title="L0 foundation decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13 locked 2026-04-16 — proc macros, kernel prelude, transform crate, memory sinks.
+    Q1-Q13 locked 2026-04-16: proc macros, kernel prelude, transform crate, memory sinks.
   </Card>
   <Card title="12-gate admission" icon="check-double" href="/architecture/admission">
-    How a crate earns a seat at the workspace — SPEC through ATOMIC commit.
+    How a crate earns a seat at the workspace: SPEC through ATOMIC commit.
   </Card>
   <Card title="ADR index" icon="scroll" href="https://github.com/supernovae-st/nika/tree/main/docs/adr">
     35 decision records (30 Accepted + 5 Proposed).

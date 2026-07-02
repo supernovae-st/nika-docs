@@ -67,24 +67,24 @@ flowchart TB
   L5 --> L4 --> L3 --> L2 --> L1 --> L05 --> L0
 ```
 
-<sub>Arrows read "depends on". Upward arrows are forbidden — `check-layering.sh` fails on any workspace-local dep that points up.</sub>
+<sub>Arrows read "depends on". Upward arrows are forbidden: `check-layering.sh` fails on any workspace-local dep that points up.</sub>
 
 ## Layer table
 
 | Layer | Role | Allowed I/O | Allowed deps | Example crates |
 |---|---|---|---|---|
 | **L0** | Pure types, lookup tables, sync-only APIs | none | (leaf) | `nika-types`, `nika-error`, `nika-catalog`, `nika-schema`, `nika-event`, `nika-binding`, `nika-transform`, `nika-pck-manifest`, `nika-catalog-codegen` |
-| **L0.5** | Kernel trait definitions + companions (mock) — async OK | none (traits only) | L0 | `nika-kernel` (facade hub), `nika-kernel-core`, `nika-kernel-ai`, `nika-kernel-runtime`, `nika-kernel-plugin`, `nika-kernel-mock` |
-| **L1** | Effect implementations — async, per-crate capability axis | declared axes only (fs / net / exec / env) | L0, L0.5 | `nika-fs`, `nika-http`, `nika-process`, `nika-git`, `nika-keys-*`, `nika-pck-registry`, `nika-pck-store`, `nika-<provider>-*` |
-| **L2** | Verbs + domain services — orchestrates L1 impls behind kernel traits | via L1 traits only | L0, L0.5, L1 | `nika-pck`, `nika-verb-*`, `nika-policy`, `nika-connectome`, `nika-observability`, `nika-builtin-{github,cloud,workspace}` |
-| **L3** | Runtime + policy + sandbox — enforces execution contracts | via L2 | L0..L2 | `nika-runtime`, `nika-shield`, `nika-wasm-host` (v0.100), `nika-sandbox` (v0.100) |
-| **L4** | Interfaces — transport / UI surfaces (libraries) | via L3 | L0..L3 | `nika-cli`, `nika-serve`, `nika-mcp`, `nika-lsp`, `nika-sdk`, `nika-catalog-verify` |
-| **L5** | The binary — sole `[[bin]]` composition root | via L4 | L0..L4 | `nika` (&lt;500 LOC) |
+| **L0.5** | Kernel trait definitions + companions (mock) · async OK | none (traits only) | L0 | `nika-kernel` (facade hub), `nika-kernel-core`, `nika-kernel-ai`, `nika-kernel-runtime`, `nika-kernel-plugin`, `nika-kernel-mock` |
+| **L1** | Effect implementations · async, per-crate capability axis | declared axes only (fs / net / exec / env) | L0, L0.5 | `nika-fs`, `nika-http`, `nika-process`, `nika-git`, `nika-keys-*`, `nika-pck-registry`, `nika-pck-store`, `nika-<provider>-*` |
+| **L2** | Verbs + domain services · orchestrates L1 impls behind kernel traits | via L1 traits only | L0, L0.5, L1 | `nika-pck`, `nika-verb-*`, `nika-policy`, `nika-connectome`, `nika-observability`, `nika-builtin-{github,cloud,workspace}` |
+| **L3** | Runtime + policy + sandbox · enforces execution contracts | via L2 | L0..L2 | `nika-runtime`, `nika-shield`, `nika-wasm-host` (v0.100), `nika-sandbox` (v0.100) |
+| **L4** | Interfaces · transport / UI surfaces (libraries) | via L3 | L0..L3 | `nika-cli`, `nika-serve`, `nika-mcp`, `nika-lsp`, `nika-sdk`, `nika-catalog-verify` |
+| **L5** | The binary · sole `[[bin]]` composition root | via L4 | L0..L4 | `nika` (&lt;500 LOC) |
 
 <Tip>
   `nika-http` is the **L1 HTTP client** (used by `fetch` / catalog sync).
   The HTTP server surface of `nika serve` lives **inline inside
-  `nika-serve` L4** — no separate server crate.
+  `nika-serve` L4**: no separate server crate.
 </Tip>
 
 ## Admitted today (v{STATUS.version})
@@ -148,8 +148,8 @@ today and forbids its silent later use.
 
 ## Forward compatibility
 
-- **The Connectome** — 1 L2 orchestrator (`nika-connectome`) + 10 L1 satellites (hnsw, bm25, rrf, rerank, fsrs, rdfs-reasoner, temporal, graph-algos, autodesc-minimal, autodesc-full). No renumber — they slot into L1 / L2 naturally.
-- **v0.100 WASM** plugin host + sandbox — L3 crates alongside `nika-runtime`. No renumber.
+- **The Connectome**: 1 L2 orchestrator (`nika-connectome`) + 10 L1 satellites (hnsw, bm25, rrf, rerank, fsrs, rdfs-reasoner, temporal, graph-algos, autodesc-minimal, autodesc-full). No renumber: they slot into L1 / L2 naturally.
+- **v0.100 WASM** plugin host + sandbox: L3 crates alongside `nika-runtime`. No renumber.
 
 ## Anti-patterns
 
@@ -157,17 +157,17 @@ today and forbids its silent later use.
   Seven patterns that tank the layer contract. If you catch yourself writing one, stop and re-ask the mechanical sort test.
 </Warning>
 
-1. **Kitchen-sink crate** — "I'll just add this utility to `nika-error`" leads to a 10k-LOC bag-of-tricks every crate transitively pulls in. One caller = stays in the caller.
-2. **Facade mega-crate** — "Re-export everything from `nika` for convenience" collapses the layer contract and tanks compile time.
-3. **Upward re-exports** — an L1 crate `pub use nika_pck::...` turns its API into an L2 consumer and breaks mechanical sorting.
-4. **`async` in L0** — forces a runtime choice on every L1 / L2 consumer; makes the crate unusable in build scripts.
-5. **`anyhow::Error` in library code** — L5 binary only. L0..L4 uses the typed error hierarchy.
-6. **`Box<dyn Error>` in public API** — hygiene vector 19 bans it. Swap to the typed error hierarchy.
-7. **Runtime imports in L0** — `tokio::spawn` in `nika-error` is a layer violation even if it compiles.
+1. **Kitchen-sink crate**: "I'll just add this utility to `nika-error`" leads to a 10k-LOC bag-of-tricks every crate transitively pulls in. One caller = stays in the caller.
+2. **Facade mega-crate**: "Re-export everything from `nika` for convenience" collapses the layer contract and tanks compile time.
+3. **Upward re-exports**: an L1 crate `pub use nika_pck::...` turns its API into an L2 consumer and breaks mechanical sorting.
+4. **`async` in L0**: forces a runtime choice on every L1 / L2 consumer; makes the crate unusable in build scripts.
+5. **`anyhow::Error` in library code**: L5 binary only. L0..L4 uses the typed error hierarchy.
+6. **`Box<dyn Error>` in public API**: hygiene vector 19 bans it. Swap to the typed error hierarchy.
+7. **Runtime imports in L0**: `tokio::spawn` in `nika-error` is a layer violation even if it compiles.
 
 ## See also
 
-- [Forward-compat invariants](/architecture/forward-compat-invariants) — the 8 patterns + 5 decisions that protect the public API
-- [L0 foundation decisions](/architecture/l0-decisions) — Q1 through Q13, locked
-- [12-gate admission](/architecture/admission) — how a crate earns a seat at the workspace
-- [Constellation](/reference/constellation) — live map of admitted / WIP / planned crates
+- [Forward-compat invariants](/architecture/forward-compat-invariants), the 8 patterns + 5 decisions that protect the public API
+- [L0 foundation decisions](/architecture/l0-decisions): Q1 through Q13, locked
+- [12-gate admission](/architecture/admission), how a crate earns a seat at the workspace
+- [Constellation](/reference/constellation), live map of admitted / WIP / planned crates

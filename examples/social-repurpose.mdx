@@ -1,11 +1,11 @@
 ---
 title: "Social repurpose"
 sidebarTitle: "Social repurpose"
-description: "T1 starter · marketing — one post becomes a thread, a LinkedIn post and a newsletter blurb, in parallel."
+description: "T1 starter · marketing: one post becomes a thread, a LinkedIn post and a newsletter blurb, in parallel."
 icon: "share-nodes"
 ---
 
-> **T1 starter · marketing / creators** — the diamond DAG. One read fans
+> **T1 starter · marketing / creators**: the diamond DAG. One read fans
 > into three rewrites that run **concurrently**, and a single write
 > merges the bundle. The craft lives in the prompts; the engine handles
 > the choreography.
@@ -13,7 +13,7 @@ icon: "share-nodes"
 ## The job
 
 You wrote the post. Now it needs to be a thread, a LinkedIn version and
-a newsletter blurb — same ideas, three voices. Sequential chatbot
+a newsletter blurb: same ideas, three voices. Sequential chatbot
 sessions drift; this file keeps one source and rewrites it three ways at
 once.
 
@@ -104,16 +104,16 @@ outputs:
 
 <Steps>
   <Step title="Fan-out by omission">
-    `thread`, `linkedin` and `newsletter` each depend only on `post` —
+    `thread`, `linkedin` and `newsletter` each depend only on `post`:
     no deps between them, so the engine runs all three at the same time.
   </Step>
   <Step title="with: keeps the merge readable">
     `bundle` aliases the three outputs to one-letter names. `with:` is
-    optional sugar — but a template interpolating three long task paths
+    optional sugar, but a template interpolating three long task paths
     is where you want it.
   </Step>
   <Step title="One multi-line write">
-    The `content:` is a YAML block scalar with three interpolations —
+    The `content:` is a YAML block scalar with three interpolations:
     the bundle file is assembled by the engine, no model needed for glue.
   </Step>
 </Steps>
@@ -128,11 +128,11 @@ outputs:
 
 ## Make it yours
 
-- Add a fourth branch (YouTube description, Mastodon, press blurb) — it's three lines and it runs in the same wave.
+- Add a fourth branch (YouTube description, Mastodon, press blurb): it's three lines and it runs in the same wave.
 - Pin a glossary: put your brand terms in a `vars:` entry and interpolate it into each prompt.
 - Want every language too? Chain this into [Localization factory](/examples/localization-factory).
 
 <Card title="Level up · T2 chains" icon="rocket" href="/examples/release-notes">
-  Next tier: typed outputs, in-place file edits and a webhook ping —
-  release day, automated.
+  Next tier: typed outputs, in-place file edits and a webhook ping.
+  Release day, automated.
 </Card>

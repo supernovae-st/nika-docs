@@ -1,13 +1,13 @@
 ---
 title: "CEO Monday brief"
 sidebarTitle: "CEO Monday brief"
-description: "T4 epic · founders — market + engineering + KPIs synthesized, and the ping tells you what the run cost."
+description: "T4 epic · founders: market + engineering + KPIs synthesized, and the ping tells you what the run cost."
 icon: "briefcase"
 ---
 
-> **T4 epic · founders / executives** — the flagship. Three branches
+> **T4 epic · founders / executives**: the flagship. Three branches
 > gather in parallel (web signal, repo pulse, the KPI sheet), jq does
-> the revenue arithmetic, a thinking model writes the brief — and
+> the revenue arithmetic, a thinking model writes the brief, and
 > `nika:inspect view: cost` puts the run's own bill in the ping.
 > A workflow that reports what it cost you is a workflow you trust on
 > a schedule.
@@ -16,7 +16,7 @@ icon: "briefcase"
 
 Monday needs one page: market, product, numbers, risks, the ONE
 decision. Assembling it eats an hour of founder time. This file
-assembles it before you wake — dated filename, summed revenue, and a
+assembles it before you wake: dated filename, summed revenue, and a
 webhook ping ending in `run cost $0.14`.
 
 ## The shape
@@ -181,15 +181,15 @@ outputs:
   <Step title="Three branches, zero coordination code">
     News (HN API through `mode: jq`), engineering pulse (`git shortlog`)
     and the KPI sheet (read → convert → jq `add`) run concurrently. The
-    revenue sum is jq arithmetic — deterministic, not model-guessed.
+    revenue sum is jq arithmetic: deterministic, not model-guessed.
   </Step>
   <Step title="Dates come from a builtin">
     `nika:date` + the `.iso[:10]` binding stamp the filename
     `briefs/2026-06-15-monday.md`. Never let a model guess the date.
   </Step>
   <Step title="The run reports its own bill">
-    `nika:inspect view: cost` returns `{total_usd, by_task, by_provider}`
-    — the ping interpolates it. Cost-aware automation is automation you
+    `nika:inspect view: cost` returns `{total_usd, by_task, by_provider}`.
+    The ping interpolates it. Cost-aware automation is automation you
     can leave running.
   </Step>
 </Steps>
@@ -206,10 +206,10 @@ outputs:
 ## Make it yours
 
 - Add a fourth branch: support sentiment from [Support triage](/examples/support-triage)'s board file.
-- Keep a budget: follow `bill` with `nika:assert` on `total_usd < 1` — the brief refuses to overspend.
+- Keep a budget: follow `bill` with `nika:assert` on `total_usd < 1`. The brief refuses to overspend.
 - Archive the history: the dated files under `briefs/` are already your decision journal.
 
 <Card title="Back to all examples" icon="rocket" href="/examples/overview">
-  You've climbed the whole ladder — starter to epic. Time to write
+  You've climbed the whole ladder, starter to epic. Time to write
   yours.
 </Card>

@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting & FAQ"
-description: "The errors you'll actually hit, what they mean, and the questions everyone asks — version story, runnable state, providers, syntax dialects."
+description: "The errors you'll actually hit, what they mean, and the questions everyone asks: version story, runnable state, providers, syntax dialects."
 sidebarTitle: "Troubleshooting"
 icon: "circle-question"
 ---
@@ -19,13 +19,13 @@ import { CANON } from "/snippets/_canon.mdx";
   </Accordion>
   <Accordion title="Why is the language v1 but the engine pre-1.0?" icon="code-branch">
     Two independent axes. The **language envelope `nika: v1` is frozen
-    forever** — files you write never break. The **engine** follows real
+    forever**: files you write never break. The **engine** follows real
     semver toward 1.0 (`0.90` release-candidate today, then `1.0.0`, `1.1`, …).
     Same model as SQL or GraphQL: the contract is stable, implementations
     iterate.
   </Accordion>
   <Accordion title="Is fetch a verb?" icon="globe">
-    No — there are exactly {CANON.verbs} verbs (`infer` · `exec` ·
+    No. There are exactly {CANON.verbs} verbs (`infer` · `exec` ·
     `invoke` · `agent`), locked forever. Fetching a URL is *calling a
     tool*: `invoke: { tool: "nika:fetch" }`. If you see `fetch:` as a
     verb anywhere, it's the pre-spec legacy dialect.
@@ -34,20 +34,20 @@ import { CANON } from "/snippets/_canon.mdx";
     {CANON.providersLocal} local runtimes (Ollama · LM Studio · llama.cpp
     · LocalAI · vLLM). Point `model: ollama/llama3.2:3b` at your machine and
     the whole workflow runs with zero cloud. `mock/echo` runs with
-    nothing at all — that's what the templates default to.
+    nothing at all: that's what the templates default to.
   </Accordion>
   <Accordion title="Do I write {{ }} or ${{ }}?" icon="dollar-sign">
-    Always `${{ … }}` — what's inside is CEL. The bare `{{ … }}` form is
+    Always `${{ … }}`: what's inside is CEL. The bare `{{ … }}` form is
     legacy and rejected by the validator. Same rule: there are **no
-    template filters** (`| upper`, `| truncate`) — transforms are jq, in
+    template filters** (`| upper`, `| truncate`): transforms are jq, in
     `output:` bindings or `nika:jq`.
   </Accordion>
-  <Accordion title="My YAML is valid — why does nika check still fail?" icon="shield-check">
+  <Accordion title="My YAML is valid, so why does nika check still fail?" icon="shield-check">
     Schema-valid ≠ spec-valid. The validator also enforces the semantic
     rules: every `${{ tasks.X }}` reference needs `depends_on: [X]`,
     `when:` must be a CEL boolean, `nika:done` only inside an agent's
-    tool list, exactly one verb per task. The error names the exact rule
-    — fix that rule, nothing else, re-check.
+    tool list, exactly one verb per task. The error names the exact
+    rule. Fix that rule, nothing else, re-check.
   </Accordion>
 </AccordionGroup>
 
@@ -59,18 +59,18 @@ flag ([error model](/reference/error-codes)). The frequent ones:
 | Symptom | Code family | What it means · what to do |
 |---|---|---|
 | « parse error » on a file that looks fine | `NIKA-PARSE` | Usually the envelope: `nika: v1` exactly (not `v1.0` · not `1`), `workflow:` kebab-case, `tasks:` present. |
-| task referenced but never ran | `NIKA-DAG` | A `${{ tasks.X }}` without `depends_on: [X]` — every data edge must be a graph edge. |
-| « unknown binding » | `NIKA-VAR` | Five namespaces only (`vars` · `with` · `tasks` · `env` · `secrets`) — typos like `tsaks.` are caught at validation. |
-| provider call fails once then works | `NIKA-PROVIDER` (`transient: true`) | The engine retries with backoff per your `retry:` — declare it instead of wrapping logic. |
+| task referenced but never ran | `NIKA-DAG` | A `${{ tasks.X }}` without `depends_on: [X]`. Every data edge must be a graph edge. |
+| « unknown binding » | `NIKA-VAR` | Five namespaces only (`vars` · `with` · `tasks` · `env` · `secrets`). Typos like `tsaks.` are caught at validation. |
+| provider call fails once then works | `NIKA-PROVIDER` (`transient: true`) | The engine retries with backoff per your `retry:`. Declare it instead of wrapping logic. |
 | fetch refuses a URL | `NIKA-SEC` | SSRF defense: private networks and cloud metadata are blocked by default ([security model](/concepts/security)). |
-| command blocked in exec | `NIKA-SEC-001` | Shell-mode blocklist hit — pass tainted data via `stdin:`/`args:`, never interpolated into `command:`. |
+| command blocked in exec | `NIKA-SEC-001` | Shell-mode blocklist hit: pass tainted data via `stdin:`/`args:`, never interpolated into `command:`. |
 | agent never finishes | `NIKA-AGENT` | Budgets are mandatory leashes: `max_turns` + `max_tokens_total`, and the loop ends with `nika:done`. |
 
 ## When it breaks, in order
 
 <Steps>
   <Step title="Read the code, not the message">
-    `NIKA-<NAMESPACE>-<NNN>` is stable and greppable — the
+    `NIKA-<NAMESPACE>-<NNN>` is stable and greppable. The
     [catalog](/reference/error-codes) gives the namespace's contract.
   </Step>
   <Step title="Check transient">

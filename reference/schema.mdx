@@ -14,7 +14,7 @@ document. Your editor's YAML LSP can consume it directly.
 
 ## Contract version
 
-`nika: v1` — the first line of every workflow. A **single version marker**:
+`nika: v1`, the first line of every workflow. A **single version marker**:
 the key `nika` declares "this is a Nika workflow", the value `v1` pins the
 language contract version. There is no separate `schema:` or `apiVersion:`
 field (the engine's internal canonical URI stays `https://nika.sh/spec/v1`
@@ -44,7 +44,7 @@ nika check workflow.nika.yaml --strict   # + extra lints
 
 - `v1` is the **only value for the entire lifetime** of the v1 contract.
 - Minor additions (a new optional field, a new builtin) are **additive**
-  and never change the marker — no `@minor` bumps, no `nika migrate` for them.
+  and never change the marker: no `@minor` bumps, no `nika migrate` for them.
 - A future `nika: v2` would be a deliberate breaking-change generation with
-  its own spec — and since the `v1` envelope is frozen, that is effectively never.
+  its own spec, and since the `v1` envelope is frozen, that is effectively never.
 - Anti-pattern: `nika: v1.0` · `nika: "1"` · `nika: 1.0`. The value is exactly `v1`.

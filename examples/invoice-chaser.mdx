@@ -1,11 +1,11 @@
 ---
 title: "Invoice chaser"
 sidebarTitle: "Invoice chaser"
-description: "T2 chain · finance — overdue reminders drafted, and nothing goes out until a human says yes."
+description: "T2 chain · finance: overdue reminders drafted, and nothing goes out until a human says yes."
 icon: "file-invoice-dollar"
 ---
 
-> **T2 chain · finance / freelance** — the human-in-the-loop example.
+> **T2 chain · finance / freelance**: the human-in-the-loop example.
 > `nika:prompt` blocks the workflow until someone answers; the
 > drafting is automated, the **sending decision never is**.
 
@@ -115,11 +115,11 @@ outputs:
 <Steps>
   <Step title="Data work is jq work">
     CSV → JSON via `nika:convert`, then `map(select(.status == "overdue"))`
-    in `nika:jq`. No model touches the numbers — deterministic, free,
+    in `nika:jq`. No model touches the numbers: deterministic, free,
     auditable.
   </Step>
   <Step title="size() gates the whole tail">
-    `when: ${{ size(tasks.overdue.output) > 0 }}` — the canonical
+    `when: ${{ size(tasks.overdue.output) > 0 }}`: the canonical
     empty-check. No overdue invoices → the rest of the file skips.
   </Step>
   <Step title="The approval gate">

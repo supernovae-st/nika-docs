@@ -19,7 +19,7 @@ intelligence.
   or `nika wire <client>` for explicit MCP client setup.
 </Info>
 
-## Tier 1 — JSON schema validation (today)
+## Tier 1: JSON schema validation (today)
 
 Any editor with `yaml-language-server` can validate `.nika.yaml` against
 the workflow schema.
@@ -103,14 +103,14 @@ tasks:
     Missing required fields, schema mismatches, wrong types.
   </Card>
   <Card title="Hover docs" icon="circle-info">
-    Every field documented inline — descriptions come from the JSON Schema.
+    Every field documented inline: descriptions come from the JSON Schema.
   </Card>
   <Card title="Format on save" icon="align-left">
     Via `prettier-plugin-yaml` or LSP-driven formatting.
   </Card>
 </CardGroup>
 
-## Tier 2 — `nika lsp` + extension
+## Tier 2: `nika lsp` + extension
 
 The generic `yaml-language-server` covers structural validation. A
 custom `nika-lsp` crate adds Nika-specific semantics:
@@ -129,7 +129,7 @@ custom `nika-lsp` crate adds Nika-specific semantics:
   </Accordion>
 
   <Accordion title="Workflow visualizer" icon="diagram-project">
-    Inline DAG preview — a small panel showing the task graph as you
+    Inline DAG preview: a small panel showing the task graph as you
     type. Click a node to jump to its definition.
   </Accordion>
 

@@ -52,7 +52,7 @@ it verbatim (MEMORY.md, CLAUDE.md, ROADMAP.md, this page).
 | workspace version | v{STATUS.version} |
 | crates (workspace) | {STATUS.cratesWorkspace} |
 | crates (admitted) | {STATUS.cratesAdmitted} / {STATUS.cratesTarget} |
-| crates (WIP) | {STATUS.wipCrates.length} — {STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"} |
+| crates (WIP) | {STATUS.wipCrates.length} · {STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"} |
 | library tests | {STATUS.libTests} passed, 0 failed |
 | clippy | {STATUS.clippyWarnings} warnings |
 | ADRs | {STATUS.adrs} ({STATUS.adrsAccepted} Accepted + {STATUS.adrsProposed} Proposed) |
@@ -98,14 +98,14 @@ first public release candidate.
 
 ## What's locked (decisions the project won't revisit)
 
-- **{STATUS.cratesTarget} crate architecture** — confirmed by POST_AUDIT_REVISIONS 2026-04-14; reached additively across 1.x minors.
-- **Real semver toward 1.0** — 0.90.0 is the first public release-candidate; 1.0 ships when release gates are green. Quality over speed.
-- **Layer discipline** — L0 zero I/O, L0.5 traits only, strict downward deps, cargo-deny enforced. See [Layers](/architecture/layers).
-- **12 gates per crate** — no exceptions. See [Admission](/architecture/admission).
-- **Zero `.unwrap()` / `.expect(` in `src/`** — `?` propagation; `workspace.lints.clippy.unwrap_used = "deny"`.
-- **Not an extraction** — every crate written fresh, legacy as reference only.
-- **TDD with mutation ≥ 90%** — RED before GREEN; `cargo mutants -p <crate>` gates admission.
-- **`#[non_exhaustive]` on every public type** — see [Forward-compat invariants](/architecture/forward-compat-invariants).
+- **{STATUS.cratesTarget} crate architecture**: confirmed by POST_AUDIT_REVISIONS 2026-04-14; reached additively across 1.x minors.
+- **Real semver toward 1.0**: 0.90.0 is the first public release-candidate; 1.0 ships when release gates are green. Quality over speed.
+- **Layer discipline**: L0 zero I/O, L0.5 traits only, strict downward deps, cargo-deny enforced. See [Layers](/architecture/layers).
+- **12 gates per crate**: no exceptions. See [Admission](/architecture/admission).
+- **Zero `.unwrap()` / `.expect(` in `src/`**: `?` propagation; `workspace.lints.clippy.unwrap_used = "deny"`.
+- **Not an extraction**: every crate written fresh, legacy as reference only.
+- **TDD with mutation ≥ 90%**: RED before GREEN; `cargo mutants -p <crate>` gates admission.
+- **`#[non_exhaustive]` on every public type**: see [Forward-compat invariants](/architecture/forward-compat-invariants).
 
 ## What's next
 
@@ -120,12 +120,12 @@ first public release candidate.
     proving the release checklist, docs, editor setup, and shadow-zone gates
     stay true end-to-end.
   </Accordion>
-  <Accordion title="The Connectome (sovereign memory) — post-foundation">
+  <Accordion title="The Connectome (sovereign memory): post-foundation">
     **Separate count** from the {STATUS.cratesTarget} Diamond crates.
     1 L2 orchestrator (`nika-connectome`) + 10 L1 satellites (hnsw, bm25, rrf, rerank,
     fsrs, rdfs-reasoner, temporal, graph-algos, autodesc). Plugs into
-    `MemoryStore` / `EmbeddingProvider` trait reservations in `nika-kernel`
-    — no breaking changes. Design tracked via ADR-004 + ADRs 029-032.
+    `MemoryStore` / `EmbeddingProvider` trait reservations in `nika-kernel`.
+    No breaking changes. Design tracked via ADR-004 + ADRs 029-032.
   </Accordion>
 </AccordionGroup>
 

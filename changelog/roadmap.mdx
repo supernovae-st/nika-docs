@@ -44,7 +44,7 @@ ADR promotions.
   </Card>
 </CardGroup>
 
-## Current state — main v{STATUS.version}
+## Current state: main v{STATUS.version}
 
 **{STATUS.cratesAdmitted} / {STATUS.cratesTarget} crates admitted** · **{STATUS.libTests} lib tests** · **{STATUS.hygieneVectors}** hygiene vectors ({STATUS.hygieneGreen} green) · **{STATUS.adrs}** ADRs.
 
@@ -53,7 +53,7 @@ See [live state](/reference/status) for the authoritative snapshot.
 ## Milestones
 
 <AccordionGroup>
-  <Accordion title="1.0.0 — Public API lock" icon="rocket">
+  <Accordion title="1.0.0: Public API lock" icon="rocket">
     **1.0.0 ships when the gates are green.** The language spec (`nika: v1`
     envelope, Apache-2.0) is already public and stable; the engine release
     candidate already exposes the first-run CLI, four verbs, `nika run`, LSP,
@@ -61,7 +61,7 @@ See [live state](/reference/status) for the authoritative snapshot.
     additive from there.
   </Accordion>
 
-  <Accordion title="1.x minors — Diamond Foundation complete" icon="diamond">
+  <Accordion title="1.x minors: Diamond Foundation complete" icon="diamond">
     **Target state, reached additively across 1.x minors:**
 
     - **All {STATUS.cratesTarget} crates admitted** past 12 gates.
@@ -75,14 +75,14 @@ See [live state](/reference/status) for the authoritative snapshot.
       parity · provider parity matrix).
     - `nika-catalog-sync` shipping catalog freshness (triple-source
       cross-check: LiteLLM + models.dev + OpenRouter corroboration).
-    - `nika-lsp` L4 admitted — full cross-task binding analysis + taint
+    - `nika-lsp` L4 admitted: full cross-task binding analysis + taint
       propagation warnings + DAG preview.
     - Sigstore keyless signing on release artifacts.
 
     **No date.** The 42-crate architecture, complete across 1.x minors.
   </Accordion>
 
-  <Accordion title="2.0 — The Connectome era (sovereign memory)" icon="brain">
+  <Accordion title="2.0: The Connectome era (sovereign memory)" icon="brain">
     **Target state when shipped:**
 
     - `nika-connectome` L2 orchestrator admitted.
@@ -91,38 +91,38 @@ See [live state](/reference/status) for the authoritative snapshot.
       `nika-graph-algos`, `nika-autodesc-minimal`, `nika-autodesc-full`.
     - `MemoryStore` + `EmbeddingProvider` trait impls live (reservations
       from v0.80 → real implementations).
-    - Oxigraph as the default backend (ADR-004 Option B) — RDF/SPARQL,
+    - Oxigraph as the default backend (ADR-004 Option B): RDF/SPARQL,
       W3C-standard, exportable, yours.
     - Agent-v2 with memory-backed recall (FSRS spaced repetition,
       multi-vector HNSW, RRF hybrid search).
 
-    **Separate count** from the {STATUS.cratesTarget} Diamond target —
+    **Separate count** from the {STATUS.cratesTarget} Diamond target:
     memory crates add on top. No date.
   </Accordion>
 
-  <Accordion title="Ecosystem tier — plugins + observability" icon="box">
+  <Accordion title="Ecosystem tier: plugins + observability" icon="box">
     **Target state when shipped:**
 
     - `nika-wasm-host` (L3) + `nika-sandbox` (L3) admitted.
-    - WASM plugin boundary live — community plugins run with fuel
+    - WASM plugin boundary live: community plugins run with fuel
       metering, Trap taxonomy, capability-scoped syscalls.
     - `nika-observability` suite: OTel GenAI semconv bridge (ADR-035),
       Prometheus / StatsD exporters, audit log with tamper-evidence.
     - `nika-policy` L2 shipping Shield policy engine (prompt injection
       classification, taint enforcement).
-    - `pck` registry fully live — community workflow packages,
+    - `pck` registry fully live: community workflow packages,
       signature verification, overlay precedence (User > Pck > Core).
 
-    **No date.** Versions stay honest real-semver tags — there is no
+    **No date.** Versions stay honest real-semver tags: there is no
     marketing version axis.
   </Accordion>
 
   <Accordion title="Ongoing" icon="infinity">
     Beyond the ecosystem tier, Nika continues incrementally:
 
-    - Language bindings (`nika-napi`, `nika-py`) — rebuild if demand
+    - Language bindings (`nika-napi`, `nika-py`): rebuild if demand
       materializes (currently deferred per POST_AUDIT).
-    - TUI (`nika-tui`) — rebuild in the "Act 3" timeframe if needed.
+    - TUI (`nika-tui`): rebuild in the "Act 3" timeframe if needed.
     - Cross-provider parity expansion as models evolve (GPT-5 family,
       Claude 5, Gemini 3, etc.).
     - Community catalogs (`nika-catalog-cn`, `nika-catalog-eu`) via
@@ -135,16 +135,16 @@ See [live state](/reference/status) for the authoritative snapshot.
 ## Deliberately excluded
 
 <Warning>
-  These are not "someday maybe" — they are architectural non-goals.
+  These are not "someday maybe": they are architectural non-goals.
   Re-opening requires a new ADR that supersedes POST_AUDIT.
 </Warning>
 
-- **`nika-sdk`** — 0 consumers, speculative (POST_AUDIT 2026-04-14).
-- **`nika-tui`** — W1 speculative. Maybe Act 3, never before.
-- **Proc macros in L0** — Q1 LOCKED. Manual impl + `macro_rules!` forever.
-- **`Box<dyn Error>` in public API** — hygiene vector 19 bans.
-- **`anyhow::Error` in library code** — ADR-005. Binary only.
-- **Plugins as proc macros** — the WASM boundary (ecosystem tier) is the plugin story.
+- **`nika-sdk`**: 0 consumers, speculative (POST_AUDIT 2026-04-14).
+- **`nika-tui`**: W1 speculative. Maybe Act 3, never before.
+- **Proc macros in L0**: Q1 LOCKED. Manual impl + `macro_rules!` forever.
+- **`Box<dyn Error>` in public API**: hygiene vector 19 bans.
+- **`anyhow::Error` in library code**: ADR-005. Binary only.
+- **Plugins as proc macros**: the WASM boundary (ecosystem tier) is the plugin story.
 
 ## Governance
 

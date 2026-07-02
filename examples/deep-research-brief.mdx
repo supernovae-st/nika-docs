@@ -1,11 +1,11 @@
 ---
 title: "Deep research brief"
 sidebarTitle: "Deep research brief"
-description: "T4 epic · research — plan → budgeted research agent → thinking-model synthesis. Auditable end to end."
+description: "T4 epic · research: plan → budgeted research agent → thinking-model synthesis. Auditable end to end."
 icon: "microscope"
 ---
 
-> **T4 epic · research / consulting / VC** — plan-then-execute. A fast
+> **T4 epic · research / consulting / VC**: plan-then-execute. A fast
 > model writes the plan, an agent works the web **under explicit
 > budgets**, a thinking model synthesizes. Three stages, three different
 > cost profiles, every intermediate on disk.
@@ -130,11 +130,11 @@ outputs:
   <Step title="The agent has a leash">
     `max_turns: 25` + `max_tokens_total: 150000` bound the loop;
     `nika:done` lets it exit cleanly when the plan is exhausted. The
-    final message must match the schema — findings AND sources.
+    final message must match the schema: findings AND sources.
   </Step>
   <Step title="Callable by other workflows">
     The typed `outputs:` (`brief`, `sources`) make this a building
-    block — a parent workflow can consume the contract without parsing
+    block: a parent workflow can consume the contract without parsing
     prose.
   </Step>
 </Steps>

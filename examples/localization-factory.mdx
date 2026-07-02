@@ -1,11 +1,11 @@
 ---
 title: "Localization factory"
 sidebarTitle: "Localization factory"
-description: "T3 fan-out · product / i18n — the whole docs tree translated, voice intact, zero copy-paste."
+description: "T3 fan-out · product / i18n: the whole docs tree translated, voice intact, zero copy-paste."
 icon: "language"
 ---
 
-> **T3 fan-out · product / content / i18n** — three chained fan-outs
+> **T3 fan-out · product / content / i18n**: three chained fan-outs
 > (read-all → translate-all → write-all) with jq `transpose` zipping
 > paths back to texts between stages. The masterclass file for
 > collections.
@@ -122,13 +122,13 @@ outputs:
 
 <Steps>
   <Step title="The filesystem is the collection">
-    `nika:glob` returns the file list at runtime — add a doc tomorrow,
+    `nika:glob` returns the file list at runtime: add a doc tomorrow,
     it's in the next run. `exclude:` keeps `node_modules` out.
   </Step>
   <Step title="transpose zips parallel arrays">
     Two fan-outs produce two aligned arrays (paths, texts). The jq
     `transpose | map({path: .[0], text: .[1]})` zip turns them into
-    `[{path, text}]` — and `${{ item.path }}` works, because loop-locals
+    `[{path, text}]`, and `${{ item.path }}` works, because loop-locals
     are full objects.
   </Step>
   <Step title="The mirror tree comes out the other end">
@@ -149,11 +149,11 @@ outputs:
 
 ## Make it yours
 
-- All your locales: wrap the lang in a list and run per locale — or lift `vars.lang` to a typed required input and call the workflow per language.
+- All your locales: wrap the lang in a list and run per locale, or lift `vars.lang` to a typed required input and call the workflow per language.
 - Glossary discipline: interpolate your terminology table into the translate prompt so product names never drift.
 - Only what changed: replace `glob` with `exec: git diff --name-only` and translate the delta ([PR review fan-out](/examples/pr-review-fanout) starts the same way).
 
 <Card title="Next · Config drift sentinel" icon="shield-halved" href="/examples/config-drift-sentinel">
-  RFC 7396 merge-patch + RFC 6902 diff — jq decides, the model only
+  RFC 7396 merge-patch + RFC 6902 diff: jq decides, the model only
   explains.
 </Card>

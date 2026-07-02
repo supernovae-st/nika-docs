@@ -1,13 +1,13 @@
 ---
 title: "Release train"
 sidebarTitle: "Release train"
-description: "T4 epic · devops — parallel gates, a human GO, an absolute-time hold until the window · ship, verify, record."
+description: "T4 epic · devops: parallel gates, a human GO, an absolute-time hold until the window · ship, verify, record."
 icon: "train"
 ---
 
-> **T4 epic · devops / release engineering** — time is a first-class
+> **T4 epic · devops / release engineering**: time is a first-class
 > citizen. The train holds with `nika:wait until:` (an absolute
-> timestamp — not a sleep), the gates' duration is computed with
+> timestamp, not a sleep), the gates' duration is computed with
 > `nika:date op: diff`, a human signs the departure, and the record
 > lands in the journal **whether the ship succeeded or not**.
 
@@ -15,7 +15,7 @@ icon: "train"
 
 Release day choreography: tests, lint and audit run as one parallel
 wave; an assert refuses departure on any red; the conductor signs with
-full information (« gates GREEN in 12 min — ship 1.4.0 in the 09:00Z
+full information (« gates GREEN in 12 min · ship 1.4.0 in the 09:00Z
 window? »); the train holds until the window; ships; re-polls prod
 until it reports the new version; and `on_finally` files the departure
 record either way.
@@ -216,7 +216,7 @@ outputs:
   </Step>
   <Step title="The human signs with full information">
     `nika:date op: diff` computes the gates' wall time, and the
-    `nika:prompt` message carries it — the conductor decides knowing
+    `nika:prompt` message carries it: the conductor decides knowing
     how fresh the green is. The assert after makes « no » terminal.
   </Step>
   <Step title="The record always lands">
@@ -240,9 +240,9 @@ outputs:
 
 - Generate the notes on the same train: insert [Release notes](/examples/release-notes) between `approved` and `hold`.
 - Canary first: duplicate `ship`/`verify` against staging, gate prod behind a second assert.
-- The window var makes this a scheduled artifact — your cron passes next Tuesday 09:00Z, the train handles the rest.
+- The window var makes this a scheduled artifact: your cron passes next Tuesday 09:00Z, the train handles the rest.
 
 <Card title="Back to all examples" icon="rocket" href="/examples/overview">
-  The full gallery — 20 workflows, four tiers, every construct taught
+  The full gallery: 20 workflows, four tiers, every construct taught
   by a real job.
 </Card>

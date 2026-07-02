@@ -1,6 +1,6 @@
 ---
 title: "Providers"
-description: "14 canonical providers, local-first — plus a wider engine catalog — behind one unified InferRequest. Switch provider = change one field."
+description: "14 canonical providers, local-first (plus a wider engine catalog) behind one unified InferRequest. Switch provider = change one field."
 sidebarTitle: "Providers"
 icon: "server"
 ---
@@ -10,7 +10,7 @@ import { CANON } from "/snippets/_canon.mdx";
 
 Two provider numbers exist, on purpose: the **language spec** locks
 **{CANON.providers} canonical providers** (what a conformant engine MUST
-ship — see the [spec catalog](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md));
+ship · see the [spec catalog](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md));
 the **reference engine's catalog** goes wider. Nika ships with
 **{STATUS.providers} LLM providers** in its catalog,
 orchestrated behind one unified `InferRequest`. The `infer:` verb takes a
@@ -20,7 +20,7 @@ through the right API dialect.
 
 <Tip>
   **Full inventory with env vars and default models:** [Providers catalog](/reference/providers-catalog).
-  This page explains the design — why a single `InferRequest` works across
+  This page explains the design: why a single `InferRequest` works across
   {STATUS.providers} providers.
 </Tip>
 
@@ -103,7 +103,7 @@ dispatch. The rules decide:
 <Check>
   If you send `tools: [...]` to a model whose capability rule says
   `tool_calling = false`, Nika fails fast with `NIKA-13x` before hitting
-  the network — no silent provider-side error.
+  the network: no silent provider-side error.
 </Check>
 
 See [Capability rules](/reference/capabilities) for the full resolution
@@ -113,7 +113,7 @@ algorithm (defaults → scan rules in file order → apply matches).
 
 When a provider fails, Nika can route to a fallback:
 
-```yaml target design — a future minor
+```yaml target design · a future minor
 tasks:
   - id: primary
     infer:
@@ -134,7 +134,7 @@ tasks:
 
 <Info>
   Earlier drafts of this page listed 9 providers. That was a snapshot from
-  mid-2025 — today's catalog is {STATUS.providers}-deep, covering frontier
+  mid-2025. Today's catalog is {STATUS.providers}-deep, covering frontier
   cloud labs, fast-inference shops (Groq, Cerebras, SambaNova), Chinese
   labs (Moonshot, Qwen, MiniMax, Zhipu), enterprise platforms (Bedrock,
   Azure, Vertex), and niche (Voyage embeddings, Writer enterprise).
@@ -175,7 +175,7 @@ tasks:
     Resolution algorithm and {STATUS.capabilityRules}-rule contract.
   </Card>
   <Card title="Concepts · Verbs" icon="play" href="/concepts/verbs">
-    The `infer:` verb and its three siblings (exec / invoke / agent) — fetch is the `nika:fetch` builtin under `invoke:`.
+    The `infer:` verb and its three siblings (exec / invoke / agent) · fetch is the `nika:fetch` builtin under `invoke:`.
   </Card>
   <Card title="L0 decisions" icon="list-check" href="/architecture/l0-decisions">
     Why capability rules use prefix matching, not regex (Q1).

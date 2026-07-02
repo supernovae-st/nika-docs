@@ -1,6 +1,6 @@
 ---
 title: "Providers catalog"
-description: "Every LLM provider Nika knows about — the canonical 14 of stdlib v0.1 (5 local · 8 cloud · 1 mock), API dialects, and environment variables."
+description: "Every LLM provider Nika knows about: the canonical 14 of stdlib v0.1 (5 local · 8 cloud · 1 mock), API dialects, and environment variables."
 sidebarTitle: "Providers catalog"
 icon: "server"
 ---
@@ -8,7 +8,7 @@ icon: "server"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 import { CANON } from "/snippets/_canon.mdx";
 
-Nika's stdlib v0.1 ships **{CANON.providers} canonical providers** —
+Nika's stdlib v0.1 ships **{CANON.providers} canonical providers**:
 {CANON.providersLocal} local / self-hosted runners, {CANON.providersCloud}
 cloud APIs, and {CANON.providersTest} deterministic mock. You select one with
 a single `model: <provider>/<name>` field. **Local first** · nothing leaves
@@ -19,7 +19,7 @@ your machine unless a cloud provider is explicitly selected.
   in the spec (counts from `canon.yaml`). The engine additionally carries an
   extended catalog of {STATUS.providers} TOML records
   ([`crates/nika-catalog/data/llm-providers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/llm-providers.toml))
-  used for capability metadata — anything outside the canonical 14 routes
+  used for capability metadata. Anything outside the canonical 14 routes
   through the `openai` + `base_url` escape hatch, not its own prefix.
 </Info>
 
@@ -27,10 +27,10 @@ your machine unless a cloud provider is explicitly selected.
 
 <CardGroup cols={3}>
   <Card title="Providers" icon="server">
-    **{CANON.providers}** canonical — {CANON.providersLocal} local · {CANON.providersCloud} cloud · {CANON.providersTest} mock
+    **{CANON.providers}** canonical: {CANON.providersLocal} local · {CANON.providersCloud} cloud · {CANON.providersTest} mock
   </Card>
   <Card title="API dialects" icon="plug">
-    **3** — openai-chat (the 5 local + most cloud) · anthropic · gemini
+    **3**: openai-chat (the 5 local + most cloud) · anthropic · gemini
   </Card>
   <Card title="Capability rules" icon="grid">
     **{STATUS.capabilityRules}** in `model-capabilities.toml`
@@ -41,13 +41,13 @@ your machine unless a cloud provider is explicitly selected.
 
 <Steps>
   <Step title="Pick your trust model">
-    Local / self-hosted (Ollama / LM Studio / llama.cpp / LocalAI / vLLM) — zero key, zero egress, sovereign by default. EU cloud (Mistral). US frontier (Anthropic / OpenAI / Google). Aggregator (OpenRouter). Each has different residency and compliance trade-offs.
+    Local / self-hosted (Ollama / LM Studio / llama.cpp / LocalAI / vLLM): zero key, zero egress, sovereign by default. EU cloud (Mistral). US frontier (Anthropic / OpenAI / Google). Aggregator (OpenRouter). Each has different residency and compliance trade-offs.
   </Step>
   <Step title="Check the `api_dialect`">
-    All 5 local providers + most cloud providers speak `openai-chat` — same request shape, differing base URL. `anthropic` and `gemini` have native dialects.
+    All 5 local providers + most cloud providers speak `openai-chat`: same request shape, differing base URL. `anthropic` and `gemini` have native dialects.
   </Step>
   <Step title="Verify the backend is reachable">
-    Local providers need their server running (e.g. the Ollama daemon on `localhost:11434`) — no key. Cloud providers declare an `env_var` (e.g., `MISTRAL_API_KEY`). `nika doctor` checks provider readiness before run.
+    Local providers need their server running (e.g. the Ollama daemon on `localhost:11434`) and no key. Cloud providers declare an `env_var` (e.g., `MISTRAL_API_KEY`). `nika doctor` checks provider readiness before run.
   </Step>
   <Step title="Pick default vs cheap model">
     Every provider declares both. `default_model` is the capable tier; `cheap_model` is the cost-optimized tier. Capability rules in `model-capabilities.toml` determine which models support vision / tools / streaming / structured output.
@@ -67,7 +67,7 @@ your machine unless a cloud provider is explicitly selected.
     | `vllm` | vLLM OpenAI server (`localhost:8000/v1`) | `openai-chat` | `(none)` | `meta-llama-3.1-70b-instruct` |
 
     <Tip>
-      **The sovereign default.** No API key, no cloud egress —
+      **The sovereign default.** No API key, no cloud egress:
       `model: ollama/llama3.2:3b` runs offline / air-gapped. Any other
       OpenAI-compatible local server (Jan · llamafile · KoboldCpp) routes
       through the `openai` + `base_url` escape hatch.
@@ -87,9 +87,9 @@ your machine unless a cloud provider is explicitly selected.
     | `xai` | xAI Grok | `openai-chat` | `XAI_API_KEY` | `grok-3` |
 
     <Tip>
-      Keys live in `${{ secrets.* }}` / env vars — never inline in the
+      Keys live in `${{ secrets.* }}` / env vars, never inline in the
       workflow. OpenRouter aggregates ~200 models under one key
-      (`openrouter/<vendor>/<model>`) — use it to experiment across vendors
+      (`openrouter/<vendor>/<model>`). Use it to experiment across vendors
       without per-vendor keys.
     </Tip>
   </Tab>
@@ -100,7 +100,7 @@ your machine unless a cloud provider is explicitly selected.
     | `mock` | Mock provider | custom | `(none)` | `echo` (deterministic) |
 
     <Note>
-      **Mock** ships with every install for deterministic tests —
+      **Mock** ships with every install for deterministic tests:
       `model: mock/echo` returns the prompt verbatim, zero network, zero
       entropy. The canonical examples + CI rely on it.
     </Note>
@@ -115,10 +115,10 @@ your machine unless a cloud provider is explicitly selected.
     `localai` · `mistral` · `mock` · `ollama` · `openai` · `openrouter` ·
     `vllm` · `xai`
 
-    {CANON.providers} total — {CANON.providersLocal} local · {CANON.providersCloud} cloud ·
+    {CANON.providers} total: {CANON.providersLocal} local · {CANON.providersCloud} cloud ·
     {CANON.providersTest} test · matches `canon.yaml` in the spec repo. The
     engine's extended capability catalog ({STATUS.providers} TOML records)
-    is an implementation detail — extended IDs are reached via the
+    is an implementation detail: extended IDs are reached via the
     `openai` + `base_url` escape hatch, never their own prefix.
   </Accordion>
 </AccordionGroup>

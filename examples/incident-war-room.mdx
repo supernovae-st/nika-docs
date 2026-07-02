@@ -1,11 +1,11 @@
 ---
 title: "Incident war room"
 sidebarTitle: "Incident war room"
-description: "T4 epic · SRE — evidence gathered in parallel, a typed timeline, and a recovery check before any postmortem draft."
+description: "T4 epic · SRE: evidence gathered in parallel, a typed timeline, and a recovery check before any postmortem draft."
 icon: "fire-extinguisher"
 ---
 
-> **T4 epic · SRE / on-call** — three evidence sources gathered in
+> **T4 epic · SRE / on-call**: three evidence sources gathered in
 > parallel, a typed timeline, then the honest part: `nika:wait` a settle
 > window, re-poll the status API, and `nika:assert` refuses to draft a
 > « resolved » postmortem while prod still burns. `on_finally:` files
@@ -15,8 +15,8 @@ icon: "fire-extinguisher"
 
 The hour after an incident is logs, Slack archaeology and a postmortem
 nobody wants to start. This pipeline assembles the evidence, rebuilds
-the timeline as typed events, proves recovery, and leaves a draft —
-summary, impact, hypotheses, actions — in the incidents folder before
+the timeline as typed events, proves recovery, and leaves a draft
+(summary, impact, hypotheses, actions) in the incidents folder before
 the retro is scheduled.
 
 ## The shape
@@ -204,14 +204,14 @@ outputs:
 
 <Steps>
   <Step title="Evidence gathers in one wave">
-    `logs` (structured capture), `status_history` (with retry — status
+    `logs` (structured capture), `status_history` (with retry: status
     pages flap during incidents) and `runbook` share no deps: one
     parallel wave, three sources.
   </Step>
   <Step title="Settle, recheck, PROVE">
     `nika:wait duration: 60s` gives the system a settle window, the
-    re-poll reads `.current.state`, and the assert fails the run —
-    loudly — if it isn't `operational`. No optimistic postmortems.
+    re-poll reads `.current.state`, and the assert fails the run,
+    loudly, if it isn't `operational`. No optimistic postmortems.
   </Step>
   <Step title="on_finally always reports">
     Whether `save` succeeded, failed or timed out, the `nika:emit`
@@ -237,5 +237,5 @@ outputs:
 
 <Card title="Next · CEO Monday brief" icon="briefcase" href="/examples/ceo-monday-brief">
   The closer: a three-branch gather, jq arithmetic, a thinking
-  synthesis — and a run that reports its own bill.
+  synthesis, and a run that reports its own bill.
 </Card>

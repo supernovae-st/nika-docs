@@ -8,8 +8,8 @@ icon: "link"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 A **binding** is a template expression wrapped in `${{ … }}`. It resolves
-at runtime against a typed scope — inputs, task outputs, environment
-variables, secrets — and substitutes into the field. What's inside
+at runtime against a typed scope (inputs, task outputs, environment
+variables, secrets) and substitutes into the field. What's inside
 `${{ }}` is [CEL](https://cel.dev) (Common Expression Language), the
 same expression language GitHub Actions and Kubernetes admission
 policies use. Nika does not invent a DSL.
@@ -23,7 +23,7 @@ the unresolved expression. See
   **Two expression layers, locked by the spec:** [CEL](https://cel.dev)
   inside `${{ }}` (conditions + value substitution) and **jq** inside
   `output:` bindings + the `nika:jq` builtin (extraction + transform).
-  There are no template filters — anything beyond a reference or a
+  There are no template filters: anything beyond a reference or a
   boolean is a jq expression or a task. Engine-side, taint propagation
   and typed scope lookup mature across admission rounds; the syntax
   below is the frozen `nika: v1` contract.
@@ -84,12 +84,12 @@ tasks:
       prompt: "Iteration ${{ item }}"
 ```
 
-Type-checking is the analyzer's job — live today in `nika check`
+Type-checking is the analyzer's job, live today in `nika check`
 (every deep output reference is validated against its declared shape). The parser's
 `Templatable<T>` carries `T` as a phantom type so downstream stages
 can't conflate `Templatable<u32>` with `Templatable<bool>`.
 
-## Taint tracking (target design — Phase D)
+## Taint tracking (target design · Phase D)
 
 External data is tainted by default. The taint set is maintained by
 the analyzer and propagates through bindings:
@@ -119,7 +119,7 @@ runtime taint layer · [security model](/concepts/security)):
     command: "${{ tasks.pull_user_input.output }}"   # NIKA-SEC taint violation
 ```
 
-Fix — never interpolate tainted data into a command string; pass it
+Fix: never interpolate tainted data into a command string; pass it
 as data instead:
 
 ```yaml
@@ -135,7 +135,7 @@ Taint is a property of **data**, not of a principal (T3:A design from
 `InferResponse.trust_level`). Cross-link: ADR-014 (sealed kernel
 traits), `nika-error::trust::TrustLevel`.
 
-## The expression language — CEL, one small subset
+## The expression language: CEL, one small subset
 
 What's inside `${{ }}` is the **v0.1 CEL subset**
 ([normative grammar](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md)):
@@ -147,12 +147,12 @@ What's inside `${{ }}` is the **v0.1 CEL subset**
 | Comparison | `==` `!=` `<` `<=` `>` `>=` |
 | Boolean | `&&` `\|\|` `!` |
 | Membership | `status in ['success', 'skipped']` |
-| Size | `size(items) > 0` — the one v0.1 function, the empty-check idiom |
+| Size | `size(items) > 0` · the one v0.1 function, the empty-check idiom |
 | Literals | `true` · `42` · `3.14` · `'str'` · `null` |
 | Grouping | `( … )` |
 
 There are **no template filters** (`\| upper`, `\| truncate`, …). Anything
-that transforms data is a **jq expression** — in an `output:` binding or
+that transforms data is a **jq expression**, in an `output:` binding or
 through the `nika:jq` builtin. Two layers, one job each:
 
 ```yaml
@@ -166,7 +166,7 @@ through the `nika:jq` builtin. Two layers, one job each:
       expression: ".items | map(.title) | join(\"\\n\")"   # jq · transform
 ```
 
-CEL macros and string functions are reserved for later minors — growth
+CEL macros and string functions are reserved for later minors: growth
 is additive, never breaking.
 
 ## Multi-line
@@ -183,7 +183,7 @@ prompt: |
   Provide three concrete improvements.
 ```
 
-The parser preserves indentation and line breaks — the prompt reaches
+The parser preserves indentation and line breaks: the prompt reaches
 the provider exactly as you typed it, minus the leading YAML block
 indentation.
 
@@ -201,14 +201,14 @@ vars:
 ```
 
 If `vars.optional_field` is absent and has no `default:`, the
-workflow fails to load — a miette diagnostic points at the declaration
+workflow fails to load: a miette diagnostic points at the declaration
 site and the usage site.
 
 ## What bindings are **not**
 
 - ❌ Not a scripting language. No loops, no conditionals inside `${{ }}`.
 - ❌ Not arbitrary JavaScript / Python eval. No dynamic code.
-- ❌ Not Jinja2 / Liquid in full — `for` and `if` blocks are **not**
+- ❌ Not Jinja2 / Liquid in full: `for` and `if` blocks are **not**
   supported inside expressions.
 - ✅ Scope lookup + CEL evaluation + type check + taint propagation.
 
@@ -220,11 +220,11 @@ decorations.
 
 ## Related ADRs
 
-- **ADR-010** — miette as the L4 diagnostic presentation layer. Every
+- **ADR-010**: miette as the L4 diagnostic presentation layer. Every
   binding error points at the exact byte range in the source file.
-- **ADR-014** — sealed kernel traits. The resolver runs at L3 and never
+- **ADR-014**: sealed kernel traits. The resolver runs at L3 and never
   crosses into arbitrary user-provided evaluator code.
-- **ADR-021** — YAML envelope convention. `${{ }}` bindings appear
+- **ADR-021**: YAML envelope convention. `${{ }}` bindings appear
   inside `spec:` (workflow) or inside reusable skill / agent documents,
   and resolve against the same scope shape.
 
