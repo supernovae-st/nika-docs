@@ -76,6 +76,10 @@ stays in your hands):
 | Codex CLI | `nika wire codex` | `~/.codex/config.toml` → `[mcp_servers.nika]` |
 | Everything | `nika wire all` | all of the above |
 
+Any other MCP client (Zed, opencode, Gemini CLI, Cline, Continue…) takes
+the same stanza in its own config: a stdio server, `command: nika`,
+`args: ["mcp"]`. The oracle is client-agnostic.
+
 The server exposes two tool families — **validate** and **learn**:
 
 - **`nika_check`**: the full static audit (plan · cost ceiling · secret
