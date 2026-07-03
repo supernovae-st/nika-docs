@@ -76,12 +76,17 @@ stays in your hands):
 | Codex CLI | `nika wire codex` | `~/.codex/config.toml` → `[mcp_servers.nika]` |
 | Everything | `nika wire all` | all of the above |
 
-The server exposes two tools:
+The server exposes two tool families — **validate** and **learn**:
 
 - **`nika_check`**: the full static audit (plan · cost ceiling · secret
   flows · types · tool args · schema) as structured JSON. The agent fixes
   its own file before you ever see it.
 - **`nika_explain`**: any `NIKA-XXX` error code, explained.
+- **`nika_schema` · `nika_examples` · `nika_template` · `nika_canon`**
+  (on `main` · ships next release): the authoring surface — the JSON
+  Schema, the runnable examples, the 6 skeletons, and the canon SSOT, so
+  the agent follows the template→fill→check→repair path instead of
+  guessing structure. All read-only, all served from the embedded pack.
 
 <Note>
   The `codex` target is on `main` and ships with the next release. On the
