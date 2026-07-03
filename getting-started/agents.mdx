@@ -76,9 +76,15 @@ stays in your hands):
 | Codex CLI | `nika wire codex` | `~/.codex/config.toml` → `[mcp_servers.nika]` |
 | Everything | `nika wire all` | all of the above |
 
-Any other MCP client (Zed, opencode, Gemini CLI, Cline, Continue…) takes
-the same stanza in its own config: a stdio server, `command: nika`,
-`args: ["mcp"]`. The oracle is client-agnostic.
+Any other MCP client takes the same stanza — a stdio server,
+`command: nika`, `args: ["mcp"]`. Verified shapes:
+
+- **Gemini CLI** (has its own installer): `gemini mcp add nika nika mcp`
+  (writes the project's `.gemini/settings.json`).
+- **Zed**: `settings.json` → `"context_servers": { "nika": { "command":
+  "nika", "args": ["mcp"] } }`.
+- **opencode · Cline · Continue…**: same two fields in each client's MCP
+  config. The oracle is client-agnostic.
 
 The server exposes two tool families — **validate** and **learn**:
 
