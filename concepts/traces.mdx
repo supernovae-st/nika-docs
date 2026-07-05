@@ -42,8 +42,10 @@ unique id, a nanosecond timestamp, a `kind`, and typed fields:
 - `workflow_started`, then one `task_scheduled` per task
 - `task_started` when a task's dependencies clear
 - `task_completed` (with `duration_ms`), or `task_failed`, or
-  `task_skipped` (a `when:` gate said no)
-- `workflow_completed`, or `workflow_failed`
+  `task_skipped` (a `when:` gate said no), or `task_cache_hit`
+  (a [resumed run](/guides/resume) reused this task's recorded work)
+- `workflow_completed`, or `workflow_failed`, or `workflow_paused`
+  (a human gate is waiting — the trace carries the prompt payload)
 
 Here is a real capture, verbatim, from a two-task exec workflow:
 
@@ -95,6 +97,9 @@ the original run: same storyboard, same timing, same verdict card.
   ("Press play. It really ran.") are exactly these files: recorded runs
   played back through the same renderer, not screenshots and not
   mockups.
+- **The run is resumable.** The same file doubles as the checkpoint:
+  `nika run --resume <trace>` skips completed work with visible cache
+  hits and re-arms a paused human gate. See [Resume a run](/guides/resume).
 
 ## Related
 
