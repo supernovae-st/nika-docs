@@ -95,6 +95,27 @@ models at $0.000:
 nika check my-workflow.nika.yaml
 ```
 
+## Thinking time is budgeted for
+
+A local thinking model legitimately needs minutes for one completion on
+consumer hardware — well past the 30s a cloud round-trip expects. Nika's
+provider deadlines are **per class**: local providers (`ollama`, `lmstudio`,
+`llamacpp`, `localai`, `vllm`) get **≥ 300s by default**, cloud providers
+30s. No 30s-everywhere default silently kills a local run mid-think.
+
+When a task needs more than the default, the task's own `timeout:` governs
+the provider deadline directly:
+
+```yaml
+- id: deep_review
+  timeout: "7m"                # Go-duration · bounds the task AND the provider call
+  infer:
+    prompt: "Review this diff…"
+```
+
+Full semantics (per-class defaults, the 600s silent-connection ceiling,
+streaming): [YAML reference · Timeouts](/reference/yaml-syntax#timeouts).
+
 ## Swapping between local and cloud
 
 The file does not change shape. One line moves the workflow between a

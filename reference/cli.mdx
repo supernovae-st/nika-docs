@@ -19,6 +19,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 |---|---|
 | `nika check <file>` | Static pre-flight audit before any run |
 | `nika run <file>` | Execute a checked workflow |
+| `nika test <file> [--update]` | Golden-test: run under the mock provider (offline · deterministic) and compare typed `outputs:` against `<file>.golden.json` |
 | `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits |
 | `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT |
 | `nika explain <code>` | Explain a `NIKA-XXXX` error code |
@@ -41,6 +42,12 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `--json` | `check`, `run` | Machine-readable output |
 | `--infer-permits` | `check` | Print the tightest inferred `permits:` boundary |
 | `--output json` | `run` | Print typed workflow outputs as one JSON object |
+| `--var key=value` | `run` | Set a workflow `vars:` input (repeatable) — overrides a `default:`, satisfies `required: true`, parses as JSON when it parses, refuses unknown keys ([details](/concepts/workflows)) |
+| `--model <provider>/<name>` | `run` | Override the envelope `model:` — `--model mock/echo` previews any workflow offline (zero key, zero network) |
+| `--resume <trace>` | `run` | Resume from a prior run's NDJSON trace: matching completed tasks skip with a visible `task_cache_hit` ([details](/guides/resume)) |
+| `--from <task_id>` | `run` | With `--resume`: force this task and its transitive downstream to re-run even on a match |
+| `--answer <task>=<value>` | `run` | With `--resume`: answer a paused `nika:prompt` (repeatable) — a boolean for `confirm`, a string for `input`, one of the choices for `choice` |
+| `--update` | `test` | (Re)write the golden from this run instead of comparing ([details](/guides/testing)) |
 | `--dry-run` | `run` | Plan only; execute zero effects |
 | `--no-progress` | `run` | Deterministic non-animated render |
 | `--quiet` | `run` | Compact final verdict card |

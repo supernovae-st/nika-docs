@@ -1,0 +1,216 @@
+---
+title: "Resume a run"
+description: "The trace is the checkpoint: nika run --resume skips completed work with visible cache hits, and a human gate can pause a run durably."
+sidebarTitle: "Resume & pause"
+icon: "rotate-right"
+---
+
+A long run dies at task 7 of 9 — laptop lid, ctrl-C, a provider hiccup.
+With most tools that is 7 tasks of tokens re-spent. With Nika the run's
+own trace is the checkpoint: **`--resume` re-executes the workflow,
+skipping every task whose recorded work is still valid** (ADR-099).
+No daemon, no run store, no new artifact — the reader of a file you
+already have.
+
+## Record, then resume
+
+```yaml release-notes.nika.yaml
+nika: v1
+workflow: release-notes
+description: "Collect commits, draft notes, stamp a file."
+
+model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
+
+tasks:
+  - id: collect
+    exec:
+      command: "printf 'feat: resume\nfix: deadline'"
+
+  - id: draft
+    depends_on: [collect]
+    infer:
+      prompt: "Draft release notes from: ${{ tasks.collect.output }}"
+      max_tokens: 400
+
+  - id: stamp
+    depends_on: [draft]
+    exec:
+      command: "printf 'stamped'"
+
+outputs:
+  notes: "${{ tasks.draft.output }}"
+```
+
+Any `--json` run is a recording ([Traces & replay](/concepts/traces)):
+
+```bash
+nika run release-notes.nika.yaml --json > .nika/traces/release-notes.ndjson
+```
+
+Resume from it:
+
+```text
+$ nika run release-notes.nika.yaml --resume .nika/traces/release-notes.ndjson
+  🦋 nika · release-notes · 3 tasks
+     permits ✓ engine floor (no boundary declared)
+
+  ✔  collect  cache hit
+  ✔  draft    cache hit
+  ✔  stamp    cache hit
+  ── 3/3 done · $0.000 · elapsed 0.0s ────────────────────────────
+
+  resumed · 3 skipped (cache hit) · 0 ran live
+```
+
+Every skip is **visible** — a `cache hit` line in the render, a
+`task_cache_hit` event in the new trace, and the summary counts skipped
+vs live. A resumed run never pretends work happened silently.
+
+<Info>
+  A trace recorded by an engine version without resume keys is not an
+  error: `--resume` prints a notice and runs everything live.
+</Info>
+
+## The skip rule · two hashes, both must match
+
+A task skips **iff** the trace holds its completed record and
+
+1. the **task definition** hashes the same (the verb body, `with:`,
+   `output:`, `retry:` / `on_error:`, `when:`, `for_each:` — as now
+   written), and
+2. the **resolved inputs** hash the same (what its `${{ }}` references
+   actually resolved to — upstream outputs, `vars`, `env`).
+
+Edit a prompt → that task re-runs. Pass a different `--var` → the tasks
+that consume it re-run, and the mismatch cascades exactly as far as the
+data flows — untouched sibling branches still skip:
+
+```text
+$ nika run brief.nika.yaml --var topic="local-first AI" --resume .nika/traces/brief.ndjson
+  resumed · 1 skipped (cache hit) · 0 ran live
+
+$ nika run brief.nika.yaml --var topic="sovereign memory" --resume .nika/traces/brief.ndjson
+  resumed · 0 skipped (cache hit) · 1 ran live
+```
+
+An `infer:` / `agent:` task that matches replays its recorded output —
+that is the point: crash-resume without re-spending tokens. There are no
+determinism rules, no replay constraints, no workflow versioning:
+durability is the engine's problem, never yours. A task that does not
+match simply re-runs live, side effects included.
+
+## `--from` · force a re-run the hashes cannot see
+
+Some changes are invisible to hashing: a rotated secret, external state,
+an `infer:` output you want re-rolled. `--from <task_id>` forces that
+task **and its transitive downstream** to re-run even on a match —
+upstream tasks still cache-hit:
+
+```text
+$ nika run release-notes.nika.yaml --resume .nika/traces/release-notes.ndjson --from draft
+  ✔  collect  cache hit
+  ✔  draft    infer · mock/echo  0ms
+  ✔  stamp    exec · printf      4ms
+  ── 3/3 done · $0.000 · elapsed 0.0s ────────────────────────────
+
+  resumed · 1 skipped (cache hit) · 2 ran live
+```
+
+An unknown task id is refused before the run, like an unknown `--var` key.
+
+<Warning>
+  **Secrets participate by name, never by value** — a trace carries no
+  secret-derived material, so a *rotated* secret does not invalidate the
+  cache. That is the one sharp edge: after a rotation, force the
+  affected node with `--from`.
+</Warning>
+
+## The durable human gate · pause and answer
+
+A [`nika:prompt`](/concepts/verbs#invoke) task blocks on a human. Under a
+non-interactive surface (`--json` · CI) with no usable `default:`, the
+run does not hang and does not fail — it **pauses durably**: the trace
+records a `workflow_paused` event with the prompt payload, and the
+process exits with code **4**.
+
+```yaml gated-ship.nika.yaml
+nika: v1
+workflow: gated-ship
+description: "Build, ask a human, ship only on yes."
+
+tasks:
+  - id: build
+    exec:
+      command: "printf 'build ok'"
+
+  - id: approve
+    depends_on: [build]
+    invoke:
+      tool: "nika:prompt"
+      args:
+        message: "Ship this build to production?"
+
+  - id: ship
+    depends_on: [approve]
+    when: "${{ tasks.approve.output == true }}"
+    exec:
+      command: "printf 'shipped'"
+```
+
+```bash
+nika run gated-ship.nika.yaml --json > .nika/traces/gated-ship.ndjson
+echo $?   # 4 · paused — not a failure, but non-zero so `&& next` stops here
+```
+
+The paused trace carries everything needed to pick the run back up —
+hours later, on the same machine, by a different process:
+
+```json the workflow_paused event (one line of the trace · reformatted)
+{"kind": "workflow_paused", "fields": [
+  {"key": "workflow", "value": "gated-ship"},
+  {"key": "task",     "value": "approve"},
+  {"key": "mode",     "value": "confirm"},
+  {"key": "note",     "value": "awaiting a `nika:prompt` answer — resume with `--resume <trace> --answer <task>=<value>`"},
+  {"key": "message",  "value": "Ship this build to production?"}]}
+```
+
+Resume with the answer bound to the task id via `--answer` (repeatable):
+
+```text
+$ nika run gated-ship.nika.yaml --resume .nika/traces/gated-ship.ndjson --answer approve=true
+  ✔  build    cache hit
+  ✔  approve  invoke · nika:prompt  0ms
+  ✔  ship     exec · printf         5ms
+  ── 3/3 done · $0.000 · elapsed 0.0s ────────────────────────────
+
+  resumed · 1 skipped (cache hit) · 2 ran live
+```
+
+The value follows the prompt's `mode:`. **`confirm` wants a boolean**
+(`--answer approve=true` / `=false` — a refusal is a value, and the
+`when:` gate downstream decides what happens with it). `input` takes a
+string, `choice` one of the declared choices. Like `--var`, the value
+parses as JSON when it parses.
+
+Resumed **without** an answer, a `--json` run pauses again — idempotent,
+exit 4 every time, so a poller can retry harmlessly. Resumed
+interactively (a human at the terminal), the prompt simply asks.
+
+## Exit codes
+
+| Exit | Meaning |
+|---|---|
+| `0` | Run completed |
+| `1` | Run executed and a task failed unrecovered |
+| `2` | Validation findings — the file never ran |
+| `3` | Environment error (also: unknown `--var` / `--from` key) |
+| `4` | **Paused** on a human gate — resume with `--resume <trace> --answer <task>=<value>` |
+
+## Related
+
+- [Concepts · Traces](/concepts/traces): the NDJSON recorder this rides —
+  record, replay, share.
+- [Concepts · Workflows](/concepts/workflows): `--var` inputs (a changed
+  input re-runs exactly the tasks that consume it).
+- [Guides · Testing](/guides/testing): the offline golden gate for the
+  same files.

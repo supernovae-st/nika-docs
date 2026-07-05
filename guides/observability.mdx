@@ -1,0 +1,132 @@
+---
+title: "Watch a run"
+description: "Three moments to look at a workflow: inspect the waves before, read the live render during, and the waterfall + verdict card after."
+sidebarTitle: "Observability"
+icon: "eye"
+---
+
+A run answers three questions at three different times: *what will
+happen?* (before), *what is happening?* (during), *what happened?*
+(after). One command each, all offline-friendly — every frame below is
+real output from this workflow:
+
+```yaml standup-digest.nika.yaml
+nika: v1
+workflow: standup-digest
+description: "Pull commits and tickets in parallel, then digest."
+
+model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
+
+tasks:
+  - id: commits
+    exec:
+      command: "sleep 0.4 && git log --oneline -5 2>/dev/null || printf 'feat: resume'"
+
+  - id: tickets
+    exec:
+      command: "sleep 0.3 && printf 'NIKA-42 open'"
+
+  - id: digest
+    depends_on: [commits, tickets]
+    infer:
+      prompt: "Digest commits ${{ tasks.commits.output }} and tickets ${{ tasks.tickets.output }}"
+      max_tokens: 400
+
+outputs:
+  digest: "${{ tasks.digest.output }}"
+```
+
+## Before · `nika inspect`
+
+Static anatomy: the DAG's **wave groups** (what runs in parallel), plus
+three planning lines — the parallelism width, the pinch points, and each
+task's blast radius. Zero execution, zero tokens:
+
+```text
+$ nika inspect standup-digest.nika.yaml
+standup-digest · 3 tasks · 2 waves · ≥ $0.0000 (floor — unbounded tasks)
+  ╭ wave 1 ── 2 in parallel ─╮
+  │ ◆ commits  exec          │
+  │ ◆ tickets  exec          │
+  ╰──────────────────────────╯
+    ↓
+  ◆ digest   infer · mock/echo
+  (no orphans · DAG check NIKA-DAG-001 clean)
+
+parallelism  width 2 · can run together: commits · tickets
+pinch        digest · nothing else runs while these run
+blast        commits blocks 1 · tickets blocks 1
+```
+
+Read it before a long run the way you read a query plan before an
+expensive query.
+
+## During · the live render
+
+In an interactive terminal, `nika run` animates a storyboard: tasks
+light up as their dependencies clear, in the wave order `inspect`
+predicted. Piped (CI logs, `tee`), the same run prints one plain,
+deterministic frame instead — `∥` marks tasks that ran in parallel:
+
+```text
+$ nika run standup-digest.nika.yaml
+  🦋 nika · standup-digest · 3 tasks
+     permits ✓ engine floor (no boundary declared)
+
+  ✔  commits  exec · sleep       416ms ∥
+  ✔  tickets  exec · sleep       312ms ∥
+  ✔  digest   infer · mock/echo    0ms
+  ── 3/3 done · $0.000 · elapsed 0.4s ────────────────────────────
+```
+
+Four render modes, one per audience:
+
+| Flag | Surface |
+|---|---|
+| *(none, terminal)* | Live animated storyboard, then waterfall + verdict card |
+| `--no-progress` | One plain final frame (the CI-stable surface · default when piped) |
+| `--quiet` | The final verdict line only — `✔  standup-digest · 3 tasks · 0.4s · $0.000` |
+| `--json` | Pure NDJSON events on stdout, progress to stderr (the machine lane · see [Traces](/concepts/traces)) |
+
+## After · the waterfall and the verdict card
+
+An interactive run ends with two frames. The **waterfall** shows where
+the wall-clock went — overlapping bars are the parallelism you actually
+got. The **verdict card** compresses the run into one box: the wave
+shape (`◆◆ ⇉ ◆` — two in parallel, then one), tasks, waves, retries,
+duration, cost, model, and the typed outputs it produced:
+
+```text
+  commits  ▕██████████████████████████████████▏  416ms
+  tickets  ▕         █████████████████████████▏  305ms
+  digest   ▕                                 █▏    0ms
+  0s ···································· 417ms
+  ╭─ nika ✓ standup-digest ───────────────────╮
+  │  ◆◆ ⇉ ◆    3 tasks · 2 waves · 0 retries  │
+  │  418ms · $0.0000 · mock/echo              │
+  │  outputs → digest (string)                │
+  ╰───────────────────────────────────────────╯
+```
+
+The same frames are recoverable from any recorded trace, hours or
+machines later:
+
+```bash
+nika run standup-digest.nika.yaml --json > .nika/traces/standup.ndjson
+
+nika trace show   .nika/traces/standup.ndjson   # storyboard + waterfall + verdict card
+nika trace replay .nika/traces/standup.ndjson   # re-render the run live · never re-execute
+```
+
+`trace show` prints the final frames; `trace replay` plays the recorded
+events through the same renderer that drew the original run. Replay
+calls no model and runs no command — it is a projection of what already
+happened ([Traces & replay](/concepts/traces)).
+
+## Related
+
+- [Concepts · Traces](/concepts/traces): the NDJSON event stream behind
+  every frame on this page.
+- [Guides · Resume](/guides/resume): the same trace doubles as a
+  checkpoint — `--resume` skips completed work with visible cache hits.
+- [Reference · CLI](/reference/cli): every render flag.

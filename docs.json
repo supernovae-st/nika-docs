@@ -151,6 +151,9 @@
               "getting-started/agents",
               "guides/local-models",
               "guides/patterns",
+              "guides/testing",
+              "guides/resume",
+              "guides/observability",
               "guides/agent-authoring",
               "guides/templates",
               "guides/troubleshooting"

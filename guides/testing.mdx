@@ -1,0 +1,150 @@
+---
+title: "Test workflows"
+description: "Golden testing with nika test: every workflow runs offline under the mock provider, deterministically, and CI gates on the diff."
+sidebarTitle: "Testing"
+icon: "vial"
+---
+
+A workflow is code, so it gets tests. `nika test <file>` runs the workflow
+under the **mock provider** — offline, deterministic, zero keys, zero
+tokens — and compares the typed `outputs:` against a **golden file**
+(`<file>.golden.json`) committed next to it. Same idea as snapshot testing:
+pin what the workflow produces, and any future edit that changes the
+contract fails loud in CI.
+
+```bash
+nika test triage.nika.yaml
+```
+
+## Why the mock makes this possible
+
+`nika test` swaps every `infer:` / `agent:` call to the mock provider,
+whatever `model:` the file declares — your `ollama/llama3.2:3b` (or
+`mistral/…`, or any cloud model) workflow tests offline, unchanged.
+
+The mock is not a stub that returns `"ok"`. It is **schema-conformant**:
+when a task declares a `schema:`, the mock synthesizes an instance that
+validates against it — required fields present, types respected. Every
+schema workflow runs offline, end to end, through the same runtime,
+bindings, and typed-outputs validation as a live run.
+
+```yaml triage.nika.yaml
+nika: v1
+workflow: ticket-triage
+description: "Classify a support ticket into a typed verdict."
+
+model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
+
+vars:
+  ticket:
+    type: string
+    default: "Payment page returns a 502 after checkout."
+
+tasks:
+  - id: classify
+    infer:
+      prompt: "Classify this ticket: ${{ vars.ticket }}"
+      max_tokens: 300
+      schema:
+        type: object
+        required: [category, urgent]
+        properties:
+          category: { type: string }
+          urgent: { type: boolean }
+
+outputs:
+  verdict: "${{ tasks.classify.output }}"
+```
+
+<Tip>
+  The golden pins the workflow's `outputs:` block — a workflow without one
+  pins `{}`. Declare typed `outputs:` and the golden guards the whole
+  callable contract.
+</Tip>
+
+## The golden lifecycle
+
+First run — no golden exists yet, so `nika test` teaches instead of
+guessing (exit 3):
+
+```text
+$ nika test triage.nika.yaml
+nika test · no golden yet for triage.nika.yaml
+
+  the golden pins this workflow's typed `outputs:` under the mock
+  provider (offline · deterministic) — future runs must match it.
+
+  create it:   nika test triage.nika.yaml --update
+  then commit: triage.nika.yaml.golden.json
+```
+
+Create it with `--update`, review it once, commit it:
+
+```text
+$ nika test triage.nika.yaml --update
+✔ golden written · triage.nika.yaml.golden.json
+  review it once, commit it — `nika test` now guards this workflow
+```
+
+The golden is small, readable JSON — the mock-synthesized, schema-conformant
+outputs:
+
+```json triage.nika.yaml.golden.json
+{
+  "verdict": {
+    "category": "mock",
+    "urgent": false
+  }
+}
+```
+
+From now on `nika test` compares. A match is exit 0; drift renders a
+per-path diff and exits 1:
+
+```text
+$ nika test triage.nika.yaml
+✖ outputs drifted from the golden · triage.nika.yaml.golden.json
+  + outputs.verdict.queue · not in the golden ("mock")
+
+  intended? re-pin with: nika test triage.nika.yaml --update
+```
+
+If the drift was intended (you changed the schema, added an output), re-pin
+with `--update` and commit the new golden — the diff shows up in code
+review, exactly like a snapshot test.
+
+## Exit codes · the CI contract
+
+| Exit | Meaning |
+|---|---|
+| `0` | Outputs match the golden (or `--update` pinned one) |
+| `1` | The mock run failed, or outputs drifted from the golden |
+| `2` | The file has validation findings (`nika check` would fail — fix those first) |
+| `3` | No golden yet (create with `--update`), or environment error |
+
+`nika test` refuses to run a dirty file the same way `nika run` does: a
+workflow with check findings exits 2 before anything executes.
+
+## Wire it into CI
+
+Offline and deterministic means no keys in CI, no flakes, no spend:
+
+```yaml .github/workflows/nika-test.yml (fragment)
+- name: Golden-test the workflows
+  run: |
+    for wf in workflows/*.nika.yaml; do
+      nika test "$wf"
+    done
+```
+
+Commit the `*.golden.json` files in the same directory as the workflows
+they guard. A PR that edits a workflow either keeps its golden green or
+shows the re-pinned golden in the diff — both are reviewable.
+
+## Related
+
+- [Concepts · Workflows](/concepts/workflows): typed `vars:` in,
+  typed `outputs:` out — the callable contract the golden pins.
+- [Reference · CLI](/reference/cli): every `nika test` flag.
+- [Guides · Troubleshooting](/guides/troubleshooting): when `nika check`
+  findings block a test (exit 2).
