@@ -111,6 +111,31 @@ dispatch. The rules decide:
 See [Capability rules](/reference/capabilities) for the full resolution
 algorithm (defaults → scan rules in file order → apply matches).
 
+## Structured output · the engine picks the wire (ADR-098)
+
+A task's `schema:` is the single authored contract — there is no `json:
+true` sugar and no per-provider knob. The engine decides, per run, how to
+honor it on the wire the model speaks:
+
+- **Fully-specified schema** (every `object` has `properties`, every
+  `array` has `items`): forwarded verbatim to the provider's strict
+  structured mode where the wire has one.
+- **Underspecified schema** (any node typed `object` without `properties`,
+  or `array` without `items` — the honest shape for "return the same
+  free-form JSON, transformed"): strict mode would reject it with an
+  HTTP 400, so the engine requests the provider's **native JSON mode**
+  instead, steers the shape through the prompt instruction, and validates
+  the reply **locally** against your schema, with bounded retry.
+- **Wire with no native JSON mode** (the anthropic dialect): the prompt
+  instruction carries the shape; the same local validation applies.
+- **The mock wire** receives the schema verbatim and *synthesizes* a
+  conformant instance — this is what lets every schema workflow run
+  offline under [`nika test`](/guides/testing).
+
+Local validation is the constant enforcement floor across **all** wires:
+the provider's strict mode is an optimization, never the guarantee. You
+write the schema you mean; the engine picks the wire that can honor it.
+
 ## Fallback chains (target design)
 
 When a provider fails, Nika can route to a fallback:
