@@ -104,6 +104,44 @@ See [Providers catalog](/reference/providers-catalog) for all
 - **Nothing else.** No service, no telemetry, no home-dir pollution beyond
   files you explicitly create with `nika init` or `nika wire`.
 
+## Shell completions
+
+The binary generates its own completions — no separate package, always in
+sync with the verbs your version actually ships:
+
+<Tabs>
+  <Tab title="zsh">
+    ```bash
+    mkdir -p ~/.zsh/completions
+    nika completions zsh > ~/.zsh/completions/_nika
+    # once, in ~/.zshrc (before compinit):
+    # fpath=(~/.zsh/completions $fpath)
+    exec zsh
+    ```
+  </Tab>
+  <Tab title="bash">
+    ```bash
+    mkdir -p ~/.local/share/bash-completion/completions
+    nika completions bash > ~/.local/share/bash-completion/completions/nika
+    exec bash
+    ```
+  </Tab>
+  <Tab title="fish">
+    ```bash
+    nika completions fish > ~/.config/fish/completions/nika.fish
+    ```
+  </Tab>
+</Tabs>
+
+Also available: `elvish` and `powershell`. Re-run the same command after an
+upgrade to pick up new verbs.
+
+<Note>
+On engines up to 0.93.x the generated script bound completions to the
+internal binary name instead of `nika` — fixed on current main. If
+completions don't fire after installing, upgrade and regenerate.
+</Note>
+
 ## Uninstall
 
 ```bash
