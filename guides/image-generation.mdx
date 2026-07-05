@@ -83,6 +83,21 @@ ComfyUI and InvokeAI standardized. Read it back with any PNG tool:
 python3 -c "import png"  # or: exiftool asset.png | grep -i nika
 ```
 
+## Content credentials (detect-and-preserve)
+
+OpenAI and Google **sign their API bytes** with C2PA Content Credentials —
+and C2PA hashes the file's byte ranges, so any pipeline that writes into a
+signed render converts valid credentials into *« present but tampered »*.
+Nika detects the signals first (PNG `caBX` · JPEG APP11 JUMBF · RIFF
+`C2PA` · MP3 GEOB): on signed payloads the `nika` tEXt embed **stands
+down** (their signed manifest outranks our informal chunk — a loud
+`content_credentials_preserved:` warning says so), and the output +
+manifest surface `content_credentials: "c2pa"` plus `watermark_declared`
+(SynthID is a provider fact — only the vendor can detect it). Detection
+labels only: the wire never says « verified ». With EU AI Act Article 50
+in force from **2026-08-02**, preserving machine-readable marks is part of
+an operator's compliance surface — no other workflow engine even looks.
+
 ## Honesty rules (what the warnings mean)
 
 Every lossy mapping is a **stable, visible warning** — silent degradation is
