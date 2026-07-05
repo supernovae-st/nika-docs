@@ -131,7 +131,9 @@ format conversion, generation, time, hashing.
 
 | Builtin | What it does |
 |---|---|
-| `nika:image_generate` | Provider-backed image generation as an *asset pipeline*: images land under a declared `output_dir:` (rides `permits.fs`), outputs and a provenance manifest carry paths + dimensions + sha256 — **image bytes never ride workflow outputs**. Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). The first graduate of the deferred media class (2026-07-05). |
+| `nika:image_generate` | Provider-backed image generation as an *asset pipeline*: images land under a declared `output_dir:` (rides `permits.fs`), outputs and a provenance manifest carry paths + dimensions + sha256 — **image bytes never ride workflow outputs**. Full guide: [Image generation](/guides/image-generation) — sovereign quickstart · cookbook · honesty rules.
+
+  Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). The first graduate of the deferred media class (2026-07-05). |
 
 ```yaml
 - id: hero

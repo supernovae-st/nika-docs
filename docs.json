@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "Nika",
-  "description": "Documentation for Nika — the AGPL workflow engine for AI. Semantic YAML, Rust, runs on your laptop.",
+  "description": "Documentation for Nika \u2014 the AGPL workflow engine for AI. Semantic YAML, Rust, runs on your laptop.",
   "theme": "mint",
   "logo": {
     "dark": "/images/logo-dark.svg",
@@ -44,7 +44,7 @@
     "raiseIssue": true
   },
   "search": {
-    "prompt": "Search Nika docs…"
+    "prompt": "Search Nika docs\u2026"
   },
   "metadata": {
     "og:image": "https://docs.nika.sh/images/og-default.png",
@@ -52,7 +52,7 @@
     "twitter:card": "summary_large_image"
   },
   "banner": {
-    "content": "🦋 Nika is out: `brew install supernovae-st/tap/nika` runs today. 1.0 + Product Hunt: August 1. [Changelog →](/reference/status)",
+    "content": "\ud83e\udd8b Nika is out: `brew install supernovae-st/tap/nika` runs today. 1.0 + Product Hunt: August 1. [Changelog \u2192](/reference/status)",
     "dismissible": true
   },
   "navbar": {
@@ -150,6 +150,7 @@
               "getting-started/editors",
               "getting-started/agents",
               "guides/local-models",
+              "guides/image-generation",
               "guides/patterns",
               "guides/testing",
               "guides/resume",
@@ -186,7 +187,7 @@
             ]
           },
           {
-            "group": "T1 · Starters",
+            "group": "T1 \u00b7 Starters",
             "pages": [
               "examples/standup-digest",
               "examples/meeting-actions",
@@ -196,7 +197,7 @@
             ]
           },
           {
-            "group": "T2 · Chains",
+            "group": "T2 \u00b7 Chains",
             "pages": [
               "examples/release-notes",
               "examples/seo-content-brief",
@@ -208,7 +209,7 @@
             ]
           },
           {
-            "group": "T3 · Fan-out",
+            "group": "T3 \u00b7 Fan-out",
             "pages": [
               "examples/competitor-radar",
               "examples/localization-factory",
@@ -218,7 +219,7 @@
             ]
           },
           {
-            "group": "T4 · Epic",
+            "group": "T4 \u00b7 Epic",
             "pages": [
               "examples/deep-research-brief",
               "examples/incident-war-room",
