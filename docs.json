@@ -191,6 +191,7 @@
               "examples/standup-digest",
               "examples/meeting-actions",
               "examples/price-watch",
+              "examples/og-images",
               "examples/social-repurpose"
             ]
           },
