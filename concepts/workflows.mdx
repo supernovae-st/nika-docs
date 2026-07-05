@@ -119,30 +119,32 @@ allows.
 
 ```yaml
 tasks:
-  - name: fetch_data
+  - id: fetch_data
     invoke:
       tool: nika:fetch
       args:
         url: https://example.com/data.json
 
-  - name: analyze
+  - id: analyze
     depends_on: [fetch_data]
     infer:
       model: ollama/<model>      # <provider>/<name>
       prompt: "${{ tasks.fetch_data.output }}"
 
-  - name: notify
+  - id: notify
     depends_on: [analyze]
     exec:
-      command: "echo ${{ tasks.analyze.output | shell_quote }}"
+      command: "echo ${{ tasks.analyze.output }}"
 ```
 
-Fan-out over a collection:
+Fan-out over a collection (`files` here is a jq
+[output binding](/concepts/bindings) on `list_files`, e.g.
+`output: { files: 'split("\n")' }`):
 
 ```yaml
-- name: analyze_each
+- id: analyze_each
   depends_on: [list_files]
-  for_each: "${{ tasks.list_files.output.lines }}"
+  for_each: "${{ tasks.list_files.output.files }}"
   infer:
     model: ollama/<model>        # <provider>/<name>
     prompt: "Review this file: ${{ item }}"
