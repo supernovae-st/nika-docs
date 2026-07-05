@@ -43,7 +43,7 @@ nika: v1
 workflow: chain-template            # SLOT: kebab-case workflow id
 description: "gather → think → persist"   # SLOT: one honest sentence
 
-model: mock/echo                    # SLOT: provider/model (mock/echo = CI-safe)
+model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
 vars:
   source: "./input.txt"             # SLOT: your inputs · typed where required
@@ -133,7 +133,7 @@ nika: v1
 workflow: fanout-template           # SLOT: kebab-case workflow id
 description: "discover N items · process in parallel · merge"   # SLOT
 
-model: mock/echo                    # SLOT: provider/model
+model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
 vars:
   collection_source: "./items"      # SLOT: where the collection comes from
@@ -212,7 +212,7 @@ tasks:
 
   - id: fresh
     invoke:
-      tool: "nika:fetch"            # SLOT: fetch / read / exec — the fresh data
+      tool: "nika:fetch"            # SLOT: fetch / read / exec · the fresh data
       args:
         url: "${{ vars.source_url }}"
         mode: jq
@@ -264,7 +264,7 @@ nika: v1
 workflow: agent-loop-template       # SLOT: kebab-case workflow id
 description: "plan → budgeted agent → typed result"   # SLOT
 
-model: mock/echo                    # SLOT: agents want a tool-calling model
+model: ollama/qwen3.5:4b           # SLOT: a tool-calling model · local by default
 
 vars:
   goal:
@@ -304,7 +304,7 @@ tasks:
       tool: "nika:assert"
       args:
         condition: "${{ size(tasks.execute.output.findings) > 0 }}"
-        message: "Agent returned no findings — do not trust an empty run"   # SLOT
+        message: "Agent returned no findings, do not trust an empty run"   # SLOT
 
 outputs:
   findings:
@@ -356,7 +356,7 @@ tasks:
       tool: "nika:assert"
       args:
         condition: "${{ tasks.check_a.output.exit_code == 0 && tasks.check_b.output.exit_code == 0 }}"
-        message: "A gate is RED — refusing to proceed"   # SLOT
+        message: "A gate is RED: refusing to proceed"   # SLOT
 
   - id: human
     depends_on: [gates]
@@ -371,7 +371,7 @@ tasks:
     when: ${{ tasks.human.output == true }}
     exec:
       command: ["echo", "shipped"]   # SLOT: the irreversible action (argv · program must be in permits.exec)
-      # default capture · a failing ship fails LOUDLY (NIKA-EXEC-001) —
+      # default capture · a failing ship fails LOUDLY (NIKA-EXEC-001):
       # never `capture: structured` on the irreversible step (exit codes
       # would become data and a red ship would read as success)
 
