@@ -1,0 +1,198 @@
+---
+title: "Image generation"
+description: "Render images inside workflows — local server first, four more providers one line away, every save permit-gated, every asset provenance-carrying."
+---
+
+`nika:image_generate` treats images as workflow citizens: the same declared
+`permits:` boundary that gates file writes gates every save, real spend lands
+in the run ledger, and provenance is structural — in the manifest beside the
+asset *and* inside the PNG itself.
+
+![One workflow renders through any of five image providers — local server first; the run meters $0.02 exactly; the asset lands sha256-named with a provenance manifest beside it](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/image-pipeline.gif)
+
+## The five providers
+
+| provider | default model | wire | what to know |
+| --- | --- | --- | --- |
+| `local` | `stablediffusion` | your server's OpenAI-images route | The sovereign path. One wire covers LocalAI (`:8080`), Ollama (`:11434`), stable-diffusion.cpp `sd-server` (`:1234`), SGLang Diffusion and vLLM-Omni. Never inferred from `model:` — always explicit. |
+| `openai` | `gpt-image-2` | Images API | Exact sizes (`WxH`), native `n`, `background: transparent`, webp/jpeg `compression`. |
+| `gemini` | `gemini-3.1-flash-image` | `generateContent` | Aspect-ratio classes; may return an interleaved caption (surfaced as `provider_text`, clamped). |
+| `xai` | `grok-imagine-image` | Imagine API | Native aspect ratios + `resolution: 1k\|2k` classes; the `-quality` model tier is the quality knob; **bills exact cost into the run ledger**. |
+| `mock` | `mock-image-1` | in-process | Real, decodable, deterministic PNG files — zero network, zero keys. CI runs the whole pipeline offline. |
+
+Keys and the local URL are **engine config, never workflow args**:
+`OPENAI_API_KEY` / `GEMINI_API_KEY` / `XAI_API_KEY` (or `NIKA_`-prefixed),
+`NIKA_IMAGE_LOCAL_URL` (+ optional `NIKA_IMAGE_LOCAL_API_KEY`). Check what's
+wired with `nika doctor` — it prints an `image` line naming the ready
+providers.
+
+## Sovereign quickstart (local server)
+
+```bash
+# LocalAI (first-party spec-complete compat route · :8080)
+docker run -p 8080:8080 localai/localai:latest
+
+# …or Ollama (macOS · experimental image generation · :11434)
+export NIKA_IMAGE_LOCAL_URL=http://localhost:11434
+
+# …or stable-diffusion.cpp's server (:1234)
+export NIKA_IMAGE_LOCAL_URL=http://localhost:1234
+```
+
+```yaml nika: v1
+workflow: og-hero-sovereign
+permits:
+  fs: { write: ["./assets/**"] }
+  tools: ["nika:image_generate"]
+tasks:
+  - id: hero
+    invoke:
+      tool: "nika:image_generate"
+      args:
+        provider: local
+        model: "x/z-image-turbo"        # model names are server-specific
+        prompt: "OG hero — a monarch butterfly over a nebula"
+        aspect_ratio: "16:9"
+        output_dir: "./assets/og"
+```
+
+The engine forces `response_format: b64_json` (LocalAI defaults to URL mode),
+refuses url-only answers (**result URLs are never fetched** — that would
+reopen the SSRF surface the fixed-endpoint design closed), and gives local
+renders a 300s default timeout — CPU diffusion runs minutes, raise
+`timeout_ms:` up to 600000 when needed. SD-family servers honor a
+`positive | negative` prompt split written directly inside `prompt:`.
+
+## What lands on disk
+
+```
+assets/og/
+├── hero-local-x-z-image-turbo-0-9ec15c15.png        # sha256-named
+└── hero-local-x-z-image-turbo-66a35545.manifest.json
+```
+
+The **manifest** carries the resolved request, per-image sha256 + dimensions,
+`endpoint_host` (which server actually rendered it), timing, warnings,
+`cost_usd`, and your `metadata:` fields — never a credential, by construction.
+
+The **PNG itself** carries a `nika` tEXt chunk (tool, engine version,
+provider, model, prompt, seed) — so provenance survives `cp`, the practice
+ComfyUI and InvokeAI standardized. Read it back with any PNG tool:
+
+```bash
+python3 -c "import png"  # or: exiftool asset.png | grep -i nika
+```
+
+## Honesty rules (what the warnings mean)
+
+Every lossy mapping is a **stable, visible warning** — silent degradation is
+non-conformant per the spec:
+
+- `count_shortfall:` — the provider returned fewer than `n:` (Ollama's compat
+  route ignores `n`, moderation can filter variants).
+- `size_conflict:` · `xai_size_class:` · `aspect_remapped:` — your exact size
+  was folded to the provider's nearest class, loudly.
+- `seed_unsupported:` · `quality_folded:` · `compression_ignored:` — the knob
+  doesn't exist on that provider; the arg was dropped, visibly.
+- `format_mismatch:` — fires only when you *explicitly* asked for a format
+  the provider didn't honor; magic bytes name the real extension either way.
+
+## Real spend in the ledger
+
+xAI bills images in cost ticks — the engine converts them exactly and the
+render's cost rides the task line, the run total, and the manifest:
+
+```
+✔  render  invoke · nika:image_generate  5.6s · $0.02
+── 1/1 done · $0.02 · elapsed 5.6s ──────────────────
+```
+
+Any invoke tool reporting a top-level `cost_usd` in its structured output is
+metered the same way. Providers that don't report exact cost show `null` —
+never an estimate dressed as truth.
+
+## Cookbook (each proven end-to-end against live APIs)
+
+**An LLM writes the brief, another provider renders it:**
+
+```yaml nika: v1
+workflow: brief-to-image
+model: gemini/gemini-2.5-flash
+permits:
+  fs: { write: ["./out/**"] }
+  tools: ["nika:image_generate"]
+tasks:
+  - id: brief
+    infer:
+      prompt: "Write a vivid one-sentence OG-image brief for a post about local-first AI. Pick the ratio."
+      schema:
+        type: object
+        required: [brief, aspect_ratio]
+        properties:
+          brief: { type: string }
+          aspect_ratio: { type: string, enum: ["1:1", "16:9", "4:3"] }
+  - id: render
+    depends_on: [brief]
+    invoke:
+      tool: "nika:image_generate"
+      args:
+        provider: xai
+        prompt: "${{ tasks.brief.output.brief }}"
+        aspect_ratio: "${{ tasks.brief.output.aspect_ratio }}"
+        output_dir: "./out"
+```
+
+**Fan out one hero across locales (concurrent, one output dir):**
+
+```yaml
+  - id: hero
+    for_each: ${{ vars.locales }}       # ["fr", "es", "ja"]
+    max_parallel: 3
+    with: { locale: ${{ item }} }
+    invoke:
+      tool: "nika:image_generate"
+      args:
+        provider: mock                   # flip to local/gemini/openai/xai
+        prompt: "launch hero, locale ${{ with.locale }}"
+        output_dir: "./out"
+        filename_prefix: "hero-${{ with.locale }}"
+```
+
+**Let an agent decide the arguments** (the model reads the tool definition):
+
+```yaml
+  - id: designer
+    agent:
+      prompt: >
+        Generate exactly one minimalist butterfly logo using the image tool
+        (provider xai, aspect_ratio 1:1, output_dir ./out), then call done
+        with the saved path.
+      tools: ["nika:image_generate", "nika:done"]
+      max_turns: 4
+```
+
+**Retry transient failures** (a local server still loading its model):
+
+```yaml
+  - id: render
+    retry:
+      max_attempts: 3
+      on_codes: ["NIKA-BUILTIN-IMAGE_GENERATE-003"]
+    invoke:
+      tool: "nika:image_generate"
+      args: { provider: local, prompt: "…", output_dir: "./out" }
+```
+
+## Why this design (versus every other engine)
+
+No other workflow engine permit-gates image saves, verifies returned bytes
+against declared MIME types, writes a provenance manifest with the resolved
+request, refuses to fetch result URLs, or ships a local-first provider — and
+none embed provenance in the file itself (that practice comes from the
+image-native world). The full comparison lives in the
+[builtins reference](/reference/builtins#media).
+
+<Warning>
+`mode: edit`, `reference_images:` and `mask:` are **reserved** — v1 is
+generation-only, and the engine refuses them loudly rather than pretending.
+</Warning>
