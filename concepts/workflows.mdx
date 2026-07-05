@@ -59,27 +59,23 @@ separated by `---`, parsed into `Vec<RawDocument>`.
 
 ## Anatomy of a workflow
 
-The workflow AST (`nika-schema::raw::RawWorkflow`) models these fields:
+The workflow AST (`nika-schema::raw::RawWorkflow`) models exactly the
+envelope's ten fields — nothing hidden, nothing extra:
 
 | Field | Type | Purpose |
 |---|---|---|
-| `schema` | `SchemaVersion` | Locked to `v1` today. |
-| `name` | `String` | Workflow identifier (within `metadata:` in the envelope). |
+| `nika` | `SchemaVersion` | The language contract version (exactly `v1`). |
+| `workflow` | `String` | Kebab-case workflow id (the document-type discriminator). |
 | `description` | `String` | Human-readable purpose. |
-| `goal` | `String` (optional) | Agent-driven workflow goal (moving to `spec.orchestrate.goal` per ADR-021). |
-| `provider` / `model` | `String` | Defaults applied to every `infer` / `agent` task. |
-| `mcp` | `RawMcpConfig` | MCP server aliases usable from `invoke` / `agent`. |
-| `context` | `ContextConfig` | Top-level constants available to all tasks. |
-| `include` | `Vec<IncludeSpec>` | Reusable sub-workflows inlined at parse time. |
-| `inputs` | `Vec<(String, Value)>` | Runtime parameters (`--input key=value`). |
-| `logging` | `LogConfig` | Event verbosity per task kind. |
-| `orchestrate` | `OrchestrateConfig` | Agentic orchestration (depth, concurrency). |
-| `routing` | `RoutingConfig` | Fallback + cost routing. |
-| `schedule` | `ScheduleConfig` | Cron / interval triggers. |
-| `max_duration_secs` | `u64` | Hard wall-clock ceiling. |
+| `model` | `String` | Workflow-level default `<provider>/<name>` for `infer` / `agent` tasks. |
+| `vars` | `Vec<(String, VarDecl)>` | Workflow inputs, typed or untyped · supplied at launch via `--var key=value`. |
+| `env` | `Vec<(String, String)>` | Non-sensitive runtime config (`${{ env.X }}`). |
+| `secrets` | `Vec<(String, SecretRef)>` | Masked store references (`${{ secrets.X }}`). |
+| `permits` | `Permits` (optional) | The declared capability boundary (absent = engine floor · present = default-deny). |
 | `tasks` | `Vec<RawTask>` | The DAG payload. |
+| `outputs` | `Vec<(String, OutputDecl)>` | The workflow's return contract. |
 
-Every optional field is `Option<Spanned<T>>`: source spans survive
+Every field is span-carrying (`Spanned<T>`): source spans survive
 all the way into the diagnostic layer (ADR-010 miette bridge).
 
 ## Execution pipeline
@@ -192,21 +188,29 @@ via `${{ vars.<name> }}`. Untyped constants and typed, validated inputs use
 the same block: the typed form powers schema generation for callable
 workflows (`nika.run_workflow` over MCP).
 
-```yaml
+```yaml research-brief.nika.yaml
+nika: v1
+workflow: research-brief
+description: "Bullet-point brief on a topic supplied at launch."
+
+model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
+
 vars:
-  target:                          # typed · validated + schema-gen
-    type: string
+  topic:
+    type: string                       # typed · validated + schema-gen
     required: true
-  verbose:
-    type: boolean
-    default: false
-  model_family: claude             # untyped · the value is the default
+    description: "Subject to research"
+  bullets:
+    type: integer
+    default: 3
 
 tasks:
-  - name: greet
+  - id: brief
     infer:
-      model: ollama/<model>  # <provider>/<name>
-      prompt: "Say hi to ${{ vars.target }}."
+      prompt: "Write ${{ vars.bullets }} bullet points on ${{ vars.topic }}."
+
+outputs:
+  brief: "${{ tasks.brief.output }}"
 ```
 
 <Note>
@@ -216,10 +220,34 @@ tasks:
   `invoke: nika:run_workflow`.
 </Note>
 
-Runtime invocation:
+### Supply values at launch · `--var`
+
+`nika run` takes one `--var key=value` per input (repeatable):
 
 ```bash
-nika run workflow.nika.yaml --input target=world
+nika run research-brief.nika.yaml --var topic="local-first AI" --var bullets=5
+```
+
+Four rules govern the flag, and the file stays the contract — every input a
+caller can pass is declared in `vars:`:
+
+- **A supplied value overrides a declared `default:`.** `--var bullets=5`
+  wins over `default: 3` for this run.
+- **It satisfies `required: true`.** A required var with no default must be
+  supplied at launch; without it the task that reads it fails loud
+  (`NIKA-VAR-001`, naming the exact flag to pass). `nika check` flags it
+  earlier, statically: `HINT [inputs] required input(s) with no default ·
+  pass at run time: --var topic=…`.
+- **The value parses as JSON when it parses.** `--var bullets=5` arrives as
+  a number, `--var deep=true` as a boolean, `--var tags='["a","b"]'` as an
+  array. Anything that does not parse as JSON rides as a string — no
+  quoting gymnastics for the common case.
+- **An unknown key is refused before the run**, with the declared set
+  listed — a typo that silently did nothing would be the worst outcome:
+
+```text
+$ nika run research-brief.nika.yaml --var topic=x --var oops=1
+nika run: --var oops: unknown var — the workflow declares: topic · bullets
 ```
 
 ## Outputs and events

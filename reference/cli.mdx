@@ -41,6 +41,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `--json` | `check`, `run` | Machine-readable output |
 | `--infer-permits` | `check` | Print the tightest inferred `permits:` boundary |
 | `--output json` | `run` | Print typed workflow outputs as one JSON object |
+| `--var key=value` | `run` | Set a workflow `vars:` input (repeatable) — overrides a `default:`, satisfies `required: true`, parses as JSON when it parses, refuses unknown keys ([details](/concepts/workflows)) |
 | `--dry-run` | `run` | Plan only; execute zero effects |
 | `--no-progress` | `run` | Deterministic non-animated render |
 | `--quiet` | `run` | Compact final verdict card |
