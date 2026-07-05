@@ -56,6 +56,51 @@ outputs: { ... }             # optional · the workflow's return value
 The full per-field semantics live in the spec:
 [03 · DAG shape](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md).
 
+## Timeouts
+
+`timeout:` is a quoted **Go-duration string** (`"90s"`, `"7m"`, `"1h30m"`) and
+bounds the **entire task**, wall-clock: retries and their backoff sleeps
+included. Exceeding it fails the task with `NIKA-TIMEOUT-001` — catchable by
+`on_error:`, never retryable (the timeout already covered the retries by
+definition). On a `for_each` task the clock applies **per iteration**.
+
+On an `infer:` / `agent:` task the declared `timeout:` also **governs the
+provider HTTP deadline**: `timeout: "7m"` gives the provider round-trip those
+seven minutes — no internal HTTP default undercuts the declared budget.
+
+```yaml
+- id: deep_review
+  timeout: "7m"                # the whole task AND the provider deadline
+  infer:
+    model: ollama/qwen3:8b     # a thinking model legitimately needs minutes
+    prompt: "Review this diff…"
+```
+
+When **no** `timeout:` is declared, the provider deadline defaults per
+provider **class**:
+
+| Class | Providers | Default deadline |
+|---|---|---|
+| Local | `ollama` · `lmstudio` · `llamacpp` · `localai` · `vllm` | **≥ 300s** |
+| Cloud | `mistral` · `anthropic` · `openai` · `openrouter` · `groq` · `deepseek` · `gemini` · `xai` | 30s |
+
+A local model routinely needs minutes for one completion on consumer
+hardware — a 30s-everywhere default would silently kill every serious
+local-first workflow before the model finishes thinking. The class is keyed
+on the **canonical provider id**: a `base_url` override never flips it.
+
+Two honest bounds ride the transport (pinned by the engine's wire tests):
+
+- **600s ceiling on a fully-silent connection.** A non-streaming completion
+  delivers zero bytes while the model computes, so the transport cannot tell
+  *thinking* from *dead*. A longer `timeout:` still bounds the task, but only
+  a connection that starts delivering can use it.
+- **Streaming rides only an explicit budget.** A declared `timeout:` bounds a
+  streaming request; when none is declared, the idle-read guard reaps a
+  *stalled* stream instead of capping a healthy one.
+
+Normative home: [stdlib · providers §Transport deadline](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md).
+
 ## Verbs
 
 See individual pages:
