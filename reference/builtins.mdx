@@ -131,14 +131,14 @@ format conversion, generation, time, hashing.
 
 | Builtin | What it does |
 |---|---|
-| `nika:image_generate` | Provider-backed image generation as an *asset pipeline*: images land under a declared `output_dir:` (rides `permits.fs`), outputs and a provenance manifest carry paths + dimensions + sha256 — **image bytes never ride workflow outputs**. Providers: `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `mock` (offline, deterministic, zero keys). The first graduate of the deferred media class (2026-07-05). |
+| `nika:image_generate` | Provider-backed image generation as an *asset pipeline*: images land under a declared `output_dir:` (rides `permits.fs`), outputs and a provenance manifest carry paths + dimensions + sha256 — **image bytes never ride workflow outputs**. Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). The first graduate of the deferred media class (2026-07-05). |
 
 ```yaml
 - id: hero
   invoke:
     tool: "nika:image_generate"
     args:
-      provider: mock              # offline dry-run · flip to gemini/openai for real renders
+      provider: mock              # offline dry-run · flip to local (sovereign) / gemini / openai / xai for real renders
       prompt: "OG hero — a monarch butterfly over a nebula"
       aspect_ratio: "16:9"
       output_dir: "./assets/og"
@@ -146,8 +146,9 @@ format conversion, generation, time, hashing.
 
 <Warning>
   API keys are **engine-configured, never workflow args**: `OPENAI_API_KEY` /
-  `GEMINI_API_KEY` (or the `NIKA_`-prefixed variants) are read once at the
-  engine's composition root. The provider endpoints are engine-fixed
+  `GEMINI_API_KEY` / `XAI_API_KEY` (or the `NIKA_`-prefixed variants) and the
+  local server's `NIKA_IMAGE_LOCAL_URL` (+ optional `NIKA_IMAGE_LOCAL_API_KEY`)
+  are read once at the engine's composition root. The provider endpoints are engine-fixed
   constants — `permits.net.http` does not govern them (exactly like
   `infer:`); `permits.tools` and `permits.fs` do.
 </Warning>

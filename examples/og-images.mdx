@@ -61,8 +61,10 @@ outputs:
 
 - **`provider: mock` first** — it renders real, decodable PNGs offline,
   deterministically, with zero keys: the pipeline is testable in CI as-is.
-  Production is a one-line flip to `gemini` (`GEMINI_API_KEY`) or `openai`
-  (`OPENAI_API_KEY`); the keys are engine-configured, never workflow args.
+  Production is a one-line flip to `local` (the sovereign path — your
+  LocalAI/Ollama/sd.cpp server, `NIKA_IMAGE_LOCAL_URL`), `gemini`
+  (`GEMINI_API_KEY`), `openai` (`OPENAI_API_KEY`) or `xai` (`XAI_API_KEY`);
+  keys and the local URL are engine-configured, never workflow args.
 - **`permits.fs.write` is the contract** — `./assets/og/**` is the ONLY
   place assets may land; a templated `output_dir` that escapes it fails
   `NIKA-SEC-004` before any byte is written. `nika check --infer-permits`
