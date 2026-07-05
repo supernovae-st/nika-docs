@@ -1,0 +1,110 @@
+---
+title: "Speech generation"
+description: "Text to speech inside workflows — the sovereign wire first, one audio file on disk with provenance, duration honesty, and scripts an LLM can write in the same run."
+---
+
+`nika:tts_generate` is the image pipeline's sibling for audio: one file
+lands under a permit-gated `output_dir:`, sha256-named, manifest beside it,
+and **audio bytes never ride workflow outputs** — tasks pass a path and a
+hash, not megabytes of base64.
+
+## The four providers
+
+| provider | default model | default voice | what to know |
+| --- | --- | --- | --- |
+| `local` | `tts-1` | `alloy` | The sovereign path: any OpenAI-speech-compatible server — LocalAI (`:8080`, also ElevenLabs-compatible upstream), Kokoro-FastAPI, Speaches, openedai-speech. One wire: `POST {base}/v1/audio/speech` → raw bytes. Never inferred from `model:`. |
+| `openai` | `gpt-4o-mini-tts` | `alloy` | Sync, seconds-class. `speed:` 0.25–4.0 native. |
+| `elevenlabs` | `eleven_multilingual_v2` | Rachel's id | `voice:` is a **voice id** (find them in your voice library) — ids ride the URL path, so the engine restricts them to the id alphabet. `speed:` is warned-dropped. |
+| `mock` | `mock-tts-1` | `sine` | A real, playable, deterministic 16 kHz WAV — zero network, zero keys. CI runs the pipeline offline. |
+
+Keys and the local URL are **engine config, never workflow args**:
+`OPENAI_API_KEY` / `ELEVENLABS_API_KEY` (or `NIKA_`-prefixed),
+`NIKA_TTS_LOCAL_URL` (+ optional `NIKA_TTS_LOCAL_API_KEY`). `nika doctor`
+prints a `tts` line naming what's wired.
+
+## Quickstart
+
+```yaml nika: v1
+workflow: narrate
+permits:
+  fs: { write: ["./out/**"] }
+  tools: ["nika:tts_generate"]
+tasks:
+  - id: speak
+    invoke:
+      tool: "nika:tts_generate"
+      args:
+        provider: openai            # or local · elevenlabs · mock
+        text: "Local first. Honest always. That is the whole design."
+        voice: "nova"
+        speed: 1.1
+        output_dir: "./out"
+outputs:
+  audio: ${{ tasks.speak.output.audio.path }}
+```
+
+```
+out/
+├── speech-openai-gpt-4o-mini-tts-a0584738.mp3
+└── speech-openai-gpt-4o-mini-tts-a0584738-….manifest.json
+```
+
+## Honesty rules
+
+- **The extension follows the bytes.** WAV `RIFF…WAVE` and MP3 headers are
+  sniffed; a mislabel is a `format_mismatch:` warning, a non-audio payload
+  is a hard error — never a corrupt file on disk.
+- **Duration is exact or absent.** WAV `duration_ms` is pure header math;
+  MP3 duration is honestly `null` rather than a frame-walking guess.
+- **`text:` caps at 4096 chars** (the strictest wire's limit, held
+  portably) — fan longer scripts out with `for_each` over paragraphs.
+- **Content credentials are detected**, not verified: audio C2PA carriage
+  (RIFF `C2PA` · MP3 GEOB) is surfaced as `content_credentials` in output
+  and manifest, [the same contract as images](/guides/image-generation#content-credentials-detect-and-preserve).
+
+## Cookbook (proven against live APIs)
+
+**An LLM writes the script, another model speaks it — one run:**
+
+```yaml nika: v1
+workflow: script-to-speech
+model: gemini/gemini-2.5-flash
+permits:
+  fs: { write: ["./out/**"] }
+  tools: ["nika:tts_generate"]
+tasks:
+  - id: script
+    infer:
+      prompt: "Write ONE energetic launch sentence (under 20 words) for a Rust workflow engine that just learned to speak."
+  - id: narrate
+    depends_on: [script]
+    invoke:
+      tool: "nika:tts_generate"
+      args:
+        provider: openai
+        text: "${{ tasks.script.output }}"
+        voice: "nova"
+        output_dir: "./out"
+        filename_prefix: "announce"
+```
+
+The manifest records the LLM's exact sentence as the resolved request —
+the provenance chain covers who *wrote* the words, not just who spoke them.
+
+**Retry a local server that's still loading its model:**
+
+```yaml
+  - id: speak
+    retry:
+      max_attempts: 3
+      on_codes: ["NIKA-BUILTIN-TTS_GENERATE-003"]
+    invoke:
+      tool: "nika:tts_generate"
+      args: { provider: local, text: "…", output_dir: "./out" }
+```
+
+<Note>
+Local CPU synthesis gets a 300s default timeout (`timeout_ms:` up to
+600000); clouds default to 120s. Sub-second values are refused — under 1s
+is a typo'd unit.
+</Note>
