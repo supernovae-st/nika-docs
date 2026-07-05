@@ -1,6 +1,6 @@
 ---
 title: "Builtins catalog"
-description: "The canonical stdlib: engine-native nika:* tools across 5 categories, all reached through the invoke: verb."
+description: "The canonical stdlib: engine-native nika:* tools across 6 categories, all reached through the invoke: verb."
 sidebarTitle: "Builtins"
 icon: "toolbox"
 ---
@@ -31,7 +31,7 @@ the same way:
 
 <CardGroup cols={3}>
   <Card title="Builtins" icon="toolbox">
-    **{CANON.builtins}** tools · 5 categories
+    **{CANON.builtins}** tools · 6 categories
   </Card>
   <Card title="Extract modes" icon="filter">
     **{CANON.extractModes}** on `nika:fetch`
@@ -113,11 +113,12 @@ format conversion, generation, time, hashing.
   self-signed TLS is rejected by default.
 </Warning>
 
-## Introspection (1)
+## Introspection (2)
 
 | Builtin | What it does |
 |---|---|
 | `nika:inspect` | Workflow introspection. One builtin, four `view:` modes: `cost` (running USD by task/provider), `records` (full execution record), `dag_info` (nodes/edges/waves), `threads` (engine pool state, advisory). |
+| `nika:compose` | The agent loop's self-check: pass a drafted workflow YAML, get the full `nika check` verdict back as JSON — never executed. Loop-only, like `nika:done` (valid only inside an `agent:` tools whitelist). |
 
 ```yaml
 - id: budget_check
@@ -125,6 +126,31 @@ format conversion, generation, time, hashing.
     tool: "nika:inspect"
     args: { view: cost }
 ```
+
+## Media (1)
+
+| Builtin | What it does |
+|---|---|
+| `nika:image_generate` | Provider-backed image generation as an *asset pipeline*: images land under a declared `output_dir:` (rides `permits.fs`), outputs and a provenance manifest carry paths + dimensions + sha256 — **image bytes never ride workflow outputs**. Providers: `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `mock` (offline, deterministic, zero keys). The first graduate of the deferred media class (2026-07-05). |
+
+```yaml
+- id: hero
+  invoke:
+    tool: "nika:image_generate"
+    args:
+      provider: mock              # offline dry-run · flip to gemini/openai for real renders
+      prompt: "OG hero — a monarch butterfly over a nebula"
+      aspect_ratio: "16:9"
+      output_dir: "./assets/og"
+```
+
+<Warning>
+  API keys are **engine-configured, never workflow args**: `OPENAI_API_KEY` /
+  `GEMINI_API_KEY` (or the `NIKA_`-prefixed variants) are read once at the
+  engine's composition root. The provider endpoints are engine-fixed
+  constants — `permits.net.http` does not govern them (exactly like
+  `infer:`); `permits.tools` and `permits.fs` do.
+</Warning>
 
 ## Design rules the set obeys
 
