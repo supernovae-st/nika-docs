@@ -123,6 +123,16 @@ events through the same renderer that drew the original run. Replay
 calls no model and runs no command — it is a projection of what already
 happened ([Traces & replay](/concepts/traces)).
 
+## Terminals & CI
+
+The live surfaces are TTY-only by design. Piped or `NO_COLOR` output is
+the sober register (plain per-line events — what CI logs want). Two
+render themes ship: unicode (default) and `--ascii` (every glyph has an
+ASCII twin — use it on terminals without good box-drawing fonts,
+including older Windows setups; Windows Terminal renders the default
+theme fine). `--no-color`, `NO_COLOR`, and `CLICOLOR_FORCE` follow the
+standard resolution order.
+
 ## Related
 
 - [Concepts · Traces](/concepts/traces): the NDJSON event stream behind
