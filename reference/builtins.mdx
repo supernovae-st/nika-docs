@@ -85,7 +85,7 @@ format conversion, generation, time, hashing.
 | `nika:json_diff` | JSON diff. Returns RFC 6902 JSON Patch (jq can't diff). |
 | `nika:validate` | Validate data against a JSON Schema: `format: json \| yaml`, returns `{ valid, errors }`. |
 | `nika:json_merge_patch` | RFC 7396 merge patch: `null` deletes a key, the semantics jq's `*` merge does not provide. |
-| `nika:convert` | Universal format converter: `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. |
+| `nika:convert` | Universal format converter: `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. CSV emit takes `formula_guard: true` (opt-in) to neutralize spreadsheet formula-injection in untrusted data. |
 | `nika:uuid` | Generate a UUID: `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
 | `nika:date` | Timestamp arithmetic: op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
 | `nika:hash` | Content hashing: default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
