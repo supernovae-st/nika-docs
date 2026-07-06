@@ -33,7 +33,8 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika examples list|show|run` | Browse or run embedded examples |
 | `nika new --from <template> <dest>` | Instantiate an embedded workflow template |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
-| `nika trace replay|show|outputs|peek|flow` | Replay, summarize, or inspect a recorded run |
+| `nika trace replay|show|outputs|export|peek|flow` | Replay, summarize, inspect, or export a recorded run — `export` projects the journal to OTLP/JSON lines (Jaeger UI, or POST to any OTLP/HTTP endpoint; a local file, zero collector, zero vendor) |
+| `nika dap` | Debug Adapter Protocol server over stdio — time-travel a recorded run in any DAP client (VS Code F5) |
 | `nika lsp` | Run the language server over stdio |
 | `nika mcp` | Run the read-only MCP server (8 tools · see below) |
 

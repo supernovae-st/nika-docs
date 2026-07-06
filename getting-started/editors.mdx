@@ -154,6 +154,18 @@ output, never a client-side guess.
     resume rides the exact journal the engine wrote.
   </Accordion>
 
+  <Accordion title="Debug (F5) — time-travel a recorded run" icon="bug">
+    Press **F5** on a workflow to launch the Nika debug adapter (the
+    engine's `nika dap`, a Debug Adapter Protocol server over stdio, so
+    the debugger is the same one any DAP editor speaks). It debugs a
+    **recorded** run, not a live one: set breakpoints on tasks, then step
+    forward *and backward* through the journal the engine wrote —
+    inspect each task's output, cost and ADR-099 identity hashes at that
+    point in time. Like replay, it re-executes nothing; it time-travels
+    what already happened, so a breakpoint costs no tokens and hits no
+    network.
+  </Accordion>
+
   <Accordion title="Preflight · lineage · the run understood" icon="magnifying-glass-chart">
     `Nika: Preflight` renders the flight plan before any token: cost
     (ceiling · an uncapped task stays a loud floor), every model
