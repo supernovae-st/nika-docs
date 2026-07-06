@@ -23,7 +23,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits |
 | `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT |
 | `nika explain <code>` | Explain a `NIKA-XXXX` error code |
-| `nika doctor` | Diagnose providers plus editor/agent readiness — findings grouped under `binary` · `config` · `lsp` · `mcp` · `provider` · `local` · `providers` · `image` · `tts` |
+| `nika doctor [--ping]` | Diagnose providers plus editor/agent readiness — findings grouped under `binary` · `config` · `lsp` · `mcp` · `provider` · `local` · `providers` · `image` · `tts`. `--ping` (0.94+) TCP-probes the local ports — loopback and configured URLs only, 300ms cap, nothing sent on the socket; the default run stays fully offline |
 | `nika init [dir]` | Scaffold schema wiring, `AGENTS.md`, and Cursor rules |
 | `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, `codex`, or `all` |
 | `nika spec [--canon]` | Print the embedded spec or canon |
@@ -49,6 +49,8 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `--resume <trace>` | `run` | Resume from a prior run's NDJSON trace: matching completed tasks skip with a visible `task_cache_hit` ([details](/guides/resume)) |
 | `--from <task_id>` | `run` | With `--resume`: force this task and its transitive downstream to re-run even on a match |
 | `--answer <task>=<value>` | `run` | With `--resume`: answer a paused `nika:prompt` (repeatable) — a boolean for `confirm`, a string for `input`, one of the choices for `choice` |
+| `--task <task_id>` | `run` | (0.94+) Run ONE task and its transitive upstream cone only — the whole file still audits, then the plan and cost re-derive for exactly what will run; workflow `outputs:` are skipped |
+| `--no-trace-file` | `run` | (0.94+) Skip the run journal — every run otherwise writes `.nika/traces/<ts>-<id>.ndjson` by default (`NIKA_NO_TRACE_FILE` opts out globally) |
 | `--update` | `test` | (Re)write the golden from this run instead of comparing ([details](/guides/testing)) |
 | `--dry-run` | `run` | Plan only; execute zero effects |
 | `--no-progress` | `run` | Deterministic non-animated render |
