@@ -34,9 +34,8 @@ tasks:
     invoke:
       tool: "nika:tts_generate"
       args:
-        provider: openai            # or local · elevenlabs · mock
+        provider: local             # sovereign wire · mock = zero-key dry-run · or openai · elevenlabs
         text: "Local first. Honest always. That is the whole design."
-        voice: "nova"
         speed: 1.1
         output_dir: "./out"
 outputs:
@@ -45,8 +44,8 @@ outputs:
 
 ```
 out/
-├── speech-openai-gpt-4o-mini-tts-a0584738.mp3
-└── speech-openai-gpt-4o-mini-tts-a0584738-….manifest.json
+├── speech-local-tts-1-a0584738.mp3
+└── speech-local-tts-1-a0584738-….manifest.json
 ```
 
 ## Honesty rules
@@ -61,6 +60,10 @@ out/
 - **Content credentials are detected**, not verified: audio C2PA carriage
   (RIFF `C2PA` · MP3 GEOB) is surfaced as `content_credentials` in output
   and manifest, [the same contract as images](/guides/image-generation#content-credentials-detect-and-preserve).
+- **Watermarking is declared, never byte-verified.** The manifest's
+  `watermark_declared` is a catalog fact: `elevenlabs` →
+  `"synthid (provider-declared · not byte-verified)"`, every other
+  provider → `null` — no such declaration, honestly absent.
 
 ## Cookbook (proven against live APIs)
 

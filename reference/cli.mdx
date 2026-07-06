@@ -23,17 +23,19 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits |
 | `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT |
 | `nika explain <code>` | Explain a `NIKA-XXXX` error code |
-| `nika doctor` | Diagnose providers plus editor/agent readiness |
+| `nika doctor` | Diagnose providers plus editor/agent readiness — findings grouped under `binary` · `config` · `lsp` · `mcp` · `provider` · `local` · `providers` · `image` · `tts` |
 | `nika init [dir]` | Scaffold schema wiring, `AGENTS.md`, and Cursor rules |
-| `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, or `all` |
+| `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, `codex`, or `all` |
 | `nika spec [--canon]` | Print the embedded spec or canon |
 | `nika schema` | Print the embedded JSON Schema |
+| `nika catalog [--json]` | The embedded provider/model catalog (models · capabilities · env vars) — `--json` emits the versioned machine projection (`catalog_version: 1`) |
+| `nika tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
 | `nika examples list|show|run` | Browse or run embedded examples |
 | `nika new --from <template> <dest>` | Instantiate an embedded workflow template |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
-| `nika trace replay|show` | Replay or summarize a recorded run |
+| `nika trace replay|show|outputs|peek|flow` | Replay, summarize, or inspect a recorded run |
 | `nika lsp` | Run the language server over stdio |
-| `nika mcp` | Run the read-only MCP server (`nika_check`, `nika_explain`) |
+| `nika mcp` | Run the read-only MCP server (8 tools · see below) |
 
 ## Global flags
 
@@ -66,6 +68,18 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
 | `XAI_API_KEY` | xAI provider |
 | `OPENROUTER_API_KEY` | OpenRouter provider |
+| `HF_TOKEN` | Hugging Face provider (`NIKA_HUGGINGFACE_API_KEY` wins when set) |
+| `NVIDIA_API_KEY` | NVIDIA provider (`NIKA_NVIDIA_API_KEY` wins when set) |
+| `ELEVENLABS_API_KEY` | ElevenLabs speech (`NIKA_ELEVENLABS_API_KEY` wins when set) |
+| `NIKA_IMAGE_LOCAL_URL` | Base URL for the `local` image provider (any OpenAI-images-compatible server) |
+| `NIKA_TTS_LOCAL_URL` | Base URL for the `local` speech provider (any OpenAI-speech-compatible server) |
 
-The MCP server is intentionally read-only. It lets agents call `nika_check`
-and `nika_explain`; effectful execution stays behind `nika run`.
+The MCP server is intentionally read-only. It exposes 8 tools — `nika_check` ·
+`nika_explain` · `nika_schema` · `nika_examples` · `nika_template` ·
+`nika_canon` · `nika_catalog` · `nika_tools`; effectful execution stays
+behind `nika run`.
+
+<Note>
+  **MCP protocol** · latest `2026-07-28`; the server accepts 5 versions
+  (`2026-07-28` · `2025-11-25` · `2025-06-18` · `2025-03-26` · `2024-11-05`).
+</Note>

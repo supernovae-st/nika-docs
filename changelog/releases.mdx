@@ -36,6 +36,46 @@ progress is tracked via:
 
 ## Recent milestones
 
+<Update label="v0.93.1" description="2026-07-05 · the embedded pack teaches 2026 models">
+  The pack vendored into the binary carries the qwen3.5 teach-cascade:
+  the first `nika examples run 01-hello` of a fresh install works against
+  the local models people actually pull in July 2026. Plus the README
+  daily-commands block — the full 0.93 user loop in one place.
+</Update>
+
+<Update label="v0.93.0" description="2026-07-05 · resume · test harness · local thinking models unbricked">
+  Provider-plane HTTP timeout rises to 180s: 2026 open-weight thinking
+  models (qwen3.5 · gemma4) no longer die at the cloud-calibrated 30s
+  ceiling. `nika run --resume` lands durable-lite resume — the trace IS
+  the checkpoint, completed tasks replay as visible cache hits (ADR-099).
+  `nika test` golden harness + ADR-098 schema wire selection + the CLI
+  verdict card. `nika-cap` admitted (all 12 gates).
+</Update>
+
+<Update label="v0.92.0" description="2026-07-03 · MCP learning tools · codex wire · exec hardening">
+  The MCP oracle grows the learning tools (`nika_schema` ·
+  `nika_examples` · `nika_template` · `nika_canon`). `nika wire codex`
+  patches `~/.codex/config.toml`; the Claude Code marketplace ships one
+  plugin dir for two ecosystems. Exec hardening: provider API keys
+  scrubbed from exec children · env keys restricted to POSIX names ·
+  browser navigation guarded against private/loopback SSRF.
+</Update>
+
+<Update label="v0.91.0" description="2026-06-25 · onboarding wiring · headless builds">
+  Explicit onboarding wiring in the CLI · `nika examples run` takes a
+  `--model` override with an offline mock hint · headless build fixes
+  (xcap backend default-off · atspi 0.29) · doctor recognizes the
+  workspace Cursor MCP config · release pipeline separates the dev
+  version from brew assets.
+</Update>
+
+<Update label="v0.90.0" description="2026-06-21 · the first public release">
+  Diamond's first tagged public release: CLI binaries via brew + the
+  install script. Real semver toward a 1.0.0 public launch — quality
+  over speed. Everything before this tag is the `v0.80.0-alpha.*`
+  rewrite history.
+</Update>
+
 <Update label="Unreleased" description="2026-04-17 · Wave 3A + 4A + 4B + Swarm-3 Batch I.b/II">
   ### Added
 

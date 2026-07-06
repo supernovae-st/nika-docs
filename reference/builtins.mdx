@@ -104,7 +104,7 @@ format conversion, generation, time, hashing.
 
 | Builtin | What it does |
 |---|---|
-| `nika:fetch` | HTTP request + content extraction: {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`). Fetching a URL is *calling a tool*, not a verb. |
+| `nika:fetch` | HTTP request + content extraction: {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`) + `raw` passthrough. Fetching a URL is *calling a tool*, not a verb. |
 | `nika:notify` | Send notifications: `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms`), one builtin not five. |
 
 <Warning>
@@ -131,10 +131,8 @@ format conversion, generation, time, hashing.
 
 | Builtin | What it does |
 |---|---|
-| `nika:image_generate` | Provider-backed image **generation and editing** as an *asset pipeline*: renders land under a declared `output_dir:` (rides `permits.fs.write`), and `mode: edit` sources are read permit-gated (`permits.fs.read` — the mirror boundary); outputs and a provenance manifest carry paths + dimensions + sha256, and an edit records its `source_images` — **image bytes never ride workflow outputs**. Full guide: [Image generation](/guides/image-generation) — sovereign quickstart · editing · cookbook · honesty rules.
+| `nika:image_generate` | Provider-backed image **generation and editing** as an *asset pipeline*: renders land under a declared `output_dir:` (rides `permits.fs.write`), and `mode: edit` sources are read permit-gated (`permits.fs.read` — the mirror boundary); outputs and a provenance manifest carry paths + dimensions + sha256, and an edit records its `source_images` — **image bytes never ride workflow outputs**. Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). Full guide: [Image generation](/guides/image-generation) — sovereign quickstart · editing · cookbook · honesty rules. |
 | `nika:tts_generate` | Speech synthesis on the same asset-pipeline contract (full guide: [Speech generation](/guides/speech-generation)): ONE audio file lands under `output_dir:` (permit-gated), output + manifest carry path + sha256 + `duration_ms` (wav-exact, mp3 honestly null) — **audio bytes never ride outputs**. Providers (sovereign-first): `local` (any OpenAI-speech-compatible server — LocalAI · Kokoro-FastAPI · Speaches — via `NIKA_TTS_LOCAL_URL`) · `openai` (`gpt-4o-mini-tts`) · `elevenlabs` (`ELEVENLABS_API_KEY`) · `mock` (real deterministic WAV, offline). |
-
-  Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). The first graduate of the deferred media class (2026-07-05). |
 
 ```yaml
 - id: hero
