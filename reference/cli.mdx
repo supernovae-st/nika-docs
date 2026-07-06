@@ -60,21 +60,25 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 ## Environment variables
 
+The five local inference providers (Ollama · LM Studio · llama.cpp ·
+LocalAI · vLLM) need **no variable at all** — keyless by construction,
+loopback defaults built in. Everything below is opt-in:
+
 | Var | Description |
 |---|---|
+| `NIKA_IMAGE_LOCAL_URL` | Base URL for the `local` image provider (any OpenAI-images-compatible server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni) |
+| `NIKA_TTS_LOCAL_URL` | Base URL for the `local` speech provider (any OpenAI-speech-compatible server — LocalAI · Kokoro · Speaches) |
+| `MISTRAL_API_KEY` | Mistral provider |
 | `ANTHROPIC_API_KEY` | Anthropic provider |
 | `OPENAI_API_KEY` | OpenAI provider |
 | `GEMINI_API_KEY` | Google Gemini provider |
-| `MISTRAL_API_KEY` | Mistral provider |
-| `GROQ_API_KEY` | Groq provider |
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
 | `XAI_API_KEY` | xAI provider |
+| `GROQ_API_KEY` | Groq provider |
 | `OPENROUTER_API_KEY` | OpenRouter provider |
 | `HF_TOKEN` | Hugging Face provider (`NIKA_HUGGINGFACE_API_KEY` wins when set) |
 | `NVIDIA_API_KEY` | NVIDIA provider (`NIKA_NVIDIA_API_KEY` wins when set) |
 | `ELEVENLABS_API_KEY` | ElevenLabs speech (`NIKA_ELEVENLABS_API_KEY` wins when set) |
-| `NIKA_IMAGE_LOCAL_URL` | Base URL for the `local` image provider (any OpenAI-images-compatible server) |
-| `NIKA_TTS_LOCAL_URL` | Base URL for the `local` speech provider (any OpenAI-speech-compatible server) |
 
 The MCP server is intentionally read-only. It exposes 8 tools — `nika_check` ·
 `nika_explain` · `nika_schema` · `nika_examples` · `nika_template` ·
