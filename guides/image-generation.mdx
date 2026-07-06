@@ -207,7 +207,38 @@ none embed provenance in the file itself (that practice comes from the
 image-native world). The full comparison lives in the
 [builtins reference](/reference/builtins#media).
 
-<Warning>
-`mode: edit`, `reference_images:` and `mask:` are **reserved** — v1 is
-generation-only, and the engine refuses them loudly rather than pretending.
-</Warning>
+## Editing (`mode: edit`)
+
+An input image plus an instruction — the same builtin, one arg away:
+
+```yaml
+  - id: night
+    invoke:
+      tool: "nika:image_generate"
+      args:
+        provider: openai            # the first edit wire · gemini/xai/local follow
+        mode: edit
+        image: ${{ tasks.render.output.images[0].path }}   # edit what you generated
+        prompt: "make it night — starry sky"
+        output_dir: "./out"
+```
+
+The rules mirror generation, inverted where reading demands it:
+
+- **Reads are permit-gated.** Every `image:`/`images:`/`mask:` path is
+  enforced against `permits.fs.read` *before* a byte is read — the exact
+  mirror of the save boundary. Edit reads what generate writes, so a
+  generate→edit chain declares both `read:` and `write:`.
+- **`image:` XOR `images:`** — one source or many (capped per provider:
+  openai 16 · gemini 14 · xai 3), 20 MB each, magic-byte sniffed.
+- **A `mask:` is refused, never dropped**, on providers that edit by
+  instruction only (gemini/xai): a silently-ignored mask edits the wrong
+  region. openai (and local inpaint) take pixel masks.
+- **The provenance chain survives.** The manifest carries `mode: "edit"`
+  plus `source_images: [{path, sha256, format}]` — an edited asset records
+  exactly what it derived from.
+
+<Note>
+`reference_images:` (compose-from-references) and `save: false` remain
+reserved — refused loudly rather than pretended.
+</Note>
