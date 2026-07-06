@@ -36,6 +36,21 @@ progress is tracked via:
 
 ## Recent milestones
 
+<Update label="v0.96.0" description="2026-07-06 · the run becomes a place">
+  `nika dap` brings time-travel replay debugging over the run journal —
+  breakpoints in your `.nika.yaml`, step forward AND backward, recorded
+  outputs in the Variables pane; the VS Code extension's F5 integration
+  lights up on this tag. `nika trace export` projects any journal to
+  OTLP/JSON lines (Jaeger · Grafana · Langfuse — cost rides
+  `gen_ai.usage.cost`). `nika check --json` gains the `requirements`
+  section (models · keys · secrets · env) so editors and CI state
+  blockers before any token. A typo'd field now teaches: « unknown
+  field `infr` — did you mean `infer`? ». Runs record their source
+  (workflow_sha256) and skips say why (when · blocked_by). Plus:
+  doctor --ping v2, strict boolean args, the opt-in CSV
+  formula-injection guard.
+</Update>
+
 <Update label="v0.95.0" description="2026-07-06 · the catalog practices local-first">
   The 5 local servers (Ollama · LM Studio · llama.cpp · LocalAI · vLLM)
   join `nika catalog` with descriptions, tags and seed models — keyless
