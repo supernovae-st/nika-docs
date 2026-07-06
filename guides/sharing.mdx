@@ -1,0 +1,57 @@
+---
+title: "Sharing workflows"
+description: "Publish and install Nika workflows through nika-registry — every entry machine-re-proven before it runs."
+sidebarTitle: "Sharing"
+icon: "share-nodes"
+---
+
+Nika workflows are one portable `.nika.yaml` file, so sharing one is just
+sharing text. [**nika-registry**](https://github.com/supernovae-st/nika-registry)
+is where that sharing gets a **trust layer no other workflow registry has**:
+every entry is re-proven by CI — pinned to a full commit + sha256, re-run
+through the conformance oracle, and certified by the engine's static
+analysis. You see what a workflow *can do* — exec, tools, cost ceiling,
+secrets — **before a single token is spent**.
+
+<Info>
+  Trust lives in the artifact, not a gatekeeper: the certificate re-derives
+  locally with `nika check`. You never have to believe the registry — you
+  re-run the proof yourself, offline.
+</Info>
+
+## Install an artifact
+
+Today the flow is a short, auditable script (the `nika add` verb is on the
+[engine roadmap](https://github.com/supernovae-st/nika)):
+
+```sh
+git clone https://github.com/supernovae-st/nika-registry && cd nika-registry
+python3 scripts/get.py --list                 # what exists
+python3 scripts/get.py meeting-actions        # fetch → verify sha256 → local audit → done
+```
+
+`get.py` refuses on any mismatch (hash · advisory · file already there) and
+**never executes anything** — the workflow lands on disk and you decide to
+run it. Not `curl | sh`.
+
+## The guarantees
+
+| Rule | What it prevents |
+|---|---|
+| Entries are **immutable** — new version = new file; withdrawal is an advisory | rug-pulls · silent tampering |
+| **Full-commit + full-sha256 pinning** — no tags, no branches | tag-rewrite attacks |
+| CI **re-hashes** the fetched bytes and **re-runs the oracle** | broken or lying artifacts |
+| **Key-shaped strings refuse the gate** | shared-template credential leaks |
+| **Zero install-time execution** — entries and artifacts are data | the entire malicious-postinstall class |
+
+## Machine surfaces (for agents)
+
+- [`index.json`](https://raw.githubusercontent.com/supernovae-st/nika-registry/main/index.json) — every artifact with its pin, digest, cert summary and advisory state in one fetch
+- [`llms.txt`](https://raw.githubusercontent.com/supernovae-st/nika-registry/main/llms.txt) — the consume/verify path in agent-readable form
+
+## Publish
+
+Your artifact stays in **your** git repo — the registry stores a pointer, a
+digest and a proof, never a copy. Open a PR adding an entry under your
+GitHub-owner namespace; CI re-proves it. See the
+[contributing guide](https://github.com/supernovae-st/nika-registry/blob/main/CONTRIBUTING.md).
