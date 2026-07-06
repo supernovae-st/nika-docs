@@ -158,6 +158,7 @@
               "guides/observability",
               "guides/agent-authoring",
               "guides/templates",
+              "guides/sharing",
               "guides/troubleshooting"
             ]
           },
