@@ -1,6 +1,6 @@
 ---
 title: "Providers catalog"
-description: "Every LLM provider Nika knows about: the canonical 14 of stdlib v0.1 (5 local · 8 cloud · 1 mock), API dialects, and environment variables."
+description: "Every LLM provider Nika knows about: the canonical stdlib catalog — local-first — plus API dialects and environment variables."
 sidebarTitle: "Providers catalog"
 icon: "server"
 ---
@@ -19,7 +19,7 @@ your machine unless a cloud provider is explicitly selected.
   in the spec (counts from `canon.yaml`). The engine additionally carries an
   extended catalog of {STATUS.providers} TOML records
   ([`crates/nika-catalog/data/llm-providers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/llm-providers.toml))
-  used for capability metadata. Anything outside the canonical 14 routes
+  used for capability metadata. Anything outside the canonical catalog routes
   through the `openai` + `base_url` escape hatch, not its own prefix.
 </Info>
 

@@ -65,6 +65,11 @@ The spine is not the whole vocabulary. Deeper kinds record retries
 full event system, including the durability checkpoints that make runs
 resumable, is documented in [Concepts · Events](/concepts/events).
 
+Real spend also rides the spine: a priced `task_completed` carries a
+`cost_usd` field next to its `tokens` — **absent** for mock and local
+runs (unpriced is honestly absent, never a fake `0`). Agent loops
+report the loop's accumulated tool spend as `tools_cost_usd`.
+
 ## Replay, never re-execute
 
 Two commands read a trace back:
