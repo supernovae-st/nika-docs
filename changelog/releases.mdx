@@ -36,6 +36,19 @@ progress is tracked via:
 
 ## Recent milestones
 
+<Update label="v0.94.0" description="2026-07-06 · the media suite · every run leaves a journal">
+  Two media builtins take the stdlib to 25: `nika:image_generate`
+  (generation and editing, local-first providers, provenance manifests,
+  content credentials preserved) and `nika:tts_generate` (one sovereign
+  `/v1/audio/speech` wire · a real deterministic WAV under mock). Every
+  run now writes `.nika/traces/` by default and `--task` scopes execution
+  to one upstream cone. The catalog rides the wire (`catalog`/`tools
+  --json` plus their MCP twins — 8 read-only tools on protocol
+  `2026-07-28`), `cost_usd` rides `task_completed` without ever faking a
+  zero, Hugging Face and NVIDIA join the 16-provider catalog, and
+  `nika doctor --ping` actually probes the local ports.
+</Update>
+
 <Update label="v0.93.1" description="2026-07-05 · the embedded pack teaches 2026 models">
   The pack vendored into the binary carries the qwen3.5 teach-cascade:
   the first `nika examples run 01-hello` of a fresh install works against
