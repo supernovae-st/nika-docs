@@ -110,48 +110,84 @@ tasks:
   </Card>
 </CardGroup>
 
-## Tier 2: `nika lsp` + extension
+## Tier 2: the extension (VS Code · Cursor · Windsurf · VSCodium)
 
-The generic `yaml-language-server` covers structural validation. A
-custom `nika-lsp` crate adds Nika-specific semantics:
+One extension, both registries — the
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika-lang)
+and [OpenVSX](https://open-vsx.org/extension/supernovae/nika-lang), so
+Cursor, Windsurf and VSCodium install it natively. It consumes the same
+binary the CLI runs: every verdict in the margin is real `nika check`
+output, never a client-side guess.
 
 <AccordionGroup>
-  <Accordion title="Cross-task binding analysis" icon="link">
-    Resolves `${{ tasks.X.output }}` across task boundaries. "Go to
-    definition" jumps from a binding reference to the source task. Unused
-    outputs flagged. Circular dependencies detected before run.
+  <Accordion title="Check-as-you-type — the full audit" icon="shield">
+    `nika check --json` painted as diagnostics while you type: DAG
+    conformance, secret leaks and egresses, permits escapes, schema
+    findings, unknown tools, typo'd or missing tool args (with the
+    engine's did-you-mean), provably dead `when:` gates, hints. The
+    finding families mirror the engine's `is_clean` list, so the
+    editor's verdict IS the binary's exit code. Dirty buffers pipe over
+    stdin (`nika check -`) — keystroke-fresh audits, nothing written to
+    disk. Machine-applicable fixes (the `add "X" to permits.<path>`
+    grammar) apply as quick fixes.
   </Accordion>
 
-  <Accordion title="Taint propagation warnings" icon="shield">
-    Tracks untrusted inputs (fetched URLs, user-provided strings) flowing
-    into sensitive sinks (shell commands, MCP invocations). Surfaces
-    violations in the editor before CI catches them.
+  <Accordion title="The DAG canvas — content-first" icon="diagram-project">
+    The file as a graph: infer cards show their prompt, exec cards their
+    `$ command`, invoke cards their tool + args — before any run. Model
+    chips edit through a provider picker fed by the binary's own catalog
+    (`nika catalog --json` — exact models, capabilities), drag an
+    out-port to wire a `depends_on`, cost badges and `⚠` audit chips
+    ride the cards, and semantic zoom keeps 100-task graphs readable.
   </Accordion>
 
-  <Accordion title="Workflow visualizer" icon="diagram-project">
-    Inline DAG preview: a small panel showing the task graph as you
-    type. Click a node to jump to its definition.
+  <Accordion title="Run · resume · replay" icon="play">
+    A ▶ Run / ▶ mock / ■ Stop pill drives the run without leaving the
+    panel — ▶ mock streams `run --model mock/echo` (deterministic, zero
+    keys, zero network). On a 0.93+ engine, ↻ re-runs only what changed
+    (engine `--resume`: unchanged tasks cache-hit visibly). Every
+    recorded run in `.nika/traces/` replays as a scrubbable timeline —
+    replay re-renders, never re-executes.
   </Accordion>
 
-  <Accordion title="Provider / model completion" icon="server">
-    Types `provider: ` → autocompletes from the catalog ({CANON.providers} canonical providers · plus extended catalog IDs).
-    Types `model: ` after a provider → autocompletes from that
-    provider's models. Invalid pairs flagged inline.
+  <Accordion title="Schema-derived intelligence" icon="wand-magic-sparkles">
+    Completions, hover and expression intel come FROM the binary
+    (`nika schema` · `nika spec --canon` · `nika tools --json`): task
+    fields, per-verb bodies, the closed builtin set,
+    provider-prefixed `model:` values, `${{ }}` reference completion
+    with go-to-definition, task rename across all syntactic homes. A
+    new field in the engine lights up with zero extension update.
   </Accordion>
 
-  <Accordion title="Capability-aware warnings" icon="grid">
-    `tools: [...]` on a model without tool_calling → warning. JSON
-    schema on a model without `json_mode: schema` → warning with
-    fallback suggestion.
+  <Accordion title="Agent-native" icon="robot">
+    `nika_check` / `nika_explain` / `nika_graph` registered as editor
+    LM tools — in-editor agents validate through the real oracle. One
+    command wires MCP config + agent rules (`nika wire` under the
+    hood), and VS Code 1.101+ discovers `nika mcp` natively.
+  </Accordion>
+
+  <Accordion title="Capability-gated by construction" icon="grid">
+    The extension probes what the binary ACTUALLY ships (`--help`,
+    never a hardcoded matrix): a dev build from engine main lights
+    features up early, an older brew binary keeps its fallbacks —
+    same extension, zero release needed.
   </Accordion>
 </AccordionGroup>
+
+### `nika lsp` (any editor)
+
+The engine's own language server rides stdio for editors outside the
+VS Code family: hover, completion (`.` `/` `[` triggers), go to
+definition, document symbols and push diagnostics. Wire it as a
+generic LSP command (`nika lsp`) in Zed, Neovim or Helix alongside the
+Tier-1 schema.
 
 ## Roadmap
 
 | Capability | Status | Admission |
 |---|---|---|
 | JSON Schema (yaml-language-server) | shipped | `nika schema` + public schema URL |
-| `nika lsp` L4 crate | shipped | `nika lsp` |
+| `nika lsp` L4 crate | shipped | `nika lsp` (hover · completion · definition · symbols · diagnostics) |
 | VS Code / Cursor extension | shipped | Marketplace + OpenVSX |
 | MCP agent oracle | shipped, read-only | `nika mcp` (8 tools: check · explain · the authoring surface) |
 | Zed / Neovim native integrations | 🧭 planned | Community + v1.0 |
