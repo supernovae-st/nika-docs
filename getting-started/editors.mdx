@@ -147,7 +147,35 @@ output, never a client-side guess.
     keys, zero network). On a 0.93+ engine, ↻ re-runs only what changed
     (engine `--resume`: unchanged tasks cache-hit visibly). Every
     recorded run in `.nika/traces/` replays as a scrubbable timeline —
-    replay re-renders, never re-executes.
+    replay re-renders, never re-executes. And **paused runs ask**: a
+    `nika:prompt` task pauses the run (ADR-099 · exit 4, a pause is not
+    a failure) — the verdict goes amber ⏸ with the question itself, the
+    answer control matches the mode (confirm · choice · input), and the
+    resume rides the exact journal the engine wrote.
+  </Accordion>
+
+  <Accordion title="Preflight · lineage · the run understood" icon="magnifying-glass-chart">
+    `Nika: Preflight` renders the flight plan before any token: cost
+    (ceiling · an uncapped task stays a loud floor), every model
+    resolved against the catalog's key requirements (local providers
+    marked sovereign), secrets/env checked against the actual
+    environment, permits + capability escapes, and the wave-by-wave
+    plan — missing requirements headline as blockers. On the canvas,
+    **lineage mode** follows the data: click a card (or put the caret
+    in `${{ tasks.x… }}`) and the producer + every consumer stay lit
+    while the rest fades. After a run, task rows grow **artifact
+    children** (images · audio · manifests) with provenance, run diffs
+    lead with the first divergence, and the replay says when the
+    workflow's definition changed under a recorded journal.
+  </Accordion>
+
+  <Accordion title="Golden testing, one command" icon="flask">
+    `Nika: Golden Test` runs `nika test <file>` (mock provider ·
+    offline · deterministic) against `<file>.golden.json`, and
+    `Update the Golden` re-pins it — the offline CI gate without
+    leaving the editor. The golden pins the workflow's OUTPUT
+    contract: schema drift and output renames go red with a precise
+    diff; prompt wording alone does not.
   </Accordion>
 
   <Accordion title="Schema-derived intelligence" icon="wand-magic-sparkles">
