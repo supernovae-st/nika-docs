@@ -44,6 +44,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 |---|---|---|
 | `--json` | `check`, `run` | Machine-readable output |
 | `--infer-permits` | `check` | Print the tightest inferred `permits:` boundary |
+| `--native-strict` | `check` | Fail (exit 2) while any `native-first` hint remains — an `exec:` a builtin or MCP tool probably covers (the agent/CI posture) |
 | `--output json` | `run` | Print typed workflow outputs as one JSON object |
 | `--var key=value` | `run` | Set a workflow `vars:` input (repeatable) — overrides a `default:`, satisfies `required: true`, parses as JSON when it parses, refuses unknown keys ([details](/concepts/workflows)) |
 | `--model <provider>/<name>` | `run` | Override the envelope `model:` — `--model mock/echo` previews any workflow offline (zero key, zero network) |
