@@ -166,6 +166,21 @@ output, never a client-side guess.
     network.
   </Accordion>
 
+  <Accordion title="Prove it ran — chain · verify · reproduce" icon="shield-check">
+    Every run hash-chains its journal (engine 0.97+), and the editor
+    carries the proof end to end: the run's verdict banner, the
+    Runs-view tooltip and the run report all show the **same chain
+    head** the engine printed. A journal that fails the walk gets a
+    shield — its claims are unverified. **Verify Journal** (right-click
+    a run) asks the engine itself (`nika trace verify`): intact with
+    its head, BROKEN at its exact line, or unchained for pre-0.96
+    journals (nothing to verify, nothing to distrust). **Reproduce
+    Run** compares two recorded runs and classifies every task —
+    `reproduced` · `NONDETERMINISTIC` (the flaky task, named) ·
+    `authored` · `environment` — by reading two files: no re-run, no
+    spend.
+  </Accordion>
+
   <Accordion title="Preflight · lineage · the run understood" icon="magnifying-glass-chart">
     `Nika: Preflight` renders the flight plan before any token: cost
     (ceiling · an uncapped task stays a loud floor), every model
