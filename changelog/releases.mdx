@@ -62,7 +62,8 @@ Between release tags, progress lands on `main` as:
   The 5 local servers (Ollama · LM Studio · llama.cpp · LocalAI · vLLM)
   join `nika catalog` with descriptions, tags and seed models — keyless
   by construction, and sovereign models stay unpriced, never « free ».
-  38 catalog providers. A bare `nika` now suggests the next command
+  38 providers in the engine's catalog inventory (the canonical spec
+  set stays 16). A bare `nika` now suggests the next command
   instead of a wall of help text. Fixes: `nika:write` honors
   `create_dirs: false` loudly, `nika:date` resolves named timezones
   from the bundled db, `nika:log` neutralizes terminal control
@@ -215,21 +216,38 @@ Between release tags, progress lands on `main` as:
   toward 1.0.
 </Update>
 
-<Update label="The exploration era" description="2026-01-01 → 2026-04-13 · ~4,600 commits · v0.1 → v0.79.3" tags={["origins"]}>
+<Update label="v0.79.3 — exploration ends" description="2026-04-09 · 322k LOC · 31 crates · the context lesson" tags={["origins", "milestone"]}>
+  The final sprint says everything about the pace: v0.73 → v0.79 in
+  three days (April 6-8), v0.79.3 on April 9. Fourteen weeks after the
+  first commit, the exploration engine is a working 322k-LOC, 31-crate
+  system — and it has surfaced the lesson Diamond is built on: at that
+  scale the biggest correctness risk stops being algorithmic and
+  becomes **context**. No human or AI assistant could hold the system
+  in working memory, so refactors happened by pattern-match, and
+  pattern-match hallucinates. Four days later the rewrite began. The
+  exploration era is preserved as a read-only private archive
+  (`brouillon`); nothing ships from it. Diamond reads it, then
+  rewrites from scratch.
+</Update>
+
+<Update label="The version storm" description="2026-02 → 2026-03 · v0.3 → v0.21 in fifteen days" tags={["origins"]}>
+  February 18 is the day the language grows teeth: `invoke:` and
+  `agent:` land in the AST and the runtime, the MCP client appears,
+  and the provider layer learns tool calling — all in one day. Then
+  the storm: v0.3 (February 19) → v0.10 (February 25) → v0.17
+  (March 2) → v0.21 with a first language server (March 5). March
+  alone counts 2,900+ commits — the month the exploration engine
+  became an ecosystem: LSP, security releases, CI/CD, release
+  automation.
+</Update>
+
+<Update label="The exploration era begins" description="2026-01-01 · the first commit" tags={["origins", "milestone"]}>
   **The first commit lands on New Year's Day 2026**: `initial nika v0.1
   with strict templating system` — followed the same week by DAG
   validation, event sourcing for the workflow audit trail, and
-  fine-grained executor events. Fourteen weeks of full-speed exploration
-  (~4,600 commits, peaking at 2,900+ in March) grew it into a working
-  322k-LOC, 31-crate engine at v0.79.3.
-
-  It also surfaced the lesson Diamond is built on: at that scale the
-  biggest correctness risk stops being algorithmic and becomes
-  **context** — no human or AI assistant could hold the system in
-  working memory, so refactors happened by pattern-match, and
-  pattern-match hallucinates. The exploration era is preserved as a
-  read-only private archive (`brouillon`); nothing ships from it. Diamond
-  reads it, then rewrites from scratch.
+  fine-grained executor events. The shape of everything that followed —
+  declarative workflows, a DAG, an audit trail — is visible in week
+  one. ~4,600 commits follow in fourteen weeks.
 </Update>
 
 <Update label="The idea" description="2025 · before any code" tags={["origins"]}>
