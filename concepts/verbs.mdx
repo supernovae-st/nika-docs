@@ -37,6 +37,19 @@ was a special case of one of these four, or workflow-level machinery
 not as a new verb.
 
 ```mermaid
+
+The vNext families stay on the same tool — uploads are `multipart:`, forms are
+`form:`, and a bounded site crawl is `traverse:` (crawl is an *intention*, fetch
+is the primitive):
+
+```yaml
+- id: crawl_site
+  invoke:
+    tool: "nika:fetch"
+    args:
+      url: "${{ vars.site_url }}"
+      traverse: { max_pages: 5 }   # same-origin BFS · robots honored · page digests out
+```
 %%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
 flowchart LR
     classDef verb fill:#3F7DFF,color:#fff,stroke:#7FE9FF,font-weight:bold

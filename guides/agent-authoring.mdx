@@ -32,7 +32,7 @@ flowchart LR
 <Steps>
   <Step title="Route: one intent, one template">
     The [templates](https://github.com/supernovae-st/nika-spec/tree/main/templates)
-    are six complete, valid skeletons (conformance-gated on every
+    are complete, valid skeletons (conformance-gated on every
     push). Match the outer shape of the job:
 
     | Intent sounds like… | Template |
@@ -71,7 +71,7 @@ flowchart LR
   </Step>
 </Steps>
 
-## The eight hard rules
+## The hard rules
 
 These catch ~90% of LLM-written errors. The validator enforces all of
 them; knowing them just saves round-trips:
@@ -92,6 +92,11 @@ them; knowing them just saves round-trips:
    sentinel, meaningless elsewhere.
 8. **Fan-outs get the leash** · `max_parallel` + `fail_fast: false` +
    per-iteration `retry`/`timeout`.
+9. **Native-first** · `invoke: nika:*` → `mcp:<server>/<tool>` →
+   `exec:` last. An `exec:` a builtin covers earns a `native-first`
+   hint; `nika check --native-strict` fails on any that remain, and a
+   surviving `exec:` gets an exec-ledger row (task · command · why ·
+   unlock) in the workflow header.
 
 ## After valid: the judgment layer
 
@@ -103,7 +108,7 @@ pattern links the canonical example that embodies it.
 
 <Columns cols={2}>
   <Card title="The templates" icon="copy" href="https://github.com/supernovae-st/nika-spec/tree/main/templates">
-    Six skeletons, every decision point a slot, conformance-gated.
+    The skeletons, every decision point a slot, conformance-gated.
   </Card>
   <Card title="The twelve patterns" icon="compass-drafting" href="/guides/patterns">
     The judgment layer: why each locked choice is locked.

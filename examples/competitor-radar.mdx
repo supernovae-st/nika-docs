@@ -45,7 +45,7 @@ nika: v1
 workflow: competitor-radar
 description: "Sitemap → parallel page reads → one competitive brief + ping"
 
-model: ollama/llama3.2:3b   # local · zero key · swap for anthropic/claude-sonnet-4-6
+model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-sonnet-4-6
 
 vars:
   competitor_sitemap: "https://competitor.example.com/sitemap.xml"
@@ -66,7 +66,7 @@ tasks:
         url: "${{ vars.competitor_sitemap }}"
         mode: sitemap
     output:
-      recent: ".urls[:8]"             # cap the radar at the 8 freshest pages
+      recent: ".[:8] | map(.loc)"     # sitemap = the root array of {loc, …} · cap at 8, keep the URLs
 
   - id: pages
     depends_on: [map]

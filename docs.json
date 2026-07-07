@@ -190,6 +190,7 @@
             "pages": [
               "examples/standup-digest",
               "examples/meeting-actions",
+              "examples/og-images",
               "examples/price-watch",
               "examples/social-repurpose"
             ]

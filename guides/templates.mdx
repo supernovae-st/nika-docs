@@ -1,6 +1,6 @@
 ---
 title: "Templates"
-description: "Six instantiable skeletons covering the recurring workflow shapes. Copy, fill the SLOT lines, check, ship: agents don't invent structure, they instantiate it."
+description: "The instantiable skeletons covering the recurring workflow shapes. Copy, fill the SLOT lines, check, ship: agents don't invent structure, they instantiate it."
 sidebarTitle: "Templates"
 icon: "copy"
 ---
@@ -21,6 +21,9 @@ re-check.**
 | « only what changed since last run » | [`etl-state`](#etl-state) | state read→diff→write · `on_error: recover:` quarantine |
 | « research / review / open-ended » | [`agent-loop`](#agent-loop) | plan-then-execute · default-deny tools · budgets · typed final message |
 | « anything irreversible (deploy · send · publish) » | [`human-gated-ship`](#human-gated-ship) | parallel gates · assert · `nika:prompt` GO · `on_finally` record |
+| « understand a site (domain · theme · assets) from a URL » | [`website-brief`](#website-brief) | fetch `traverse:` crawl · one typed infer · explicit persist · zero exec |
+| « generate image/audio assets from a brief » | [`media-asset-pack`](#media-asset-pack) | `nika:image_generate` · `nika:jq` manifest · local/mock provider first |
+| « call a product API: upload a file, then create from it » | [`api-upload-and-create`](#api-upload-and-create) | fetch `multipart:` upload · masked secrets header · mode/jq extraction |
 
 Composite jobs compose templates: a fanout whose merge feeds a
 human-gated-ship, an etl-state whose delta fans out. Start from the
@@ -43,7 +46,7 @@ nika: v1
 workflow: chain-template            # SLOT: kebab-case workflow id
 description: "gather → think → persist"   # SLOT: one honest sentence
 
-model: mock/echo                    # SLOT: provider/model (mock/echo = CI-safe)
+model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
 vars:
   source: "./input.txt"             # SLOT: your inputs · typed where required
@@ -133,7 +136,7 @@ nika: v1
 workflow: fanout-template           # SLOT: kebab-case workflow id
 description: "discover N items · process in parallel · merge"   # SLOT
 
-model: mock/echo                    # SLOT: provider/model
+model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
 vars:
   collection_source: "./items"      # SLOT: where the collection comes from
@@ -212,7 +215,7 @@ tasks:
 
   - id: fresh
     invoke:
-      tool: "nika:fetch"            # SLOT: fetch / read / exec — the fresh data
+      tool: "nika:fetch"            # SLOT: fetch / read / exec · the fresh data
       args:
         url: "${{ vars.source_url }}"
         mode: jq
@@ -264,7 +267,7 @@ nika: v1
 workflow: agent-loop-template       # SLOT: kebab-case workflow id
 description: "plan → budgeted agent → typed result"   # SLOT
 
-model: mock/echo                    # SLOT: agents want a tool-calling model
+model: ollama/qwen3.5:4b           # SLOT: a tool-calling model · local by default
 
 vars:
   goal:
@@ -304,7 +307,7 @@ tasks:
       tool: "nika:assert"
       args:
         condition: "${{ size(tasks.execute.output.findings) > 0 }}"
-        message: "Agent returned no findings — do not trust an empty run"   # SLOT
+        message: "Agent returned no findings, do not trust an empty run"   # SLOT
 
 outputs:
   findings:
@@ -356,7 +359,7 @@ tasks:
       tool: "nika:assert"
       args:
         condition: "${{ tasks.check_a.output.exit_code == 0 && tasks.check_b.output.exit_code == 0 }}"
-        message: "A gate is RED — refusing to proceed"   # SLOT
+        message: "A gate is RED: refusing to proceed"   # SLOT
 
   - id: human
     depends_on: [gates]
@@ -371,7 +374,7 @@ tasks:
     when: ${{ tasks.human.output == true }}
     exec:
       command: ["echo", "shipped"]   # SLOT: the irreversible action (argv · program must be in permits.exec)
-      # default capture · a failing ship fails LOUDLY (NIKA-EXEC-001) —
+      # default capture · a failing ship fails LOUDLY (NIKA-EXEC-001):
       # never `capture: structured` on the irreversible step (exit codes
       # would become data and a red ship would read as success)
 
@@ -388,6 +391,187 @@ tasks:
 
 outputs:
   acted: ${{ tasks.act.status }}
+```
+{/* template:end */}
+
+## website-brief
+
+Understand a site from a URL: bounded `traverse:` crawl → one typed brief → persist. Zero exec.
+
+{/* template:begin website-brief.nika.yaml */}
+```yaml website-brief.nika.yaml
+nika: v1
+workflow: website-brief-template    # SLOT: kebab-case workflow id
+description: "crawl → brief → persist"   # SLOT: one honest sentence
+
+model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
+
+vars:
+  site_url: "https://example.com"   # SLOT: the site to understand
+  out_path: "./out/brief.json"      # SLOT: where the brief lands
+
+tasks:
+  - id: crawl_site
+    invoke:
+      tool: "nika:fetch"
+      args:
+        url: "${{ vars.site_url }}"
+        traverse: { max_pages: 5 }  # SLOT: crawl bound · 1..=25 (robots honored)
+
+  - id: brief
+    depends_on: [crawl_site]
+    infer:
+      max_tokens: 1200
+      prompt: |
+        # SLOT: the one model job · what should the brief capture?
+        From this site crawl, produce a creative brief: the domain of
+        activity, the dominant visual theme, the audience, the usable
+        colors and image assets.
+        Crawl digest · ${{ tasks.crawl_site.output }}
+      schema:                       # SLOT: the typed shape downstream tasks rely on
+        type: object
+        additionalProperties: false
+        properties:
+          domain: { type: string }
+          theme: { type: string }
+          audience: { type: string }
+          colors: { type: array, items: { type: string } }
+          assets: { type: array, items: { type: string } }
+        required: [domain, theme, audience, colors, assets]
+
+  - id: persist
+    depends_on: [brief]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "${{ vars.out_path }}"
+        create_dirs: true
+        content: "${{ tasks.brief.output }}"   # ALWAYS pass content
+
+outputs:
+  brief: ${{ tasks.brief.output }}   # SLOT: the callable contract
+```
+{/* template:end */}
+
+## media-asset-pack
+
+Generate assets from a brief: typed creative direction → `nika:image_generate` → jq manifest.
+
+{/* template:begin media-asset-pack.nika.yaml */}
+```yaml media-asset-pack.nika.yaml
+nika: v1
+workflow: media-asset-pack-template # SLOT: kebab-case workflow id
+description: "brief → render → manifest"  # SLOT: one honest sentence
+
+model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
+
+vars:
+  subject: "a calm cosmic landing hero"   # SLOT: what the asset is about
+  out_dir: "./out/assets"           # SLOT: where assets land
+
+tasks:
+  - id: brief
+    infer:
+      max_tokens: 600
+      prompt: |
+        # SLOT: the creative direction · style · constraints
+        Write one vivid, concrete image prompt for: ${{ vars.subject }}.
+        No text in the image · no watermark · a calm central zone.
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          image_prompt: { type: string }
+        required: [image_prompt]
+
+  - id: render
+    depends_on: [brief]
+    invoke:
+      tool: "nika:image_generate"
+      args:
+        provider: mock              # SLOT: local | openai | gemini | xai (local/mock first)
+        prompt: "${{ tasks.brief.output.image_prompt }}"
+        output_dir: "${{ vars.out_dir }}"
+        filename_prefix: "asset"    # SLOT: filename stem
+
+  - id: manifest
+    depends_on: [brief, render]
+    invoke:
+      tool: "nika:jq"
+      args:
+        expression: "{ brief: .[0], images: .[1].images }"
+        input:
+          - "${{ tasks.brief.output }}"
+          - "${{ tasks.render.output }}"
+
+  - id: persist
+    depends_on: [manifest]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "${{ vars.out_dir }}/manifest.json"
+        create_dirs: true
+        content: "${{ tasks.manifest.output }}"
+
+outputs:
+  manifest: ${{ tasks.manifest.output }}  # SLOT: the callable contract
+```
+{/* template:end */}
+
+## api-upload-and-create
+
+Call a product API natively: `multipart:` upload (masked secrets header) → JSON create → typed result.
+
+{/* template:begin api-upload-and-create.nika.yaml */}
+```yaml api-upload-and-create.nika.yaml
+nika: v1
+workflow: api-upload-and-create-template  # SLOT: kebab-case workflow id
+description: "upload → create → result"   # SLOT: one honest sentence
+
+model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
+
+vars:
+  api_base: "https://api.example.com"     # SLOT: the product API base
+  asset_path: "./out/assets/asset-1.png"  # SLOT: the file to upload
+
+secrets:
+  API_KEY:
+    source: env
+    key: EXAMPLE_API_KEY            # SLOT: the OS env var holding the key
+    egress:
+      - to: "nika:fetch"            # the ONE sanctioned sink · default-deny otherwise
+
+tasks:
+  - id: upload
+    invoke:
+      tool: "nika:fetch"
+      args:
+        url: "${{ vars.api_base }}/upload"   # SLOT: the upload endpoint
+        method: POST
+        headers:
+          x-api-key: "${{ secrets.API_KEY }}"  # SLOT: the auth header name
+        multipart:
+          - { name: file, path: "${{ vars.asset_path }}" }
+          # SLOT: extra text fields · { name: directory, value: "assets" }
+        mode: jq
+        jq: ".url"                  # SLOT: where the response carries the asset URL
+
+  - id: create
+    depends_on: [upload]
+    invoke:
+      tool: "nika:fetch"
+      args:
+        url: "${{ vars.api_base }}/create"   # SLOT: the create endpoint
+        method: POST
+        headers:
+          x-api-key: "${{ secrets.API_KEY }}"
+        body:                       # SLOT: the create payload (objects auto-JSON)
+          asset_url: "${{ tasks.upload.output }}"
+        mode: jq
+        jq: "{ id: .id, url: .url }"   # SLOT: the fields downstream needs
+
+outputs:
+  result: ${{ tasks.create.output }}   # SLOT: the callable contract
 ```
 {/* template:end */}
 
