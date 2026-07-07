@@ -1,6 +1,6 @@
 ---
 title: "Roadmap"
-description: "Real semver toward 1.0. Quality over speed. 0.90.0 is the first public release-candidate; 1.0 tags when the gates are green."
+description: "Real semver toward 1.0. Quality over speed. The 0.9x train hardens the engine; 1.0 tags when the gates are green."
 sidebarTitle: "Roadmap"
 icon: "map"
 ---
@@ -8,10 +8,9 @@ icon: "map"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika follows **real semver toward 1.0**. The latest tagged public release is
-**0.90.0**; this docs build follows `main` at **{STATUS.version}**. 1.0 tags
-when the release gates are green. Features arrive in 1.x minors. Each version
-is a quality milestone earned by crate admissions + hygiene vector deploys +
-ADR promotions.
+**v{STATUS.version}**. 1.0 tags when the release gates are green — never on a
+calendar. Features arrive in 1.x minors. Each version is a quality milestone
+earned by crate admissions + hygiene vector deploys + ADR promotions.
 
 <Info>
   **Canonical source:** [`ROADMAP.md`](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md)
@@ -19,13 +18,29 @@ ADR promotions.
   the full roadmap lives in the repo alongside ADRs.
 </Info>
 
+## The road so far
+
+| When | What |
+|---|---|
+| 2025 | The idea: durable agent work should be source code — one file, any model, sovereign by default. |
+| 2026-01-01 | First exploratory commit. 14 weeks · ~4,600 commits · a working 322k-LOC engine (v0.79.3) — and the context lesson that motivates Diamond. |
+| 2026-04-13 | **Diamond begins**: ground-up rewrite on an orphan branch. 12 gates per crate, hard caps, zero `.unwrap()`. |
+| May 2026 | The language locks in the open spec: `nika: v1` envelope · 4 verbs · CEL + jq · 22-builtin stdlib. |
+| 2026-06-10 → 21 | The vertical slice: 23 crates admitted in twelve days — verbs, runtime, LSP, MCP, schema, CLI. |
+| 2026-06-21 | **v0.90.0 — first public release** (Homebrew + install script, 4 platforms). |
+| Since | The 0.9x train: agent wiring (0.92) · resume + test harness (0.93) · media suite (0.94) · local-first catalog (0.95) · time-travel debugging (0.96). |
+
+The dated, tagged detail lives on the [Releases](/changelog/releases) page.
+
 ## Why real semver toward 1.0
 
 <CardGroup cols={2}>
   <Card title="1.0 means we stand behind it" icon="circle-check">
-    0.90.0 is the first public release-candidate. 1.0 is the usable engine
-    we commit to as a stable public API, not a marketing tick. Pre-1.0 the surface is still hardening; 1.0
-    is the line where the public API is stable and additive from there.
+    v0.90.0 was the first public release; the 0.9x line is
+    release-candidate grade. 1.0 is the usable engine we commit to as a
+    stable public API, not a marketing tick. Pre-1.0 the surface is still
+    hardening; 1.0 is the line where the public API is stable and
+    additive from there.
   </Card>
   <Card title="Quality bar stays high" icon="medal">
     Every crate admits with 12 gates. {STATUS.cratesAdmitted} of
@@ -44,42 +59,60 @@ ADR promotions.
   </Card>
 </CardGroup>
 
-## Current state: main v{STATUS.version}
+## Current state: v{STATUS.version}
 
-**{STATUS.cratesAdmitted} / {STATUS.cratesTarget} crates admitted** · **{STATUS.libTests} lib tests** · **{STATUS.hygieneVectors}** hygiene vectors ({STATUS.hygieneGreen} green) · **{STATUS.adrs}** ADRs.
+**{STATUS.cratesAdmitted} / {STATUS.cratesTarget} crates admitted** · **{STATUS.libTests} lib tests** · **{STATUS.hygieneVectors}** hygiene vectors · **{STATUS.adrs}** ADRs ({STATUS.adrsAccepted} Accepted).
 
+Already live today: the four verbs (`infer` · `exec` · `invoke` · `agent`),
+`nika run` / `check` / `test` / `trace` / `dap`, the LSP, the MCP oracle,
+{STATUS.providers} catalog providers, and the embedded language pack.
 See [live state](/reference/status) for the authoritative snapshot.
 
 ## Milestones
 
 <AccordionGroup>
-  <Accordion title="1.0.0: Public API lock" icon="rocket">
-    **1.0.0 ships when the gates are green.** The language spec (`nika: v1`
-    envelope, Apache-2.0) is already public and stable; the engine release
-    candidate already exposes the first-run CLI, four verbs, `nika run`, LSP,
-    and MCP surfaces. 1.0 is the point where the public API is locked and
-    additive from there.
+  <Accordion title="0.9x: the hardening train (now)" icon="train">
+    **The current work.** Each 0.9x minor is a complete, diamond-grade
+    release; together they close the distance to 1.0:
+
+    - **The last two crates to {STATUS.cratesTarget}/{STATUS.cratesTarget}**:
+      `nika-pck-manifest` (manifest DTO · L0) and `nika-binding`
+      (types-first slice).
+    - **The 7 shadow zones close** (the 1.0 gates): `nika serve` input
+      trust · cross-provider structured-output parity · binding taint
+      runtime · `for_each` per-element spotlight · L1 taint runtime ·
+      NikaError Display parity · the provider parity matrix.
+    - **The registry story**: shared workflows re-proven by CI (hash +
+      oracle + engine cert) and a client verb to consume them
+      (`nika add` — ADR-106, Proposed).
+    - **Design-partner hardening**: `1.0.0-rc.N` pre-releases once the
+      gates are green, exercised on real workloads before the lock.
+
+    **No date.** The train ships when each release earns its tag.
   </Accordion>
 
-  <Accordion title="1.x minors: Diamond Foundation complete" icon="diamond">
-    **Target state, reached additively across 1.x minors:**
+  <Accordion title="1.0.0: Public API lock" icon="rocket">
+    **1.0.0 ships when the gates are green.** The language spec (`nika: v1`
+    envelope, Apache-2.0) is already public and stable; the engine already
+    exposes the first-run CLI, four verbs, `nika run`, LSP, and MCP
+    surfaces. 1.0 is the point where the public API is locked and
+    additive from there — enforced by `cargo public-api` +
+    `cargo semver-checks` on every PR.
+  </Accordion>
 
-    - **All {STATUS.cratesTarget} crates admitted** past 12 gates.
-    - `nika` binary admitted (L5, &lt;500 LOC composition root).
-    - 4 verbs live: `infer`, `exec`, `invoke`, `agent` (HTTP fetch is the `nika:fetch` builtin under `invoke`).
-    - {STATUS.providers} providers routed through 1 unified InferRequest,
-      {STATUS.capabilityRules} capability rules enforced.
-    - 7 shadow zones closed (nika serve input trust · cross-provider
-      structured output parity · binding taint runtime · for_each
-      per-element spotlight · L1 taint runtime · NikaError Display
-      parity · provider parity matrix).
+  <Accordion title="1.x minors: the foundation completes, additively" icon="diamond">
+    **Arrives across 1.x minors, no breaking changes:**
+
     - `nika-catalog-sync` shipping catalog freshness (triple-source
       cross-check: LiteLLM + models.dev + OpenRouter corroboration).
-    - `nika-lsp` L4 admitted: full cross-task binding analysis + taint
-      propagation warnings + DAG preview.
     - Sigstore keyless signing on release artifacts.
+    - `cargo install nika` — crates.io joins the install matrix.
+    - Deeper LSP analysis: full cross-task binding analysis + taint
+      propagation warnings + DAG preview.
+    - Cross-provider parity expansion as models evolve.
 
-    **No date.** The 42-crate architecture, complete across 1.x minors.
+    **No date.** The 42-crate architecture, complete and then extended
+    across 1.x minors.
   </Accordion>
 
   <Accordion title="2.0: The Connectome era (sovereign memory)" icon="brain">
@@ -90,7 +123,7 @@ See [live state](/reference/status) for the authoritative snapshot.
       `nika-rrf`, `nika-fsrs`, `nika-rdfs-reasoner`, `nika-temporal`,
       `nika-graph-algos`, `nika-autodesc-minimal`, `nika-autodesc-full`.
     - `MemoryStore` + `EmbeddingProvider` trait impls live (reservations
-      from v0.80 → real implementations).
+      planted at v0.80 → real implementations).
     - Oxigraph as the default backend (ADR-004 Option B): RDF/SPARQL,
       W3C-standard, exportable, yours.
     - Agent-v2 with memory-backed recall (FSRS spaced repetition,
@@ -132,6 +165,27 @@ See [live state](/reference/status) for the authoritative snapshot.
   </Accordion>
 </AccordionGroup>
 
+## How a release ships
+
+<Steps>
+  <Step title="The work earns the tag">
+    Crate admissions (12 gates), shadow-zone closures, and field fixes
+    accumulate on `main` — every commit atomic and bisectable.
+  </Step>
+  <Step title="The tag cuts the binaries">
+    A `vX.Y.Z` tag triggers the release pipeline: four `nika` binaries
+    (macOS arm64/x64 · Linux arm64/x64) + checksums.
+  </Step>
+  <Step title="The release lands everywhere">
+    GitHub Release with curated notes, the Homebrew tap bumps, the
+    install script serves the new version.
+  </Step>
+  <Step title="The changelog tells the story">
+    A curated `CHANGELOG.md` section + an entry on
+    [Releases](/changelog/releases) (subscribable via RSS).
+  </Step>
+</Steps>
+
 ## Deliberately excluded
 
 <Warning>
@@ -170,7 +224,7 @@ See [live state](/reference/status) for the authoritative snapshot.
 
 <CardGroup cols={2}>
   <Card title="Releases" icon="clock-rotate-left" href="/changelog/releases">
-    Crate-by-crate admission log + Unreleased changes.
+    The full arc, dated and tagged: origins → Diamond → the 0.9x train.
   </Card>
   <Card title="Live state" icon="gauge" href="/reference/status">
     Where the engine is today.
