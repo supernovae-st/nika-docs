@@ -1,42 +1,49 @@
 ---
 title: "Releases"
-description: "Every crate admission + every significant engine update. One source of truth: `CHANGELOG.md` on the `main` branch."
+description: "The full arc — the idea (2025), the exploration era, the Diamond rebuild, and every public release since v0.90.0. One source of truth: `CHANGELOG.md` on the `main` branch."
 sidebarTitle: "Releases"
 icon: "clock-rotate-left"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Diamond started at **v0.80.0** (2026-04-13). The legacy exploration era
-(v0.79.3) lives on the private `brouillon` archive: read-only, never
-shipped from.
+Nika follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
+[real semver toward 1.0](/changelog/roadmap). The history below spans three
+eras, and every entry is dated from the git record:
+
+1. **Origins** (2025 → April 2026) — the idea, then a 14-week private
+   exploration that grew to a 322k-LOC engine and taught the lesson Diamond
+   is built on.
+2. **The Diamond rebuild** (April 13, 2026 →) — a ground-up rewrite, one
+   crate at a time, 12 gates each.
+3. **Public releases** (June 21, 2026 →) — tagged binaries, curated
+   changelogs, real semver.
 
 <Info>
   **Canonical source:** [`CHANGELOG.md`](https://github.com/supernovae-st/nika/blob/main/CHANGELOG.md)
-  on the `main` branch. This page curates milestones; the full
-  history lives in the repo. Current HEAD `{STATUS.head}`.
+  on the `main` branch. This page curates the milestones; the full history
+  lives in the repo. Current HEAD `{STATUS.head}`. Filter entries with the
+  tags, or subscribe via [RSS](https://docs.nika.sh/changelog/releases/rss.xml).
 </Info>
 
 ## Cadence
 
 <Check>
-  **One crate admission = one commit = one `v0.80.0-alpha.N` tag** (the
-  alpha train below · the scheme rides the current milestone).
-  Every 4 weeks, a blog post or dev log entry. Public accountability,
-  no hidden work.
+  **Since v0.90.0 (June 21, 2026 · the first public release), every release
+  is a real-semver tag with binaries**: Homebrew, the install script, a
+  GitHub Release, and a curated `CHANGELOG.md` section. Public
+  accountability, no hidden work.
 </Check>
 
-Since v0.90.0, Nika ships tagged CLI release artifacts. Between release tags,
-progress is tracked via:
+Between release tags, progress lands on `main` as:
 
-1. **Crate admission commits** on `main` (e.g., `feat(nika-X): admit to workspace — all 12 gates passed`).
-2. **Hygiene vector deployments** (currently {STATUS.hygieneVectors} active, {STATUS.hygieneGreen} green / {STATUS.hygieneYellow} yellow / {STATUS.hygieneRed} red).
+1. **Crate admission commits** (e.g., `feat(nika-X): admit to workspace — all 12 gates passed`).
+2. **Hygiene vector deployments** ({STATUS.hygieneVectors} active vectors guard the workspace on every push).
 3. **ADR promotions** ({STATUS.adrs} total: {STATUS.adrsAccepted} Accepted, {STATUS.adrsProposed} Proposed).
 
-## Recent milestones
+## History
 
-<Update label="v0.96.0" description="2026-07-06 · the run becomes a place">
+<Update label="v0.96.0" description="2026-07-06 · the run becomes a place" tags={["release", "debugging"]}>
   `nika dap` brings time-travel replay debugging over the run journal —
   breakpoints in your `.nika.yaml`, step forward AND backward, recorded
   outputs in the Variables pane; the VS Code extension's F5 integration
@@ -51,7 +58,7 @@ progress is tracked via:
   formula-injection guard.
 </Update>
 
-<Update label="v0.95.0" description="2026-07-06 · the catalog practices local-first">
+<Update label="v0.95.0" description="2026-07-06 · the catalog practices local-first" tags={["release", "providers", "local-first"]}>
   The 5 local servers (Ollama · LM Studio · llama.cpp · LocalAI · vLLM)
   join `nika catalog` with descriptions, tags and seed models — keyless
   by construction, and sovereign models stay unpriced, never « free ».
@@ -62,7 +69,7 @@ progress is tracked via:
   sequences, and the MCP stdio transport bounds its line reads.
 </Update>
 
-<Update label="v0.94.0" description="2026-07-06 · the media suite · every run leaves a journal">
+<Update label="v0.94.0" description="2026-07-06 · the media suite · every run leaves a journal" tags={["release", "media", "providers"]}>
   Two media builtins take the stdlib to 25: `nika:image_generate`
   (generation and editing, local-first providers, provenance manifests,
   content credentials preserved) and `nika:tts_generate` (one sovereign
@@ -71,27 +78,27 @@ progress is tracked via:
   to one upstream cone. The catalog rides the wire (`catalog`/`tools
   --json` plus their MCP twins — 8 read-only tools on protocol
   `2026-07-28`), `cost_usd` rides `task_completed` without ever faking a
-  zero, Hugging Face and NVIDIA join the 16-provider catalog, and
-  `nika doctor --ping` actually probes the local ports.
+  zero, Hugging Face and NVIDIA join the 16-provider canonical catalog,
+  and `nika doctor --ping` actually probes the local ports.
 </Update>
 
-<Update label="v0.93.1" description="2026-07-05 · the embedded pack teaches 2026 models">
+<Update label="v0.93.1" description="2026-07-05 · the embedded pack teaches 2026 models" tags={["release", "local-first"]}>
   The pack vendored into the binary carries the qwen3.5 teach-cascade:
   the first `nika examples run 01-hello` of a fresh install works against
   the local models people actually pull in July 2026. Plus the README
   daily-commands block — the full 0.93 user loop in one place.
 </Update>
 
-<Update label="v0.93.0" description="2026-07-05 · resume · test harness · local thinking models unbricked">
+<Update label="v0.93.0" description="2026-07-05 · resume · test harness · local thinking models unbricked" tags={["release", "local-first", "debugging"]}>
   Provider-plane HTTP timeout rises to 180s: 2026 open-weight thinking
   models (qwen3.5 · gemma4) no longer die at the cloud-calibrated 30s
   ceiling. `nika run --resume` lands durable-lite resume — the trace IS
   the checkpoint, completed tasks replay as visible cache hits (ADR-099).
   `nika test` golden harness + ADR-098 schema wire selection + the CLI
-  verdict card. `nika-cap` admitted (all 12 gates).
+  verdict card. `nika-cap` admitted (all 12 gates) — 40 of 42 crates.
 </Update>
 
-<Update label="v0.92.0" description="2026-07-03 · MCP learning tools · codex wire · exec hardening">
+<Update label="v0.92.0" description="2026-07-03 · MCP learning tools · codex wire · exec hardening" tags={["release", "agents", "security"]}>
   The MCP oracle grows the learning tools (`nika_schema` ·
   `nika_examples` · `nika_template` · `nika_canon`). `nika wire codex`
   patches `~/.codex/config.toml`; the Claude Code marketplace ships one
@@ -100,7 +107,7 @@ progress is tracked via:
   browser navigation guarded against private/loopback SSRF.
 </Update>
 
-<Update label="v0.91.0" description="2026-06-25 · onboarding wiring · headless builds">
+<Update label="v0.91.0" description="2026-06-25 · onboarding wiring · headless builds" tags={["release", "packaging"]}>
   Explicit onboarding wiring in the CLI · `nika examples run` takes a
   `--model` override with an offline mock hint · headless build fixes
   (xcap backend default-off · atspi 0.29) · doctor recognizes the
@@ -108,62 +115,73 @@ progress is tracked via:
   version from brew assets.
 </Update>
 
-<Update label="v0.90.0" description="2026-06-21 · the first public release">
-  Diamond's first tagged public release: CLI binaries via brew + the
-  install script. Real semver toward a 1.0.0 public launch — quality
-  over speed. Everything before this tag is the `v0.80.0-alpha.*`
-  rewrite history.
+<Update label="v0.90.0" description="2026-06-21 · the first public release" tags={["release", "milestone", "packaging"]}>
+  **Diamond's first tagged public release.** CLI binaries for four
+  platforms (macOS arm64/x64 · Linux arm64/x64) via Homebrew and the
+  install script, cut by the release pipeline on the tag. `nika-cli` and
+  `nika-extract` admitted the same morning — the operator surface and the
+  9 fetch extract modes. Real semver toward a 1.0.0 public launch —
+  quality over speed. Everything before this tag is rewrite history.
 </Update>
 
-<Update label="Unreleased" description="2026-04-17 · Wave 3A + 4A + 4B + Swarm-3 Batch I.b/II">
+<Update label="The vertical slice" description="2026-06-10 → 2026-06-21 · 23 crates in twelve days" tags={["foundation", "milestone"]}>
+  The sprint that turned a foundation into a runnable engine. June 10:
+  the kernel splits into four siblings (`core` · `ai` · `runtime` ·
+  `plugin`) and the effect crates land — `nika-fs`, `nika-http`,
+  `nika-blob`, `nika-exec-runner`, `nika-input`. June 11: `nika-pack`,
+  `nika-providers`, `nika-browser`, and **all four verb crates admitted
+  the same day** — `infer` · `exec` · `invoke` · `agent`. June 12:
+  `nika-runtime` (the DAG scheduler). June 15-18: `nika-lsp`,
+  `nika-mcp`, `nika-builtin`, `nika-schema`. June 21: `nika-cli` +
+  `nika-extract` — and the v0.90.0 tag ships that evening.
+</Update>
+
+<Update label="The language locks" description="May 2026 · the spec goes public · 7 crates climb" tags={["foundation", "language"]}>
+  The month the language reached its final shape, in the open
+  [`nika-spec`](https://github.com/supernovae-st/nika-spec) repo
+  (Apache-2.0): the `nika: v1` envelope (one field, forever), the four
+  verbs locked (`infer` · `exec` · `invoke` · `agent` — everything else
+  is a tool under `invoke`), CEL + jq as the only two expression layers,
+  agent tools default-deny, and the stdlib curated down to 22 builtins
+  with zero capability loss. Meanwhile the climb continued:
+  `nika-catalog-codegen` (May 10), `nika-bm25` (May 12), `nika-event` +
+  `nika-clock` (May 24), `nika-screen` + `nika-ocr` + `nika-a11y`
+  (May 25).
+</Update>
+
+<Update label="The foundation hardens" description="2026-04-17 · hygiene vectors · forward-compat seams · telemetry seeds" tags={["foundation"]}>
   ### Added
 
   - **4 new hygiene vectors** (30-33): `check-cancel-safety.sh`,
-    `check-owned-strings.sh`, `check-unsafe-count.sh`, `check-layer-deps.sh`.
-    Brings the suite to {STATUS.hygieneVectors} active vectors.
-  - **Wave 3A post-commit hook**: engine commits now trigger Olympus
-    `xtask.ts` in background, live-refreshing `/timeline`, `/graph/diff`,
-    `/graph/fitness`, `/hygiene`.
-  - **Wave 4A reservations**: 5 forward-compat seams for v0.95 memory subsystem
-    + v0.100 WASM: `EmbeddingSpec`, `MemoryFrameRef.trust`,
+    `check-owned-strings.sh`, `check-unsafe-count.sh`, `check-layer-deps.sh` —
+    the suite reaches 33 active vectors.
+  - **Forward-compat reservations**: 5 seams pre-planted for the memory
+    subsystem + WASM eras: `EmbeddingSpec`, `MemoryFrameRef.trust`,
     `RecallQuery.tenant`, `WasmPluginError::OutOfFuel` +
     `PluginCallContext`, `MemoryLifecycle` trait.
-  - **Wave 4B telemetry seeds**: `SpanGuard.parent_span_id` + W3C
-    Trace Context linkage; `Timestamp(i64 unix_ns)` + `WallDuration`
-    in `nika-types::timestamp` with RFC 3339 Display (inlined
-    Hinnant civil-from-days).
-  - **Batch II test depth**: 14 new proptest properties (TrustLevel
-    lattice invariants, ID serde roundtrip); Loom `#[cfg(loom)]`
-    interleaving tests for `CancelCtx` (INV-029); mutation baseline
-    for `nika-error` (60 mutants, 31 caught, 13 missed).
-  - **5 new ADRs**: ADR-029 EmbeddingSpec, ADR-030 MemoryFrameRef
-    trust, ADR-031 RecallQuery tenant, ADR-032 WasmPluginContext,
-    ADR-035 Telemetry seams (all Proposed, arming vector 19).
+  - **Telemetry seeds**: `SpanGuard.parent_span_id` + W3C Trace Context
+    linkage; `Timestamp(i64 unix_ns)` + `WallDuration` in
+    `nika-types::timestamp` with RFC 3339 Display.
+  - **Test depth**: 14 new proptest properties (TrustLevel lattice
+    invariants, ID serde roundtrip); Loom interleaving tests for
+    `CancelCtx`; a mutation baseline for `nika-error`.
+  - **5 new ADRs**: ADR-029 → ADR-032 + ADR-035 (telemetry seams).
 
   ### Changed
 
-  - Killed vectors 7 (linear-issue-states) and 18 (adr-dangling
-    duplicate of vector 16).
   - `ObservabilitySink` dropped → 5 sibling channels (Event · Metrics ·
-    Trace · Audit · Billing) per Q12 rev.3.
-  - Engine hygiene now enforces RED as fail / YELLOW as suggestion for
-    routine pushes (was YELLOW-as-fail, too strict).
-
-  ### Fixed
-
-  - 34 ADR evidence-path updates (vector 20 GREEN / 127 paths verified).
-  - ADR index regenerated 22→30→{STATUS.adrs}.
-  - FCI §See-also titles corrected + ADR-023..028 added.
-  - nika-catalog-verify spec corrected L2 → L4.
+    Trace · Audit · Billing).
+  - Engine hygiene enforces RED as fail / YELLOW as suggestion for
+    routine pushes.
 </Update>
 
-<Update label="v0.80.0-alpha.4" description="2026-04-14 · nika-catalog-verify admitted">
+<Update label="v0.80.0-alpha.4" description="2026-04-14 · nika-catalog-verify admitted" tags={["foundation"]}>
   **Crate admitted:** `nika-catalog-verify` (L4, 600 LOC, 9 tests, all 12
   gates green). The first L4 interface crate: validates all catalog
   TOMLs at build time via `cargo run -p nika-catalog-verify`.
 </Update>
 
-<Update label="v0.80.0-alpha.3" description="2026-04-13 · nika-kernel + nika-kernel-mock admitted">
+<Update label="v0.80.0-alpha.3" description="2026-04-13 · nika-kernel + nika-kernel-mock admitted" tags={["foundation"]}>
   **Crates admitted:** `nika-kernel` (L0.5) + `nika-kernel-mock` (L0.5).
   40 ISP traits with sealed supertrait discipline. `trait_variant::make`
   for async dynamic dispatch. Pure-memory mocks for hermetic test
@@ -171,23 +189,57 @@ progress is tracked via:
   for ergonomic downstream imports.
 </Update>
 
-<Update label="v0.80.0-alpha.2" description="2026-04-13 · nika-catalog admitted">
+<Update label="v0.80.0-alpha.2" description="2026-04-13 · nika-catalog admitted" tags={["foundation"]}>
   **Crate admitted:** `nika-catalog` (L0). TOML-driven provider + model +
   capability catalog with build-time codegen, perfect-hash lookup, Cow-
-  heavy zero-copy types. {STATUS.providers} providers + {STATUS.capabilityRules}
-  capability rules. Schema FK-check enforced in `build.rs`.
+  heavy zero-copy types. At admission: 105 MCP servers, 32 LLM providers,
+  13 embedding models in the inventory. Schema FK-check enforced in
+  `build.rs`.
 </Update>
 
-<Update label="v0.80.0-alpha.1" description="2026-04-13 · nika-error admitted">
+<Update label="v0.80.0-alpha.1" description="2026-04-13 · nika-error admitted" tags={["foundation"]}>
   **Crate admitted:** `nika-error` (L0). Typed NIKA-XXX error hierarchy,
   miette integration for L4 diagnostics, per-crate error range
   allocation, proptest-backed roundtrip invariants.
 </Update>
 
-<Update label="v0.80.0-alpha.0" description="2026-04-13 · Diamond begins">
-  **The beginning.** Orphan branch created from scratch as `nika-diamond` (renamed `main` 2026-05).
-  Legacy `main` (v0.79.3) abandoned. Forever-v0.x: no v1.0 target.
-  First admitted crate: `nika-types` (L0 foundation).
+<Update label="Diamond begins" description="2026-04-13 · the orphan branch · v0.80.0-alpha.0" tags={["foundation", "milestone"]}>
+  **The rewrite starts.** An orphan branch created from scratch (as
+  `nika-diamond`, renamed `main` in May 2026) — zero shared history with
+  the exploration era. The constraint that defines everything after:
+  every crate must fit in an AI context window. ≤15k LOC per crate,
+  ≤1,500 per file, ≤100 lines per function, zero `.unwrap()` in `src/`,
+  and 12 admission gates before a crate joins the workspace. First
+  admitted crate: `nika-types` (L0 foundation). The versioning policy
+  said « forever v0.x » at the time; it was later amended to real semver
+  toward 1.0.
+</Update>
+
+<Update label="The exploration era" description="2026-01-01 → 2026-04-13 · ~4,600 commits · v0.1 → v0.79.3" tags={["origins"]}>
+  **The first commit lands on New Year's Day 2026**: `initial nika v0.1
+  with strict templating system` — followed the same week by DAG
+  validation, event sourcing for the workflow audit trail, and
+  fine-grained executor events. Fourteen weeks of full-speed exploration
+  (~4,600 commits, peaking at 2,900+ in March) grew it into a working
+  322k-LOC, 31-crate engine at v0.79.3.
+
+  It also surfaced the lesson Diamond is built on: at that scale the
+  biggest correctness risk stops being algorithmic and becomes
+  **context** — no human or AI assistant could hold the system in
+  working memory, so refactors happened by pattern-match, and
+  pattern-match hallucinates. The exploration era is preserved as a
+  read-only private archive (`brouillon`); nothing ships from it. Diamond
+  reads it, then rewrites from scratch.
+</Update>
+
+<Update label="The idea" description="2025 · before any code" tags={["origins"]}>
+  Nika started as a frustration, in 2025, before a single line existed:
+  useful AI work kept disappearing into chat histories. A great run — a
+  research brief, a review procedure, a data pipeline — lived and died
+  inside one conversation, unrepeatable and unownable. The bet:
+  **durable agent work should be source code** — one file you can run,
+  diff, review, and keep; local-first; any model; sovereign by default.
+  The first exploratory commit followed on January 1, 2026.
 </Update>
 
 ## Full history
@@ -201,12 +253,16 @@ progress is tracked via:
     Every commit on the `main` branch: atomic, bisectable,
     Co-Authored-By Nika 🦋.
   </Card>
+  <Card title="GitHub Releases" icon="tag" href="https://github.com/supernovae-st/nika/releases">
+    Binaries for every tag: macOS arm64/x64 · Linux arm64/x64 ·
+    checksums + per-release notes.
+  </Card>
   <Card title="Live state" icon="gauge" href="/reference/status">
     Current test counts, clippy, hygiene, admitted crate inventory.
   </Card>
   <Card title="Roadmap" icon="map" href="/changelog/roadmap">
-    What's next: 1.0.0 public API lock after the release gates are green,
-    1.x minors completing the 42-crate foundation, then the
-    2.0 Connectome era and the ecosystem tier.
+    What's next: the 0.9x hardening train, the 1.0.0 public API lock,
+    1.x minors completing the 42-crate foundation, then the 2.0
+    Connectome era and the ecosystem tier.
   </Card>
 </CardGroup>
