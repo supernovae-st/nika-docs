@@ -43,6 +43,21 @@ Between release tags, progress lands on `main` as:
 
 ## History
 
+<Update label="v0.97.0" description="2026-07-07 · the run becomes evidence" tags={["release", "trust"]}>
+  Every journal line carries a **hash chain** — `nika trace verify` walks
+  it and names the first broken link; export and replay check the chain
+  before trusting the data. `nika trace reproduce` compares a recorded
+  run against a fresh one and classifies every task (reproduced ·
+  nondeterministic · authored · environment). The journal **attests its
+  engine** (`engine_version` + platform on `workflow_started`). Models
+  are **priced before the first run** — 602 rules refreshed from
+  models.dev, per-model rates in `check --json` (the VS Code preflight
+  shows `$in/$out per 1M` on this tag). `check` IS the dry-run — the
+  plan names what dispatches in which wave. `doctor --json` speaks
+  machine; bare `nika init`/`new` converse on a terminal; and the dap
+  drift warn tells a re-encode from an edit (`workflow_sha256_lf`).
+</Update>
+
 <Update label="v0.96.0" description="2026-07-06 · the run becomes a place" tags={["release", "debugging"]}>
   `nika dap` brings time-travel replay debugging over the run journal —
   breakpoints in your `.nika.yaml`, step forward AND backward, recorded
