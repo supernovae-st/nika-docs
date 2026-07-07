@@ -1,19 +1,20 @@
 ---
 title: "OG images"
 sidebarTitle: "OG images"
-description: "T1 starter · a typed brief drives nika:image_generate: one OG card per page, provenance manifest included."
+description: "T1 starter · marketing: brief in, OG image variants + provenance manifest out."
 icon: "image"
 ---
 
-> **T1 starter · the native media path**: no provider curl, no helper
-> script — `nika:image_generate` renders the card, the manifest carries
-> the provenance, and the typed outputs stay the callable contract.
+> **T1 starter · marketing / content**: one task is the whole media
+> pipeline. Generated images land **on disk** under a declared boundary —
+> outputs carry paths and sha256 hashes, never image bytes.
 
 ## The job
 
-Every page needs an Open-Graph card and nobody wants to hand-run a
-design tool for each one. This workflow turns a page list into rendered
-OG images on disk — deterministic filenames, hashes in the manifest.
+Every landing page, blog post and QR campaign needs an OG image, and
+someone ends up producing them one by one in a chat window. This workflow
+turns that into a step: creative brief in, rendered variants + a
+provenance manifest out, ready for the site build to pick up.
 
 ## The shape
 
@@ -25,7 +26,7 @@ flowchart LR
 ```
 {/* showcase:dag-end */}
 
-## The workflow
+## The file
 
 {/* showcase:begin t1-og-images.nika.yaml */}
 ```yaml t1-og-images.nika.yaml
@@ -56,9 +57,33 @@ outputs:
 ```
 {/* showcase:end */}
 
+## Why it reads like that
+
+- **`provider: mock` first** — it renders real, decodable PNGs offline,
+  deterministically, with zero keys: the pipeline is testable in CI as-is.
+  Production is a one-line flip to `local` (the sovereign path — your
+  LocalAI/Ollama/sd.cpp server, `NIKA_IMAGE_LOCAL_URL`), `gemini`
+  (`GEMINI_API_KEY`), `openai` (`OPENAI_API_KEY`) or `xai` (`XAI_API_KEY`);
+  keys and the local URL are engine-configured, never workflow args.
+- **`permits.fs.write` is the contract** — `./assets/og/**` is the ONLY
+  place assets may land; a templated `output_dir` that escapes it fails
+  `NIKA-SEC-004` before any byte is written. `nika check --infer-permits`
+  writes this block for you.
+- **assets, not blobs** — `tasks.hero.output.images` is a list of
+  `{ path, filename, width, height, sha256, … }` entries, and a
+  `*.manifest.json` lands beside the files (request echo · hashes ·
+  usage · your `metadata:` fields). Base64 never rides outputs, logs or
+  traces.
+- **`n: 2` for A/B** — OpenAI renders n natively; Gemini runs n
+  sequential calls (documented); mock renders n distinct deterministic
+  variants.
+
 ## Run it
 
-```bash
-nika check og-images.nika.yaml
-nika run og-images.nika.yaml --model mock/echo   # offline preview
+```sh
+nika examples run showcase/t1-og-images        # offline · mock renders real PNGs
+ls assets/og/                                  # variants + the provenance manifest
 ```
+
+Flip the provider line and re-run when you want real renders — the rest
+of the file does not change.

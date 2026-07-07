@@ -1,6 +1,6 @@
 ---
 title: "Providers"
-description: "14 canonical providers, local-first (plus a wider engine catalog) behind one unified InferRequest. Switch provider = change one field."
+description: "The canonical provider catalog — local-first (plus a wider engine catalog) behind one unified InferRequest. Switch provider = change one field."
 sidebarTitle: "Providers"
 icon: "server"
 ---
@@ -69,7 +69,7 @@ tasks:
 ## API dialects (7)
 
 Providers speak 7 distinct dialects. One provider crate per dialect + an
-OpenAI-compatible family that covers ~22 providers.
+OpenAI-compatible family that covers 23 providers.
 
 | Dialect | Providers | Notes |
 |---|---|---|
@@ -144,11 +144,11 @@ When a provider fails, Nika can route to a fallback:
 tasks:
   - id: primary
     infer:
-      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
+      model: ollama/llama3.2:3b            # <provider>/<name> · local first
       prompt: "..."
     fallback:
-      - { model: openai/gpt-4o }
-      - { model: groq/llama-3.3-70b-versatile }
+      - { model: mistral/mistral-large }
+      - { model: anthropic/claude-sonnet-4-6 }
 ```
 
 <Warning>

@@ -123,6 +123,26 @@ events through the same renderer that drew the original run. Replay
 calls no model and runs no command — it is a projection of what already
 happened ([Traces & replay](/concepts/traces)).
 
+## Export to your tracing stack · OTLP
+
+A recorded trace projects to OTLP/JSON lines, so any OpenTelemetry
+viewer becomes a Nika run viewer — no collector, no daemon, no vendor:
+
+```bash
+nika trace export .nika/traces/standup.ndjson
+# → .nika/traces/standup.otlp.jsonl  (one OTLP span per line)
+
+nika trace export .nika/traces/standup.ndjson -o run.otlp.jsonl   # choose the path
+```
+
+Each verb becomes a span (duration, tokens, the ADR-099 identity
+hashes). Drag the file into the Jaeger UI (≥ 1.60), or POST the lines to
+any OTLP/HTTP endpoint (Grafana Tempo, Langfuse, your own collector).
+Task outputs stay **local** by default; `--include-content` widens the
+exported file to carry them as span attributes when you explicitly want
+them. The export is a projection of the journal — it never re-runs
+anything.
+
 ## Terminals & CI
 
 The live surfaces are TTY-only by design. Piped or `NO_COLOR` output is

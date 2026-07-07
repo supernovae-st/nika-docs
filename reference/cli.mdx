@@ -17,23 +17,26 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 | Command | What it does |
 |---|---|
-| `nika check <file>` | Static pre-flight audit before any run |
+| `nika check <file>` | Static pre-flight audit before any run — `-` reads the workflow from stdin (0.94+) |
 | `nika run <file>` | Execute a checked workflow |
 | `nika test <file> [--update]` | Golden-test: run under the mock provider (offline · deterministic) and compare typed `outputs:` against `<file>.golden.json` |
-| `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits |
-| `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT |
+| `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits — `-` reads stdin (0.94+) |
+| `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT — `-` reads stdin (0.94+) |
 | `nika explain <code>` | Explain a `NIKA-XXXX` error code |
-| `nika doctor` | Diagnose providers plus editor/agent readiness |
+| `nika doctor [--ping]` | Diagnose providers plus editor/agent readiness — findings grouped under `binary` · `config` · `lsp` · `mcp` · `provider` · `local` · `providers` · `image` · `tts`. `--ping` (0.94+) TCP-probes the local ports — loopback and configured URLs only, 300ms cap, nothing sent on the socket; the default run stays fully offline |
 | `nika init [dir]` | Scaffold schema wiring, `AGENTS.md`, and Cursor rules |
-| `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, or `all` |
+| `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, `codex`, or `all` |
 | `nika spec [--canon]` | Print the embedded spec or canon |
 | `nika schema` | Print the embedded JSON Schema |
+| `nika catalog [--json]` | The embedded provider/model catalog (models · capabilities · env vars) — `--json` emits the versioned machine projection (`catalog_version: 1`) |
+| `nika tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
 | `nika examples list|show|run` | Browse or run embedded examples |
 | `nika new --from <template> <dest>` | Instantiate an embedded workflow template |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
-| `nika trace replay|show` | Replay or summarize a recorded run |
+| `nika trace replay|show|outputs|export|peek|flow` | Replay, summarize, inspect, or export a recorded run — `export` projects the journal to OTLP/JSON lines (Jaeger UI, or POST to any OTLP/HTTP endpoint; a local file, zero collector, zero vendor) |
+| `nika dap` | Debug Adapter Protocol server over stdio — time-travel a recorded run in any DAP client (VS Code F5) |
 | `nika lsp` | Run the language server over stdio |
-| `nika mcp` | Run the read-only MCP server (`nika_check`, `nika_explain`) |
+| `nika mcp` | Run the read-only MCP server (8 tools · see below) |
 
 ## Global flags
 
@@ -48,6 +51,8 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `--resume <trace>` | `run` | Resume from a prior run's NDJSON trace: matching completed tasks skip with a visible `task_cache_hit` ([details](/guides/resume)) |
 | `--from <task_id>` | `run` | With `--resume`: force this task and its transitive downstream to re-run even on a match |
 | `--answer <task>=<value>` | `run` | With `--resume`: answer a paused `nika:prompt` (repeatable) — a boolean for `confirm`, a string for `input`, one of the choices for `choice` |
+| `--task <task_id>` | `run` | (0.94+) Run ONE task and its transitive upstream cone only — the whole file still audits, then the plan and cost re-derive for exactly what will run; workflow `outputs:` are skipped |
+| `--no-trace-file` | `run` | (0.94+) Skip the run journal — every run otherwise writes `.nika/traces/<ts>-<id>.ndjson` by default (`NIKA_NO_TRACE_FILE` opts out globally) |
 | `--update` | `test` | (Re)write the golden from this run instead of comparing ([details](/guides/testing)) |
 | `--dry-run` | `run` | Plan only; execute zero effects |
 | `--no-progress` | `run` | Deterministic non-animated render |
@@ -57,16 +62,32 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 ## Environment variables
 
+The five local inference providers (Ollama · LM Studio · llama.cpp ·
+LocalAI · vLLM) need **no variable at all** — keyless by construction,
+loopback defaults built in. Everything below is opt-in:
+
 | Var | Description |
 |---|---|
+| `NIKA_IMAGE_LOCAL_URL` | Base URL for the `local` image provider (any OpenAI-images-compatible server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni) |
+| `NIKA_TTS_LOCAL_URL` | Base URL for the `local` speech provider (any OpenAI-speech-compatible server — LocalAI · Kokoro · Speaches) |
+| `MISTRAL_API_KEY` | Mistral provider |
 | `ANTHROPIC_API_KEY` | Anthropic provider |
 | `OPENAI_API_KEY` | OpenAI provider |
 | `GEMINI_API_KEY` | Google Gemini provider |
-| `MISTRAL_API_KEY` | Mistral provider |
-| `GROQ_API_KEY` | Groq provider |
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
 | `XAI_API_KEY` | xAI provider |
+| `GROQ_API_KEY` | Groq provider |
 | `OPENROUTER_API_KEY` | OpenRouter provider |
+| `HF_TOKEN` | Hugging Face provider (`NIKA_HUGGINGFACE_API_KEY` wins when set) |
+| `NVIDIA_API_KEY` | NVIDIA provider (`NIKA_NVIDIA_API_KEY` wins when set) |
+| `ELEVENLABS_API_KEY` | ElevenLabs speech (`NIKA_ELEVENLABS_API_KEY` wins when set) |
 
-The MCP server is intentionally read-only. It lets agents call `nika_check`
-and `nika_explain`; effectful execution stays behind `nika run`.
+The MCP server is intentionally read-only. It exposes 8 tools — `nika_check` ·
+`nika_explain` · `nika_schema` · `nika_examples` · `nika_template` ·
+`nika_canon` · `nika_catalog` · `nika_tools`; effectful execution stays
+behind `nika run`.
+
+<Note>
+  **MCP protocol** · latest `2026-07-28`; the server accepts 5 versions
+  (`2026-07-28` · `2025-11-25` · `2025-06-18` · `2025-03-26` · `2024-11-05`).
+</Note>

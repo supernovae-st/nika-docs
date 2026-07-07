@@ -1,6 +1,6 @@
 ---
 title: "Builtins catalog"
-description: "The canonical stdlib: engine-native nika:* tools across 5 categories, all reached through the invoke: verb."
+description: "The canonical stdlib: engine-native nika:* tools across 6 categories, all reached through the invoke: verb."
 sidebarTitle: "Builtins"
 icon: "toolbox"
 ---
@@ -31,7 +31,7 @@ the same way:
 
 <CardGroup cols={3}>
   <Card title="Builtins" icon="toolbox">
-    **{CANON.builtins}** tools · 5 categories
+    **{CANON.builtins}** tools · 6 categories
   </Card>
   <Card title="Extract modes" icon="filter">
     **{CANON.extractModes}** on `nika:fetch`
@@ -85,7 +85,7 @@ format conversion, generation, time, hashing.
 | `nika:json_diff` | JSON diff. Returns RFC 6902 JSON Patch (jq can't diff). |
 | `nika:validate` | Validate data against a JSON Schema: `format: json \| yaml`, returns `{ valid, errors }`. |
 | `nika:json_merge_patch` | RFC 7396 merge patch: `null` deletes a key, the semantics jq's `*` merge does not provide. |
-| `nika:convert` | Universal format converter: `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. |
+| `nika:convert` | Universal format converter: `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. CSV emit takes `formula_guard: true` (opt-in) to neutralize spreadsheet formula-injection in untrusted data. |
 | `nika:uuid` | Generate a UUID: `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
 | `nika:date` | Timestamp arithmetic: op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
 | `nika:hash` | Content hashing: default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
@@ -104,7 +104,7 @@ format conversion, generation, time, hashing.
 
 | Builtin | What it does |
 |---|---|
-| `nika:fetch` | HTTP request + content extraction: {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`) — plus `form:` (urlencoded), `multipart:` (file parts ride the `permits.fs` READ boundary · ≤32 MiB) and `traverse:` (bounded same-origin crawl · `max_pages` ≤ 25 · robots honored · the effect certificate counts every page). Fetching a URL is *calling a tool*, not a verb — and so is crawling: no `nika:crawl`. |
+| `nika:fetch` | HTTP request + content extraction: {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`) + `raw` passthrough — plus `form:` (urlencoded), `multipart:` (file parts ride the `permits.fs` READ boundary · ≤32 MiB) and `traverse:` (bounded same-origin crawl · `max_pages` ≤ 25 · robots honored · the effect certificate counts every page). Fetching a URL is *calling a tool*, not a verb — and so is crawling: no `nika:crawl`. |
 | `nika:notify` | Send notifications: `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms`), one builtin not five. |
 
 <Warning>
@@ -113,11 +113,12 @@ format conversion, generation, time, hashing.
   self-signed TLS is rejected by default.
 </Warning>
 
-## Introspection (1)
+## Introspection (2)
 
 | Builtin | What it does |
 |---|---|
 | `nika:inspect` | Workflow introspection. One builtin, four `view:` modes: `cost` (running USD by task/provider), `records` (full execution record), `dag_info` (nodes/edges/waves), `threads` (engine pool state, advisory). |
+| `nika:compose` | The agent loop's self-check: pass a drafted workflow YAML, get the full `nika check` verdict back as JSON — never executed. Loop-only, like `nika:done` (valid only inside an `agent:` tools whitelist). |
 
 ```yaml
 - id: budget_check
@@ -125,6 +126,33 @@ format conversion, generation, time, hashing.
     tool: "nika:inspect"
     args: { view: cost }
 ```
+
+## Media (2)
+
+| Builtin | What it does |
+|---|---|
+| `nika:image_generate` | Provider-backed image **generation and editing** as an *asset pipeline*: renders land under a declared `output_dir:` (rides `permits.fs.write`), and `mode: edit` sources are read permit-gated (`permits.fs.read` — the mirror boundary); outputs and a provenance manifest carry paths + dimensions + sha256, and an edit records its `source_images` — **image bytes never ride workflow outputs**. Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). Full guide: [Image generation](/guides/image-generation) — sovereign quickstart · editing · cookbook · honesty rules. |
+| `nika:tts_generate` | Speech synthesis on the same asset-pipeline contract (full guide: [Speech generation](/guides/speech-generation)): ONE audio file lands under `output_dir:` (permit-gated), output + manifest carry path + sha256 + `duration_ms` (wav-exact, mp3 honestly null) — **audio bytes never ride outputs**. Providers (sovereign-first): `local` (any OpenAI-speech-compatible server — LocalAI · Kokoro-FastAPI · Speaches — via `NIKA_TTS_LOCAL_URL`) · `openai` (`gpt-4o-mini-tts`) · `elevenlabs` (`ELEVENLABS_API_KEY`) · `mock` (real deterministic WAV, offline). |
+
+```yaml
+- id: hero
+  invoke:
+    tool: "nika:image_generate"
+    args:
+      provider: mock              # offline dry-run · flip to local (sovereign) / gemini / openai / xai for real renders
+      prompt: "OG hero — a monarch butterfly over a nebula"
+      aspect_ratio: "16:9"
+      output_dir: "./assets/og"
+```
+
+<Warning>
+  API keys are **engine-configured, never workflow args**: `OPENAI_API_KEY` /
+  `GEMINI_API_KEY` / `XAI_API_KEY` (or the `NIKA_`-prefixed variants) and the
+  local server's `NIKA_IMAGE_LOCAL_URL` (+ optional `NIKA_IMAGE_LOCAL_API_KEY`)
+  are read once at the engine's composition root. The provider endpoints are engine-fixed
+  constants — `permits.net.http` does not govern them (exactly like
+  `infer:`); `permits.tools` and `permits.fs` do.
+</Warning>
 
 ## Design rules the set obeys
 

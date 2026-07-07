@@ -35,7 +35,7 @@ nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
 - **`.cursor/rules/nika.mdc`**, the Cursor rules file (globs `*.nika.yaml`):
   the syntax floor + the check loop, auto-attached whenever the agent touches
   a workflow file.
-- **`.agents/skills/nika-authoring/SKILL.md`** (on `main` · next release): a
+- **`.agents/skills/nika-authoring/SKILL.md`** (0.93+): a
   repo-level [agent skill](https://agentskills.io) — Codex and every
   `.agents`-aware client discover it automatically and can invoke it as
   `$nika-authoring`. Same author → check → repair loop, packaged as a skill.
@@ -57,9 +57,9 @@ claude plugin install nika@nika
 ```
 
 One install: the `nika-authoring` skill lands (invoke it explicitly, or
-let it auto-trigger on `.nika.yaml` work), and the read-only oracle
-(`nika_check` + `nika_explain`) is wired. The plugin expects the `nika`
-binary on your PATH (`brew install supernovae-st/tap/nika`).
+let it auto-trigger on `.nika.yaml` work), and the read-only oracle is
+wired (8 tools: `nika_check` + `nika_explain` + the authoring surface).
+The plugin expects the `nika` binary on your PATH (`brew install supernovae-st/tap/nika`).
 
 ## `nika wire`: give the agent the real oracle
 
@@ -92,18 +92,18 @@ The server exposes two tool families — **validate** and **learn**:
   flows · types · tool args · schema) as structured JSON. The agent fixes
   its own file before you ever see it.
 - **`nika_explain`**: any `NIKA-XXX` error code, explained.
-- **`nika_schema` · `nika_examples` · `nika_template` · `nika_canon`**
-  (on `main` · ships next release): the authoring surface — the JSON
-  Schema, the runnable examples, the skeletons, and the canon SSOT, so
-  the agent follows the template→fill→check→repair path instead of
-  guessing structure. All read-only, all served from the embedded pack.
+- **`nika_schema` · `nika_examples` · `nika_template` · `nika_canon` ·
+  `nika_catalog` · `nika_tools`**: the authoring surface — the JSON
+  Schema, the runnable examples, the skeletons, the canon SSOT, and the
+  provider + builtin catalogs as versioned machine projections, so the
+  agent follows the template→fill→check→repair path instead of guessing
+  structure. All read-only, all served from the embedded pack.
 
 <Note>
-  The `codex` target is on `main` and ships with the next release. On the
-  current release, add the oracle to `~/.codex/config.toml` manually
-  (`[mcp_servers.nika]` · `command = "nika"` · `args = ["mcp"]`) — Codex
-  also reads `AGENTS.md` natively, so `nika init` alone already teaches it
-  the authoring loop.
+  The `codex` target is shipped (0.93+): `nika wire codex` patches
+  `~/.codex/config.toml` (`[mcp_servers.nika]` · `command = "nika"` ·
+  `args = ["mcp"]`, comments preserved) — Codex also reads `AGENTS.md`
+  natively, so `nika init` alone already teaches it the authoring loop.
 </Note>
 
 ## The loop

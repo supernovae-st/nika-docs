@@ -23,3 +23,5 @@ jobs:
           python-version: '3.12'
       - name: link + canon audit
         run: python3 scripts/link-audit.py
+      - name: count-drift gate
+        run: python3 scripts/count-drift-gate.py

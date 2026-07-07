@@ -34,6 +34,13 @@ so capturing it live costs nothing. By convention, project traces live
 under `.nika/traces/` next to the workflows they record; the CLI reads a
 trace from any path you give it.
 
+Since 0.94 the redirect is optional: **every run writes its own journal**
+to `.nika/traces/<timestamp>-<id>.ndjson` by default, and the verdict
+line prints the path. `--resume`, `nika trace show|replay` and the editor
+read it directly. Opt out per run with `--no-trace-file`, or globally
+with `NIKA_NO_TRACE_FILE` (`nika examples run` never journals — a staged
+temp-file run is not a workspace run).
+
 ## The event stream
 
 A trace is the run's lifecycle spine. Each line is one event with a
@@ -64,6 +71,11 @@ The spine is not the whole vocabulary. Deeper kinds record retries
 (`agent_tools_selected`, `agent_budget_checkpoint`, and friends). The
 full event system, including the durability checkpoints that make runs
 resumable, is documented in [Concepts · Events](/concepts/events).
+
+Real spend also rides the spine: a priced `task_completed` carries a
+`cost_usd` field next to its `tokens` — **absent** for mock and local
+runs (unpriced is honestly absent, never a fake `0`). Agent loops
+report the loop's accumulated tool spend as `tools_cost_usd`.
 
 ## Replay, never re-execute
 
