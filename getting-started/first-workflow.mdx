@@ -104,6 +104,29 @@ Example output:
 ✓ greet  T+00:00:01.42  OK
 ```
 
+### Read the story back (0.98+)
+
+`nika explain <file>` narrates any checked workflow — the waves, the
+**cost before a token is spent** (an unbounded task reads `FLOOR`, a
+local model reads *unpriced — not « free »*), what it touches, and the
+flight recorder hand-off. Captured verbatim against the released
+`0.98.0` on the chain skeleton after one recorded run:
+
+```text
+cost before a token is spent
+  ≥ $0.0000 — a FLOOR, not a ceiling:
+    think: no max_tokens declared — spend has no ceiling
+  local models: your compute · tokens unpriced — not « free »
+
+flight recorder
+  1 run(s) in .nika/traces · latest:
+  nika trace show .nika/traces/2026-07-08T21-18-22Z-642b.ndjson
+  nika trace verify <same file>   # prove the hash chain
+```
+
+Give the `infer` task a `max_tokens:` and the floor becomes a hard
+ceiling — the report tells you exactly that.
+
 ## 4. Add a second task that depends on the first
 
 ```yaml hello.nika.yaml
