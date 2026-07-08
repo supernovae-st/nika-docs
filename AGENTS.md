@@ -34,8 +34,10 @@ Public documentation for Nika — the open workflow language for AI
    studio). Include it rather than hand-writing link lists per page.
 6. Expression canon: `${{ … }}` = CEL (conditions + references) ·
    `output:`/`nika:jq` = jq (extraction + transform) · NO template
-   filters. Model id in examples: `ollama/llama3.1` (local-first ·
-   sovereignty default) · cloud variant when needed: `mistral/mistral-large` ·
-   anthropic/openai NEVER the default example (presentation order per
+   filters. Model id in examples: `ollama/qwen3.5:4b` (local-first ·
+   sovereignty default · the SAME model the engine's own scaffold and
+   the brew caveat teach — one first experience across the funnel) ·
+   cloud variant when needed: `mistral/mistral-large` · anthropic/openai
+   NEVER the default example (presentation order per
    supernovae-alignment Rule 3 · local → mistral → anthropic → openai).
 7. Commit trailer: `Co-Authored-By: Nika 🦋 <nika@supernovae.studio>`.
