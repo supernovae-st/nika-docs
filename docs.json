@@ -52,7 +52,7 @@
     "twitter:card": "summary_large_image"
   },
   "banner": {
-    "content": "\ud83e\udd8b Nika is out: `brew install supernovae-st/tap/nika` runs today. 1.0 + Product Hunt: August 1. [Changelog \u2192](/reference/status)",
+    "content": "\ud83e\udd8b Nika is out: `brew install supernovae-st/tap/nika` runs today. 1.0 + Product Hunt: August 1. [Changelog \u2192](/changelog/releases)",
     "dismissible": true
   },
   "navbar": {
@@ -191,7 +191,6 @@
               "examples/meeting-actions",
               "examples/og-images",
               "examples/price-watch",
-              "examples/og-images",
               "examples/social-repurpose"
             ]
           },
