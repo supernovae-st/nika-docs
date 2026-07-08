@@ -5,9 +5,59 @@ sidebarTitle: "Your machine"
 icon: "stethoscope"
 ---
 
-Nika never asks you to configure blind. `nika doctor` reads your machine —
-**offline, presence-only** — and prints the exact command that closes every
-gap it finds.
+Nika never asks you to configure blind. Two commands read your machine —
+**offline, presence-only** — and hand you the exact next step:
+`nika welcome` is the thirty-second mirror, `nika doctor` the exhaustive
+diagnosis with a fix line per gap.
+
+## The mirror (0.98+)
+
+```bash
+nika welcome
+```
+
+Captured verbatim against the released `nika 0.98.0` on a machine with no
+keys, no configs, no editors wired — the stranger's first screen:
+
+```text
+🦋 nika 0.98.0 — Intent as Code. The workflow language for AI.
+   one file · 4 verbs · one binary · audited BEFORE it runs
+   every run records a tamper-evident, hash-chained trace
+
+this machine
+  editors    cursor ✗ · windsurf ✗ · claude ✗ · vscode ✗   → nika wire all
+  local      ollama · lmstudio · llamacpp · localai · vllm · no key needed
+  keys       0/10 cloud keys present · details + fixes → nika doctor
+  workspace  git ✗ · no workflows yet · agents not briefed → nika init
+
+this binary
+  4 verbs · 25 builtins · 15 providers · 28 examples · 9 templates
+
+a whole workflow is one file
+  nika: v1
+  workflow: hello
+  model: mock/echo
+  tasks:
+    - id: greet
+      infer: { prompt: "say hello to the operator", max_tokens: 50 }
+
+start here (offline · zero keys)
+  nika examples run 01-hello --model mock/echo   # offline proof · zero keys
+  nika new                                       # guided first workflow
+  nika init                                      # brief editor + agents
+
+learn: nika.sh · docs: docs.nika.sh
+```
+
+Three details worth noticing: the six-line workflow **is real** (an
+engine test pins that it checks clean — the sample only appears while
+your workspace has zero workflows), every count on the « this binary »
+line is derived live from the embedded pack (never hand-typed), and key
+presence is a **count** — welcome never even names the env variables.
+`--json` emits the machine mirror (`welcome_version: 1`); `--ascii`
+swaps every glyph for CI logs.
+
+## The diagnosis
 
 ```bash
 nika doctor
