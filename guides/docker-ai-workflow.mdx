@@ -1,0 +1,176 @@
+---
+title: "A Docker AI workflow"
+description: "Read the daemon's real state, have a local model explain it, keep the report — with the exec boundary pinned to argv form and default-deny permits."
+sidebarTitle: "Docker AI workflow"
+icon: "docker"
+---
+
+Ops work is where « the agent ran a command » stops being acceptable and
+« the file says exactly which commands, and the runtime enforces it »
+starts to matter. This guide builds a Docker health report the audited
+way: two pinned `docker` reads, one local model, one kept artifact.
+
+## The whole workflow
+
+Checked clean against `nika 0.97.0` (`nika check` exit 0 · permits
+declared · 0 hints):
+
+```yaml
+# EXEC LEDGER ·
+# | task | command          | why no native path               | unlock that removes it |
+# | ps   | docker ps        | product CLI · no MCP surface yet | a docker MCP server    |
+# | df   | docker system df | same                             | same                   |
+nika: v1
+workflow: docker-health-report
+description: read the Docker daemon's state, have a local model explain it, keep the report
+
+model: ollama/qwen3.5:4b
+
+permits:
+  exec:
+    - "docker"
+  tools:
+    - "nika:write"
+  fs:
+    write:
+      - "./docker-health.md"
+
+tasks:
+  - id: ps
+    exec:
+      command: ["docker", "ps", "--all", "--format", "{{.Names}}\t{{.Status}}\t{{.Image}}"]
+
+  - id: df
+    exec:
+      command: ["docker", "system", "df"]
+
+  - id: diagnose
+    depends_on: [ps, df]
+    infer:
+      prompt: |
+        You are reading a Docker host's state. Containers (name·status·image):
+        ${{ tasks.ps.output }}
+
+        Disk usage:
+        ${{ tasks.df.output }}
+
+        Write a short health report: what is running, what exited, what
+        looks unhealthy (restart loops · old exits), and whether disk
+        usage needs attention. Plain prose, no preamble.
+      max_tokens: 600
+
+  - id: keep
+    depends_on: [diagnose]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./docker-health.md"
+        content: "${{ tasks.diagnose.output }}"
+
+outputs:
+  report: ${{ tasks.keep.output }}
+```
+
+## Why the exec tasks are arrays
+
+Write `command: "docker ps | grep Up"` and `nika check` refuses to bless
+the boundary:
+
+```text
+✖ PERMITS  [exec] task `ps` · a shell-string command cannot be verified
+           against a `permits.exec` program allowlist (a pipeline can
+           launch any program) — use the array form
+```
+
+That refusal is the feature. A shell string can smuggle any program
+through a pipe; the **argv array** names exactly one program with exactly
+those arguments, so `permits.exec: ["docker"]` is a boundary the checker
+can actually prove. Transforms that would have lived in `| grep | awk`
+belong in `output:` bindings and `nika:jq` instead.
+
+## What the audit says before a token is spent
+
+```text
+✔ PLAN     3 wave(s) · 4 task(s) · max parallelism 2
+     wave 1 ps (exec · docker) · df (exec · docker)
+     wave 2 diagnose (infer · ollama/qwen3.5:4b)
+     wave 3 keep (invoke · nika:write)
+⚠ COST     $0.0000 – $0.0000 FLOOR (unbounded tasks present)
+  diagnose  ollama/qwen3.5:4b  UNBOUNDED — no catalog price (local/unknown model)
+✔ PERMITS  body fits the declared boundary
+✔ audited · 4 task(s) · 3 wave(s) · permits declared · est ≥$0.0000 · 0 hints
+```
+
+Two things worth noticing:
+
+- The two `docker` reads run **in parallel** (wave 1) — the scheduler
+  proved it from `depends_on`, nobody ordered it.
+- The cost line practices the honesty rule: a local model is **unpriced
+  compute, not « free »** — the report says FLOOR and names why, it never
+  rounds unknown to $0.
+
+## Run it
+
+```bash
+nika run docker-health-report.nika.yaml
+```
+
+Captured verbatim (Apple-silicon laptop · Docker Desktop · a small local
+thinking model — the two-minute `infer` is the model, not the engine):
+
+```text
+🦋 nika · docker-health-report · 4 tasks
+   permits ✓ declared boundary · default-deny
+
+✔  ps        exec · docker              108ms ∥
+✔  df        exec · docker              561ms ∥
+✔  diagnose  infer · ollama/qwen3.5:4b  2m16s
+✔  keep      invoke · nika:write          2ms
+── 4/4 done · $0.00 · elapsed 137.3s ───────────────────────────
+  trace: .nika/traces/2026-07-08T12-43-02Z-d3f3.ndjson · 14 events · chain 5667b30f53baf619227324e70871de71
+```
+
+`docker-health.md` now holds the model's prose, and the run left a
+hash-chained journal you can prove later:
+
+```bash
+nika trace verify .nika/traces/<run>.ndjson
+```
+
+## When the daemon is down
+
+The failure is part of the design. With Docker stopped, the same run
+fails **honestly and early** — the model is never called, nothing is
+spent, and the card hands over:
+
+```text
+✖  ps        exec · docker              167ms ∥
+⊘  diagnose  blocked · upstream failed
+⊘  keep      blocked · upstream failed
+── 4/4 done · $0.00 · elapsed 0.2s ─────────────────────────────
+
+✖ NIKA-EXEC-001 · command exited with status 1: failed to connect to the
+  docker API at unix:///…/docker.sock; check if the path is correct and
+  if the daemon is running
+  fix: nika explain NIKA-EXEC-001
+```
+
+## Take it further
+
+- **Gate an action on the report** — add an `agent:` task allowed only
+  `nika:done`, or a `when:` gate on a structured `diagnose` output, and
+  the workflow can *act* on unhealthy containers, still inside the
+  declared boundary. See [patterns](/guides/patterns).
+- **Schedule it** — the file is the artifact: cron or CI runs
+  `nika run` and every execution leaves a verifiable trace.
+- **Structured instead of prose** — give `diagnose` a `schema:` and the
+  report becomes typed data downstream tasks can branch on. See
+  [testing](/guides/testing) for pinning it with a golden.
+
+<Note>
+The two `exec` tasks carry the repo's **exec ledger** (the header
+comment): every surviving `exec:` names why no builtin or MCP tool
+covers it yet, and what would remove it. When a Docker MCP server enters
+your stack, `invoke:` replaces both reads and the ledger empties —
+that is the [native-first law](/concepts/workflows) working as intended.
+</Note>

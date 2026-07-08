@@ -147,6 +147,7 @@
               "getting-started/editors",
               "getting-started/agents",
               "guides/local-models",
+              "guides/docker-ai-workflow",
               "guides/image-generation",
               "guides/speech-generation",
               "guides/patterns",
