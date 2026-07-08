@@ -1,0 +1,119 @@
+---
+title: "What Nika sees on your machine"
+description: "One offline command maps your environment: editors wired, local model servers, key presence, media planes — and the exact fix for every gap."
+sidebarTitle: "Your machine"
+icon: "stethoscope"
+---
+
+Nika never asks you to configure blind. `nika doctor` reads your machine —
+**offline, presence-only** — and prints the exact command that closes every
+gap it finds.
+
+```bash
+nika doctor
+```
+
+Three honesty rules shape everything below:
+
+- **Presence, never values.** A key is reported set or unset — the value is
+  never read into a variable, so it can never reach your terminal, a log,
+  or a trace.
+- **Offline by default.** The base run touches nothing on the network.
+  `--ping` (opt-in) TCP-probes your **local** ports only — never a vendor
+  endpoint, and nothing is ever sent on the socket.
+- **Diagnose-only.** Doctor prints fixes, it never runs them. Your shell,
+  your `PATH`, your configs stay untouched (`nika wire` is the explicit,
+  idempotent mutator when you want one).
+
+## A fresh machine, honestly
+
+Captured verbatim against `nika 0.97.0` on a machine with no keys, no
+configs, no editors wired — the worst case, and every line hands over:
+
+```text
+✔ 6 ok · 15 warn · 0 fail
+✔ binary     v0.97.0 · self-contained (spec v1 embedded)
+⚠ config     none — built-in defaults
+✔ lsp        available via `nika lsp` (editor language server)
+✔ mcp        available via `nika mcp` (8 read-only tools · nika_check through nika_tools)
+⚠ agent      cursor not wired
+  fix: nika wire cursor
+⚠ agent      claude not wired
+  fix: nika wire claude
+✔ local      5 provider(s) (ollama · lmstudio · llamacpp · localai · vllm) — no key · needs a running server
+  fix: nika doctor --ping   # probe the local ports (offline otherwise)
+⚠ provider   mistral — MISTRAL_API_KEY unset
+  fix: export MISTRAL_API_KEY=…
+⚠ provider   anthropic — ANTHROPIC_API_KEY unset
+  fix: export ANTHROPIC_API_KEY=…
+✔ image      mock ready · local → http://localhost:8080 default (set NIKA_IMAGE_LOCAL_URL to point elsewhere) · no cloud image key set
+✔ tts        mock ready · local → http://localhost:8080 default (set NIKA_TTS_LOCAL_URL to point elsewhere) · no cloud speech key set
+```
+
+(Abridged — the full report lists every cloud provider the binary knows,
+each with its own `fix:` line. Warnings are advisory: with no workflow in
+hand, doctor cannot know which provider you need, so an unset key is never
+an error.)
+
+Read it in one pass:
+
+| Row | What it tells you |
+|---|---|
+| `binary` | The engine is self-contained — spec, schema, examples, templates all embedded. No install step is missing. |
+| `agent` | Which editors/agent clients have MCP wiring to the real oracle. Every unwired row prints its own `nika wire <client>`. |
+| `local` | The keyless, sovereign path — these providers need a running server, not an account. |
+| `provider` | Cloud keys by **presence** (local-first ordering; set only the ones you'll use). |
+| `image` · `tts` | The media planes — `mock` always works, so media workflows are testable with zero keys too. |
+
+## Probe the local ports
+
+The local providers row says « needs a running server » — `--ping` answers
+whether one is actually there (loopback connect, 300 ms cap, nothing sent):
+
+```text
+$ nika doctor --ping
+✔ ping       ollama — listening on 127.0.0.1:11434 (0ms)
+⚠ ping       lmstudio — nothing listening on 127.0.0.1:1234
+⚠ ping       llamacpp — nothing listening on 127.0.0.1:8080
+⚠ ping       vllm — nothing listening on 127.0.0.1:8000
+```
+
+One local server up = a fully sovereign inference path: no key, no cloud,
+no account. That is the machine from the capture running
+[local models](/guides/local-models) with nothing else configured.
+
+## For scripts and agents
+
+Every fact above ships as JSON — agents and CI branch on `summary.fail`
+instead of parsing glyphs:
+
+```bash
+nika doctor --json
+```
+
+## The fix that mutates, explicitly
+
+Doctor never edits configs. When a row says `fix: nika wire cursor`, that
+command — and only that command — writes the MCP wiring, idempotently,
+preserving whatever other servers the config already carries:
+
+```bash
+nika wire cursor     # or: claude · vscode · windsurf · codex · all
+```
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
+    Your first run needs none of the keys above — `mock/echo` is free and offline.
+  </Card>
+  <Card title="Local models" icon="server" href="/guides/local-models">
+    Turn the `local` row into a running, keyless inference path.
+  </Card>
+  <Card title="Editors" icon="code" href="/getting-started/editors">
+    What the wired editor actually does (diagnostics · canvas · time-travel).
+  </Card>
+  <Card title="Agents" icon="robot" href="/getting-started/agents">
+    `nika init` briefs your agents; `nika wire` points them at the oracle.
+  </Card>
+</CardGroup>
