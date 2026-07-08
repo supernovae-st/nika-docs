@@ -24,6 +24,7 @@ re-check.**
 | « understand a site (domain · theme · assets) from a URL » | [`website-brief`](#website-brief) | fetch `traverse:` crawl · one typed infer · explicit persist · zero exec |
 | « generate image/audio assets from a brief » | [`media-asset-pack`](#media-asset-pack) | `nika:image_generate` · `nika:jq` manifest · local/mock provider first |
 | « call a product API: upload a file, then create from it » | [`api-upload-and-create`](#api-upload-and-create) | fetch `multipart:` upload · masked secrets header · mode/jq extraction |
+| « read a system's state (docker · kubectl · gh), explain it, keep the report » | [`docker-report`](#docker-report) | argv-array exec (provable allowlist) · parallel reads · exec ledger · one artifact |
 
 Composite jobs compose templates: a fanout whose merge feeds a
 human-gated-ship, an etl-state whose delta fans out. Start from the
@@ -572,6 +573,68 @@ tasks:
 
 outputs:
   result: ${{ tasks.create.output }}   # SLOT: the callable contract
+```
+{/* template:end */}
+
+## docker-report
+
+The audited-ops shape: read a system's real state via a pinned CLI (argv-array exec — the only form a `permits.exec` allowlist can prove), explain it with one bounded model call, keep the report as a file. Swap `docker` for any product CLI. The live-proven walkthrough: [A Docker AI workflow](/guides/docker-ai-workflow).
+
+{/* template:begin docker-report.nika.yaml */}
+```yaml docker-report.nika.yaml
+nika: v1
+workflow: docker-report-template    # SLOT: kebab-case workflow id
+description: "read the daemon's state · explain it · keep the report"   # SLOT
+
+model: ollama/qwen3.5:4b            # SLOT: local-first · mock/echo for offline rehearsal
+
+permits:
+  exec:
+    - "docker"                      # SLOT: the ONE program the reads may launch
+  tools:
+    - "nika:write"
+  fs:
+    write:
+      - "./docker-health.md"        # SLOT: where the report lands (must match `keep`)
+
+tasks:
+  # The reads run IN PARALLEL (no depends_on between them) — the
+  # scheduler proves it from the DAG, nobody orders it.
+  - id: ps
+    exec:
+      # SLOT: argv ARRAY form — one program, exactly these arguments
+      command: ["docker", "ps", "--all", "--format", "{{.Names}}\t{{.Status}}\t{{.Image}}"]
+
+  - id: df
+    exec:
+      command: ["docker", "system", "df"]   # SLOT: the second read (drop the task if one suffices)
+
+  - id: diagnose
+    depends_on: [ps, df]
+    infer:
+      # SLOT: what should the model DO with the readings?
+      prompt: |
+        You are reading a Docker host's state. Containers (name·status·image):
+        ${{ tasks.ps.output }}
+
+        Disk usage:
+        ${{ tasks.df.output }}
+
+        Write a short health report: what is running, what exited, what
+        looks unhealthy (restart loops · old exits), and whether disk
+        usage needs attention. Plain prose, no preamble.
+      max_tokens: 600               # SLOT: the spend ceiling for this call
+
+  - id: keep
+    depends_on: [diagnose]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./docker-health.md"  # SLOT: same path as permits.fs.write
+        content: "${{ tasks.diagnose.output }}"
+
+outputs:
+  report: ${{ tasks.keep.output }}
 ```
 {/* template:end */}
 
