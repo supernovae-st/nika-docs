@@ -24,10 +24,10 @@ This repo is **not** the Nika engine source, **not** the marketing site, and
 nika-docs/
 ├── docs.json              Mintlify config + navigation (every page MUST be registered)
 ├── introduction.mdx       Landing
-├── getting-started/       3 pages (installation · first-workflow · editors)
-├── guides/                4 pages (patterns · agent-authoring · templates · troubleshooting)
-├── concepts/              7 pages (architecture · verbs · workflows · bindings · events · providers · security)
-├── examples/              21 pages (overview + 20 tiered showcase workflows · PROJECTED)
+├── getting-started/       installation · your-machine · first-workflow · editors · agents
+├── guides/                patterns · agent-authoring · templates · troubleshooting · local-models · … (task-oriented)
+├── concepts/              architecture · verbs · workflows · bindings · events · providers · security · …
+├── examples/              overview + the tiered showcase workflows (PROJECTED — counts live in the projector)
 ├── architecture/          5 pages (layers · FCI · L0 decisions · admission · ADR index)
 ├── reference/             10 pages (YAML · CLI · schema · error codes · builtins · providers catalog · MCP catalog · capabilities · constellation · status)
 ├── changelog/             2 pages (releases · roadmap)
