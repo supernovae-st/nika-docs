@@ -116,7 +116,9 @@ Pull requests are welcome.
 | [`supernovae-st/nika-spec`](https://github.com/supernovae-st/nika-spec) | The open workflow language spec (Apache-2.0) — the language the engine implements |
 | [`supernovae-st/nika.sh`](https://github.com/supernovae-st/nika.sh) | The site (Vite + React + r3f) — [nika.sh](https://nika.sh) |
 | [`supernovae-st/nika-client`](https://github.com/supernovae-st/nika-client) | TypeScript SDK for consuming the Nika daemon |
-| [`supernovae-st/nika-design-skill`](https://github.com/supernovae-st/nika-design-skill) | Claude skill for authoring workflows |
+| [`supernovae-st/nika-vscode`](https://github.com/supernovae-st/nika-vscode) | VS Code / Cursor / Windsurf extension (Marketplace + OpenVSX) |
+| [`supernovae-st/nika-agents`](https://github.com/supernovae-st/nika-agents) | Agent plugin marketplace — the authoring skill + MCP oracle (Claude Code + Codex) |
+| [`supernovae-st/nika-registry`](https://github.com/supernovae-st/nika-registry) | Share workflows — every entry machine-re-proven |
 | [`supernovae-st/homebrew-tap`](https://github.com/supernovae-st/homebrew-tap) | Homebrew formula |
 | [`supernovae-st/nika-site-audit`](https://github.com/supernovae-st/nika-site-audit) | Example workflow: audit a website with Nika |
 
