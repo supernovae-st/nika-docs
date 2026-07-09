@@ -1,0 +1,125 @@
+---
+title: "Per-client MCP wiring"
+description: "One stanza, every client: Cursor, Claude Code, Codex, Zed, Gemini CLI, Windsurf, Continue, Cline, Aider — deep-linkable per tool."
+sidebarTitle: "Per-client wiring"
+icon: "plug-circle-bolt"
+---
+
+Every MCP-capable client wires the same read-only oracle
+([what it exposes](/reference/mcp-server)) with the same two fields —
+`command: nika` · `args: [mcp]`. This page is one anchor per client, so
+directory listings can deep-link straight to their tool.
+
+For **cursor · vscode · windsurf · claude · codex** the wiring is one
+command (idempotent, writes the right file):
+
+```sh
+nika wire <client>     # or: nika wire all
+```
+
+And in every case, `nika init` first — the agent-teaching surface
+(`AGENTS.md`, rules, the repo skill) is what makes the oracle useful.
+
+## Cursor
+
+```sh
+nika wire cursor
+```
+
+Writes the `nika` server into `~/.cursor/mcp.json`. The repo side
+(`.cursor/rules/nika.mdc`, auto-attached on `*.nika.yaml`) comes from
+`nika init`. The VS Code extension also installs into Cursor via OpenVSX.
+
+## Claude Code
+
+```sh
+nika wire claude          # MCP oracle
+claude plugin marketplace add supernovae-st/nika-agents
+claude plugin install nika@nika        # authoring skill + oracle as a plugin
+```
+
+## Codex
+
+```sh
+nika wire codex
+codex plugin marketplace add supernovae-st/nika-agents
+codex plugin add nika@nika
+```
+
+## VS Code / Copilot
+
+```sh
+nika wire vscode
+```
+
+`nika init` also writes `.github/copilot-instructions.md` and the
+`.vscode/settings.json` schema mapping (validation + completion in any
+YAML-aware editor).
+
+## Zed
+
+Settings → `context_servers`:
+
+```json
+{ "context_servers": { "nika": { "command": { "path": "nika", "args": ["mcp"] } } } }
+```
+
+## Gemini CLI
+
+`~/.gemini/settings.json`:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+## Windsurf
+
+```sh
+nika wire windsurf
+```
+
+## OpenCode
+
+Native `AGENTS.md` + repo-skill discovery — see the dedicated
+[OpenCode page](/integrations/opencode).
+
+## Hermes
+
+Tap-installable delegation skill + `mcp_servers` stanza — see the dedicated
+[Hermes page](/integrations/hermes).
+
+## Continue
+
+`~/.continue/config.yaml`:
+
+```yaml
+mcpServers:
+  - name: nika
+    command: nika
+    args: [mcp]
+```
+
+## Cline
+
+MCP settings (`cline_mcp_settings.json`):
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+## Aider
+
+Aider reads repo conventions rather than MCP: `nika init`'s `AGENTS.md`
+covers it (add `CONVENTIONS.md: AGENTS.md` to `.aider.conf.yml` if you keep
+conventions elsewhere). The check loop is the same:
+`nika check <file>` after every edit.
+
+## Verify (any client)
+
+Ask the agent to list its tools — the eight `nika_*` names should appear.
+Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).
+
+> Client config formats move fast. The stable contract is the stanza
+> (`nika` + `mcp`) and the oracle's read-only surface; when a client's
+> config path changes, only this page's anchor needs the touch-up.

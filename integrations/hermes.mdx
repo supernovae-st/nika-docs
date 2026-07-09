@@ -1,0 +1,81 @@
+---
+title: "Nika × Hermes"
+description: "Hermes orchestrates. Nika captures the repeatable work as a checkable file and runs it with receipts — budget-capped, trace-verified."
+sidebarTitle: "Hermes"
+icon: "wand-magic-sparkles"
+---
+
+[Hermes](https://github.com/NousResearch/hermes-agent) is the always-on
+orchestrator whose community pattern is delegation: Hermes plans and
+coordinates, then hands work to specialist CLIs. Nika slots into exactly
+that pattern as **the deterministic workflow worker** — not another coding
+agent (that's OpenCode's seat), but the runner for work that should be
+*repeatable, budgeted and auditable*.
+
+> **Hermes orchestrates · Nika runs the plan with receipts.**
+
+## Install the skill (day 1 — no catalog wait)
+
+The Nika delegation skill lives in the public marketplace repo and installs
+three ways:
+
+```sh
+# as a tap (Hermes scans skills/ by default)
+hermes skills tap add supernovae-st/nika-agents
+hermes skills install nika
+
+# or single-file from the raw URL
+hermes skills install https://raw.githubusercontent.com/supernovae-st/nika-agents/main/skills/autonomous-ai-agents/nika/SKILL.md
+
+# or via the skills.sh CLI
+npx skills add supernovae-st/nika-agents
+```
+
+New skills take effect next session (or `--now`). The skill teaches the
+delegation idiom end-to-end: scaffold via `terminal()`, the
+check-before-run law, budget caps on paid models, background+poll for long
+runs, and the receipts loop (`nika trace show` · `nika trace verify`).
+
+## Wire the oracle (optional, recommended)
+
+For schema/validation answers without shell round-trips, add the read-only
+MCP oracle to `~/.hermes/config.yaml`, then `/reload-mcp`:
+
+```yaml
+mcp_servers:
+  nika:
+    command: nika
+    args: [mcp]
+    timeout: 120
+```
+
+Validation and learning only — running workflows stays on the terminal,
+where the budget flags and traces live
+([the oracle's contract](/reference/mcp-server)).
+
+## Prove the delegation
+
+In a Hermes session:
+
+> Use the nika skill: smoke-test my nika install offline, then create
+> hello.nika.yaml from the chain template, check it, and run it with the
+> mock model. Report the trace verify verdict.
+
+Expected: `nika --version` → `nika examples run 01-hello --model mock/echo`
+(offline, zero keys) → `nika new --from chain` → `nika check --json` →
+mock run → `nika trace verify` exit 0.
+
+## The two clocks
+
+Hermes runs live — its terminal is a pipe, and a long `nika run` renders
+quietly until the final card. The skill teaches the fix: launch with
+`background=true`, poll with `process(action="poll")`, then read
+`nika trace show` for the run card.
+
+## Cost honesty in delegation
+
+- Always pass `--max-cost-usd` on paid cloud models — the floor refusal
+  (exit 2) and the mid-run stop (`NIKA-1704`, exit 1) are the guardrails.
+- Prefer local models for drafts (`ollama/…`) — no key, no meter.
+- An **uncataloged** model meters as $0: never rely on the budget cap for a
+  custom endpoint ([cost honesty](/guides/cost-honesty)).

@@ -1,0 +1,87 @@
+---
+title: "Nika as an MCP server"
+description: "The read-only oracle: 8 validate-and-learn tools over stdio. Agents inspect freely; execution stays on the CLI, where the budget flags and traces live."
+sidebarTitle: "MCP server"
+icon: "plug"
+---
+
+`nika mcp` serves the **read-only oracle** over stdio — the in-binary MCP
+server every wired client talks to. Its contract is one sentence:
+
+> **Agents can inspect freely, execute deliberately.** The oracle validates
+> and teaches; running a workflow stays on the CLI, where `--max-cost-usd`,
+> the permits boundary and the trace file live.
+
+There is no HTTP flag today (stdio only), no write tool, and no way to make
+the oracle execute anything. That is the design, not a gap: generation and
+repair belong to [the authoring skill](/getting-started/agents), execution
+belongs to a human-gated `nika run`.
+
+## Start it
+
+Every client uses the same two fields:
+
+```json
+{ "command": "nika", "args": ["mcp"] }
+```
+
+`nika wire <client>` writes this stanza into the right config file for
+cursor · vscode · windsurf · claude · codex (and `all`). For any other
+MCP-capable client, paste the stanza into its server config — see
+[per-client wiring](/integrations/mcp-clients).
+
+## The 8 tools
+
+Projected from the live wire (`tools/list`), never hand-counted:
+
+| tool | what it answers |
+|---|---|
+| `nika_check` | Statically audit a workflow (schema · DAG · CEL · effects · permits · cost) **before** running it — findings, or a clean bill. |
+| `nika_explain` | Teach one `NIKA-XXXX` error code: cause, category, and the fix form. |
+| `nika_schema` | The embedded JSON Schema for `*.nika.yaml` — the structural contract an agent authors against. |
+| `nika_examples` | Browse the embedded runnable examples; with a `slug`, that example's full source. |
+| `nika_template` | The canonical workflow skeletons (chain · gate-and-act · fanout · …); with a `name`, that skeleton's source — copy it, never invent structure. |
+| `nika_canon` | The spec canon SSOT (`canon.yaml`) — the locked counts and names. Cite it, never a remembered number. |
+| `nika_catalog` | The embedded provider/model catalog — models, capabilities, context windows, API-key env vars. |
+| `nika_tools` | The embedded builtin-tool catalog — every `nika:*` tool with its model-facing JSON Schema. |
+
+The split is deliberate: **validate** (`nika_check` · `nika_explain`) and
+**learn** (`nika_schema` · `nika_examples` · `nika_template` · `nika_canon` ·
+`nika_catalog` · `nika_tools`).
+
+## Why read-only is the whole point
+
+A `.nika.yaml` can declare `exec:` shell steps — that is the language working
+as designed. An MCP tool that *ran* workflows would hand every wired agent a
+shell with your credentials, one prompt-injection away. So the oracle refuses
+the category:
+
+- **No `nika_run`, no `nika_generate`, no write tools — ever.** Authoring is
+  the skill's job (the agent writes the file, you review it); running is the
+  CLI's job (`nika run`, with budget flags, under your eyes).
+- **Secrets never transit the oracle.** The catalog names the env var a
+  provider needs; it never reads or returns values.
+- What the trace's hash chain proves — and what it does not — is stated
+  plainly in [machine surfaces](/reference/machine-surfaces): tamper-evidence
+  for the recorded run, not a signature. Signed attestations are a separate,
+  future layer.
+
+## Context budget
+
+The oracle is lean by design — a handful of read-only tools with compact
+outputs, sized so wiring it costs an agent almost nothing. Clients that
+support per-server tool filtering can narrow further (e.g. expose only
+`nika_check` + `nika_template` to a coding agent).
+
+## Verify a wiring
+
+Ask the connected agent to list its tools — the eight names above should
+appear. From a shell, the JSON-RPC handshake works too:
+
+```sh
+printf '%s\n' \
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"probe","version":"1"}}}' \
+  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+  '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
+  | nika mcp
+```

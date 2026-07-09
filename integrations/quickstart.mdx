@@ -1,0 +1,73 @@
+---
+title: "Integrate Nika in 10 minutes"
+description: "Whatever agent you run — Claude Code, Codex, Cursor, OpenCode, Hermes, Zed — two commands teach it Nika, and CI gets receipts."
+sidebarTitle: "In 10 minutes"
+icon: "bolt"
+---
+
+Nika is not another agent. It is **the workflow file your agents already
+run** — checked before, verified after. Integration therefore means two
+small things: teach your agent the language, and wire the read-only oracle.
+
+## Minute 0-2 · install the binary
+
+```sh
+brew install supernovae-st/tap/nika    # or: curl -LsSf https://nika.sh/install.sh | sh
+nika --version && nika doctor          # doctor prints exact fixes, never mutates
+```
+
+No key needed yet — the mock and local providers run without one.
+
+## Minute 2-5 · teach the repo
+
+```sh
+nika init
+```
+
+One command writes the agent surface: `AGENTS.md` (read natively by Codex,
+Claude Code, Cursor, OpenCode, Hermes, Jules and every AGENTS.md-aware
+tool), the Cursor rule, the Copilot instructions, the repo-level
+[agent skill](https://agentskills.io), and the `.vscode` schema wiring.
+Idempotent — existing files are skipped.
+
+## Minute 5-7 · wire the oracle
+
+```sh
+nika wire cursor     # or: vscode · windsurf · claude · codex · all
+```
+
+For clients without a wire target yet (OpenCode, Hermes, Zed, Gemini CLI,
+Continue, Cline…), it is the same two-field stanza everywhere — copy it from
+[per-client wiring](/integrations/mcp-clients). What the oracle exposes (and
+refuses to): [Nika as an MCP server](/reference/mcp-server).
+
+## Minute 7-10 · prove the loop
+
+Ask your agent:
+
+> Create a workflow from the `chain` template that summarizes ./notes.md
+> into ./out/brief.md, **check it**, then run it with the mock model.
+
+The agent scaffolds (`nika new --from chain`), audits (`nika check` — plan,
+cost floor, permits, **before** any token is spent), runs offline
+(`--model mock/echo`), and the receipts land in `.nika/traces/`
+(`nika trace verify` → exit 0).
+
+## Then: CI receipts
+
+Put [the GitHub Action](/integrations/github-actions) on the repo — every PR
+that touches a `.nika.yaml` gets a sticky comment with the check verdict,
+the honest cost floor, required secrets and the DAG. Check-only, zero
+secrets, by default.
+
+## The per-tool pages
+
+- [OpenCode](/integrations/opencode) — native skills + AGENTS.md + MCP; zero
+  packaging needed.
+- [Hermes](/integrations/hermes) — the delegation pattern: Hermes
+  orchestrates, Nika runs the repeatable work with receipts.
+- [GitHub Actions](/integrations/github-actions) — plan with receipts on
+  every PR.
+- [Everything MCP-capable](/integrations/mcp-clients) — Cursor · Claude Code
+  · Codex · Zed · Gemini CLI · Windsurf · Continue · Cline · Aider, one
+  stanza each.
