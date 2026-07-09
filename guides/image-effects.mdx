@@ -1,0 +1,148 @@
+---
+title: "Image effects"
+description: "Deterministic artistic styling — dither, palettes, halftone, retro, glitch, ascii. Same input, same args, same bytes forever: the styled image becomes a receipt in the run's proof chain."
+---
+
+`nika:image_fx` is the deterministic sibling of
+[`nika:image_generate`](/guides/image-generation): a pure pixel transform —
+no provider, no network, no clock. Style a PNG through an ordered pipeline of
+effects and get an artifact that is **byte-identical forever** for identical
+`(input, args)`.
+
+That determinism is the point, not a detail. The artifact's sha256 joins the
+run's hash-chained trace, re-rendering the recipe is the tamper check, and the
+full recipe (contract tag `image_fx/v1` · input sha256 · seed · ops) travels
+*inside* the PNG as a `nika` tEXt chunk — no timestamp, ever. Your workflow
+draws its own receipts.
+
+## The 30-second pipeline
+
+```yaml
+nika: v1
+workflow: styled-hero
+permits:
+  tools: ["nika:image_generate", "nika:image_fx"]
+  fs:
+    read: ["out/**"]
+    write: ["out/**"]
+tasks:
+  - id: generate
+    invoke:
+      tool: "nika:image_generate"
+      args:
+        provider: mock            # offline dry-run · flip to local/openai/gemini/xai
+        prompt: "a monarch butterfly over a nebula"
+        output_dir: out
+        format: png
+  - id: style
+    depends_on: [generate]
+    invoke:
+      tool: "nika:image_fx"
+      args:
+        input: "${{ tasks.generate.output.images[0].path }}"
+        out: out/hero-gameboy.png
+        seed: 42                  # the seed IS the style — same seed, same bytes
+        ops:
+          - resize: { width: 320 }
+          - dither: { mode: floyd_steinberg, palette: gameboy }
+          - grain: { intensity: 32 }
+          - scanlines: { strength: 110, period: 4 }
+          - vignette: { strength: 140 }
+```
+
+Run it twice: the second run reports `skipped_existing: true` and the artifact
+hash never moves. Mutate one byte of the PNG and a re-render no longer matches
+— that mismatch *is* the tamper detection.
+
+## The op vocabulary (closed · v1)
+
+`ops:` is an **ordered list of single-key maps** — a linear pipeline by design.
+Branching and fan-out belong to the workflow (`depends_on` · `for_each`), never
+inside the builtin.
+
+| Op | What it does | Key knobs |
+|---|---|---|
+| `resize` | Linear-light resample | `width`/`height` (one may be omitted) · `filter: auto\|nearest\|bilinear` |
+| `crop` | Exact rectangle | `x` · `y` · `width` · `height` |
+| `levels` | Brightness / contrast | `brightness` −255..255 · `contrast` −128..128 |
+| `grayscale` | Linear-light luma | — |
+| `palette_map` | Nearest palette color (Oklab distance) | `palette` |
+| `dither` | Quantize through a dither | `mode: bayer2\|bayer4\|bayer8\|blue_noise\|ign\|floyd_steinberg\|atkinson\|jjn` · `palette` |
+| `duotone` | Two-stop gradient map (Oklab ramp) | `dark` · `light` (`#rrggbb` or `[r,g,b]`) |
+| `pixelate` | Block mosaic | `block` 2..256 |
+| `halftone` | Rotated clustered-dot screen (print look) | `cell` 3..64 · `angle: 0\|15\|45\|75` |
+| `grain` | Luminance-shaped film grain (seeded) | `intensity` 0..128 |
+| `vignette` | Natural cos⁴ falloff | `strength` 0..255 |
+| `chromatic_aberration` | Per-channel radial split | `shift` 1..16 |
+| `scanlines` | CRT row darkening | `strength` 0..255 · `period` 2..64 |
+| `glitch` | Seeded databending | `line_shift` ≤64 · `channel_shift` ≤16 · `blocks` ≤64 |
+| `ascii` | Character-grid render — **must be the last op** | `cols` 2..1024 · `emit: png\|text\|ansi` |
+
+Palettes: presets `bw · gray4 · gameboy · cga · okabe_ito`, or an inline list
+of 2–256 colors. Unknown op parameters are **rejected loudly**
+(`NIKA-BUILTIN-IMAGE_FX-001`) — a typo'd knob never silently lies about the
+style.
+
+<Warning>
+  Input is **PNG in v1** (depth 8 · no interlace). Non-PNG fails with a typed
+  hint: produce PNG upstream (`image_generate` with `format: png`) or convert
+  once via `exec:`. Decode is budget-gated from the header **before** any
+  decompression — hostile dimension claims are rejected, never allocated.
+</Warning>
+
+## Why deterministic styling matters
+
+Every incumbent styling path is nondeterministic by default — image tools
+timestamp their outputs, and generative models can't reproduce bytes across
+hardware at all. That makes styled assets un-verifiable: you can sign them,
+but you can't *re-derive* them.
+
+`image_fx` inverts that: integer/fixed-point pixel math, a seeded noise
+stream, zero wall-clock. So the artifact can be:
+
+- **chained** — its sha256 lands in the trace (`nika trace verify` covers it);
+- **re-rendered** — the same input + the recipe reproduces the exact bytes;
+- **carried** — the recipe rides the artifact itself, so any holder of the
+  input can verify the styling.
+
+One recipe, one hash, forever. Batch-style a hundred campaign images with
+`for_each` and every one of them is a receipt.
+
+```yaml
+  - id: variants
+    depends_on: [generate]
+    for_each: ["bw", "gameboy", "cga"]
+    invoke:
+      tool: "nika:image_fx"
+      args:
+        input: "${{ tasks.generate.output.images[0].path }}"
+        out: "out/variant-${{ item }}.png"
+        ops:
+          - dither: { mode: bayer4, palette: "${{ item }}" }
+```
+
+## Output contract
+
+```json
+{
+  "input": "out/hero.png",
+  "input_sha256": "…",
+  "path": "out/hero-gameboy.png",
+  "sha256": "…",
+  "size_bytes": 323953,
+  "width": 320,
+  "height": 200,
+  "format": "png",
+  "ops_applied": 5,
+  "seed": 42,
+  "skipped_existing": false
+}
+```
+
+Artifact bytes never ride outputs (the disk law). Text artifacts (`ascii` with
+`emit: text|ansi`) land as `.txt`/`.ans`, report `width`/`height` `0`, and are
+sha256'd like any other artifact.
+
+Errors are typed `NIKA-BUILTIN-IMAGE_FX-001..006` — invalid args · input read
+· unsupported format · decode · pixel budget · save — plus the boundary
+`NIKA-SEC-004` when a path resolves outside `permits.fs`.
