@@ -13,7 +13,9 @@ rendered natively by GitHub as mermaid.
 
 ```yaml
 name: nika
-on: [pull_request]
+on:
+  pull_request:
+    paths: ['**.nika.yaml']  # fire only when a workflow file changes
 permissions:
   contents: read
   pull-requests: write     # drop it and the body lands in the step summary
@@ -22,12 +24,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # pin by full commit SHA in real use (marketplace norm)
+      # in real use, pin by full commit SHA with the release in a comment —
+      # the form Dependabot/Renovate bump: @<sha> # v1.0.2
       - uses: supernovae-st/nika-action@v1
         with:
           workflow: flows/report.nika.yaml
           mode: check        # or: test → adds the offline mock golden lane
 ```
+
+No workflow yet? `nika new flows/report.nika.yaml --from chain` scaffolds
+one — [authoring in 10 minutes](/integrations/quickstart).
 
 ## What lands on the PR
 
