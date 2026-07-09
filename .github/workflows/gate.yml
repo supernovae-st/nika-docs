@@ -4,7 +4,10 @@ name: gate
 # prober enforces, but at PUSH TIME (detection latency ≈ 0 instead of
 # "whenever someone runs the full hygiene sweep from the monorepo").
 # Checks: internal links resolve · every page in docs.json nav ·
-# no dead-branch refs (nika-diamond → main) · no legacy {{ }} bindings.
+# no dead-branch refs (nika-diamond → main) · no legacy {{ }} bindings ·
+# every full ```yaml workflow block validates against the spec oracle
+# (the pre-push hook ran this locally, but a web-UI edit or API commit
+# skipped it — CI closes that door).
 # No untrusted event input is interpolated anywhere in this workflow.
 
 on:
@@ -25,3 +28,22 @@ jobs:
         run: python3 scripts/link-audit.py
       - name: count-drift gate
         run: python3 scripts/count-drift-gate.py
+
+  oracle-sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # oracle-sweep.py resolves the spec as the docs' SIBLING directory
+      # (DOCS.parent / "spec") — same layout as the monorepo checkout.
+      - name: fetch the spec oracle (sibling layout)
+        run: git clone --depth 1 https://github.com/supernovae-st/nika-spec ../spec
+      - name: runner deps (pyyaml · jsonschema · jq for jq-compile checks)
+        run: |
+          pip install pyyaml jsonschema
+          jq --version || (sudo apt-get update && sudo apt-get install -y jq)
+      - name: every docs yaml block passes the spec oracle
+        run: python3 scripts/oracle-sweep.py
