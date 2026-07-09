@@ -26,8 +26,9 @@ nika init
 
 One command writes the agent surface: `AGENTS.md` (read natively by Codex,
 Claude Code, Cursor, OpenCode, Hermes, Jules and every AGENTS.md-aware
-tool), the Cursor rule, the Copilot instructions, the repo-level
-[agent skill](https://agentskills.io), and the `.vscode` schema wiring.
+tool), `CLAUDE.md`, the Cursor rule, the Copilot instructions, the
+repo-level [agent skill](https://agentskills.io), and the `.vscode` schema
+wiring.
 Idempotent — existing files are skipped.
 
 ## Minute 5-7 · wire the oracle
@@ -51,7 +52,8 @@ Ask your agent:
 The agent scaffolds (`nika new --from chain`), audits (`nika check` — plan,
 cost floor, permits, **before** any token is spent), runs offline
 (`--model mock/echo`), and the receipts land in `.nika/traces/`
-(`nika trace verify` → exit 0).
+(`nika trace verify .nika/traces/<run>.ndjson` → exit 0 — the run card
+prints the path on its `trace:` line).
 
 ## Then: CI receipts
 

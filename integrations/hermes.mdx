@@ -63,14 +63,15 @@ In a Hermes session:
 
 Expected: `nika --version` → `nika examples run 01-hello --model mock/echo`
 (offline, zero keys) → `nika new --from chain` → `nika check --json` →
-mock run → `nika trace verify` exit 0.
+mock run → `nika trace verify <trace>` exit 0 (path from the run card's
+`trace:` line — the bare form is a usage error).
 
 ## The two clocks
 
 Hermes runs live — its terminal is a pipe, and a long `nika run` renders
 quietly until the final card. The skill teaches the fix: launch with
 `background=true`, poll with `process(action="poll")`, then read
-`nika trace show` for the run card.
+`nika trace show <trace>` for the run card.
 
 ## Cost honesty in delegation
 
