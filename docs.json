@@ -200,6 +200,7 @@
           {
             "group": "T1 · Starters",
             "pages": [
+              "examples/local-first-daily-brief",
               "examples/standup-digest",
               "examples/meeting-actions",
               "examples/og-images",
