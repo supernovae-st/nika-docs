@@ -1,0 +1,116 @@
+---
+title: "Local-first daily brief"
+sidebarTitle: "Local-first daily brief"
+description: "T1 starter · zero keys, zero cloud: fetch real data, brief it with a local Ollama model, keep a tamper-evident trace."
+icon: "house-signal"
+---
+
+> **T1 starter · local-first**: the whole loop on your machine — a real
+> HTTP fetch, a local model, a verifiable trace. No API key exists in
+> this tutorial, so there is nothing to leak and nothing to meter.
+
+## The job
+
+A morning brief from a live source, every day, the same way. One file
+captures it; your laptop runs it; the trace proves what happened.
+
+## Prerequisites
+
+- `nika` installed: `brew install supernovae-st/tap/nika` ([other paths](/getting-started/installation))
+- [Ollama](https://ollama.com) running with a small model:
+  `ollama pull qwen3.5:4b` (any local model works — swap the `model:` line)
+
+## The file
+
+Save as `daily-brief.nika.yaml`:
+
+```yaml
+nika: v1
+workflow: daily-brief
+model: ollama/qwen3.5:4b
+
+tasks:
+  - id: fetch
+    invoke:
+      tool: "nika:fetch"
+      args: { url: "https://hn.algolia.com/api/v1/search?tags=front_page" }
+
+  - id: brief
+    depends_on: [fetch]
+    infer:
+      max_tokens: 300
+      prompt: |
+        Five bullet points, most signal first: ${{ tasks.fetch.output }}
+
+outputs:
+  brief: ${{ tasks.brief.output }}
+```
+
+Swap the URL for any JSON source — an RSS-to-JSON bridge, your issue
+tracker's API, a status page.
+
+## Check, then run
+
+```sh
+nika check daily-brief.nika.yaml
+```
+
+The static audit passes before a single token is spent — plan, types,
+tools, args, secret flows. One honest wrinkle to read, not fear:
+
+```text
+⚠  COST   $0.0000 – $0.0000 FLOOR (unbounded tasks present)
+   brief  ollama/qwen3.5:4b  UNBOUNDED — no catalog price (local/unknown model)
+```
+
+A local model has no list rate, so the engine says **unbounded** instead
+of pretending `$0.00` is a promise. Local work is never blocked and never
+metered — the flag exists so a *paid* uncataloged model can't hide behind
+a fake zero ([cost honesty](/guides/cost-honesty)).
+
+Then:
+
+```sh
+nika run daily-brief.nika.yaml
+```
+
+A real run of this exact file (Apple Silicon, qwen3.5:4b):
+
+```text
+✔  fetch  invoke · nika:fetch        762ms
+✔  brief  infer · ollama/qwen3.5:4b  48.0s
+── 2/2 done · ≥ $0.00 (1 unpriced) · elapsed 48.7s ─────────────
+  trace: .nika/traces/2026-07-09T22-54-50Z-e843.ndjson · 8 events · chain 394719d2…
+```
+
+## The receipt
+
+```sh
+nika trace verify .nika/traces/<run>.ndjson   # path from the run card's trace: line
+```
+
+```text
+OK — 8 events · chain intact · head 394719d24361e1a6…
+```
+
+The trace is a hash chain: edit any event after the fact and `verify`
+exits non-zero. Your brief comes with proof of what ran, in what order,
+against which inputs — even offline.
+
+## Make it daily
+
+Cron it, or wire [the GitHub Action](/integrations/github-actions) if the
+file lives in a repo — every edit to the workflow gets a static check
+before it lands. When you want the run itself in CI, that stays a
+deliberate step in your own job, with your own budget flags.
+
+## Where to go next
+
+- Add a `permits:` boundary — `nika check --infer-permits` writes the
+  tightest one, and the workflow becomes default-deny
+  ([security](/concepts/security)).
+- Persist the brief: a third task with `nika:write` and a
+  `content:` binding ([starters](/examples/standup-digest) show the shape).
+- Mix providers: keep `fetch` local, point `brief` at a cloud model with
+  `--max-cost-usd` — the budget gate prices the file's own model before
+  anything starts ([cost honesty](/guides/cost-honesty)).
