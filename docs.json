@@ -163,7 +163,7 @@
           {
             "group": "Agents & integrations",
             "pages": [
-              "integrations/index",
+              "integrations/quickstart",
               "getting-started/agents",
               "integrations/opencode",
               "integrations/hermes",

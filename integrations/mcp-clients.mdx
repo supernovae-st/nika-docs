@@ -20,7 +20,7 @@ nika wire <client>     # or: nika wire all
 And in every case, `nika init` first — the agent-teaching surface
 (`AGENTS.md`, rules, the repo skill) is what makes the oracle useful.
 
-## Cursor [#cursor]
+## Cursor
 
 ```sh
 nika wire cursor
@@ -30,7 +30,7 @@ Writes the `nika` server into `~/.cursor/mcp.json`. The repo side
 (`.cursor/rules/nika.mdc`, auto-attached on `*.nika.yaml`) comes from
 `nika init`. The VS Code extension also installs into Cursor via OpenVSX.
 
-## Claude Code [#claude-code]
+## Claude Code
 
 ```sh
 nika wire claude          # MCP oracle
@@ -38,7 +38,7 @@ claude plugin marketplace add supernovae-st/nika-agents
 claude plugin install nika@nika        # authoring skill + oracle as a plugin
 ```
 
-## Codex [#codex]
+## Codex
 
 ```sh
 nika wire codex
@@ -46,7 +46,7 @@ codex plugin marketplace add supernovae-st/nika-agents
 codex plugin add nika@nika
 ```
 
-## VS Code / Copilot [#vscode]
+## VS Code / Copilot
 
 ```sh
 nika wire vscode
@@ -56,7 +56,7 @@ nika wire vscode
 `.vscode/settings.json` schema mapping (validation + completion in any
 YAML-aware editor).
 
-## Zed [#zed]
+## Zed
 
 Settings → `context_servers`:
 
@@ -64,7 +64,7 @@ Settings → `context_servers`:
 { "context_servers": { "nika": { "command": { "path": "nika", "args": ["mcp"] } } } }
 ```
 
-## Gemini CLI [#gemini-cli]
+## Gemini CLI
 
 `~/.gemini/settings.json`:
 
@@ -72,23 +72,23 @@ Settings → `context_servers`:
 { "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
 ```
 
-## Windsurf [#windsurf]
+## Windsurf
 
 ```sh
 nika wire windsurf
 ```
 
-## OpenCode [#opencode]
+## OpenCode
 
 Native `AGENTS.md` + repo-skill discovery — see the dedicated
 [OpenCode page](/integrations/opencode).
 
-## Hermes [#hermes]
+## Hermes
 
 Tap-installable delegation skill + `mcp_servers` stanza — see the dedicated
 [Hermes page](/integrations/hermes).
 
-## Continue [#continue]
+## Continue
 
 `~/.continue/config.yaml`:
 
@@ -99,7 +99,7 @@ mcpServers:
     args: [mcp]
 ```
 
-## Cline [#cline]
+## Cline
 
 MCP settings (`cline_mcp_settings.json`):
 
@@ -107,7 +107,7 @@ MCP settings (`cline_mcp_settings.json`):
 { "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
 ```
 
-## Aider [#aider]
+## Aider
 
 Aider reads repo conventions rather than MCP: `nika init`'s `AGENTS.md`
 covers it (add `CONVENTIONS.md: AGENTS.md` to `.aider.conf.yml` if you keep
@@ -118,7 +118,7 @@ conventions elsewhere). The check loop is the same:
 
 Ask the agent to list its tools — the eight `nika_*` names should appear.
 Then prove the loop end-to-end:
-[integrate in 10 minutes](/integrations/index).
+[integrate in 10 minutes](/integrations/quickstart).
 
 > Client config formats move fast. The stable contract is the stanza
 > (`nika` + `mcp`) and the oracle's read-only surface; when a client's
