@@ -76,6 +76,10 @@ stays in your hands):
 | Codex CLI | `nika wire codex` | `~/.codex/config.toml` → `[mcp_servers.nika]` |
 | Everything | `nika wire all` | all of the above |
 
+Whatever the harness, the payloads an agent parses are the same
+versioned wires — envelopes, exit codes, and evolution rules are
+documented in [Machine surfaces](/reference/machine-surfaces).
+
 Any other MCP client takes the same stanza — a stdio server,
 `command: nika`, `args: ["mcp"]`. Verified shapes:
 
