@@ -1,0 +1,75 @@
+---
+title: "Design system (machine-readable)"
+description: "The nika icon ontology as data: every verb, builtin, feature and run-state with its canonical glyph, hue and motion — served as JSON, Turtle and SVG."
+sidebarTitle: "Design system"
+icon: "swatchbook"
+---
+
+import { CANON } from "/snippets/_canon.mdx";
+
+Every Nika **verb**, **builtin**, **feature** and **run-state** carries a
+canonical icon, color role and motion pattern — declared once in an
+ontology and served as data from [nika.sh/brand](https://nika.sh/brand).
+If you're building a dashboard, an editor integration or an agent surface
+on top of Nika, take the visual language from here instead of inventing
+one: your run view and the official surfaces stay one system.
+
+## The served surfaces
+
+| Surface | URL | What it is |
+| --- | --- | --- |
+| Icon catalog | `https://nika.sh/brand/icons/<namespace>-<name>.svg` | One SVG per entity (e.g. [`verb-infer`](https://nika.sh/brand/icons/verb-infer.svg) · [`builtin-fetch`](https://nika.sh/brand/icons/builtin-fetch.svg) · [`state-recovered`](https://nika.sh/brand/icons/state-recovered.svg)) |
+| JSON ontology | [`/brand/icons.json`](https://nika.sh/brand/icons.json) | Labels, semantics, hue tokens, effects and links for every entity |
+| RDF projection | [`/brand/icons.ttl`](https://nika.sh/brand/icons.ttl) | The same graph in Turtle — SPARQL-ready, namespace [`nkd:`](https://nika.sh/ontology/design/) |
+| Identity kit | [`/brand/`](https://nika.sh/brand) + [BRAND.md](https://github.com/supernovae-st/nika.sh/blob/main/BRAND.md) | The butterfly-supernova marks, lockups, tiles and usage rules |
+
+Entity ids are `<namespace>/<name>` across seven namespaces: `verb` ·
+`builtin` · `feature` · `state` · `ui` · `social` · `anim`. The builtin
+entries track the {CANON.builtins}-builtin stdlib — the ontology is
+parity-gated against the spec canon, so a new builtin cannot ship without
+its icon.
+
+## The color law
+
+The four verb hues mean **a run is alive** — they appear only on live-run
+surfaces (an executing DAG, a replay). Static UI renders every icon in the
+surrounding text ink. If you consume the catalog, keep that rule: it is
+what makes color a signal instead of decoration.
+
+| Verb | Hue |
+| --- | --- |
+| `infer` | blue `#5b8cff` |
+| `exec` | orange `#ff7a3c` |
+| `invoke` | cyan `#22d3ee` |
+| `agent` | violet `#b07bff` |
+
+## Motion
+
+The `anim/*` entities define the dot-matrix motion register: each verb's
+pattern is its execution model — `infer` samples (a sparkle emerges from
+seeded noise), `exec` scans like stdout, `invoke` round-trips, `agent`
+orbits its bounded loop. The pattern names and parameters ride
+`icons.json`; the reference renderer lives in the
+[site source](https://github.com/supernovae-st/nika.sh/tree/main/src/fx/dotmatrix).
+
+## Querying the ontology
+
+The Turtle projection answers SPARQL. For example, every builtin and its
+glyph:
+
+```sparql
+PREFIX nkd: <https://nika.sh/ontology/design#>
+SELECT ?entity ?label ?glyph WHERE {
+  ?entity a nkd:Builtin ;
+          rdfs:label ?label ;
+          nkd:glyph ?glyph .
+}
+```
+
+Classes: `nkd:Verb` · `nkd:Builtin` · `nkd:Feature` · `nkd:RunState` ·
+`nkd:UiGlyph` · `nkd:SocialMark` · `nkd:Animation`. Relations worth
+knowing: `nkd:parent` (every builtin points at `verb/invoke` — everything
+callable is a tool reached through `invoke:`), `nkd:sharesGlyphWith`
+(deliberate glyph reuse, e.g. the `compose` builtin and the check feature
+share the shield — same oracle), and `nkd:hueToken` (the CSS custom
+property a hue rides on the official surfaces).
