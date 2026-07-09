@@ -28,6 +28,20 @@ icon: "plug"
 `nika check -` reads the workflow from **stdin** — editors and agents
 audit keystroke-fresh buffers without touching the disk.
 
+## The hosted twins
+
+The same law reaches the web: the machine surfaces an agent can fetch
+without a binary, each probed and versioned like the CLI wires.
+
+| URL | What it carries |
+|---|---|
+| [`nika.sh/spec/v1/workflow.schema.json`](https://nika.sh/spec/v1/workflow.schema.json) | the published workflow JSON Schema — the same one `nika schema` embeds |
+| [`nika.sh/errors/catalog.json`](https://nika.sh/errors/catalog.json) | the error catalog, projected from the spec's normative table |
+| [`nika.sh/brand/icons.json`](https://nika.sh/brand/icons.json) | the [design ontology](/reference/design-system): every verb, builtin, feature and run-state with glyph, hue and motion |
+| [`nika.sh/brand/icons.ttl`](https://nika.sh/brand/icons.ttl) | the same graph in Turtle — SPARQL-ready, namespace [`nkd:`](https://nika.sh/ontology/design/) |
+| [`nika.sh/llms.txt`](https://nika.sh/llms.txt) | the agent-readable site summary (llmstxt.org shape) |
+| [registry `index.json`](https://raw.githubusercontent.com/supernovae-st/nika-registry/main/index.json) | every shared artifact with its pin, digest, cert summary and advisory state — resolve names here before installing anything an LLM suggests |
+
 ## The exit-code contract
 
 Scripts and agents branch on exit codes, so they are a spec surface
