@@ -1,0 +1,69 @@
+---
+title: "Nika × OpenCode"
+description: "OpenCode reads everything nika init writes — AGENTS.md, the repo skill — natively. Add one MCP stanza and the loop is complete. Zero packaging."
+sidebarTitle: "OpenCode"
+icon: "terminal"
+---
+
+[OpenCode](https://github.com/anomalyco/opencode) is the open-source,
+provider-agnostic terminal coding agent. The division of labor writes
+itself: **OpenCode writes code · Nika captures the repeatable AI work as a
+checkable file.** No plugin is required — OpenCode natively reads every
+surface `nika init` scaffolds.
+
+## Wire it (3 minutes)
+
+**1 · Teach the repo** — OpenCode discovers `AGENTS.md` (project root,
+upward traversal, `CLAUDE.md` fallback) and repo skills under
+`.agents/skills/` natively:
+
+```sh
+nika init
+```
+
+That is the whole teaching step. The `nika-authoring` skill (author → check
+→ repair loop) appears in OpenCode's skill tool automatically.
+
+**2 · Wire the oracle** — add the two-field stanza to `opencode.json`
+(project-local, or `~/.config/opencode/opencode.json` globally):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "nika": { "type": "local", "command": ["nika", "mcp"], "enabled": true }
+  }
+}
+```
+
+OpenCode's own docs warn that heavy MCP servers blow the context budget —
+the Nika oracle is the lean counter-example: a handful of read-only
+validate/learn tools ([what it exposes and refuses](/reference/mcp-server)).
+
+## Prove the loop
+
+Ask OpenCode:
+
+> Turn my weekly changelog digest into a Nika workflow from the chain
+> template, check it, and run it with the mock model.
+
+Expected tool trail: `nika new --from chain` → edit → `nika check` (static
+audit, nothing spent) → `nika run … --model mock/echo` (offline) →
+receipts in `.nika/traces/`.
+
+## When to reach for which
+
+| task | who |
+|---|---|
+| implement/refactor/review code | OpenCode |
+| a repeated AI pipeline (digest, triage, ETL, report, multi-model bench) | a `.nika.yaml` OpenCode authors once |
+| a one-off question | neither — just answer |
+
+## Troubleshooting
+
+- **Skill not listed** — OpenCode discovers `.agents/skills/*/SKILL.md`
+  from the git worktree root; re-check `nika init` ran at the repo root.
+- **MCP server absent** — validate `opencode.json` against its `$schema`;
+  the `nika` binary must be on PATH (`nika --version`).
+- **Which config wins** — project-local `opencode.json` merges over the
+  global file; keep the stanza in one place.

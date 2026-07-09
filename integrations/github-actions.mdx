@@ -1,0 +1,67 @@
+---
+title: "Nika × GitHub Actions"
+description: "Plan with receipts on every PR: the check verdict, the honest cost floor, required secrets and the DAG — before anyone runs anything."
+sidebarTitle: "GitHub Actions"
+icon: "github"
+---
+
+[`supernovae-st/nika-action`](https://github.com/supernovae-st/nika-action)
+turns every PR that touches a `.nika.yaml` into a reviewed plan: a sticky
+comment with the `nika check` verdict, the cost floor (never a fake zero),
+the models and secrets the change needs, its egress statics, and the DAG —
+rendered natively by GitHub as mermaid.
+
+```yaml
+name: nika
+on: [pull_request]
+permissions:
+  contents: read
+  pull-requests: write     # drop it and the body lands in the step summary
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # pin by full commit SHA in real use (marketplace norm)
+      - uses: supernovae-st/nika-action@v1
+        with:
+          workflow: flows/report.nika.yaml
+          mode: check        # or: test → adds the offline mock golden lane
+```
+
+## What lands on the PR
+
+> ✅ **nika check** — clean · `flows/report.nika.yaml` · 3 task(s) · 3 wave(s)
+> 💰 **cost floor ≥ $0.12** · ⚠ 1 unpriced task — never rendered as $0
+> 🔐 **requires** — models: `ollama/qwen3.5:4b` · secrets: `OPENAI_API_KEY`
+> 🌊 **schedule** — 3 wave(s), max width 1
+> 🗺 DAG *(collapsible mermaid)*
+
+One comment per workflow file, upserted in place on every push — never
+thread spam.
+
+## The lanes — and the missing one
+
+| lane | runs | secrets |
+|---|---|---|
+| `check` (default) | static analysis only, nothing executes | none |
+| `test` | + `nika test` vs `<file>.golden.json` — mock provider, offline | none |
+| ~~run~~ | **refused by design.** A `.nika.yaml` can declare `exec:` shell steps — executing PR content under a CI token is your decision to make explicitly, in your own workflow, never on fork-origin events | — |
+
+## Security posture
+
+- The engine download is **verified against the release's `SHA256SUMS`**
+  before extraction.
+- Fork PRs carry a read-only token: the comment degrades to the **step
+  summary** automatically. Never wire any of this via `pull_request_target`
+  with a checkout of the PR head.
+- Pin the action itself by commit SHA — the marketplace norm.
+
+## Honesty semantics
+
+The comment's cost figure is a **floor** (`spend ≥ floor`); unpriced tasks
+render as `unpriced` with their reason verbatim, never `$0`. When the DAG
+has parallel waves the comment states the budget bound explicitly: a
+mid-run `--max-cost-usd` stops *new* admissions, so the worst-case
+overshoot is one full wave (`spend ≤ floor + W · c_max`). The full
+semantics: [cost honesty](/guides/cost-honesty).
