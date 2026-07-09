@@ -154,6 +154,7 @@
               "guides/testing",
               "guides/resume",
               "guides/observability",
+              "guides/cost-honesty",
               "guides/agent-authoring",
               "guides/templates",
               "guides/sharing",
@@ -265,6 +266,7 @@
             "group": "CLI & errors",
             "pages": [
               "reference/cli",
+              "reference/machine-surfaces",
               "reference/error-codes"
             ]
           },
