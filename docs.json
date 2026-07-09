@@ -321,5 +321,15 @@
       "og:image": "https://docs.nika.sh/images/og-card.png",
       "twitter:card": "summary_large_image"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/errors",
+      "destination": "/reference/error-codes"
+    },
+    {
+      "source": "/errors/:code*",
+      "destination": "/reference/error-codes"
+    }
+  ]
 }
