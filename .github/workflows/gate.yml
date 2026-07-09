@@ -26,8 +26,31 @@ jobs:
           python-version: '3.12'
       - name: link + canon audit
         run: python3 scripts/link-audit.py
-      - name: count-drift gate
-        run: python3 scripts/count-drift-gate.py
+      # count-drift check (c) asserts hand-typed MCP tool counts against the
+      # live wire — without a binary it self-skips, so CI was only running
+      # checks (a)+(b) while the wire assertion lived local-only. Install the
+      # latest release the same checksum-verified way the marketplace gate
+      # does: no bare curl|tar.
+      - name: install nika (latest release · checksum-verified)
+        run: |
+          set -euo pipefail
+          tag=$(curl -fsSL -o /dev/null -w '%{url_effective}'             https://github.com/supernovae-st/nika/releases/latest | sed 's|.*/tag/||')
+          ver=${tag#v}
+          dl="https://github.com/supernovae-st/nika/releases/download/${tag}"
+          asset="nika-linux-x64-${ver}.tar.gz"
+          curl -fsSL "${dl}/${asset}" -o "${asset}"
+          curl -fsSL "${dl}/SHA256SUMS" -o SHA256SUMS
+          grep " ${asset}\$" SHA256SUMS | sha256sum -c -
+          tar xzf "${asset}"
+          sudo mv nika /usr/local/bin/nika
+          nika --version
+      - name: count-drift gate (wire-asserted)
+        run: |
+          python3 scripts/count-drift-gate.py | tee /tmp/cdg.out
+          if grep -q "skipped" /tmp/cdg.out; then
+            echo "::error::tool-count check skipped despite the install — wire assertion did not run"
+            exit 1
+          fi
 
   oracle-sweep:
     runs-on: ubuntu-latest
