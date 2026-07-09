@@ -43,6 +43,24 @@ Between release tags, progress lands on `main` as:
 
 ## History
 
+<Update label="v0.98.0" description="2026-07-08 · native answers · the checker closes run-fail gaps · one lexer" tags={["release", "structured-output", "onboarding"]}>
+  Structured output goes **native per provider** — Anthropic's
+  `output_config.format`, Gemini's `responseJsonSchema` (the lossy
+  converter dies), OpenAI strict-mode honesty (`not`/`allOf` stripped at
+  the wire instead of 400ing) — with a **coercion ladder** that repairs
+  case-folded enums, string numbers and singleton arrays before any PAID
+  retry. The checker closes gaps that used to fail at run: the compact
+  block-sequence **bomb** that aborted every check/run is caught as
+  NIKA-PARSE-001, `max_turns` bounds and `for_each` over a typed
+  non-array are check-time findings, and `env:` **binds at run** exactly
+  as checked. The `${{ }}` scanner becomes its own crate (`nika-tmpl`),
+  shared by checker AND runtime — parity by construction. And the first
+  30 seconds learn to speak: `nika welcome` mirrors your machine,
+  `nika explain <file>` narrates a workflow (cost honesty included),
+  `nika init` briefs six agent surfaces, `--max-cost-usd` refuses to
+  start when the static floor already exceeds the budget.
+</Update>
+
 <Update label="v0.97.0" description="2026-07-07 · the run becomes evidence" tags={["release", "trust"]}>
   Every journal line carries a **hash chain** — `nika trace verify` walks
   it and names the first broken link; export and replay check the chain
