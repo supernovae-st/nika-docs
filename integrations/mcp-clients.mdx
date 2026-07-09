@@ -12,6 +12,11 @@ Every MCP-capable client wires the same read-only oracle
 This page is one anchor per client, so directory listings can deep-link
 straight to their tool.
 
+One-click where the client supports it (binary still required first):
+
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-install_nika_mcp-0098FF?logo=githubcopilot)](https://insiders.vscode.dev/redirect/mcp/install?name=nika&config=%7B%22command%22%3A%20%22nika%22%2C%20%22args%22%3A%20%5B%22mcp%22%5D%7D)
+[![Install in Cursor](https://img.shields.io/badge/Cursor-install_nika_mcp-000000)](https://cursor.com/en/install-mcp?name=nika&config=eyJjb21tYW5kIjogIm5pa2EiLCAiYXJncyI6IFsibWNwIl19)
+
 For **cursor · vscode · windsurf · claude · codex** the wiring is one
 command (idempotent, writes the right file):
 
@@ -123,5 +128,5 @@ Then prove the loop end-to-end:
 [integrate in 10 minutes](/integrations/quickstart).
 
 > Client config formats move fast. The stable contract is the stanza
-> (`nika` + `mcp`) and the oracle's read-only surface; when a client's
-> config path changes, only this page's anchor needs the touch-up.
+> (`nika` + `mcp`) and the oracle's read-only surface — if a client's
+> documented path has moved, the stanza still applies.

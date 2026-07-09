@@ -87,3 +87,18 @@ printf '%s\n' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
   | nika mcp
 ```
+
+And the last inch — a real `nika_check` call. `workflow` takes the file's
+**source text** (the oracle has no filesystem access by design), so shell in
+the file's contents:
+
+```sh
+printf '%s\n' \
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"probe","version":"1"}}}' \
+  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+  "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"nika_check\",\"arguments\":{\"workflow\":$(python3 -c 'import json,sys;print(json.dumps(open(sys.argv[1]).read()))' flow.nika.yaml)}}}" \
+  | nika mcp
+```
+
+A clean workflow answers with the audit verdict in `content[0].text` —
+same output as `nika check`, over the wire.
