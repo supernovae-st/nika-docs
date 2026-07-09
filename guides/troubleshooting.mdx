@@ -84,11 +84,26 @@ flag ([error model](/reference/error-codes)). The frequent ones:
     not-found, still fail loudly on permission-denied).
   </Step>
   <Step title="Ask with context">
-    [GitHub issues](https://github.com/supernovae-st/nika/issues) with
-    the code + the task id + the minimal YAML. Security findings:
-    security@supernovae.studio, never public issues.
+    Two guided forms exist so nothing gets lost: **[First run
+    failed](https://github.com/supernovae-st/nika/issues/new?template=first_run_failed.yml)**
+    (a stumble in your first minutes is a bug, even when nothing
+    crashed) and **[I was confused
+    here](https://github.com/supernovae-st/nika/issues/new?template=confused_here.yml)**
+    (paper cuts are bugs in the teaching). The output of `nika welcome`
+    is the perfect diagnostic attachment — it prints key *presence*,
+    never values. For everything else,
+    [Discussions](https://github.com/supernovae-st/nika/discussions) is
+    the fastest lane. Security findings: security@supernovae.studio,
+    never public issues.
   </Step>
 </Steps>
+
+<Note>
+  Nika ships **zero telemetry** — the binary never phones home. These
+  forms and Discussions ARE the project's analytics: a report that you
+  reached your first green run in under two minutes is a data point we
+  cannot get any other way.
+</Note>
 
 ## See also
 
