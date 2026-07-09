@@ -1,0 +1,74 @@
+---
+title: "Machine surfaces"
+sidebarTitle: "Machine surfaces"
+description: "The versioned JSON wires — every human surface has a machine twin, envelopes are versioned and additive-only, exit codes are a contract."
+icon: "plug"
+---
+
+> The law: **every human-facing surface has a `--json` twin**, every
+> machine payload carries a **version envelope**, and evolution is
+> **additive-only** — a field is added, never renamed or removed within
+> a version. Agents and tooling parse the JSON; the pretty output is
+> free to improve without breaking anyone.
+
+## The wires
+
+| Surface | Envelope | What it carries |
+|---|---|---|
+| `nika check <file> --json` | `report_version` | the full audit report: conformance findings (each with `code` · `severity` · `docs_url` · span), cost intervals per task, the derivation certificate, requirements (models · secrets · env), secret-flow findings, hints, pricing provenance (`pricing.snapshot`) |
+| `nika doctor --json` | — (stable shape) | the environment diagnosis: per-finding status + the exact fix command, key PRESENCE (never values), local provider reachability |
+| `nika catalog --json` | `catalog_version` | the provider/model vocabulary: models, capabilities, key env-var NAMES |
+| `nika tools --json` | `tools_version` | the builtin tool catalog with model-facing JSON Schemas per tool |
+| `nika graph <file> --format json` | `graph_format` | the ONE graph projection: nodes (id · verb · model/tool · when · fan-out · permits · cost interval) + edges — mermaid and dot are derived from this, never parallel truths |
+| `nika run <file> --json` | NDJSON stream | the live event stream, one JSON object per line — the same events the trace records |
+| `nika trace export` | OTLP | any recorded journal projected to OpenTelemetry (Jaeger · Grafana · Langfuse) |
+| `nika spec --canon` | `schema_version` | the embedded canon SSOT (counts and names — cite it, never a remembered number) |
+| `nika schema` | JSON Schema `$id` | the embedded workflow schema — the same one editors validate against |
+
+`nika check -` reads the workflow from **stdin** — editors and agents
+audit keystroke-fresh buffers without touching the disk.
+
+## The exit-code contract
+
+Scripts and agents branch on exit codes, so they are a spec surface
+(spec §4), not an accident:
+
+| Code | Meaning |
+|---|---|
+| `0` | success — clean check · completed run |
+| `1` | the workflow ran and failed (a task settled failed) |
+| `2` | findings / usage / refusal — check findings, bad flags, the `--max-cost-usd` floor refusal |
+| `3` | environment — missing file, no golden to compare, binary-level trouble |
+
+Stream discipline: product output goes to **stdout**, only
+environmental noise goes to stderr — and in `--json` modes, progress
+moves to stderr so stdout stays parseable.
+
+## The MCP oracle
+
+`nika mcp` serves the same truths over the Model Context Protocol
+(stdio, read-only): validate (`nika_check` — a dirty workflow returns
+`isError: true`, mirroring the CLI's exit 2) and learn (`nika_schema` ·
+`nika_examples` · `nika_template` · `nika_canon` · `nika_catalog` ·
+`nika_tools` · `nika_explain`). Same owning builders as the CLI
+payloads — the two lanes cannot drift apart by construction.
+
+## The evolution rules
+
+- **Versioned**: breaking a payload shape means bumping its envelope
+  field — consumers pin on it.
+- **Additive-only within a version**: new fields appear, existing ones
+  keep their meaning.
+- **Deterministic**: stable key ordering, no timestamps injected into
+  otherwise-stable payloads — machine output is cache- and
+  diff-friendly.
+- **Presence, never values**: no secret VALUE crosses any wire, human
+  or machine. Requirements name the env var; doctor reports set/unset.
+
+<Note>
+  Next on this page once the next engine tag ships: `nika context
+  --json` (`context_version`) — the whole workspace truth in one call
+  (file map with per-file verdicts · run inventory with actual cost ·
+  environment snapshot · wiring state · caps always reported, relative
+  paths only). It is merged on `main` today and rides the next release.
+</Note>
