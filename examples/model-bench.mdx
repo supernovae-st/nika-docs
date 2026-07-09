@@ -128,9 +128,18 @@ bench is FOR:
 
 ```bash
 ollama pull qwen2.5:14b llama3.2:3b qwen2.5:0.5b   # or swap the seats
+git clone https://github.com/supernovae-st/nika-spec && cd nika-spec
 nika run examples/showcase/t2-model-bench.nika.yaml
 cat bench/model-bench.md
 ```
+
+<Note>
+  This workflow is newer than the currently shipped engine pack:
+  `nika examples run showcase/t2-model-bench` says `unknown example`
+  until the next engine tag re-vendors the pack. Until then, run it
+  from the spec checkout as above — the file is the same one the pack
+  will embed, sha-pinned in the spec manifest.
+</Note>
 
 The first call to each model pays its load time — run the bench twice
 and read the warm numbers. Swap any seat for `mistral/…`,
