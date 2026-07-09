@@ -83,6 +83,11 @@ triggers an automatic rebuild (typically ~30 seconds) and updates
 
 ## Content conventions
 
+- **Brand assets** (`images/logo-{light,dark}.svg` · `images/favicon.svg`)
+  are vendored from the Nika brand kit — canonical files + usage rules at
+  [nika.sh/brand](https://nika.sh/brand/nika-logo-dark.svg)
+  ([BRAND.md](https://github.com/supernovae-st/nika.sh/blob/main/BRAND.md)).
+  Sync contents from the kit, never hand-tune colors here.
 - **Narrative vocabulary** (locked): "organ" not "module", "admitted" not
   "added", "grew" not "shipped", "chrysalis" not "beta", "emerge" reserved for
   the 1.0 release.
