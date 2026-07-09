@@ -1,0 +1,139 @@
+---
+title: "Model bench"
+sidebarTitle: "Model bench"
+description: "T2 diamond · engineering: the same question, three local models, one MEASURED table. Zero keys, zero cloud, zero spend."
+icon: "scale-unbalanced"
+---
+
+> **T2 diamond · engineering / model selection**: three `infer.model:`
+> seats fan out the SAME question in parallel; a `nika:jq` fan-in builds
+> a markdown table from measured facts — each answer's latency comes
+> from `tasks.X.duration_ms`, the run's own clock. No judge model, no
+> scores: the table states facts, the quality call stays yours.
+
+## The job
+
+Picking a default model by vibes is how you end up paying for quality
+you don't need — or shipping answers a smaller model would have matched.
+This workflow is the bench you run BEFORE deciding: same prompt, three
+seats, one report on disk that you can diff run over run.
+
+## The shape
+
+{/* showcase:dag-begin t2-model-bench.nika.yaml */}
+```mermaid
+flowchart LR
+  ask_incumbent["ask_incumbent"]:::infer
+  ask_challenger["ask_challenger"]:::infer
+  ask_tiny["ask_tiny"]:::infer
+  tabulate["tabulate · nika:jq"]:::invoke
+  persist["persist · nika:write"]:::invoke
+  ask_incumbent --> tabulate
+  ask_challenger --> tabulate
+  ask_tiny --> tabulate
+  tabulate --> persist
+  classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+{/* showcase:dag-end */}
+
+## The file
+
+{/* showcase:begin t2-model-bench.nika.yaml */}
+```yaml t2-model-bench.nika.yaml
+nika: v1
+workflow: model-bench
+description: "One question → three local models → a measured comparison table"
+
+model: ollama/qwen3.5:4b # the house default · contenders below pick their own seats
+
+vars:
+  question:
+    type: string
+    default: "Explain, in five lines, why a workflow should be audited before it runs."
+
+tasks:
+  - id: ask_incumbent
+    infer:
+      model: ollama/qwen2.5:14b # the quality bar · the seat to beat
+      prompt: "${{ vars.question }}"
+      max_tokens: 600
+
+  - id: ask_challenger
+    infer:
+      model: ollama/llama3.2:3b # another family · same size class
+      prompt: "${{ vars.question }}"
+      max_tokens: 600
+
+  - id: ask_tiny
+    infer:
+      model: ollama/qwen2.5:0.5b # the "is small enough?" probe
+      prompt: "${{ vars.question }}"
+      max_tokens: 600
+
+  - id: tabulate
+    depends_on: [ask_incumbent, ask_challenger, ask_tiny]
+    invoke:
+      tool: "nika:jq"
+      args:
+        input:
+          - model: "ollama/qwen2.5:14b"
+            ms: "${{ tasks.ask_incumbent.duration_ms }}"
+            answer: "${{ tasks.ask_incumbent.output }}"
+          - model: "ollama/llama3.2:3b"
+            ms: "${{ tasks.ask_challenger.duration_ms }}"
+            answer: "${{ tasks.ask_challenger.output }}"
+          - model: "ollama/qwen2.5:0.5b"
+            ms: "${{ tasks.ask_tiny.duration_ms }}"
+            answer: "${{ tasks.ask_tiny.output }}"
+        expression: >-
+          "| model | latency | chars | answer (first 160) |\n|---|---|---|---|\n"
+          + (map("| " + .model + " | "
+               + (if .ms == null then "cached" else (.ms | tostring) + "ms" end) + " | "
+               + (.answer | length | tostring) + " | "
+               + (.answer | gsub("\n"; " ") | .[0:160]) + " |")
+             | join("\n"))
+
+  - id: persist
+    depends_on: [tabulate]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "./bench/model-bench.md"
+        create_dirs: true
+        content: |
+          # Model bench — same question, measured
+
+          ${{ tasks.tabulate.output }}
+
+          Facts only: latency from the run's clock, length in characters.
+          The answers are side by side — the quality call is yours.
+```
+{/* showcase:end */}
+
+## Two findings the bench surfaced on its own authoring run
+
+Both were caught live while writing this example — they are what the
+bench is FOR:
+
+1. **A thinking model with a bounded `max_tokens` can return an empty
+   answer** — it spends the whole budget reasoning before a single
+   output token. The row reads `0 chars`: that is a bench *result*, not
+   a bug. Seat `ollama/qwen3.5:4b` and reproduce it on your machine.
+2. **On a `--resume`, rehydrated rows say `cached`** — a latency that
+   was not re-measured is never re-printed as a fresh number. The
+   report stays honest across resumes.
+
+## Run it
+
+```bash
+ollama pull qwen2.5:14b llama3.2:3b qwen2.5:0.5b   # or swap the seats
+nika run examples/showcase/t2-model-bench.nika.yaml
+cat bench/model-bench.md
+```
+
+The first call to each model pays its load time — run the bench twice
+and read the warm numbers. Swap any seat for `mistral/…`,
+`anthropic/…` or `openai/…` to bench a cloud contender against your
+local incumbents (the cost column of `nika check` starts telling the
+price story the moment a priced model enters).

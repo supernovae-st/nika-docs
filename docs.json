@@ -205,6 +205,7 @@
               "examples/support-triage",
               "examples/contract-guard",
               "examples/etl-quarantine",
+              "examples/model-bench",
               "examples/release-radar"
             ]
           },
