@@ -237,6 +237,38 @@ definition, document symbols and push diagnostics. Wire it as a
 generic LSP command (`nika lsp`) in Zed, Neovim or Helix alongside the
 Tier-1 schema.
 
+## File and folder icons
+
+`*.nika.yaml` files carry the butterfly mark out of the box wherever the
+icon theme honors language icons (Seti — VS Code's default — does; the
+extension contributes it). Folder icons are the icon theme's territory,
+not an extension's, so `.nika/` — the flight-recorder home — needs one
+line in your settings until the upstream icons land:
+
+<Tabs>
+  <Tab title="Material Icon Theme">
+    Map `.nika/` to the existing `flow` folder icon today:
+
+    ```json settings.json
+    {
+      "material-icon-theme.folders.associations": { ".nika": "flow" }
+    }
+    ```
+
+    Native butterfly icons (file + folder) are
+    [in review upstream](https://github.com/material-extensions/vscode-material-icon-theme/pull/3529) —
+    once merged, delete the association and both arrive with the theme.
+  </Tab>
+
+  <Tab title="vscode-icons">
+    A ready-made custom set (file · folder · open folder) ships in the
+    extension repo's
+    [`contrib/`](https://github.com/supernovae-st/nika-vscode/tree/main/contrib)
+    with the wiring steps (`vsicons.customIconFolderPath` + two
+    association entries).
+  </Tab>
+</Tabs>
+
 ## Roadmap
 
 | Capability | Status | Admission |
