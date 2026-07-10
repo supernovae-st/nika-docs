@@ -38,8 +38,9 @@ runs, and the receipts loop (`nika trace show` · `nika trace verify`).
 
 ## Wire the oracle (optional, recommended)
 
-For schema/validation answers without shell round-trips, add the read-only
-MCP oracle to `~/.hermes/config.yaml`, then `/reload-mcp`:
+For schema/validation answers without shell round-trips, `nika wire hermes`
+(0.99+) writes the oracle into `~/.hermes/config.yaml` for you — or add it
+by hand, then `/reload-mcp`:
 
 ```yaml
 mcp_servers:
@@ -75,12 +76,11 @@ quietly until the final card. The skill teaches the fix: launch with
 
 ## Cost honesty in delegation
 
-- Always pass `--max-cost-usd` on paid cloud models. Two guardrails, two
-  strengths: when the workflow file's own `model:` prices above the budget,
-  the run **refuses to start** (exit 2, zero tokens) — prefer the in-file
-  model for budgeted runs. A `--model` override is not priced by that
-  pre-start gate today (0.98.x): the run starts and the budget binds
-  mid-run — the crossing call completes, nothing new starts, the run fails
+- Always pass `--max-cost-usd` on paid cloud models. Since 0.99 the
+  pre-start floor prices the **effective** model (`--model` override
+  included): a workflow that prices above the budget **refuses to start**
+  (exit 2, zero tokens). Mid-run, the ledger stops the moment real spend
+  crosses — the crossing call completes, nothing new starts, the run fails
   `NIKA-1704` (exit 1) with spent-vs-budget.
 - Prefer local models for drafts (`ollama/…`) — no key, no meter.
 - An **uncataloged** model meters as $0: never rely on the budget cap for a
