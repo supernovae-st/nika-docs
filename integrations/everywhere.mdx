@@ -1,0 +1,100 @@
+---
+title: "Everywhere Nika meets you"
+description: "The complete map: every install path, IDE, agent, skill, plugin, CI surface, SDK and registry where Nika ships — one page, categorized."
+sidebarTitle: "The full map"
+icon: "map"
+---
+
+One binary, many doors. This page is the single map of **every surface Nika
+ships on** — pick your door, each row links to the exact guide.
+
+<Info>
+The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
+`nika init` teaches whatever agent you run.
+</Info>
+
+## Install paths
+
+| Surface | What you get | Where |
+|---|---|---|
+| **Homebrew tap** | `brew install supernovae-st/tap/nika` (macOS + Linux) | [Quickstart](/integrations/quickstart) |
+| **Release tarballs** | per-platform binaries + `SHA256SUMS` (verify before you trust) | [GitHub releases](https://github.com/supernovae-st/nika/releases/latest) |
+| **`install.sh`** | one-command install from the site | [nika.sh/install](https://nika.sh/install) |
+| **`.mcpb` bundles** | one-click MCP bundle (macOS arm64 · Linux x64) with checksums | [MCP clients](/integrations/mcp-clients) |
+| **Docker image** | the read-only oracle in a container (`integrations/mcp/Dockerfile` in the kit) | [nika-agents kit](https://github.com/supernovae-st/nika-agents) |
+
+## IDEs & editors
+
+| Surface | Mechanism | Where |
+|---|---|---|
+| **VS Code** | extension on the [Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) (LSP · DAG canvas · preflight) | [MCP clients → VS Code](/integrations/mcp-clients#vs-code--copilot) |
+| **Cursor** | `nika wire cursor` + one-click deeplink button | [MCP clients → Cursor](/integrations/mcp-clients#cursor) |
+| **Windsurf** | `nika wire windsurf` | [MCP clients → Windsurf](/integrations/mcp-clients#windsurf) |
+| **Zed** | `nika wire zed` (0.99+) | [MCP clients → Zed](/integrations/mcp-clients#zed) |
+| **Cursor forks / VSCodium** | extension via [OpenVSX](https://open-vsx.org/extension/supernovae/nika) | — |
+| **Neovim** | via the mcphub.nvim registry (covers avante · codecompanion) | [MCP clients](/integrations/mcp-clients) |
+| **Any editor with YAML-LSP** | the `# yaml-language-server: $schema=` modeline `nika init` writes | [Editors guide](/getting-started/editors) |
+
+## Agents & assistants
+
+| Surface | Mechanism | Where |
+|---|---|---|
+| **Claude Code** | first-party plugin (`.claude-plugin` · `/nika:check` · `/nika:explain` · `/nika:new` · skill) | [Agents guide](/getting-started/agents) |
+| **Codex** | first-party plugin (`.codex-plugin` · same commands) | [Agents guide](/getting-started/agents) |
+| **Hermes** | skill pack (`skills/autonomous-ai-agents/nika` · guard-scanned SAFE) | [Hermes guide](/integrations/hermes) |
+| **OpenCode** | `opencode.json` MCP stanza + native `.agents/` reading — `nika init` suffices | [OpenCode guide](/integrations/opencode) |
+| **goose · Cline · Gemini CLI · Continue · Aider** | generic MCP stanza + `AGENTS.md` (written by `nika init`) | [MCP clients](/integrations/mcp-clients) |
+| **Any AGENTS.md reader** | `nika init` writes 6 agent-facing files (AGENTS.md included) | [Quickstart](/integrations/quickstart) |
+
+## Skills & plugins (the teaching surfaces)
+
+| Element | What it is | Lives at |
+|---|---|---|
+| **SKILL.md pack** | the authoring skill (check-before-run law · cost honesty) — installable via `npx skills add supernovae-st/nika-agents` | [nika-agents kit](https://github.com/supernovae-st/nika-agents) |
+| **Plugin commands** | `/nika:check` · `/nika:explain` · `/nika:new` mirrored from the engine | kit `.agents/plugins/nika/` |
+| **Integration kit contract** | « You want to support Nika? Copy this folder » — pinned mirrors, drift-gated in CI | [kit README](https://github.com/supernovae-st/nika-agents#readme) |
+
+## MCP (the read-only oracle)
+
+`nika mcp` exposes 8 tools — validate, explain, examples, schema, cost — **no
+execution, no mutation, by design** ([threat model](https://github.com/supernovae-st/nika-agents/blob/main/integrations/mcp/THREAT-MODEL.md)).
+
+| Element | Where |
+|---|---|
+| Full tool reference | [MCP server reference](/reference/mcp-server) |
+| Per-client wiring (12 clients) | [MCP clients](/integrations/mcp-clients) |
+| `server.json` (registry shape) + bundles + Dockerfile | [kit `integrations/mcp/`](https://github.com/supernovae-st/nika-agents/tree/main/integrations/mcp) |
+
+## CI/CD
+
+| Element | What it does | Where |
+|---|---|---|
+| **nika-action** — *plan with receipts* | check verdict · honest cost floor · permits · the DAG, as a sticky PR comment. Static, zero secrets by default | [GitHub Actions guide](/integrations/github-actions) · [repo](https://github.com/supernovae-st/nika-action) |
+| **Offline test lane** | `nika test` golden runs on the mock provider — CI with no API key | [Local-first tutorial](/examples/local-first-daily-brief) |
+
+## SDKs & language surfaces
+
+| Element | What it is | Where |
+|---|---|---|
+| **TypeScript client** | `LocalNika` — typed driver over the shipped binary (check · run stream · dry-run plan) · Apache-2.0 | [nika-client](https://github.com/supernovae-st/nika-client) |
+| **Language spec** | the `.nika.yaml` contract — Apache-2.0, runtime-agnostic | [nika-spec](https://github.com/supernovae-st/nika-spec) |
+| **Registry** | CI-re-proven workflow artifacts (hash + oracle + engine cert) | [nika-registry](https://github.com/supernovae-st/nika-registry) |
+
+## Where Nika is listed
+
+Marketplaces and directories where you'll find us today — the public
+submissions ledger (with pinned descriptions and review cadence) lives in
+[`listings.yaml`](https://github.com/supernovae-st/nika-agents/blob/main/listings.yaml).
+
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) · [OpenVSX](https://open-vsx.org/extension/supernovae/nika) — the extension
+- [skills.sh](https://skills.sh/supernovae-st/nika-agents) — the skill pack
+- GitHub topics + release feeds — engine · kit · action · docs · spec · client
+- More MCP registries and community catalogs are in flight — the ledger above
+  is the always-current truth (every submission registers there the day it
+  goes out).
+
+<Tip>
+Something missing? The kit contract makes adding a surface a folder-copy:
+[`nika-agents`](https://github.com/supernovae-st/nika-agents) — and the
+[integration quickstart](/integrations/quickstart) is the 10-minute path.
+</Tip>

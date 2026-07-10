@@ -166,6 +166,7 @@
             "group": "Agents & integrations",
             "pages": [
               "integrations/quickstart",
+              "integrations/everywhere",
               "getting-started/agents",
               "integrations/opencode",
               "integrations/hermes",
