@@ -149,6 +149,7 @@
               "guides/docker-ai-workflow",
               "guides/image-generation",
               "guides/image-effects",
+              "guides/charts",
               "guides/speech-generation",
               "guides/patterns",
               "guides/testing",
