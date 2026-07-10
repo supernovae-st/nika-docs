@@ -36,6 +36,18 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
     same install step by step, alongside this raw script.
   </Tab>
 
+  <Tab title="cargo binstall">
+    ```bash
+    cargo binstall --git https://github.com/supernovae-st/nika nika-cli
+    ```
+    Fetches the **prebuilt release tarball** (no compile — the crate ships
+    [binstall metadata](https://github.com/cargo-bins/cargo-binstall) mapping
+    every release asset). One honest wart until the crates.io publish: the
+    binary lands as `~/.cargo/bin/nika-cli` (the crate's declared bin name) —
+    add the public name once with
+    `ln -sf ~/.cargo/bin/nika-cli ~/.cargo/bin/nika`.
+  </Tab>
+
   <Tab title="source">
     ```bash
     git clone https://github.com/supernovae-st/nika.git
