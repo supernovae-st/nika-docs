@@ -115,6 +115,24 @@ MCP settings (`cline_mcp_settings.json`):
 { "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
 ```
 
+## goose
+
+goose (the AAIF agent) discovers MCP extensions from its config. Add the
+oracle as a stdio extension:
+
+```yaml
+extensions:
+  nika:
+    cmd: nika
+    args: [mcp]
+    enabled: true
+    type: stdio
+```
+
+goose also reads `AGENTS.md` natively — `nika init` in the repo teaches it
+the language with zero extra wiring. The binary install is a prerequisite
+(brew or a release tarball; goose's directory entry documents the same).
+
 ## Aider
 
 Aider reads repo conventions rather than MCP: `nika init`'s `AGENTS.md`
