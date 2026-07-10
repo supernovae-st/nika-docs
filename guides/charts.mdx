@@ -1,0 +1,101 @@
+---
+title: "Charts"
+description: "Deterministic chart artifacts — rows + a semantic spec compile to byte-identical SVG, sha256-chained into the run's trace. Five types, typed semantics, an optional Vega-Lite sibling."
+---
+
+`nika:chart` is the data twin of [`nika:image_fx`](/guides/image-effects):
+pure compute plus one permit-gated write — no network, no clock, no
+provider. Rows and a semantic spec compile to an SVG that is
+**byte-identical forever** for identical inputs, and the artifact's sha256
+joins the run's hash-chained trace. Your cost report draws its own
+receipts.
+
+## The 30-second chart
+
+```yaml
+nika: v1
+workflow: spend-report
+permits:
+  tools: ["nika:chart"]
+  fs: { write: ["out/**"] }
+tasks:
+  - id: draw
+    invoke:
+      tool: "nika:chart"
+      args:
+        data:
+          - { day: 1751328000000, cost: 0.42, provider: "anthropic" }
+          - { day: 1751414400000, cost: 0.31, provider: "anthropic" }
+          - { day: 1751328000000, cost: 0.05, provider: "ollama" }
+          - { day: 1751414400000, cost: 0.07, provider: "ollama" }
+        semantics: { day: timestamp, cost: usd, provider: category }
+        chart: { type: line, x: day, y: cost, color: provider, title: "Spend by provider" }
+        out: out/spend.svg
+
+outputs:
+  receipt: "${{ tasks.draw.output }}"
+```
+
+Run it twice: the second run is idempotent and the artifact hash never
+moves. The SVG ships accessibility built in (`role="img"` +
+`aria-label`, a `<title>` node) and carries its own recipe in a
+`<metadata>` block — the chart explains itself with no sidecar.
+
+## The five types (closed · v1)
+
+| `type` | Shape | The extra fields |
+|---|---|---|
+| `bar` | magnitude by category | — |
+| `line` | change over time | `color` splits series |
+| `area_band` | a range around a line | `y_lo` / `y_hi` bounds · `y2` actual overlay |
+| `scatter` | two measures, point cloud | `color` splits series |
+| `heatmap` | grid intensity | `color` names the VALUE field |
+
+`x` / `y` / `y_lo` / `y_hi` / `y2` / `color` are **field names** into your
+rows. `title`, `width`, `height` are optional.
+
+## Semantics drive the rendering
+
+`semantics:` maps each field to what it *means* — the type picks the
+formatting and the palette, so the chart is right by construction:
+
+| Semantic | Renders as |
+|---|---|
+| `usd` | currency ticks (a floor stays a floor — unpriced never fakes a 0) |
+| `duration_ms` | humanized durations |
+| `tokens` · `count` | integer scales |
+| `percent` | percentage axis |
+| `delta` | **diverging palette anchored at 0** — sign is the message |
+| `timestamp` | time axis — the value is **epoch milliseconds** (a date string is a type error at check-in: `NIKA-BUILTIN-CHART-006` names the row) |
+| `category` | the fixed categorical palette, hues assigned in order, never cycled |
+
+## Rows in, artifact out
+
+`data` accepts inline rows (an array of flat string/number objects) or
+`{ path: "rows.json" }` to read a JSON file — the natural pair with an
+upstream task that produced it. `out` must end in `.svg` (the
+attestation surface); parents are created; the write is `fs`-permit
+gated like every artifact.
+
+## The Vega-Lite sibling
+
+```yaml
+        compile_to: vega_lite
+```
+
+writes `out/spend.vl.json` next to the SVG — a real Vega-Lite spec
+(`$schema` · `data` · `encoding` · `mark`) for any downstream tool that
+speaks it. The SVG stays the canonical, hash-attested artifact; the
+sibling is a projection.
+
+## Determinism is the contract
+
+Same rows, same spec, same bytes — proven across architectures
+(wasm32 ≡ aarch64 in the engine's own parity suite). That makes charts
+*evidence*: the sha256 in the task output is the same one the trace
+chain records, `nika trace verify` walks it, and a regenerated chart
+that stops matching is a tamper signal, not a formatting quirk.
+
+Pair it with the flight recorder: draw your run costs from
+`.nika/traces/` data, and the report about your runs is itself a
+receipt in one.
