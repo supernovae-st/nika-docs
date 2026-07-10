@@ -64,10 +64,9 @@ your compute · tokens unpriced — not « free » »* — and
   exceeds --max-cost-usd $0.000100 … (nika check shows the envelope)
   ```
 
-- That pre-start refusal prices the **workflow file's own `model:`**. A
-  `--model` override is not priced by the gate today (0.98.x): the run
-  starts and the budget binds mid-run instead — prefer the in-file model
-  for budgeted runs.
+- Since 0.99 that pre-start refusal prices the **effective** model —
+  `--model` override included. On 0.98.x the override was only guarded
+  mid-run; upgrading closes that gap.
 
 - If unbounded work rides along, the gate says so loudly on stderr —
   a budget over work with no ceiling is a promise it names, not one it
