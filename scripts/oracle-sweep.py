@@ -14,7 +14,21 @@ import sys
 import tempfile
 
 DOCS = pathlib.Path(__file__).resolve().parent.parent
-SPEC = DOCS.parent / "spec"
+# The sibling spec checkout, through the repo-container law (D-2026-07-02-N1
+# addendum): a repo dir may be FLAT (<repos>/spec) or a CONTAINER
+# (<repos>/spec/repo) — and docs itself may sit at either depth. First
+# candidate carrying the conformance runner wins; the 2026-07-10
+# containerization broke the bare `DOCS.parent / "spec"` (every local
+# sweep crashed 48/48 while CI, which lays out flat siblings, stayed green).
+SPEC = next(
+    (c for c in (
+        DOCS.parent / "spec",                      # both flat
+        DOCS.parent / "spec" / "repo",             # docs flat · spec container
+        DOCS.parent.parent / "spec" / "repo",      # both containers
+        DOCS.parent.parent / "spec",               # docs container · spec flat
+    ) if (c / "conformance" / "runner.py").exists()),
+    DOCS.parent / "spec",
+)
 SKIP = re.compile(r"skeleton|illustration|modeline", re.I)
 FENCE = re.compile(r"```yaml([^\n]*)\n(.*?)```", re.DOTALL)
 

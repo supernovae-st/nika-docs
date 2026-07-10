@@ -148,6 +148,7 @@
               "guides/local-models",
               "guides/docker-ai-workflow",
               "guides/image-generation",
+              "guides/image-effects",
               "guides/speech-generation",
               "guides/patterns",
               "guides/testing",
