@@ -48,6 +48,17 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
     `ln -sf ~/.cargo/bin/nika-cli ~/.cargo/bin/nika`.
   </Tab>
 
+  <Tab title="nix">
+    ```bash
+    nix run github:supernovae-st/nika
+    ```
+    **Builds the exact release source** via the repo's root `flake.nix` —
+    the first run compiles, the store caches it, and the binary answers as
+    `nika` (the flake renames the seed crate at install, same as the
+    release). `nix profile install github:supernovae-st/nika` for a durable
+    install. Zero gatekeeper: no nixpkgs queue, the flake ships in-repo.
+  </Tab>
+
   <Tab title="source">
     ```bash
     git clone https://github.com/supernovae-st/nika.git
