@@ -26,7 +26,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika explain <code\|file>` | Teach a `NIKA-XXXX` error code — or narrate a workflow FILE (0.98+): the waves, cost before a token is spent, what it touches, the flight-recorder hand-off |
 | `nika doctor [--ping]` | Diagnose providers plus editor/agent readiness — findings grouped under `binary` · `config` · `lsp` · `mcp` · `provider` · `local` · `providers` · `image` · `tts`. `--ping` (0.94+) TCP-probes the local ports — loopback and configured URLs only, 300ms cap, nothing sent on the socket; the default run stays fully offline |
 | `nika init [dir]` | Scaffold schema wiring, `AGENTS.md`, and Cursor rules |
-| `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, `codex`, or `all` |
+| `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, `codex`, `zed`, `opencode`, `hermes`, or `all` — the [client table](/integrations/mcp-clients) carries every target and its config path |
 | `nika spec [--canon]` | Print the embedded spec or canon |
 | `nika schema` | Print the embedded JSON Schema |
 | `nika catalog [--json]` | The embedded provider/model catalog (models · capabilities · env vars) — `--json` emits the versioned machine projection (`catalog_version: 1`) |
