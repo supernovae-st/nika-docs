@@ -184,7 +184,8 @@
               "concepts/events",
               "concepts/providers",
               "concepts/traces",
-              "concepts/security"
+              "concepts/security",
+              "concepts/how-nika-compares"
             ]
           }
         ],
