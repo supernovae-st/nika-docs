@@ -1,7 +1,9 @@
 /* Nika — Mintlify global styles · cosmos blue+black theme companion
-   (colors + fonts live in docs.json · derived from the nika.sh palette ·
-   --bg #050a1c · --brand oklch(0.62 0.195 258)=#2d82f8 · butterfly ice
-   #9fd0ff · this file = the polish layer) */
+   (colors + fonts live in docs.json · pinned to the shared visual
+   vocabulary SSOT, nika-spec design/tokens.yaml: bg #08090b · primary
+   = accent_strong #2f6bff · light = accent_bright #8db4ff · butterfly
+   ice #9fd0ff · parity-gated by design-projector --check in gate.yml ·
+   this file = the polish layer) */
 
 /* ── Mermaid · transparent over the warm near-black page ── */
 .mermaid svg,

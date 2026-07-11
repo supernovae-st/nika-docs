@@ -70,3 +70,7 @@ jobs:
           jq --version || (sudo apt-get update && sudo apt-get install -y jq)
       - name: every docs yaml block passes the spec oracle
         run: python3 scripts/oracle-sweep.py
+      - name: docs.json theme parity vs the design-tokens SSOT
+        env:
+          NIKA_DOCS_ROOT: ${{ github.workspace }}
+        run: python3 ../spec/scripts/design-projector.py --check
