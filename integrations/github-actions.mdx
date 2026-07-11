@@ -35,6 +35,28 @@ jobs:
 No workflow yet? `nika new flows/report.nika.yaml --from chain` scaffolds
 one — [authoring in 10 minutes](/integrations/quickstart).
 
+## Already have CI? One line
+
+The starter repo publishes a **reusable workflow** that wraps the action
+with the same fork-safe posture — adopting the check in an existing repo
+is a single `uses:` block:
+
+```yaml
+jobs:
+  nika:
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: supernovae-st/nika-actions-starter/.github/workflows/nika-check.yml@main
+    with:
+      workflow: path/to/your.nika.yaml
+```
+
+Starting fresh instead? [`nika-actions-starter`](https://github.com/supernovae-st/nika-actions-starter)
+is a template repo — **Use this template**, and the verdict lands on your
+first PR with zero further wiring. Its own pull requests run the check
+live, so you can read a real sticky comment before adopting anything.
+
 ## What lands on the PR
 
 > ✅ **nika check** — clean · `flows/report.nika.yaml` · 3 task(s) · 3 wave(s)
