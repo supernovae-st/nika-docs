@@ -186,7 +186,8 @@
               "concepts/providers",
               "concepts/traces",
               "concepts/security",
-              "concepts/how-nika-compares"
+              "concepts/how-nika-compares",
+              "patterns/run-receipts"
             ]
           }
         ],

@@ -1,0 +1,98 @@
+---
+title: "Run receipts"
+description: "A tool-neutral pattern for AI pipelines: a reviewable contract before execution, a verifiable record after. Nika is one implementation — the pattern stands on its own."
+sidebarTitle: "Run receipts"
+icon: "receipt"
+---
+
+AI runs act on the real world — they spend money, read secrets, write
+files, call tools. Most of them leave nothing behind that a reviewer can
+trust: a chat log is editable, a dashboard is a vendor's word, a green CI
+tick says only that *something* exited zero. **Run receipts** is the
+pattern that fixes this, and it is deliberately not a product: any
+pipeline, framework or runtime can implement it.
+
+## The pattern
+
+A run deserves two documents, one on each side of the execution:
+
+<Steps>
+  <Step title="Before — a reviewable contract">
+    A static, diffable statement of what the run *would* do: the task
+    graph and its order, which models and secrets it needs, what it may
+    read, write and reach on the network, and an honest cost bound —
+    a ceiling when priceable, an explicit *unknown* when not (never a
+    silent `$0`). A human can approve it in review; a machine can gate
+    on it in CI. Nothing has executed yet.
+  </Step>
+  <Step title="During — bounded execution">
+    The runtime enforces the contract instead of trusting the prose:
+    effects outside the declared boundary fail, spend past the bound
+    stops the run. The contract is load-bearing, not documentation.
+  </Step>
+  <Step title="After — a verifiable record">
+    An append-only journal of what *actually* happened: every task's
+    settle, output digest, spend and timing, each entry carrying a hash
+    of the previous one. Anyone holding the file can recompute the chain
+    and detect tampering — trust lives in the artifact, not in whoever
+    hands it over.
+  </Step>
+</Steps>
+
+## What a receipt answers
+
+| The reviewer's question | Where the answer lives |
+|---|---|
+| What ran, in what order? | the task graph + per-task settle events |
+| What did it touch? | the declared boundary + the recorded effects |
+| What did it cost? | per-task spend, summed — floors stay honest floors |
+| Which model, which provider? | pinned per task in the record, not recalled from memory |
+| Can I trust this file? | recompute the hash chain — it verifies or it names the break |
+| Can I re-run it? | the contract is the input; the record is the expected shape |
+
+## The minimal shape
+
+Nothing about the record requires a platform. Newline-delimited JSON,
+one event per line, each line carrying the hash of the line before it:
+
+```text
+{"event":"task_settled","task":"digest","status":"success","spend_usd":0.0031,"prev":"8c41…","hash":"f09a…"}
+{"event":"task_settled","task":"notes","status":"success","output_sha256":"77b2…","prev":"f09a…","hash":"d418…"}
+{"event":"run_closed","verdict":"completed","total_usd":0.0031,"prev":"d418…","hash":"9e0c…"}
+```
+
+Grep-able, git-trackable, verifiable offline with a for-loop and a hash
+function. That is the whole trick — the value is in *committing to it*,
+not in any engine.
+
+## Nika as one implementation
+
+Nika ships the pattern end to end, which is why this page lives here —
+but each half maps to a plain command you can inspect:
+
+- **The contract** is [`nika check`](/concepts/how-nika-compares): the
+  static audit that prints the plan, the cost bound, the secret flows and
+  the permits boundary before a single token is spent, and exits non-zero
+  when the file breaks its own contract.
+- **The record** is the [flight recorder](/concepts/traces): every run
+  journals to `.nika/traces/` as hash-chained NDJSON, and the run prints
+  its chain head on close.
+- **The re-proof** is `nika trace verify` — it recomputes the chain and
+  either confirms the head or names the first altered link (the full
+  trace verb family is in the [CLI reference](/reference/cli)).
+- **The exit** is `nika trace export`: the journal projects to OTLP/JSON
+  for Jaeger, Grafana or Langfuse — the receipt is portable, not a
+  lock-in surface.
+
+In CI, the same split powers [Nika × GitHub Actions](/integrations/github-actions):
+pull requests get the contract as a sticky comment, and nothing executes.
+
+## Adopt it without adopting Nika
+
+The pattern is worth stealing. If your pipeline is LangGraph, plain
+Python or a Makefile, you can still ship receipts: declare the boundary
+in a reviewable file, journal settles as append-only NDJSON, chain the
+hashes, and teach CI to show the contract on every change. Your reviewers
+get the same two documents; no dependency required. If you later want the
+enforced version, [how Nika compares](/concepts/how-nika-compares) is the
+honest map — including when not to switch.
