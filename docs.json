@@ -171,6 +171,7 @@
               "integrations/opencode",
               "integrations/hermes",
               "integrations/github-actions",
+              "integrations/pre-commit",
               "integrations/mcp-clients"
             ]
           },
