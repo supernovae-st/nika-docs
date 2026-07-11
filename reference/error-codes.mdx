@@ -1,9 +1,11 @@
 ---
 title: "Error codes"
-description: "The typed error model: namespaces, categories, and the 28 registered v0.1 codes. Generated from the spec registry."
+description: "The typed error model: namespaces, categories, and the registered v0.1 codes. Generated from the spec registry."
 sidebarTitle: "Error codes"
 icon: "triangle-exclamation"
 ---
+
+import { CANON } from "/snippets/_canon.mdx";
 
 Every error Nika emits is a **typed structure** with a stable code, a
 category, and a `transient` flag the retry machinery reads. The format is
@@ -62,9 +64,9 @@ code.
 | `internal_error` | Engine bug · unexpected state |
 {/* errors-categories:end */}
 
-## The 28 registered codes (v0.1 normative floor)
+## The registered codes (v0.1 normative floor)
 
-A conformant engine emits exactly these codes for these failures. Engines
+A conformant engine emits exactly these **{CANON.errorCodes}** codes for these failures. Engines
 may add codes within a namespace's `001-099` range. Never repurpose one.
 
 {/* errors-codes:begin */}

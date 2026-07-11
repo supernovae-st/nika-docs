@@ -12,7 +12,12 @@ server every wired client talks to. Its contract is one sentence:
 > and teaches; running a workflow stays on the CLI, where `--max-cost-usd`,
 > the permits boundary and the trace file live.
 
-There is no HTTP flag today (stdio only), no write tool, and no way to make
+The released binary serves stdio; a **Streamable HTTP** transport
+(`nika mcp --transport http` — POST JSON-RPC, origin-gated against
+DNS-rebinding, loopback bind by default on port 8123) has landed on `main`
+and ships with the next release, for managed hosts that cannot spawn a
+process. Widening `--bind` beyond loopback is on you: put TLS + auth in
+front first. Either transport, there is no write tool and no way to make
 the oracle execute anything. That is the design, not a gap: generation and
 repair belong to [the authoring skill](/getting-started/agents), execution
 belongs to a human-gated `nika run`.
