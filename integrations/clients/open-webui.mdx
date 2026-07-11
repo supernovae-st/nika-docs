@@ -1,0 +1,42 @@
+---
+title: "Use Nika with Open WebUI"
+description: "The mcpo recipe: proxy the read-only Nika oracle as an OpenAPI tool server and register it in Open WebUI. Wiring is manual (no wire target)."
+sidebarTitle: "Open WebUI"
+icon: "globe"
+---
+
+[Open WebUI](https://github.com/open-webui/open-webui) consumes OpenAPI
+tool servers, and its companion proxy
+[mcpo](https://github.com/open-webui/mcpo) turns any stdio MCP server into
+one. That is the recipe for Nika: run the oracle behind mcpo, register the
+endpoint.
+
+Wiring is manual — `nika wire` has no Open WebUI target.
+
+## The recipe
+
+The binary comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)). Then:
+
+```sh
+uvx mcpo --port 8000 -- nika mcp
+```
+
+mcpo serves the oracle's eight `nika_*` tools as OpenAPI endpoints (the
+interactive docs appear at `http://localhost:8000/docs`). Register
+`http://localhost:8000` as a tool server in Open WebUI — its
+[mcpo guide](https://github.com/open-webui/mcpo#readme) shows where — and
+the tools appear in chat.
+
+## What you get
+
+Validation, explanation, schema and cost answers with receipts — no
+execution, no mutation, by design
+([the oracle's contract](/reference/mcp-server)). Running workflows stays
+on the terminal, where the budget flags and traces live.
+
+## Verify
+
+Ask a chat with the tool server enabled to check a workflow — the
+`nika_check` call shows up in the response's tool trail. Then prove the
+loop end-to-end: [integrate in 10 minutes](/integrations/quickstart).

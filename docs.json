@@ -172,7 +172,30 @@
               "integrations/hermes",
               "integrations/github-actions",
               "integrations/pre-commit",
-              "integrations/mcp-clients"
+              {
+                "group": "MCP clients",
+                "pages": [
+                  "integrations/mcp-clients",
+                  "integrations/clients/claude-code",
+                  "integrations/clients/claude-desktop",
+                  "integrations/clients/vscode",
+                  "integrations/clients/cursor",
+                  "integrations/clients/windsurf",
+                  "integrations/clients/zed",
+                  "integrations/clients/codex",
+                  "integrations/clients/gemini-cli",
+                  "integrations/clients/qwen-code",
+                  "integrations/clients/cline",
+                  "integrations/clients/continue",
+                  "integrations/clients/lm-studio",
+                  "integrations/clients/junie",
+                  "integrations/clients/goose",
+                  "integrations/clients/open-webui",
+                  "integrations/clients/anythingllm",
+                  "integrations/clients/cherry-studio",
+                  "integrations/clients/jan"
+                ]
+              }
             ]
           },
           {

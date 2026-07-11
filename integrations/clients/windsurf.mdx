@@ -1,0 +1,36 @@
+---
+title: "Use Nika with Windsurf"
+description: "One command wires the read-only Nika oracle into Windsurf's mcp_config.json — the exact path, the stanza, and the verify step."
+sidebarTitle: "Windsurf"
+icon: "wind"
+---
+
+One command — binary first (`brew install supernovae-st/tap/nika` ·
+[other paths](/getting-started/installation)):
+
+```sh
+nika wire windsurf
+```
+
+## What it writes
+
+`~/.codeium/windsurf/mcp_config.json` — the `nika` entry under
+`mcpServers`; every unrelated server survives, re-running prints
+`· current` (idempotent). The same block by hand:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+## The repo side
+
+`nika init` writes the agent-teaching surface (`AGENTS.md`, rules, the repo
+skill) plus the `$schema` modeline that gives any YAML-aware editor
+validation and completion on `*.nika.yaml`.
+
+## Verify
+
+Windsurf's MCP server list shows `nika` with the eight `nika_*` tools
+([the oracle's contract](/reference/mcp-server): validate, explain, schema,
+cost — no execution, no mutation). Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

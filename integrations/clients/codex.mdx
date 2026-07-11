@@ -1,0 +1,43 @@
+---
+title: "Use Nika with Codex"
+description: "One command wires the read-only Nika oracle into ~/.codex/config.toml — comments preserved — plus the first-party Codex plugin."
+sidebarTitle: "Codex"
+icon: "infinity"
+---
+
+Codex gets two Nika surfaces: the MCP oracle and the first-party plugin.
+Binary first (`brew install supernovae-st/tap/nika` ·
+[other paths](/getting-started/installation)):
+
+```sh
+nika wire codex
+```
+
+## What it writes
+
+`~/.codex/config.toml` — TOML, not JSON. The writer edits only the
+`[mcp_servers.nika]` table and keeps your comments and unrelated tables
+intact; re-running prints `· current` (idempotent). The same block by hand:
+
+```toml
+[mcp_servers.nika]
+command = "nika"
+args = ["mcp"]
+```
+
+## The plugin (skill + commands)
+
+```sh
+codex plugin marketplace add supernovae-st/nika-agents
+codex plugin add nika@nika
+```
+
+Then `nika init` in the repo — the agent-teaching surface (`AGENTS.md`,
+rules, the repo skill) is what makes the oracle useful
+([agents guide](/getting-started/agents)).
+
+## Verify
+
+Codex's MCP server list shows `nika` with the eight `nika_*` tools
+([the oracle's contract](/reference/mcp-server)). Then prove the loop
+end-to-end: [integrate in 10 minutes](/integrations/quickstart).

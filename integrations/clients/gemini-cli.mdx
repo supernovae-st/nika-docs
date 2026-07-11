@@ -1,0 +1,39 @@
+---
+title: "Use Nika with Gemini CLI"
+description: "Add the read-only Nika oracle to Gemini CLI's settings.json — the exact stanza today, one wire command in the next release."
+sidebarTitle: "Gemini CLI"
+icon: "gem"
+---
+
+[Gemini CLI](https://github.com/google-gemini/gemini-cli) reads MCP servers
+from `mcpServers` in its user-scope `~/.gemini/settings.json`. The binary
+comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Add the `nika` entry to `~/.gemini/settings.json`:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+`nika wire gemini` ships in the next release and writes exactly this —
+it touches only the `mcpServers` key, so every other setting in the shared
+file survives, and re-running prints `· current` (idempotent).
+
+<Note>
+Gemini CLI's policy parser splits server names on underscores — a server
+named `my_server` misbehaves upstream. `nika` is underscore-free, safe
+as-is.
+</Note>
+
+## The repo side
+
+`nika init` writes the agent-teaching surface (`AGENTS.md`, rules) plus
+the `$schema` modeline for validation and completion on `*.nika.yaml`.
+
+## Verify
+
+`/mcp` in a Gemini CLI session lists `nika` with the eight `nika_*` tools
+([the oracle's contract](/reference/mcp-server): validate, explain, schema,
+cost — no execution). Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

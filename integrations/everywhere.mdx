@@ -22,17 +22,18 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 | **`install.sh`** | one-command install from the site | [nika.sh/install](https://nika.sh/install) |
 | **cargo binstall** | the prebuilt release tarball, no compile (`cargo binstall --git https://github.com/supernovae-st/nika nika-cli`) | [Installation](/getting-started/installation) |
 | **nix flake** | `nix run github:supernovae-st/nika` — builds the exact release source, store-cached | [Installation](/getting-started/installation) |
-| **`.mcpb` bundles** | one-click MCP bundle (macOS arm64 · Linux x64) with checksums | [MCP clients](/integrations/mcp-clients) |
+| **`.mcpb` bundles** | one-click MCP bundle (macOS arm64 · Linux x64) with checksums | [Claude Desktop guide](/integrations/clients/claude-desktop) |
 | **Docker image** | the read-only oracle in a container (`integrations/mcp/Dockerfile` in the kit) | [nika-agents kit](https://github.com/supernovae-st/nika-agents) |
 
 ## IDEs & editors
 
 | Surface | Mechanism | Where |
 |---|---|---|
-| **VS Code** | extension on the [Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika-lang) (LSP · DAG canvas · preflight) | [MCP clients → VS Code](/integrations/mcp-clients#vs-code--copilot) |
-| **Cursor** | `nika wire cursor` + one-click deeplink button | [MCP clients → Cursor](/integrations/mcp-clients#cursor) |
-| **Windsurf** | `nika wire windsurf` | [MCP clients → Windsurf](/integrations/mcp-clients#windsurf) |
-| **Zed** | `nika wire zed` (0.99+) | [MCP clients → Zed](/integrations/mcp-clients#zed) |
+| **VS Code** | extension on the [Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika-lang) (LSP · DAG canvas · preflight) | [VS Code / Copilot guide](/integrations/clients/vscode) |
+| **Cursor** | `nika wire cursor` + one-click deeplink button | [Cursor guide](/integrations/clients/cursor) |
+| **Windsurf** | `nika wire windsurf` | [Windsurf guide](/integrations/clients/windsurf) |
+| **Zed** | `nika wire zed` (0.99+) | [Zed guide](/integrations/clients/zed) |
+| **JetBrains (Junie)** | project-scope `.junie/mcp/mcp.json` stanza | [Junie guide](/integrations/clients/junie) |
 | **Cursor forks / VSCodium** | extension via [OpenVSX](https://open-vsx.org/extension/supernovae/nika) | — |
 | **Neovim** | via the mcphub.nvim registry (covers avante · codecompanion) | [MCP clients](/integrations/mcp-clients) |
 | **Any editor with YAML-LSP** | the `# yaml-language-server: $schema=` modeline `nika init` writes | [Editors guide](/getting-started/editors) |
@@ -41,12 +42,16 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 
 | Surface | Mechanism | Where |
 |---|---|---|
-| **Claude Code** | first-party plugin (`.claude-plugin` · `/nika:check` · `/nika:explain` · `/nika:new` · skill) | [Agents guide](/getting-started/agents) |
-| **Codex** | first-party plugin (`.codex-plugin` · same commands) | [Agents guide](/getting-started/agents) |
+| **Claude Code** | first-party plugin (`.claude-plugin` · `/nika:check` · `/nika:explain` · `/nika:new` · skill) + `nika wire claude` | [Claude Code guide](/integrations/clients/claude-code) |
+| **Claude Desktop** | `claude_desktop_config.json` stanza + one-click `.mcpb` bundles | [Claude Desktop guide](/integrations/clients/claude-desktop) |
+| **Codex** | first-party plugin (`.codex-plugin` · same commands) + `nika wire codex` | [Codex guide](/integrations/clients/codex) |
 | **Hermes** | skill pack (`skills/autonomous-ai-agents/nika` · guard-scanned SAFE) | [Hermes guide](/integrations/hermes) |
 | **OpenCode** | `opencode.json` MCP stanza + native `.agents/` reading — `nika init` suffices | [OpenCode guide](/integrations/opencode) |
-| **goose** | MCP extension stanza + native `AGENTS.md` reading | [MCP clients → goose](/integrations/mcp-clients#goose) |
-| **Cline · Gemini CLI · Continue · Aider** | generic MCP stanza + `AGENTS.md` (written by `nika init`) | [MCP clients](/integrations/mcp-clients) |
+| **goose** | MCP extension stanza + native `AGENTS.md` reading | [goose guide](/integrations/clients/goose) |
+| **Gemini CLI · Qwen Code** | `mcpServers` stanza in the user-scope `settings.json` | [Gemini CLI](/integrations/clients/gemini-cli) · [Qwen Code](/integrations/clients/qwen-code) |
+| **Cline · Continue** | `cline_mcp_settings.json` (hot-reloaded) · own-file `~/.continue/mcpServers/nika.json` | [Cline](/integrations/clients/cline) · [Continue](/integrations/clients/continue) |
+| **Open WebUI · AnythingLLM · Cherry Studio · Jan** | mcpo recipe · generic stdio stanza | [Open WebUI](/integrations/clients/open-webui) · [AnythingLLM](/integrations/clients/anythingllm) · [Cherry Studio](/integrations/clients/cherry-studio) · [Jan](/integrations/clients/jan) |
+| **Aider** | no MCP — `AGENTS.md` (written by `nika init`) covers it | [MCP clients → Aider](/integrations/mcp-clients#aider) |
 | **Any AGENTS.md reader** | `nika init` writes 6 agent-facing files (AGENTS.md included) | [Quickstart](/integrations/quickstart) |
 
 ## Skills & plugins (the teaching surfaces)
@@ -65,7 +70,7 @@ execution, no mutation, by design** ([threat model](https://github.com/supernova
 | Element | Where |
 |---|---|
 | Full tool reference | [MCP server reference](/reference/mcp-server) |
-| Per-client wiring (one section per client — Cursor to Aider) | [MCP clients](/integrations/mcp-clients) |
+| Per-client wiring (one dedicated page per client — the matrix) | [MCP clients](/integrations/mcp-clients) |
 | `server.json` (registry shape) + bundles + Dockerfile | [kit `integrations/mcp/`](https://github.com/supernovae-st/nika-agents/tree/main/integrations/mcp) |
 
 ## CI/CD

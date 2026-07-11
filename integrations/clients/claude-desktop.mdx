@@ -1,0 +1,46 @@
+---
+title: "Use Nika with Claude Desktop"
+description: "Wire the read-only Nika oracle into Claude Desktop — the exact claude_desktop_config.json path per platform, the stanza, and the verify step."
+sidebarTitle: "Claude Desktop"
+icon: "desktop"
+---
+
+Claude Desktop is a different app with a different config file than Claude
+Code's `~/.claude.json` — it reads `claude_desktop_config.json` from the
+platform app-config dir. The binary comes first:
+`brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Add the `nika` server under `mcpServers`:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+The file lives at:
+
+| Platform | Path |
+|---|---|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Linux | `~/.config/Claude/claude_desktop_config.json` (community builds — same dir the app uses) |
+
+`nika wire claude-desktop` ships in the next release and writes exactly
+this — idempotent, every unrelated server preserved.
+
+<Note>
+Each [engine release](https://github.com/supernovae-st/nika/releases/latest)
+also ships one-click `.mcpb` bundles (macOS arm64 · Linux x64, with
+checksums) if you prefer not to touch JSON at all.
+</Note>
+
+## Verify
+
+Restart Claude Desktop, then check its tools list — the eight `nika_*`
+tools appear ([the oracle's contract](/reference/mcp-server): validate,
+explain, schema, cost — no execution, no mutation). The config-file
+convention is the MCP quickstart's own
+([modelcontextprotocol.io](https://modelcontextprotocol.io/quickstart/user)).
+
+Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).
