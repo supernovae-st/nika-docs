@@ -1,0 +1,39 @@
+---
+title: "Use Nika with LM Studio"
+description: "Add the read-only Nika oracle to LM Studio's mcp.json — the real macOS path quirk included; one wire command in the next release."
+sidebarTitle: "LM Studio"
+icon: "microchip"
+---
+
+[LM Studio](https://lmstudio.ai) (v0.3.17+) follows Cursor's `mcp.json`
+notation. The safe path is in-app — `Program` tab →
+`Install > Edit mcp.json` — then add:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+The binary comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+## Where the file lives
+
+LM Studio documents `~/.lmstudio/mcp.json` (macOS + Linux;
+`%USERPROFILE%\.lmstudio` on Windows) — but on some macOS installs the app
+actually keeps it under `~/.cache/lm-studio/` instead
+(lmstudio-bug-tracker#1371, open). Writing the documented path there wires
+nothing, which is why editing in-app is the safe manual route.
+
+`nika wire lmstudio` ships in the next release and resolves this for you:
+whichever app-created directory exists wins (documented location first);
+neither existing falls back to the documented default. Idempotent,
+unrelated servers preserved.
+
+## Verify
+
+LM Studio's MCP listing shows `nika` with the eight `nika_*` tools
+([the oracle's contract](/reference/mcp-server): validate, explain, schema,
+cost — no execution, no mutation). A fully local pairing: LM Studio serves
+the model, Nika runs the workflow —
+[local models guide](/guides/local-models). Then prove the loop
+end-to-end: [integrate in 10 minutes](/integrations/quickstart).

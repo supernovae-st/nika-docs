@@ -1,0 +1,40 @@
+---
+title: "Use Nika with Zed"
+description: "Wire the read-only Nika oracle into Zed's context_servers — one command that respects your commented settings.json, plus the manual stanza."
+sidebarTitle: "Zed"
+icon: "bolt"
+---
+
+One command — binary first (`brew install supernovae-st/tap/nika` ·
+[other paths](/getting-started/installation)):
+
+```sh
+nika wire zed
+```
+
+## What it writes
+
+`~/.config/zed/settings.json` — on **every** platform, macOS included
+(Zed's deliberate upstream choice). The entry lands under
+`context_servers`, the shape from
+[zed.dev/docs/ai/mcp](https://zed.dev/docs/ai/mcp):
+
+```json
+{ "context_servers": { "nika": { "command": "nika", "args": ["mcp"], "env": {} } } }
+```
+
+<Note>
+Zed's `settings.json` is JSONC — the default file ships with comments, and
+comments would be destroyed by a rewrite. `nika wire zed` only rewrites a
+file it can round-trip losslessly; if yours carries comments it prints the
+exact snippet (`✋ manual`) and leaves the file byte-identical. Paste the
+`"nika"` entry into `context_servers` yourself.
+</Note>
+
+## Verify
+
+Zed's agent panel lists `nika` among its context servers, with the eight
+`nika_*` tools ([the oracle's contract](/reference/mcp-server)). The repo
+side comes from `nika init` — `AGENTS.md` plus the `$schema` modeline for
+validation and completion. Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

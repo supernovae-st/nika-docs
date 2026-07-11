@@ -1,0 +1,39 @@
+---
+title: "Use Nika with Cherry Studio"
+description: "Add the read-only Nika oracle to Cherry Studio as a stdio MCP server. Wiring is manual (no wire target)."
+sidebarTitle: "Cherry Studio"
+icon: "palette"
+---
+
+[Cherry Studio](https://github.com/CherryHQ/cherry-studio) configures MCP
+servers in its settings UI — add Nika as a **stdio** server. The binary
+comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Wiring is manual — `nika wire` has no Cherry Studio target. The three
+fields, whichever form the settings take:
+
+| Field | Value |
+|---|---|
+| type | `stdio` |
+| command | `nika` |
+| args | `mcp` |
+
+Equivalently, where Cherry Studio accepts the JSON form:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+## What you get
+
+Validation, explanation, schema and cost answers for `.nika.yaml`
+workflows — no execution, no mutation, by design
+([the oracle's contract](/reference/mcp-server)). Running workflows stays
+on the terminal, where the budget flags and traces live.
+
+## Verify
+
+Cherry Studio's MCP server list shows `nika` with the eight `nika_*`
+tools. Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

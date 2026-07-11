@@ -1,0 +1,40 @@
+---
+title: "Use Nika with VS Code and Copilot"
+description: "One command writes a repo-local .vscode/mcp.json for VS Code and Copilot agent mode — plus the marketplace extension with LSP and DAG canvas."
+sidebarTitle: "VS Code / Copilot"
+icon: "code"
+---
+
+One command, or one click — binary first
+(`brew install supernovae-st/tap/nika` ·
+[other paths](/getting-started/installation)):
+
+```sh
+nika wire vscode
+```
+
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-install%20nika%20mcp-0098FF?logo=githubcopilot)](https://insiders.vscode.dev/redirect/mcp/install?name=nika&config=%7B%22command%22%3A%20%22nika%22%2C%20%22args%22%3A%20%5B%22mcp%22%5D%7D)
+
+## What it writes
+
+`.vscode/mcp.json` in the current repo (`--dir` picks another workspace) —
+VS Code's own MCP file, `servers` key, `stdio` type. Idempotent; unrelated
+servers survive. The same block by hand:
+
+```json
+{ "servers": { "nika": { "type": "stdio", "command": "nika", "args": ["mcp"] } } }
+```
+
+## The rest of the VS Code surface
+
+- The [marketplace extension](https://marketplace.visualstudio.com/items?itemName=supernovae.nika-lang)
+  — LSP, DAG canvas, preflight.
+- `nika init` writes `.github/copilot-instructions.md` and the
+  `.vscode/settings.json` schema mapping (validation + completion in any
+  YAML-aware editor).
+
+## Verify
+
+Open Copilot's agent-mode tools list — the eight `nika_*` tools appear
+([the oracle's contract](/reference/mcp-server)). Then prove the loop
+end-to-end: [integrate in 10 minutes](/integrations/quickstart).

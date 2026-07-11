@@ -1,0 +1,38 @@
+---
+title: "Use Nika with AnythingLLM"
+description: "Add the read-only Nika oracle to AnythingLLM with the standard mcpServers stanza. Wiring is manual (no wire target)."
+sidebarTitle: "AnythingLLM"
+icon: "layer-group"
+---
+
+[AnythingLLM](https://github.com/Mintplex-Labs/anything-llm) speaks MCP
+through the standard `mcpServers` JSON convention (the Claude-Desktop
+shape) — its MCP docs show where the servers file lives for your install
+(desktop vs Docker). The binary comes first:
+`brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Wiring is manual — `nika wire` has no AnythingLLM target. Add the `nika`
+entry to AnythingLLM's MCP servers file:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+<Note>
+The stable contract is the stanza — `nika` + `mcp`, stdio. If AnythingLLM's
+documented file location has moved, the stanza still applies.
+</Note>
+
+## What you get
+
+Validation, explanation, schema and cost answers for `.nika.yaml`
+workflows — no execution, no mutation, by design
+([the oracle's contract](/reference/mcp-server)). Running workflows stays
+on the terminal, where the budget flags and traces live.
+
+## Verify
+
+AnythingLLM's agent-skills / MCP panel lists `nika` with the eight
+`nika_*` tools. Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

@@ -1,0 +1,40 @@
+---
+title: "Use Nika with Jan"
+description: "Add the read-only Nika oracle to Jan as a stdio MCP server — a fully local pairing. Wiring is manual (no wire target)."
+sidebarTitle: "Jan"
+icon: "laptop"
+---
+
+[Jan](https://github.com/janhq/jan) — the local-first assistant —
+configures MCP servers in its settings. Add Nika as a **stdio** server.
+The binary comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Wiring is manual — `nika wire` has no Jan target. The three fields,
+whichever form the settings take:
+
+| Field | Value |
+|---|---|
+| type | `stdio` |
+| command | `nika` |
+| args | `mcp` |
+
+Equivalently, where Jan accepts the JSON form:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+## A fully local pairing
+
+Jan runs the model on your machine; Nika runs workflows on local models
+with the same sovereignty (`ollama/…`, no key, no meter) — see the
+[local models guide](/guides/local-models). The oracle itself is read-only:
+validation, explanation, schema and cost answers, no execution
+([the contract](/reference/mcp-server)).
+
+## Verify
+
+Jan's MCP server list shows `nika` with the eight `nika_*` tools. Then
+prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

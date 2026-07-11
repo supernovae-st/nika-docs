@@ -1,7 +1,7 @@
 ---
 title: "Per-client MCP wiring"
-description: "One stanza, every client: Cursor, Claude Code, Codex, Zed, Gemini CLI, Windsurf, Continue, Cline, Aider — deep-linkable per tool."
-sidebarTitle: "Per-client wiring"
+description: "One stanza, every client: Cursor, Claude Code, Codex, Zed, Gemini CLI, Windsurf, Continue, Cline, Aider — one dedicated page per tool."
+sidebarTitle: "All clients"
 icon: "plug-circle-bolt"
 ---
 
@@ -9,82 +9,87 @@ Every MCP-capable client wires the same read-only oracle
 ([what it exposes](/reference/mcp-server)) with the same two fields —
 `command: nika` · `args: [mcp]`. The binary comes first:
 `brew install supernovae-st/tap/nika` ([other paths](/getting-started/installation)).
-This page is one anchor per client, so directory listings can deep-link
-straight to their tool.
+This page is the matrix; every client has a dedicated page with the exact
+file, shape, reload behavior and verify step.
 
 One-click where the client supports it (binary still required first):
 
 [![Install in VS Code](https://img.shields.io/badge/VS_Code-install%20nika%20mcp-0098FF?logo=githubcopilot)](https://insiders.vscode.dev/redirect/mcp/install?name=nika&config=%7B%22command%22%3A%20%22nika%22%2C%20%22args%22%3A%20%5B%22mcp%22%5D%7D)
 [![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=nika&config=eyJjb21tYW5kIjogIm5pa2EiLCAiYXJncyI6IFsibWNwIl19)
 
-For **cursor · vscode · windsurf · claude · codex · opencode · hermes**
-the wiring is one
-command (idempotent, writes the right file):
-
-```sh
-nika wire <client>     # or: nika wire all
-```
-
 And in every case, `nika init` first — the agent-teaching surface
 (`AGENTS.md`, rules, the repo skill) is what makes the oracle useful.
 
+## The client matrix
+
+| Client | Wire | Where it lands |
+|---|---|---|
+| [Claude Code](/integrations/clients/claude-code) | `nika wire claude` | `~/.claude.json` |
+| [Claude Desktop](/integrations/clients/claude-desktop) | `nika wire claude-desktop` ° | `claude_desktop_config.json` (app-config dir) |
+| [VS Code / Copilot](/integrations/clients/vscode) | `nika wire vscode` | `.vscode/mcp.json` (repo-local) |
+| [Cursor](/integrations/clients/cursor) | `nika wire cursor` | `~/.cursor/mcp.json` |
+| [Windsurf](/integrations/clients/windsurf) | `nika wire windsurf` | `~/.codeium/windsurf/mcp_config.json` |
+| [Zed](/integrations/clients/zed) | `nika wire zed` | `~/.config/zed/settings.json` |
+| [Codex](/integrations/clients/codex) | `nika wire codex` | `~/.codex/config.toml` |
+| [OpenCode](/integrations/opencode) | `nika wire opencode` | `opencode.json` (repo-local) |
+| [Hermes](/integrations/hermes) | `nika wire hermes` | `~/.hermes/config.yaml` |
+| [Gemini CLI](/integrations/clients/gemini-cli) | `nika wire gemini` ° | `~/.gemini/settings.json` |
+| [Qwen Code](/integrations/clients/qwen-code) | `nika wire qwen` ° | `~/.qwen/settings.json` |
+| [Cline](/integrations/clients/cline) | `nika wire cline` ° | `cline_mcp_settings.json` (resolved) |
+| [Continue](/integrations/clients/continue) | `nika wire continue` ° | `~/.continue/mcpServers/nika.json` |
+| [LM Studio](/integrations/clients/lm-studio) | `nika wire lmstudio` ° | `~/.lmstudio/mcp.json` (resolved) |
+| [Junie](/integrations/clients/junie) | `nika wire junie` ° | `.junie/mcp/mcp.json` (repo-local) |
+| [goose](/integrations/clients/goose) | manual stanza | goose config `extensions:` |
+| [Open WebUI](/integrations/clients/open-webui) | manual — mcpo recipe | OpenAPI tool server |
+| [AnythingLLM](/integrations/clients/anythingllm) | manual stanza | its `mcpServers` file |
+| [Cherry Studio](/integrations/clients/cherry-studio) | manual stanza | settings UI (stdio) |
+| [Jan](/integrations/clients/jan) | manual stanza | settings UI (stdio) |
+| [Aider](#aider) | no MCP — `AGENTS.md` covers it | `.aider.conf.yml` |
+
+° ships in the next release — the manual stanza on each page works today.
+Every `nika wire` write is idempotent (re-run prints `· current`) and
+preserves unrelated servers.
+
+The anchors below stay for directory deep-links — each points to its
+dedicated page.
+
 ## Cursor
 
-```sh
-nika wire cursor
-```
-
-Writes the `nika` server into `~/.cursor/mcp.json`. The repo side
-(`.cursor/rules/nika.mdc`, auto-attached on `*.nika.yaml`) comes from
-`nika init`. The VS Code extension also installs into Cursor via OpenVSX.
+`nika wire cursor` → `~/.cursor/mcp.json`, plus the one-click deeplink and
+the auto-attached `.cursor/rules/nika.mdc` —
+[full page](/integrations/clients/cursor).
 
 ## Claude Code
 
-```sh
-nika wire claude          # MCP oracle
-claude plugin marketplace add supernovae-st/nika-agents
-claude plugin install nika@nika   # authoring skill + /nika:* commands + oracle
-```
+`nika wire claude` → `~/.claude.json`, plus the first-party plugin
+(`claude plugin install nika@nika`) —
+[full page](/integrations/clients/claude-code).
 
 ## Codex
 
-```sh
-nika wire codex
-codex plugin marketplace add supernovae-st/nika-agents
-codex plugin add nika@nika
-```
+`nika wire codex` → `~/.codex/config.toml` (comments preserved), plus the
+plugin — [full page](/integrations/clients/codex).
 
 ## VS Code / Copilot
 
-```sh
-nika wire vscode
-```
-
-`nika init` also writes `.github/copilot-instructions.md` and the
-`.vscode/settings.json` schema mapping (validation + completion in any
-YAML-aware editor).
+`nika wire vscode` → repo-local `.vscode/mcp.json`, plus the marketplace
+extension — [full page](/integrations/clients/vscode).
 
 ## Zed
 
-Settings → `context_servers`:
-
-```json
-{ "context_servers": { "nika": { "command": { "path": "nika", "args": ["mcp"] } } } }
-```
+`nika wire zed` → `context_servers` in `~/.config/zed/settings.json`, with
+the JSONC-respecting contract —
+[full page](/integrations/clients/zed).
 
 ## Gemini CLI
 
-`~/.gemini/settings.json`:
-
-```json
-{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
-```
+The `mcpServers` stanza in `~/.gemini/settings.json` (wire lands next
+release) — [full page](/integrations/clients/gemini-cli).
 
 ## Windsurf
 
-```sh
-nika wire windsurf
-```
+`nika wire windsurf` → `~/.codeium/windsurf/mcp_config.json` —
+[full page](/integrations/clients/windsurf).
 
 ## OpenCode
 
@@ -98,51 +103,23 @@ Tap-installable delegation skill + `mcp_servers` stanza — see the dedicated
 
 ## Continue
 
-`~/.continue/config.yaml`:
-
-```yaml
-mcpServers:
-  - name: nika
-    command: nika
-    args: [mcp]
-```
+An own-file drop: `~/.continue/mcpServers/nika.json` — reload to pick it
+up — [full page](/integrations/clients/continue).
 
 ## Cline
 
-MCP settings (`cline_mcp_settings.json`):
-
-```json
-{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
-```
+`cline_mcp_settings.json` (hot-reloaded; the file's two possible homes
+resolved) — [full page](/integrations/clients/cline).
 
 ## LM Studio
 
-LM Studio follows Cursor's `mcp.json` notation (v0.3.17+). Edit it in-app —
-`Program` tab → `Install > Edit mcp.json` (the safe path: on some macOS
-installs the file lives under `~/.cache/lm-studio/` instead of the
-documented `~/.lmstudio/`) — and add:
-
-```json
-{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
-```
+Cursor-notation `mcp.json`, with the real macOS path quirk —
+[full page](/integrations/clients/lm-studio).
 
 ## goose
 
-goose (the AAIF agent) discovers MCP extensions from its config. Add the
-oracle as a stdio extension:
-
-```yaml
-extensions:
-  nika:
-    cmd: nika
-    args: [mcp]
-    enabled: true
-    type: stdio
-```
-
-goose also reads `AGENTS.md` natively — `nika init` in the repo teaches it
-the language with zero extra wiring. The binary install is a prerequisite
-(brew or a release tarball; goose's directory entry documents the same).
+A stdio extension stanza + native `AGENTS.md` reading —
+[full page](/integrations/clients/goose).
 
 ## Aider
 

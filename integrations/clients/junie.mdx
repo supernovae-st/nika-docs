@@ -1,0 +1,36 @@
+---
+title: "Use Nika with Junie"
+description: "Add the read-only Nika oracle to JetBrains Junie via project-scope .junie/mcp/mcp.json — the stanza today, one wire command in the next release."
+sidebarTitle: "Junie"
+icon: "atom"
+---
+
+[Junie](https://www.jetbrains.com/junie/) — JetBrains' coding agent —
+reads MCP servers from project-scope `.junie/mcp/mcp.json` (`mcpServers`
+root). The binary comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Create `.junie/mcp/mcp.json` at the repo root:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+A global `~/.junie/mcp/mcp.json` exists too, but the project file is the
+least-privilege home — the repo the oracle serves, same reasoning as
+[OpenCode](/integrations/opencode).
+
+`nika wire junie` ships in the next release and writes exactly this —
+idempotent, unrelated servers preserved.
+
+## The repo side
+
+`nika init` writes the agent-teaching surface (`AGENTS.md`, rules) plus
+the `$schema` modeline for validation and completion on `*.nika.yaml`.
+
+## Verify
+
+Junie's MCP listing shows `nika` with the eight `nika_*` tools
+([the oracle's contract](/reference/mcp-server): validate, explain, schema,
+cost — no execution, no mutation). Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

@@ -1,0 +1,41 @@
+---
+title: "Use Nika with goose"
+description: "Add the read-only Nika oracle to goose as a stdio extension — plus the AGENTS.md surface goose reads natively. Wiring is manual (no wire target)."
+sidebarTitle: "goose"
+icon: "feather"
+---
+
+[goose](https://github.com/block/goose) (the AAIF agent) discovers MCP
+extensions from its config, and reads `AGENTS.md` natively — so `nika init`
+in the repo teaches it the language with zero extra wiring. The binary
+install is the prerequisite (`brew install supernovae-st/tap/nika` or a
+release tarball · [other paths](/getting-started/installation)).
+
+Wiring is manual — `nika wire` has no goose target. Add the oracle as a
+stdio extension in goose's config:
+
+```yaml
+extensions:
+  nika:
+    cmd: nika
+    args: [mcp]
+    enabled: true
+    type: stdio
+```
+
+## The repo side
+
+```sh
+nika init
+```
+
+`AGENTS.md`, rules and the repo skill land at the repo root — the
+agent-teaching surface that makes the oracle useful. goose picks up
+`AGENTS.md` on its own.
+
+## Verify
+
+goose's extension list shows `nika` with the eight `nika_*` tools
+([the oracle's contract](/reference/mcp-server): validate, explain, schema,
+cost — no execution, no mutation). Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

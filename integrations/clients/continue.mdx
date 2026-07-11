@@ -1,0 +1,39 @@
+---
+title: "Use Nika with Continue"
+description: "Drop one file into ~/.continue/mcpServers/ and Continue gets the read-only Nika oracle — your config.yaml untouched; one wire command in the next release."
+sidebarTitle: "Continue"
+icon: "forward"
+---
+
+[Continue](https://github.com/continuedev/continue) scans
+`~/.continue/mcpServers/*.json` for MCP servers (the Claude-Desktop JSON
+shape, name-keyed) — so Nika gets its **own file** and your
+comment-bearing `config.yaml` is never touched. The binary comes first:
+`brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Create `~/.continue/mcpServers/nika.json`:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+`nika wire continue` ships in the next release and writes exactly this
+file — idempotent, nothing else in your Continue setup touched.
+
+<Note>
+External writes are **not** hot-reloaded: reload Continue (or re-save
+`config.yaml`) to pick the server up.
+</Note>
+
+## The repo side
+
+`nika init` writes the agent-teaching surface (`AGENTS.md`, rules) plus
+the `$schema` modeline for validation and completion on `*.nika.yaml`.
+
+## Verify
+
+Continue's tool list shows the eight `nika_*` tools
+([the oracle's contract](/reference/mcp-server): validate, explain, schema,
+cost — no execution, no mutation). Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

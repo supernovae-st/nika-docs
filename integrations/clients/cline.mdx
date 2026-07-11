@@ -1,0 +1,43 @@
+---
+title: "Use Nika with Cline"
+description: "Add the read-only Nika oracle to Cline's cline_mcp_settings.json — hot-reloaded, no restart; one wire command in the next release."
+sidebarTitle: "Cline"
+icon: "robot"
+---
+
+[Cline](https://github.com/cline/cline) configures MCP servers in
+`cline_mcp_settings.json` — Cursor-style `mcpServers` record — and
+hot-reloads the file (a watcher picks up external writes, no restart).
+The binary comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Add the `nika` entry:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+## Where the file lives
+
+Cline's settings live in two generations of home:
+
+- **Today's extension** keeps `settings/cline_mcp_settings.json` under the
+  host IDE's globalStorage — the dir name `saoudrizwan.claude-dev` is
+  stable across VS Code · Cursor · Windsurf · VSCodium · Insiders. On
+  macOS: `~/Library/Application Support/<Host>/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+  (elsewhere: `~/.config/<Host>/User/globalStorage/…`). Cline's own MCP
+  Servers panel edits the same file.
+- **The stable home** — `~/.cline/data/settings/cline_mcp_settings.json` —
+  is what the Cline CLI reads today and where the extension migrates next.
+
+`nika wire cline` ships in the next release and resolves this for you: a
+host IDE's existing extension dir wins (the live, hot-reloaded file); none
+existing falls back to the stable home. Idempotent, unrelated servers
+preserved.
+
+## Verify
+
+Cline's MCP Servers view lists `nika` with the eight `nika_*` tools
+([the oracle's contract](/reference/mcp-server)). The repo side comes from
+`nika init` (`AGENTS.md`, rules). Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).

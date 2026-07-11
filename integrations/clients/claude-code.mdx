@@ -1,0 +1,43 @@
+---
+title: "Use Nika with Claude Code"
+description: "One command wires the read-only Nika oracle into Claude Code — plus the first-party plugin with the authoring skill and /nika:* commands."
+sidebarTitle: "Claude Code"
+icon: "asterisk"
+---
+
+Claude Code gets two Nika surfaces: the MCP oracle — schema, validation and
+cost answers without shell round-trips
+([what it exposes and refuses](/reference/mcp-server)) — and the first-party
+plugin. The binary comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+```sh
+nika wire claude
+```
+
+## What it writes
+
+`~/.claude.json` — the `nika` entry lands under `mcpServers`; every
+unrelated server and setting survives, and re-running prints `· current`
+(idempotent). Prefer manual? Add the same block yourself:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+## The plugin (skill + commands)
+
+```sh
+claude plugin marketplace add supernovae-st/nika-agents
+claude plugin install nika@nika   # authoring skill + /nika:* commands + oracle
+```
+
+Then `nika init` in the repo — the agent-teaching surface (`AGENTS.md`,
+rules, the repo skill) is what makes the oracle useful
+([agents guide](/getting-started/agents)).
+
+## Verify
+
+`claude mcp list` shows `nika`, and the tool list carries the eight
+`nika_*` tools. Then prove the loop end-to-end:
+[integrate in 10 minutes](/integrations/quickstart).
