@@ -1,0 +1,64 @@
+---
+title: "How Nika compares"
+description: "An honest map of where Nika fits next to LangGraph, Temporal, GitHub Actions and the agent frameworks: what it does that they do not, and what they do that it does not."
+sidebarTitle: "How it compares"
+icon: "scale-balanced"
+---
+
+Most orchestrators plan. Nika sits under them: a plain-text file your agent, cron or CI can hand the repeatable slice of the work to, checked before a single token is spent and verifiable after it runs. This page is an honest map, including the places where the other tools win.
+
+## The one thing that is different
+
+Nika is the only one where you can **audit a workflow before you run it**. `nika check` reads the file statically and tells you the plan, an honest cost floor, which secrets flow into which step, and the permits boundary, before anything executes. Every run then leaves a hash-chained trace that `nika trace verify` confirms or breaks. The receipt comes from the runtime, never from a model's prose.
+
+That is a property of the whole design (one static Rust binary, a frozen language, local-first), not a feature bolted on. It is what the rest of this page is measured against.
+
+## Where Nika fits
+
+<table>
+<thead>
+<tr><th>You want to...</th><th>Reach for</th></tr>
+</thead>
+<tbody>
+<tr><td>Turn a repeated AI job into a reviewable, diffable file</td><td><strong>Nika</strong></td></tr>
+<tr><td>Know what a workflow will cost and touch before it runs</td><td><strong>Nika</strong> (no other tool checks cost and secret flows statically)</td></tr>
+<tr><td>Run AI work locally, offline, with no keys</td><td><strong>Nika</strong> (mock and Ollama paths), or a local framework</td></tr>
+<tr><td>Build a long-lived, distributed, durable-execution system</td><td><strong>Temporal</strong>, DBOS, Restate</td></tr>
+<tr><td>Write agent logic as code with a visual graph</td><td><strong>LangGraph</strong>, Mastra</td></tr>
+<tr><td>Orchestrate repos, runners and services in CI</td><td><strong>GitHub Actions</strong>, Argo</td></tr>
+<tr><td>An autonomous coding agent in your editor</td><td><strong>Cursor</strong>, Claude Code, Continue.dev</td></tr>
+</tbody>
+</table>
+
+They orchestrate infra, services and code. Nika is the file for the AI-native slice, and it runs happily **inside** any of them: there is a [GitHub Action](https://github.com/supernovae-st/nika-action) that posts the check verdict on your PRs.
+
+## Where Nika is honestly weaker
+
+We publish this because a comparison that only lists wins is marketing, not a map.
+
+- **No IDE chrome.** Cursor and Continue.dev win for in-editor UX. Nika ships a VS Code extension for `.nika.yaml` (syntax, a DAG view, diagnostics), but it is not an agentic editor.
+- **No visual workflow builder.** LangGraph has a graph UI. Nika draws the DAG (`nika graph`) but you author in YAML and CLI.
+- **No enterprise durable-execution track record.** Temporal has a decade of battle-testing for long-lived distributed state. Nika is a finite single-run DAG, one file in, one run out. Different problem.
+- **Younger, smaller community.** LangGraph and Cursor have far larger ecosystems today.
+- **Non-interactive by design.** A Nika run does not stop to ask questions mid-flight. That is the contract that makes it repeatable; it also means it is not a chat.
+
+## Where Nika is honestly stronger
+
+- **Check before run.** The static audit (plan, types, cost floor, secret flows, permits) exists in no other tool in this list. You spend zero tokens to learn a workflow is broken or expensive.
+- **Receipts, not vibes.** The hash-chained trace is tamper-evident: verify exits clean or names the first altered link. Editable, lossy chat logs cannot make that claim.
+- **One static binary.** The same file is a runner, a checker, a golden-test harness, an MCP server, an LSP, and a time-travel DAP debugger. No runtime to stand up, no cluster.
+- **The file is portable.** A Nika workflow is text bound to no framework: any conformant engine runs it. Your logic is not locked to one vendor's Python graph.
+- **Sovereign by construction.** AGPL engine, Apache-2.0 spec, local-first, no mandatory cloud, sixteen providers you pick from.
+
+## The honest bottom line
+
+If you need durable distributed execution, use Temporal. If you want an agentic IDE, use Cursor. If your agent logic is genuinely code, use LangGraph. If you want the repeatable, budgeted, auditable slice of AI work to live in a file you can review before it spends and verify after it runs, that is Nika, and it composes with all of the above rather than replacing them.
+
+<Note>
+Try the difference in two commands, offline, no keys:
+
+```bash
+brew install supernovae-st/tap/nika
+nika examples run 01-hello --model mock/echo
+```
+</Note>
