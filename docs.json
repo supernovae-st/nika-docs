@@ -208,7 +208,8 @@
               "examples/meeting-actions",
               "examples/og-images",
               "examples/price-watch",
-              "examples/social-repurpose"
+              "examples/social-repurpose",
+              "examples/image-fx-batch"
             ]
           },
           {
@@ -221,7 +222,10 @@
               "examples/contract-guard",
               "examples/etl-quarantine",
               "examples/model-bench",
-              "examples/release-radar"
+              "examples/release-radar",
+              "examples/csv-chart-report",
+              "examples/transcript-shownotes",
+              "examples/bookmark-triage"
             ]
           },
           {

@@ -1,0 +1,166 @@
+---
+title: "CSV chart report"
+sidebarTitle: "CSV chart report"
+description: "T2 chain · data → picture: paste the spreadsheet, get the slide. Offline, deterministic, zero model calls."
+icon: "chart-column"
+---
+
+> **T2 chain · data → picture**: `nika:read` loads the CSV,
+> `nika:convert` types it into rows, `nika:jq` aggregates by region,
+> `nika:chart` renders the bar chart as a real image, and `nika:write`
+> assembles the markdown report around it. Five tasks, zero model
+> calls — the whole pipeline is deterministic data plumbing.
+
+## The job
+
+The Monday deck needs one chart and one table, and the ritual is
+always the same: open the sheet, pivot, screenshot, paste. This
+workflow replaces the ritual with a file — drop the CSV, run once,
+and the report (chart image + aggregate table) is on disk, identical
+every time the data is identical.
+
+## The shape
+
+{/* showcase:dag-begin t2-csv-chart-report.nika.yaml */}
+```mermaid
+flowchart LR
+  raw["raw · nika:read"]:::invoke
+  rows["rows · nika:convert"]:::invoke
+  by_region["by_region · nika:jq"]:::invoke
+  chart["chart · nika:chart"]:::invoke
+  rows_md["rows_md · nika:jq"]:::invoke
+  report["report · nika:write"]:::invoke
+  raw --> rows
+  rows --> by_region
+  by_region --> chart
+  by_region --> rows_md
+  chart --> report
+  rows_md --> report
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+{/* showcase:dag-end */}
+
+## The file
+
+{/* showcase:begin t2-csv-chart-report.nika.yaml */}
+```yaml t2-csv-chart-report.nika.yaml
+nika: v1
+workflow: csv-chart-report
+description: "CSV → aggregate → rendered bar chart + markdown report · offline · deterministic"
+
+vars:
+  sales_csv: "./data/sales.csv" # columns · region,revenue (revenue a plain number)
+
+permits:
+  exec: false
+  fs:
+    read: ["data/**"]
+    write: ["out/**"]
+  tools: ["nika:read", "nika:convert", "nika:jq", "nika:chart", "nika:write"]
+
+tasks:
+  - id: raw
+    invoke:
+      tool: "nika:read"
+      args: { path: "${{ vars.sales_csv }}" }
+
+  - id: rows
+    depends_on: [raw]
+    invoke:
+      tool: "nika:convert"
+      args:
+        input: "${{ tasks.raw.output }}"
+        from: csv
+        to: json
+        has_header: true
+
+  # Sum revenue per region · a deterministic reduce, no model.
+  - id: by_region
+    depends_on: [rows]
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: "${{ tasks.rows.output }}"
+        expression: 'group_by(.region) | map({ region: .[0].region, revenue: (map(.revenue | tonumber) | add) })'
+
+  # The picture · one SVG, its sha lands in the trace.
+  - id: chart
+    depends_on: [by_region]
+    invoke:
+      tool: "nika:chart"
+      args:
+        data: "${{ tasks.by_region.output }}"
+        semantics: { region: category, revenue: usd }
+        chart: { type: bar, x: region, y: revenue, title: "Revenue by region" }
+        out: out/revenue-by-region.svg
+
+  # The rows as MARKDOWN · a report renders lines, never a JSON blob
+  # (region names are user data — the esc guards a `|` in them).
+  - id: rows_md
+    depends_on: [by_region]
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: "${{ tasks.by_region.output }}"
+        expression: >-
+          def esc: tostring | gsub("\\|"; "\\|") | gsub("\n"; " ");
+          map("| \(.region | esc) | \(.revenue) |") | join("\n")
+
+  # The page · the report references the picture beside it.
+  - id: report
+    depends_on: [chart, rows_md]
+    invoke:
+      tool: "nika:write"
+      args:
+        path: out/revenue-report.md
+        content: |
+          # Revenue by region
+
+          ![Revenue by region](revenue-by-region.svg)
+
+          | region | revenue |
+          | --- | --- |
+          ${{ tasks.rows_md.output }}
+
+          *Generated offline by [nika](https://nika.sh) · the chart's sha is in the run trace (`nika trace verify`).*
+
+outputs:
+  by_region:
+    value: ${{ tasks.by_region.output }}
+    type: array
+    description: "Per-region revenue totals · the chart + report render from this"
+```
+{/* showcase:end */}
+
+## What this file teaches
+
+- **`nika:convert` is the typed seam** — CSV text becomes structured
+  rows once, at one task, and everything downstream works on data,
+  not strings. The jq aggregation reads fields, never re-parses.
+- **A chart is an artifact, not a side effect** — `nika:chart` returns
+  a rendered image the report links by path. Re-running with the same
+  CSV produces the same bytes: the chart can live in git, and a diff
+  on it means the *data* moved.
+- **No model, no bill, no network** — `nika check` shows an empty cost
+  interval, and the run works on a plane. Determinism is the feature:
+  this is the workflow you trust in a cron.
+
+## Run it
+
+```bash
+git clone https://github.com/supernovae-st/nika-spec && cd nika-spec
+nika run examples/showcase/t2-csv-chart-report.nika.yaml
+open out/revenue-report.md
+```
+
+<Note>
+  This workflow is newer than the currently shipped engine pack:
+  `nika examples run showcase/t2-csv-chart-report` says
+  `unknown example` until the next engine tag re-vendors the pack.
+  Until then, run it from the spec checkout as above — the file is the
+  same one the pack will embed, sha-pinned in the spec manifest.
+</Note>
+
+Swap the bundled sample for your own export by pointing
+`vars.sales_csv` at it — the aggregation key and the chart spec are
+the only two lines to adapt.
