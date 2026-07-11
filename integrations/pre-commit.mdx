@@ -1,0 +1,65 @@
+---
+title: "Nika × pre-commit"
+description: "Audit every .nika.yaml before it lands: the check verdict — DAG, types, permits, secret flows, cost floor — at commit time, before a single token is spent."
+sidebarTitle: "pre-commit"
+icon: "code-commit"
+---
+
+The engine ships a [pre-commit](https://pre-commit.com) manifest, so `nika
+check` runs as a hook on every staged `.nika.yaml`. A workflow that names a
+missing secret, wires a type mismatch, or quietly widens its permits is
+stopped at the commit, with the same named finding and fix the CLI gives you
+— not twenty minutes later in CI.
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/supernovae-st/nika
+    rev: v0.99.0        # pin a tagged release
+    hooks:
+      - id: nika-check
+```
+
+```bash
+pre-commit install     # once per clone
+git commit             # every staged .nika.yaml is audited from now on
+```
+
+## What the hook checks
+
+`nika-check` is the full static audit, the same one the
+[GitHub Action](/integrations/github-actions) posts on PRs and the
+[VS Code extension](https://github.com/supernovae-st/nika-vscode) surfaces
+in-editor:
+
+- the **plan** — every task, wave and wire the file declares, as a DAG
+- the **types** across each wire, before any model is called
+- the **permits boundary** — default-deny, and what the file actually asks for
+- the **secret flows** — which secret reaches which task, statically
+- the **cost floor** — an honest lower bound, never a fake zero
+
+Nothing executes. The check spends zero tokens, needs zero keys, and works
+offline.
+
+## Requirements
+
+The hook is `language: system`: it assumes the `nika` binary on `PATH` —
+the same trade [actionlint](https://github.com/rhysd/actionlint)'s system
+hook takes. Any install lane works:
+
+```bash
+brew install supernovae-st/tap/nika        # macOS / Linux
+cargo binstall nika --git https://github.com/supernovae-st/nika   # prebuilt
+nix profile install github:supernovae-st/nika                      # flake
+```
+
+Staged files are passed in one argv and audited in one call; each file gets
+its full report and the worst exit code survives, so one broken workflow
+fails the commit even when its siblings are clean.
+
+## One verdict, every surface
+
+The commit hook, the [PR comment](/integrations/github-actions), the
+[MCP oracle](/integrations/mcp-clients) an agent queries, and the editor
+diagnostics all run the same check and speak the same findings. If the hook
+lets a file through, CI will agree — there is one voice, not four opinions.
