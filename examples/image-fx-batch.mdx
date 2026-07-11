@@ -1,0 +1,119 @@
+---
+title: "Image FX batch"
+sidebarTitle: "Image FX batch"
+description: "T1 fan-out · creators / media: a folder of photos → deterministic art, byte-identical forever. Zero model, zero network."
+icon: "wand-magic-sparkles"
+---
+
+> **T1 fan-out · creators / media**: `nika:glob` lists the folder,
+> `for_each` fans one `nika:image_fx` task per photo, and a fixed ops
+> chain (grayscale → dither → pixelate) renders each one. No model in
+> the loop — the pipeline is pure pixels, so the same input produces
+> the same bytes on every run, on every machine.
+
+## The job
+
+Batch-stylizing a shoot means opening an editor, replaying the same
+five clicks per photo, and hoping you replayed them identically. This
+workflow IS the preset: the ops chain is written once in YAML, the
+batch fans out in parallel, and re-running it a year from now yields
+byte-identical output — the style is version-controlled with your
+repo.
+
+## The shape
+
+{/* showcase:dag-begin t1-image-fx-batch.nika.yaml */}
+```mermaid
+flowchart LR
+  shots["shots · nika:glob"]:::invoke
+  stylize["stylize · ∥ for_each · nika:image_fx"]:::invoke
+  shots --> stylize
+  classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
+```
+{/* showcase:dag-end */}
+
+## The file
+
+{/* showcase:begin t1-image-fx-batch.nika.yaml */}
+```yaml t1-image-fx-batch.nika.yaml
+nika: v1
+workflow: image-fx-batch
+description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
+
+vars:
+  photos: "./photos" # the input folder · every .png in it gets the treatment
+
+permits:
+  exec: false
+  fs:
+    # a RELATIVE glob walks from `.` (the engine gates the walk root), so
+    # the read boundary is the cwd subtree — and `vars.photos` is caller-
+    # overridable, so no narrower literal glob can be proven to cover it.
+    # Fixing the folder? Tighten this to `photos/**`. The write stays tight
+    read: ["**"]
+    write: ["out/**"]
+  tools: ["nika:glob", "nika:image_fx"]
+
+tasks:
+  # The folder is the work list — no hand-maintained array to drift.
+  - id: shots
+    invoke:
+      tool: "nika:glob"
+      args: { pattern: "${{ vars.photos }}/*.png" }
+
+  # One deterministic darkroom pass per photo · the ops run IN ORDER.
+  - id: stylize
+    depends_on: [shots]
+    for_each: ${{ tasks.shots.output }}
+    max_parallel: 4
+    invoke:
+      tool: "nika:image_fx"
+      args:
+        input: "${{ item }}"
+        ops:
+          - grayscale: {}
+          - dither: { mode: bayer4 }
+          - pixelate: { block: 4 }
+        out: "out/${{ item }}"
+
+outputs:
+  rendered:
+    # an empty ./photos skips the fan-out (its output is null) — the guard
+    # keeps the typed contract honest on the very first exploratory run
+    value: "${{ tasks.stylize.output != null ? tasks.stylize.output : [] }}"
+    type: array
+    description: "The stylized artifact receipts · one per input photo"
+```
+{/* showcase:end */}
+
+## Two things this file teaches
+
+1. **The ops vocabulary is a closed set** — `dither: { mode: bayer4 }`
+   is one of the engine's named modes; misspell it (`bayer`) and
+   `nika check` answers with the whole legal set instead of guessing.
+   The checker teaches the vocabulary before the run spends a cycle.
+2. **A fan-out that can produce nothing still binds** — the collect
+   step guards with `${{ tasks.stylize.output != null ? … : [] }}`
+   (quoted, because a bare CEL ternary contains `:` and YAML would
+   claim it). An empty folder degrades to an empty manifest, not a
+   crash.
+
+## Run it
+
+```bash
+git clone https://github.com/supernovae-st/nika-spec && cd nika-spec
+nika run examples/showcase/t1-image-fx-batch.nika.yaml
+ls out/
+```
+
+<Note>
+  This workflow is newer than the currently shipped engine pack:
+  `nika examples run showcase/t1-image-fx-batch` says `unknown example`
+  until the next engine tag re-vendors the pack. Until then, run it
+  from the spec checkout as above — the file is the same one the pack
+  will embed, sha-pinned in the spec manifest.
+</Note>
+
+Point `vars.photos` at any directory of PNG files. Because every op is
+deterministic, the diff of `fx-out/` across two runs is empty — which
+makes the output safe to commit, and the workflow safe to put in CI.
