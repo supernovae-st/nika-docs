@@ -18,8 +18,10 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | Command | What it does |
 |---|---|
 | `nika welcome` | The mirror: what this machine has (editors · local models · key presence), what this binary carries, where to start — offline, always exit 0 |
-| `nika check <file>` | Static pre-flight audit before any run — `-` reads the workflow from stdin (0.94+) |
-| `nika run <file>` | Execute a checked workflow |
+| `nika context [--json]` | The whole workspace truth in one call: every workflow audited (verdict · tasks · waves · cost honesty · permits), recent runs folded from the flight recorder, the machine facts — capped and says so |
+| `nika check <file>` | Static pre-flight audit before any run — `-` reads the workflow from stdin (0.94+) · `registry:owner/name` pulls a certified artifact first ° |
+| `nika run <file>` | Execute a checked workflow — `registry:owner/name` refs resolve through the verified cache, then the normal audit-before-run ° |
+| `nika model serve\|pull\|list\|rm` | The sovereign local lane °: serve a GGUF through the in-process sidecar (`serve --model x.gguf` · loopback · feature `local-infer`), acquire from the Hugging Face Hub (`pull`), inventory and reclaim disk (`list` · `rm`) |
 | `nika test <file> [--update]` | Golden-test: run under the mock provider (offline · deterministic) and compare typed `outputs:` against `<file>.golden.json` |
 | `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits — `-` reads stdin (0.94+) |
 | `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT — `-` reads stdin (0.94+) |
@@ -38,6 +40,8 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika dap` | Debug Adapter Protocol server over stdio — time-travel a recorded run in any DAP client (VS Code F5) |
 | `nika lsp` | Run the language server over stdio |
 | `nika mcp` | Run the read-only MCP oracle (the tool set is listed below) |
+
+° ships in the next release — merged on main, verified there, absent from the released binary until the tag.
 
 ## Global flags
 
