@@ -152,8 +152,9 @@ the sober register (plain per-line events — what CI logs want). Two
 render themes ship: unicode (default) and `--ascii` (every glyph has an
 ASCII twin — use it on terminals without good box-drawing fonts,
 including older Windows setups; Windows Terminal renders the default
-theme fine). `--no-color`, `NO_COLOR`, and `CLICOLOR_FORCE` follow the
-standard resolution order.
+theme fine). `--color never` (or `--plain`), `NO_COLOR`, and
+`CLICOLOR_FORCE` follow the standard resolution order — one global
+colour chain, no per-verb twins.
 
 ## Related
 
