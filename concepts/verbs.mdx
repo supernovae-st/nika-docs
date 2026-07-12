@@ -127,6 +127,13 @@ modes become the builtin's `mode` argument.
         Authorization: "Bearer ${{ env.GITHUB_TOKEN }}"
 ```
 
+**Pick the `mode` for the content** — the default is `markdown`, built
+for *pages*: fetching a JSON API without a mode markdown-escapes the
+body (`\[`, `assets\_url`) and every downstream `jq`/`fromjson` fails
+on byte 0. APIs take `mode: raw` (the exact bytes) or `mode: jq` + a
+`jq:` expression — the shape step rides the fetch itself, one task
+instead of two.
+
 **Invariants** (from `nika-kernel::http::HttpClient`):
 
 - Output is **tainted** by default (external input is untrusted, T3:A).

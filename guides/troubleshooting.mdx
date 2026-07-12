@@ -60,6 +60,7 @@ flag ([error model](/reference/error-codes)). The frequent ones:
 |---|---|---|
 | « parse error » on a file that looks fine | `NIKA-PARSE` | Usually the envelope: `nika: v1` exactly (not `v1.0` · not `1`), `workflow:` kebab-case, `tasks:` present. |
 | task referenced but never ran | `NIKA-DAG` | A `${{ tasks.X }}` without `depends_on: [X]`. Every data edge must be a graph edge. |
+| `jq`/`fromjson` fails on fetch output (« expecting value, byte 0 ») | `NIKA-BUILTIN-JQ` | The fetch used the default `mode: markdown` (built for pages — it escapes JSON bodies). APIs take `mode: raw`, or `mode: jq` + `jq:` so the shaping rides the fetch. |
 | « unknown binding » | `NIKA-VAR` | Five namespaces only (`vars` · `with` · `tasks` · `env` · `secrets`). Typos like `tsaks.` are caught at validation. |
 | provider call fails once then works | `NIKA-PROVIDER` (`transient: true`) | The engine retries with backoff per your `retry:`. Declare it instead of wrapping logic. |
 | fetch refuses a URL | `NIKA-SEC` | SSRF defense: private networks and cloud metadata are blocked by default ([security model](/concepts/security)). |
