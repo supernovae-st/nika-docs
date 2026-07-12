@@ -25,7 +25,7 @@ And in every case, `nika init` first — the agent-teaching surface
 | Client | Wire | Where it lands |
 |---|---|---|
 | [Claude Code](/integrations/clients/claude-code) | `nika wire claude` | `~/.claude.json` |
-| [Claude Desktop](/integrations/clients/claude-desktop) | `nika wire claude-desktop` ° | `claude_desktop_config.json` (app-config dir) |
+| [Claude Desktop](/integrations/clients/claude-desktop) | `nika wire claude-desktop` | `claude_desktop_config.json` (app-config dir) |
 | [VS Code / Copilot](/integrations/clients/vscode) | `nika wire vscode` | `.vscode/mcp.json` (repo-local) |
 | [Cursor](/integrations/clients/cursor) | `nika wire cursor` | `~/.cursor/mcp.json` |
 | [Windsurf](/integrations/clients/windsurf) | `nika wire windsurf` | `~/.codeium/windsurf/mcp_config.json` |
@@ -33,20 +33,18 @@ And in every case, `nika init` first — the agent-teaching surface
 | [Codex](/integrations/clients/codex) | `nika wire codex` | `~/.codex/config.toml` |
 | [OpenCode](/integrations/opencode) | `nika wire opencode` | `opencode.json` (repo-local) |
 | [Hermes](/integrations/hermes) | `nika wire hermes` | `~/.hermes/config.yaml` |
-| [Gemini CLI](/integrations/clients/gemini-cli) | `nika wire gemini` ° | `~/.gemini/settings.json` |
-| [Qwen Code](/integrations/clients/qwen-code) | `nika wire qwen` ° | `~/.qwen/settings.json` |
-| [Cline](/integrations/clients/cline) | `nika wire cline` ° | `cline_mcp_settings.json` (resolved) |
-| [Continue](/integrations/clients/continue) | `nika wire continue` ° | `~/.continue/mcpServers/nika.json` |
-| [LM Studio](/integrations/clients/lm-studio) | `nika wire lmstudio` ° | `~/.lmstudio/mcp.json` (resolved) |
-| [Junie](/integrations/clients/junie) | `nika wire junie` ° | `.junie/mcp/mcp.json` (repo-local) |
+| [Gemini CLI](/integrations/clients/gemini-cli) | `nika wire gemini` | `~/.gemini/settings.json` |
+| [Qwen Code](/integrations/clients/qwen-code) | `nika wire qwen` | `~/.qwen/settings.json` |
+| [Cline](/integrations/clients/cline) | `nika wire cline` | `cline_mcp_settings.json` (resolved) |
+| [Continue](/integrations/clients/continue) | `nika wire continue` | `~/.continue/mcpServers/nika.json` |
+| [LM Studio](/integrations/clients/lm-studio) | `nika wire lmstudio` | `~/.lmstudio/mcp.json` (resolved) |
+| [Junie](/integrations/clients/junie) | `nika wire junie` | `.junie/mcp/mcp.json` (repo-local) |
 | [goose](/integrations/clients/goose) | manual stanza | goose config `extensions:` |
 | [Open WebUI](/integrations/clients/open-webui) | manual — mcpo recipe | OpenAPI tool server |
 | [AnythingLLM](/integrations/clients/anythingllm) | manual stanza | its `mcpServers` file |
 | [Cherry Studio](/integrations/clients/cherry-studio) | manual stanza | settings UI (stdio) |
 | [Jan](/integrations/clients/jan) | manual stanza | settings UI (stdio) |
 | [Aider](#aider) | no MCP — `AGENTS.md` covers it | `.aider.conf.yml` |
-
-° ships in the next release — the manual stanza on each page works today.
 Every `nika wire` write is idempotent (re-run prints `· current`) and
 preserves unrelated servers.
 
