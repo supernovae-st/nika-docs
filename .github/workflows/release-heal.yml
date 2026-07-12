@@ -1,0 +1,45 @@
+name: release-heal
+
+# The hand-bump class dies: the status snapshot said 0.99.0 while the
+# published release was 0.101.0 — two waves of silent drift the nightly
+# coherence bot could only WARN about. This cron asks the public release
+# API and, on drift, runs the repo's own scripts/mintlify-snapshot.sh and
+# pushes the two derived fields (version · lastUpdated). Self-heal on
+# self, GITHUB_TOKEN only — the changelog-cliff pattern.
+#
+# SECURITY: no github.event data reaches the shell; the only external
+# value is the release tag, validated against ^v[0-9.]+$ before use.
+
+on:
+  schedule:
+    - cron: '17 6 * * *' # daily · after the engine's nightly window
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  heal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Snapshot tracks the published release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="$(gh release view --repo supernovae-st/nika --json tagName --jq .tagName)"
+          [[ "$tag" =~ ^v[0-9][0-9.]*$ ]] || { echo "::error::unexpected tag shape: $tag"; exit 1; }
+          current="$(sed -n 's/.*version:\s*"\([^"]*\)".*/\1/p' snippets/_status-snapshot.mdx | head -1)"
+          if [ "v$current" = "$tag" ]; then
+            echo "snapshot already at $tag — nothing to heal"
+            exit 0
+          fi
+          bash scripts/mintlify-snapshot.sh
+          git config user.name "nika-release[bot]"
+          git config user.email "nika@supernovae.studio"
+          git add snippets/_status-snapshot.mdx
+          git diff --cached --quiet && { echo "no diff after heal — done"; exit 0; }
+          git commit -m "chore(status): the snapshot heals to $tag — release-heal cron"
+          git push
