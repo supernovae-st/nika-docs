@@ -30,7 +30,7 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 | Surface | Mechanism | Where |
 |---|---|---|
 | **VS Code** | extension on the [Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika-lang) (LSP · DAG canvas · preflight) | [VS Code / Copilot guide](/integrations/clients/vscode) |
-| **Cursor** | `nika wire cursor` + one-click deeplink button | [Cursor guide](/integrations/clients/cursor) |
+| **Cursor** | marketplace plugin (skill · subagent · commands · check-on-edit hook · MCP, one Add) + `nika wire cursor` + `nika init` (`.cursor/rules` + `.cursor/mcp.json`) | [Cursor guide](/integrations/clients/cursor) |
 | **Windsurf** | `nika wire windsurf` | [Windsurf guide](/integrations/clients/windsurf) |
 | **Zed** | `nika wire zed` (0.99+) | [Zed guide](/integrations/clients/zed) |
 | **JetBrains (Junie)** | project-scope `.junie/mcp/mcp.json` stanza | [Junie guide](/integrations/clients/junie) |
@@ -52,7 +52,7 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 | **Cline · Continue** | `cline_mcp_settings.json` (hot-reloaded) · own-file `~/.continue/mcpServers/nika.json` | [Cline](/integrations/clients/cline) · [Continue](/integrations/clients/continue) |
 | **Open WebUI · AnythingLLM · Cherry Studio · Jan** | mcpo recipe · generic stdio stanza | [Open WebUI](/integrations/clients/open-webui) · [AnythingLLM](/integrations/clients/anythingllm) · [Cherry Studio](/integrations/clients/cherry-studio) · [Jan](/integrations/clients/jan) |
 | **Aider** | no MCP — `AGENTS.md` (written by `nika init`) covers it | [MCP clients → Aider](/integrations/mcp-clients#aider) |
-| **Any AGENTS.md reader** | `nika init` writes 6 agent-facing files (AGENTS.md included) | [Quickstart](/integrations/quickstart) |
+| **Any AGENTS.md reader** | `nika init` writes 7 agent-facing files (AGENTS.md · `.cursor/{rules,mcp.json}` included) | [Quickstart](/integrations/quickstart) |
 
 ## Skills & plugins (the teaching surfaces)
 
@@ -60,6 +60,7 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 |---|---|---|
 | **SKILL.md pack** | the authoring skill (check-before-run law · cost honesty) — installable via `npx skills add supernovae-st/nika-agents` | [nika-agents kit](https://github.com/supernovae-st/nika-agents) |
 | **Plugin commands** | `/nika:check` · `/nika:explain` · `/nika:new` mirrored from the engine | kit `.agents/plugins/nika/` |
+| **`nika-author` subagent** | routes an intent to a template, fills the `# SLOT:` markers, loops `nika check` until rc=0 — read-only | kit `.agents/plugins/nika/agents/` |
 | **Integration kit contract** | « You want to support Nika? Copy this folder » — pinned mirrors, drift-gated in CI | [kit README](https://github.com/supernovae-st/nika-agents#readme) |
 
 ## MCP (the read-only oracle)
