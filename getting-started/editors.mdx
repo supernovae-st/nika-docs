@@ -249,7 +249,10 @@ reference pages.
 
 The engine's own language server rides stdio for editors outside the
 VS Code family: hover, completion (`.` `/` `[` triggers), go to
-definition, document symbols and push diagnostics. Wire it as a
+definition, document symbols, push diagnostics — and **quickfix code
+actions** (engines after 0.99.0): the `nika check --fix` rename engine
+projected, so a typo'd tool, arg, field or task reference offers its
+did-you-mean as a one-click repair in any LSP editor. Wire it as a
 generic LSP command (`nika lsp`) in Zed, Neovim or Helix alongside the
 Tier-1 schema.
 
