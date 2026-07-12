@@ -88,10 +88,10 @@ execution, no mutation, by design** ([threat model](https://github.com/supernova
 |---|---|---|
 | **TypeScript client** | `LocalNika` — typed driver over the shipped binary (check · run stream · dry-run plan) · Apache-2.0 | [nika-client](https://github.com/supernovae-st/nika-client) |
 | **Language spec** | the `.nika.yaml` contract — Apache-2.0, runtime-agnostic | [nika-spec](https://github.com/supernovae-st/nika-spec) |
-| **Registry** | CI-re-proven workflow artifacts (hash + oracle + engine cert) — the engine pulls them natively: `nika check registry:owner/name` ° (digest verify · cache · the normal audit-before-run) | [nika-registry](https://github.com/supernovae-st/nika-registry) |
-| **Sovereign local lane** ° | `nika model serve --model x.gguf` — the in-process candle sidecar (loopback · feature `local-infer`) · `pull`/`list`/`rm` acquire and manage GGUFs | [CLI reference](/reference/cli) |
+| **Registry** | CI-re-proven workflow artifacts (hash + oracle + engine cert) — the engine pulls them natively: `nika check registry:owner/name` (digest verify · cache · the normal audit-before-run) | [nika-registry](https://github.com/supernovae-st/nika-registry) |
+| **Sovereign local lane** | `nika model serve --model x.gguf` ° — the in-process candle sidecar (loopback · feature `local-infer`) · `pull`/`list`/`rm` acquire and manage GGUFs | [CLI reference](/reference/cli) |
 
-° ships in the next release — merged on main, absent from the released binary until the tag.
+° `serve` needs the `local-infer` build feature — absent from released binaries up to 0.100; `pull`/`list`/`rm` ship in every release.
 
 ## Where Nika is listed
 
