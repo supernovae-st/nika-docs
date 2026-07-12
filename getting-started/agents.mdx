@@ -35,6 +35,13 @@ nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
 - **`.cursor/rules/nika.mdc`**, the Cursor rules file (globs `*.nika.yaml`):
   the syntax floor + the check loop, auto-attached whenever the agent touches
   a workflow file.
+- **Cursor, fully equipped** (next release): the three kit subagents
+  (`.cursor/agents/nika-{author,debugger,migrator}.md`), the delegation rule
+  (`.cursor/rules/nika-delegation.mdc`) and the three seatbelt hooks
+  (`.cursor/hooks.json` + `.cursor/hooks-nika/` — session context ·
+  check-on-edit · a guard that audits before any `nika run`). Cursor's local
+  plugin loader consumes MCP + skills only, so the binary carries the rest
+  project-side; every body is byte-identical to the kit.
 - **`.agents/skills/nika-authoring/SKILL.md`** (0.93+): a
   repo-level [agent skill](https://agentskills.io) — Codex and every
   `.agents`-aware client discover it automatically and can invoke it as
@@ -43,8 +50,9 @@ nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
 ## Or: install the plugin (Codex · Claude Code)
 
 Codex and Claude Code users can skip per-repo setup entirely — the engine
-repo hosts one plugin (authoring skill **and** MCP oracle) for both
-ecosystems:
+repo hosts one plugin for both ecosystems: 4 skills, 3 subagents, 5 slash
+commands, the three seatbelt hooks (one dialect, sniffed — Codex speaks
+Claude Code's hook contract verbatim) **and** the MCP oracle:
 
 ```sh
 # Codex
