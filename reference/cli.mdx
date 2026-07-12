@@ -18,21 +18,21 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | Command | What it does |
 |---|---|
 | `nika welcome` | The mirror: what this machine has (editors · local models · key presence), what this binary carries, where to start — offline, always exit 0 |
-| `nika context [--json]` | The whole workspace truth in one call: every workflow audited (verdict · tasks · waves · cost honesty · permits), recent runs folded from the flight recorder, the machine facts — capped and says so |
+| `nika welcome --deep [--json]` | The whole workspace truth in one call: every workflow audited (verdict · tasks · waves · cost honesty · permits), recent runs folded from the flight recorder, the machine facts — capped and says so |
 | `nika check <file>` | Static pre-flight audit before any run — `-` reads the workflow from stdin (0.94+) · `registry:owner/name` pulls a certified artifact first ° |
 | `nika run <file>` | Execute a checked workflow — `registry:owner/name` refs resolve through the verified cache, then the normal audit-before-run ° |
 | `nika model serve\|pull\|list\|rm` | The sovereign local lane °: serve a GGUF through the in-process sidecar (`serve --model x.gguf` · loopback · feature `local-infer`), acquire from the Hugging Face Hub (`pull`), inventory and reclaim disk (`list` · `rm`) |
 | `nika test <file> [--update]` | Golden-test: run under the mock provider (offline · deterministic) and compare typed `outputs:` against `<file>.golden.json` |
 | `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits — `-` reads stdin (0.94+) |
-| `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT — `-` reads stdin (0.94+) |
+| `nika inspect <file> --format json\|mermaid\|dot` | Project the workflow graph — `-` reads stdin |
 | `nika explain <code\|file>` | Teach a `NIKA-XXXX` error code — or narrate a workflow FILE (0.98+): the waves, cost before a token is spent, what it touches, the flight-recorder hand-off |
 | `nika doctor [--ping]` | Diagnose providers plus editor/agent readiness — findings grouped under `binary` · `config` · `lsp` · `mcp` · `provider` · `local` · `providers` · `image` · `tts`. `--ping` (0.94+) TCP-probes the local ports — loopback and configured URLs only, 300ms cap, nothing sent on the socket; the default run stays fully offline |
 | `nika init [dir]` | Scaffold schema wiring, `AGENTS.md`, and Cursor rules |
 | `nika wire <target>` | Explicitly wire MCP for `cursor`, `vscode`, `windsurf`, `claude`, `codex`, `zed`, `opencode`, `hermes`, or `all` — the [client table](/integrations/mcp-clients) carries every target and its config path |
 | `nika spec [--canon]` | Print the embedded spec or canon |
-| `nika schema` | Print the embedded JSON Schema |
+| `nika spec --schema` | Print the embedded JSON Schema |
 | `nika catalog [--json]` | The embedded provider/model catalog (models · capabilities · env vars) — `--json` emits the versioned machine projection (`catalog_version: 1`) |
-| `nika tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
+| `nika catalog --tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
 | `nika examples list|show|run` | Browse or run embedded examples |
 | `nika new --from <template> <dest>` | Instantiate an embedded workflow template |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
