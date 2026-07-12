@@ -18,12 +18,12 @@ icon: "plug"
 | `nika check <file> --json` | `report_version` | the full audit report: conformance findings (each with `code` · `severity` · `docs_url` · span), cost intervals per task, the derivation certificate, requirements (models · secrets · env), secret-flow findings, hints, pricing provenance (`pricing.snapshot`) |
 | `nika doctor --json` | — (stable shape) | the environment diagnosis: per-finding status + the exact fix command, key PRESENCE (never values), local provider reachability |
 | `nika catalog --json` | `catalog_version` | the provider/model vocabulary: models, capabilities, key env-var NAMES |
-| `nika tools --json` | `tools_version` | the builtin tool catalog with model-facing JSON Schemas per tool |
-| `nika graph <file> --format json` | `graph_format` | the ONE graph projection: nodes (id · verb · model/tool · when · fan-out · permits · cost interval) + edges — mermaid and dot are derived from this, never parallel truths |
+| `nika catalog --tools --json` | `tools_version` | the builtin tool catalog with model-facing JSON Schemas per tool |
+| `nika inspect <file> --format json` | `graph_format` | the ONE graph projection: nodes (id · verb · model/tool · when · fan-out · permits · cost interval) + edges — mermaid and dot are derived from this, never parallel truths |
 | `nika run <file> --json` | NDJSON stream | the live event stream, one JSON object per line — the same events the trace records |
 | `nika trace export` | OTLP | any recorded journal projected to OpenTelemetry (Jaeger · Grafana · Langfuse) |
 | `nika spec --canon` | `schema_version` | the embedded canon SSOT (counts and names — cite it, never a remembered number) |
-| `nika schema` | JSON Schema `$id` | the embedded workflow schema — the same one editors validate against |
+| `nika spec --schema` | JSON Schema `$id` | the embedded workflow schema — the same one editors validate against |
 
 `nika check -` reads the workflow from **stdin** — editors and agents
 audit keystroke-fresh buffers without touching the disk.
@@ -35,7 +35,7 @@ without a binary, each probed and versioned like the CLI wires.
 
 | URL | What it carries |
 |---|---|
-| [`nika.sh/spec/v1/workflow.schema.json`](https://nika.sh/spec/v1/workflow.schema.json) | the published workflow JSON Schema — the same one `nika schema` embeds |
+| [`nika.sh/spec/v1/workflow.schema.json`](https://nika.sh/spec/v1/workflow.schema.json) | the published workflow JSON Schema — the same one `nika spec --schema` embeds |
 | [`nika.sh/errors/catalog.json`](https://nika.sh/errors/catalog.json) | the error catalog, projected from the spec's normative table |
 | [`nika.sh/brand/icons.json`](https://nika.sh/brand/icons.json) | the [design ontology](/reference/design-system): every verb, builtin, feature and run-state with glyph, hue and motion |
 | [`nika.sh/brand/icons.ttl`](https://nika.sh/brand/icons.ttl) | the same graph in Turtle — SPARQL-ready, namespace [`nkd:`](https://nika.sh/ontology/design/) |
@@ -80,7 +80,7 @@ payloads — the two lanes cannot drift apart by construction.
   or machine. Requirements name the env var; doctor reports set/unset.
 
 <Note>
-  Next on this page once the next engine tag ships: `nika context
+  Next on this page once the next engine tag ships: `nika welcome --deep
   --json` (`context_version`) — the whole workspace truth in one call
   (file map with per-file verdicts · run inventory with actual cost ·
   environment snapshot · wiring state · caps always reported, relative

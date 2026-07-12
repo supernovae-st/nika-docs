@@ -203,14 +203,14 @@ This is Q1 (no proc macros) applied at the data-layer. See
 ## How to query capabilities
 
 Two shipped subcommands project the embedded catalogs — `nika catalog`
-(providers · models · capabilities · env vars) and `nika tools` (the
+(providers · models · capabilities · env vars) and `nika catalog --tools` (the
 `nika:*` builtin schemas), each with a versioned `--json` machine form:
 
 <CodeGroup>
 ```bash nika catalog (shipped)
 $ nika catalog                # human listing · local providers first
 $ nika catalog --json         # machine projection (catalog_version: 1)
-$ nika tools --json           # builtin tool catalog (tools_version: 1)
+$ nika catalog --tools --json # builtin tool catalog (tools_version: 1)
 ```
 
 ```rust Rust API (shipped · nika-catalog)

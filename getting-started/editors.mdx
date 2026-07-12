@@ -14,7 +14,7 @@ that works with any yaml-language-server-compatible editor, and **(2)** the
 intelligence.
 
 <Info>
-  **v{STATUS.version} state:** the binary ships `nika schema`, `nika lsp`,
+  **v{STATUS.version} state:** the binary ships `nika spec --schema`, `nika lsp`,
   `nika mcp`, and `nika wire`. Use `nika init` for repo-local schema/rules,
   or `nika wire <client>` for explicit MCP client setup.
 </Info>
@@ -228,7 +228,7 @@ reference pages.
 
   <Accordion title="Schema-derived intelligence" icon="wand-magic-sparkles">
     Completions, hover and expression intel come FROM the binary
-    (`nika schema` · `nika spec --canon` · `nika tools --json`): task
+    (`nika spec --schema` · `nika spec --canon` · `nika catalog --tools --json`): task
     fields, per-verb bodies, the closed builtin set,
     provider-prefixed `model:` values, `${{ }}` reference completion
     with go-to-definition, task rename across all syntactic homes. A
@@ -297,7 +297,7 @@ line in your settings until the upstream icons land:
 
 | Capability | Status | Admission |
 |---|---|---|
-| JSON Schema (yaml-language-server) | shipped | `nika schema` + public schema URL |
+| JSON Schema (yaml-language-server) | shipped | `nika spec --schema` + public schema URL |
 | `nika lsp` L4 crate | shipped | `nika lsp` (hover · completion · definition · symbols · diagnostics) |
 | VS Code / Cursor extension | shipped | Marketplace + OpenVSX |
 | MCP agent oracle | shipped, read-only | `nika mcp` (8 tools: check · explain · the authoring surface) |
