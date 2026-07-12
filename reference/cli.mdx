@@ -21,7 +21,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika context [--json]` | The whole workspace truth in one call: every workflow audited (verdict · tasks · waves · cost honesty · permits), recent runs folded from the flight recorder, the machine facts — capped and says so |
 | `nika check <file>` | Static pre-flight audit before any run — `-` reads the workflow from stdin (0.94+) · `registry:owner/name` pulls a certified artifact first ° |
 | `nika run <file>` | Execute a checked workflow — `registry:owner/name` refs resolve through the verified cache, then the normal audit-before-run ° |
-| `nika model serve\|pull\|list\|rm` | The sovereign local lane °: serve a GGUF through the in-process sidecar (`serve --model x.gguf` · loopback · feature `local-infer`), acquire from the Hugging Face Hub (`pull`), inventory and reclaim disk (`list` · `rm`) |
+| `nika model serve\|pull\|list\|rm` | The sovereign local lane °: serve a GGUF through the in-process sidecar (`serve --model x.gguf` · loopback · feature `local-infer` · qwen3-family GGUFs, a wrong family refuses in milliseconds), acquire from the Hugging Face Hub (`pull` — brings `tokenizer.json` along, borrowing it from the repo's declared base model when the mirror ships none), inventory and reclaim disk (`list` · `rm`) |
 | `nika test <file> [--update]` | Golden-test: run under the mock provider (offline · deterministic) and compare typed `outputs:` against `<file>.golden.json` |
 | `nika inspect <file>` | Static anatomy: tasks, verbs, DAG, cost, permits — `-` reads stdin (0.94+) |
 | `nika graph <file>` | Project the workflow graph as JSON, Mermaid, or DOT — `-` reads stdin (0.94+) |
@@ -36,7 +36,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika examples list|show|run` | Browse or run embedded examples |
 | `nika new --from <template> <dest>` | Instantiate an embedded workflow template |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
-| `nika trace verify|reproduce|replay|show|outputs|export|peek|flow` | Prove, replay, summarize, inspect, or export a recorded run — `verify` walks the tamper-evidence hash chain and names the first broken link · `reproduce` re-runs and classifies every divergence — `export` projects the journal to OTLP/JSON lines (Jaeger UI, or POST to any OTLP/HTTP endpoint; a local file, zero collector, zero vendor) |
+| `nika trace verify|reproduce|replay|show|outputs|export|peek|flow` | Prove, replay, summarize, inspect, or export a recorded run — `verify` walks the tamper-evidence hash chain and names the first broken link (several traces verify per-file, worst exit wins — a shell glob just works °) · `peek` renders a task's full recorded value, and a FAILED task's recorded failure + its explain line ° · `reproduce` re-runs and classifies every divergence — `export` projects the journal to OTLP/JSON lines (Jaeger UI, or POST to any OTLP/HTTP endpoint; a local file, zero collector, zero vendor) |
 | `nika dap` | Debug Adapter Protocol server over stdio — time-travel a recorded run in any DAP client (VS Code F5) |
 | `nika lsp` | Run the language server over stdio |
 | `nika mcp` | Run the read-only MCP oracle (the tool set is listed below) |
