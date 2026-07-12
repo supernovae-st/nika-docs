@@ -117,9 +117,25 @@ One extension, both registries — the
 and [OpenVSX](https://open-vsx.org/extension/supernovae/nika-lang), so
 Cursor, Windsurf and VSCodium install it natively. It consumes the same
 binary the CLI runs: every verdict in the margin is real `nika check`
-output, never a client-side guess.
+output, never a client-side guess. Workflow files carry the language
+identity out of the box — the four verbs color distinctly in every
+theme (`Nika: Apply Verb Colors` writes the exact canonical hues), a
+🦋 badge marks workflows in the Explorer without replacing your icon
+theme, and verbs, tools and `permits:` are ctrl-clickable to their
+reference pages.
 
 <AccordionGroup>
+  <Accordion title="Install = everything on" icon="rocket">
+    First activation with the engine present silently wires MCP for the
+    host (`nika wire`, idempotent) — install the extension, accept the
+    one-click verified download (SHA256SUMS, mandatory), and MCP · LSP ·
+    diagnostics are live in the same window. No binary? The status menu
+    leads with **Finish Setup** — one orchestrated gesture: download →
+    wire → optional `nika init` (repo writes stay consented) → recap.
+    Fresh workspace? **Run the 10-second proof** (the offline hello,
+    zero keys). `nika.autoSetup: false` opts out of all of it.
+  </Accordion>
+
   <Accordion title="Check-as-you-type — the full audit" icon="shield">
     `nika check --json` painted as diagnostics while you type: DAG
     conformance, secret leaks and egresses, permits escapes, schema
