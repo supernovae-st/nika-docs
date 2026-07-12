@@ -129,11 +129,16 @@ reference pages.
     First activation with the engine present silently wires MCP for the
     host (`nika wire`, idempotent) — install the extension, accept the
     one-click verified download (SHA256SUMS, mandatory), and MCP · LSP ·
-    diagnostics are live in the same window. No binary? The status menu
-    leads with **Finish Setup** — one orchestrated gesture: download →
-    wire → optional `nika init` (repo writes stay consented) → recap.
-    Fresh workspace? **Run the 10-second proof** (the offline hello,
-    zero keys). `nika.autoSetup: false` opts out of all of it.
+    diagnostics are live in the same window. The 🦋 status menu then
+    opens on *your* next step, whichever it is: no binary → **Finish
+    Setup** (one orchestrated gesture: download → wire → optional
+    `nika init`, repo writes stay consented → recap) · repo not
+    equipped → **Init this project** (agent rules · MCP · schema
+    wiring, skip-if-exists) · fresh workspace → **Run the 10-second
+    proof** (the offline hello, zero keys) · already working → the
+    active file's Run · Check · Graph. The sidebar's welcome view says
+    the same thing — one journey, every surface. `nika.autoSetup:
+    false` opts out of all of it.
   </Accordion>
 
   <Accordion title="Check-as-you-type — the full audit" icon="shield">
