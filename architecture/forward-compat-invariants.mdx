@@ -79,8 +79,9 @@ and features we haven't imagined **without breaking changes to the public API**.
     ```
 
     `v1` is the only value for the lifetime of the v1 contract: minor
-    additions are **additive** and never change it. A `nika: v2` would be a
-    deliberate breaking generation (the `v1` envelope is frozen · effectively never).
+    additions are **additive** and never change it. There is no `nika: v2` —
+    ever: pre-1.0 grammar changes happen inside `v1` (the pre-1.0 stability
+    contract) · after engine 1.0.0 the grammar is additive only.
     Non-workflow artifacts (package manifests, events) carry their own
     schema version field.
   </Accordion>

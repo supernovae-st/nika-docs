@@ -121,6 +121,6 @@ It's 100% machine-authoritative. This doc is a readable summary.
 `nika: v1` is a **single version marker**: `v1` is the only value for the
 entire lifetime of the v1 contract. Minor additions (a new optional field, a
 new builtin) are **additive** and never change it (no `@minor` bumps, no
-`nika migrate` for them). A future `nika: v2` would be a deliberate
-breaking-change generation with its own spec, and since the `v1` envelope
-is frozen, effectively never.
+`nika migrate` for them). There is no `nika: v2` — ever:
+pre-1.0 grammar changes happen inside `v1` (the pre-1.0 stability contract) ·
+after engine 1.0.0 the grammar is additive only.

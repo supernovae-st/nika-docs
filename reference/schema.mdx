@@ -46,6 +46,7 @@ nika check workflow.nika.yaml --strict   # + extra lints
 - `v1` is the **only value for the entire lifetime** of the v1 contract.
 - Minor additions (a new optional field, a new builtin) are **additive**
   and never change the marker: no `@minor` bumps, no `nika migrate` for them.
-- A future `nika: v2` would be a deliberate breaking-change generation with
-  its own spec, and since the `v1` envelope is frozen, that is effectively never.
+- **There is no `nika: v2` — ever**: pre-1.0 grammar changes happen inside
+  `v1` (the pre-1.0 stability contract) · after engine 1.0.0 the grammar is
+  additive only.
 - Anti-pattern: `nika: v1.0` · `nika: "1"` · `nika: 1.0`. The value is exactly `v1`.
