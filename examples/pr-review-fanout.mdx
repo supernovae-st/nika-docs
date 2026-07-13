@@ -68,7 +68,7 @@ vars:
 tasks:
   - id: changed
     exec:
-      command: "git diff --name-only ${{ vars.base_ref }}...HEAD"
+      command: ["git", "diff", "--name-only", "${{ vars.base_ref }}...HEAD"]
 
   - id: files
     depends_on: [changed]

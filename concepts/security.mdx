@@ -70,7 +70,7 @@ spawn. But the structural defense is in how you write workflows:
 # ❌ tainted output interpolated into a command string
 - id: bad
   exec:
-    command: "echo ${{ tasks.fetch_comment.output }}"
+    command: ["echo", "${{ tasks.fetch_comment.output }}"]
 
 # ✅ tainted output passed as data
 - id: good
