@@ -41,7 +41,7 @@ Four examples, each a valid `Templatable::Template`:
 prompt: "${{ vars.target }}"
 prompt: "${{ tasks.fetch_issue.output.title }}"
 prompt: "${{ with.model_family }}"
-command: "echo ${{ env.HOME }}/output.txt"
+command: ["echo", "${{ env.HOME }}/output.txt"]
 ```
 
 Whitespace inside `${{ }}` is ignored. Nested `${{ }}` is rejected at
@@ -116,7 +116,7 @@ runtime taint layer · [security model](/concepts/security)):
 - name: run_it
   depends_on: [pull_user_input]
   exec:
-    command: "${{ tasks.pull_user_input.output }}"   # NIKA-SEC taint violation
+    command: ["${{ tasks.pull_user_input.output }}"]   # NIKA-SEC taint violation
 ```
 
 Fix: never interpolate tainted data into a command string; pass it

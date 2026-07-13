@@ -24,7 +24,7 @@ model: mock/echo                       # swap for ollama/llama3.2:3b or any prov
 tasks:
   - id: collect
     exec:
-      command: "printf 'feat: resume\nfix: deadline'"
+      command: ["printf", "'feat:", "resume\nfix:", "deadline'"]
 
   - id: draft
     depends_on: [collect]
@@ -35,7 +35,7 @@ tasks:
   - id: stamp
     depends_on: [draft]
     exec:
-      command: "printf 'stamped'"
+      command: ["printf", "'stamped'"]
 
 outputs:
   notes: "${{ tasks.draft.output }}"
@@ -141,7 +141,7 @@ description: "Build, ask a human, ship only on yes."
 tasks:
   - id: build
     exec:
-      command: "printf 'build ok'"
+      command: ["printf", "'build", "ok'"]
 
   - id: approve
     depends_on: [build]
@@ -154,7 +154,7 @@ tasks:
     depends_on: [approve]
     when: "${{ tasks.approve.output == true }}"
     exec:
-      command: "printf 'shipped'"
+      command: ["printf", "'shipped'"]
 ```
 
 ```bash

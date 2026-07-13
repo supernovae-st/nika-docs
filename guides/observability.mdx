@@ -20,11 +20,11 @@ model: mock/echo                       # swap for ollama/llama3.2:3b or any prov
 tasks:
   - id: commits
     exec:
-      command: "sleep 0.4 && git log --oneline -5 2>/dev/null || printf 'feat: resume'"
+      shell: "sleep 0.4 && git log --oneline -5 2>/dev/null || printf 'feat: resume'"
 
   - id: tickets
     exec:
-      command: "sleep 0.3 && printf 'NIKA-42 open'"
+      shell: "sleep 0.3 && printf 'NIKA-42 open'"
 
   - id: digest
     depends_on: [commits, tickets]

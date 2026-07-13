@@ -134,7 +134,7 @@ tasks:
   - id: notify
     depends_on: [analyze]
     exec:
-      command: "echo ${{ tasks.analyze.output }}"
+      command: ["echo", "${{ tasks.analyze.output }}"]
 ```
 
 Fan-out over a collection (`files` here is a jq

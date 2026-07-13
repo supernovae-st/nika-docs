@@ -310,7 +310,7 @@ fan out over it:
   for_each: ${{ tasks.build_matrix.output }}
   max_parallel: 3
   exec:
-    command: "./test.sh --os ${{ item.os }} --node ${{ item.ver }}"
+    command: ["./test.sh", "--os", "${{ item.os }}", "--node", "${{ item.ver }}"]
 ```
 
 Include/exclude rules are jq filters on the product: no second syntax to
