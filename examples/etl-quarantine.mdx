@@ -46,25 +46,26 @@ flowchart LR
 {/* showcase:begin t2-etl-quarantine.nika.yaml */}
 ```yaml t2-etl-quarantine.nika.yaml
 nika: v1
-workflow: etl-quarantine
-description: "CSV batch → schema gate → quarantine the bad · aggregate the good"
+workflow:
+  id: etl-quarantine
+  description: "CSV batch → schema gate → quarantine the bad · aggregate the good"
 
 vars:
   batch_csv: "./data/incoming/orders.csv"
 
 tasks:
   # A deterministic empty fallback · the recover target when parsing dies.
-  - id: empty_batch
+  empty_batch:
     invoke:
       tool: "nika:jq"
       args: { input: [], expression: "." }
 
-  - id: raw
+  raw:
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.batch_csv }}" }
 
-  - id: rows
+  rows:
     depends_on: [raw]
     invoke:
       tool: "nika:convert"
@@ -76,7 +77,7 @@ tasks:
     on_error:
       recover: ${{ tasks.empty_batch.output }}    # malformed CSV → empty batch · pipeline lives
 
-  - id: check
+  check:
     depends_on: [rows]
     invoke:
       tool: "nika:validate"
@@ -93,7 +94,7 @@ tasks:
               amount: { type: string }
               currency: { type: string, enum: [EUR, USD, GBP] }
 
-  - id: good
+  good:
     depends_on: [rows, check]
     when: ${{ tasks.check.output.valid == true }}
     invoke:
@@ -102,7 +103,7 @@ tasks:
         input: "${{ tasks.rows.output }}"
         expression: 'group_by(.currency) | map({currency: .[0].currency, orders: length, total: (map(.amount | tonumber) | add)})'
 
-  - id: quarantine
+  quarantine:
     depends_on: [rows, check]
     when: ${{ tasks.check.output.valid == false }}
     invoke:
@@ -112,7 +113,7 @@ tasks:
         content: "${{ tasks.check.output.errors }}"
         create_dirs: true
 
-  - id: report
+  report:
     depends_on: [good]
     when: ${{ tasks.good.output != null && size(tasks.good.output) > 0 }}   # good is SKIPPED (null) on the quarantine path · guard before size()
     invoke:

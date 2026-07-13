@@ -14,7 +14,7 @@ namespace, engine-native (no MCP round-trip, no subprocess), all invoked
 the same way:
 
 ```yaml
-- id: read_config
+read_config:
   invoke:
     tool: "nika:read"
     args: { path: "./config.yaml" }
@@ -55,7 +55,7 @@ The workflow-control family: speak, signal, guard, ask, finish, pause.
 | `nika:wait` | Temporal pause: relative `duration:` XOR absolute `until:` (ISO 8601), validated at parse time. |
 
 ```yaml
-- id: gate
+gate:
   invoke:
     tool: "nika:assert"
     args:
@@ -92,7 +92,7 @@ format conversion, generation, time, hashing.
 
 ```yaml
 # recursive deep-merge of two task outputs — pure jq, no extra builtin
-- id: merged
+merged:
   invoke:
     tool: "nika:jq"
     args:
@@ -121,7 +121,7 @@ format conversion, generation, time, hashing.
 | `nika:compose` | The agent loop's self-check: pass a drafted workflow YAML, get the full `nika check` verdict back as JSON — never executed. Loop-only, like `nika:done` (valid only inside an `agent:` tools whitelist). |
 
 ```yaml
-- id: budget_check
+budget_check:
   invoke:
     tool: "nika:inspect"
     args: { view: cost }
@@ -136,7 +136,7 @@ format conversion, generation, time, hashing.
 | `nika:image_fx` | **Deterministic artistic effects** on a PNG — dither (bayer · blue-noise · ign · floyd_steinberg · atkinson · jjn) · palette mapping (Oklab) · duotone · pixelate · halftone · grain · vignette · chromatic aberration · scanlines · glitch · ascii (png/text/ansi). Zero providers, zero network: **byte-identical output forever** for identical `(input, args)` — the artifact's sha256 joins the trace chain, re-render IS the tamper check, and the full recipe (contract tag `image_fx/v1` · input sha256 · seed · ops) rides the PNG itself as a `nika` tEXt chunk. `input:` read + `out:` write both ride `permits.fs`. Full guide: [Image effects](/guides/image-effects) — the receipts story · op table · cookbook. |
 
 ```yaml
-- id: hero
+hero:
   invoke:
     tool: "nika:image_generate"
     args:

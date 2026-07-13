@@ -51,8 +51,9 @@ flowchart TD
 {/* showcase:begin t3-config-drift-sentinel.nika.yaml */}
 ```yaml t3-config-drift-sentinel.nika.yaml
 nika: v1
-workflow: config-drift-sentinel
-description: "live config vs sanctioned baseline → typed drift → explained alert"
+workflow:
+  id: config-drift-sentinel
+  description: "live config vs sanctioned baseline → typed drift → explained alert"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-haiku-4-5 (explain is cheap)
 
@@ -72,7 +73,7 @@ secrets:
         host_from_self: true
 
 tasks:
-  - id: live
+  live:
     invoke:
       tool: "nika:fetch"
       args:
@@ -83,12 +84,12 @@ tasks:
       max_attempts: 3
       backoff_strategy: exponential
 
-  - id: baseline
+  baseline:
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.baseline_path }}" }
 
-  - id: expected
+  expected:
     depends_on: [baseline]
     invoke:
       tool: "nika:json_merge_patch"
@@ -96,7 +97,7 @@ tasks:
         target: "${{ tasks.baseline.output }}"
         patch: "${{ vars.approved_overrides }}"
 
-  - id: drift
+  drift:
     depends_on: [expected, live]
     invoke:
       tool: "nika:json_diff"
@@ -104,7 +105,7 @@ tasks:
         before: "${{ tasks.expected.output }}"
         after: "${{ tasks.live.output }}"
 
-  - id: fingerprint
+  fingerprint:
     depends_on: [live]
     invoke:
       tool: "nika:hash"
@@ -113,7 +114,7 @@ tasks:
         content: "${{ tasks.live.output }}"
         encoding: hex
 
-  - id: explain
+  explain:
     depends_on: [drift]
     when: ${{ size(tasks.drift.output) > 0 }}
     on_error:
@@ -124,7 +125,7 @@ tasks:
         ${{ tasks.drift.output }}
         Explain in 3 bullets · what changed · likely blast radius · first check.
 
-  - id: alert
+  alert:
     depends_on: [explain, drift, fingerprint]
     when: ${{ size(tasks.drift.output) > 0 }}
     invoke:
@@ -135,7 +136,7 @@ tasks:
         message: "Config drift detected · ${{ tasks.explain.output }} · live config blake3 ${{ tasks.fingerprint.output }}"
         severity: critical
 
-  - id: record
+  record:
     depends_on: [drift, fingerprint]
     invoke:
       tool: "nika:emit"

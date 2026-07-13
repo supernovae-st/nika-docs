@@ -25,12 +25,13 @@ prints a `tts` line naming what's wired.
 ## Quickstart
 
 ```yaml nika: v1
-workflow: narrate
+workflow:
+  id: narrate
 permits:
   fs: { write: ["./out/**"] }
   tools: ["nika:tts_generate"]
 tasks:
-  - id: speak
+  speak:
     invoke:
       tool: "nika:tts_generate"
       args:
@@ -70,16 +71,17 @@ out/
 **An LLM writes the script, another model speaks it — one run:**
 
 ```yaml nika: v1
-workflow: script-to-speech
+workflow:
+  id: script-to-speech
 model: gemini/gemini-2.5-flash
 permits:
   fs: { write: ["./out/**"] }
   tools: ["nika:tts_generate"]
 tasks:
-  - id: script
+  script:
     infer:
       prompt: "Write ONE energetic launch sentence (under 20 words) for a Rust workflow engine that just learned to speak."
-  - id: narrate
+  narrate:
     depends_on: [script]
     invoke:
       tool: "nika:tts_generate"
@@ -97,7 +99,7 @@ the provenance chain covers who *wrote* the words, not just who spoke them.
 **Retry a local server that's still loading its model:**
 
 ```yaml
-  - id: speak
+  speak:
     retry:
       max_attempts: 3
       on_codes: ["NIKA-BUILTIN-TTS_GENERATE-003"]

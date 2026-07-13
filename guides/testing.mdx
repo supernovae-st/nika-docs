@@ -30,8 +30,9 @@ bindings, and typed-outputs validation as a live run.
 
 ```yaml triage.nika.yaml
 nika: v1
-workflow: ticket-triage
-description: "Classify a support ticket into a typed verdict."
+workflow:
+  id: ticket-triage
+  description: "Classify a support ticket into a typed verdict."
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 
@@ -41,7 +42,7 @@ vars:
     default: "Payment page returns a 502 after checkout."
 
 tasks:
-  - id: classify
+  classify:
     infer:
       prompt: "Classify this ticket: ${{ vars.ticket }}"
       max_tokens: 300

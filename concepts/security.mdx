@@ -68,12 +68,12 @@ spawn. But the structural defense is in how you write workflows:
 
 ```yaml
 # ❌ tainted output interpolated into a command string
-- id: bad
+bad:
   exec:
     command: ["echo", "${{ tasks.fetch_comment.output }}"]
 
 # ✅ tainted output passed as data
-- id: good
+good:
   exec:
     command: tee
     args: ["/tmp/comment.txt"]

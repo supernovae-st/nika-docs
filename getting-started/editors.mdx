@@ -84,10 +84,11 @@ zero editor configuration:
 ```yaml
 # yaml-language-server: $schema=https://nika.sh/spec/v1/workflow.schema.json
 nika: v1
-workflow: hello
+workflow:
+  id: hello
 
 tasks:
-  - id: greet
+  greet:
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local · zero key
       prompt: "..."
@@ -316,7 +317,7 @@ line in your settings until the upstream icons land:
 | JSON Schema (yaml-language-server) | shipped | `nika spec --schema` + public schema URL |
 | `nika lsp` L4 crate | shipped | `nika lsp` (hover · completion · definition · symbols · diagnostics) |
 | VS Code / Cursor extension | shipped | Marketplace + OpenVSX |
-| MCP agent oracle | shipped, read-only | `nika mcp` (8 tools: check · explain · the authoring surface) |
+| MCP agent oracle | shipped, read-only | `nika mcp` (9 tools: check · explain · the authoring surface) |
 | Zed / Neovim native integrations | 🧭 planned | Community + v1.0 |
 
 ## Next

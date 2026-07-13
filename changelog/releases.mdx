@@ -197,7 +197,7 @@ Between release tags, progress lands on `main` as:
   `/v1/audio/speech` wire · a real deterministic WAV under mock). Every
   run now writes `.nika/traces/` by default and `--task` scopes execution
   to one upstream cone. The catalog rides the wire (`catalog`/`tools
-  --json` plus their MCP twins — 8 read-only tools on protocol
+  --json` plus their MCP twins — the read-only tool set on protocol
   `2026-07-28`), `cost_usd` rides `task_completed` without ever faking a
   zero, Hugging Face and NVIDIA join the 16-provider canonical catalog,
   and `nika doctor --ping` actually probes the local ports.

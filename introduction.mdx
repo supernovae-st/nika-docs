@@ -39,17 +39,18 @@ writing a file, calling GitHub are all **tools** under `invoke`.
 
 ```yaml workflow.nika.yaml
 nika: v1
-workflow: summarize
+workflow:
+  id: summarize
 
 tasks:
-  - id: read
+  read:
     invoke:
       tool: nika:fetch
       args:
         url: https://example.com/post.md
         mode: text
 
-  - id: summarize
+  summarize:
     depends_on: [read]
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local · zero key
@@ -57,7 +58,7 @@ tasks:
         Summarize in one sentence:
         ${{ tasks.read.output }}
 
-  - id: save
+  save:
     depends_on: [summarize]
     invoke:
       tool: nika:write
