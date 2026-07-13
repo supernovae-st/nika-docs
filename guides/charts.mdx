@@ -14,12 +14,13 @@ receipts.
 
 ```yaml
 nika: v1
-workflow: spend-report
+workflow:
+  id: spend-report
 permits:
   tools: ["nika:chart"]
   fs: { write: ["out/**"] }
 tasks:
-  - id: draw
+  draw:
     invoke:
       tool: "nika:chart"
       args:

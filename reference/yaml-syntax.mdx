@@ -15,8 +15,9 @@ icon: "file-code"
 
 ```yaml the envelope · a skeleton, not a runnable file
 nika: v1                     # required · language + contract version (single marker)
-workflow: <identifier>       # required · kebab-case · unique within file
-description: <string>        # optional · human-readable
+workflow:                    # required · the identity object
+  id: <identifier>           #   required · kebab-case · unique within file
+  description: <string>      #   optional · human-readable
 
 model: <provider>/<name>     # optional · default model for infer/agent tasks
 
@@ -24,7 +25,7 @@ vars: { ... }                # optional · inputs (typed or untyped) · ${{ vars
 env: { ... }                 # optional · non-sensitive config · ${{ env.* }}
 secrets: { ... }             # optional · vault/env/file references · ${{ secrets.* }}
 
-tasks: [ ... ]               # required · non-empty
+tasks: { ... }               # required · non-empty MAP · the key IS the task id
 
 outputs: { ... }             # optional · the workflow's return value
 ```
@@ -32,7 +33,7 @@ outputs: { ... }             # optional · the workflow's return value
 ## A task
 
 ```yaml
-- id: <identifier>           # required, unique within workflow (snake_case)
+<identifier>:                # the map KEY is the identity (snake_case · unique)
 
   depends_on: [<id>, ...]    # optional DAG edge
   when: <expression>         # optional gate · ${{ }} CEL boolean OR literal true/false
@@ -69,7 +70,7 @@ provider HTTP deadline**: `timeout: "7m"` gives the provider round-trip those
 seven minutes — no internal HTTP default undercuts the declared budget.
 
 ```yaml
-- id: deep_review
+deep_review:
   timeout: "7m"                # the whole task AND the provider deadline
   infer:
     model: ollama/qwen3:8b     # a thinking model legitimately needs minutes

@@ -19,14 +19,15 @@ draws its own receipts.
 
 ```yaml
 nika: v1
-workflow: styled-hero
+workflow:
+  id: styled-hero
 permits:
   tools: ["nika:image_generate", "nika:image_fx"]
   fs:
     read: ["out/**"]
     write: ["out/**"]
 tasks:
-  - id: generate
+  generate:
     invoke:
       tool: "nika:image_generate"
       args:
@@ -34,7 +35,7 @@ tasks:
         prompt: "a monarch butterfly over a nebula"
         output_dir: out
         format: png
-  - id: style
+  style:
     depends_on: [generate]
     invoke:
       tool: "nika:image_fx"
@@ -109,7 +110,7 @@ One recipe, one hash, forever. Batch-style a hundred campaign images with
 `for_each` and every one of them is a receipt.
 
 ```yaml
-  - id: variants
+  variants:
     depends_on: [generate]
     for_each: ["bw", "gameboy", "cga"]
     invoke:

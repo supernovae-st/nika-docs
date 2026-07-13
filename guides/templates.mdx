@@ -44,8 +44,9 @@ The default shape for « take real data, produce words, save them ».
 {/* template:begin chain.nika.yaml */}
 ```yaml chain.nika.yaml
 nika: v1
-workflow: chain-template            # SLOT: kebab-case workflow id
-description: "gather → think → persist"   # SLOT: one honest sentence
+workflow:
+  id: chain-template            # SLOT: kebab-case workflow id
+  description: "gather → think → persist"   # SLOT: one honest sentence
 
 model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
@@ -53,19 +54,19 @@ vars:
   source: "./input.txt"             # SLOT: your inputs · typed where required
 
 tasks:
-  - id: gather
+  gather:
     invoke:                         # SLOT: the fact source · nika:read / nika:fetch / exec
       tool: "nika:read"
       args: { path: "${{ vars.source }}" }
 
-  - id: think
+  think:
     depends_on: [gather]
     infer:
       prompt: |
         # SLOT: the one model job · interpolate ${{ tasks.gather.output }}
         Summarize · ${{ tasks.gather.output }}
 
-  - id: persist
+  persist:
     depends_on: [think]
     invoke:
       tool: "nika:write"
@@ -85,8 +86,9 @@ Watch something, act only when a condition holds (often zero model calls).
 {/* template:begin gate-and-act.nika.yaml */}
 ```yaml gate-and-act.nika.yaml
 nika: v1
-workflow: gate-and-act-template     # SLOT: kebab-case workflow id
-description: "watch a value · act only when the condition holds"   # SLOT
+workflow:
+  id: gate-and-act-template     # SLOT: kebab-case workflow id
+  description: "watch a value · act only when the condition holds"   # SLOT
 
 vars:
   source_url: "https://api.example.com/v1/value"   # SLOT: what to watch
@@ -101,7 +103,7 @@ secrets:
         host_from_self: true        # the secret value IS the destination URL
 
 tasks:
-  - id: check
+  check:
     invoke:
       tool: "nika:fetch"
       args:
@@ -111,7 +113,7 @@ tasks:
     output:
       value: ".value"               # SLOT: the jq path to the watched field
 
-  - id: act
+  act:
     depends_on: [check]
     when: ${{ tasks.check.value > vars.threshold }}   # SLOT: the CEL condition
     invoke:
@@ -134,8 +136,9 @@ The same work for every item of a runtime collection, fully leashed.
 {/* template:begin fanout.nika.yaml */}
 ```yaml fanout.nika.yaml
 nika: v1
-workflow: fanout-template           # SLOT: kebab-case workflow id
-description: "discover N items · process in parallel · merge"   # SLOT
+workflow:
+  id: fanout-template           # SLOT: kebab-case workflow id
+  description: "discover N items · process in parallel · merge"   # SLOT
 
 model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
@@ -143,12 +146,12 @@ vars:
   collection_source: "./items"      # SLOT: where the collection comes from
 
 tasks:
-  - id: discover
+  discover:
     invoke:                         # SLOT: glob / fetch sitemap / exec + jq split
       tool: "nika:glob"
       args: { pattern: "${{ vars.collection_source }}/*.md" }
 
-  - id: process
+  process:
     depends_on: [discover]
     for_each: ${{ tasks.discover.output }}
     max_parallel: 4                 # SLOT: the polite ceiling
@@ -164,7 +167,7 @@ tasks:
       prompt: |
         Process this item · ${{ item }}
 
-  - id: survivors
+  survivors:
     depends_on: [process]
     invoke:                         # the null-aware fan-in · order preserved
       tool: "nika:jq"
@@ -173,7 +176,7 @@ tasks:
         expression: "[ .[] | select(. != null) ]"
 
 
-  - id: merge
+  merge:
     depends_on: [survivors]
     infer:
       prompt: |
@@ -192,8 +195,9 @@ Incremental runs: only what changed since last time, survive bad input.
 {/* template:begin etl-state.nika.yaml */}
 ```yaml etl-state.nika.yaml
 nika: v1
-workflow: etl-state-template        # SLOT: kebab-case workflow id
-description: "read state · fetch fresh · diff · process the delta · save state"   # SLOT
+workflow:
+  id: etl-state-template        # SLOT: kebab-case workflow id
+  description: "read state · fetch fresh · diff · process the delta · save state"   # SLOT
 
 vars:
   source_url: "https://api.example.com/v1/records"   # SLOT: the data source
@@ -201,12 +205,12 @@ vars:
 
 tasks:
   # First run · no state file yet · recover to an empty list.
-  - id: empty
+  empty:
     invoke:
       tool: "nika:jq"
       args: { input: [], expression: "." }
 
-  - id: previous
+  previous:
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.state_path }}" }
@@ -214,7 +218,7 @@ tasks:
       on_codes: [NIKA-BUILTIN-READ-001]   # not-found ONLY · a permission error still fails loudly
       recover: ${{ tasks.empty.output }}
 
-  - id: fresh
+  fresh:
     invoke:
       tool: "nika:fetch"            # SLOT: fetch / read / exec · the fresh data
       args:
@@ -222,7 +226,7 @@ tasks:
         mode: jq
         jq: ".records"
 
-  - id: delta
+  delta:
     depends_on: [previous, fresh]
     invoke:
       tool: "nika:json_diff"        # RFC 6902 · empty patch = nothing new
@@ -230,7 +234,7 @@ tasks:
         before: "${{ tasks.previous.output }}"
         after: "${{ tasks.fresh.output }}"
 
-  - id: process
+  process:
     depends_on: [delta]
     when: ${{ size(tasks.delta.output) > 0 }}
     invoke:
@@ -239,7 +243,7 @@ tasks:
         input: "${{ tasks.delta.output }}"
         expression: "length"
 
-  - id: save_state
+  save_state:
     depends_on: [fresh]
     invoke:
       tool: "nika:write"
@@ -265,8 +269,9 @@ validate the typed result. Never ship an unleashed agent.
 {/* template:begin agent-loop.nika.yaml */}
 ```yaml agent-loop.nika.yaml
 nika: v1
-workflow: agent-loop-template       # SLOT: kebab-case workflow id
-description: "plan → budgeted agent → typed result"   # SLOT
+workflow:
+  id: agent-loop-template       # SLOT: kebab-case workflow id
+  description: "plan → budgeted agent → typed result"   # SLOT
 
 model: ollama/qwen3.5:4b           # SLOT: a tool-calling model · local by default
 
@@ -277,7 +282,7 @@ vars:
     description: "What the agent must accomplish"   # SLOT
 
 tasks:
-  - id: plan
+  plan:
     infer:
       prompt: "Break '${{ vars.goal }}' into at most 4 concrete steps."   # SLOT
       schema:
@@ -286,7 +291,7 @@ tasks:
         properties:
           steps: { type: array, items: { type: string } }
 
-  - id: execute
+  execute:
     depends_on: [plan]
     agent:
       system: "Work the plan step by step. Call nika:done when finished."   # SLOT
@@ -302,7 +307,7 @@ tasks:
         properties:
           findings: { type: array, items: { type: string } }
 
-  - id: confirm
+  confirm:
     depends_on: [execute]
     invoke:
       tool: "nika:assert"
@@ -326,8 +331,9 @@ Anything irreversible: parallel gates, a hard assert, a human GO, and an
 {/* template:begin human-gated-ship.nika.yaml */}
 ```yaml human-gated-ship.nika.yaml
 nika: v1
-workflow: human-gated-ship-template  # SLOT: kebab-case workflow id
-description: "verify in parallel · human GO · act · record"   # SLOT
+workflow:
+  id: human-gated-ship-template  # SLOT: kebab-case workflow id
+  description: "verify in parallel · human GO · act · record"   # SLOT
 
 permits:                            # SLOT: the blast radius · default-deny once present
   exec: ["echo"]                    # SLOT: ONLY the programs the gates + act run (argv form)
@@ -344,17 +350,17 @@ secrets:
 
 tasks:
   # ── the verification wave · all checks run in parallel ──
-  - id: check_a
+  check_a:
     exec:
       command: ["echo", "ok"]        # SLOT: gate 1 (argv form · injection-safe)
       capture: structured
 
-  - id: check_b
+  check_b:
     exec:
       command: ["echo", "ok"]        # SLOT: gate 2
       capture: structured
 
-  - id: gates
+  gates:
     depends_on: [check_a, check_b]
     invoke:
       tool: "nika:assert"
@@ -362,7 +368,7 @@ tasks:
         condition: "${{ tasks.check_a.output.exit_code == 0 && tasks.check_b.output.exit_code == 0 }}"
         message: "A gate is RED: refusing to proceed"   # SLOT
 
-  - id: human
+  human:
     depends_on: [gates]
     invoke:
       tool: "nika:prompt"
@@ -370,7 +376,7 @@ tasks:
         message: "All gates GREEN. Proceed?"   # SLOT: the decision, fully informed
         default: false
 
-  - id: act
+  act:
     depends_on: [human]
     when: ${{ tasks.human.output == true }}
     exec:
@@ -379,7 +385,7 @@ tasks:
       # never `capture: structured` on the irreversible step (exit codes
       # would become data and a red ship would read as success)
 
-  - id: record
+  record:
     depends_on: [act]
     when: true                      # the always-pattern · runs on success, failure, OR refusal
     invoke:
@@ -402,8 +408,9 @@ Understand a site from a URL: bounded `traverse:` crawl → one typed brief → 
 {/* template:begin website-brief.nika.yaml */}
 ```yaml website-brief.nika.yaml
 nika: v1
-workflow: website-brief-template    # SLOT: kebab-case workflow id
-description: "crawl → brief → persist"   # SLOT: one honest sentence
+workflow:
+  id: website-brief-template    # SLOT: kebab-case workflow id
+  description: "crawl → brief → persist"   # SLOT: one honest sentence
 
 model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
 
@@ -412,14 +419,14 @@ vars:
   out_path: "./out/brief.json"      # SLOT: where the brief lands
 
 tasks:
-  - id: crawl_site
+  crawl_site:
     invoke:
       tool: "nika:fetch"
       args:
         url: "${{ vars.site_url }}"
         traverse: { max_pages: 5 }  # SLOT: crawl bound · 1..=25 (robots honored)
 
-  - id: brief
+  brief:
     depends_on: [crawl_site]
     infer:
       max_tokens: 1200
@@ -440,7 +447,7 @@ tasks:
           assets: { type: array, items: { type: string } }
         required: [domain, theme, audience, colors, assets]
 
-  - id: persist
+  persist:
     depends_on: [brief]
     invoke:
       tool: "nika:write"
@@ -461,8 +468,9 @@ Generate assets from a brief: typed creative direction → `nika:image_generate`
 {/* template:begin media-asset-pack.nika.yaml */}
 ```yaml media-asset-pack.nika.yaml
 nika: v1
-workflow: media-asset-pack-template # SLOT: kebab-case workflow id
-description: "brief → render → manifest"  # SLOT: one honest sentence
+workflow:
+  id: media-asset-pack-template # SLOT: kebab-case workflow id
+  description: "brief → render → manifest"  # SLOT: one honest sentence
 
 model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
 
@@ -471,7 +479,7 @@ vars:
   out_dir: "./out/assets"           # SLOT: where assets land
 
 tasks:
-  - id: brief
+  brief:
     infer:
       max_tokens: 600
       prompt: |
@@ -485,7 +493,7 @@ tasks:
           image_prompt: { type: string }
         required: [image_prompt]
 
-  - id: render
+  render:
     depends_on: [brief]
     invoke:
       tool: "nika:image_generate"
@@ -495,7 +503,7 @@ tasks:
         output_dir: "${{ vars.out_dir }}"
         filename_prefix: "asset"    # SLOT: filename stem
 
-  - id: manifest
+  manifest:
     depends_on: [brief, render]
     invoke:
       tool: "nika:jq"
@@ -505,7 +513,7 @@ tasks:
           - "${{ tasks.brief.output }}"
           - "${{ tasks.render.output }}"
 
-  - id: persist
+  persist:
     depends_on: [manifest]
     invoke:
       tool: "nika:write"
@@ -526,8 +534,9 @@ Call a product API natively: `multipart:` upload (masked secrets header) → JSO
 {/* template:begin api-upload-and-create.nika.yaml */}
 ```yaml api-upload-and-create.nika.yaml
 nika: v1
-workflow: api-upload-and-create-template  # SLOT: kebab-case workflow id
-description: "upload → create → result"   # SLOT: one honest sentence
+workflow:
+  id: api-upload-and-create-template  # SLOT: kebab-case workflow id
+  description: "upload → create → result"   # SLOT: one honest sentence
 
 model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
 
@@ -544,7 +553,7 @@ secrets:
       - to: "outputs"               # the return value derives from the authed response
 
 tasks:
-  - id: upload
+  upload:
     invoke:
       tool: "nika:fetch"
       args:
@@ -558,7 +567,7 @@ tasks:
         mode: jq
         jq: ".url"                  # SLOT: where the response carries the asset URL
 
-  - id: create
+  create:
     depends_on: [upload]
     invoke:
       tool: "nika:fetch"
@@ -591,8 +600,9 @@ The audited-ops shape: read a system's real state via a pinned CLI (argv-array e
 {/* template:begin docker-report.nika.yaml */}
 ```yaml docker-report.nika.yaml
 nika: v1
-workflow: docker-report-template    # SLOT: kebab-case workflow id
-description: "read the daemon's state · explain it · keep the report"   # SLOT
+workflow:
+  id: docker-report-template    # SLOT: kebab-case workflow id
+  description: "read the daemon's state · explain it · keep the report"   # SLOT
 
 model: ollama/qwen3.5:4b            # SLOT: local-first · mock/echo for offline rehearsal
 
@@ -608,16 +618,16 @@ permits:
 tasks:
   # The reads run IN PARALLEL (no depends_on between them) — the
   # scheduler proves it from the DAG, nobody orders it.
-  - id: ps
+  ps:
     exec:
       # SLOT: argv ARRAY form — one program, exactly these arguments
       command: ["docker", "ps", "--all", "--format", "{{.Names}}\t{{.Status}}\t{{.Image}}"]
 
-  - id: df
+  df:
     exec:
       command: ["docker", "system", "df"]   # SLOT: the second read (drop the task if one suffices)
 
-  - id: diagnose
+  diagnose:
     depends_on: [ps, df]
     infer:
       # SLOT: what should the model DO with the readings?
@@ -633,7 +643,7 @@ tasks:
         usage needs attention. Plain prose, no preamble.
       max_tokens: 600               # SLOT: the spend ceiling for this call
 
-  - id: keep
+  keep:
     depends_on: [diagnose]
     invoke:
       tool: "nika:write"

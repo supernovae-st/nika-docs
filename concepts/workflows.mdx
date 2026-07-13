@@ -24,11 +24,12 @@ the dependency graph allows.
 
 ```yaml
 nika: v1
-workflow: hello
-description: "A minimal workflow."
+workflow:
+  id: hello
+  description: "A minimal workflow."
 
 tasks:
-  - id: greet
+  greet:
     infer:
       prompt: "Say hi in one line."
       model: ollama/<model>      # <provider>/<name>
@@ -119,19 +120,19 @@ allows.
 
 ```yaml
 tasks:
-  - id: fetch_data
+  fetch_data:
     invoke:
       tool: nika:fetch
       args:
         url: https://example.com/data.json
 
-  - id: analyze
+  analyze:
     depends_on: [fetch_data]
     infer:
       model: ollama/<model>      # <provider>/<name>
       prompt: "${{ tasks.fetch_data.output }}"
 
-  - id: notify
+  notify:
     depends_on: [analyze]
     exec:
       command: ["echo", "${{ tasks.analyze.output }}"]
@@ -142,7 +143,7 @@ Fan-out over a collection (`files` here is a jq
 `output: { files: 'split("\n")' }`):
 
 ```yaml
-- id: analyze_each
+analyze_each:
   depends_on: [list_files]
   for_each: "${{ tasks.list_files.output.files }}"
   infer:
@@ -154,7 +155,7 @@ Conditional execution: `when:` is the field (a CEL boolean, or the
 literal `true` for the always-pattern):
 
 ```yaml
-- id: deploy
+deploy:
   depends_on: [tests]
   when: "${{ tasks.tests.output.passed == true }}"
   exec:
@@ -165,7 +166,7 @@ Retry on failure: `retry:` is the one shape (and `on_error:` catches
 what retries can't fix):
 
 ```yaml
-- id: flaky_api
+flaky_api:
   invoke:
     tool: nika:fetch
     args:
@@ -192,8 +193,9 @@ workflows (`nika.run_workflow` over MCP).
 
 ```yaml research-brief.nika.yaml
 nika: v1
-workflow: research-brief
-description: "Bullet-point brief on a topic supplied at launch."
+workflow:
+  id: research-brief
+  description: "Bullet-point brief on a topic supplied at launch."
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 
@@ -207,7 +209,7 @@ vars:
     default: 3
 
 tasks:
-  - id: brief
+  brief:
     infer:
       prompt: "Write ${{ vars.bullets }} bullet points on ${{ vars.topic }}."
 

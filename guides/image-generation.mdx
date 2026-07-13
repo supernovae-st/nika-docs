@@ -40,12 +40,13 @@ export NIKA_IMAGE_LOCAL_URL=http://localhost:1234
 ```
 
 ```yaml nika: v1
-workflow: og-hero-sovereign
+workflow:
+  id: og-hero-sovereign
 permits:
   fs: { write: ["./assets/**"] }
   tools: ["nika:image_generate"]
 tasks:
-  - id: hero
+  hero:
     invoke:
       tool: "nika:image_generate"
       args:
@@ -131,13 +132,14 @@ never an estimate dressed as truth.
 **An LLM writes the brief, another provider renders it:**
 
 ```yaml nika: v1
-workflow: brief-to-image
+workflow:
+  id: brief-to-image
 model: gemini/gemini-2.5-flash
 permits:
   fs: { write: ["./out/**"] }
   tools: ["nika:image_generate"]
 tasks:
-  - id: brief
+  brief:
     infer:
       prompt: "Write a vivid one-sentence OG-image brief for a post about local-first AI. Pick the ratio."
       schema:
@@ -146,7 +148,7 @@ tasks:
         properties:
           brief: { type: string }
           aspect_ratio: { type: string, enum: ["1:1", "16:9", "4:3"] }
-  - id: render
+  render:
     depends_on: [brief]
     invoke:
       tool: "nika:image_generate"
@@ -160,7 +162,7 @@ tasks:
 **Fan out one hero across locales (concurrent, one output dir):**
 
 ```yaml
-  - id: hero
+  hero:
     for_each: ${{ vars.locales }}       # ["fr", "es", "ja"]
     max_parallel: 3
     with: { locale: ${{ item }} }
@@ -176,7 +178,7 @@ tasks:
 **Let an agent decide the arguments** (the model reads the tool definition):
 
 ```yaml
-  - id: designer
+  designer:
     agent:
       prompt: >
         Generate exactly one minimalist butterfly logo using the image tool
@@ -189,7 +191,7 @@ tasks:
 **Retry transient failures** (a local server still loading its model):
 
 ```yaml
-  - id: render
+  render:
     retry:
       max_attempts: 3
       on_codes: ["NIKA-BUILTIN-IMAGE_GENERATE-003"]
@@ -212,7 +214,7 @@ image-native world). The full comparison lives in the
 An input image plus an instruction — the same builtin, one arg away:
 
 ```yaml
-  - id: night
+  night:
     invoke:
       tool: "nika:image_generate"
       args:

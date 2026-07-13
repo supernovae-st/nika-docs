@@ -38,7 +38,7 @@ a whole workflow is one file
   workflow: hello
   model: mock/echo
   tasks:
-    - id: greet
+    greet:
       infer: { prompt: "say hello to the operator", max_tokens: 50 }
 
 start here (offline · zero keys)
@@ -89,7 +89,7 @@ configs, no editors wired — the worst case, and every line hands over:
 ⚠ config     none — built-in defaults
 ✔ lsp        available via `nika lsp` (editor language server)
 ✔ traces     keep 10 per workflow · max age 30d · budget 256MB (NIKA_TRACE_KEEP · NIKA_TRACE_MAX_AGE_DAYS · NIKA_TRACE_BUDGET_MB)
-✔ mcp        available via `nika mcp` (8 read-only tools · nika_check through nika_tools)
+✔ mcp        available via `nika mcp` (9 read-only tools · nika_check through nika_tools)
 ⚠ agent      cursor not wired
   fix: nika wire cursor
 ⚠ agent      claude not wired

@@ -41,16 +41,17 @@ references servers by id: Nika handles the rest.
 <CodeGroup>
 ```yaml workflow.nika.yaml
 nika: v1
-workflow: scrape-and-summarise
+workflow:
+  id: scrape-and-summarise
 
 tasks:
-  - id: crawl
+  crawl:
     invoke:
       tool: "mcp:firecrawl/scrape"   # mcp:<server>/<tool> · server id from the catalog below
       args:
         url: https://example.com
 
-  - id: summarise
+  summarise:
     depends_on: [crawl]
     infer:
       model: anthropic/claude-sonnet-4-6   # <provider>/<name>
@@ -69,7 +70,7 @@ nika run workflow.nika.yaml
 <Note>
   Verb `invoke:` is live in v{STATUS.version}. The Nika MCP catalog here is
   about workflows calling external MCP tools; Nika's own agent-facing MCP
-  server remains read-only (8 tools — `nika_check` · `nika_explain` ·
+  server remains read-only (9 tools — `nika_check` · `nika_explain` ·
   the authoring surface).
 </Note>
 

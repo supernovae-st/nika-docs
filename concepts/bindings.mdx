@@ -157,7 +157,7 @@ through the `nika:jq` builtin. Two layers, one job each:
 
 ```yaml
 # CEL decides · jq transforms
-- id: digest
+digest:
   when: ${{ size(tasks.fetch.output) > 0 }}      # CEL · condition
   invoke:
     tool: "nika:jq"

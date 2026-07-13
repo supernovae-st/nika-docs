@@ -107,7 +107,7 @@ When a task needs more than the default, the task's own `timeout:` governs
 the provider deadline directly:
 
 ```yaml
-- id: deep_review
+deep_review:
   timeout: "7m"                # Go-duration · bounds the task AND the provider call
   infer:
     prompt: "Review this diff…"

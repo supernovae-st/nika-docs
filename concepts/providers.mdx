@@ -60,7 +60,7 @@ Switching provider is **one line** in YAML:
 
 ```yaml
 tasks:
-  - id: first
+  first:
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · swap to mistral/… · anthropic/… · gemini/…
       prompt: "Hello."
@@ -142,7 +142,7 @@ When a provider fails, Nika can route to a fallback:
 
 ```yaml target design · a future minor
 tasks:
-  - id: primary
+  primary:
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local first
       prompt: "..."

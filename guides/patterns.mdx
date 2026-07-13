@@ -31,11 +31,11 @@ a model can do: judgment, language, synthesis.
 
 ```yaml
 # ✅ jq filters · the model only explains what survived
-- id: urgent
+urgent:
   invoke:
     tool: "nika:jq"
     args: { input: "${{ tasks.triage.output.tickets }}", expression: 'map(select(.urgency == "critical"))' }
-- id: explain
+explain:
   depends_on: [urgent]
   when: ${{ size(tasks.urgent.output) > 0 }}
   infer: { prompt: "Explain these critical tickets · ${{ tasks.urgent.output }}" }
@@ -199,8 +199,9 @@ workflows replayable.
 
 ```yaml the shape · a skeleton, not a runnable file
 nika: v1                      # the contract · one line · forever
-workflow: kebab-case-name     # resource name
-description: "…"              # one honest sentence
+workflow:
+  id: kebab-case-name     # resource name
+  description: "…"              # one honest sentence
 
 model: mock/echo              # mock-first · sovereignty is one line away
 
@@ -229,7 +230,7 @@ improvised.
 turns polling into typed, bounded retry:
 
 ```yaml
-- id: await_export
+await_export:
   invoke:
     tool: "nika:fetch"
     args:
@@ -251,7 +252,7 @@ Two exclusive `when:` branches, one consumer. A skipped branch's output is
 **defined `null`** (never an error), so the join is one jq filter:
 
 ```yaml
-- id: pick
+pick:
   depends_on: [build_prod, build_dev]
   invoke:
     tool: nika:jq
@@ -274,7 +275,7 @@ what it is:
 </video>
 
 ```yaml
-- id: scrape_all
+scrape_all:
   for_each: ${{ tasks.discover.pages }}
   max_parallel: 5
   fail_fast: false
@@ -283,7 +284,7 @@ what it is:
     tool: "nika:fetch"
     args: { url: "${{ item }}", mode: article }
 
-- id: digest
+digest:
   depends_on: [scrape_all]
   invoke:
     tool: nika:jq
@@ -298,14 +299,14 @@ A matrix is precomputed data, not control flow. Build the product with jq,
 fan out over it:
 
 ```yaml
-- id: build_matrix
+build_matrix:
   invoke:
     tool: nika:jq
     args:
       input: { os: ["linux", "macos"], ver: ["18", "20", "22"] }
       expression: "[ .os[] as $o | .ver[] as $v | {os: $o, ver: $v} ]"
 
-- id: test_all
+test_all:
   depends_on: [build_matrix]
   for_each: ${{ tasks.build_matrix.output }}
   max_parallel: 3

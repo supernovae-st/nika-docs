@@ -12,21 +12,22 @@ real output from this workflow:
 
 ```yaml standup-digest.nika.yaml
 nika: v1
-workflow: standup-digest
-description: "Pull commits and tickets in parallel, then digest."
+workflow:
+  id: standup-digest
+  description: "Pull commits and tickets in parallel, then digest."
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 
 tasks:
-  - id: commits
+  commits:
     exec:
       shell: "sleep 0.4 && git log --oneline -5 2>/dev/null || printf 'feat: resume'"
 
-  - id: tickets
+  tickets:
     exec:
       shell: "sleep 0.3 && printf 'NIKA-42 open'"
 
-  - id: digest
+  digest:
     depends_on: [commits, tickets]
     infer:
       prompt: "Digest commits ${{ tasks.commits.output }} and tickets ${{ tasks.tickets.output }}"
