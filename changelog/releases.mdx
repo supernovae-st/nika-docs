@@ -43,6 +43,18 @@ Between release tags, progress lands on `main` as:
 
 ## History
 
+<Update label="v0.101.0" description="2026-07-13 · the sovereign lane ships whole" tags={["release", "sovereign", "models"]}>
+  Every release binary now carries `local-infer` — `nika model pull` →
+  `nika model serve` → workflow `infer` against your own machine: no
+  cloud, no external daemon, no build-from-source wall (#518, the
+  release ruling, executed). CPU on every target on purpose (darwin
+  included) until candle's quantized rms-norm Metal kernel is fixed.
+  The release funnel now pins the teaching both ways: a shipped binary
+  must never utter « built without local inference ».
+
+  [Engine release](https://github.com/supernovae-st/nika/releases/tag/v0.101.0)
+</Update>
+
 <Update label="v0.100.0" description="2026-07-12 · the terminal sings · the models come home · the kit rides three surfaces" tags={["release", "cli", "sovereign", "agents"]}>
   The terminal learns to sing: a **verb band** colors every task by its
   verb, the spinner is a real live probe, and `nika run` paints the DAG
