@@ -154,7 +154,7 @@ tasks:
   ship:
     depends_on: [hold]
     exec:
-      command: ["./scripts/release.sh", "${{ vars.version }}"]
+      command: ["./scripts/release.sh", "${{ vars.version }}"]   # argv: the interpolation cannot break out
       capture: structured
     timeout: "30m"
 

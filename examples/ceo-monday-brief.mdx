@@ -87,7 +87,7 @@ tasks:
   # ── branch 2 · engineering pulse ──
   pulse:
     exec:
-      command: ["git", "shortlog", "-sn", "--since='1", "week", "ago'"]
+      command: ["git", "shortlog", "-sn", "--since=1 week ago"]
 
   # ── branch 3 · the numbers ──
   kpi_raw:
@@ -135,7 +135,7 @@ tasks:
       tool: "nika:date"
       args: { op: now }
     output:
-      day: ".iso[:10]"               # YYYY-MM-DD from the ISO timestamp
+      day: ".[:10]"                  # nika:date returns the ISO string itself · slice YYYY-MM-DD
 
   save:
     depends_on: [brief, stamp]

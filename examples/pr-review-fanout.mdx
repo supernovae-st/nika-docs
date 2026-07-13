@@ -94,7 +94,7 @@ tasks:
     on_error:
       recover: null                    # a budget-exhausted review yields null · the swarm lives
     agent:
-      system: "You are a precise code reviewer. Read the file, then report findings."
+      system: "You are a precise code reviewer. Read the file, then finish with ONLY the schema'd object ({file, findings: [{severity, message, line}]} · severity exactly one of blocker|high|med|low), then call nika:done."
       prompt: "Review ${{ item }} · bugs first, then risky patterns. Read it before judging."
       tools:
         - "nika:read"                  # read-only swarm · least privilege
@@ -122,7 +122,9 @@ tasks:
       tool: "nika:jq"
       args:
         input: "${{ tasks.reviews.output }}"
-        expression: 'map(select(. != null)) | map(.findings[] + {file: .file}) | sort_by(.severity)'
+        # `. // []` · a clean diff SKIPS the swarm (empty for_each → null
+        # upstream) and the fan-in must survive its own good news.
+        expression: '(. // []) | map(select(. != null)) | map(.findings[] + {file: .file}) | sort_by(.severity)'
 
   summary:
     depends_on: [merged, todo_sweep]

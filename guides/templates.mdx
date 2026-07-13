@@ -51,7 +51,8 @@ workflow:
 model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
 vars:
-  source: "./input.txt"             # SLOT: your inputs · typed where required
+  source: "./README.md"             # SLOT: your input — README.md exists in ANY repo, so the
+                                    # skeleton runs green BEFORE you point it at real data
 
 tasks:
   gather:
@@ -112,9 +113,14 @@ tasks:
         jq: "."
     output:
       value: ".value"               # SLOT: the jq path to the watched field
+    on_error:
+      # Offline rehearsal · a sample UNDER the threshold — the gate stays
+      # closed, the skeleton runs green before you wire the real source.
+      recover: { value: 42 }
 
   act:
     depends_on: [check]
+    # when: is a SKIP gate — routing, not failure (a skipped task is not an error)
     when: ${{ tasks.check.value > vars.threshold }}   # SLOT: the CEL condition
     invoke:
       tool: "nika:notify"           # SLOT: the action · notify / write / exec
@@ -173,8 +179,9 @@ tasks:
       tool: "nika:jq"
       args:
         input: ${{ tasks.process.output }}
-        expression: "[ .[] | select(. != null) ]"
-
+        # `. // []` · an EMPTY discovery skips the whole for_each (null
+        # upstream) — the fan-in must survive its own quiet day.
+        expression: "(. // []) | [ .[] | select(. != null) ]"
 
   merge:
     depends_on: [survivors]
@@ -225,6 +232,8 @@ tasks:
         url: "${{ vars.source_url }}"
         mode: jq
         jq: ".records"
+    on_error:
+      recover: []                   # offline rehearsal · an empty batch, the delta stays quiet
 
   delta:
     depends_on: [previous, fresh]
@@ -294,7 +303,10 @@ tasks:
   execute:
     depends_on: [plan]
     agent:
-      system: "Work the plan step by step. Call nika:done when finished."   # SLOT
+      # The done-contract belongs IN the prompt: the final message must
+      # carry the schema'd shape, so SAY so — a live model that is not
+      # told finishes in prose and fails NIKA-INFER-002 (proven on GPT).
+      system: "Work the plan step by step. When finished, reply with ONLY your final result as an object carrying a `findings` array (one short string each), then call nika:done."   # SLOT
       prompt: "Plan · ${{ tasks.plan.output.steps }}"
       tools:                        # SLOT: the MINIMUM grant for the job
         - "nika:read"
@@ -371,6 +383,8 @@ tasks:
   human:
     depends_on: [gates]
     invoke:
+      # the prompt PAUSES the run (exit 4 · not a failure) — answer and resume:
+      #   nika run --resume <trace> --answer human=yes
       tool: "nika:prompt"
       args:
         message: "All gates GREEN. Proceed?"   # SLOT: the decision, fully informed
