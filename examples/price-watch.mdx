@@ -60,6 +60,10 @@ tasks:
     output:                           # named jq bindings over the raw response
       price: ".price"
       name: ".name"
+    on_error:
+      # Offline rehearsal · a sample ABOVE the target — the gate below
+      # stays closed and the dry run ends green with the alert skipped.
+      recover: { price: 949, name: "MacBook Air (offline sample)" }
 
   alert:
     depends_on: [check]

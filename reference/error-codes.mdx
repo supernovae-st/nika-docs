@@ -90,6 +90,10 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-PARSE-017` | duplicate mapping key — no silent last-wins | `validation_error` | false |
 | `NIKA-PARSE-018` | missing required field in a verb body (infer.prompt · exec.command · invoke.tool) | `validation_error` | false |
 | `NIKA-PARSE-019` | generic structural validation — wrong YAML shape for a field | `validation_error` | false |
+| `NIKA-PARSE-020` | workflow: is a scalar — the envelope became an object (workflow: then id: <value>) | `validation_error` | false |
+| `NIKA-PARSE-021` | top-level description: — it moved into workflow.description | `validation_error` | false |
+| `NIKA-PARSE-022` | tasks: is a sequence — it became a map keyed by task id (drop `- id:`, the key IS the identity) | `validation_error` | false |
+| `NIKA-PARSE-023` | a task carries an id: field — the map key is the identity, the field is gone | `validation_error` | false |
 | `NIKA-DAG-001` | cycle in depends_on (incl. self-dependency) | `validation_error` | false |
 | `NIKA-DAG-002` | depends_on references an undeclared task | `validation_error` | false |
 | `NIKA-DAG-003` | a tasks.X reference with no declared edge | `validation_error` | false |
@@ -102,6 +106,7 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-VAR-006` | expression type error at evaluation — cross-type compare · non-boolean when: value · for_each over a non-array | `variable_error` | false |
 | `NIKA-VAR-007` | bytes value substituted into a string position | `variable_error` | false |
 | `NIKA-VAR-008` | unclosed $&#123;&#123; opener | `validation_error` | false |
+| `NIKA-VAR-020` | bare tasks.X is the envelope, not a value — the projection set (.output/.status/.error/.duration_ms) is closed and required (04 §namespaces · 0.103 · #75 D2) | `validation_error` | false |
 | `NIKA-VAR-009` | typed outputs value did not match its declared type: at run end (the output half of the callable contract) | `validation_error` | false |
 | `NIKA-INFER-001` | provider call failed (HTTP error · provider refusal) | `provider_error` | engine-assessed |
 | `NIKA-INFER-002` | structured output failed schema validation (after any engine-internal retries) | `validation_error` | false |
@@ -111,6 +116,8 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-INVOKE-002` | tool args failed the tool's schema | `validation_error` | false |
 | `NIKA-AGENT-001` | max_turns exhausted before completion | `budget_error` | false |
 | `NIKA-AGENT-002` | max_tokens_total exhausted before completion | `budget_error` | false |
+| `NIKA-AGENT-003` | a skills: path does not resolve (file missing/unreadable at compose time) | `validation_error` | false |
+| `NIKA-AGENT-004` | a skills: file is not a valid Agent Skill (frontmatter shape · missing/empty name/description) | `validation_error` | false |
 | `NIKA-MCP-001` | MCP server not configured / not reachable at call time | `tool_error` | engine-assessed |
 | `NIKA-MCP-002` | MCP tool call failed (transport · tool-side error) | `tool_error` | engine-assessed |
 | `NIKA-SEC-001` | exec: blocklist hit | `security_error` | false |

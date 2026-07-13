@@ -62,6 +62,7 @@ vars:
   baseline_path: "./ops/config-baseline.json"
   approved_overrides:
     type: object
+    default: {}                      # zero approved drifts until you say otherwise
     description: "Sanctioned config overrides (RFC 7396 merge-patch shape)"
 
 secrets:
