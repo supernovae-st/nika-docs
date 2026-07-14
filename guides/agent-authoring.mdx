@@ -89,8 +89,10 @@ them; knowing them just saves round-trips:
    a bare string without `${{ }}` is rejected. It reads local namespaces
    only (`vars` · `env` · `with` · `item`/`index`), post-gate; the
    always-pattern is `after: { x: terminal }`, never a `when:` trick.
-5. **`size()` is the only CEL function** · arithmetic and string
-   functions live in jq, not in `${{ }}`.
+5. **The CEL function set is closed** · `size()` · the `has()` presence
+   macro · the `contains`/`startsWith`/`endsWith` string tests · the
+   `?:` conditional (`cel-subset/0.1`). Everything else — arithmetic,
+   regex, transforms — lives in jq, not in `${{ }}`.
 6. **`nika:write` needs `content:`** · a write without it writes
    nothing.
 7. **`nika:done` only inside `agent.tools`** · it is the loop
