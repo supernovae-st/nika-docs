@@ -209,7 +209,7 @@ summarize:
 
 **Invariants** (from `nika-kernel::provider::Provider`):
 
-- Unified `InferRequest` (INV-017): one DTO · per-provider wire dialects below (3 implemented today: anthropic · gemini · openai-compat, the dialect that carries most of the 14-provider catalog · plus mock).
+- Unified `InferRequest` (INV-017): one DTO · per-provider wire dialects below (3 implemented today: anthropic · gemini · openai-compat, the dialect that carries most of the 16-provider catalog · plus mock).
 - Capability rules ([{STATUS.capabilityRules} rules](/reference/capabilities))
   run **before** dispatch. Sending `tools` to a model whose capability
   rule says `tool_calling = false` fails with a typed validation error
