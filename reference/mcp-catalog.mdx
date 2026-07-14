@@ -52,10 +52,11 @@ tasks:
         url: https://example.com
 
   summarise:
-    depends_on: [crawl]
+    with:
+      page: ${{ tasks.crawl.output.content }}
     infer:
       model: anthropic/claude-sonnet-4-6   # <provider>/<name>
-      prompt: "Summarise: ${{ tasks.crawl.output.content }}"
+      prompt: "Summarise: ${{ with.page }}"
 ```
 
 ```bash Required env

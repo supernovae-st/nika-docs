@@ -44,10 +44,12 @@ import { CANON } from "/snippets/_canon.mdx";
   </Accordion>
   <Accordion title="My YAML is valid, so why does nika check still fail?" icon="shield-check">
     Schema-valid ≠ spec-valid. The validator also enforces the semantic
-    rules: every `${{ tasks.X }}` reference needs `depends_on: [X]`,
-    `when:` must be a CEL boolean, `nika:done` only inside an agent's
-    tool list, exactly one verb per task. The error names the exact
-    rule. Fix that rule, nothing else, re-check.
+    rules: `tasks.*` references live at the boundary only (`with:` ·
+    `after:` — a body reference is `NIKA-VAR-021`, hoist it into
+    `with:`), `when:` must be a CEL boolean over local namespaces,
+    `nika:done` only inside an agent's tool list, exactly one verb per
+    task. The error names the exact rule. Fix that rule, nothing else,
+    re-check.
   </Accordion>
 </AccordionGroup>
 
@@ -59,7 +61,7 @@ flag ([error model](/reference/error-codes)). The frequent ones:
 | Symptom | Code family | What it means · what to do |
 |---|---|---|
 | « parse error » on a file that looks fine | `NIKA-PARSE` | Usually the envelope: `nika: v1` exactly (not `v1.0` · not `1`), `workflow:` kebab-case, `tasks:` present. |
-| task referenced but never ran | `NIKA-DAG` | A `${{ tasks.X }}` without `depends_on: [X]`. Every data edge must be a graph edge. |
+| `tasks.X` read refused at check time | `NIKA-VAR-021` · `NIKA-PARSE-024` | A `tasks.*` reference outside the boundary (verb body · `when:` · `for_each:`): hoist it into `with:` — the binding IS the edge (`nika check --fix` applies it). A lingering `depends_on:` is `NIKA-PARSE-024`: data → `with:`, control → `after:`. |
 | `jq`/`fromjson` fails on fetch output (« expecting value, byte 0 ») | `NIKA-BUILTIN-JQ` | The fetch used the default `mode: markdown` (built for pages — it escapes JSON bodies). APIs take `mode: raw`, or `mode: jq` + `jq:` so the shaping rides the fetch. |
 | « unknown binding » | `NIKA-VAR` | Five namespaces only (`vars` · `with` · `tasks` · `env` · `secrets`). Typos like `tsaks.` are caught at validation. |
 | provider call fails once then works | `NIKA-PROVIDER` (`transient: true`) | The engine retries with backoff per your `retry:`. Declare it instead of wrapping logic. |

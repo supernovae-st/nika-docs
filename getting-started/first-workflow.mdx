@@ -143,18 +143,21 @@ tasks:
       prompt: "Say hi to the chrysalis. Be brief."
 
   critique:
-    depends_on: [greet]
+    with:
+      greeting: ${{ tasks.greet.output }}  # the binding IS the edge
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: |
-        The greeting was: ${{ tasks.greet.output }}
+        The greeting was: ${{ with.greeting }}
 
         Rewrite it shorter and more enigmatic.
 ```
 
-Notice `${{ tasks.greet.output }}`. That's a [binding](/concepts/bindings).
-The engine injects the previous task's output into the prompt at runtime,
-with explicit taint tracking and pipe filters.
+Notice the `with:` block. Each `${{ tasks.X.* }}` reference in it is a
+[binding](/concepts/bindings): it **names the data** the task consumes
+(`${{ with.greeting }}` in the prompt) and **declares the edge** that
+orders it — greet → critique, one declaration, no invisible edges. The
+engine injects the value at runtime, with explicit taint tracking.
 
 ### The graph you just built
 
@@ -165,9 +168,10 @@ flowchart LR
     G["greet<br/>infer"]:::task --> F["critique<br/>infer"]:::task
 ```
 
-One `depends_on` line and the order falls out of the file. Tasks with no
-dependency between them run **in parallel automatically**. You never
-schedule anything.
+One `with:` binding and the order falls out of the file. Tasks with no
+edge between them run **in parallel automatically**. You never schedule
+anything. (For an ordering with no data — run the deploy after the tests,
+consume nothing — use `after: { tests: succeeded }`, the control door.)
 
 ## 5. Get structured output
 
@@ -209,10 +213,10 @@ nika run hello.nika.yaml
 ## What you just built
 
 - Workflows are YAML files: `.nika.yaml`.
-- Tasks are units of work, identified by `id`.
+- Tasks are units of work; the map key is the identity.
 - Four verbs (`infer`, `exec`, `invoke`, `agent`) define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
-- `depends_on:` builds a DAG.
-- `${{ tasks.X.output }}` bindings flow data between tasks, with taint tracking.
+- `with:` (data) and `after:` (control) build the DAG — the binding IS the edge.
+- `${{ tasks.X.output }}` crosses a task boundary in `with:`; the body reads `${{ with.<name> }}`, with taint tracking.
 - `schema:` enforces JSON schemas on AI output.
 
 ## Next checks

@@ -90,14 +90,17 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-PARSE-017` | duplicate mapping key — no silent last-wins | `validation_error` | false |
 | `NIKA-PARSE-018` | missing required field in a verb body (infer.prompt · exec.command · invoke.tool) | `validation_error` | false |
 | `NIKA-PARSE-019` | generic structural validation — wrong YAML shape for a field | `validation_error` | false |
-| `NIKA-PARSE-020` | workflow: is a scalar — the envelope became an object (workflow: then id: <value>) | `validation_error` | false |
+| `NIKA-PARSE-020` | workflow: is a scalar — the envelope became an object (workflow: then id: &lt;value&gt;) | `validation_error` | false |
 | `NIKA-PARSE-021` | top-level description: — it moved into workflow.description | `validation_error` | false |
 | `NIKA-PARSE-022` | tasks: is a sequence — it became a map keyed by task id (drop `- id:`, the key IS the identity) | `validation_error` | false |
 | `NIKA-PARSE-023` | a task carries an id: field — the map key is the identity, the field is gone | `validation_error` | false |
-| `NIKA-DAG-001` | cycle in depends_on (incl. self-dependency) | `validation_error` | false |
-| `NIKA-DAG-002` | depends_on references an undeclared task | `validation_error` | false |
-| `NIKA-DAG-003` | a tasks.X reference with no declared edge | `validation_error` | false |
+| `NIKA-PARSE-024` | a task carries depends_on: — dead since W2 (data → with: bindings · control → after: predicates · check --fix migrates) | `validation_error` | false |
+| `NIKA-DAG-001` | cycle in the precedence graph G_p = E_d ∪ E_c (incl. self-dependency · via with:/after:) | `validation_error` | false |
+| `NIKA-DAG-002` | with:/after: references an undeclared task | `validation_error` | false |
 | `NIKA-DAG-004` | on_error.recover references a task downstream of the declaring task (await would deadlock) | `validation_error` | false |
+| `NIKA-DAG-005` | after: predicate outside the closed set (succeeded · failed · skipped · terminal) | `validation_error` | false |
+| `NIKA-DAG-006` | statically dead task — an incoming edge's pass-set excludes every reachable producer state, or the when: gate is false under every reachable upstream combination (gate algebra v2) | `validation_error` | false |
+| `NIKA-DAG-007` | status compared against a literal outside the vocabulary (success · failure · skipped · cancelled) — == never matches, != always holds | `validation_error` | false |
 | `NIKA-VAR-001` | unresolved reference (unknown namespace entry · undeclared env/vars key) | `variable_error` | false |
 | `NIKA-VAR-002` | binding cardinality — a jq binding emitted zero or multiple values | `variable_error` | false |
 | `NIKA-VAR-003` | provably-invalid path into a declared schema (static walk) | `validation_error` | false |
@@ -107,6 +110,7 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-VAR-007` | bytes value substituted into a string position | `variable_error` | false |
 | `NIKA-VAR-008` | unclosed $&#123;&#123; opener | `validation_error` | false |
 | `NIKA-VAR-020` | bare tasks.X is the envelope, not a value — the projection set (.output/.status/.error/.duration_ms) is closed and required (04 §namespaces · 0.103 · #75 D2) | `validation_error` | false |
+| `NIKA-VAR-021` | a tasks.* reference outside the boundary (with: · after: · on_error.recover · on_finally parent-only · workflow outputs) — hoist it into with: (check --fix applies it) | `validation_error` | false |
 | `NIKA-VAR-009` | typed outputs value did not match its declared type: at run end (the output half of the callable contract) | `validation_error` | false |
 | `NIKA-INFER-001` | provider call failed (HTTP error · provider refusal) | `provider_error` | engine-assessed |
 | `NIKA-INFER-002` | structured output failed schema validation (after any engine-internal retries) | `validation_error` | false |
@@ -130,6 +134,18 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-BUILTIN-001` | builtin invoke violates its statically-checkable arg contract (e.g. nika:fetch without url: · nika:jq arg shape) | `validation_error` | false |
 | `NIKA-BUILTIN-DONE-001` | nika:done invoked outside an agent: loop | `validation_error` | false |
 {/* errors-codes:end */}
+
+### Retired codes (never reuse)
+
+Two allocation holes in the table above are deliberate — a retired code is
+never repurposed:
+
+- **`NIKA-PARSE-016`** — the jq-binding-contains-template class folded into
+  `NIKA-VAR-005`.
+- **`NIKA-DAG-003`** — « a `tasks.X` reference with no declared edge »
+  became **inexpressible** in W2 « the flow »: the `with:` binding IS the
+  edge (derived, never restated), and a reference outside the boundary is
+  `NIKA-VAR-021`.
 
 ## Namespaces
 

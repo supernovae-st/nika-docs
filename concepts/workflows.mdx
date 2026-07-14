@@ -112,11 +112,16 @@ all the way into the diagnostic layer (ADR-010 miette bridge).
 ASCII by intent: Mintlify renders fine, but the diagram above is plain
 text and pastes into terminals and issue trackers without a renderer.
 
-## Tasks, dependencies, fan-out
+## Tasks, edges, fan-out
 
-Tasks declare dependencies explicitly through `depends_on:`. Nika builds
-the DAG, topologically sorts, and runs tasks in parallel where the graph
-allows.
+`tasks.*` crosses a task boundary through exactly **two doors** — `with:`
+(data) and `after:` (control) — and the engine computes the graph FROM
+those doors: a `with:` binding referencing `${{ tasks.X.* }}` both names
+the data the task consumes and declares a typed edge; an `after:` entry
+(`{producer: predicate}`) orders on state and carries no data. There is no
+third way to connect two tasks — `depends_on` is dead (`NIKA-PARSE-024` ·
+`nika check --fix` migrates it). Nika builds the DAG, topologically sorts,
+and runs tasks in parallel where the graph allows.
 
 ```yaml
 tasks:
@@ -127,40 +132,77 @@ tasks:
         url: https://example.com/data.json
 
   analyze:
-    depends_on: [fetch_data]
+    with:
+      data: ${{ tasks.fetch_data.output }}    # the binding IS the edge
     infer:
       model: ollama/<model>      # <provider>/<name>
-      prompt: "${{ tasks.fetch_data.output }}"
+      prompt: "${{ with.data }}"
 
   notify:
-    depends_on: [analyze]
+    with:
+      analysis: ${{ tasks.analyze.output }}
     exec:
-      command: ["echo", "${{ tasks.analyze.output }}"]
+      command: ["echo", "${{ with.analysis }}"]
 ```
+
+The task's **body consumes its bindings** (`${{ with.data }}`), never the
+global `tasks.*` namespace: a reference outside the boundary is
+`NIKA-VAR-021`, and `nika check --fix` hoists it into `with:` for you.
+
+For an ordering with **no data** (run the deploy after the tests, consume
+nothing), use `after:` — a map `{producer: predicate}` whose predicate
+names the producer states that admit this task:
+
+```yaml
+deploy:
+  after:
+    tests: succeeded      # control edge · state, never data
+  exec:
+    command: ["./deploy.sh"]
+```
+
+The predicate set is **closed** (`NIKA-DAG-005` otherwise): `succeeded` ·
+`failed` · `skipped` · `terminal` — where `terminal` admits any terminal
+state, `cancelled` included (the always-pattern: « run once X is settled,
+whatever happened »).
 
 Fan-out over a collection (`files` here is a jq
 [output binding](/concepts/bindings) on `list_files`, e.g.
-`output: { files: 'split("\n")' }`):
+`output: { files: 'split("\n")' }` — the collection crosses the boundary
+through `with:`, then `for_each:` reads the binding):
 
 ```yaml
 analyze_each:
-  depends_on: [list_files]
-  for_each: "${{ tasks.list_files.output.files }}"
+  with:
+    files: ${{ tasks.list_files.files }}
+  for_each: "${{ with.files }}"
   infer:
     model: ollama/<model>        # <provider>/<name>
     prompt: "Review this file: ${{ item }}"
 ```
 
-Conditional execution: `when:` is the field (a CEL boolean, or the
-literal `true` for the always-pattern):
+Conditional execution: `when:` is a **local business condition**, evaluated
+*after* the gate admits the task. It reads local namespaces only (`vars` ·
+`env` · `with` · the `for_each` locals) — a `tasks.*` reference inside
+`when:` is refused at parse time (`NIKA-VAR-021`): the binding creates the
+edge, `when:` reads the binding.
 
 ```yaml
 deploy:
-  depends_on: [tests]
-  when: "${{ tasks.tests.output.passed == true }}"
+  with:
+    passed: ${{ tasks.tests.output.passed }}
+  when: "${{ with.passed == true }}"
   exec:
-    command: ./deploy.sh
+    command: ["./deploy.sh"]
 ```
+
+`when:` evaluating `false` settles the task **`skipped`** (a decision —
+downstream value edges pass, reading `null`), and the gate always applies:
+`when:` refines it, never replaces it. To run a task *whatever happened*
+upstream (the report / cleanup class), say it in the graph —
+`after: { pipeline: terminal }` — and observe the outcome through
+`with: { outcome: ${{ tasks.pipeline.status }} }` when the body branches
+on it.
 
 Retry on failure: `retry:` is the one shape (and `on_error:` catches
 what retries can't fix):
@@ -178,8 +220,9 @@ flaky_api:
 ```
 
 <Note>
-  Field names are the spec's: `id:` (not `name:`), `when:` (not
-  `condition:`), `retry.max_attempts` (not `max_retries:`). The
+  Field names are the spec's: the map key is the task's identity (no
+  `id:`/`name:` field), `when:` (not `condition:`), `with:`/`after:`
+  (not `depends_on:`), `retry.max_attempts` (not `max_retries:`). The
   [JSON Schema](https://nika.sh/spec/v1/workflow.schema.json) rejects the wrong
   names at check time.
 </Note>

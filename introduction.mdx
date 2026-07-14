@@ -51,20 +51,22 @@ tasks:
         mode: text
 
   summarize:
-    depends_on: [read]
+    with:
+      post: ${{ tasks.read.output }}       # the binding IS the edge
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local · zero key
       prompt: |
         Summarize in one sentence:
-        ${{ tasks.read.output }}
+        ${{ with.post }}
 
   save:
-    depends_on: [summarize]
+    with:
+      summary: ${{ tasks.summarize.output }}
     invoke:
       tool: nika:write
       args:
         path: "/tmp/summary.txt"
-        content: "${{ tasks.summarize.output }}"
+        content: "${{ with.summary }}"
 ```
 
 <Note>

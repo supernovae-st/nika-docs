@@ -63,8 +63,10 @@ flowchart LR
 
     | Error | The fix |
     |---|---|
-    | `NIKA-DAG-003` | you referenced `${{ tasks.X }}`: add `depends_on: [X]` |
+    | `NIKA-VAR-021` | you referenced `${{ tasks.X.* }}` in a verb body, `when:` or `for_each:`: hoist it into `with:` and read `${{ with.<name> }}` (`nika check --fix` applies it) |
+    | `NIKA-PARSE-024` | `depends_on:` is dead: data → a `with:` binding · control → `after: { x: succeeded }` (`nika check --fix` migrates) |
     | `NIKA-DAG-001` | cycle: remove the back-edge |
+    | `NIKA-DAG-005` | unknown `after:` predicate: the set is closed — `succeeded` · `failed` · `skipped` · `terminal` |
     | `NIKA-VAR-001` | undeclared name: declare it in `vars:`/`secrets:` or fix the typo |
     | `NIKA-PROVIDER` | `model:` must be `<provider>/<name>` with a canonical prefix |
     | `NIKA-PARSE` (duplicate id) | two tasks share an id: rename one |
@@ -78,12 +80,15 @@ them; knowing them just saves round-trips:
 
 1. **One verb per task** · `infer`, `exec`, `invoke` or `agent`.
 2. **snake_case task ids** (CEL-safe) · **kebab-case `workflow:`**.
-3. **Every `${{ tasks.X }}` reference requires `depends_on: [X]`** ·
-   the DAG has no invisible edges.
+3. **`tasks.*` crosses a boundary through `with:` or `after:` only** ·
+   the binding IS the edge, the body reads `${{ with.<name> }}` — the
+   DAG has no invisible edges (`NIKA-VAR-021` otherwise, and
+   `depends_on:` is dead: `NIKA-PARSE-024`).
 4. **`when:` is a `${{ }}` CEL boolean or the literal `true`/`false`** ·
    `${{ vars.count }}` is not a condition; `${{ vars.count > 0 }}` is;
-   a bare string without `${{ }}` is rejected; `when: true` is the
-   always-pattern (run even when an upstream failed).
+   a bare string without `${{ }}` is rejected. It reads local namespaces
+   only (`vars` · `env` · `with` · `item`/`index`), post-gate; the
+   always-pattern is `after: { x: terminal }`, never a `when:` trick.
 5. **`size()` is the only CEL function** · arithmetic and string
    functions live in jq, not in `${{ }}`.
 6. **`nika:write` needs `content:`** · a write without it writes

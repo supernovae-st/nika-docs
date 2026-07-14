@@ -149,13 +149,15 @@ tasks:
           brief: { type: string }
           aspect_ratio: { type: string, enum: ["1:1", "16:9", "4:3"] }
   render:
-    depends_on: [brief]
+    with:
+      brief: ${{ tasks.brief.output.brief }}
+      ratio: ${{ tasks.brief.output.aspect_ratio }}
     invoke:
       tool: "nika:image_generate"
       args:
         provider: xai
-        prompt: "${{ tasks.brief.output.brief }}"
-        aspect_ratio: "${{ tasks.brief.output.aspect_ratio }}"
+        prompt: "${{ with.brief }}"
+        aspect_ratio: "${{ with.ratio }}"
         output_dir: "./out"
 ```
 
@@ -215,12 +217,14 @@ An input image plus an instruction — the same builtin, one arg away:
 
 ```yaml
   night:
+    with:
+      src: ${{ tasks.render.output.images[0].path }}   # edit what you generated
     invoke:
       tool: "nika:image_generate"
       args:
         provider: openai            # the first edit wire · gemini/xai/local follow
         mode: edit
-        image: ${{ tasks.render.output.images[0].path }}   # edit what you generated
+        image: ${{ with.src }}
         prompt: "make it night — starry sky"
         output_dir: "./out"
 ```

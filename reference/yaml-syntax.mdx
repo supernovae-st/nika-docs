@@ -35,15 +35,15 @@ outputs: { ... }             # optional · the workflow's return value
 ```yaml
 <identifier>:                # the map KEY is the identity (snake_case · unique)
 
-  depends_on: [<id>, ...]    # optional DAG edge
-  when: <expression>         # optional gate · ${{ }} CEL boolean OR literal true/false
-  for_each: <expression>     # optional fan-out (an array)
+  with: { ... }              # optional · the DATA boundary · each tasks.* ref = one typed edge
+  after: { <id>: <pred> }    # optional · the CONTROL boundary · pred ∈ succeeded|failed|skipped|terminal
+  when: <expression>         # optional · LOCAL business condition · evaluated POST-gate
+  for_each: <expression>     # optional fan-out (an array · local read)
   max_parallel: <int>        # optional · cap concurrent iterations
   fail_fast: <bool>          # optional · default true · false = collect errors
   timeout: "<duration>"      # optional · quoted Go-duration · per-iteration on for_each
   retry: { ... }             # optional retry policy (max_attempts · backoff · on_codes)
   on_error: { ... }          # optional recovery · recover/skip/fail_workflow + on_codes
-  with: { ... }              # optional task-scoped variables
   output: { <name>: <jq> }   # optional named jq bindings over the raw output
   on_finally: [ ... ]        # optional cleanup steps · run if the task STARTED
 
@@ -54,8 +54,17 @@ outputs: { ... }             # optional · the workflow's return value
   agent: { ... }
 ```
 
+`tasks.*` crosses a task boundary through exactly **two doors** — `with:`
+(data · observations) and `after:` (control) — and the engine computes the
+graph FROM those doors. A `with:` binding that references `${{ tasks.X.* }}`
+both names the data and declares a typed edge; an `after:` entry
+(`{producer: predicate}`) orders on state and carries no data. `depends_on`
+is dead (`NIKA-PARSE-024` · `nika check --fix` migrates it), and a `tasks.*`
+reference outside the boundary — in a verb body, `when:`, or `for_each:` —
+is `NIKA-VAR-021` with a machine-applicable fix (hoist into `with:`).
+
 The full per-field semantics live in the spec:
-[03 · DAG shape](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md).
+[03 · The flow](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md).
 
 ## Timeouts
 

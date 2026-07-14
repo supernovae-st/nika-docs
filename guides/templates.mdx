@@ -61,19 +61,21 @@ tasks:
       args: { path: "${{ vars.source }}" }
 
   think:
-    depends_on: [gather]
+    with:
+      gather: ${{ tasks.gather.output }}
     infer:
       prompt: |
-        # SLOT: the one model job · interpolate ${{ tasks.gather.output }}
-        Summarize · ${{ tasks.gather.output }}
+        # SLOT: the one model job · interpolate ${{ with.gather }}
+        Summarize · ${{ with.gather }}
 
   persist:
-    depends_on: [think]
+    with:
+      think: ${{ tasks.think.output }}
     invoke:
       tool: "nika:write"
       args:
         path: "./output.md"         # SLOT: destination
-        content: "${{ tasks.think.output }}"   # ALWAYS pass content · a write without it writes nothing
+        content: "${{ with.think }}"   # ALWAYS pass content · a write without it writes nothing
 
 outputs:
   result: ${{ tasks.think.output }}  # SLOT: the callable contract
@@ -119,15 +121,16 @@ tasks:
       recover: { value: 42 }
 
   act:
-    depends_on: [check]
+    with:
+      value: ${{ tasks.check.value }}   # the binding IS the edge · check → act
     # when: is a SKIP gate — routing, not failure (a skipped task is not an error)
-    when: ${{ tasks.check.value > vars.threshold }}   # SLOT: the CEL condition
+    when: ${{ with.value > vars.threshold }}   # SLOT: the CEL condition
     invoke:
       tool: "nika:notify"           # SLOT: the action · notify / write / exec
       args:
         channel: webhook
         target: "${{ secrets.webhook }}"
-        message: "Threshold crossed · ${{ tasks.check.value }}"   # SLOT
+        message: "Threshold crossed · ${{ with.value }}"   # SLOT
         severity: warning
 
 outputs:
@@ -158,8 +161,9 @@ tasks:
       args: { pattern: "${{ vars.collection_source }}/*.md" }
 
   process:
-    depends_on: [discover]
-    for_each: ${{ tasks.discover.output }}
+    with:
+      discover: ${{ tasks.discover.output }}
+    for_each: ${{ with.discover }}
     max_parallel: 4                 # SLOT: the polite ceiling
     fail_fast: false
     timeout: "60s"                  # SLOT: per-iteration bound
@@ -174,21 +178,23 @@ tasks:
         Process this item · ${{ item }}
 
   survivors:
-    depends_on: [process]
+    with:
+      process: ${{ tasks.process.output }}
     invoke:                         # the null-aware fan-in · order preserved
       tool: "nika:jq"
       args:
-        input: ${{ tasks.process.output }}
+        input: ${{ with.process }}
         # `. // []` · an EMPTY discovery skips the whole for_each (null
         # upstream) — the fan-in must survive its own quiet day.
         expression: "(. // []) | [ .[] | select(. != null) ]"
 
   merge:
-    depends_on: [survivors]
+    with:
+      survivors: ${{ tasks.survivors.output }}
     infer:
       prompt: |
         # SLOT: the fan-in · the survivors array (failed items filtered)
-        Merge these results into one report · ${{ tasks.survivors.output }}
+        Merge these results into one report · ${{ with.survivors }}
 
 outputs:
   report: ${{ tasks.merge.output }}
@@ -236,29 +242,33 @@ tasks:
       recover: []                   # offline rehearsal · an empty batch, the delta stays quiet
 
   delta:
-    depends_on: [previous, fresh]
+    with:                           # the bindings ARE the edges · previous + fresh → delta
+      previous: ${{ tasks.previous.output }}
+      fresh: ${{ tasks.fresh.output }}
     invoke:
       tool: "nika:json_diff"        # RFC 6902 · empty patch = nothing new
       args:
-        before: "${{ tasks.previous.output }}"
-        after: "${{ tasks.fresh.output }}"
+        before: "${{ with.previous }}"
+        after: "${{ with.fresh }}"
 
   process:
-    depends_on: [delta]
-    when: ${{ size(tasks.delta.output) > 0 }}
+    with:
+      delta: ${{ tasks.delta.output }}
+    when: ${{ size(with.delta) > 0 }}
     invoke:
       tool: "nika:jq"               # SLOT: the delta job (jq · infer · write…)
       args:
-        input: "${{ tasks.delta.output }}"
+        input: "${{ with.delta }}"
         expression: "length"
 
   save_state:
-    depends_on: [fresh]
+    with:
+      fresh: ${{ tasks.fresh.output }}
     invoke:
       tool: "nika:write"
       args:
         path: "${{ vars.state_path }}"
-        content: "${{ tasks.fresh.output }}"
+        content: "${{ with.fresh }}"
         create_dirs: true
         overwrite: true
 
@@ -301,13 +311,14 @@ tasks:
           steps: { type: array, items: { type: string } }
 
   execute:
-    depends_on: [plan]
+    with:
+      steps: ${{ tasks.plan.output.steps }}
     agent:
       # The done-contract belongs IN the prompt: the final message must
       # carry the schema'd shape, so SAY so — a live model that is not
       # told finishes in prose and fails NIKA-INFER-002 (proven on GPT).
       system: "Work the plan step by step. When finished, reply with ONLY your final result as an object carrying a `findings` array (one short string each), then call nika:done."   # SLOT
-      prompt: "Plan · ${{ tasks.plan.output.steps }}"
+      prompt: "Plan · ${{ with.steps }}"
       tools:                        # SLOT: the MINIMUM grant for the job
         - "nika:read"
         - "nika:done"
@@ -320,11 +331,12 @@ tasks:
           findings: { type: array, items: { type: string } }
 
   confirm:
-    depends_on: [execute]
+    with:
+      has_findings: ${{ size(tasks.execute.output.findings) > 0 }}   # the check crosses as ONE boundary expression
     invoke:
       tool: "nika:assert"
       args:
-        condition: "${{ size(tasks.execute.output.findings) > 0 }}"
+        condition: "${{ with.has_findings }}"
         message: "Agent returned no findings, do not trust an empty run"   # SLOT
 
 outputs:
@@ -373,15 +385,17 @@ tasks:
       capture: structured
 
   gates:
-    depends_on: [check_a, check_b]
+    with:
+      all_green: ${{ tasks.check_a.output.exit_code == 0 && tasks.check_b.output.exit_code == 0 }}   # two value edges · one boundary expression
     invoke:
       tool: "nika:assert"
       args:
-        condition: "${{ tasks.check_a.output.exit_code == 0 && tasks.check_b.output.exit_code == 0 }}"
+        condition: "${{ with.all_green }}"
         message: "A gate is RED: refusing to proceed"   # SLOT
 
   human:
-    depends_on: [gates]
+    after:
+      gates: succeeded              # state, no data · no question until the board is green
     invoke:
       # the prompt PAUSES the run (exit 4 · not a failure) — answer and resume:
       #   nika run --resume <trace> --answer human=yes
@@ -391,8 +405,9 @@ tasks:
         default: false
 
   act:
-    depends_on: [human]
-    when: ${{ tasks.human.output == true }}
+    with:
+      go: ${{ tasks.human.output }}   # the answer crosses as a value edge
+    when: ${{ with.go == true }}
     exec:
       command: ["echo", "shipped"]   # SLOT: the irreversible action (argv · program must be in permits.exec)
       # default capture · a failing ship fails LOUDLY (NIKA-EXEC-001):
@@ -400,14 +415,16 @@ tasks:
       # would become data and a red ship would read as success)
 
   record:
-    depends_on: [act]
-    when: true                      # the always-pattern · runs on success, failure, OR refusal
+    after:
+      act: terminal                 # the always-pattern · runs on success, failure, OR refusal
+    with:
+      acted: ${{ tasks.act.status }}   # observe the outcome · same pass-set as the after edge
     invoke:
       tool: "nika:notify"
       args:
         channel: webhook
         target: "${{ secrets.webhook }}"
-        message: "Run finished · act=${{ tasks.act.status }}"   # SLOT · success | failure | skipped
+        message: "Run finished · act=${{ with.acted }}"   # SLOT · success | failure | skipped
         severity: info
 
 outputs:
@@ -441,7 +458,8 @@ tasks:
         traverse: { max_pages: 5 }  # SLOT: crawl bound · 1..=25 (robots honored)
 
   brief:
-    depends_on: [crawl_site]
+    with:
+      crawl_site: ${{ tasks.crawl_site.output }}
     infer:
       max_tokens: 1200
       prompt: |
@@ -449,7 +467,7 @@ tasks:
         From this site crawl, produce a creative brief: the domain of
         activity, the dominant visual theme, the audience, the usable
         colors and image assets.
-        Crawl digest · ${{ tasks.crawl_site.output }}
+        Crawl digest · ${{ with.crawl_site }}
       schema:                       # SLOT: the typed shape downstream tasks rely on
         type: object
         additionalProperties: false
@@ -462,13 +480,14 @@ tasks:
         required: [domain, theme, audience, colors, assets]
 
   persist:
-    depends_on: [brief]
+    with:
+      brief: ${{ tasks.brief.output }}
     invoke:
       tool: "nika:write"
       args:
         path: "${{ vars.out_path }}"
         create_dirs: true
-        content: "${{ tasks.brief.output }}"   # ALWAYS pass content
+        content: "${{ with.brief }}"   # ALWAYS pass content
 
 outputs:
   brief: ${{ tasks.brief.output }}   # SLOT: the callable contract
@@ -508,33 +527,37 @@ tasks:
         required: [image_prompt]
 
   render:
-    depends_on: [brief]
+    with:
+      brief_image_prompt: ${{ tasks.brief.output.image_prompt }}
     invoke:
       tool: "nika:image_generate"
       args:
         provider: mock              # SLOT: local | openai | gemini | xai (local/mock first)
-        prompt: "${{ tasks.brief.output.image_prompt }}"
+        prompt: "${{ with.brief_image_prompt }}"
         output_dir: "${{ vars.out_dir }}"
         filename_prefix: "asset"    # SLOT: filename stem
 
   manifest:
-    depends_on: [brief, render]
+    with:
+      brief: ${{ tasks.brief.output }}
+      render: ${{ tasks.render.output }}
     invoke:
       tool: "nika:jq"
       args:
         expression: "{ brief: .[0], images: .[1].images }"
         input:
-          - "${{ tasks.brief.output }}"
-          - "${{ tasks.render.output }}"
+          - "${{ with.brief }}"
+          - "${{ with.render }}"
 
   persist:
-    depends_on: [manifest]
+    with:
+      manifest: ${{ tasks.manifest.output }}
     invoke:
       tool: "nika:write"
       args:
         path: "${{ vars.out_dir }}/manifest.json"
         create_dirs: true
-        content: "${{ tasks.manifest.output }}"
+        content: "${{ with.manifest }}"
 
 outputs:
   manifest: ${{ tasks.manifest.output }}  # SLOT: the callable contract
@@ -582,7 +605,8 @@ tasks:
         jq: ".url"                  # SLOT: where the response carries the asset URL
 
   create:
-    depends_on: [upload]
+    with:
+      upload: ${{ tasks.upload.output }}
     invoke:
       tool: "nika:fetch"
       args:
@@ -591,7 +615,7 @@ tasks:
         headers:
           x-api-key: "${{ secrets.API_KEY }}"
         body:                       # SLOT: the create payload (objects auto-JSON)
-          asset_url: "${{ tasks.upload.output }}"
+          asset_url: "${{ with.upload }}"
         mode: jq
         jq: "{ id: .id, url: .url }"   # SLOT: the fields downstream needs
 
@@ -630,7 +654,7 @@ permits:
       - "./docker-health.md"        # SLOT: where the report lands (must match `keep`)
 
 tasks:
-  # The reads run IN PARALLEL (no depends_on between them) — the
+  # The reads run IN PARALLEL (no edges between them) — the
   # scheduler proves it from the DAG, nobody orders it.
   ps:
     exec:
@@ -642,15 +666,17 @@ tasks:
       command: ["docker", "system", "df"]   # SLOT: the second read (drop the task if one suffices)
 
   diagnose:
-    depends_on: [ps, df]
+    with:
+      ps: ${{ tasks.ps.output }}
+      df: ${{ tasks.df.output }}
     infer:
       # SLOT: what should the model DO with the readings?
       prompt: |
         You are reading a Docker host's state. Containers (name·status·image):
-        ${{ tasks.ps.output }}
+        ${{ with.ps }}
 
         Disk usage:
-        ${{ tasks.df.output }}
+        ${{ with.df }}
 
         Write a short health report: what is running, what exited, what
         looks unhealthy (restart loops · old exits), and whether disk
@@ -658,12 +684,13 @@ tasks:
       max_tokens: 600               # SLOT: the spend ceiling for this call
 
   keep:
-    depends_on: [diagnose]
+    with:
+      diagnose: ${{ tasks.diagnose.output }}
     invoke:
       tool: "nika:write"
       args:
         path: "./docker-health.md"  # SLOT: same path as permits.fs.write
-        content: "${{ tasks.diagnose.output }}"
+        content: "${{ with.diagnose }}"
 
 outputs:
   report: ${{ tasks.keep.output }}

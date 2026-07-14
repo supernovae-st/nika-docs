@@ -31,7 +31,7 @@ flowchart LR
   map --> pages
   pages --> digest
   digest --> save
-  save --> ping
+  save -.->|succeeded| ping
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
@@ -70,8 +70,9 @@ tasks:
       recent: ".[:8] | map(.loc)"     # sitemap = the root array of {loc, …} · cap at 8, keep the URLs
 
   pages:
-    depends_on: [map]
-    for_each: ${{ tasks.map.recent }}
+    with:
+      map_recent: ${{ tasks.map.recent }}
+    for_each: ${{ with.map_recent }}
     max_parallel: 4                    # be polite · 4 fetches in flight max
     fail_fast: false                   # one dead page must not kill the radar
     on_error:
@@ -88,25 +89,28 @@ tasks:
         mode: article
 
   digest:
-    depends_on: [pages]
+    with:
+      pages: ${{ tasks.pages.output }}
     infer:
       prompt: |
         These are the pages a competitor published recently ·
-        ${{ tasks.pages.output }}
+        ${{ with.pages }}
         Write the Monday brief · what they shipped · what it signals ·
         what we should watch. One page, plain words.
 
   save:
-    depends_on: [digest]
+    with:
+      digest: ${{ tasks.digest.output }}
     invoke:
       tool: "nika:write"
       args:
         path: "./radar/competitor-brief.md"
-        content: "${{ tasks.digest.output }}"
+        content: "${{ with.digest }}"
         create_dirs: true
 
   ping:
-    depends_on: [save]
+    after:
+      save: succeeded
     invoke:
       tool: "nika:notify"
       args:
@@ -124,8 +128,10 @@ outputs:
 
 <Steps>
   <Step title="The collection is computed, not hardcoded">
-    `for_each: ${{ tasks.map.recent }}`: eight URLs this week, three
-    next week. The DAG doesn't change.
+    The URL list crosses the boundary
+    (`map_recent: ${{ tasks.map.recent }}` in `with:`), then
+    `for_each: ${{ with.map_recent }}` fans out: eight URLs this week,
+    three next week. The DAG doesn't change.
   </Step>
   <Step title="Resilience is per-iteration">
     `retry:` (exponential + jitter) and `timeout: "30s"` apply to EACH
