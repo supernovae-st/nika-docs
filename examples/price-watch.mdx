@@ -23,7 +23,7 @@ time to buy.
 flowchart LR
   check["check · nika:fetch"]:::invoke
   alert["alert · nika:notify"]:::invoke
-  check -.-> alert
+  check --> alert
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
 {/* showcase:dag-end */}
@@ -66,14 +66,16 @@ tasks:
       recover: { price: 949, name: "MacBook Air (offline sample)" }
 
   alert:
-    depends_on: [check]
-    when: ${{ tasks.check.price < vars.alert_below }}
+    with:
+      price: ${{ tasks.check.price }}     # value edges · the named bindings cross the boundary here
+      name: ${{ tasks.check.name }}
+    when: ${{ with.price < vars.alert_below }}
     invoke:
       tool: "nika:notify"
       args:
         channel: webhook
         target: "${{ secrets.alerts_webhook }}"
-        message: "Price drop · ${{ tasks.check.name }} is now ${{ tasks.check.price }} (target ${{ vars.alert_below }})"
+        message: "Price drop · ${{ with.name }} is now ${{ with.price }} (target ${{ vars.alert_below }})"
         severity: info
 
 outputs:
@@ -90,7 +92,9 @@ outputs:
     number, not a blob of HTML.
   </Step>
   <Step title="CEL gates the alert">
-    `when: ${{ tasks.check.price < vars.alert_below }}` is a plain CEL
+    The named binding crosses in `with:`
+    (`price: ${{ tasks.check.price }}`), then
+    `when: ${{ with.price < vars.alert_below }}` is a plain CEL
     comparison. False → the task is skipped, not failed.
   </Step>
   <Step title="The webhook stays secret">

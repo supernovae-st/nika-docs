@@ -36,11 +36,12 @@ tasks:
         output_dir: out
         format: png
   style:
-    depends_on: [generate]
+    with:
+      src: ${{ tasks.generate.output.images[0].path }}
     invoke:
       tool: "nika:image_fx"
       args:
-        input: "${{ tasks.generate.output.images[0].path }}"
+        input: "${{ with.src }}"
         out: out/hero-gameboy.png
         seed: 42                  # the seed IS the style — same seed, same bytes
         ops:
@@ -58,8 +59,8 @@ hash never moves. Mutate one byte of the PNG and a re-render no longer matches
 ## The op vocabulary (closed · v1)
 
 `ops:` is an **ordered list of single-key maps** — a linear pipeline by design.
-Branching and fan-out belong to the workflow (`depends_on` · `for_each`), never
-inside the builtin.
+Branching and fan-out belong to the workflow (`with:`/`after:` edges ·
+`for_each`), never inside the builtin.
 
 | Op | What it does | Key knobs |
 |---|---|---|
@@ -111,12 +112,13 @@ One recipe, one hash, forever. Batch-style a hundred campaign images with
 
 ```yaml
   variants:
-    depends_on: [generate]
+    with:
+      src: ${{ tasks.generate.output.images[0].path }}
     for_each: ["bw", "gameboy", "cga"]
     invoke:
       tool: "nika:image_fx"
       args:
-        input: "${{ tasks.generate.output.images[0].path }}"
+        input: "${{ with.src }}"
         out: "out/variant-${{ item }}.png"
         ops:
           - dither: { mode: bayer4, palette: "${{ item }}" }

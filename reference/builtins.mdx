@@ -56,10 +56,12 @@ The workflow-control family: speak, signal, guard, ask, finish, pause.
 
 ```yaml
 gate:
+  with:
+    count: ${{ tasks.fetch_data.output.count }}
   invoke:
     tool: "nika:assert"
     args:
-      condition: "${{ tasks.fetch_data.output.count > 0 }}"
+      condition: "${{ with.count > 0 }}"
       message: "Expected non-empty result"
 ```
 
@@ -93,10 +95,13 @@ format conversion, generation, time, hashing.
 ```yaml
 # recursive deep-merge of two task outputs — pure jq, no extra builtin
 merged:
+  with:
+    base: ${{ tasks.base.output }}
+    overlay: ${{ tasks.overlay.output }}
   invoke:
     tool: "nika:jq"
     args:
-      input: ["${{ tasks.base.output }}", "${{ tasks.overlay.output }}"]
+      input: ["${{ with.base }}", "${{ with.overlay }}"]
       expression: ".[0] * .[1]"
 ```
 

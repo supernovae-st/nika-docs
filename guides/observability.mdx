@@ -28,9 +28,11 @@ tasks:
       shell: "sleep 0.3 && printf 'NIKA-42 open'"
 
   digest:
-    depends_on: [commits, tickets]
+    with:
+      commits: ${{ tasks.commits.output }}
+      tickets: ${{ tasks.tickets.output }}
     infer:
-      prompt: "Digest commits ${{ tasks.commits.output }} and tickets ${{ tasks.tickets.output }}"
+      prompt: "Digest commits ${{ with.commits }} and tickets ${{ with.tickets }}"
       max_tokens: 400
 
 outputs:

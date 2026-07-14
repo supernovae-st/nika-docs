@@ -39,9 +39,10 @@ Four examples, each a valid `Templatable::Template`:
 
 ```yaml
 prompt: "${{ vars.target }}"
-prompt: "${{ tasks.fetch_issue.output.title }}"
 prompt: "${{ with.model_family }}"
 command: ["echo", "${{ env.HOME }}/output.txt"]
+with:
+  title: ${{ tasks.fetch_issue.output.title }}   # tasks.* lives at the boundary
 ```
 
 Whitespace inside `${{ }}` is ignored. Nested `${{ }}` is rejected at
@@ -56,14 +57,46 @@ is caught before the run starts.
 | Scope | Source | Example |
 |---|---|---|
 | `vars.*` | Workflow inputs, declared in the envelope `vars:` block (typed or untyped) | `vars.target` |
-| `with.*` | Task-level scope, declared in a per-task `with:` block (pre-bind + alias) | `with.model_family` |
-| `tasks.<name>.output` | The result record of a completed task (`.output` · `.status` · `.error` · `.duration_ms`) | `tasks.greet.output` |
+| `with.*` | The task's **data boundary** — per-task `with:` block; each `tasks.*` reference in a value declares a typed edge, the body reads the binding | `with.model_family` |
+| `tasks.<name>.output` | The result record of a completed task (`.output` · `.status` · `.error` · `.duration_ms` · named bindings) — **boundary surfaces only** (see below) | `tasks.greet.output` |
 | `env.*` | Non-sensitive runtime config, declared in the envelope `env:` block | `env.HOME`, `env.REGION` |
 | `secrets.*` | Vault/env/file-backed secret references (masked in logs) | `secrets.api_key` |
 
 Task names are validated at parse time (`snake_case`, unique). A
 binding that references a task not present in the file fails with a
 miette diagnostic pointing at the exact byte range.
+
+## The reference boundary: where `tasks.*` may appear
+
+The `tasks` namespace is **boundary-only**. A `${{ tasks.X.* }}` reference
+is legal in exactly five places: `with:` values (the binding IS the edge) ·
+`after:` keys (the entry names the producer) · `on_error.recover:` (a
+fallback reads a settled record) · `on_finally:` blocks (the **parent**
+task only) · workflow `outputs:` (the run's exports read the settled
+world).
+
+Everywhere else — verb fields (`prompt:` · `command:` · `args:` · …),
+`when:`, `for_each:` — a `tasks.*` reference is refused at parse time
+(`NIKA-VAR-021`) with a machine-applicable fix: **hoist it into `with:`**
+and read the binding.
+
+```yaml
+# ❌ NIKA-VAR-021 — the body reads the global namespace
+summarize:
+  infer:
+    prompt: "Summarize · ${{ tasks.fetch.output }}"
+
+# ✅ the fix `nika check --fix` applies
+summarize:
+  with:
+    article: ${{ tasks.fetch.output }}
+  infer:
+    prompt: "Summarize · ${{ with.article }}"
+```
+
+The task body is a **pure function of its declared inputs** (`with` ·
+`vars` · `env` · `secrets` · the loop locals): every cross-task dependency
+is visible at the boundary, named, and typed by its edge role.
 
 ## Typed resolution
 
@@ -77,7 +110,7 @@ vars:
     type: integer
 
 tasks:
-  - name: loop
+  loop:
     for_each: "${{ vars.count }}"      # fails — for_each needs a list
     infer:
       model: ollama/<model>     # <provider>/<name>
@@ -107,28 +140,29 @@ without an explicit sanitizer raises a `NIKA-SEC`-family error (the
 runtime taint layer · [security model](/concepts/security)):
 
 ```yaml
-- name: pull_user_input
+pull_user_input:
   invoke:
     tool: nika:fetch
     args:
       url: https://api.example.com/comment
 
-- name: run_it
-  depends_on: [pull_user_input]
+run_it:
+  with:
+    comment: ${{ tasks.pull_user_input.output }}
   exec:
-    command: ["${{ tasks.pull_user_input.output }}"]   # NIKA-SEC taint violation
+    command: ["${{ with.comment }}"]   # NIKA-SEC taint violation · tainted data as the program
 ```
 
-Fix: never interpolate tainted data into a command string; pass it
+Fix: never interpolate tainted data into the command position; pass it
 as data instead:
 
 ```yaml
-- name: run_it
-  depends_on: [pull_user_input]
+run_it:
+  with:
+    comment: ${{ tasks.pull_user_input.output }}
   exec:
-    command: tee
-    args: ["/tmp/comment.txt"]
-    stdin: "${{ tasks.pull_user_input.output }}"   # data channel, not code channel
+    command: ["tee", "/tmp/comment.txt"]
+    stdin: "${{ with.comment }}"   # data channel, not code channel
 ```
 
 Taint is a property of **data**, not of a principal (T3:A design from
@@ -158,11 +192,13 @@ through the `nika:jq` builtin. Two layers, one job each:
 ```yaml
 # CEL decides · jq transforms
 digest:
-  when: ${{ size(tasks.fetch.output) > 0 }}      # CEL · condition
+  with:
+    items: ${{ tasks.fetch.output }}             # the binding IS the edge
+  when: ${{ size(with.items) > 0 }}              # CEL · condition (local read)
   invoke:
     tool: "nika:jq"
     args:
-      input: "${{ tasks.fetch.output }}"          # CEL · reference
+      input: "${{ with.items }}"                 # CEL · reference
       expression: ".items | map(.title) | join(\"\\n\")"   # jq · transform
 ```
 
@@ -171,16 +207,22 @@ is additive, never breaking.
 
 ## Multi-line
 
-YAML block scalars compose cleanly with bindings:
+YAML block scalars compose cleanly with bindings (the pull-request fields
+crossed the boundary in `with:`; the prompt reads the bindings):
 
 ```yaml
-prompt: |
-  You are reviewing the following pull request.
+review:
+  with:
+    title: ${{ tasks.fetch_pr.output.title }}
+    body: ${{ tasks.fetch_pr.output.body }}
+  infer:
+    prompt: |
+      You are reviewing the following pull request.
 
-  Title: ${{ tasks.fetch_pr.output.title }}
-  Body:  ${{ tasks.fetch_pr.output.body }}
+      Title: ${{ with.title }}
+      Body:  ${{ with.body }}
 
-  Provide three concrete improvements.
+      Provide three concrete improvements.
 ```
 
 The parser preserves indentation and line breaks: the prompt reaches
@@ -212,8 +254,8 @@ site and the usage site.
   supported inside expressions.
 - ✅ Scope lookup + CEL evaluation + type check + taint propagation.
 
-Workflow-level control flow (`for_each:`, `condition:`,
-`depends_on:`) lives on the **task envelope**, not inside bindings.
+Workflow-level control flow (`for_each:`, `when:`, the `with:` /
+`after:` edges) lives on the **task envelope**, not inside bindings.
 This is deliberate: the DAG is a static artifact, inspectable by the
 analyzer and renderable in the Olympus visualizer; bindings are local
 decorations.

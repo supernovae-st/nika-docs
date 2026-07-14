@@ -63,21 +63,24 @@ tasks:
       top: ".[:5] | map(.loc)"
 
   top_page:
-    depends_on: [map]
+    with:
+      map_top: ${{ tasks.map.top[0] }}
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ tasks.map.top[0] }}"
+        url: "${{ with.map_top }}"
         mode: article
 
   brief:
-    depends_on: [map, top_page]
+    with:
+      map_top: ${{ tasks.map.top }}
+      top_page: ${{ tasks.top_page.output }}
     infer:
       prompt: |
         Topic to rank for · ${{ vars.topic }}
-        Competitor's top URLs · ${{ tasks.map.top }}
+        Competitor's top URLs · ${{ with.map_top }}
         Their best page on it ·
-        ${{ tasks.top_page.output }}
+        ${{ with.top_page }}
 
         Write a content brief that BEATS this page · find the gaps they
         missed · angle for search intent.
@@ -91,12 +94,13 @@ tasks:
           keywords: { type: array, items: { type: string } }
 
   save:
-    depends_on: [brief]
+    with:
+      brief: ${{ tasks.brief.output }}
     invoke:
       tool: "nika:write"
       args:
         path: "./briefs/${{ vars.topic }}.json"
-        content: "${{ tasks.brief.output }}"
+        content: "${{ with.brief }}"
         create_dirs: true
 
 outputs:
@@ -116,9 +120,10 @@ outputs:
     slices, filters, everything.
   </Step>
   <Step title="CEL indexes into the binding">
-    The second fetch reads `${{ tasks.map.top[0] }}`: index access is
-    part of the CEL subset. The reference also requires
-    `depends_on: [map]`: every reference is a visible edge.
+    The second fetch binds `map_top: ${{ tasks.map.top[0] }}` in
+    `with:`: index access is part of the CEL subset, and the binding IS
+    the edge — every reference is a visible edge, declared where the
+    data crosses.
   </Step>
   <Step title="The brief is a contract">
     title · angle · outline · keywords: your writer (or your next
@@ -137,7 +142,7 @@ outputs:
 
 ## Make it yours
 
-- Brief the top THREE pages instead of one: `for_each: ${{ tasks.map.top }}`. The fan-out tier shows how ([Competitor radar](/examples/competitor-radar)).
+- Brief the top THREE pages instead of one: bind `top: ${{ tasks.map.top }}` in `with:` and fan out with `for_each: ${{ with.top }}`. The fan-out tier shows how ([Competitor radar](/examples/competitor-radar)).
 - Feed your own sitemap too and ask the model for internal-linking opportunities.
 - Pipe the brief straight into a draft: a second `infer` consuming `${{ tasks.brief.output.outline }}`.
 

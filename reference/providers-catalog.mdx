@@ -139,8 +139,9 @@ tasks:
       prompt: "Explain linear algebra in one sentence."
 
   fallback:
-    depends_on: [primary]
-    when: "${{ tasks.primary.error != null }}"   # skip preserves the error · the fallback reads it
+    with:
+      problem: ${{ tasks.primary.error }}   # failure-observation edge · a skip carries its preserved error
+    when: "${{ with.problem != null }}"     # local read of the binding
     infer:
       model: mistral/mistral-large
       prompt: "Explain linear algebra in one sentence."

@@ -82,12 +82,13 @@ tasks:
     infer:
       prompt: "Write ONE energetic launch sentence (under 20 words) for a Rust workflow engine that just learned to speak."
   narrate:
-    depends_on: [script]
+    with:
+      script: ${{ tasks.script.output }}
     invoke:
       tool: "nika:tts_generate"
       args:
         provider: openai
-        text: "${{ tasks.script.output }}"
+        text: "${{ with.script }}"
         voice: "nova"
         output_dir: "./out"
         filename_prefix: "announce"

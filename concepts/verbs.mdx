@@ -80,14 +80,16 @@ flowchart LR
 
 Spawns a subprocess, captures stdout/stderr, returns exit code + output.
 
-**Required**: `command` (string).
+**Required**: exactly one of `command` (array · argv through `execve`, no
+shell) | `shell` (string · the explicit shell door: pipes · redirects ·
+globs). A string `command:` is rejected at parse.
 **Optional**: `cwd` (path), `env` (map · OS env for this subprocess), `stdin` (string), `capture` (`stdout` default · `stderr` · `combined` · `structured`). Task-level `timeout:` applies (not a verb field).
 
 ```yaml
-- name: build
+build:
   timeout: "300s"                  # task-level (applies to any verb)
   exec:
-    command: cargo build --release
+    command: ["cargo", "build", "--release"]
     cwd: ./crates/engine
     capture: structured            # { stdout, stderr, exit_code }
     env:
@@ -101,8 +103,9 @@ Spawns a subprocess, captures stdout/stderr, returns exit code + output.
 - Non-zero exit is a task failure (`NIKA-EXEC-001`) in the default
   capture modes, **except `capture: structured`**, where the exit code
   is data (`output.exit_code` · the task succeeds and the workflow
-  branches on it). Sanitize untrusted interpolation through the
-  `shell_quote` filter before the command reaches L1.
+  branches on it). Untrusted values ride argv elements (each substituted
+  independently, no shell to break out of) or `stdin:` — never a
+  `shell:` string.
 
 Cross-link: [`ShellExecutor` trait](/architecture/layers#layer-table) (L0.5 kernel contract).
 
@@ -114,7 +117,7 @@ reached through `invoke:`, not its own verb. Issues an HTTP request
 modes become the builtin's `mode` argument.
 
 ```yaml
-- name: pull_readme
+pull_readme:
   timeout: "30s"                       # task-level (applies to any verb)
   invoke:
     tool: nika:fetch
@@ -154,11 +157,13 @@ declared in the workflow's `mcp:` block.
 **Optional**: `args` (object · tool-specific schema). Task-level `timeout:` applies (not a verb field).
 
 ```yaml
-- name: search_vectordb
+search_vectordb:
+  with:
+    summary: ${{ tasks.summarize.output }}
   invoke:
     tool: "mcp:chroma/query"          # mcp:<server>/<tool> · one colon, then a slash
     args:
-      query: "${{ tasks.summarize.output }}"
+      query: "${{ with.summary }}"
       top_k: 5
 ```
 
@@ -182,13 +187,15 @@ workflow default), `temperature` (0.0–2.0), `max_tokens` (u32), `schema`
 `vision` (image inputs).
 
 ```yaml
-- name: summarize
+summarize:
+  with:
+    readme: ${{ tasks.pull_readme.output }}
   infer:
     model: mistral/<model>          # <provider>/<name> · see /reference/providers-catalog
     system: "You are a technical writer."
     prompt: |
       Summarize this in one sentence:
-      ${{ tasks.pull_readme.output }}
+      ${{ with.readme }}
     temperature: 0.3
     max_tokens: 500
 ```
@@ -224,7 +231,7 @@ until a completion signal fires or a budget exhausts.
 `schema` (JSON Schema · validates the final message).
 
 ```yaml
-- name: investigate
+investigate:
   agent:
     model: mistral/<model>          # <provider>/<name>
     system: |

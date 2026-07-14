@@ -46,14 +46,16 @@ tasks:
       command: ["docker", "system", "df"]
 
   diagnose:
-    depends_on: [ps, df]
+    with:
+      containers: ${{ tasks.ps.output }}
+      disk: ${{ tasks.df.output }}
     infer:
       prompt: |
         You are reading a Docker host's state. Containers (name·status·image):
-        ${{ tasks.ps.output }}
+        ${{ with.containers }}
 
         Disk usage:
-        ${{ tasks.df.output }}
+        ${{ with.disk }}
 
         Write a short health report: what is running, what exited, what
         looks unhealthy (restart loops · old exits), and whether disk
@@ -61,12 +63,13 @@ tasks:
       max_tokens: 600
 
   keep:
-    depends_on: [diagnose]
+    with:
+      report: ${{ tasks.diagnose.output }}
     invoke:
       tool: "nika:write"
       args:
         path: "./docker-health.md"
-        content: "${{ tasks.diagnose.output }}"
+        content: "${{ with.report }}"
 
 outputs:
   report: ${{ tasks.keep.output }}
@@ -105,7 +108,7 @@ belong in `output:` bindings and `nika:jq` instead.
 Two things worth noticing:
 
 - The two `docker` reads run **in parallel** (wave 1) — the scheduler
-  proved it from `depends_on`, nobody ordered it.
+  proved it from the `with:` bindings, nobody ordered it.
 - The cost line practices the honesty rule: a local model is **unpriced
   compute, not « free »** — the report says FLOOR and names why, it never
   rounds unknown to $0.

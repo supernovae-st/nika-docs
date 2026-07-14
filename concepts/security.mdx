@@ -67,17 +67,20 @@ spawn. But the structural defense is in how you write workflows:
 **tainted data goes through data channels, never code channels**.
 
 ```yaml
-# ❌ tainted output interpolated into a command string
+# ❌ tainted output interpolated into the argv
 bad:
+  with:
+    comment: ${{ tasks.fetch_comment.output }}
   exec:
-    command: ["echo", "${{ tasks.fetch_comment.output }}"]
+    command: ["echo", "${{ with.comment }}"]
 
 # ✅ tainted output passed as data
 good:
+  with:
+    comment: ${{ tasks.fetch_comment.output }}
   exec:
-    command: tee
-    args: ["/tmp/comment.txt"]
-    stdin: "${{ tasks.fetch_comment.output }}"
+    command: ["tee", "/tmp/comment.txt"]
+    stdin: "${{ with.comment }}"
 ```
 
 Passing tainted data to a privileged sink without going through a data

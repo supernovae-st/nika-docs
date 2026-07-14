@@ -28,13 +28,15 @@ tasks:
       command: ["printf", "'feat:", "resume\nfix:", "deadline'"]
 
   draft:
-    depends_on: [collect]
+    with:
+      commits: ${{ tasks.collect.output }}
     infer:
-      prompt: "Draft release notes from: ${{ tasks.collect.output }}"
+      prompt: "Draft release notes from: ${{ with.commits }}"
       max_tokens: 400
 
   stamp:
-    depends_on: [draft]
+    after:
+      draft: succeeded
     exec:
       command: ["printf", "'stamped'"]
 
@@ -146,15 +148,17 @@ tasks:
       command: ["printf", "'build", "ok'"]
 
   approve:
-    depends_on: [build]
+    after:
+      build: succeeded
     invoke:
       tool: "nika:prompt"
       args:
         message: "Ship this build to production?"
 
   ship:
-    depends_on: [approve]
-    when: "${{ tasks.approve.output == true }}"
+    with:
+      approved: ${{ tasks.approve.output }}
+    when: "${{ with.approved == true }}"
     exec:
       command: ["printf", "'shipped'"]
 ```
