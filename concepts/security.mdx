@@ -22,10 +22,36 @@ typed `NIKA-SEC-*` error your workflow can read, not a stack trace.
 | `infer:` → tool use | the fetched content the model reads | trust levels + spotlight + injection scanning |
 | `secrets.*` bindings | log access | masked at the binding layer, never logged |
 
+## Permits — declare the blast radius
+
 On top of the hardened mechanisms, a `permits:` block makes the file
-itself declare its blast radius — hosts, paths, programs, tools, all
-default-deny once declared. A task reaching beyond the boundary is
-caught by `nika check`, statically, with the exact fix:
+itself declare its blast radius. Four families, one shape:
+
+```yaml
+permits:
+  fs:
+    read: ["./data/**"]        # paths tasks may read
+    write: ["./out/**"]        # paths tasks may write
+  net:
+    http: ["api.github.com"]   # hosts nika:fetch may reach
+  exec: ["git", "wc"]          # programs exec: may run (false · true · allowlist)
+  tools: ["nika:*"]            # tool ids invoke:/agents may call
+```
+
+Two laws govern it:
+
+1. **No `permits:` block → the engine floor only.** The hardened
+   defaults below (SSRF defense, shell blocklist, secret masking)
+   apply — nothing else is restricted.
+2. **Any `permits:` block → default-deny for the whole file.** Anything
+   not listed is refused. A task reaching beyond the boundary is caught
+   by `nika check`, statically — `NIKA-SEC-004`, with the exact fix —
+   and the same boundary is enforced again at run time.
+
+You never have to write it by hand: `nika check --infer-permits`
+computes the tightest boundary the file actually needs and prints it,
+ready to paste. The SSRF floor below stays on **regardless** of
+permits — a permitted host still cannot bounce into private space.
 
 <video autoPlay muted loop playsInline poster="/images/posters/permits-audit.png" style={{ borderRadius: "0.75rem" }}>
   <source src="/videos/permits-audit.webm" type="video/webm" />
