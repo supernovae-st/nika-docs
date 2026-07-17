@@ -156,12 +156,12 @@ names the producer states that admit this task:
 ```yaml
 deploy:
   after:
-    tests: succeeded      # control edge · state, never data
+    tests: success      # control edge · state, never data
   exec:
     command: ["./deploy.sh"]
 ```
 
-The predicate set is **closed** (`NIKA-DAG-005` otherwise): `succeeded` ·
+The predicate set is **closed** (`NIKA-DAG-005` otherwise): `success` ·
 `failed` · `skipped` · `terminal` — where `terminal` admits any terminal
 state, `cancelled` included (the always-pattern: « run once X is settled,
 whatever happened »).

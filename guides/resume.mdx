@@ -36,7 +36,7 @@ tasks:
 
   stamp:
     after:
-      draft: succeeded
+      draft: success
     exec:
       command: ["printf", "'stamped'"]
 
@@ -149,7 +149,7 @@ tasks:
 
   approve:
     after:
-      build: succeeded
+      build: success
     invoke:
       tool: "nika:prompt"
       args:

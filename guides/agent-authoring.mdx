@@ -64,9 +64,9 @@ flowchart LR
     | Error | The fix |
     |---|---|
     | `NIKA-VAR-021` | you referenced `${{ tasks.X.* }}` in a verb body, `when:` or `for_each:`: hoist it into `with:` and read `${{ with.<name> }}` (`nika check --fix` applies it) |
-    | `NIKA-PARSE-024` | `depends_on:` is dead: data → a `with:` binding · control → `after: { x: succeeded }` (`nika check --fix` migrates) |
+    | `NIKA-PARSE-024` | `depends_on:` is dead: data → a `with:` binding · control → `after: { x: success }` (`nika check --fix` migrates) |
     | `NIKA-DAG-001` | cycle: remove the back-edge |
-    | `NIKA-DAG-005` | unknown `after:` predicate: the set is closed — `succeeded` · `failed` · `skipped` · `terminal` |
+    | `NIKA-DAG-005` | unknown `after:` predicate: the set is closed — `success` · `failed` · `skipped` · `terminal` |
     | `NIKA-VAR-001` | undeclared name: declare it in `vars:`/`secrets:` or fix the typo |
     | `NIKA-PROVIDER` | `model:` must be `<provider>/<name>` with a canonical prefix |
     | `NIKA-PARSE` (duplicate id) | two tasks share an id: rename one |
