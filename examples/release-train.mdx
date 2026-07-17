@@ -9,7 +9,7 @@ icon: "train"
 > citizen. The train holds with `nika:wait until:` (an absolute
 > timestamp, not a sleep), the gates' duration is computed with
 > `nika:date op: diff`, a human signs the departure, and the record
-> lands in the journal **whether the ship succeeded or not**.
+> lands in the journal **whether the ship success or not**.
 
 ## The job
 
@@ -42,12 +42,12 @@ flowchart TD
   lint --> gates_green
   audit --> gates_green
   t0 --> gate_time
-  gates_green -.->|succeeded| gate_time
+  gates_green -.->|success| gate_time
   gate_time --> conductor
   conductor --> approved
-  approved -.->|succeeded| hold
-  hold -.->|succeeded| ship
-  ship -.->|succeeded| verify
+  approved -.->|success| hold
+  hold -.->|success| ship
+  ship -.->|success| verify
   verify --> live
   live --> record
   live -.->|terminal| record
@@ -120,7 +120,7 @@ tasks:
     with:
       t0: ${{ tasks.t0.output }}
     after:
-      gates_green: succeeded           # state, no data · the timing is only worth taking on a green board
+      gates_green: success           # state, no data · the timing is only worth taking on a green board
     invoke:
       tool: "nika:date"
       args:
@@ -151,7 +151,7 @@ tasks:
   # ── hold until the window · absolute time, not a sleep ──
   hold:
     after:
-      approved: succeeded
+      approved: success
     invoke:
       tool: "nika:wait"
       args:
@@ -160,7 +160,7 @@ tasks:
 
   ship:
     after:
-      hold: succeeded
+      hold: success
     exec:
       command: ["./scripts/release.sh", "${{ vars.version }}"]   # argv: the interpolation cannot break out
       capture: structured
@@ -168,7 +168,7 @@ tasks:
 
   verify:
     after:
-      ship: succeeded
+      ship: success
     invoke:
       tool: "nika:fetch"
       args:
@@ -190,7 +190,7 @@ tasks:
         message: "Prod does not report the shipped version: investigate before announcing"
 
   # the always-pattern · `after: {live: terminal}` admits every settled
-  # state · this task runs whether `live` succeeded, failed, or was
+  # state · this task runs whether `live` success, failed, or was
   # cancelled by an upstream abort · a record that must land on EVERY
   # outcome is a terminal task, not a cleanup hook (03 §on_finally).
   record:

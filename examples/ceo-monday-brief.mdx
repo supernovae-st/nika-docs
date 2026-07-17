@@ -42,7 +42,7 @@ flowchart TD
   revenue --> brief
   stamp --> save
   brief --> save
-  save -.->|succeeded| bill
+  save -.->|success| bill
   stamp --> ping
   bill --> ping
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
@@ -157,7 +157,7 @@ tasks:
   # ── the run reports its own bill ──
   bill:
     after:
-      save: succeeded                # state, no data · read the meter once the brief landed
+      save: success                # state, no data · read the meter once the brief landed
     invoke:
       tool: "nika:inspect"
       args: { view: cost }
