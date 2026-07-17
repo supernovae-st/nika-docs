@@ -43,6 +43,26 @@ Between release tags, progress lands on `main` as:
 
 ## History
 
+<Update label="v0.104.0" description="2026-07-17 · the seventeenth seat" tags={["release", "providers"]}>
+  **Moonshot (Kimi) joins the canonical catalog** — 17 providers (11 cloud
+  · 5 local · 1 test). `model: moonshot/kimi-k3` runs Kimi K3 first-class:
+  1M context, `MOONSHOT_API_KEY`, and the pricing snapshot makes
+  `--max-cost-usd` a **hard ceiling** on kimi spend (the promotion run
+  metered $0.002787 against a $0.0077 printed worst-case). K3 is a
+  thinking model — reasoning spends output tokens, so budget `max_tokens`
+  generously (512+; at 64 the answer comes back empty and the engine says
+  why). Weights are announced open on July 27; until then the hosted API
+  routes through Moonshot's servers with training-by-default — read the
+  permits section of your workflow as the data-residency contract it is:
+  no declared egress, no call. Also in this wave: the lsp/graph/mcp test
+  fixtures that shipped red at the v0.103.0 tag now speak the argv form
+  (a CI-coverage gap banked as a finding), and the tag's rustfmt drift is
+  cleared. Release branch cut from v0.103.0 — `main` is mid-refonte and
+  users never ship a transitional grammar. Spec side: ADR-105 + stdlib
+  16→17 + the escape-hatch doc now names the real variable
+  (`NIKA_OPENAI_BASE_URL`, complete endpoint, verbatim).
+</Update>
+
 <Update label="v0.103.0" description="2026-07-13 · the language tightens" tags={["release", "language", "breaking"]}>
   The pre-1.0 window pays for itself — three breaking cuts in one wave,
   spec and engine merged in the same window. `command:` is **argv-only**

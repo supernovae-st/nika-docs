@@ -31,7 +31,7 @@ flowchart LR
   map --> pages
   pages --> digest
   digest --> save
-  save -.->|succeeded| ping
+  save -.->|success| ping
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
@@ -110,7 +110,7 @@ tasks:
 
   ping:
     after:
-      save: succeeded
+      save: success
     invoke:
       tool: "nika:notify"
       args:

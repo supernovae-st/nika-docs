@@ -36,7 +36,7 @@ outputs: { ... }             # optional · the workflow's return value
 <identifier>:                # the map KEY is the identity (snake_case · unique)
 
   with: { ... }              # optional · the DATA boundary · each tasks.* ref = one typed edge
-  after: { <id>: <pred> }    # optional · the CONTROL boundary · pred ∈ succeeded|failed|skipped|terminal
+  after: { <id>: <pred> }    # optional · the CONTROL boundary · pred ∈ success|failed|skipped|terminal
   when: <expression>         # optional · LOCAL business condition · evaluated POST-gate
   for_each: <expression>     # optional fan-out (an array · local read)
   max_parallel: <int>        # optional · cap concurrent iterations

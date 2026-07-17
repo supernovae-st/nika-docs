@@ -121,7 +121,7 @@ promising more than it checks.
 **Anti-pattern** · a `tasks.*` status test inside `when:` as a plain
 success gate. That form is illegal since W2 (`NIKA-VAR-021`): the gate
 lives on the edges — a value edge already admits on `{success, skipped}`,
-and `after: { a: succeeded }` is the strict form. `when:` decides
+and `after: { a: success }` is the strict form. `when:` decides
 *business* conditions on local values, post-gate.
 
 Taught by · [Invoice chaser](/examples/invoice-chaser) (human gate) ·

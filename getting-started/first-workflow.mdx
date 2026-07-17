@@ -171,7 +171,7 @@ flowchart LR
 One `with:` binding and the order falls out of the file. Tasks with no
 edge between them run **in parallel automatically**. You never schedule
 anything. (For an ordering with no data — run the deploy after the tests,
-consume nothing — use `after: { tests: succeeded }`, the control door.)
+consume nothing — use `after: { tests: success }`, the control door.)
 
 ## 5. Get structured output
 

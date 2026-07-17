@@ -27,7 +27,7 @@ flowchart LR
   trace["trace · nika:log"]:::invoke
   transcript --> extract
   extract --> save
-  extract -.->|succeeded| trace
+  extract -.->|success| trace
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
@@ -88,7 +88,7 @@ tasks:
 
   trace:
     after:
-      extract: succeeded
+      extract: success
     invoke:
       tool: "nika:log"
       args:

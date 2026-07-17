@@ -34,7 +34,7 @@ flowchart LR
   clauses --> check
   check --> gate
   clauses --> memo
-  gate -.->|succeeded| memo
+  gate -.->|success| memo
   memo --> save
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
@@ -115,7 +115,7 @@ tasks:
     with:
       clauses: ${{ tasks.clauses.output.clauses }}
     after:
-      gate: succeeded              # state, no data · the assert passed or the memo is cancelled
+      gate: success              # state, no data · the assert passed or the memo is cancelled
     infer:
       prompt: |
         Write a one-page risk memo from these clauses ·
