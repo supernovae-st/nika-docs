@@ -257,8 +257,8 @@ site and the usage site.
 Workflow-level control flow (`for_each:`, `when:`, the `with:` /
 `after:` edges) lives on the **task envelope**, not inside bindings.
 This is deliberate: the DAG is a static artifact, inspectable by the
-analyzer and renderable in the Olympus visualizer; bindings are local
-decorations.
+analyzer and renderable by any graph surface — `nika inspect <file>
+--format mermaid|dot|json`; bindings are local decorations.
 
 ## Related ADRs
 
