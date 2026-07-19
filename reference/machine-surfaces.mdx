@@ -44,8 +44,8 @@ without a binary, each probed and versioned like the CLI wires.
 
 ## The exit-code contract
 
-Scripts and agents branch on exit codes, so they are a spec surface
-(spec §4), not an accident:
+Scripts and agents branch on exit codes, so they are the engine CLI
+exit-code contract (locked · additive-only), not an accident:
 
 | Code | Meaning |
 |---|---|
@@ -53,6 +53,7 @@ Scripts and agents branch on exit codes, so they are a spec surface
 | `1` | the workflow ran and failed (a task settled failed) |
 | `2` | findings / usage / refusal — check findings, bad flags, the `--max-cost-usd` floor refusal |
 | `3` | environment — missing file, no golden to compare, binary-level trouble |
+| `4` | paused — the run parked on a blocking `nika:prompt` (durable pause · ADR-099) · not a failure but non-zero on purpose · resume with `nika run --resume <trace> --answer <task>=<value>` |
 
 Stream discipline: product output goes to **stdout**, only
 environmental noise goes to stderr — and in `--json` modes, progress
