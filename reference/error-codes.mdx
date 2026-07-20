@@ -95,12 +95,24 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-PARSE-022` | tasks: is a sequence — it became a map keyed by task id (drop `- id:`, the key IS the identity) | `validation_error` | false |
 | `NIKA-PARSE-023` | a task carries an id: field — the map key is the identity, the field is gone | `validation_error` | false |
 | `NIKA-PARSE-024` | a task carries depends_on: — dead since W2 (data → with: bindings · control → after: predicates · check --fix migrates) | `validation_error` | false |
+| `NIKA-PARSE-025` | decode: with capture: structured — that capture already IS an object · type it with returns: | `validation_error` | false |
+| `NIKA-COMP-001` | invoke.workflow: target is not statically resolvable (templated · malformed · unpinned registry ref) — a call graph you cannot draw before the run cannot be bounded (spec 14) | `validation_error` | false |
+| `NIKA-COMP-002` | the child workflow's effect boundary exceeds the parent capped by the call-site declaration (Authority(child) subset of Authority(parent) intersect declared · spec 14 laws 3/4) | `security_error` | false |
+| `NIKA-COMP-003` | the static call graph is not acyclic (self-launch · cycle · spec 14 law 7 · NIKA-SEC-003 is the runtime depth backstop) | `validation_error` | false |
+| `NIKA-COMP-004` | the typed call does not compose — parent args do not fit child inputs, or child outputs do not fit parent returns (spec 14 law 2) | `validation_error` | false |
 | `NIKA-DAG-001` | cycle in the precedence graph G_p = E_d ∪ E_c (incl. self-dependency · via with:/after:) | `validation_error` | false |
 | `NIKA-DAG-002` | with:/after: references an undeclared task | `validation_error` | false |
 | `NIKA-DAG-004` | on_error.recover references a task downstream of the declaring task (await would deadlock) | `validation_error` | false |
-| `NIKA-DAG-005` | after: predicate outside the closed set (success · failed · skipped · terminal) | `validation_error` | false |
+| `NIKA-DAG-005` | after: predicate outside the closed set (success · failure · skipped · terminal) | `validation_error` | false |
 | `NIKA-DAG-006` | statically dead task — an incoming edge's pass-set excludes every reachable producer state, or the when: gate is false under every reachable upstream combination (gate algebra v2) | `validation_error` | false |
 | `NIKA-DAG-007` | status compared against a literal outside the vocabulary (success · failure · skipped · cancelled) — == never matches, != always holds | `validation_error` | false |
+| `NIKA-TYPE-001` | unknown type name (in types: · returns: · an outputs: type) — did-you-mean when close | `validation_error` | false |
+| `NIKA-TYPE-002` | recursive type reference — the types: graph must be acyclic | `validation_error` | false |
+| `NIKA-TYPE-003` | returns: and schema: on the same task — one contract, one spelling | `validation_error` | false |
+| `NIKA-TYPE-004` | returns: type unreachable from the declared decode: (an object contract over decode: text · …) | `validation_error` | false |
+| `NIKA-TYPE-005` | a secret-carrying type in a lowered position (reserved with secret&lt;T&gt; · W4) | `security_error` | false |
+| `NIKA-TYPE-006` | regex pattern outside the locked dialect (backreference · lookaround · named group · inline flags · lazy/possessive · word-boundary · unicode-class — spec 09 §the regex dialect) | `validation_error` | false |
+| `NIKA-TYPE-101` | run-time contract violation — the decoded value does not fit returns: (exec:/invoke: lane) | `validation_error` | false |
 | `NIKA-VAR-001` | unresolved reference (unknown namespace entry · undeclared env/vars key) | `variable_error` | false |
 | `NIKA-VAR-002` | binding cardinality — a jq binding emitted zero or multiple values | `variable_error` | false |
 | `NIKA-VAR-003` | provably-invalid path into a declared schema (static walk) | `validation_error` | false |
@@ -124,13 +136,23 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-AGENT-004` | a skills: file is not a valid Agent Skill (frontmatter shape · missing/empty name/description) | `validation_error` | false |
 | `NIKA-MCP-001` | MCP server not configured / not reachable at call time | `tool_error` | engine-assessed |
 | `NIKA-MCP-002` | MCP tool call failed (transport · tool-side error) | `tool_error` | engine-assessed |
+| `NIKA-DECIDE-001` | the decision bundle is malformed or violates its own laws (float weight · undeclared evidence key in rules · identity key feeding a technical dimension · missing contradictory fixture · monotonicity violated by the bundle's own fixtures) (spec 11) | `validation_error` | false |
+| `NIKA-DECIDE-002` | the evidence snapshot does not satisfy the bundle's evidence schema (type misfit · unauthorized source · integrity below the declared floor · undeclared key) (spec 11) | `validation_error` | false |
+| `NIKA-POLICY-001` | a hard policy: rule is violated (require.human_gate_before · forbid.exec_after · allow.providers · limits.max_tasks) — the diagnostic names rule + task + witness (order rules: the path) · check-time, before any token (spec 10) | `security_error` | false |
+| `NIKA-PORT-001` | a gateway artifact (deployment bundle · capabilities report · lowering report · fidelity report · authority delta) is malformed or violates its laws (unknown promoted · permissive_unsafe without refusal · disclosure subset-chain violated · child authority exceeding parent) (spec 12) | `validation_error` | false |
+| `NIKA-PORT-002` | policy lowering is permissive_unsafe — the backend would allow what the policy forbids · refused with the divergence witness (spec 12) | `security_error` | false |
 | `NIKA-SEC-001` | exec: blocklist hit | `security_error` | false |
 | `NIKA-SEC-002` | agent tool call outside the tools: whitelist | `security_error` | false |
 | `NIKA-SEC-003` | run-recursion bound — nested-run depth exceeded OR self-launching workflow | `security_error` | false |
 | `NIKA-SEC-004` | effect outside the declared permits: capability boundary (fs/net/exec/tool) | `security_error` | false |
 | `NIKA-SEC-005` | SSRF block — a nika:fetch/nika:notify URL resolves to a loopback/private/link-local/metadata target (always-on engine floor · independent of permits:) | `security_error` | false |
+| `NIKA-SEC-006` | secret flow — a secrets.&lt;name&gt; value reaches an unsanctioned sink (exec argument · invoke payload · infer/agent prompt) · the diagnostic carries the taint path + the egress clause that would sanction it (spec 10 · flow rules in 01 §egress) | `security_error` | false |
+| `NIKA-SEC-007` | secret egress — a tainted value reaches the workflow boundary (outputs:) · the diagnostic carries the taint path (spec 10 · the to: outputs sanction in 01 §egress) | `security_error` | false |
+| `NIKA-SEC-009` | lethal trifecta complete — the declared boundary grants private read (fs.read non-empty) + untrusted ingress (a nika:fetch builtin invoked or granted · any mcp:* server granted) + external egress (net.http non-empty · an escaping fs.write glob · exec enabled), and no blocking invoke: nika:prompt (no default:) dominates an egress-capable task (NEP-0002 · the Rule of Two as a static check) | `security_error` | false |
 | `NIKA-TIMEOUT-001` | task (or for_each iteration) exceeded timeout: | `timeout_error` | false |
 | `NIKA-CANCEL-001` | task cancelled (workflow failure gate · user cancellation) | `cancelled` | false |
+| `NIKA-ASSERT-001` | an assert: claims a level the evidence does not support (a StaticProof the IR cannot decide · a mis-leveled obligation · spec 15) | `validation_error` | false |
+| `NIKA-LOCK-001` | a dependency resolved that nika.lock does not pin, or a hand-edited lock digest does not match (pin-by-default · the lock's own hash catches the edit · spec 15) | `validation_error` | false |
 | `NIKA-BUILTIN-001` | builtin invoke violates its statically-checkable arg contract (e.g. nika:fetch without url: · nika:jq arg shape) | `validation_error` | false |
 | `NIKA-BUILTIN-DONE-001` | nika:done invoked outside an agent: loop | `validation_error` | false |
 {/* errors-codes:end */}
@@ -153,18 +175,25 @@ never repurposed:
 | Namespace | Scope | Range |
 |---|---|---|
 | `NIKA-AGENT` | agent: verb errors | 001-099 |
+| `NIKA-ASSERT` |  | 001-099 |
 | `NIKA-BUILTIN` | Builtin tool errors · per-builtin sub-namespace | 001-099 |
 | `NIKA-CANCEL` | Task or workflow cancellation | 001-099 |
+| `NIKA-COMP` |  | 001-099 |
 | `NIKA-DAG` | DAG topology · cycles · invalid deps | 001-099 |
 | `NIKA-EXEC` | exec: verb errors | 001-099 |
 | `NIKA-IMPL` | Engine internal errors | 001-099 |
 | `NIKA-INFER` | infer: verb errors | 001-099 |
 | `NIKA-INVOKE` | invoke: verb errors | 001-099 |
+| `NIKA-LOCK` |  | 001-099 |
 | `NIKA-MCP` | MCP client errors | 001-099 |
+| `NIKA-DECIDE` |  | 001-099 |
 | `NIKA-PARSE` | YAML parse + envelope validation | 001-099 |
+| `NIKA-POLICY` |  | 001-099 |
+| `NIKA-PORT` |  | 001-099 |
 | `NIKA-PROVIDER` | Provider adapter errors | 001-099 |
 | `NIKA-SEC` | Security policy violations (SSRF · blocklist) | 001-099 |
 | `NIKA-TIMEOUT` | Task or step timeouts | 001-099 |
+| `NIKA-TYPE` |  | 001-099 |
 | `NIKA-VAR` | Variable resolution failures | 001-099 |
 {/* errors-namespaces:end */}
 

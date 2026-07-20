@@ -39,18 +39,18 @@ writing a file, calling GitHub are all **tools** under `invoke`.
 
 ```yaml workflow.nika.yaml
 nika: v1
-workflow:
-  id: summarize
+workflow: summarize
 
 tasks:
-  read:
+  - id: read
     invoke:
       tool: nika:fetch
       args:
         url: https://example.com/post.md
         mode: text
 
-  summarize:
+  - id: summarize
+    depends_on: [read]
     with:
       post: ${{ tasks.read.output }}       # the binding IS the edge
     infer:
@@ -59,7 +59,8 @@ tasks:
         Summarize in one sentence:
         ${{ with.post }}
 
-  save:
+  - id: save
+    depends_on: [summarize]
     with:
       summary: ${{ tasks.summarize.output }}
     invoke:

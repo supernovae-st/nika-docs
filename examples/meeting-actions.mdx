@@ -38,9 +38,8 @@ flowchart LR
 {/* showcase:begin t1-meeting-actions.nika.yaml */}
 ```yaml t1-meeting-actions.nika.yaml
 nika: v1
-workflow:
-  id: meeting-actions
-  description: "Transcript → typed action items {owner, task, due}"
+workflow: meeting-actions
+description: "Transcript → typed action items {owner, task, due}"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for openai/gpt-5.2 or any provider in the catalog
 
@@ -51,12 +50,13 @@ vars:
     description: "Path to the raw meeting transcript"
 
 tasks:
-  transcript:
+  - id: transcript
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.transcript_path }}" }
 
-  extract:
+  - id: extract
+    depends_on: [transcript]
     with:
       transcript: ${{ tasks.transcript.output }}
     infer:
@@ -77,7 +77,8 @@ tasks:
                 task: { type: string }
                 due: { type: string }
 
-  save:
+  - id: save
+    depends_on: [extract]
     with:
       extract_actions: ${{ tasks.extract.output.actions }}
     invoke:
@@ -86,9 +87,8 @@ tasks:
         path: "./action-items.json"
         content: "${{ with.extract_actions }}"
 
-  trace:
-    after:
-      extract: success
+  - id: trace
+    depends_on: [extract]
     invoke:
       tool: "nika:log"
       args:
@@ -98,7 +98,6 @@ tasks:
 outputs:
   actions:
     value: ${{ tasks.extract.output.actions }}
-    type: array
     description: "Typed action items, tracker-ready"
 ```
 {/* showcase:end */}

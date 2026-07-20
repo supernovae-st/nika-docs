@@ -56,9 +56,8 @@ flowchart TD
 {/* showcase:begin t4-incident-war-room.nika.yaml */}
 ```yaml t4-incident-war-room.nika.yaml
 nika: v1
-workflow:
-  id: incident-war-room
-  description: "parallel evidence → typed timeline → settle + recheck → postmortem draft"
+workflow: incident-war-room
+description: "parallel evidence → typed timeline → settle + recheck → postmortem draft"
 
 model: ollama/qwen3.5:4b   # local default · the synthesis task below overrides to a stronger model
 
@@ -77,12 +76,12 @@ secrets:
 
 tasks:
   # ── the gather wave · all three run in parallel ──
-  logs:
+  - id: logs
     exec:
       command: ["journalctl", "-u", "${{ vars.service }}", "--since", "${{ vars.log_window }}", "--no-pager"]
       capture: structured
 
-  status_history:
+  - id: status_history
     invoke:
       tool: "nika:fetch"
       args:
@@ -94,13 +93,14 @@ tasks:
       backoff_strategy: exponential
       jitter: true
 
-  runbook:
+  - id: runbook
     invoke:
       tool: "nika:read"
       args: { path: "./runbooks/${{ vars.service }}.md" }
 
   # ── reconstruct · typed timeline ──
-  timeline:
+  - id: timeline
+    depends_on: [logs, status_history, runbook]
     with:                               # three value edges · the gather wave feeds the synthesis
       logs: ${{ tasks.logs.output.stdout }}
       history: ${{ tasks.status_history.output }}
@@ -128,16 +128,14 @@ tasks:
                 evidence: { type: string }
 
   # ── settle, then confirm recovery before claiming it ──
-  settle:
-    after:
-      timeline: success
+  - id: settle
+    depends_on: [timeline]
     invoke:
       tool: "nika:wait"
       args: { duration: "60s" }
 
-  recheck:
-    after:
-      settle: success
+  - id: recheck
+    depends_on: [settle]
     invoke:
       tool: "nika:fetch"
       args:
@@ -145,7 +143,8 @@ tasks:
         mode: jq
         jq: ".current.state"
 
-  confirmed:
+  - id: confirmed
+    depends_on: [recheck]
     with:
       recovered: ${{ tasks.recheck.output == 'operational' }}   # the whole check crosses as ONE boundary expression
     invoke:
@@ -155,11 +154,10 @@ tasks:
         message: "Service is NOT back to operational: postmortem draft blocked"
 
   # ── the draft · only after recovery is proven ──
-  postmortem:
+  - id: postmortem
     with:
       events: ${{ tasks.timeline.output.events }}
-    after:
-      confirmed: success             # state, no data · recovery proven or no draft
+    depends_on: [confirmed, timeline]
     infer:
       model: anthropic/claude-sonnet-4-6   # per-task override · thinking budget
       prompt: |
@@ -170,7 +168,8 @@ tasks:
         enabled: true
         budget_tokens: 6000
 
-  save:
+  - id: save
+    depends_on: [postmortem]
     with:
       postmortem: ${{ tasks.postmortem.output }}
     invoke:
@@ -184,9 +183,8 @@ tasks:
   # including the designed failure path (recovery NOT confirmed → the
   # assert fails → save is cancelled → this still runs · `after:
   # terminal` admits all four settled states · 03 §gate algebra).
-  ping:
-    after:
-      save: terminal
+  - id: ping
+    depends_on: [save]
     with:
       outcome: ${{ tasks.save.status }}   # observe WHAT happened · same pass-set as the after edge
     invoke:
@@ -208,7 +206,6 @@ tasks:
 outputs:
   events:
     value: ${{ tasks.timeline.output.events }}
-    type: array
     description: "The reconstructed, typed incident timeline"
   postmortem: ${{ tasks.postmortem.output }}
 ```

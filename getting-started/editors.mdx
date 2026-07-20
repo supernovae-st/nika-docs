@@ -84,11 +84,10 @@ zero editor configuration:
 ```yaml
 # yaml-language-server: $schema=https://nika.sh/spec/v1/workflow.schema.json
 nika: v1
-workflow:
-  id: hello
+workflow: hello
 
 tasks:
-  greet:
+  - id: greet
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local · zero key
       prompt: "..."

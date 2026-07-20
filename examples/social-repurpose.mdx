@@ -43,9 +43,8 @@ flowchart LR
 {/* showcase:begin t1-social-repurpose.nika.yaml */}
 ```yaml t1-social-repurpose.nika.yaml
 nika: v1
-workflow:
-  id: social-repurpose
-  description: "One post → thread + LinkedIn + newsletter, in parallel"
+workflow: social-repurpose
+description: "One post → thread + LinkedIn + newsletter, in parallel"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large or any provider
 
@@ -53,31 +52,35 @@ vars:
   post_path: "./blog/launch-post.md"
 
 tasks:
-  post:
+  - id: post
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.post_path }}" }
 
   # Three rewrites · no deps between them · they run concurrently.
-  thread:
+  - id: thread
+    depends_on: [post]
     with:
       post: ${{ tasks.post.output }}
     infer:
       prompt: "Turn this post into a 6-tweet thread · keep the voice · ${{ with.post }}"
 
-  linkedin:
+  - id: linkedin
+    depends_on: [post]
     with:
       post: ${{ tasks.post.output }}
     infer:
       prompt: "Rewrite this post for LinkedIn · hook first · ${{ with.post }}"
 
-  newsletter:
+  - id: newsletter
+    depends_on: [post]
     with:
       post: ${{ tasks.post.output }}
     infer:
       prompt: "Write a 3-sentence newsletter blurb for this post · ${{ with.post }}"
 
-  bundle:
+  - id: bundle
+    depends_on: [thread, linkedin, newsletter]
     with:
       t: ${{ tasks.thread.output }}
       l: ${{ tasks.linkedin.output }}

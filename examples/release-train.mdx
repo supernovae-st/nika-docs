@@ -61,9 +61,8 @@ flowchart TD
 {/* showcase:begin t4-release-train.nika.yaml */}
 ```yaml t4-release-train.nika.yaml
 nika: v1
-workflow:
-  id: release-train
-  description: "parallel gates → human GO → hold until the window → ship · verify · record"
+workflow: release-train
+description: "parallel gates → human GO → hold until the window → ship · verify · record"
 
 vars:
   version:
@@ -81,25 +80,25 @@ secrets:
         host_from_self: true
 
 tasks:
-  t0:
+  - id: t0
     invoke:
       tool: "nika:date"
       args: { op: now }
 
   # ── the gate wave · all three run in parallel ──
-  tests:
+  - id: tests
     exec:
       command: ["cargo", "test", "--workspace", "--quiet"]
       capture: structured
     timeout: "15m"
 
-  lint:
+  - id: lint
     exec:
       command: ["cargo", "clippy", "--workspace", "--all-targets", "--", "-D", "warnings"]
       capture: structured
     timeout: "10m"
 
-  audit:
+  - id: audit
     exec:
       command: ["cargo", "audit"]
       capture: structured
@@ -107,7 +106,8 @@ tasks:
     retry:
       max_attempts: 2                  # advisory DB fetch can flake
 
-  gates_green:
+  - id: gates_green
+    depends_on: [tests, lint, audit]
     with:
       all_green: ${{ tasks.tests.output.exit_code == 0 && tasks.lint.output.exit_code == 0 && tasks.audit.output.exit_code == 0 }}   # three value edges · one boundary expression
     invoke:
@@ -116,11 +116,10 @@ tasks:
         condition: "${{ with.all_green }}"
         message: "A release gate is RED: the train does not depart"
 
-  gate_time:
+  - id: gate_time
     with:
       t0: ${{ tasks.t0.output }}
-    after:
-      gates_green: success           # state, no data · the timing is only worth taking on a green board
+    depends_on: [gates_green, t0]
     invoke:
       tool: "nika:date"
       args:
@@ -130,7 +129,8 @@ tasks:
         unit: minutes
 
   # ── the human signs the departure ──
-  conductor:
+  - id: conductor
+    depends_on: [gate_time]
     with:
       gate_time: ${{ tasks.gate_time.output }}
     invoke:
@@ -139,7 +139,8 @@ tasks:
         message: "Gates GREEN in ${{ with.gate_time }} min. Ship ${{ vars.version }} in the ${{ vars.window }} window?"
         default: false
 
-  approved:
+  - id: approved
+    depends_on: [conductor]
     with:
       signed: ${{ tasks.conductor.output == true }}   # the signature check crosses as ONE boundary expression
     invoke:
@@ -149,26 +150,23 @@ tasks:
         message: "Departure not signed: train cancelled"
 
   # ── hold until the window · absolute time, not a sleep ──
-  hold:
-    after:
-      approved: success
+  - id: hold
+    depends_on: [approved]
     invoke:
       tool: "nika:wait"
       args:
         until: "${{ vars.window }}"
         timeout: "48h"
 
-  ship:
-    after:
-      hold: success
+  - id: ship
+    depends_on: [hold]
     exec:
       command: ["./scripts/release.sh", "${{ vars.version }}"]   # argv: the interpolation cannot break out
       capture: structured
     timeout: "30m"
 
-  verify:
-    after:
-      ship: success
+  - id: verify
+    depends_on: [ship]
     invoke:
       tool: "nika:fetch"
       args:
@@ -180,7 +178,8 @@ tasks:
       backoff_strategy: exponential
       backoff_ms: 5000
 
-  live:
+  - id: live
+    depends_on: [verify]
     with:
       version_live: ${{ tasks.verify.output == vars.version }}   # the whole check crosses as ONE boundary expression
     invoke:
@@ -190,12 +189,11 @@ tasks:
         message: "Prod does not report the shipped version: investigate before announcing"
 
   # the always-pattern · `after: {live: terminal}` admits every settled
-  # state · this task runs whether `live` success, failed, or was
+  # state · this task runs whether `live` succeeded, failed, or was
   # cancelled by an upstream abort · a record that must land on EVERY
   # outcome is a terminal task, not a cleanup hook (03 §on_finally).
-  record:
-    after:
-      live: terminal
+  - id: record
+    depends_on: [live]
     with:
       outcome: ${{ tasks.live.status }}   # observe the departure verdict · same pass-set as the after edge
     invoke:

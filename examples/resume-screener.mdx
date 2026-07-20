@@ -49,9 +49,8 @@ flowchart TD
 {/* showcase:begin t3-resume-screener.nika.yaml */}
 ```yaml t3-resume-screener.nika.yaml
 nika: v1
-workflow:
-  id: resume-screener
-  description: "glob CVs → local-model rubric per candidate → deterministic shortlist"
+workflow: resume-screener
+description: "glob CVs → local-model rubric per candidate → deterministic shortlist"
 
 model: ollama/qwen3.5:4b   # PII stays on the machine · the whole screen is offline
 
@@ -67,12 +66,13 @@ vars:
   shortlist_size: 5
 
 tasks:
-  pool:
+  - id: pool
     invoke:
       tool: "nika:glob"
       args: { pattern: "${{ vars.cv_glob }}" }
 
-  cvs:
+  - id: cvs
+    depends_on: [pool]
     with:
       paths: ${{ tasks.pool.output }}    # the collection crosses the boundary here
     for_each: ${{ with.paths }}
@@ -84,7 +84,8 @@ tasks:
       tool: "nika:read"
       args: { path: "${{ item }}" }
 
-  pairs:
+  - id: pairs
+    depends_on: [pool, cvs]
     with:
       paths: ${{ tasks.pool.output }}
       texts: ${{ tasks.cvs.output }}
@@ -94,7 +95,8 @@ tasks:
         input: ["${{ with.paths }}", "${{ with.texts }}"]
         expression: "transpose | map(select(.[1] != null)) | map({path: .[0], text: .[1]})"
 
-  screened:
+  - id: screened
+    depends_on: [pairs]
     with:
       pairs: ${{ tasks.pairs.output }}   # pre-fan-out import · the collection
       cv_path: ${{ item.path }}          # re-evaluated per iteration
@@ -121,7 +123,8 @@ tasks:
           strengths: { type: array, items: { type: string } }
           concerns: { type: array, items: { type: string } }
 
-  ranked:
+  - id: ranked
+    depends_on: [screened]
     with:
       screened: ${{ tasks.screened.output }}
     invoke:
@@ -130,7 +133,8 @@ tasks:
         input: "${{ with.screened }}"
         expression: 'map(select(. != null)) | map(select(.fit != "weak")) | sort_by(.fit != "strong", -(.years_relevant // 0))'
 
-  shortlist:
+  - id: shortlist
+    depends_on: [ranked]
     with:
       ranked: ${{ tasks.ranked.output }}
     invoke:
@@ -139,7 +143,8 @@ tasks:
         input: "${{ with.ranked }}"
         expression: ".[:${{ vars.shortlist_size }}]"
 
-  brief:
+  - id: brief
+    depends_on: [shortlist]
     with:
       shortlist: ${{ tasks.shortlist.output }}
     when: ${{ size(with.shortlist) > 0 }}
@@ -150,7 +155,8 @@ tasks:
         One paragraph each · lead with the evidence quotes · end with
         the suggested interview focus.
 
-  save:
+  - id: save
+    depends_on: [brief]
     with:
       brief: ${{ tasks.brief.output }}
     when: ${{ with.brief != null }}    # skip cascades by VALUE · a skipped brief reads null
@@ -164,7 +170,6 @@ tasks:
 outputs:
   shortlist:
     value: ${{ tasks.shortlist.output }}
-    type: array
     description: "Ranked candidates · strong first, then by relevant years"
 ```
 {/* showcase:end */}

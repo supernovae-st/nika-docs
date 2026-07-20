@@ -16,27 +16,26 @@ already have.
 
 ```yaml release-notes.nika.yaml
 nika: v1
-workflow:
-  id: release-notes
-  description: "Collect commits, draft notes, stamp a file."
+workflow: release-notes
+description: "Collect commits, draft notes, stamp a file."
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 
 tasks:
-  collect:
+  - id: collect
     exec:
       command: ["printf", "'feat:", "resume\nfix:", "deadline'"]
 
-  draft:
+  - id: draft
+    depends_on: [collect]
     with:
       commits: ${{ tasks.collect.output }}
     infer:
       prompt: "Draft release notes from: ${{ with.commits }}"
       max_tokens: 400
 
-  stamp:
-    after:
-      draft: success
+  - id: stamp
+    depends_on: [draft]
     exec:
       command: ["printf", "'stamped'"]
 
@@ -138,24 +137,23 @@ process exits with code **4**.
 
 ```yaml gated-ship.nika.yaml
 nika: v1
-workflow:
-  id: gated-ship
-  description: "Build, ask a human, ship only on yes."
+workflow: gated-ship
+description: "Build, ask a human, ship only on yes."
 
 tasks:
-  build:
+  - id: build
     exec:
       command: ["printf", "'build", "ok'"]
 
-  approve:
-    after:
-      build: success
+  - id: approve
+    depends_on: [build]
     invoke:
       tool: "nika:prompt"
       args:
         message: "Ship this build to production?"
 
-  ship:
+  - id: ship
+    depends_on: [approve]
     with:
       approved: ${{ tasks.approve.output }}
     when: "${{ with.approved == true }}"

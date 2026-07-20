@@ -41,17 +41,17 @@ references servers by id: Nika handles the rest.
 <CodeGroup>
 ```yaml workflow.nika.yaml
 nika: v1
-workflow:
-  id: scrape-and-summarise
+workflow: scrape-and-summarise
 
 tasks:
-  crawl:
+  - id: crawl
     invoke:
       tool: "mcp:firecrawl/scrape"   # mcp:<server>/<tool> · server id from the catalog below
       args:
         url: https://example.com
 
-  summarise:
+  - id: summarise
+    depends_on: [crawl]
     with:
       page: ${{ tasks.crawl.output.content }}
     infer:

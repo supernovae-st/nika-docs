@@ -33,9 +33,8 @@ flowchart LR
 {/* showcase:begin t1-price-watch.nika.yaml */}
 ```yaml t1-price-watch.nika.yaml
 nika: v1
-workflow:
-  id: price-watch
-  description: "Watch a product price, ping me when it drops below my target"
+workflow: price-watch
+description: "Watch a product price, ping me when it drops below my target"
 
 vars:
   product_api: "https://api.shop.example.com/v1/products/macbook-air"
@@ -50,7 +49,7 @@ secrets:
         host_from_self: true
 
 tasks:
-  check:
+  - id: check
     invoke:
       tool: "nika:fetch"
       args:
@@ -65,7 +64,8 @@ tasks:
       # stays closed and the dry run ends green with the alert skipped.
       recover: { price: 949, name: "MacBook Air (offline sample)" }
 
-  alert:
+  - id: alert
+    depends_on: [check]
     with:
       price: ${{ tasks.check.price }}     # value edges · the named bindings cross the boundary here
       name: ${{ tasks.check.name }}

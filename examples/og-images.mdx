@@ -31,16 +31,15 @@ flowchart LR
 {/* showcase:begin t1-og-images.nika.yaml */}
 ```yaml t1-og-images.nika.yaml
 nika: v1
-workflow:
-  id: og-images
-  description: "Generate the launch OG hero image set into ./assets/og"
+workflow: og-images
+description: "Generate the launch OG hero image set into ./assets/og"
 
 permits:
   fs: { write: ["./assets/og/**"] }   # the ONLY place assets may land
   tools: ["nika:image_generate"]
 
 tasks:
-  hero:
+  - id: hero
     invoke:
       tool: "nika:image_generate"
       args:

@@ -39,24 +39,24 @@ flowchart LR
 {/* showcase:begin t1-standup-digest.nika.yaml */}
 ```yaml t1-standup-digest.nika.yaml
 nika: v1
-workflow:
-  id: standup-digest
-  description: "Read yesterday's commits, write today's standup note"
+workflow: standup-digest
+description: "Read yesterday's commits, write today's standup note"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-haiku-4-5 (fast one-liner job)
 
 tasks:
   # No deps between these two → the engine runs them in parallel.
-  today:
+  - id: today
     invoke:
       tool: "nika:date"
       args: { op: now }
 
-  history:
+  - id: history
     exec:
       command: ["git", "log", "--since=yesterday", "--oneline", "--no-merges"]
 
-  digest:
+  - id: digest
+    depends_on: [today, history]
     with:
       today: ${{ tasks.today.output }}
       history: ${{ tasks.history.output }}
@@ -69,7 +69,8 @@ tasks:
         Write my standup note · 3 bullets · done / doing / blocked.
         Plain words · no fluff.
 
-  save:
+  - id: save
+    depends_on: [digest]
     with:
       digest: ${{ tasks.digest.output }}
     invoke:

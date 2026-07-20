@@ -40,9 +40,8 @@ flowchart LR
 {/* showcase:begin t4-deep-research-brief.nika.yaml */}
 ```yaml t4-deep-research-brief.nika.yaml
 nika: v1
-workflow:
-  id: deep-research-brief
-  description: "plan → budgeted research agent → thinking synthesis → brief on disk"
+workflow: deep-research-brief
+description: "plan → budgeted research agent → thinking synthesis → brief on disk"
 
 model: ollama/qwen3.5:4b   # local default · per-task overrides below pick stronger models
 
@@ -53,7 +52,7 @@ vars:
     description: "What to research"
 
 tasks:
-  plan:
+  - id: plan
     infer:
       model: anthropic/claude-haiku-4-5    # planning is a fast-model job
       prompt: "Break '${{ vars.topic }}' into 4 sharp research queries · no overlap."
@@ -65,7 +64,8 @@ tasks:
             type: array
             items: { type: string }
 
-  investigate:
+  - id: investigate
+    depends_on: [plan]
     with:
       plan_queries: ${{ tasks.plan.output.queries }}
     agent:
@@ -91,7 +91,8 @@ tasks:
             type: array
             items: { type: string }
 
-  brief:
+  - id: brief
+    depends_on: [investigate]
     with:
       investigate_findings: ${{ tasks.investigate.output.findings }}
       investigate_sources: ${{ tasks.investigate.output.sources }}
@@ -105,7 +106,8 @@ tasks:
         enabled: true
         budget_tokens: 8000
 
-  save:
+  - id: save
+    depends_on: [brief]
     with:
       brief: ${{ tasks.brief.output }}
     invoke:
@@ -119,7 +121,6 @@ outputs:
   brief: ${{ tasks.brief.output }}
   sources:
     value: ${{ tasks.investigate.output.sources }}
-    type: array
     description: "Every source the agent actually used"
 ```
 {/* showcase:end */}

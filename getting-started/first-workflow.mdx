@@ -59,11 +59,10 @@ Create `hello.nika.yaml`:
 
 ```yaml hello.nika.yaml
 nika: v1
-workflow:
-  id: hello
+workflow: hello
 
 tasks:
-  greet:
+  - id: greet
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: "Say hi to the chrysalis. Be brief."
@@ -133,16 +132,16 @@ ceiling — the report tells you exactly that.
 
 ```yaml hello.nika.yaml
 nika: v1
-workflow:
-  id: hello
+workflow: hello
 
 tasks:
-  greet:
+  - id: greet
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: "Say hi to the chrysalis. Be brief."
 
-  critique:
+  - id: critique
+    depends_on: [greet]
     with:
       greeting: ${{ tasks.greet.output }}  # the binding IS the edge
     infer:
@@ -177,11 +176,10 @@ consume nothing — use `after: { tests: success }`, the control door.)
 
 ```yaml hello.nika.yaml
 nika: v1
-workflow:
-  id: hello-structured
+workflow: hello-structured
 
 tasks:
-  names:
+  - id: names
     infer:
       model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: "Generate three names for a butterfly."

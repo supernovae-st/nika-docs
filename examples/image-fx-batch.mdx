@@ -37,9 +37,8 @@ flowchart LR
 {/* showcase:begin t1-image-fx-batch.nika.yaml */}
 ```yaml t1-image-fx-batch.nika.yaml
 nika: v1
-workflow:
-  id: image-fx-batch
-  description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
+workflow: image-fx-batch
+description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
 
 vars:
   photos: "./photos" # the input folder · every .png in it gets the treatment
@@ -48,7 +47,7 @@ permits:
   exec: false
   fs:
     # a RELATIVE glob walks from `.` (the engine gates the walk root), so
-    # the read boundary is the cwd subtree — and `vars.photos` is caller-
+    # the read boundary is the cwd subtree — and `const.photos` is caller-
     # overridable, so no narrower literal glob can be proven to cover it.
     # Fixing the folder? Tighten this to `photos/**`. The write stays tight
     read: ["**"]
@@ -57,13 +56,14 @@ permits:
 
 tasks:
   # The folder is the work list — no hand-maintained array to drift.
-  shots:
+  - id: shots
     invoke:
       tool: "nika:glob"
       args: { pattern: "${{ vars.photos }}/*.png" }
 
   # One deterministic darkroom pass per photo · the ops run IN ORDER.
-  stylize:
+  - id: stylize
+    depends_on: [shots]
     with:
       shots: ${{ tasks.shots.output }}
     for_each: ${{ with.shots }}
@@ -83,7 +83,6 @@ outputs:
     # an empty ./photos skips the fan-out (its output is null) — the guard
     # keeps the typed contract honest on the very first exploratory run
     value: "${{ tasks.stylize.output != null ? tasks.stylize.output : [] }}"
-    type: array
     description: "The stylized artifact receipts · one per input photo"
 ```
 {/* showcase:end */}

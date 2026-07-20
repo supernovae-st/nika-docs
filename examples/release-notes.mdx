@@ -40,9 +40,8 @@ flowchart LR
 {/* showcase:begin t2-release-notes.nika.yaml */}
 ```yaml t2-release-notes.nika.yaml
 nika: v1
-workflow:
-  id: release-notes
-  description: "git log → typed release notes → CHANGELOG insert → team ping"
+workflow: release-notes
+description: "git log → typed release notes → CHANGELOG insert → team ping"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large
 
@@ -58,11 +57,12 @@ secrets:
         host_from_self: true
 
 tasks:
-  history:
+  - id: history
     exec:
       command: ["git", "log", "${{ vars.since_tag }}..HEAD", "--oneline", "--no-merges"]
 
-  notes:
+  - id: notes
+    depends_on: [history]
     with:
       history: ${{ tasks.history.output }}
     infer:
@@ -78,7 +78,8 @@ tasks:
           breaking: { type: array, items: { type: string } }
           body: { type: string }
 
-  changelog:
+  - id: changelog
+    depends_on: [notes]
     with:
       notes_headline: ${{ tasks.notes.output.headline }}
       notes_body: ${{ tasks.notes.output.body }}
@@ -94,11 +95,10 @@ tasks:
 
           ${{ with.notes_body }}
 
-  announce:
+  - id: announce
     with:
       notes_headline: ${{ tasks.notes.output.headline }}
-    after:
-      changelog: success
+    depends_on: [changelog, notes]
     invoke:
       tool: "nika:notify"
       args:

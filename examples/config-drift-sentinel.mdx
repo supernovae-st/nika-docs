@@ -51,9 +51,8 @@ flowchart TD
 {/* showcase:begin t3-config-drift-sentinel.nika.yaml */}
 ```yaml t3-config-drift-sentinel.nika.yaml
 nika: v1
-workflow:
-  id: config-drift-sentinel
-  description: "live config vs sanctioned baseline → typed drift → explained alert"
+workflow: config-drift-sentinel
+description: "live config vs sanctioned baseline → typed drift → explained alert"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-haiku-4-5 (explain is cheap)
 
@@ -74,7 +73,7 @@ secrets:
         host_from_self: true
 
 tasks:
-  live:
+  - id: live
     invoke:
       tool: "nika:fetch"
       args:
@@ -85,12 +84,13 @@ tasks:
       max_attempts: 3
       backoff_strategy: exponential
 
-  baseline:
+  - id: baseline
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.baseline_path }}" }
 
-  expected:
+  - id: expected
+    depends_on: [baseline]
     with:
       baseline: ${{ tasks.baseline.output }}
     invoke:
@@ -99,7 +99,8 @@ tasks:
         target: "${{ with.baseline }}"
         patch: "${{ vars.approved_overrides }}"
 
-  drift:
+  - id: drift
+    depends_on: [expected, live]
     with:
       expected: ${{ tasks.expected.output }}
       live: ${{ tasks.live.output }}
@@ -109,7 +110,8 @@ tasks:
         before: "${{ with.expected }}"
         after: "${{ with.live }}"
 
-  fingerprint:
+  - id: fingerprint
+    depends_on: [live]
     with:
       live: ${{ tasks.live.output }}
     invoke:
@@ -119,7 +121,8 @@ tasks:
         content: "${{ with.live }}"
         encoding: hex
 
-  explain:
+  - id: explain
+    depends_on: [drift]
     with:
       patch: ${{ tasks.drift.output }}
     when: ${{ size(with.patch) > 0 }}
@@ -131,7 +134,8 @@ tasks:
         ${{ with.patch }}
         Explain in 3 bullets · what changed · likely blast radius · first check.
 
-  alert:
+  - id: alert
+    depends_on: [drift, explain, fingerprint]
     with:
       patch: ${{ tasks.drift.output }}
       explanation: ${{ tasks.explain.output }}
@@ -145,7 +149,8 @@ tasks:
         message: "Config drift detected · ${{ with.explanation }} · live config blake3 ${{ with.live_hash }}"
         severity: critical
 
-  record:
+  - id: record
+    depends_on: [drift, fingerprint]
     with:
       patch: ${{ tasks.drift.output }}
       live_hash: ${{ tasks.fingerprint.output }}
@@ -160,7 +165,6 @@ tasks:
 outputs:
   drift:
     value: ${{ tasks.drift.output }}
-    type: array
     description: "RFC 6902 operations · empty when prod matches the sanctioned state"
 ```
 {/* showcase:end */}

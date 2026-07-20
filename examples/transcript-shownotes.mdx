@@ -44,9 +44,8 @@ flowchart LR
 {/* showcase:begin t2-transcript-shownotes.nika.yaml */}
 ```yaml t2-transcript-shownotes.nika.yaml
 nika: v1
-workflow:
-  id: transcript-shownotes
-  description: "Raw transcript → typed show-notes (chapters · quotes · summary) · one bounded infer"
+workflow: transcript-shownotes
+description: "Raw transcript → typed show-notes (chapters · quotes · summary) · one bounded infer"
 
 model: ollama/llama3.2:3b # local · zero key · deliberately NOT the qwen3.5 convention: a thinking model can burn max_tokens in its think block before the JSON (engine#428) — schema showcases pick a non-thinking model
 
@@ -61,13 +60,14 @@ permits:
   tools: ["nika:read", "nika:jq", "nika:write"]
 
 tasks:
-  raw:
+  - id: raw
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.transcript }}" }
 
   # ONE bounded model call · the schema is the contract, not a suggestion.
-  notes:
+  - id: notes
+    depends_on: [raw]
     with:
       raw: ${{ tasks.raw.output }}
     infer:
@@ -98,7 +98,8 @@ tasks:
             items: { type: string }
 
   # Typed JSON → markdown lines · mechanical, zero second model call.
-  sections:
+  - id: sections
+    depends_on: [notes]
     with:
       notes: ${{ tasks.notes.output }}
     invoke:
@@ -111,7 +112,8 @@ tasks:
             quotes: (.quotes | map("> \(.)") | join("\n\n"))
           }
 
-  page:
+  - id: page
+    depends_on: [notes, sections]
     with:
       notes_summary: ${{ tasks.notes.output.summary }}
       sections_chapters: ${{ tasks.sections.output.chapters }}
@@ -138,7 +140,6 @@ tasks:
 outputs:
   notes:
     value: ${{ tasks.notes.output }}
-    type: object
     description: "The typed show-notes · summary + chapters + quotes"
 ```
 {/* showcase:end */}
