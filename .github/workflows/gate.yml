@@ -60,16 +60,34 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.12'
-      # oracle-sweep.py resolves the spec as the docs' SIBLING directory
-      # (DOCS.parent / "spec") — same layout as the monorepo checkout.
-      - name: fetch the spec oracle (sibling layout)
-        run: git clone --depth 1 https://github.com/supernovae-st/nika-spec ../spec
-      - name: runner deps (pyyaml · jsonschema · jq for jq-compile checks)
+      # The fence judge is the RELEASED binary — docs are a baked visitor
+      # surface, and what a reader copies must run on THEIR installed nika.
+      # (The spec oracle judges the PACK in the spec repo's own CI; judging
+      # a served surface against spec HEAD is the wrong judge — that is how
+      # 56 fences stayed green while broken on every installed binary.)
+      - name: install nika (latest release · checksum-verified)
         run: |
-          pip install pyyaml jsonschema
-          jq --version || (sudo apt-get update && sudo apt-get install -y jq)
-      - name: every docs yaml block passes the spec oracle
+          set -euo pipefail
+          tag=$(curl -fsSL -o /dev/null -w '%{url_effective}' \
+            https://github.com/supernovae-st/nika/releases/latest | sed 's|.*/tag/||')
+          ver=${tag#v}
+          dl="https://github.com/supernovae-st/nika/releases/download/${tag}"
+          asset="nika-linux-x64-${ver}.tar.gz"
+          curl -fsSL "${dl}/${asset}" -o "${asset}"
+          curl -fsSL "${dl}/SHA256SUMS" -o SHA256SUMS
+          grep " ${asset}\$" SHA256SUMS | sha256sum -c -
+          tar xzf "${asset}"
+          sudo mv nika /usr/local/bin/nika
+          nika --version
+      - name: every docs yaml block runs on the released binary
         run: python3 scripts/oracle-sweep.py
+      # The spec clone below serves ONLY the design-token parity check.
+      # Pin debt (known): it tracks spec HEAD — tokens drift slowly and the
+      # check is advisory-shaped; the fence judge above no longer does.
+      - name: fetch the spec (design parity only)
+        run: git clone --depth 1 https://github.com/supernovae-st/nika-spec ../spec
+      - name: projector deps (pyyaml · jsonschema)
+        run: pip install pyyaml jsonschema
       - name: docs.json theme parity vs the design-tokens SSOT
         env:
           NIKA_DOCS_ROOT: ${{ github.workspace }}
