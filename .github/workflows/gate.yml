@@ -82,13 +82,17 @@ jobs:
       - name: every docs yaml block runs on the released binary
         run: python3 scripts/oracle-sweep.py
       # The spec clone below serves ONLY the design-token parity check.
-      # Pin debt (known): it tracks spec HEAD — tokens drift slowly and the
-      # check is advisory-shaped; the fence judge above no longer does.
+      # clock: ratified-HEAD · because the docs THEME follows the spec design
+      # pack as ratified — an accepted, advisory drift signal (a spec-side
+      # token merge may flag here before docs re-theme). Advisory means
+      # advisory: continue-on-error keeps a floating judge from blocking the
+      # gate (the clock-sweep caught the comment/behavior mismatch 2026-07-20).
       - name: fetch the spec (design parity only)
         run: git clone --depth 1 https://github.com/supernovae-st/nika-spec ../spec
       - name: projector deps (pyyaml · jsonschema)
         run: pip install pyyaml jsonschema
-      - name: docs.json theme parity vs the design-tokens SSOT
+      - name: docs.json theme parity vs the design-tokens SSOT (advisory)
+        continue-on-error: true
         env:
           NIKA_DOCS_ROOT: ${{ github.workspace }}
         run: python3 ../spec/scripts/design-projector.py --check
