@@ -23,9 +23,8 @@ pre-push:
       # reference/cli.mdx row (soft-skips when the binary is absent)
       run: python3 scripts/teach-parity.py
     oracle-sweep:
-      # every full yaml workflow block must validate against the spec oracle
-      # (needs the sibling spec clone · soft-skip when absent)
-      run: >
-        sh -c '[ -d ../spec/conformance ]
-        && python3 scripts/oracle-sweep.py
-        || echo "⚠ sibling spec clone absent — oracle-sweep SKIPPED"'
+      # every full yaml workflow block must run on the RELEASED binary — the
+      # same judge CI uses (local/CI judge parity · the sibling-spec probe
+      # died with the wrong-judge fix; the script itself soft-exits 2 when
+      # no `nika` is on PATH, so the guard is the script's, not the hook's)
+      run: python3 scripts/oracle-sweep.py
