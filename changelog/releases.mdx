@@ -1,6 +1,6 @@
 ---
 title: "Releases"
-description: "The full arc — the idea (2025), the exploration era, the Diamond rebuild, and every public release since v0.90.0. One source of truth: `CHANGELOG.md` on the `main` branch."
+description: "The full arc — the exploration (summer 2025), the brouillon era (v0.1 → v0.79), the Diamond rewrite, and every public release since v0.90.0. One source of truth: `CHANGELOG.md` on the `main` branch."
 sidebarTitle: "Releases"
 icon: "clock-rotate-left"
 ---
@@ -11,19 +11,25 @@ Nika follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 [real semver toward 1.0](/changelog/roadmap). The history below spans three
 eras, and every entry is dated from the git record:
 
-1. **Origins** (2025 → April 2026) — the idea, then a 14-week private
-   exploration that grew to a 322k-LOC engine and taught the lesson Diamond
-   is built on.
-2. **The Diamond rebuild** (April 13, 2026 →) — a ground-up rewrite, one
-   crate at a time, 12 gates each.
-3. **Public releases** (June 21, 2026 →) — tagged binaries, curated
-   changelogs, real semver.
+1. **✧ Exploration** (summer 2025 → end 2025) — private prototypes before
+   the repo existed: the idea, tested in code that was never meant to
+   survive.
+2. **✎ Brouillon** (January 1 → April 13, 2026) — the named draft: v0.1 →
+   v0.79.3, a 14-week private sprint that grew to a 322k-LOC engine and
+   taught the lesson Diamond is built on. The era is called what its git
+   branch is called: `brouillon`.
+3. **◆ Diamond** (April 13, 2026 →) — a ground-up rewrite, one crate at a
+   time, 12 gates each; tagged binaries and real semver since v0.90.0
+   (June 21, 2026).
 
 <Info>
   **Canonical source:** [`CHANGELOG.md`](https://github.com/supernovae-st/nika/blob/main/CHANGELOG.md)
   on the `main` branch. This page curates the milestones; the full history
   lives in the repo. Current HEAD `{STATUS.head}`. Filter entries with the
   tags, or subscribe via [RSS](https://docs.nika.sh/changelog/releases/rss.xml).
+  The era model itself is machine-verified: [nika.sh/timeline](https://nika.sh/timeline)
+  renders the spec's [`timeline/timeline.yaml`](https://github.com/supernovae-st/nika-spec/blob/main/timeline/timeline.yaml),
+  and every provable claim in it is re-proven in CI against crates.io and GitHub.
 </Info>
 
 ## Cadence
@@ -370,7 +376,7 @@ Between release tags, progress lands on `main` as:
 <Update label="Diamond begins" description="2026-04-13 · the orphan branch · v0.80.0-alpha.0" tags={["foundation", "milestone"]}>
   **The rewrite starts.** An orphan branch created from scratch (as
   `nika-diamond`, renamed `main` in May 2026) — zero shared history with
-  the exploration era. The constraint that defines everything after:
+  the brouillon. The constraint that defines everything after:
   every crate must fit in an AI context window. ≤15k LOC per crate,
   ≤1,500 per file, ≤100 lines per function, zero `.unwrap()` in `src/`,
   and 12 admission gates before a crate joins the workspace. First
@@ -379,18 +385,18 @@ Between release tags, progress lands on `main` as:
   toward 1.0.
 </Update>
 
-<Update label="v0.79.3 — exploration ends" description="2026-04-09 · 322k LOC · 31 crates · the context lesson" tags={["origins", "milestone"]}>
+<Update label="v0.79.3 — the brouillon closes" description="2026-04-09 · 322k LOC · 31 crates · the context lesson" tags={["origins", "milestone"]}>
   The final sprint says everything about the pace: v0.73 → v0.79 in
   three days (April 6-8), v0.79.3 on April 9. Fourteen weeks after the
-  first commit, the exploration engine is a working 322k-LOC, 31-crate
+  first commit, the brouillon engine is a working 322k-LOC, 31-crate
   system — and it has surfaced the lesson Diamond is built on: at that
   scale the biggest correctness risk stops being algorithmic and
   becomes **context**. No human or AI assistant could hold the system
   in working memory, so refactors happened by pattern-match, and
   pattern-match hallucinates. Four days later the rewrite began. The
-  exploration era is preserved as a read-only private archive
-  (`brouillon`); nothing ships from it. Diamond reads it, then
-  rewrites from scratch.
+  era is preserved read-only on the branch that named it —
+  `brouillon`, a private archive; nothing ships from it. Diamond
+  reads it, then rewrites from scratch.
 </Update>
 
 <Update label="The version storm" description="2026-02 → 2026-03 · v0.3 → v0.21 in fifteen days" tags={["origins"]}>
@@ -399,28 +405,34 @@ Between release tags, progress lands on `main` as:
   and the provider layer learns tool calling — all in one day. Then
   the storm: v0.3 (February 19) → v0.10 (February 25) → v0.17
   (March 2) → v0.21 with a first language server (March 5). March
-  alone counts 2,900+ commits — the month the exploration engine
+  alone counts 2,900+ commits — the month the brouillon engine
   became an ecosystem: LSP, security releases, CI/CD, release
-  automation.
+  automation. The era even has a public spine: seven crates.io
+  releases, 0.20.0 (March 4) → 0.47.1 (March 26) — later yanked,
+  listed forever.
 </Update>
 
-<Update label="The exploration era begins" description="2026-01-01 · the first commit" tags={["origins", "milestone"]}>
+<Update label="The brouillon era begins" description="2026-01-01 · the first commit" tags={["origins", "milestone"]}>
   **The first commit lands on New Year's Day 2026**: `initial nika v0.1
   with strict templating system` — followed the same week by DAG
   validation, event sourcing for the workflow audit trail, and
   fine-grained executor events. The shape of everything that followed —
   declarative workflows, a DAG, an audit trail — is visible in week
-  one. ~4,600 commits follow in fourteen weeks.
+  one. ~4,600 commits follow in fourteen weeks. The era carries the
+  name its git branch carries: `brouillon` — the draft.
 </Update>
 
-<Update label="The idea" description="2025 · before any code" tags={["origins"]}>
-  Nika started as a frustration, in 2025, before a single line existed:
-  useful AI work kept disappearing into chat histories. A great run — a
-  research brief, a review procedure, a data pipeline — lived and died
-  inside one conversation, unrepeatable and unownable. The bet:
-  **durable agent work should be source code** — one file you can run,
-  diff, review, and keep; local-first; any model; sovereign by default.
-  The first exploratory commit followed on January 1, 2026.
+<Update label="The exploration" description="summer 2025 → end 2025 · prototypes before the repo" tags={["origins"]}>
+  Nika started as a frustration in 2025: useful AI work kept
+  disappearing into chat histories. A great run — a research brief, a
+  review procedure, a data pipeline — lived and died inside one
+  conversation, unrepeatable and unownable. The bet: **durable agent
+  work should be source code** — one file you can run, diff, review,
+  and keep; local-first; any model; sovereign by default. The idea was
+  tested in code from the start — private prototypes through the
+  summer and fall of 2025, pre-git and testimony-grade, and the
+  [timeline](https://nika.sh/timeline) labels them exactly that. The
+  first repo commit followed on January 1, 2026.
 </Update>
 
 ## Full history

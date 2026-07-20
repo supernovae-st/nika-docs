@@ -22,10 +22,10 @@ earned by crate admissions + hygiene vector deploys + ADR promotions.
 
 | When | What |
 |---|---|
-| 2025 | The idea: durable agent work should be source code — one file, any model, sovereign by default. |
-| 2026-01-01 | First exploratory commit. Fourteen weeks and ~4,600 commits of private exploration begin. |
-| Feb–Mar 2026 | The version storm: verbs, an MCP client, then a first LSP appear in the exploration codebase — v0.3 → v0.21 in fifteen days. |
-| 2026-04-09 | v0.79.3 — the exploration engine peaks at 322k LOC / 31 crates, and teaches the context lesson that motivates Diamond. |
+| Summer → end 2025 | ✧ The exploration — private prototypes before the repo; the idea: durable agent work should be source code — one file, any model, sovereign by default. |
+| 2026-01-01 | ✎ The brouillon era begins — first commit `initial nika v0.1`. Fourteen weeks and ~4,600 commits of private drafting, on the branch literally named `brouillon`. |
+| Feb–Mar 2026 | The version storm: verbs, an MCP client, then a first LSP appear in the brouillon codebase — v0.3 → v0.21 in fifteen days, plus a public crates.io spine (0.20.0 → 0.47.1). |
+| 2026-04-09 | v0.79.3 — the brouillon engine peaks at 322k LOC / 31 crates, and teaches the context lesson that motivates Diamond. |
 | 2026-04-13 | **Diamond begins**: ground-up rewrite on an orphan branch. 12 gates per crate, hard caps, zero `.unwrap()`. |
 | May 2026 | The language locks in the open spec: `nika: v1` envelope · 4 verbs · CEL + jq · 22-builtin stdlib. |
 | 2026-06-10 → 21 | The vertical slice: 23 crates admitted in twelve days — verbs, runtime, LSP, MCP, schema, CLI. |
@@ -226,7 +226,11 @@ See [live state](/reference/status) for the authoritative snapshot.
 
 <CardGroup cols={2}>
   <Card title="Releases" icon="clock-rotate-left" href="/changelog/releases">
-    The full arc, dated and tagged: origins → Diamond → the 0.9x train.
+    The full arc, dated and tagged: exploration → brouillon → Diamond.
+  </Card>
+  <Card title="Timeline" icon="timeline" href="https://nika.sh/timeline">
+    The one verifiable record — eras, releases, forward gates; every
+    provable claim re-proven in CI.
   </Card>
   <Card title="Live state" icon="gauge" href="/reference/status">
     Where the engine is today.
