@@ -43,6 +43,29 @@ Between release tags, progress lands on `main` as:
 
 ## History
 
+<Update label="v0.105.0" description="2026-07-20 · the map comes home" tags={["release", "language", "security", "breaking"]}>
+  The refonte reaches users — **the file becomes a map**. `workflow:` is
+  an object (`id:` + `description:`), `tasks:` is a map keyed by id, and
+  precedence reads the way you think: **the binding IS the edge**
+  (`with: x: ${{ tasks.a.output }}` declares the data edge) · control-only
+  ordering is `after: {producer: succeeded}` against a closed predicate
+  set (succeeded · failed · skipped · terminal). The old forms die loudly
+  — a scalar `workflow:` is NIKA-PARSE-020, `depends_on:` is
+  NIKA-PARSE-024 — and `nika check --fix` machine-migrates the provable
+  cases. The proof layer opens: semantic hash + `nika.lock` +
+  `receipt_format: 1`, workflow composition (`invoke: workflow:`), and
+  `nika:decide`, the deterministic decision kernel. One security seat
+  ships in this tag: the **lethal-trifecta judge** (NIKA-SEC-009) refuses
+  private-read + untrusted-ingress + external-egress with no blocking
+  human gate on the path. The LSP learns the map end-to-end (server-side
+  rename · per-block keysets · `semantic_document_format: 1`). Every
+  surface you copy from re-baked the same day — the site, these docs, the
+  templates and the kit speak the released grammar (the serve-time door
+  law: what you copy runs on YOUR installed binary). Thinking-model note,
+  same honesty as the K3 seat: reasoning spends `max_tokens` — budget
+  generously or declare `thinking:`; an empty answer says why.
+</Update>
+
 <Update label="v0.104.0" description="2026-07-17 · the seventeenth seat" tags={["release", "providers"]}>
   **Moonshot (Kimi) joins the canonical catalog** — 17 providers (11 cloud
   · 5 local · 1 test). `model: moonshot/kimi-k3` runs Kimi K3 first-class:
