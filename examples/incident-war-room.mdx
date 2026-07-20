@@ -56,8 +56,9 @@ flowchart TD
 {/* showcase:begin t4-incident-war-room.nika.yaml */}
 ```yaml t4-incident-war-room.nika.yaml
 nika: v1
-workflow: incident-war-room
-description: "parallel evidence → typed timeline → settle + recheck → postmortem draft"
+workflow:
+  id: incident-war-room
+  description: "parallel evidence → typed timeline → settle + recheck → postmortem draft"
 
 model: ollama/qwen3.5:4b   # local default · the synthesis task below overrides to a stronger model
 
@@ -76,12 +77,12 @@ secrets:
 
 tasks:
   # ── the gather wave · all three run in parallel ──
-  - id: logs
+  logs:
     exec:
       command: ["journalctl", "-u", "${{ vars.service }}", "--since", "${{ vars.log_window }}", "--no-pager"]
       capture: structured
 
-  - id: status_history
+  status_history:
     invoke:
       tool: "nika:fetch"
       args:
@@ -93,14 +94,13 @@ tasks:
       backoff_strategy: exponential
       jitter: true
 
-  - id: runbook
+  runbook:
     invoke:
       tool: "nika:read"
       args: { path: "./runbooks/${{ vars.service }}.md" }
 
   # ── reconstruct · typed timeline ──
-  - id: timeline
-    depends_on: [logs, status_history, runbook]
+  timeline:
     with:                               # three value edges · the gather wave feeds the synthesis
       logs: ${{ tasks.logs.output.stdout }}
       history: ${{ tasks.status_history.output }}
@@ -128,14 +128,16 @@ tasks:
                 evidence: { type: string }
 
   # ── settle, then confirm recovery before claiming it ──
-  - id: settle
-    depends_on: [timeline]
+  settle:
+    after:
+      timeline: succeeded
     invoke:
       tool: "nika:wait"
       args: { duration: "60s" }
 
-  - id: recheck
-    depends_on: [settle]
+  recheck:
+    after:
+      settle: succeeded
     invoke:
       tool: "nika:fetch"
       args:
@@ -143,8 +145,7 @@ tasks:
         mode: jq
         jq: ".current.state"
 
-  - id: confirmed
-    depends_on: [recheck]
+  confirmed:
     with:
       recovered: ${{ tasks.recheck.output == 'operational' }}   # the whole check crosses as ONE boundary expression
     invoke:
@@ -154,10 +155,11 @@ tasks:
         message: "Service is NOT back to operational: postmortem draft blocked"
 
   # ── the draft · only after recovery is proven ──
-  - id: postmortem
+  postmortem:
     with:
       events: ${{ tasks.timeline.output.events }}
-    depends_on: [confirmed, timeline]
+    after:
+      confirmed: succeeded             # state, no data · recovery proven or no draft
     infer:
       model: anthropic/claude-sonnet-4-6   # per-task override · thinking budget
       prompt: |
@@ -168,8 +170,7 @@ tasks:
         enabled: true
         budget_tokens: 6000
 
-  - id: save
-    depends_on: [postmortem]
+  save:
     with:
       postmortem: ${{ tasks.postmortem.output }}
     invoke:
@@ -183,8 +184,9 @@ tasks:
   # including the designed failure path (recovery NOT confirmed → the
   # assert fails → save is cancelled → this still runs · `after:
   # terminal` admits all four settled states · 03 §gate algebra).
-  - id: ping
-    depends_on: [save]
+  ping:
+    after:
+      save: terminal
     with:
       outcome: ${{ tasks.save.status }}   # observe WHAT happened · same pass-set as the after edge
     invoke:

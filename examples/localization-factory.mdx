@@ -45,8 +45,9 @@ flowchart LR
 {/* showcase:begin t3-localization-factory.nika.yaml */}
 ```yaml t3-localization-factory.nika.yaml
 nika: v1
-workflow: localization-factory
-description: "glob docs → parallel read → parallel translate → mirror tree"
+workflow:
+  id: localization-factory
+  description: "glob docs → parallel read → parallel translate → mirror tree"
 
 model: ollama/qwen3.5:4b   # local default · swap for mistral/mistral-large (EU model for EU locales)
 
@@ -55,15 +56,14 @@ vars:
   source_glob: "./docs/**/*.md"
 
 tasks:
-  - id: files
+  files:
     invoke:
       tool: "nika:glob"
       args:
         pattern: "${{ vars.source_glob }}"
         exclude: ["**/node_modules/**"]
 
-  - id: texts
-    depends_on: [files]
+  texts:
     with:
       files: ${{ tasks.files.output }}
     for_each: ${{ with.files }}
@@ -72,8 +72,7 @@ tasks:
       tool: "nika:read"
       args: { path: "${{ item }}" }
 
-  - id: pairs
-    depends_on: [files, texts]
+  pairs:
     with:
       files: ${{ tasks.files.output }}
       texts: ${{ tasks.texts.output }}
@@ -83,8 +82,7 @@ tasks:
         input: ["${{ with.files }}", "${{ with.texts }}"]
         expression: "transpose | map({path: .[0], text: .[1]})"
 
-  - id: translated
-    depends_on: [pairs]
+  translated:
     with:
       pairs: ${{ tasks.pairs.output }}
     for_each: ${{ with.pairs }}
@@ -98,8 +96,7 @@ tasks:
         untouched, and the original tone ·
         ${{ item.text }}
 
-  - id: bundle
-    depends_on: [pairs, translated]
+  bundle:
     with:
       pairs: ${{ tasks.pairs.output }}
       translated: ${{ tasks.translated.output }}
@@ -109,8 +106,7 @@ tasks:
         input: ["${{ with.pairs }}", "${{ with.translated }}"]
         expression: "transpose | map(select(.[1] != null)) | map({path: .[0].path, text: .[1]})"
 
-  - id: mirror
-    depends_on: [bundle]
+  mirror:
     with:
       bundle: ${{ tasks.bundle.output }}
     for_each: ${{ with.bundle }}

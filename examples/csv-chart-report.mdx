@@ -45,8 +45,9 @@ flowchart LR
 {/* showcase:begin t2-csv-chart-report.nika.yaml */}
 ```yaml t2-csv-chart-report.nika.yaml
 nika: v1
-workflow: csv-chart-report
-description: "CSV → aggregate → rendered bar chart + markdown report · offline · deterministic"
+workflow:
+  id: csv-chart-report
+  description: "CSV → aggregate → rendered bar chart + markdown report · offline · deterministic"
 
 vars:
   sales_csv: "./data/sales.csv" # columns · region,revenue (revenue a plain number)
@@ -59,13 +60,12 @@ permits:
   tools: ["nika:read", "nika:convert", "nika:jq", "nika:chart", "nika:write"]
 
 tasks:
-  - id: raw
+  raw:
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.sales_csv }}" }
 
-  - id: rows
-    depends_on: [raw]
+  rows:
     with:
       raw: ${{ tasks.raw.output }}
     invoke:
@@ -77,8 +77,7 @@ tasks:
         has_header: true
 
   # Sum revenue per region · a deterministic reduce, no model.
-  - id: by_region
-    depends_on: [rows]
+  by_region:
     with:
       rows: ${{ tasks.rows.output }}
     invoke:
@@ -88,8 +87,7 @@ tasks:
         expression: 'group_by(.region) | map({ region: .[0].region, revenue: (map(.revenue | tonumber) | add) })'
 
   # The picture · one SVG, its sha lands in the trace.
-  - id: chart
-    depends_on: [by_region]
+  chart:
     with:
       by_region: ${{ tasks.by_region.output }}
     invoke:
@@ -102,8 +100,7 @@ tasks:
 
   # The rows as MARKDOWN · a report renders lines, never a JSON blob
   # (region names are user data — the esc guards a `|` in them).
-  - id: rows_md
-    depends_on: [by_region]
+  rows_md:
     with:
       by_region: ${{ tasks.by_region.output }}
     invoke:
@@ -115,10 +112,11 @@ tasks:
           map("| \(.region | esc) | \(.revenue) |") | join("\n")
 
   # The page · the report references the picture beside it.
-  - id: report
+  report:
     with:
       rows_md: ${{ tasks.rows_md.output }}
-    depends_on: [chart, rows_md]
+    after:
+      chart: succeeded
     invoke:
       tool: "nika:write"
       args:

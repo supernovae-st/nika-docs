@@ -19,14 +19,15 @@ draws its own receipts.
 
 ```yaml
 nika: v1
-workflow: styled-hero
+workflow:
+  id: styled-hero
 permits:
   tools: ["nika:image_generate", "nika:image_fx"]
   fs:
     read: ["out/**"]
     write: ["out/**"]
 tasks:
-  - id: generate
+  generate:
     invoke:
       tool: "nika:image_generate"
       args:
@@ -34,8 +35,7 @@ tasks:
         prompt: "a monarch butterfly over a nebula"
         output_dir: out
         format: png
-  - id: style
-    depends_on: [generate]
+  style:
     with:
       src: ${{ tasks.generate.output.images[0].path }}
     invoke:

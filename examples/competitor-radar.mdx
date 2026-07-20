@@ -42,8 +42,9 @@ flowchart LR
 {/* showcase:begin t3-competitor-radar.nika.yaml */}
 ```yaml t3-competitor-radar.nika.yaml
 nika: v1
-workflow: competitor-radar
-description: "Sitemap → parallel page reads → one competitive brief + ping"
+workflow:
+  id: competitor-radar
+  description: "Sitemap → parallel page reads → one competitive brief + ping"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-sonnet-4-6
 
@@ -59,7 +60,7 @@ secrets:
         host_from_self: true
 
 tasks:
-  - id: map
+  map:
     invoke:
       tool: "nika:fetch"
       args:
@@ -68,8 +69,7 @@ tasks:
     output:
       recent: ".[:8] | map(.loc)"     # sitemap = the root array of {loc, …} · cap at 8, keep the URLs
 
-  - id: pages
-    depends_on: [map]
+  pages:
     with:
       map_recent: ${{ tasks.map.recent }}
     for_each: ${{ with.map_recent }}
@@ -88,8 +88,7 @@ tasks:
         url: "${{ item }}"
         mode: article
 
-  - id: digest
-    depends_on: [pages]
+  digest:
     with:
       pages: ${{ tasks.pages.output }}
     infer:
@@ -99,8 +98,7 @@ tasks:
         Write the Monday brief · what they shipped · what it signals ·
         what we should watch. One page, plain words.
 
-  - id: save
-    depends_on: [digest]
+  save:
     with:
       digest: ${{ tasks.digest.output }}
     invoke:
@@ -110,8 +108,9 @@ tasks:
         content: "${{ with.digest }}"
         create_dirs: true
 
-  - id: ping
-    depends_on: [save]
+  ping:
+    after:
+      save: succeeded
     invoke:
       tool: "nika:notify"
       args:

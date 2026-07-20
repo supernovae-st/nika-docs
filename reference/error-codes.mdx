@@ -86,7 +86,6 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-PARSE-012` | on_error: block violates the spec shape (fields mutually exclusive) | `validation_error` | false |
 | `NIKA-PARSE-013` | with:/output: binding uses a reserved name (output · status · error · started_at · ended_at · duration_ms) | `validation_error` | false |
 | `NIKA-PARSE-014` | secrets: entry is not a store reference — inline literals forbidden | `validation_error` | false |
-| `NIKA-PARSE-015` | typed vars: declaration malformed (type in string/number/integer/boolean/array/object) | `validation_error` | false |
 | `NIKA-PARSE-017` | duplicate mapping key — no silent last-wins | `validation_error` | false |
 | `NIKA-PARSE-018` | missing required field in a verb body (infer.prompt · exec.command · invoke.tool) | `validation_error` | false |
 | `NIKA-PARSE-019` | generic structural validation — wrong YAML shape for a field | `validation_error` | false |
@@ -113,7 +112,7 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-TYPE-005` | a secret-carrying type in a lowered position (reserved with secret&lt;T&gt; · W4) | `security_error` | false |
 | `NIKA-TYPE-006` | regex pattern outside the locked dialect (backreference · lookaround · named group · inline flags · lazy/possessive · word-boundary · unicode-class — spec 09 §the regex dialect) | `validation_error` | false |
 | `NIKA-TYPE-101` | run-time contract violation — the decoded value does not fit returns: (exec:/invoke: lane) | `validation_error` | false |
-| `NIKA-VAR-001` | unresolved reference (unknown namespace entry · undeclared env/vars key) | `variable_error` | false |
+| `NIKA-VAR-001` | unresolved reference (unknown namespace entry · undeclared inputs/config/const/secrets/with key) | `variable_error` | false |
 | `NIKA-VAR-002` | binding cardinality — a jq binding emitted zero or multiple values | `variable_error` | false |
 | `NIKA-VAR-003` | provably-invalid path into a declared schema (static walk) | `validation_error` | false |
 | `NIKA-VAR-004` | jq runtime error while evaluating a binding | `variable_error` | false |

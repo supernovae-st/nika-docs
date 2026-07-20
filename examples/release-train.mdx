@@ -61,8 +61,9 @@ flowchart TD
 {/* showcase:begin t4-release-train.nika.yaml */}
 ```yaml t4-release-train.nika.yaml
 nika: v1
-workflow: release-train
-description: "parallel gates → human GO → hold until the window → ship · verify · record"
+workflow:
+  id: release-train
+  description: "parallel gates → human GO → hold until the window → ship · verify · record"
 
 vars:
   version:
@@ -80,25 +81,25 @@ secrets:
         host_from_self: true
 
 tasks:
-  - id: t0
+  t0:
     invoke:
       tool: "nika:date"
       args: { op: now }
 
   # ── the gate wave · all three run in parallel ──
-  - id: tests
+  tests:
     exec:
       command: ["cargo", "test", "--workspace", "--quiet"]
       capture: structured
     timeout: "15m"
 
-  - id: lint
+  lint:
     exec:
       command: ["cargo", "clippy", "--workspace", "--all-targets", "--", "-D", "warnings"]
       capture: structured
     timeout: "10m"
 
-  - id: audit
+  audit:
     exec:
       command: ["cargo", "audit"]
       capture: structured
@@ -106,8 +107,7 @@ tasks:
     retry:
       max_attempts: 2                  # advisory DB fetch can flake
 
-  - id: gates_green
-    depends_on: [tests, lint, audit]
+  gates_green:
     with:
       all_green: ${{ tasks.tests.output.exit_code == 0 && tasks.lint.output.exit_code == 0 && tasks.audit.output.exit_code == 0 }}   # three value edges · one boundary expression
     invoke:
@@ -116,10 +116,11 @@ tasks:
         condition: "${{ with.all_green }}"
         message: "A release gate is RED: the train does not depart"
 
-  - id: gate_time
+  gate_time:
     with:
       t0: ${{ tasks.t0.output }}
-    depends_on: [gates_green, t0]
+    after:
+      gates_green: succeeded           # state, no data · the timing is only worth taking on a green board
     invoke:
       tool: "nika:date"
       args:
@@ -129,8 +130,7 @@ tasks:
         unit: minutes
 
   # ── the human signs the departure ──
-  - id: conductor
-    depends_on: [gate_time]
+  conductor:
     with:
       gate_time: ${{ tasks.gate_time.output }}
     invoke:
@@ -139,8 +139,7 @@ tasks:
         message: "Gates GREEN in ${{ with.gate_time }} min. Ship ${{ vars.version }} in the ${{ vars.window }} window?"
         default: false
 
-  - id: approved
-    depends_on: [conductor]
+  approved:
     with:
       signed: ${{ tasks.conductor.output == true }}   # the signature check crosses as ONE boundary expression
     invoke:
@@ -150,23 +149,26 @@ tasks:
         message: "Departure not signed: train cancelled"
 
   # ── hold until the window · absolute time, not a sleep ──
-  - id: hold
-    depends_on: [approved]
+  hold:
+    after:
+      approved: succeeded
     invoke:
       tool: "nika:wait"
       args:
         until: "${{ vars.window }}"
         timeout: "48h"
 
-  - id: ship
-    depends_on: [hold]
+  ship:
+    after:
+      hold: succeeded
     exec:
       command: ["./scripts/release.sh", "${{ vars.version }}"]   # argv: the interpolation cannot break out
       capture: structured
     timeout: "30m"
 
-  - id: verify
-    depends_on: [ship]
+  verify:
+    after:
+      ship: succeeded
     invoke:
       tool: "nika:fetch"
       args:
@@ -178,8 +180,7 @@ tasks:
       backoff_strategy: exponential
       backoff_ms: 5000
 
-  - id: live
-    depends_on: [verify]
+  live:
     with:
       version_live: ${{ tasks.verify.output == vars.version }}   # the whole check crosses as ONE boundary expression
     invoke:
@@ -192,8 +193,9 @@ tasks:
   # state · this task runs whether `live` succeeded, failed, or was
   # cancelled by an upstream abort · a record that must land on EVERY
   # outcome is a terminal task, not a cleanup hook (03 §on_finally).
-  - id: record
-    depends_on: [live]
+  record:
+    after:
+      live: terminal
     with:
       outcome: ${{ tasks.live.status }}   # observe the departure verdict · same pass-set as the after edge
     invoke:

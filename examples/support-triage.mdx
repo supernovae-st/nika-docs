@@ -43,8 +43,9 @@ flowchart LR
 {/* showcase:begin t2-support-triage.nika.yaml */}
 ```yaml t2-support-triage.nika.yaml
 nika: v1
-workflow: support-triage
-description: "Ticket queue → typed triage → urgent escalation → triage board"
+workflow:
+  id: support-triage
+  description: "Ticket queue → typed triage → urgent escalation → triage board"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (triage wants speed)
 
@@ -60,18 +61,17 @@ secrets:
         host_from_self: true
 
 tasks:
-  - id: batch
+  batch:
     invoke:
       tool: "nika:uuid"
       args: { version: v7 }
 
-  - id: queue
+  queue:
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.queue_path }}" }
 
-  - id: triage
-    depends_on: [queue]
+  triage:
     with:
       queue: ${{ tasks.queue.output }}
     infer:
@@ -94,8 +94,7 @@ tasks:
                 urgency: { type: string, enum: [low, normal, high, critical] }
                 first_reply: { type: string }
 
-  - id: urgent
-    depends_on: [triage]
+  urgent:
     with:
       tickets: ${{ tasks.triage.output.tickets }}
     invoke:
@@ -104,8 +103,7 @@ tasks:
         input: "${{ with.tickets }}"
         expression: 'map(select(.urgency == "high" or .urgency == "critical"))'
 
-  - id: escalate
-    depends_on: [urgent, batch]
+  escalate:
     with:
       urgent: ${{ tasks.urgent.output }}
       batch: ${{ tasks.batch.output }}
@@ -118,8 +116,7 @@ tasks:
         message: "Urgent tickets in triage batch ${{ with.batch }} · ${{ with.urgent }}"
         severity: warning
 
-  - id: board
-    depends_on: [triage, batch]
+  board:
     with:
       tickets: ${{ tasks.triage.output.tickets }}
       batch: ${{ tasks.batch.output }}

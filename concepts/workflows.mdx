@@ -24,11 +24,12 @@ the dependency graph allows.
 
 ```yaml
 nika: v1
-workflow: hello
-description: "A minimal workflow."
+workflow:
+  id: hello
+  description: "A minimal workflow."
 
 tasks:
-  - id: greet
+  greet:
     infer:
       prompt: "Say hi in one line."
       model: ollama/<model>      # <provider>/<name>
@@ -235,8 +236,9 @@ workflows (`nika.run_workflow` over MCP).
 
 ```yaml research-brief.nika.yaml
 nika: v1
-workflow: research-brief
-description: "Bullet-point brief on a topic supplied at launch."
+workflow:
+  id: research-brief
+  description: "Bullet-point brief on a topic supplied at launch."
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 
@@ -250,7 +252,7 @@ vars:
     default: 3
 
 tasks:
-  - id: brief
+  brief:
     infer:
       prompt: "Write ${{ vars.bullets }} bullet points on ${{ vars.topic }}."
 

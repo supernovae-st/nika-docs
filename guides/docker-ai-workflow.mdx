@@ -21,8 +21,9 @@ declared · 0 hints):
 # | ps   | docker ps        | product CLI · no MCP surface yet | a docker MCP server    |
 # | df   | docker system df | same                             | same                   |
 nika: v1
-workflow: docker-health-report
-description: read the Docker daemon's state, have a local model explain it, keep the report
+workflow:
+  id: docker-health-report
+  description: read the Docker daemon's state, have a local model explain it, keep the report
 
 model: ollama/qwen3.5:4b
 
@@ -36,16 +37,15 @@ permits:
       - "./docker-health.md"
 
 tasks:
-  - id: ps
+  ps:
     exec:
       command: ["docker", "ps", "--all", "--format", "{{.Names}}\t{{.Status}}\t{{.Image}}"]
 
-  - id: df
+  df:
     exec:
       command: ["docker", "system", "df"]
 
-  - id: diagnose
-    depends_on: [ps, df]
+  diagnose:
     with:
       containers: ${{ tasks.ps.output }}
       disk: ${{ tasks.df.output }}
@@ -62,8 +62,7 @@ tasks:
         usage needs attention. Plain prose, no preamble.
       max_tokens: 600
 
-  - id: keep
-    depends_on: [diagnose]
+  keep:
     with:
       report: ${{ tasks.diagnose.output }}
     invoke:

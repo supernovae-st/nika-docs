@@ -39,8 +39,9 @@ flowchart LR
 {/* showcase:begin t2-bookmark-triage.nika.yaml */}
 ```yaml t2-bookmark-triage.nika.yaml
 nika: v1
-workflow: bookmark-triage
-description: "URL list → per-page metadata fan-out (dead links survive) → one markdown triage table"
+workflow:
+  id: bookmark-triage
+  description: "URL list → per-page metadata fan-out (dead links survive) → one markdown triage table"
 
 vars:
   bookmarks:
@@ -62,7 +63,7 @@ permits:
 tasks:
   # The fan-out · one metadata fetch per URL · a dead link recovers to a
   # marker object (the batch NEVER dies at bookmark 14).
-  - id: pages
+  pages:
     for_each: ${{ vars.bookmarks }}
     max_parallel: 3
     fail_fast: false
@@ -76,8 +77,7 @@ tasks:
         mode: metadata
 
   # The fan-in · zip results back to their URLs · split live from dead.
-  - id: table
-    depends_on: [pages]
+  table:
     with:
       pages: ${{ tasks.pages.output }}
     invoke:
@@ -95,8 +95,7 @@ tasks:
             dead: ([$rows[] | select(.page.dead == true) | "| \(.url) | DEAD | link rot |"] | join("\n"))
           }
 
-  - id: report
-    depends_on: [table]
+  report:
     with:
       table_live: ${{ tasks.table.output.live }}
       table_dead: ${{ tasks.table.output.dead }}

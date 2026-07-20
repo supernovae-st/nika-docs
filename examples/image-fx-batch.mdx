@@ -37,8 +37,9 @@ flowchart LR
 {/* showcase:begin t1-image-fx-batch.nika.yaml */}
 ```yaml t1-image-fx-batch.nika.yaml
 nika: v1
-workflow: image-fx-batch
-description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
+workflow:
+  id: image-fx-batch
+  description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
 
 vars:
   photos: "./photos" # the input folder · every .png in it gets the treatment
@@ -56,14 +57,13 @@ permits:
 
 tasks:
   # The folder is the work list — no hand-maintained array to drift.
-  - id: shots
+  shots:
     invoke:
       tool: "nika:glob"
       args: { pattern: "${{ vars.photos }}/*.png" }
 
   # One deterministic darkroom pass per photo · the ops run IN ORDER.
-  - id: stylize
-    depends_on: [shots]
+  stylize:
     with:
       shots: ${{ tasks.shots.output }}
     for_each: ${{ with.shots }}

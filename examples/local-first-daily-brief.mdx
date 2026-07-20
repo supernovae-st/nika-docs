@@ -26,17 +26,17 @@ Save as `daily-brief.nika.yaml`:
 
 ```yaml
 nika: v1
-workflow: daily-brief
+workflow:
+  id: daily-brief
 model: ollama/qwen3.5:4b
 
 tasks:
-  - id: fetch
+  fetch:
     invoke:
       tool: "nika:fetch"
       args: { url: "https://hn.algolia.com/api/v1/search?tags=front_page" }
 
-  - id: brief
-    depends_on: [fetch]
+  brief:
     with:
       stories: ${{ tasks.fetch.output }}
     infer:

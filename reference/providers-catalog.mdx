@@ -128,17 +128,17 @@ your machine unless a cloud provider is explicitly selected.
 <CodeGroup>
 ```yaml workflow.nika.yaml
 nika: v1
-workflow: multi-provider
+workflow:
+  id: multi-provider
 
 tasks:
-  - id: primary
+  primary:
     on_error: { skip: true }   # a dead provider skips (error preserved) · the gate below reads it
     infer:
       model: ollama/llama3.2:3b              # local · zero key
       prompt: "Explain linear algebra in one sentence."
 
-  - id: fallback
-    depends_on: [primary]
+  fallback:
     with:
       problem: ${{ tasks.primary.error }}   # failure-observation edge · a skip carries its preserved error
     when: "${{ with.problem != null }}"     # local read of the binding

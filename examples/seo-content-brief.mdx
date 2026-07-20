@@ -39,8 +39,9 @@ flowchart LR
 {/* showcase:begin t2-seo-content-brief.nika.yaml */}
 ```yaml t2-seo-content-brief.nika.yaml
 nika: v1
-workflow: seo-content-brief
-description: "Competitor sitemap → top page → gap analysis → typed brief"
+workflow:
+  id: seo-content-brief
+  description: "Competitor sitemap → top page → gap analysis → typed brief"
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for openai/gpt-5.2
 
@@ -52,7 +53,7 @@ vars:
   competitor_sitemap: "https://competitor.example.com/sitemap.xml"
 
 tasks:
-  - id: map
+  map:
     invoke:
       tool: "nika:fetch"
       args:
@@ -61,8 +62,7 @@ tasks:
     output:
       top: ".[:5] | map(.loc)"
 
-  - id: top_page
-    depends_on: [map]
+  top_page:
     with:
       map_top: ${{ tasks.map.top[0] }}
     invoke:
@@ -71,8 +71,7 @@ tasks:
         url: "${{ with.map_top }}"
         mode: article
 
-  - id: brief
-    depends_on: [map, top_page]
+  brief:
     with:
       map_top: ${{ tasks.map.top }}
       top_page: ${{ tasks.top_page.output }}
@@ -94,8 +93,7 @@ tasks:
           outline: { type: array, items: { type: string } }
           keywords: { type: array, items: { type: string } }
 
-  - id: save
-    depends_on: [brief]
+  save:
     with:
       brief: ${{ tasks.brief.output }}
     invoke:

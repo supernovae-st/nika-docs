@@ -56,8 +56,9 @@ flowchart TD
 {/* showcase:begin t4-ceo-monday-brief.nika.yaml */}
 ```yaml t4-ceo-monday-brief.nika.yaml
 nika: v1
-workflow: ceo-monday-brief
-description: "news + repo pulse + KPIs → thinking synthesis → dated brief + cost ping"
+workflow:
+  id: ceo-monday-brief
+  description: "news + repo pulse + KPIs → thinking synthesis → dated brief + cost ping"
 
 model: ollama/qwen3.5:4b   # local default · the synthesis task below overrides to a stronger model
 
@@ -75,7 +76,7 @@ secrets:
 
 tasks:
   # ── branch 1 · market signal ──
-  - id: news
+  news:
     invoke:
       tool: "nika:fetch"
       args:
@@ -84,18 +85,17 @@ tasks:
         jq: ".hits[:10] | map(.title)"
 
   # ── branch 2 · engineering pulse ──
-  - id: pulse
+  pulse:
     exec:
       command: ["git", "shortlog", "-sn", "--since=1 week ago"]
 
   # ── branch 3 · the numbers ──
-  - id: kpi_raw
+  kpi_raw:
     invoke:
       tool: "nika:read"
       args: { path: "${{ vars.kpi_csv }}" }
 
-  - id: kpis
-    depends_on: [kpi_raw]
+  kpis:
     with:
       csv: ${{ tasks.kpi_raw.output }}
     invoke:
@@ -106,8 +106,7 @@ tasks:
         to: json
         has_header: true
 
-  - id: revenue
-    depends_on: [kpis]
+  revenue:
     with:
       kpis: ${{ tasks.kpis.output }}
     invoke:
@@ -117,8 +116,7 @@ tasks:
         expression: "map(.weekly_revenue | tonumber) | add"
 
   # ── synthesis · with a thinking budget ──
-  - id: brief
-    depends_on: [news, pulse, kpis, revenue]
+  brief:
     with:                              # the three branches join here · four value edges
       news: ${{ tasks.news.output }}
       pulse: ${{ tasks.pulse.output }}
@@ -138,15 +136,14 @@ tasks:
         enabled: true
         budget_tokens: 10000
 
-  - id: stamp
+  stamp:
     invoke:
       tool: "nika:date"
       args: { op: now }
     output:
       day: ".[:10]"                  # nika:date returns the ISO string itself · slice YYYY-MM-DD
 
-  - id: save
-    depends_on: [stamp, brief]
+  save:
     with:
       day: ${{ tasks.stamp.day }}
       brief: ${{ tasks.brief.output }}
@@ -158,14 +155,14 @@ tasks:
         create_dirs: true
 
   # ── the run reports its own bill ──
-  - id: bill
-    depends_on: [save]
+  bill:
+    after:
+      save: succeeded                # state, no data · read the meter once the brief landed
     invoke:
       tool: "nika:inspect"
       args: { view: cost }
 
-  - id: ping
-    depends_on: [stamp, bill]
+  ping:
     with:
       day: ${{ tasks.stamp.day }}    # hoisted once · the body AND the cleanup below read this binding
       cost: ${{ tasks.bill.output.total_usd }}
