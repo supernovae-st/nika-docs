@@ -26,6 +26,11 @@ jobs:
           python-version: '3.12'
       - name: link + canon audit
         run: python3 scripts/link-audit.py
+      # the estate manifest re-emits and byte-compares — a red here means a
+      # PR changed tracked files without `python3 scripts/estate.py --write`.
+      - name: Estate manifest observes (non-blocking · E0)
+        continue-on-error: true
+        run: python3 scripts/estate.py --check
       # count-drift check (c) asserts hand-typed MCP tool counts against the
       # live wire — without a binary it self-skips, so CI was only running
       # checks (a)+(b) while the wire assertion lived local-only. Install the
