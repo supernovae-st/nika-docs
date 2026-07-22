@@ -96,13 +96,37 @@ See [live state](/reference/status) for the authoritative snapshot.
     **No date.** The train ships when each release earns its tag.
   </Accordion>
 
+  <Accordion title="The Connectome: sovereign memory, whole, before 1.0" icon="brain">
+    **The whole Connectome is a declared pre-condition of the official
+    launch** (the timeline's [connectome gate](https://nika.sh/timeline#gates)
+    · « lands whole before 1.0 »):
+
+    - `nika-connectome` L2 orchestrator + the L1 memory satellites
+      (`nika-hnsw`, `nika-bm25`, `nika-rrf`, `nika-fsrs`,
+      `nika-rdfs-reasoner`, `nika-temporal`, `nika-graph-algos`,
+      `nika-autodesc-minimal`, `nika-autodesc-full`), admitted through
+      the same 12 gates as every crate.
+    - Recall and ingest as builtin tools under `invoke:` — never a new
+      verb (the 4 verbs are absolute).
+    - The zero-LLM write path: memory is written by deterministic code,
+      never by a model's output.
+    - A sovereign, exportable store on open standards (RDF/SPARQL ·
+      ADR-004): yours to query, export, delete.
+    - Store digests pinned in receipts, so recall is replayable.
+
+    **Separate count** from the {STATUS.cratesTarget} Diamond target:
+    memory crates add on top. No date: gates, not calendars. The
+    un-numbered next major stays reserved, its content the operator's
+    to declare.
+  </Accordion>
+
   <Accordion title="1.0.0: Public API lock" icon="rocket">
-    **1.0.0 ships when the gates are green.** The language spec (`nika: v1`
-    envelope, Apache-2.0) is already public and stable; the engine already
-    exposes the first-run CLI, four verbs, `nika run`, LSP, and MCP
-    surfaces. 1.0 is the point where the public API is locked and
-    additive from there — enforced by `cargo public-api` +
-    `cargo semver-checks` on every PR.
+    **1.0.0 ships when the gates are green — the culmination, not the
+    start.** The contract system and the whole Connectome land first
+    (the timeline's gates carry the conditions); the language spec
+    (`nika: v1` envelope, Apache-2.0) is already public and stable. 1.0
+    is the point where the public API is locked and additive from there,
+    enforced by `cargo public-api` + `cargo semver-checks` on every PR.
   </Accordion>
 
   <Accordion title="1.x minors: the foundation completes, additively" icon="diamond">
@@ -118,31 +142,6 @@ See [live state](/reference/status) for the authoritative snapshot.
 
     **No date.** The 42-crate architecture, complete and then extended
     across 1.x minors.
-  </Accordion>
-
-  <Accordion title="The Connectome era (sovereign memory · the next major, un-numbered until declared)" icon="brain">
-    **The first Connectome capabilities land before 1.0** — a declared
-    pre-condition of the official launch (the timeline's
-    [connectome gate](https://nika.sh/timeline#gates)): recall and ingest
-    ship as builtin tools under `invoke:` (never a new verb), the
-    zero-LLM write path holds, and store digests are pinned in receipts.
-    What follows below is the fuller era beyond those capabilities.
-
-    **Target state when shipped:**
-
-    - `nika-connectome` L2 orchestrator admitted.
-    - **9 L1 memory satellites** admitted: `nika-hnsw`, `nika-bm25`,
-      `nika-rrf`, `nika-fsrs`, `nika-rdfs-reasoner`, `nika-temporal`,
-      `nika-graph-algos`, `nika-autodesc-minimal`, `nika-autodesc-full`.
-    - `MemoryStore` + `EmbeddingProvider` trait impls live (reservations
-      planted at v0.80 → real implementations).
-    - Oxigraph as the default backend (ADR-004 Option B): RDF/SPARQL,
-      W3C-standard, exportable, yours.
-    - Agent-v2 with memory-backed recall (FSRS spaced repetition,
-      multi-vector HNSW, RRF hybrid search).
-
-    **Separate count** from the {STATUS.cratesTarget} Diamond target:
-    memory crates add on top. No date.
   </Accordion>
 
   <Accordion title="Ecosystem tier: plugins + observability" icon="box">

@@ -131,11 +131,12 @@ flowchart TB
 | **L4** | nika-catalog-verify, nika-cli, nika-mcp, nika-lsp | — | serve, sdk | Interfaces, libraries |
 | **L5** | nika | — | — | The public binary surface |
 
-## Memory subsystem (the Connectome era): separate count
+## Memory subsystem (the Connectome): separate count
 
 The 8-crate memory subsystem (plus 1 orchestrator at L2) is **not counted**
-in the {STATUS.cratesTarget} target. It lands in the Connectome era (the next major, un-numbered until declared),
-after the 42-crate foundation, via the `MemoryStore` + `EmbeddingProvider`
+in the {STATUS.cratesTarget} target. It lands **whole before 1.0** (the
+timeline's [connectome gate](https://nika.sh/timeline#gates) · a declared
+pre-condition of the launch), via the `MemoryStore` + `EmbeddingProvider`
 trait reservations already in `nika-kernel`.
 
 <AccordionGroup>
