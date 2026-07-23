@@ -56,15 +56,19 @@ your machine unless a cloud provider is explicitly selected.
 
 ## By category
 
+Local/open-weight first (sovereignty default), then cloud starting with
+Mistral (EU) — anthropic/openai are never presented first, per the
+catalog's own presentation-order note in `canon.yaml`.
+
 <Tabs>
   <Tab title="Local / self-hosted (5)">
     | ID | Name | Dialect | Env var | Example model |
     |---|---|---|---|---|
     | `ollama` | Ollama daemon (`localhost:11434`) | `openai-chat` | `(none)` | `llama3.1` |
-    | `lmstudio` | LM Studio (`localhost:1234/v1`) | `openai-chat` | `(none)` | `qwen2.5-14b-instruct` |
     | `llamacpp` | llama.cpp `llama-server` (`localhost:8080/v1`) | `openai-chat` | `(none)` | `qwen2.5-7b-instruct` |
-    | `localai` | LocalAI (`localhost:8080/v1`) | `openai-chat` | `(none)` | `llama-3.1-8b-instruct` |
     | `vllm` | vLLM OpenAI server (`localhost:8000/v1`) | `openai-chat` | `(none)` | `meta-llama-3.1-70b-instruct` |
+    | `lmstudio` | LM Studio (`localhost:1234/v1`) | `openai-chat` | `(none)` | `qwen2.5-14b-instruct` |
+    | `localai` | LocalAI (`localhost:8080/v1`) | `openai-chat` | `(none)` | `llama-3.1-8b-instruct` |
 
     <Tip>
       **The sovereign default.** No API key, no cloud egress:
@@ -74,23 +78,27 @@ your machine unless a cloud provider is explicitly selected.
     </Tip>
   </Tab>
 
-  <Tab title="Cloud (8)">
+  <Tab title="Cloud (11)">
     | ID | Name | Dialect | Env var | Default model |
     |---|---|---|---|---|
     | `mistral` | Mistral AI (EU · sovereign-leaning) | `openai-chat` | `MISTRAL_API_KEY` | `mistral-large-latest` |
-    | `anthropic` | Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-4-6` |
+    | `huggingface` | Hugging Face Inference Providers (100+ open-weight · 18 backends) | `openai-chat` | `HF_TOKEN` | `Qwen/Qwen3.5-9B:cheapest` |
     | `openai` | OpenAI | `openai-chat` | `OPENAI_API_KEY` | `gpt-4o` |
-    | `openrouter` | OpenRouter gateway | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-6` |
-    | `groq` | Groq (fastest open-weight) | `openai-chat` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` |
-    | `deepseek` | DeepSeek | `openai-chat` | `DEEPSEEK_API_KEY` | `deepseek-chat` |
-    | `gemini` | Google Gemini | `gemini` | `GEMINI_API_KEY` | `gemini-2.5-flash` |
     | `xai` | xAI Grok | `openai-chat` | `XAI_API_KEY` | `grok-3` |
+    | `anthropic` | Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-4-6` |
+    | `gemini` | Google Gemini | `gemini` | `GEMINI_API_KEY` | `gemini-2.5-flash` |
+    | `deepseek` | DeepSeek | `openai-chat` | `DEEPSEEK_API_KEY` | `deepseek-chat` |
+    | `groq` | Groq (fastest open-weight) | `openai-chat` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` |
+    | `openrouter` | OpenRouter gateway | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-6` |
+    | `nvidia` | NVIDIA API (Nemotron 3 · NIM self-hostable) | `openai-chat` | `NVIDIA_API_KEY` | `nvidia/nemotron-3-super-120b-a12b` |
+    | `moonshot` | Moonshot AI (Kimi K3 · frontier open-weight) | `openai-chat` | `MOONSHOT_API_KEY` | `kimi-k3` |
 
     <Tip>
       Keys live in `${{ secrets.* }}` / env vars, never inline in the
       workflow. OpenRouter aggregates ~200 models under one key
-      (`openrouter/<vendor>/<model>`). Use it to experiment across vendors
-      without per-vendor keys.
+      (`openrouter/<vendor>/<model>`); Hugging Face routes 100+ open models
+      across 18 backends under one `HF_TOKEN`. Use either to experiment
+      across vendors without per-vendor keys.
     </Tip>
   </Tab>
 
@@ -111,9 +119,9 @@ your machine unless a cloud provider is explicitly selected.
 
 <AccordionGroup>
   <Accordion title={`The ${CANON.providers} canonical spec v0.1 IDs (sorted)`} icon="list">
-    `anthropic` · `deepseek` · `gemini` · `groq` · `llamacpp` · `lmstudio` ·
-    `localai` · `mistral` · `mock` · `ollama` · `openai` · `openrouter` ·
-    `vllm` · `xai`
+    `anthropic` · `deepseek` · `gemini` · `groq` · `huggingface` ·
+    `llamacpp` · `lmstudio` · `localai` · `mistral` · `mock` · `moonshot` ·
+    `nvidia` · `ollama` · `openai` · `openrouter` · `vllm` · `xai`
 
     {CANON.providers} total: {CANON.providersLocal} local · {CANON.providersCloud} cloud ·
     {CANON.providersTest} test · matches `canon.yaml` in the spec repo. The

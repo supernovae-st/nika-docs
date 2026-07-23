@@ -469,7 +469,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "integrations/pre-commit.mdx"
   class: authored
-  sha256: 496349f6f5fcdbb2c765b969af72c0af48997e7251fa82d7ceaeed40bb200368
+  sha256: 85d2b9f8d927a98012d243a8ab4f20c2a11758aa17df9e6264b135958dc7501b
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "integrations/quickstart.mdx"
   class: authored
@@ -477,7 +477,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "introduction.mdx"
   class: authored
-  sha256: 5b99485e8b103e042cedabc0f13fe9121ac0d131d7b9977792418d44ac341a25
+  sha256: caf96b4fb324555996438e1496956dfe81bacc0e87b3134614de939a6366ee5b
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "lefthook.yml"
   class: authored
@@ -527,7 +527,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/providers-catalog.mdx"
   class: authored
-  sha256: 94dcb11e78759ae24b7f5335302eec1ebb6f1d1e05d6e61f6eaea05b69c03923
+  sha256: 7eab7ea1aecee47ef5436daa93a9c12cfded6aa5acd07025c81d57e98f35fee5
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/schema.mdx"
   class: authored
