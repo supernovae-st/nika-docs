@@ -10,17 +10,17 @@ Nika never asks you to configure blind. Two commands read your machine —
 `nika welcome` is the thirty-second mirror, `nika doctor` the exhaustive
 diagnosis with a fix line per gap.
 
-## The mirror (0.98+)
+## The mirror
 
 ```bash
 nika welcome
 ```
 
-Captured verbatim against the released `nika 0.99.0` on a machine with no
+Captured verbatim against the released `nika 0.105.0` on a machine with no
 keys, no configs, no editors wired — the stranger's first screen:
 
 ```text
-🦋 nika 0.99.0 — Intent as Code. The workflow language for AI.
+🦋 nika 0.105.0 — Intent as Code. The workflow language for AI.
    one file · 4 verbs · one binary · audited BEFORE it runs
    every run records a tamper-evident, hash-chained trace
 
@@ -31,11 +31,12 @@ this machine
   workspace  git ✗ · no workflows yet · agents not briefed → nika init
 
 this binary
-  4 verbs · 27 builtins · 15 providers · 29 examples · 10 templates
+  4 verbs · 28 builtins · 15 providers · 33 examples · 10 templates
 
 a whole workflow is one file
   nika: v1
-  workflow: hello
+  workflow:
+    id: hello
   model: mock/echo
   tasks:
     greet:
@@ -49,12 +50,12 @@ start here (offline · zero keys)
 learn: nika.sh · docs: docs.nika.sh
 ```
 
-Three details worth noticing: the six-line workflow **is real** (an
+Three details worth noticing: the seven-line workflow **is real** (an
 engine test pins that it checks clean — the sample only appears while
 your workspace has zero workflows), every count on the « this binary »
 line is derived live from the embedded pack (never hand-typed — the
-`15 providers` are the runnable 10-cloud + 5-local set; the
-[catalog](/reference/providers-catalog) counts 16 with the deterministic
+`15 providers` are the runnable cloud + local set; the
+[catalog](/reference/providers-catalog) counts 17 with the deterministic
 `mock`), and key
 presence is a **count** — welcome never even names the env variables.
 `--json` emits the machine mirror (`welcome_version: 1`); `--ascii`
@@ -80,21 +81,24 @@ Three honesty rules shape everything below:
 
 ## A fresh machine, honestly
 
-Captured verbatim against `nika 0.99.0` on a machine with no keys, no
+Captured verbatim against `nika 0.105.0` on a machine with no keys, no
 configs, no editors wired — the worst case, and every line hands over:
 
 ```text
-✔ 8 ok · 16 warn · 0 fail
-✔ binary     v0.99.0 · self-contained (spec v1 embedded)
+✔ 9 ok · 17 warn · 0 fail
+✔ binary     v0.105.0 · self-contained (spec v1 embedded)
 ⚠ config     none — built-in defaults
 ✔ lsp        available via `nika lsp` (editor language server)
 ✔ traces     keep 10 per workflow · max age 30d · budget 256MB (NIKA_TRACE_KEEP · NIKA_TRACE_MAX_AGE_DAYS · NIKA_TRACE_BUDGET_MB)
 ✔ mcp        available via `nika mcp` (9 read-only tools · nika_check through nika_tools)
+✔ sidecar    local inference built in — `nika model serve --model <path.gguf>` (loopback · OpenAI-compatible)
+⚠ models     none pulled yet — the sidecar has nothing to serve
+  fix: nika model pull Qwen/Qwen3-4B-Instruct-2507-GGUF
 ⚠ agent      cursor not wired
   fix: nika wire cursor
 ⚠ agent      claude not wired
   fix: nika wire claude
-✔ local      5 provider(s) (ollama · lmstudio · llamacpp · localai · vllm) — no key · needs a running server
+✔ local      5 providers (ollama · lmstudio · llamacpp · localai · vllm) — no key · needs a running server
   fix: nika doctor --ping   # probe the local ports (offline otherwise)
 ⚠ provider   mistral — MISTRAL_API_KEY unset
   fix: export MISTRAL_API_KEY=…
