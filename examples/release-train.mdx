@@ -70,12 +70,8 @@ inputs:
     type: string
     required: true
     description: "The version to ship (e.g. 1.4.0)"
-
-config:
-  window:
-    type: timestamp
-    default: "2026-07-28T09:00:00Z"
-    description: "The absolute departure window the train holds for"
+const:
+  window: "2026-07-28T09:00:00Z"
 
 secrets:
   team_webhook:
@@ -84,12 +80,10 @@ secrets:
     egress:                       # sanction the on_finally ping · the secret IS the URL
       - to: "nika:notify"
         host_from_self: true
-
 permits:
-  exec: ["./scripts/release.sh", "cargo"]   # the three gates + the one ship script
-  net:
-    http: ["api.example.com", "hooks.example.com"]   # prod's version endpoint + the webhook
-  tools: ["nika:date", "nika:assert", "nika:prompt", "nika:wait", "nika:fetch", "nika:emit", "nika:notify"]
+  tools: ["nika:notify", "nika:assert", "nika:date", "nika:emit", "nika:fetch", "nika:prompt", "nika:wait"]
+  exec: ["./scripts/release.sh", "cargo"]
+  net: { http: ["api.example.com"] }
 
 tasks:
   t0:
@@ -131,7 +125,7 @@ tasks:
     with:
       t0: ${{ tasks.t0.output }}
     after:
-      gates_green: success             # state, no data · the timing is only worth taking on a green board
+      gates_green: success           # state, no data · the timing is only worth taking on a green board
     invoke:
       tool: "nika:date"
       args:
@@ -147,7 +141,7 @@ tasks:
     invoke:
       tool: "nika:prompt"
       args:
-        message: "Gates GREEN in ${{ with.gate_time }} min. Ship ${{ inputs.version }} in the ${{ config.window }} window?"
+        message: "Gates GREEN in ${{ with.gate_time }} min. Ship ${{ inputs.version }} in the ${{ const.window }} window?"
         default: false
 
   approved:
@@ -166,7 +160,7 @@ tasks:
     invoke:
       tool: "nika:wait"
       args:
-        until: "${{ config.window }}"
+        until: "${{ const.window }}"
         timeout: "48h"
 
   ship:

@@ -95,6 +95,9 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-PARSE-023` | a task carries an id: field — the map key is the identity, the field is gone | `validation_error` | false |
 | `NIKA-PARSE-024` | a task carries depends_on: — dead since W2 (data → with: bindings · control → after: predicates · check --fix migrates) | `validation_error` | false |
 | `NIKA-PARSE-025` | decode: with capture: structured — that capture already IS an object · type it with returns: | `validation_error` | false |
+| `NIKA-PARSE-026` | a declared entropy x clock contradiction · entropy: ambient paired with clock: virtual — the ambient declaration contradicts the determinism demand (NEP-0010 · F-P3) | `validation_error` | false |
+| `NIKA-PARSE-027` | a declared entropy x clock contradiction · entropy: none | seeded paired with clock: system — deterministic journals cannot ride the wall clock (NEP-0010 · F-P3) | `validation_error` | false |
+| `NIKA-PARSE-028` | entropy: none declares strict determinism while a structural randomness source is consumed (a live retry jitter · nika:uuid) — the strict declaration cannot hold (NEP-0010 · F-P3 · judged at check) | `validation_error` | false |
 | `NIKA-COMP-001` | invoke.workflow: target is not statically resolvable (templated · malformed · unpinned registry ref) — a call graph you cannot draw before the run cannot be bounded (spec 14) | `validation_error` | false |
 | `NIKA-COMP-002` | the child workflow's effect boundary exceeds the parent capped by the call-site declaration (Authority(child) subset of Authority(parent) intersect declared · spec 14 laws 3/4) | `security_error` | false |
 | `NIKA-COMP-003` | the static call graph is not acyclic (self-launch · cycle · spec 14 law 7 · NIKA-SEC-003 is the runtime depth backstop) | `validation_error` | false |
@@ -147,13 +150,24 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-SEC-005` | SSRF block — a nika:fetch/nika:notify URL resolves to a loopback/private/link-local/metadata target (always-on engine floor · independent of permits:) | `security_error` | false |
 | `NIKA-SEC-006` | secret flow — a secrets.&lt;name&gt; value reaches an unsanctioned sink (exec argument · invoke payload · infer/agent prompt) · the diagnostic carries the taint path + the egress clause that would sanction it (spec 10 · flow rules in 01 §egress) | `security_error` | false |
 | `NIKA-SEC-007` | secret egress — a tainted value reaches the workflow boundary (outputs:) · the diagnostic carries the taint path (spec 10 · the to: outputs sanction in 01 §egress) | `security_error` | false |
-| `NIKA-SEC-009` | lethal trifecta complete — the declared boundary grants private read (fs.read non-empty) + untrusted ingress (a nika:fetch builtin invoked or granted · any mcp:* server granted) + external egress (net.http non-empty · an escaping fs.write glob · exec enabled), and no blocking invoke: nika:prompt (no default:) dominates an egress-capable task (NEP-0002 · the Rule of Two as a static check) | `security_error` | false |
+| `NIKA-SEC-008` | data-as-code sink · a nika:fetch resolved URL path names a code-bearing class (serialized-executable · script/interpreter · executable binary/module · the closed NEP-0006 list) and the task declares no inert: door · the read hides an execution sink (F-O7 · NEP-0006) | `security_error` | false |
+| `NIKA-SEC-009` | lethal trifecta complete — the declared boundary grants private read (fs.read non-empty) + untrusted ingress (a nika:fetch builtin invoked · an mcp:* tool invoked · an agent: whose whitelist admits ingress) + external egress (net.http non-empty · an escaping fs.write glob · exec enabled), the untrusted content REACHES an egress-capable task's effect surface (a realized flow), and no blocking invoke: nika:prompt (no default:) dominates it (NEP-0002 v2.0 · the Rule of Two as a static check) | `security_error` | false |
 | `NIKA-TIMEOUT-001` | task (or for_each iteration) exceeded timeout: | `timeout_error` | false |
 | `NIKA-CANCEL-001` | task cancelled (workflow failure gate · user cancellation) | `cancelled` | false |
 | `NIKA-ASSERT-001` | an assert: claims a level the evidence does not support (a StaticProof the IR cannot decide · a mis-leveled obligation · spec 15) | `validation_error` | false |
 | `NIKA-LOCK-001` | a dependency resolved that nika.lock does not pin, or a hand-edited lock digest does not match (pin-by-default · the lock's own hash catches the edit · spec 15) | `validation_error` | false |
 | `NIKA-BUILTIN-001` | builtin invoke violates its statically-checkable arg contract (e.g. nika:fetch without url: · nika:jq arg shape) | `validation_error` | false |
 | `NIKA-BUILTIN-DONE-001` | nika:done invoked outside an agent: loop | `validation_error` | false |
+| `NIKA-DRIFT-001` | declared-but-unused — a vars:/env:/secrets: name or a permits: entry (exec program · tool glob · net host · fs path) that nothing in the body references (advisory check hint · never fails the audit — the reverse direction, used-but-undeclared, is the hard NIKA-VAR-001/NIKA-DAG-002/NIKA-SEC-004 surface) | `validation_error` | false |
+| `NIKA-AUTH-006` | no permits: block declared and the body has effects — absent = zero authority (F-O8 · NEP-0003) | `security_error` | false |
+| `NIKA-AUTH-007` | an interpolation reaches a permit bound (host · glob · program · env name) — a bound MUST be a literal, the boundary would be self-serve (F-O1 · NEP-0004 · env per NEP-0005) | `security_error` | false |
+| `NIKA-AUTH-008` | an untrusted value reaches a permitted verb's argument and its canonical resolved form escapes the step's permit — re-gate refused (F-O1 · NEP-0004) | `security_error` | false |
+| `NIKA-AUTH-009` | a permits env: entry names a dangerous-floor variable · the engine strips the name unconditionally, the grant can never take effect: an inert dead grant (F-O4 · NEP-0005) | `security_error` | false |
+| `NIKA-AUTH-010` | a permits net.http: entry carries the *. subdomain wildcard · the grant delegates the boundary to the zone operator (every host under the suffix, present and future) — refused: name exact hosts, or the bare * when allow-all is genuinely intended (F-P5 · NEP-0008) | `security_error` | false |
+| `NIKA-VALUES-001` | vars: is a dead envelope field (R3a · the E-split) | `validation_error` | false |
+| `NIKA-VALUES-002` | env: is a dead envelope field (R3a · the E-split) | `validation_error` | false |
+| `NIKA-VALUES-003` | a value-namespace read outside the four-authority family (R3a · LAW-SURFACE-0201) | `validation_error` | false |
+| `NIKA-DEFAULT-001` | a declared default (inputs · config) or typed const value does not conform to its declared type (R3b · LAW-TYPE-0211) | `validation_error` | false |
 {/* errors-codes:end */}
 
 ### Retired codes (never reuse)
@@ -175,10 +189,12 @@ never repurposed:
 |---|---|---|
 | `NIKA-AGENT` | agent: verb errors | 001-099 |
 | `NIKA-ASSERT` |  | 001-099 |
+| `NIKA-AUTH` |  | 001-099 |
 | `NIKA-BUILTIN` | Builtin tool errors · per-builtin sub-namespace | 001-099 |
 | `NIKA-CANCEL` | Task or workflow cancellation | 001-099 |
 | `NIKA-COMP` |  | 001-099 |
 | `NIKA-DAG` | DAG topology · cycles · invalid deps | 001-099 |
+| `NIKA-DEFAULT` |  | 001-099 |
 | `NIKA-EXEC` | exec: verb errors | 001-099 |
 | `NIKA-IMPL` | Engine internal errors | 001-099 |
 | `NIKA-INFER` | infer: verb errors | 001-099 |
@@ -186,6 +202,7 @@ never repurposed:
 | `NIKA-LOCK` |  | 001-099 |
 | `NIKA-MCP` | MCP client errors | 001-099 |
 | `NIKA-DECIDE` |  | 001-099 |
+| `NIKA-DRIFT` |  | 001-099 |
 | `NIKA-PARSE` | YAML parse + envelope validation | 001-099 |
 | `NIKA-POLICY` |  | 001-099 |
 | `NIKA-PORT` |  | 001-099 |
@@ -194,6 +211,7 @@ never repurposed:
 | `NIKA-TIMEOUT` | Task or step timeouts | 001-099 |
 | `NIKA-TYPE` |  | 001-099 |
 | `NIKA-VAR` | Variable resolution failures | 001-099 |
+| `NIKA-VALUES` |  | 001-099 |
 {/* errors-namespaces:end */}
 
 Builtin errors use a per-builtin sub-namespace: each builtin owns its own

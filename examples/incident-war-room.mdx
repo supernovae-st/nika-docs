@@ -75,12 +75,8 @@ secrets:
       - to: "nika:notify"
         host_from_self: true
 permits:
-  tools: ["nika:assert", "nika:emit", "nika:fetch", "nika:notify", "nika:read", "nika:wait", "nika:write"]
+  tools: ["nika:notify", "nika:assert", "nika:emit", "nika:fetch", "nika:read", "nika:wait", "nika:write"]
   exec: ["journalctl"]
-  net: { http: ["status.internal.example.com"] }
-  fs:
-    read: ["./runbooks/**"]
-    write: ["./incidents/**"]
 
 tasks:
   # ── the gather wave · all three run in parallel ──
@@ -166,7 +162,7 @@ tasks:
     with:
       events: ${{ tasks.timeline.output.events }}
     after:
-      confirmed: success               # state, no data · recovery proven or no draft
+      confirmed: success             # state, no data · recovery proven or no draft
     infer:
       model: anthropic/claude-sonnet-4-6   # per-task override · thinking budget
       prompt: |

@@ -37,17 +37,9 @@ workflow:
   id: price-watch
   description: "Watch a product price, ping me when it drops below my target"
 
-inputs:
-  product_api:
-    type: uri
-    default: "https://api.shop.example.com/v1/products/macbook-air"
-    description: "The product endpoint to watch"
-
-config:
-  alert_below:
-    type: number
-    default: 899
-    description: "Ping me once the price drops below this"
+const:
+  product_api: "https://api.shop.example.com/v1/products/macbook-air"
+  alert_below: 899
 
 secrets:
   alerts_webhook:
@@ -56,11 +48,7 @@ secrets:
     egress:                       # sanction the one send · the secret IS the URL
       - to: "nika:notify"
         host_from_self: true
-
 permits:
-  exec: false                     # no shells · two tools and one comparison
-  net:
-    http: ["api.shop.example.com", "hooks.example.com"]   # the shop + the webhook · nothing else leaves
   tools: ["nika:fetch", "nika:notify"]
 
 tasks:
@@ -68,7 +56,7 @@ tasks:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ inputs.product_api }}"
+        url: "${{ const.product_api }}"
         mode: jq
         jq: "."
     output:                           # named jq bindings over the raw response
@@ -83,13 +71,13 @@ tasks:
     with:
       price: ${{ tasks.check.price }}     # value edges · the named bindings cross the boundary here
       name: ${{ tasks.check.name }}
-    when: ${{ with.price < config.alert_below }}
+    when: ${{ with.price < const.alert_below }}
     invoke:
       tool: "nika:notify"
       args:
         channel: webhook
         target: "${{ secrets.alerts_webhook }}"
-        message: "Price drop · ${{ with.name }} is now ${{ with.price }} (target ${{ config.alert_below }})"
+        message: "Price drop · ${{ with.name }} is now ${{ with.price }} (target ${{ const.alert_below }})"
         severity: info
 
 outputs:

@@ -60,14 +60,11 @@ model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
 const:
   source: "./README.md"             # SLOT: your input — README.md exists in ANY repo, so the
-                                    # skeleton runs green BEFORE you point it at real data
-
-permits:                            # the blast radius · default-deny once present
-  exec: false                       # no program launches from this shape
+permits:
   tools: ["nika:read", "nika:write"]
-  fs:
-    read: ["./README.md"]           # SLOT: same path as const.source · move one, move both
-    write: ["./output.md"]          # SLOT: same path as the persist destination
+  fs: { read: ["./README.md"], write: ["./output.md"] }
+
+                                    # skeleton runs green BEFORE you point it at real data
 
 tasks:
   gather:
@@ -110,11 +107,7 @@ workflow:
 
 const:
   source_url: "https://api.example.com/v1/value"   # SLOT: what to watch
-
-config:
-  threshold:                        # SLOT: the trigger condition value · a dial, not the subject
-    type: integer
-    default: 100
+  threshold: 100                    # SLOT: the trigger condition value
 
 secrets:
   webhook:
@@ -123,14 +116,6 @@ secrets:
     egress:
       - to: "nika:notify"
         host_from_self: true        # the secret value IS the destination URL
-
-permits:
-  exec: false
-  tools: ["nika:fetch", "nika:notify"]
-  net:
-    http:
-      - "api.example.com"           # SLOT: the watched host · same as const.source_url
-      - "hooks.slack.com"           # SLOT: the webhook host · nothing else may leave
 
 tasks:
   check:
@@ -151,7 +136,7 @@ tasks:
     with:
       value: ${{ tasks.check.value }}   # the binding IS the edge · check → act
     # when: is a SKIP gate — routing, not failure (a skipped task is not an error)
-    when: ${{ with.value > config.threshold }}   # SLOT: the CEL condition
+    when: ${{ with.value > const.threshold }}   # SLOT: the CEL condition
     invoke:
       tool: "nika:notify"           # SLOT: the action · notify / write / exec
       args:
@@ -182,10 +167,9 @@ const:
   collection_source: "./items"      # SLOT: where the collection comes from
 
 permits:
-  exec: false
   tools: ["nika:glob", "nika:jq"]
   fs:
-    read: ["./items/**"]            # SLOT: the tree the glob walks · same as const.collection_source
+    read: ["./items/**"]
 
 tasks:
   discover:
@@ -248,15 +232,6 @@ workflow:
 const:
   source_url: "https://api.example.com/v1/records"   # SLOT: the data source
   state_path: "./state/etl-state.json"               # SLOT: the cursor file
-
-permits:
-  exec: false
-  tools: ["nika:fetch", "nika:jq", "nika:json_diff", "nika:read", "nika:write"]
-  net:
-    http: ["api.example.com"]       # SLOT: the data-source host · same as const.source_url
-  fs:
-    read: ["./state/etl-state.json"]    # SLOT: the cursor file · same as const.state_path
-    write: ["./state/etl-state.json"]   # the same file, read AND written — that is why it is const
 
 tasks:
   # First run · no state file yet · recover to an empty list.
@@ -340,10 +315,8 @@ inputs:
     type: string
     required: true
     description: "What the agent must accomplish"   # SLOT
-
 permits:
-  exec: false
-  tools: ["nika:assert", "nika:done", "nika:read"]   # the agent's grant + the confirm gate
+  tools: ["nika:assert", "nika:done", "nika:read"]
 
 tasks:
   plan:
@@ -439,7 +412,7 @@ tasks:
 
   human:
     after:
-      gates: success                # state, no data · no question until the board is green
+      gates: success              # state, no data · no question until the board is green
     invoke:
       # the prompt PAUSES the run (exit 4 · not a failure) — answer and resume:
       #   nika run --resume <trace> --answer human=yes
@@ -492,14 +465,6 @@ model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
 const:
   site_url: "https://example.com"   # SLOT: the site to understand
   out_path: "./out/brief.json"      # SLOT: where the brief lands
-
-permits:
-  exec: false
-  tools: ["nika:fetch", "nika:write"]
-  net:
-    http: ["example.com"]           # SLOT: the crawled host · same as const.site_url
-  fs:
-    write: ["./out/brief.json"]     # SLOT: same path as const.out_path
 
 tasks:
   crawl_site:
@@ -559,19 +524,11 @@ workflow:
 
 model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
 
-inputs:
-  subject:                          # SLOT: what the asset is about · the caller's subject
-    type: string
-    default: "a calm cosmic landing hero"   # a default keeps the skeleton green with zero args
-
 const:
+  subject: "a calm cosmic landing hero"   # SLOT: what the asset is about
   out_dir: "./out/assets"           # SLOT: where assets land
-
 permits:
-  exec: false
   tools: ["nika:image_generate", "nika:jq", "nika:write"]
-  fs:
-    write: ["./out/assets/**"]      # SLOT: the asset tree · same as const.out_dir
 
 tasks:
   brief:
@@ -579,7 +536,7 @@ tasks:
       max_tokens: 600
       prompt: |
         # SLOT: the creative direction · style · constraints
-        Write one vivid, concrete image prompt for: ${{ inputs.subject }}.
+        Write one vivid, concrete image prompt for: ${{ const.subject }}.
         No text in the image · no watermark · a calm central zone.
       schema:
         type: object
@@ -650,12 +607,6 @@ secrets:
     egress:
       - to: "nika:fetch"            # the send · default-deny otherwise
       - to: "outputs"               # the return value derives from the authed response
-
-permits:
-  exec: false
-  tools: ["nika:fetch"]
-  net:
-    http: ["api.example.com"]       # SLOT: the product API host · same as const.api_base
 
 tasks:
   upload:

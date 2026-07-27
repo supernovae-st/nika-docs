@@ -55,11 +55,7 @@ const:
   lang: "fr"
   source_glob: "./docs/**/*.md"
 permits:
-  exec: false
   tools: ["nika:glob", "nika:jq", "nika:read", "nika:write"]
-  fs:
-    read: ["./docs/**"]
-    write: ["./i18n/**"]
 
 tasks:
   files:

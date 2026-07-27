@@ -57,12 +57,9 @@ inputs:
     type: string
     required: true
     description: "Path to the contract (markdown or plain text)"
-
 permits:
-  exec: false
-  fs:
-    write: ["./legal/risk-memo.md"]
   tools: ["nika:assert", "nika:read", "nika:validate", "nika:write"]
+  fs: { write: ["./legal/risk-memo.md"] }
 
 tasks:
   contract:
@@ -121,7 +118,7 @@ tasks:
     with:
       clauses: ${{ tasks.clauses.output.clauses }}
     after:
-      gate: success                # state, no data · the assert passed or the memo is cancelled
+      gate: success              # state, no data · the assert passed or the memo is cancelled
     infer:
       prompt: |
         Write a one-page risk memo from these clauses ·

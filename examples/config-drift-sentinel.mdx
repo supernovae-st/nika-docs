@@ -60,9 +60,10 @@ model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-haik
 const:
   config_url: "https://api.internal.example.com/v1/config"
   baseline_path: "./ops/config-baseline.json"
-  # Sanctioned config overrides (RFC 7396 merge-patch shape) · a bare
-  # literal: the sanction list is the file's own, never caller-supplied.
-  approved_overrides: {}             # zero approved drifts until you say otherwise
+  approved_overrides:
+    type: object
+    default: {}                      # zero approved drifts until you say otherwise
+    description: "Sanctioned config overrides (RFC 7396 merge-patch shape)"
 
 secrets:
   oncall_webhook:
@@ -71,13 +72,7 @@ secrets:
     egress:                       # sanction the one send · the secret IS the URL
       - to: "nika:notify"
         host_from_self: true
-
 permits:
-  exec: false
-  net:
-    http: ["api.internal.example.com"]
-  fs:
-    read: ["./ops/config-baseline.json"]
   tools: ["nika:emit", "nika:fetch", "nika:hash", "nika:json_diff", "nika:json_merge_patch", "nika:notify", "nika:read"]
 
 tasks:

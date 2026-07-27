@@ -51,11 +51,7 @@ inputs:
     type: string
     required: true
     description: "What to research"
-
 permits:
-  exec: false
-  fs:
-    write: ["./research/**"]      # the filename is the topic · the tree is the boundary
   tools: ["nika:done", "nika:fetch", "nika:write"]
 
 tasks:

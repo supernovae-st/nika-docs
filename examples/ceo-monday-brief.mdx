@@ -31,6 +31,7 @@ flowchart TD
   revenue["revenue · nika:jq"]:::invoke
   brief["brief · thinking"]:::infer
   stamp["stamp · nika:date"]:::invoke
+  approve["approve · nika:prompt"]:::invoke
   save["save · nika:write"]:::invoke
   bill["bill · nika:inspect"]:::invoke
   ping["ping · nika:notify"]:::invoke
@@ -40,8 +41,10 @@ flowchart TD
   pulse --> brief
   kpis --> brief
   revenue --> brief
+  brief --> approve
   stamp --> save
   brief --> save
+  approve -.->|success| save
   save -.->|success| bill
   stamp --> ping
   bill --> ping
@@ -73,15 +76,9 @@ secrets:
     egress:                       # sanction the one send · the secret IS the URL
       - to: "nika:notify"
         host_from_self: true
-
 permits:
-  exec: ["git"]                   # the pulse · argv[0] only
-  net:
-    http: ["hn.algolia.com"]
-  fs:
-    read: ["./finance/kpis.csv"]
-    write: ["./briefs/**"]        # the filename is dated · the tree is the boundary
-  tools: ["nika:convert", "nika:date", "nika:emit", "nika:fetch", "nika:inspect", "nika:jq", "nika:notify", "nika:read", "nika:write"]
+  tools: ["nika:convert", "nika:date", "nika:fetch", "nika:inspect", "nika:jq", "nika:emit", "nika:notify", "nika:prompt", "nika:read", "nika:write"]
+  exec: ["git"]
 
 tasks:
   # ── branch 1 · market signal ──
@@ -152,7 +149,27 @@ tasks:
     output:
       day: ".[:10]"                  # nika:date returns the ISO string itself · slice YYYY-MM-DD
 
+  # ── the human gate · the trifecta judge demands it ──
+  # Untrusted content (the fetched news) reaches the write and the ping
+  # while the KPI sheet grants a private read: the lethal trifecta. The
+  # brief therefore lands on a human first — nika:prompt blocks until
+  # answered, and the save fires only on approval (NIKA-SEC-009).
+  approve:
+    with:
+      brief: ${{ tasks.brief.output }}
+    invoke:
+      tool: "nika:prompt"
+      args:
+        message: |
+          The Monday brief is ready to land:
+
+          ${{ with.brief }}
+
+          Save it and ping the founders? [yes/no]
+
   save:
+    after:
+      approve: success
     with:
       day: ${{ tasks.stamp.day }}
       brief: ${{ tasks.brief.output }}
@@ -166,7 +183,7 @@ tasks:
   # ── the run reports its own bill ──
   bill:
     after:
-      save: success                  # state, no data · read the meter once the brief landed
+      save: success                # state, no data · read the meter once the brief landed
     invoke:
       tool: "nika:inspect"
       args: { view: cost }

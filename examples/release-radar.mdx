@@ -49,23 +49,11 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for any provider in the catalog
 
-inputs:
-  releases_feed:
-    type: uri
-    default: "https://github.com/tokio-rs/tokio/releases.atom"
-    description: "The dependency release feed to watch"
-
 const:
-  state_path: "./state/release-radar.json"   # the file owns its own cursor · not caller-movable
-
+  releases_feed: "https://github.com/tokio-rs/tokio/releases.atom"
+  state_path: "./state/release-radar.json"
 permits:
-  exec: false                     # no shells · five tools and a diff
-  net:
-    http: ["github.com"]          # the feed host · nothing else leaves
-  fs:
-    read: ["./state/**"]          # the cursor, read on entry
-    write: ["./state/**"]         # the cursor, rewritten on exit
-  tools: ["nika:jq", "nika:read", "nika:fetch", "nika:json_diff", "nika:write"]
+  tools: ["nika:fetch", "nika:jq", "nika:json_diff", "nika:read", "nika:write"]
 
 tasks:
   # First run has no state file · recover to an empty list.
@@ -86,7 +74,7 @@ tasks:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ inputs.releases_feed }}"
+        url: "${{ const.releases_feed }}"
         mode: feed
     output:
       entries: "[.items[] | {title, url, published}]"
