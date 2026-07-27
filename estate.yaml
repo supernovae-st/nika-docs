@@ -518,7 +518,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/mcp-catalog.mdx"
   class: authored
-  sha256: a4475e7e03522c99b677fc1fe4e2f85bca137354ab6a71a404204866d6c37c0d
+  sha256: 5d8a23bc2fce2f10a34032cf2452f8eb3cd17eda76aa39eb194d181c51310ced
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
   note: "frontmatter description hand-types '105 MCP server entries … snapshot 2026-04-17' — outside count-drift-gate's checked classes (providers · builtins · extract modes), so it can rot silently"
 - path: "reference/mcp-server.mdx"
@@ -543,7 +543,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "scripts/count-drift-gate.py"
   class: authored
-  sha256: ecbed02405dd2b9534b894ee21c54078e6ff132da149a0aeac4df9b86a277a34
+  sha256: 78689def3114c2bd68cdd4c3630e3bbcca6b3755c76ba1957e3b771a2be9bd37
   evidence: "hand-written gate · 'the count-rot ratchet' design prose header"
 - path: "scripts/estate.py"
   class: authored
