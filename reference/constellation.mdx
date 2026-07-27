@@ -1,16 +1,19 @@
 ---
 title: "Crate constellation"
-description: "Visual map of every Nika Diamond crate across six layers. Live admission status. The 42-crate architecture (locked target), reached additively across 1.x minors."
+description: "Visual map of every Nika Diamond crate across six layers. Live admission status. The architecture grows additively across 1.x minors, toward a projected horizon."
 sidebarTitle: "Constellation"
 icon: "diagram-project"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika Diamond targets the **{STATUS.cratesTarget}-crate** architecture,
-reached additively across 1.x minors, organized across six layers.
-Today **{STATUS.cratesAdmitted} are admitted** and {STATUS.wipCrates.length}
-are WIP ({STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}).
+Nika Diamond grows additively across 1.x minors, organized across six
+layers. Today **{STATUS.cratesAdmitted} crates are admitted** and
+{STATUS.wipCrates.length} are WIP
+({STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}), against a
+projected horizon of **{STATUS.cratesTarget} crates** (hard cap
+{STATUS.cratesCap}, per ADR-037). The horizon is a projection, never a gate:
+crates are admitted when they pass the 12 gates, not to reach a number.
 The remaining crates are future 1.x expansion, not required for the first-run
 CLI/LSP/MCP path.
 
@@ -133,8 +136,9 @@ flowchart TB
 
 ## Memory subsystem (the Connectome): separate count
 
-The 8-crate memory subsystem (plus 1 orchestrator at L2) is **not counted**
-in the {STATUS.cratesTarget} target. It lands **whole before 1.0** (the
+The memory subsystem is **11 crates** — 1 L2 orchestrator + 10 L1
+satellites — and is **not counted** in the {STATUS.cratesTarget} crate
+horizon. It lands **whole before 1.0** (the
 timeline's [connectome gate](https://nika.sh/timeline#gates) · a declared
 pre-condition of the launch), via the `MemoryStore` + `EmbeddingProvider`
 trait reservations already in `nika-kernel`.
@@ -144,15 +148,17 @@ trait reservations already in `nika-kernel`.
     `nika-connectome` ties the 10 satellites together behind the `MemoryStore`
     trait. Exposes unified put / query / forget / recall API.
   </Accordion>
-  <Accordion title="L1 satellites (8)" icon="satellite-dish">
+  <Accordion title="L1 satellites (10)" icon="satellite-dish">
     - `nika-hnsw`, approximate nearest neighbor (HNSW index)
     - `nika-bm25`, sparse full-text ranking
     - `nika-rrf`, reciprocal-rank fusion (hybrid search)
+    - `nika-rerank`, local reranking for precision
     - `nika-fsrs`, Free Spaced Repetition Scheduler (memory decay)
     - `nika-rdfs-reasoner`, RDFS inference for knowledge triples
     - `nika-temporal`, time-aware recency + decay
     - `nika-graph-algos`, graph traversal (shortest-path, community)
-    - `nika-autodesc`, auto-description generation (embed-and-label)
+    - `nika-autodesc-minimal`, provenance-attached auto-description
+    - `nika-autodesc-full`, schema-evolving auto-description
   </Accordion>
 </AccordionGroup>
 

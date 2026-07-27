@@ -37,18 +37,21 @@ nika-docs/
 ├── guides/                patterns · agent-authoring · templates · troubleshooting · local-models · … (task-oriented)
 ├── concepts/              architecture · verbs · workflows · bindings · events · providers · security · …
 ├── examples/              overview + the tiered showcase workflows (PROJECTED; counts live in the projector)
-├── architecture/          5 pages (layers · FCI · L0 decisions · admission · ADR index)
-├── reference/             10 pages (YAML · CLI · schema · error codes · builtins · providers catalog · MCP catalog · capabilities · constellation · status)
-├── changelog/             2 pages (releases · roadmap)
-├── snippets/              _canon · _status-snapshot · _ecosystem (auto-generated/shared; see below)
+├── integrations/          editor · CI · agent-client wiring (nested)
+├── patterns/              cross-cutting pattern index
+├── architecture/          layers · FCI · L0 decisions · admission · ADR index
+├── reference/             YAML · CLI · schema · error codes · builtins · providers catalog · MCP catalog · MCP server · capabilities · constellation · design system · machine surfaces · status
+├── changelog/             releases · roadmap
+├── snippets/              _canon · _status-snapshot · _showcase · _ecosystem (auto-generated/shared; see below)
 ├── scripts/link-audit.py  the repo's own drift gate (see CI)
 ├── .github/workflows/     gate.yml (link-audit on every push/PR)
 ├── images/                logos + favicon
 └── global.css             Mermaid transparent background
 ```
 
-~57 pages of curated MDX across four tabs: **Guide · Architecture ·
-Reference · Changelog** (count drifts; trust the tree, not this line).
+Curated MDX across four tabs: **Guide · Architecture · Reference ·
+Changelog**. No page count here on purpose — `docs.json` is the nav source
+of truth, and a hand-typed total is the first thing to rot.
 
 ## Local preview
 
@@ -75,7 +78,8 @@ Hand edits are overwritten on the next regeneration (and the projector
 
 | Surface | Source of truth | Regenerate |
 |---|---|---|
-| `snippets/_status-snapshot.mdx` (engine live state) | engine repo | `bash scripts/mintlify-snapshot.sh` (in the engine) |
+| `snippets/_status-snapshot.mdx` · `version` + `lastUpdated` | published GitHub release | `bash scripts/mintlify-snapshot.sh` (here) |
+| `snippets/_status-snapshot.mdx` · **every count** | engine `main` refresh-status.sh block | **hand-copied.** No gate watches it — see the file header for the per-field derivation commands |
 | `snippets/_canon.mdx` (language facts: verbs/builtins/providers counts) | `nika-spec/canon.yaml` | `python3 scripts/canon-projectors.py --write` (in the spec) |
 | `examples/*.mdx` YAML+mermaid blocks · `guides/templates.mdx` template blocks · `reference/error-codes.mdx` tables | `nika-spec` showcase/ · templates/ · error registry | `python3 scripts/showcase-projector.py --write` (in the spec) |
 

@@ -17,10 +17,15 @@ Public documentation for Nika — the open workflow language for AI
    `import { CANON } from "/snippets/_canon.mdx"` then `{CANON.builtins}`
    inline. Engine live state (version, crates, tests, ADRs) derives from
    `snippets/_status-snapshot.mdx` the same way (`STATUS.version`…).
-   Frontmatter `description:` cannot import — keep volatile numbers OUT
-   of descriptions entirely (only forever-locked facts like the 42-crate
-   target may appear as words). Dated changelog/ADR entries are FROZEN
-   history: never retro-edit their numbers.
+   Frontmatter `description:` cannot import — keep counts OUT of
+   descriptions entirely. **No exemption, no "forever-locked" carve-out.**
+   This rule used to exempt "the 42-crate target"; ADR-037 then revised it
+   to a 50-90 horizon (cap 100, "projected, never a gate"), and the
+   blessed literal went on rendering `54 / 42` on live pages. A count that
+   feels permanent is the one nobody re-checks. If a description needs a
+   number, rewrite the sentence so it doesn't. Dated changelog/ADR entries
+   are FROZEN history: never retro-edit their numbers — fix the drift in
+   the live pages instead.
 2. **4 verbs only**: `infer` · `exec` · `invoke` · `agent`. Fetch is the
    `nika:fetch` builtin under `invoke:` — never document it as a verb.
 3. New pages must be registered in `docs.json` nav — `python3

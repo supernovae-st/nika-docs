@@ -12,8 +12,8 @@ classes:
   pinned-copy: "byte-copy pinned to an upstream rev"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  authored: 146
-  generated: 3
+  authored: 147
+  generated: 2
   pinned-copy: 0
   foreign: 0
   unverified-default: 23
@@ -24,11 +24,11 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: f3829266d644a9785c9178d3d33350f620920e2ff7db1bf0bacae6db12550ad0
+  sha256: 167f52271ea6ca19e1639f0186876fe6a5ef570b3b81eb354b6e861c1ac2b674
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
-  sha256: 851647bec21fe1ec107bd7771eb2ec646e1286fd3be5889ad7ef0cbbe108bfff
+  sha256: dd3ab25d0c79d5c8c2df5e073ec73b873f91cd6d8b28a5e869c1ef6e202f52a7
   evidence: "hand-written bot workflow (it edits snippets/_status-snapshot.mdx — nothing writes it)"
   note: "release-heal rewrites the version + lastUpdated fields of snippets/_status-snapshot.mdx on a daily cron — bot-maintained fields in ANOTHER file, this one stays hand-written"
 - path: ".nvmrc"
@@ -37,7 +37,7 @@ files:
   evidence: "hand-pinned Node major for the local mint preview"
 - path: "AGENTS.md"
   class: authored
-  sha256: e1bde20ecb36c6d299cf302351f5b4e2c33b5c3207d950246453ac293a17ef12
+  sha256: 6cb6be4e0466ba72801da98f0400e7dcd39dcff11f40e2ebf7280ba2a78eebbc
   evidence: "hand-written agent entry per the AGENTS.md convention · it STATES the projection rules the snippets follow"
 - path: "DEPLOY.md"
   class: authored
@@ -49,7 +49,7 @@ files:
   evidence: "verbatim GNU AGPL-3.0 license text (FSF canonical text · hand-placed · matches the engine's license)"
 - path: "README.md"
   class: authored
-  sha256: 38901d10e7ec4f29385430796abf535dee628932afc56db38690961d55794207
+  sha256: 6357b53a8787b9567ec995cc3b354f9335343f57ae1d038c7795ee2140c3073d
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -57,15 +57,15 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "architecture/admission.mdx"
   class: authored
-  sha256: c15fe245f7fdc54570553238f37c4b298f62966176b0235b8ec7a194275c92e8
+  sha256: de2f4725cae1a84708d050771f864b95a3dfb4aedbfbe78e3b6109923e949a5f
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "architecture/adrs.mdx"
   class: authored
-  sha256: c34c2e88ae8070789deaad1d205d56db04316a87d3abea3d47711c9418de02c0
+  sha256: 7e7a3f0c691e3527cdbc6d0191350d998bad4cc0e66526bcd06dfe9fcbe1b0d9
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "architecture/forward-compat-invariants.mdx"
   class: authored
-  sha256: 60aec089764352c8921a463e0d6a109cafde4ab5cf554c1b8e5d0d9b921e5d8c
+  sha256: ec37c3ef417570d8245bb5e7e02ad3f7836e48f4df69124742bd7f797cea1323
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "architecture/l0-decisions.mdx"
   class: authored
@@ -73,19 +73,19 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "architecture/layers.mdx"
   class: authored
-  sha256: c23ab589d90badcf71f6a953ddd7cf38f0b4cb86b6027bb25bcf47cfee85423f
+  sha256: 23bf9d3d531bc7c911ca9365ef7f7b8df81a10eb4fe7c1ca4a9e84ca5a8df763
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "changelog/releases.mdx"
   class: authored
-  sha256: 83bfc3c2176ec0f387f08aa9cb8ac5315f447fa9533968020d4c2ae005915698
+  sha256: 5597ee14764b144eb16172a545486af2ba2fc0593aacdb0d6858ce252a85d44a
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "changelog/roadmap.mdx"
   class: authored
-  sha256: fc5ef0b9e072f40c0289bafa9c0386da2acfdb231e743c801f511d7e5ce35ece
+  sha256: f5420aef1536fd4bb31fa7b42170ce0d3086aca99c956afd5fa145936fa996ff
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "concepts/architecture.mdx"
   class: authored
-  sha256: 88d978686824b725e83544e2055d9a310eca4e7d02efde4aa19cf7f9e8ee90be
+  sha256: a1593b17c7549b33d3b2f7b30d3ee35ff21f8b7f72e1375837837add52f7b486
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "concepts/bindings.mdx"
   class: authored
@@ -294,7 +294,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/patterns.mdx"
   class: authored
-  sha256: 866b314fa633fde3650b3e9ed035e19e7834b439c0b947cf1bb0a45b59bd3903
+  sha256: 402da863f1d237b1aea8d7b0097512dd31b2f933c5e4bb003b30704ddb3d157d
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/resume.mdx"
   class: authored
@@ -310,7 +310,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/templates.mdx"
   class: authored
-  sha256: c064d3ae114a9ecddf49bee76b42ed5c90df998ceca4a9b4a10877481d383777
+  sha256: 745ee1da8287a8d0e3e8ec2e5bcf7d0756b230e3b3214a71c68b3d2d5070f404
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/testing.mdx"
   class: authored
@@ -318,7 +318,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/troubleshooting.mdx"
   class: authored
-  sha256: c4583a1cab2a8616ea917cb32e4dad61ba610de06c9ef5c7209b12f083c0880f
+  sha256: 5d217dbdb8582d2331af2728850f400931a8efcb9df72e88de64fdae70442f99
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "images/favicon.svg"
   class: authored
@@ -501,7 +501,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/constellation.mdx"
   class: authored
-  sha256: 84a4a2cd7ce461e8a8eb2ccd082cf0ab379fae0a151b2fa708d1e87f54750bcb
+  sha256: 1e97322a8ca428100242e65753bf7cabb711418d245c48b2cdaad4be0cd36bcd
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/design-system.mdx"
   class: authored
@@ -535,7 +535,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/status.mdx"
   class: authored
-  sha256: 25c32e6a3b606fb65147ddce02803005230ec1064f50552006f1459f7367e908
+  sha256: 9df1b67f0b2ba73c3fd85285302f1c3ecec6e679d99e789489aaa999cc680b19
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/yaml-syntax.mdx"
   class: authored
@@ -547,7 +547,7 @@ files:
   evidence: "hand-written gate · 'the count-rot ratchet' design prose header"
 - path: "scripts/estate.py"
   class: authored
-  sha256: d414bd5aa9ae6883579d0f31e5cdf71638c9fc0cb47165af24e3b94c8de7b053
+  sha256: 75d9e8b57f00dab1ec5b90cf69e7874f16604ea19861800dffad8da548e5a9c2
   evidence: "hand-written estate projector (this manifest's generator)"
 - path: "scripts/link-audit.py"
   class: authored
@@ -588,16 +588,10 @@ files:
     inputs:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
-  class: generated
-  sha256: a77f94f0988564de69e49f065c28670a51e4f5626b21067447a6b5655a3e3c04
-  evidence: "in-file marker: '{/* _status-snapshot.mdx — AUTO-GENERATED by scripts/mintlify-snapshot.sh'"
-  derivation:
-    tool: "bash scripts/mintlify-snapshot.sh (public GitHub release API via authenticated gh — no engine checkout)"
-    gate: ".github/workflows/release-heal.yml daily cron — re-derives version + lastUpdated against the published release and pushes on drift (a self-heal, not a byte-compare gate)"
-    inputs:
-    - "supernovae-st/nika latest PUBLISHED release tag (the version users install)"
-    - "hand-refreshed count fields (crates · tests · clippy · adrs · providers · hygiene) — a periodic manual snapshot"
-  note: "hybrid — the header claims the whole file is AUTO-GENERATED, but scripts/mintlify-snapshot.sh derives ONLY version + lastUpdated; every count field is a hand-maintained periodic snapshot (the script's own prose says so)"
+  class: authored
+  sha256: f4713398d1ff190fcfcba607c5bc9ba7c2303b47aba5d0b4209e758f53060316
+  evidence: "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields"
+  note: "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands."
 - path: "videos/chat-to-workflow.mp4"
   class: authored
   sha256: e58dec059cafc38cabfcfdb9b476c78947dc3bd6119a7c0554e3909691f7c2d6

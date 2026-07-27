@@ -5,6 +5,8 @@ sidebarTitle: "Templates"
 icon: "copy"
 ---
 
+import { SHOWCASE } from "/snippets/_showcase.mdx";
+
 Every recurring workflow shape has a **complete, valid skeleton** in the
 spec, gated by the conformance suite on every push, with a `# SLOT:`
 marker at every decision point. The path from intent to a correct file
@@ -723,10 +725,10 @@ outputs:
     The deterministic protocol these templates anchor.
   </Card>
   <Card title="Patterns" icon="diagram-project" href="/guides/patterns">
-    The 8 composition patterns the templates lock in.
+    The twelve composition patterns the templates lock in.
   </Card>
   <Card title="Examples" icon="grid" href="/examples/overview">
-    20 full tiered workflows built from these shapes.
+    {SHOWCASE.count} full tiered workflows built from these shapes.
   </Card>
   <Card title="Templates source" icon="github" href="https://github.com/supernovae-st/nika-spec/tree/main/templates">
     The skeletons in the spec repo, conformance-gated.

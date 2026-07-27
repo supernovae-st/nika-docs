@@ -5,6 +5,8 @@ sidebarTitle: "Forward-compat"
 icon: "shield-halved"
 ---
 
+import { CANON } from "/snippets/_canon.mdx";
+
 Nika follows **real semver toward 1.0**. Features ship incrementally across 1.x minors over years.
 The 1.0 architecture must accommodate later minors (memory subsystem, agent-v2; WASM plugins, observability),
 and features we haven't imagined **without breaking changes to the public API**.
@@ -105,7 +107,8 @@ and features we haven't imagined **without breaking changes to the public API**.
 
   <Accordion title="FCI-005: Reserved error code ranges" icon="triangle-exclamation">
     Two error surfaces, one rule each. The WORKFLOW-VISIBLE surface is the
-    spec's `NIKA-<NAMESPACE>-<NNN>` taxonomy (28 registered v0.1 codes ·
+    spec's `NIKA-<NAMESPACE>-<NNN>` taxonomy ({CANON.errorCodes} registered
+    codes across {CANON.errorNamespaces} namespaces ·
     [`reference/error-codes`](/reference/error-codes)). Namespaces own
     `001-099` ranges, codes are never repurposed. The ENGINE-INTERNAL
     registry (`nika_error::codes` · `NIKA-1000+` blocks per L1 effect

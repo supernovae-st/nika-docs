@@ -1,6 +1,6 @@
 ---
 title: "Architecture"
-description: "Nika is a single Rust binary composed of 42 crates (locked target) across 7 layers. Strict downward dependencies, enforced by cargo-deny."
+description: "Nika is a single Rust binary composed of layered crates, six layers deep plus the L0.5 trait half-layer. Strict downward dependencies, enforced by cargo-deny."
 sidebarTitle: "Architecture"
 icon: "layer-group"
 ---
@@ -8,8 +8,8 @@ icon: "layer-group"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika is a single Rust binary (`nika` at **L5**) composed of
-**{STATUS.cratesTarget} crates** across seven layers
-(L0 · L0.5 · L1 · L2 · L3 · L4 · L5). Each crate has one job.
+**{STATUS.cratesAdmitted} admitted crates** across six layers
+(L0 → L5) plus the **L0.5** trait half-layer. Each crate has one job.
 Together they parse `.nika.yaml`, resolve templates, route to providers,
 execute verbs, and emit a structured event stream.
 

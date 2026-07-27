@@ -172,8 +172,11 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
   <Step title="Supersede">
     Rare, but when a decision proves wrong, a new Accepted ADR
     supersedes it. The superseded ADR stays in the tree with
-    `status: Superseded-by: ADR-XXX`. Examples: none yet (all 30 Accepted
-    ADRs remain authoritative).
+    `status: superseded` and `superseded_by:`. It has happened once so
+    far: **ADR-021** (the K8s-style `apiVersion` envelope) was superseded
+    by **ADR-082**, which locked the single `nika: v1` version marker.
+    One ADR is also Rejected outright (**ADR-089**) and kept in the tree
+    as the record of a road not taken.
   </Step>
 </Steps>
 
@@ -183,7 +186,7 @@ Every ADR carries rich metadata in both its frontmatter and `index.json`:
 
 | Field | Purpose |
 |---|---|
-| `id` | `ADR-001`..`ADR-035` · monotonic, gap-free |
+| `id` | `ADR-NNN` · assigned in ascending order, never reused. Not gap-free: ranges are reserved in blocks, so the tree currently runs `ADR-001`..`ADR-106` with 043-077 and 101-104 unallocated |
 | `title` | One-line decision summary |
 | `status` | `Proposed` / `Accepted` / `Rejected` / `Superseded` |
 | `date` | ISO date of last status change |

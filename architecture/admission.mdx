@@ -14,7 +14,7 @@ later." No "the spec is obvious." A crate admission is one atomic commit.
 <Info>
   **Canonical source:** [`RUST_ENFORCEMENT.md`](https://github.com/supernovae-st/nika/blob/main/RUST_ENFORCEMENT.md) §12 Gates · checker `scripts/ci/check-crate-gates.sh` (machine-readable JSON output).
 
-  **Live progress:** {STATUS.cratesAdmitted} / {STATUS.cratesTarget} crates admitted · {STATUS.wipCrates.length} WIP ({STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}).
+  **Live progress:** {STATUS.cratesAdmitted} crates admitted · {STATUS.wipCrates.length} WIP ({STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}) · projected horizon {STATUS.cratesTarget} (cap {STATUS.cratesCap}).
 </Info>
 
 ## The 12 gates

@@ -48,9 +48,9 @@ The dated, tagged detail lives on the [Releases](/changelog/releases) page.
     additive from there.
   </Card>
   <Card title="Quality bar stays high" icon="medal">
-    Every crate admits with 12 gates. {STATUS.cratesAdmitted} of
-    {STATUS.cratesTarget} crates meet that bar today. Admission cadence
-    is set by the quality bar, not a calendar.
+    Every crate admits with 12 gates. {STATUS.cratesAdmitted} crates meet
+    that bar today. Admission cadence is set by the quality bar, not a
+    calendar — and not by a crate count.
   </Card>
   <Card title="Forward-compat = additive" icon="shield-halved">
     `#[non_exhaustive]` on every public type + pre-planted reservations
@@ -66,7 +66,7 @@ The dated, tagged detail lives on the [Releases](/changelog/releases) page.
 
 ## Current state: v{STATUS.version}
 
-**{STATUS.cratesAdmitted} / {STATUS.cratesTarget} crates admitted** · **{STATUS.libTests} lib tests** · **{STATUS.hygieneVectors}** hygiene vectors · **{STATUS.adrs}** ADRs ({STATUS.adrsAccepted} Accepted).
+**{STATUS.cratesAdmitted} crates admitted** · **{STATUS.libTests} lib tests** · **{STATUS.hygieneVectors}** hygiene vectors · **{STATUS.adrs}** ADRs ({STATUS.adrsAccepted} Accepted).
 
 Already live today: the four verbs (`infer` · `exec` · `invoke` · `agent`),
 `nika run` / `check` / `test` / `trace` / `dap`, the LSP, the MCP oracle,
@@ -80,9 +80,10 @@ See [live state](/reference/status) for the authoritative snapshot.
     **The current work.** Each 0.9x minor is a complete, diamond-grade
     release; together they close the distance to 1.0:
 
-    - **The last two crates to {STATUS.cratesTarget}/{STATUS.cratesTarget}**:
-      `nika-pck-manifest` (manifest DTO · L0) and `nika-binding`
-      (types-first slice).
+    - **The remaining L0 slices**: `nika-binding` (types-first slice) and
+      `nika-transform`. There is no "last crate": ADR-037 made the count a
+      projection ({STATUS.cratesTarget}, cap {STATUS.cratesCap}), so the
+      train ends when the gates close, not when a counter fills.
     - **The 7 shadow zones close** (the 1.0 gates): `nika serve` input
       trust · cross-provider structured-output parity · binding taint
       runtime · `for_each` per-element spotlight · L1 taint runtime ·
@@ -114,8 +115,8 @@ See [live state](/reference/status) for the authoritative snapshot.
       ADR-004): yours to query, export, delete.
     - Store digests pinned in receipts, so recall is replayable.
 
-    **Separate count** from the {STATUS.cratesTarget} Diamond target:
-    memory crates add on top. No date: gates, not calendars. The
+    **Separate count** from the {STATUS.cratesTarget} Diamond horizon: the
+    11 memory crates (1 orchestrator + 10 satellites) add on top. No date: gates, not calendars. The
     un-numbered next major stays reserved, its content the operator's
     to declare.
   </Accordion>
@@ -159,7 +160,7 @@ See [live state](/reference/status) for the authoritative snapshot.
       propagation warnings + DAG preview.
     - Cross-provider parity expansion as models evolve.
 
-    **No date.** The 42-crate architecture, complete and then extended
+    **No date.** The layered architecture, complete and then extended
     across 1.x minors.
   </Accordion>
 
