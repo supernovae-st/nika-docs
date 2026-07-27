@@ -57,13 +57,12 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-haiku-4-5 (explain is cheap)
 
-vars:
+const:
   config_url: "https://api.internal.example.com/v1/config"
   baseline_path: "./ops/config-baseline.json"
-  approved_overrides:
-    type: object
-    default: {}                      # zero approved drifts until you say otherwise
-    description: "Sanctioned config overrides (RFC 7396 merge-patch shape)"
+  # Sanctioned config overrides (RFC 7396 merge-patch shape) · a bare
+  # literal: the sanction list is the file's own, never caller-supplied.
+  approved_overrides: {}             # zero approved drifts until you say otherwise
 
 secrets:
   oncall_webhook:
@@ -73,12 +72,20 @@ secrets:
       - to: "nika:notify"
         host_from_self: true
 
+permits:
+  exec: false
+  net:
+    http: ["api.internal.example.com"]
+  fs:
+    read: ["./ops/config-baseline.json"]
+  tools: ["nika:emit", "nika:fetch", "nika:hash", "nika:json_diff", "nika:json_merge_patch", "nika:notify", "nika:read"]
+
 tasks:
   live:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.config_url }}"
+        url: "${{ const.config_url }}"
         mode: jq
         jq: "."
     retry:
@@ -88,7 +95,7 @@ tasks:
   baseline:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.baseline_path }}" }
+      args: { path: "${{ const.baseline_path }}" }
 
   expected:
     with:
@@ -97,7 +104,7 @@ tasks:
       tool: "nika:json_merge_patch"
       args:
         target: "${{ with.baseline }}"
-        patch: "${{ vars.approved_overrides }}"
+        patch: "${{ const.approved_overrides }}"
 
   drift:
     with:

@@ -30,6 +30,12 @@ workflow:
   id: daily-brief
 model: ollama/qwen3.5:4b
 
+permits:
+  exec: false                          # nothing shells out
+  net:
+    http: ["hn.algolia.com"]           # the one host this file reaches
+  tools: ["nika:fetch"]
+
 tasks:
   fetch:
     invoke:
@@ -108,8 +114,9 @@ deliberate step in your own job, with your own budget flags.
 
 ## Where to go next
 
-- Add a `permits:` boundary — `nika check --infer-permits` writes the
-  tightest one, and the workflow becomes default-deny
+- Read the `permits:` block as the contract: absent is zero authority,
+  present is default-deny. `nika check --infer-permits` writes the
+  tightest one for the next file you author
   ([security](/concepts/security)).
 - Persist the brief: a third task with `nika:write` and a
   `content:` binding ([starters](/examples/standup-digest) show the shape).

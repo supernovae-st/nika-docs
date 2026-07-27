@@ -22,6 +22,9 @@ workflow:
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 
+permits:
+  exec: ["printf"]                     # the only program either task launches
+
 tasks:
   collect:
     exec:
@@ -36,7 +39,7 @@ tasks:
 
   stamp:
     after:
-      draft: succeeded
+      draft: success
     exec:
       command: ["printf", "'stamped'"]
 
@@ -49,6 +52,13 @@ Any `--json` run is a recording ([Traces & replay](/concepts/traces)):
 ```bash
 nika run release-notes.nika.yaml --json > .nika/traces/release-notes.ndjson
 ```
+
+<Warning>
+  **Owed a re-capture.** The workflow above now declares a `permits:`
+  block, so this captured render line (`engine floor`) is stale. A capture
+  is evidence, not prose — it is re-run, never retyped. Re-capture against
+  the 0.106 binary the day the tag ships.
+</Warning>
 
 Resume from it:
 
@@ -82,7 +92,7 @@ A task skips **iff** the trace holds its completed record and
    `output:`, `retry:` / `on_error:`, `when:`, `for_each:` — as now
    written), and
 2. the **resolved inputs** hash the same (what its `${{ }}` references
-   actually resolved to — upstream outputs, `vars`, `env`).
+   actually resolved to — upstream outputs, `inputs`, `config`, `const`).
 
 Edit a prompt → that task re-runs. Pass a different `--var` → the tasks
 that consume it re-run, and the mismatch cascades exactly as far as the
@@ -142,6 +152,10 @@ workflow:
   id: gated-ship
   description: "Build, ask a human, ship only on yes."
 
+permits:
+  exec: ["printf"]                     # build + ship · the argv form is the provable one
+  tools: ["nika:prompt"]               # the human gate · default-deny once permits: is present
+
 tasks:
   build:
     exec:
@@ -149,7 +163,7 @@ tasks:
 
   approve:
     after:
-      build: succeeded
+      build: success
     invoke:
       tool: "nika:prompt"
       args:

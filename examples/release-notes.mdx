@@ -46,8 +46,11 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large
 
-vars:
-  since_tag: "v0.80.0"
+inputs:
+  since_tag:
+    type: string
+    default: "v0.80.0"
+    description: "The tag the release range starts from"
 
 secrets:
   team_webhook:
@@ -57,10 +60,19 @@ secrets:
       - to: "nika:notify"
         host_from_self: true
 
+permits:
+  exec: ["git"]                   # the history read · no other program
+  net:
+    http: ["hooks.example.com"]     # the team webhook host · nothing else leaves
+  fs:
+    read: ["./CHANGELOG.md"]      # nika:edit reads before it writes
+    write: ["./CHANGELOG.md"]     # the ONE file the release touches
+  tools: ["nika:edit", "nika:notify"]
+
 tasks:
   history:
     exec:
-      command: ["git", "log", "${{ vars.since_tag }}..HEAD", "--oneline", "--no-merges"]
+      command: ["git", "log", "${{ inputs.since_tag }}..HEAD", "--oneline", "--no-merges"]
 
   notes:
     with:
@@ -90,7 +102,7 @@ tasks:
         replace: |
           # Changelog
 
-          ## ${{ vars.since_tag }}..HEAD · ${{ with.notes_headline }}
+          ## ${{ inputs.since_tag }}..HEAD · ${{ with.notes_headline }}
 
           ${{ with.notes_body }}
 
@@ -98,7 +110,7 @@ tasks:
     with:
       notes_headline: ${{ tasks.notes.output.headline }}
     after:
-      changelog: succeeded
+      changelog: success
     invoke:
       tool: "nika:notify"
       args:
@@ -116,8 +128,8 @@ outputs:
 ## How it works
 
 <Steps>
-  <Step title="The range is a var, not a hardcode">
-    `${{ vars.since_tag }}..HEAD`: next release you change one input,
+  <Step title="The range is an input, not a hardcode">
+    `${{ inputs.since_tag }}..HEAD`: next release you change one input,
     or pass it at run time.
   </Step>
   <Step title="Typed notes · headline + breaking + body">
@@ -135,7 +147,7 @@ outputs:
 
 | Construct | Where | Reference |
 |---|---|---|
-| `exec:` with var interpolation | `history` | [The 4 verbs](/concepts/verbs) |
+| `exec:` with input interpolation | `history` | [The 4 verbs](/concepts/verbs) |
 | `infer.schema:` | `notes` | [The 4 verbs](/concepts/verbs) |
 | `nika:edit` find/replace | `changelog` | [Builtins](/reference/builtins) |
 | `nika:notify` + `secrets:` | `announce` | [Builtins](/reference/builtins) |

@@ -48,7 +48,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-sonnet-4-6
 
-vars:
+const:
   competitor_sitemap: "https://competitor.example.com/sitemap.xml"
 
 secrets:
@@ -59,12 +59,20 @@ secrets:
       - to: "nika:notify"
         host_from_self: true
 
+permits:
+  exec: false
+  net:
+    http: ["competitor.example.com"]   # the sitemap AND every page it lists
+  fs:
+    write: ["./radar/competitor-brief.md"]
+  tools: ["nika:fetch", "nika:notify", "nika:write"]
+
 tasks:
   map:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.competitor_sitemap }}"
+        url: "${{ const.competitor_sitemap }}"
         mode: sitemap
     output:
       recent: ".[:8] | map(.loc)"     # sitemap = the root array of {loc, …} · cap at 8, keep the URLs
@@ -110,7 +118,7 @@ tasks:
 
   ping:
     after:
-      save: succeeded
+      save: success
     invoke:
       tool: "nika:notify"
       args:

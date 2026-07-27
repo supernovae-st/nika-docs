@@ -52,17 +52,23 @@ workflow:
 
 model: ollama/qwen3.5:4b   # the whole review runs offline · zero cloud
 
-vars:
+inputs:
   contract_path:
     type: string
     required: true
     description: "Path to the contract (markdown or plain text)"
 
+permits:
+  exec: false
+  fs:
+    write: ["./legal/risk-memo.md"]
+  tools: ["nika:assert", "nika:read", "nika:validate", "nika:write"]
+
 tasks:
   contract:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.contract_path }}" }
+      args: { path: "${{ inputs.contract_path }}" }
 
   clauses:
     with:
@@ -115,7 +121,7 @@ tasks:
     with:
       clauses: ${{ tasks.clauses.output.clauses }}
     after:
-      gate: succeeded              # state, no data · the assert passed or the memo is cancelled
+      gate: success                # state, no data · the assert passed or the memo is cancelled
     infer:
       prompt: |
         Write a one-page risk memo from these clauses ·

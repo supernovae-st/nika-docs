@@ -41,7 +41,7 @@ workflow:
   id: image-fx-batch
   description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
 
-vars:
+const:
   photos: "./photos" # the input folder · every .png in it gets the treatment
 
 permits:
@@ -60,7 +60,7 @@ tasks:
   shots:
     invoke:
       tool: "nika:glob"
-      args: { pattern: "${{ vars.photos }}/*.png" }
+      args: { pattern: "${{ const.photos }}/*.png" }
 
   # One deterministic darkroom pass per photo · the ops run IN ORDER.
   stylize:
@@ -115,6 +115,6 @@ ls out/
   will embed, sha-pinned in the spec manifest.
 </Note>
 
-Point `vars.photos` at any directory of PNG files. Because every op is
+Point `const.photos` at any directory of PNG files. Because every op is
 deterministic, the diff of `fx-out/` across two runs is empty — which
 makes the output safe to commit, and the workflow safe to put in CI.

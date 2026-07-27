@@ -46,3 +46,29 @@ Public documentation for Nika — the open workflow language for AI
    NEVER the default example (presentation order per
    supernovae-alignment Rule 3 · local → mistral → anthropic → openai).
 7. Commit trailer: `Co-Authored-By: Nika 🦋 <nika@supernovae.studio>`.
+8. **These docs teach 0.106 and only 0.106.** No dual grammar, no "if
+   you are on 0.105" branch, no alias (`no-legacy-no-back-compat`). The
+   two flag-days: every value lands under one of four authorities —
+   `inputs:` (the caller supplies it) · `config:` (the deployment) ·
+   `const:` (the file owns it) · `secrets:` (a governed store); `vars:`
+   and `env:` are dead (`NIKA-VALUES-001`/`-002`, and the envelope `env:`
+   only — `exec.env:` is alive). And an absent `permits:` block declares
+   **zero** authority (`NIKA-AUTH-006`), so every effect-bearing example
+   carries one. Also: `after:` is `success`/`failure` (not `succeeded`/
+   `failed`), and `bool` is the boolean spelling — but raw JSON Schema
+   under `infer.schema:` is a different language and is never touched.
+9. **Two regions of this repo are PROJECTED, not authored** — never
+   hand-edit them, the next projection reverts you:
+   - `{/* showcase:begin … */}` and `{/* template:begin … */}` blocks in
+     `examples/*.mdx` and `guides/*.mdx` ← `nika-spec` `examples/showcase/`
+     + `templates/`, via `nika-spec/scripts/showcase-projector.py`.
+   - `{/* errors-*:begin */}` tables in `reference/error-codes.mdx` ←
+     `nika-spec` `canon/diagnostics/registry.yaml`, same projector.
+
+   The projector serves those blocks through
+   `nika-spec/scripts/grammar_door.py`, which **downcasts the ratified
+   pack to whatever the RELEASED binary speaks** (`NIKA_SERVED_GRAMMAR`,
+   default `w105`) — that is why served examples can lag the spec by one
+   grammar. It flips to identity with `NIKA_SERVED_GRAMMAR=wnew` at the
+   release train. Changing a served example for real means changing the
+   spec file and re-projecting, not editing the mirror.

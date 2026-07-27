@@ -61,20 +61,31 @@ separated by `---`, parsed into `Vec<RawDocument>`.
 ## Anatomy of a workflow
 
 The workflow AST (`nika-schema::raw::RawWorkflow`) models exactly the
-envelope's ten fields — nothing hidden, nothing extra:
+envelope's fields — nothing hidden, nothing extra:
 
-| Field | Type | Purpose |
-|---|---|---|
-| `nika` | `SchemaVersion` | The language contract version (exactly `v1`). |
-| `workflow` | `String` | Kebab-case workflow id (the document-type discriminator). |
-| `description` | `String` | Human-readable purpose. |
-| `model` | `String` | Workflow-level default `<provider>/<name>` for `infer` / `agent` tasks. |
-| `vars` | `Vec<(String, VarDecl)>` | Workflow inputs, typed or untyped · supplied at launch via `--var key=value`. |
-| `env` | `Vec<(String, String)>` | Non-sensitive runtime config (`${{ env.X }}`). |
-| `secrets` | `Vec<(String, SecretRef)>` | Masked store references (`${{ secrets.X }}`). |
-| `permits` | `Permits` (optional) | The declared capability boundary (absent = engine floor · present = default-deny). |
-| `tasks` | `Vec<RawTask>` | The DAG payload. |
-| `outputs` | `Vec<(String, OutputDecl)>` | The workflow's return contract. |
+| Field | Purpose |
+|---|---|
+| `nika` | The language contract version (exactly `v1`). |
+| `workflow` | The identity object — kebab-case `id:` (the document-type discriminator) + optional `description:`. |
+| `model` | Workflow-level default `<provider>/<name>` for `infer` / `agent` tasks. |
+| `inputs` | **Value authority** · typed parameters the caller supplies at launch (`--var key=value`) · `${{ inputs.X }}`. |
+| `config` | **Value authority** · typed non-sensitive runtime config the deployment supplies · `${{ config.X }}`. |
+| `const` | **Value authority** · named constants fixed in the file, never caller-supplied · `${{ const.X }}`. |
+| `secrets` | **Value authority** · masked store references · `${{ secrets.X }}`. |
+| `permits` | The declared capability boundary. Absent = **zero** authority; present = default-deny per category. |
+| `policy` | The run's declared limits. |
+| `types` | Named PascalCase type declarations, referenced by `returns:` and typed `outputs:`. |
+| `run` | The run's entropy + clock declaration — randomness and time are declared, never ambient. |
+| `tasks` | The DAG payload — a non-empty map, the key IS the task id. |
+| `outputs` | The workflow's return contract. |
+| `assert` | The author's obligations, judged by the engine. |
+
+The four value authorities are a **closed family**: `inputs` · `config` ·
+`const` · `secrets`. The pre-flip `vars:` and `env:` blocks are dead
+(`NIKA-VALUES-001` / `NIKA-VALUES-002`) and no alias survives — each old
+use classifies into the authority its role commands. (The `env:` field
+*inside* an `exec:` block is a different thing and is alive: it is the
+child process's environment map.)
 
 Every field is span-carrying (`Spanned<T>`): source spans survive
 all the way into the diagnostic layer (ADR-010 miette bridge).
@@ -227,12 +238,18 @@ flaky_api:
   names at check time.
 </Note>
 
-## Inputs · `vars`
+## Inputs · `inputs`
 
-Workflow inputs live in `vars:` (typed or untyped), available in every task
-via `${{ vars.<name> }}`. Untyped constants and typed, validated inputs use
-the same block: the typed form powers schema generation for callable
-workflows (`nika.run_workflow` over MCP).
+Workflow inputs live in `inputs:`, available in every task via
+`${{ inputs.<name> }}`. Every entry is a **typed declaration** (`type:` is
+required, and speaks the full type grammar): that is what lets the engine
+validate what a caller passes and generate a callable schema for
+`nika.run_workflow` over MCP.
+
+A value the caller may override belongs here. A value the file owns and
+nobody overrides is a `const:` entry; a deployment dial is a `config:`
+declaration; a credential is a `secrets:` reference. Four authorities, one
+role each — pick by the role the value plays.
 
 ```yaml research-brief.nika.yaml
 nika: v1
@@ -240,9 +257,9 @@ workflow:
   id: research-brief
   description: "Bullet-point brief on a topic supplied at launch."
 
-model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
+model: mock/echo                       # swap for ollama/qwen3.5:4b or any provider
 
-vars:
+inputs:
   topic:
     type: string                       # typed · validated + schema-gen
     required: true
@@ -254,11 +271,16 @@ vars:
 tasks:
   brief:
     infer:
-      prompt: "Write ${{ vars.bullets }} bullet points on ${{ vars.topic }}."
+      prompt: "Write ${{ inputs.bullets }} bullet points on ${{ inputs.topic }}."
 
 outputs:
   brief: "${{ tasks.brief.output }}"
 ```
+
+This file declares no `permits:` block and needs none: it runs zero shells,
+touches no file, reaches no host. Every effect-bearing workflow carries one —
+absent means **zero** authority, and the check refuses the body with
+`NIKA-AUTH-006` before a single token is spent.
 
 <Note>
   v1 workflows are **single-file**: there is no `include:` / `import:`
@@ -276,11 +298,11 @@ nika run research-brief.nika.yaml --var topic="local-first AI" --var bullets=5
 ```
 
 Four rules govern the flag, and the file stays the contract — every input a
-caller can pass is declared in `vars:`:
+caller can pass is declared in `inputs:`:
 
 - **A supplied value overrides a declared `default:`.** `--var bullets=5`
   wins over `default: 3` for this run.
-- **It satisfies `required: true`.** A required var with no default must be
+- **It satisfies `required: true`.** A required input with no default must be
   supplied at launch; without it the task that reads it fails loud
   (`NIKA-VAR-001`, naming the exact flag to pass). `nika check` flags it
   earlier, statically: `HINT [inputs] required input(s) with no default ·
@@ -294,8 +316,12 @@ caller can pass is declared in `vars:`:
 
 ```text
 $ nika run research-brief.nika.yaml --var topic=x --var oops=1
-nika run: --var oops: unknown var — the workflow declares: topic · bullets
+nika run: --var oops: unknown input — the workflow declares: topic · bullets
 ```
+
+`--var` reaches `inputs:` and nothing else. A `const:` entry is immutable
+across the run by construction, and a `config:` value comes from the
+deployment — neither is a launch flag.
 
 ## Outputs and events
 

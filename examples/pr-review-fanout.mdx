@@ -63,13 +63,25 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local tool-calling model · swap for anthropic/claude-sonnet-4-6 for depth
 
-vars:
-  base_ref: "main"
+config:
+  base_ref:
+    type: string
+    default: "main"
+    description: "The ref the PR is diffed against"
+
+permits:
+  exec: ["git"]                # the diff · no other program
+  fs:
+    # `git diff` names files anywhere in the tree, so the tree IS the read
+    # boundary. The leash is the TOOL list below: read and done, never write.
+    read: ["**"]
+    write: ["./REVIEW.md"]     # the ONE file a run may leave behind
+  tools: ["nika:jq", "nika:grep", "nika:read", "nika:done", "nika:write"]
 
 tasks:
   changed:
     exec:
-      command: ["git", "diff", "--name-only", "${{ vars.base_ref }}...HEAD"]
+      command: ["git", "diff", "--name-only", "${{ config.base_ref }}...HEAD"]
 
   files:
     with:

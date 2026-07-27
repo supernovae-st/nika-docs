@@ -18,6 +18,9 @@ workflow:
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 
+permits:
+  exec: true                           # both probes are shell strings · only the argv form takes an allowlist
+
 tasks:
   commits:
     exec:
@@ -70,6 +73,13 @@ In an interactive terminal, `nika run` animates a storyboard: tasks
 light up as their dependencies clear, in the wave order `inspect`
 predicted. Piped (CI logs, `tee`), the same run prints one plain,
 deterministic frame instead — `∥` marks tasks that ran in parallel:
+
+<Warning>
+  **Owed a re-capture.** The workflow above now declares a `permits:`
+  block, so this captured render line (`engine floor`) is stale. A capture
+  is evidence, not prose — it is re-run, never retyped. Re-capture against
+  the 0.106 binary the day the tag ships.
+</Warning>
 
 ```text
 $ nika run standup-digest.nika.yaml

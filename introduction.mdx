@@ -42,6 +42,12 @@ nika: v1
 workflow:
   id: summarize
 
+permits:                                 # the file IS the blast radius
+  net: { http: ["example.com"] }         #   one host, nothing else
+  fs:  { write: ["/tmp/summary.txt"] }   #   one file, nothing else
+  exec: false                            #   this workflow runs zero shells
+  tools: ["nika:fetch", "nika:write"]
+
 tasks:
   read:
     invoke:
@@ -68,6 +74,12 @@ tasks:
         path: "/tmp/summary.txt"
         content: "${{ with.summary }}"
 ```
+
+The `permits:` block is not decoration and not optional in spirit: an
+absent one declares **zero** authority, so any workflow that touches a
+file, a host or a shell is refused at check (`NIKA-AUTH-006`) until it
+says what it needs. `nika check --infer-permits` writes the tightest one
+for you.
 
 <Note>
   The `nika` CLI, `nika check`, `nika run`, `nika lsp`, and read-only

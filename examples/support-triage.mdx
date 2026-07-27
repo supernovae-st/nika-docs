@@ -49,7 +49,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (triage wants speed)
 
-vars:
+const:
   queue_path: "./support/overnight-queue.json"
 
 secrets:
@@ -59,6 +59,8 @@ secrets:
     egress:                       # sanction the one send · the secret IS the URL
       - to: "nika:notify"
         host_from_self: true
+permits:
+  tools: ["nika:jq", "nika:notify", "nika:read", "nika:uuid", "nika:write"]
 
 tasks:
   batch:
@@ -69,7 +71,7 @@ tasks:
   queue:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.queue_path }}" }
+      args: { path: "${{ const.queue_path }}" }
 
   triage:
     with:

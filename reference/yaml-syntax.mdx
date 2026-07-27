@@ -21,14 +21,93 @@ workflow:                    # required · the identity object
 
 model: <provider>/<name>     # optional · default model for infer/agent tasks
 
-vars: { ... }                # optional · inputs (typed or untyped) · ${{ vars.* }}
-env: { ... }                 # optional · non-sensitive config · ${{ env.* }}
-secrets: { ... }             # optional · vault/env/file references · ${{ secrets.* }}
+# the four value authorities · one role each · no other value namespace exists
+inputs: { ... }              # optional · TYPED · the caller supplies at launch · ${{ inputs.* }}
+config: { ... }              # optional · TYPED · the deployment supplies · logged · ${{ config.* }}
+const:  { ... }              # optional · fixed in the file · never caller-supplied · ${{ const.* }}
+secrets: { ... }             # optional · vault/env/file references · masked · ${{ secrets.* }}
+
+permits: { ... }             # optional KEY · but ABSENT = zero authority (see below)
+policy: { ... }              # optional · the run's declared limits
+types: { ... }               # optional · named PascalCase type declarations
+run: { ... }                 # optional · the run's entropy + clock declaration
 
 tasks: { ... }               # required · non-empty MAP · the key IS the task id
 
 outputs: { ... }             # optional · the workflow's return value
+assert: [ ... ]              # optional · the author's obligations, checked
 ```
+
+## The four value authorities
+
+Every value a workflow declares lands under exactly one of four authorities.
+The family is closed — a value-namespace read outside it is `NIKA-VALUES-003`.
+
+| Authority | Who supplies it | Shape | Integrity |
+|---|---|---|---|
+| `inputs:` | the **caller**, at launch (`--var k=v` · an MCP `nika.run_workflow` argument) | `{ type, required?, default?, description? }` · `type:` required | untrusted |
+| `config:` | the **deployment** · may appear in logs and traces | `{ type, default?, description? }` · `type:` required · never `required:` | untrusted |
+| `const:` | the **file** · immutable across the run, never caller-supplied | a bare literal, or `{ type, value }` | trusted |
+| `secrets:` | a **governed store** · masked everywhere | `{ source: vault\|env\|file, key\|path, egress? }` | trusted |
+
+```yaml
+inputs:
+  topic:    { type: string, required: true, description: "Subject to research" }
+  bullets:  { type: integer, default: 3 }
+config:
+  log_level: { type: string, default: "info" }
+const:
+  output_dir: "./output"                 # the file owns the destination
+secrets:
+  api_key: { source: env, key: MISTRAL_API_KEY }
+```
+
+The integrity column is not decoration: under a `permits:` block an
+**untrusted** value that reaches a verb argument is re-gated on its canonical
+resolved form, and an escape is refused `NIKA-AUTH-008`. That is the practical
+reason a destination the boundary pins belongs in `const:` — a caller cannot
+move it out from under the permit.
+
+`vars:` and `env:` are **dead envelope fields** (`NIKA-VALUES-001` /
+`NIKA-VALUES-002`), and so are the `${{ vars.X }}` / `${{ env.X }}` reads.
+There is no alias: each old use **classifies** into the authority its role
+commands — a typed parameter is an `inputs:` declaration, a fixed value a
+`const:` entry, non-sensitive runtime configuration a `config:` declaration, a
+governed store reference a `secrets:` entry. `nika check --fix` migrates the
+provable cases. (The `env:` **inside** an `exec:` block is a different field
+and is alive: it is the child process's environment map.)
+
+## `permits:` — the key is optional, the authority is not
+
+An absent `permits:` block declares **zero** authority. Every effect the body
+requires is refused at check with `NIKA-AUTH-006` — before a single token —
+and any effect attempted at run time fails the task with `NIKA-SEC-004`. A
+pure-compute workflow passes with an informational hint; `permits: {}` is the
+authored spelling of "I touch nothing".
+
+```bash
+nika check flow.nika.yaml --infer-permits   # prints the tightest block, ready to paste
+```
+
+Once the block is present every category is **default-deny unless listed** —
+including `tools:`, which must name every builtin the file invokes, even the
+pure-compute ones.
+
+## The run declaration
+
+```yaml
+run:
+  entropy: ambient           # none | ambient | { seeded: <u64> }
+  clock: system              # system | virtual
+```
+
+Every source of randomness and time is declared, never ambient. Absent, the
+run behaves as `entropy: ambient` + `clock: system`. The two dimensions
+couple: only `ambient × system` and `none | seeded × virtual` are legal —
+byte-identical journals need deterministic time as much as deterministic
+randomness. A declared contradiction refuses at parse (`NIKA-PARSE-026` ·
+`NIKA-PARSE-027`); `entropy: none` with a live randomness source consumed
+refuses at check (`NIKA-PARSE-028`).
 
 ## A task
 
@@ -36,7 +115,7 @@ outputs: { ... }             # optional · the workflow's return value
 <identifier>:                # the map KEY is the identity (snake_case · unique)
 
   with: { ... }              # optional · the DATA boundary · each tasks.* ref = one typed edge
-  after: { <id>: <pred> }    # optional · the CONTROL boundary · pred ∈ success|failed|skipped|terminal
+  after: { <id>: <pred> }    # optional · the CONTROL boundary · pred ∈ success|failure|skipped|terminal
   when: <expression>         # optional · LOCAL business condition · evaluated POST-gate
   for_each: <expression>     # optional fan-out (an array · local read)
   max_parallel: <int>        # optional · cap concurrent iterations
@@ -62,6 +141,11 @@ both names the data and declares a typed edge; an `after:` entry
 is dead (`NIKA-PARSE-024` · `nika check --fix` migrates it), and a `tasks.*`
 reference outside the boundary — in a verb body, `when:`, or `for_each:` —
 is `NIKA-VAR-021` with a machine-applicable fix (hoist into `with:`).
+
+The `after:` predicate set is **closed**: `success` · `failure` · `skipped` ·
+`terminal` (`terminal` admits any settled state, cancelled included). Anything
+else is `NIKA-DAG-005`; the participial spellings `succeeded` and `failed` are
+dead forms and refuse with their respelling, which `nika check --fix` applies.
 
 The full per-field semantics live in the spec:
 [03 · The flow](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md).

@@ -37,9 +37,17 @@ workflow:
   id: price-watch
   description: "Watch a product price, ping me when it drops below my target"
 
-vars:
-  product_api: "https://api.shop.example.com/v1/products/macbook-air"
-  alert_below: 899
+inputs:
+  product_api:
+    type: uri
+    default: "https://api.shop.example.com/v1/products/macbook-air"
+    description: "The product endpoint to watch"
+
+config:
+  alert_below:
+    type: number
+    default: 899
+    description: "Ping me once the price drops below this"
 
 secrets:
   alerts_webhook:
@@ -49,12 +57,18 @@ secrets:
       - to: "nika:notify"
         host_from_self: true
 
+permits:
+  exec: false                     # no shells · two tools and one comparison
+  net:
+    http: ["api.shop.example.com", "hooks.example.com"]   # the shop + the webhook · nothing else leaves
+  tools: ["nika:fetch", "nika:notify"]
+
 tasks:
   check:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.product_api }}"
+        url: "${{ inputs.product_api }}"
         mode: jq
         jq: "."
     output:                           # named jq bindings over the raw response
@@ -69,13 +83,13 @@ tasks:
     with:
       price: ${{ tasks.check.price }}     # value edges · the named bindings cross the boundary here
       name: ${{ tasks.check.name }}
-    when: ${{ with.price < vars.alert_below }}
+    when: ${{ with.price < config.alert_below }}
     invoke:
       tool: "nika:notify"
       args:
         channel: webhook
         target: "${{ secrets.alerts_webhook }}"
-        message: "Price drop · ${{ with.name }} is now ${{ with.price }} (target ${{ vars.alert_below }})"
+        message: "Price drop · ${{ with.name }} is now ${{ with.price }} (target ${{ config.alert_below }})"
         severity: info
 
 outputs:
@@ -94,7 +108,7 @@ outputs:
   <Step title="CEL gates the alert">
     The named binding crosses in `with:`
     (`price: ${{ tasks.check.price }}`), then
-    `when: ${{ with.price < vars.alert_below }}` is a plain CEL
+    `when: ${{ with.price < config.alert_below }}` is a plain CEL
     comparison. False → the task is skipped, not failed.
   </Step>
   <Step title="The webhook stays secret">
@@ -114,7 +128,7 @@ outputs:
 
 ## Make it yours
 
-- Watch N products: lift the URL into a list var and `for_each` over it. See [Competitor radar](/examples/competitor-radar) for the fan-out pattern.
+- Watch N products: lift the URL into a list input and `for_each` over it. See [Competitor radar](/examples/competitor-radar) for the fan-out pattern.
 - Schedule it: workflow files describe a run. Your host's cron (or `nika serve`) decides when runs start.
 - Add a second `when:` branch that notifies on price INCREASES above a ceiling.
 

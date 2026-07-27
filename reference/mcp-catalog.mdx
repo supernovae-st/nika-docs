@@ -44,6 +44,10 @@ nika: v1
 workflow:
   id: scrape-and-summarise
 
+permits:                              # an MCP tool is granted like any other
+  exec: false
+  tools: ["mcp:firecrawl/scrape"]     # the server's own reach is its side of the boundary
+
 tasks:
   crawl:
     invoke:

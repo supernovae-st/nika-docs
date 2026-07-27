@@ -215,8 +215,12 @@ workflow:
 
 model: mock/echo              # mock-first · sovereignty is one line away
 
-vars:                         # typed where it matters · required: true documents itself
+inputs:                       # typed · what the CALLER supplies · required: true documents itself
+config:                       # typed · the DEPLOYMENT's dials · may appear in logs
+const:                        # fixed in the file · the destinations the boundary pins
 secrets:                      # vault/env-backed · never inline
+
+permits:                      # the blast radius · absent = zero authority
 
 tasks:                        # the DAG · true dependencies only ·
   # deterministic core (jq · builtins) · model at the edges ·
@@ -244,7 +248,7 @@ await_export:
   invoke:
     tool: "nika:fetch"
     args:
-      url: "https://api.example.com/jobs/${{ vars.job_id }}"
+      url: "https://api.example.com/jobs/${{ inputs.job_id }}"
       mode: jq
       jq: 'if .status == "done" then . else error("not ready") end'
   retry:

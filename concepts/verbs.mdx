@@ -45,7 +45,7 @@ crawl_site:
   invoke:
     tool: "nika:fetch"
     args:
-      url: "${{ vars.site_url }}"
+      url: "${{ inputs.site_url }}"
       traverse: { max_pages: 5 }   # same-origin BFS · robots honored · page digests out
 ```
 
@@ -117,18 +117,37 @@ reached through `invoke:`, not its own verb. Issues an HTTP request
 modes become the builtin's `mode` argument.
 
 ```yaml
-pull_readme:
-  timeout: "30s"                       # task-level (applies to any verb)
-  invoke:
-    tool: nika:fetch
-    args:
-      url: https://api.github.com/repos/supernovae-st/nika/readme
-      method: GET
-      mode: text                       # extraction mode · see extract-modes
-      headers:
-        Accept: application/vnd.github.raw
-        Authorization: "Bearer ${{ env.GITHUB_TOKEN }}"
+secrets:
+  github_token:
+    source: env                        # a token is a governed reference, never a literal
+    key: GITHUB_TOKEN
+    egress:
+      - to: "nika:fetch"               # the author declassifies THIS sink, in-file
+        host: "api.github.com"         # and only this host
+
+permits:
+  net: { http: ["api.github.com"] }
+  tools: ["nika:fetch"]
+
+tasks:
+  pull_readme:
+    timeout: "30s"                     # task-level (applies to any verb)
+    invoke:
+      tool: nika:fetch
+      args:
+        url: https://api.github.com/repos/supernovae-st/nika/readme
+        method: GET
+        mode: text                     # extraction mode · see extract-modes
+        headers:
+          Accept: application/vnd.github.raw
+          Authorization: "Bearer ${{ secrets.github_token }}"
 ```
+
+A credential is a `secrets:` reference — never a `config:` value, never a
+literal. And a secret reaching any sink is a blocking leak by default
+(`NIKA-SEC-006`): the `egress:` entry is the author sanctioning one
+specific destination, statically checkable, and it never widens
+`permits.net.http` — it narrows inside it.
 
 **Pick the `mode` for the content** — the default is `markdown`, built
 for *pages*: fetching a JSON API without a mode markdown-escapes the
@@ -243,7 +262,7 @@ investigate:
     max_turns: 10
     max_tokens_total: 100000
     prompt: |
-      Investigate issue #${{ vars.issue_number }} and summarise
+      Investigate issue #${{ inputs.issue_number }} and summarise
       the root cause in under 200 words.
 ```
 

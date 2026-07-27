@@ -49,6 +49,62 @@ Between release tags, progress lands on `main` as:
 
 ## History
 
+<Update label="v0.106.0" description="UNRELEASED · the values get names, the boundary gets teeth" tags={["release", "language", "security", "breaking"]}>
+  Two flag-days land in one window, and both are the same idea: **a thing
+  the file left implicit becomes a thing the file declares.**
+
+  **① The E-split — `vars:` and `env:` die into four named authorities.**
+  One block for everything a workflow knew was a block that told you
+  nothing: whether a value came from the caller, from the deployment, or
+  from the file itself was invisible, and so was whether it could be
+  trusted. The family is now closed at four, one role each — `inputs:`
+  (the caller supplies it at launch) · `config:` (the deployment supplies
+  it, and it may appear in logs) · `const:` (the file owns it, immutable)
+  · `secrets:` (a governed store, masked). `inputs.*` and `config.*` are
+  **untrusted** (they come from outside the file); literals, `const.*` and
+  `secrets.*` are **trusted** — which is why a destination a `permits:`
+  entry pins belongs in `const:`, where no caller can move it out from
+  under the boundary.
+
+  The old spellings refuse loudly, and they refuse with a *classification*,
+  not a rename: there is no mechanical `vars:` → `inputs:` (that is how you
+  end up with a caller-overridable output path). Each use is classified
+  into the authority its role commands; `nika check --fix` migrates the
+  provable cases and stops on the rest rather than guessing.
+
+  **② An absent `permits:` block declares ZERO authority.** It used to mean
+  "engine floor only" — a hint, and a green check. It now means what its
+  absence always should have: no filesystem, no network, no shell, no
+  tools. Every effect the body requires is refused at check with
+  `NIKA-AUTH-006` before a single token is spent, and any effect that
+  reaches run time fails the task with `NIKA-SEC-004`. A pure-compute
+  workflow still passes; `permits: {}` is the authored spelling of "I
+  touch nothing"; and under composition the absence is a wall — a parent's
+  grants never flow down implicitly (`NIKA-COMP-002`). The repair is one
+  command: `nika check --infer-permits` walks the DAG and prints the
+  tightest boundary the body actually needs, ready to paste.
+
+  | Dead form | Refusal | The 0.106 form |
+  |---|---|---|
+  | `vars:` block | `NIKA-VALUES-001` | classify each entry → `inputs:` · `config:` · `const:` · `secrets:` |
+  | `env:` block (envelope) | `NIKA-VALUES-002` | `config:` for a non-sensitive dial · `secrets:` for a governed reference (`exec.env:` is a different field and is untouched) |
+  | `${{ vars.X }}` · `${{ env.X }}` | `NIKA-VALUES-001` / `-002` | the read follows the declaration |
+  | any other value namespace | `NIKA-VALUES-003` | the family is exactly four |
+  | no `permits:` block, body has effects | `NIKA-AUTH-006` | the block `--infer-permits` writes |
+  | `after: { x: succeeded }` · `failed` | `NIKA-DAG-005` | `success` · `failure` (`skipped` · `terminal` unchanged) |
+  | `type: boolean` in a declaration | `NIKA-TYPE-001` | `bool` — and the flat 6-enum gives way to the type grammar (`{ array: string }`, `{ object: { … } }`). Raw JSON Schema under `infer.schema:` is untouched. |
+
+  Also in the window: an envelope `run:` block declares the run's
+  **entropy** and **clock** (`{ entropy, clock }`, closed) — randomness and
+  time stop being ambient, and `entropy: { seeded: N }` + `clock: virtual`
+  make two runs of the same file byte-identical. The dimensions couple, so
+  a declared contradiction refuses at parse (`NIKA-PARSE-026` /
+  `NIKA-PARSE-027`).
+
+  These docs teach 0.106 and only 0.106 — no dual grammar, no "if you are
+  on 0.105" branch. Pin the tag you run.
+</Update>
+
 <Update label="v0.105.0" description="2026-07-20 · the map comes home" tags={["release", "language", "security", "breaking"]}>
   The refonte reaches users — **the file becomes a map**. `workflow:` is
   an object (`id:` + `description:`), `tasks:` is a map keyed by id, and

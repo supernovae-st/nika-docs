@@ -37,7 +37,7 @@ files:
   evidence: "hand-pinned Node major for the local mint preview"
 - path: "AGENTS.md"
   class: authored
-  sha256: 6cb6be4e0466ba72801da98f0400e7dcd39dcff11f40e2ebf7280ba2a78eebbc
+  sha256: 0b6847ad7f42a791ea23a0a36b743439c19ea7ac2b6fac20829d32700c9d229e
   evidence: "hand-written agent entry per the AGENTS.md convention · it STATES the projection rules the snippets follow"
 - path: "DEPLOY.md"
   class: authored
@@ -65,7 +65,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "architecture/forward-compat-invariants.mdx"
   class: authored
-  sha256: ec37c3ef417570d8245bb5e7e02ad3f7836e48f4df69124742bd7f797cea1323
+  sha256: dabcab4902a3a96fc517ded206140b9db15afba0bb986e7a91a5da6f32414f3b
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "architecture/l0-decisions.mdx"
   class: authored
@@ -77,7 +77,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "changelog/releases.mdx"
   class: authored
-  sha256: 5597ee14764b144eb16172a545486af2ba2fc0593aacdb0d6858ce252a85d44a
+  sha256: 25477e75a9032e349b30df9db1a0bdc6c63e03f0d527dc3f6c55c7a991082720
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "changelog/roadmap.mdx"
   class: authored
@@ -89,7 +89,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "concepts/bindings.mdx"
   class: authored
-  sha256: 83437dae4b420b5fea55583ebb49ac805ad0dc4a2adeae863f869ccd655fdab4
+  sha256: 16781cf6ede5e8bea53ca9eba2f0b31dc71e3605c7911ba11a702dbd2e082956
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "concepts/events.mdx"
   class: authored
@@ -113,11 +113,11 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "concepts/verbs.mdx"
   class: authored
-  sha256: 0c6e762247bdc8a42bb03ef676ba223091b46ffc2865cdd2efdf5afa0f864cfb
+  sha256: e49666ba3b155bb7370426efd187ae3dbf01cee29742bae411379e744b508506
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "concepts/workflows.mdx"
   class: authored
-  sha256: 9ef6fd0b191c324bfed8ff5888ad97980e8982c86a9bdcdda551d6f0f6cbe705
+  sha256: a691dac0e4c6e6e016cef8886d8505cb6ba92d53d77694602d1a547beccded4a
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "docs.json"
   class: authored
@@ -126,63 +126,63 @@ files:
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "examples/bookmark-triage.mdx"
   class: authored
-  sha256: df127f32132bbc78bbe785860e172e49538c6e9c9be168670de1eae7f7359495
+  sha256: 0362da7c9dfbf5aad7e6d811e2e60851f5dbcabfc4ee83f53903630a4b349097
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/ceo-monday-brief.mdx"
   class: authored
-  sha256: 39fd32d242cc7805ac06d5726751ef6657e4762b18907dd95b13386b14e80f3b
+  sha256: b5a251316eaaaafa15913164d03b225b5e440c0b9860a58b9ff2e58ee4b668a4
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/competitor-radar.mdx"
   class: authored
-  sha256: 4ae09346392530f8261821087a8ec68a1ac9d1ae33a267b09d7b9bd43914e399
+  sha256: 333e05a7108ef42e5c29f13e171147cf3e43bc6c0acd07669549f0b745e3f218
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/config-drift-sentinel.mdx"
   class: authored
-  sha256: 261863e4514c426ac8614e0d2641d92464475feefcc78a33cf69d37a4d9350a7
+  sha256: a7f1145e20df6c9706eacce9841084167896a39c8bc4de061c3bbb629a7db5c9
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/contract-guard.mdx"
   class: authored
-  sha256: 8a10a0ee8f0b88b1c9a45c2a4b207ea729ddd121655eff10d3952703f9120d9f
+  sha256: 5de41756b257936949a2bf34802b289a09e7bf5445210b95b6070a59c00fd29a
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/csv-chart-report.mdx"
   class: authored
-  sha256: 425fe21006856b18b2307b7d4fb7a3aecdeb894e0914318f918e2742deaf66c1
+  sha256: c288ac2c7145de75b20e1a45e9e276ab401a8053319e15f5ba45c62f59f39331
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/deep-research-brief.mdx"
   class: authored
-  sha256: 699453f907d1f3578f19af901b6605d9d86e0795aefc2bad97bfe686c78c9658
+  sha256: 2d434caaeb1aa5ca3f52c40630d08c9709139244b4fab909f07d60e6e0014c0d
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/etl-quarantine.mdx"
   class: authored
-  sha256: 8b9902793f8bfe1bea0943748e43ff0a9ebea3f43de25528387f549dee476d21
+  sha256: 62a865cf10251a6171467f326777baab29ece8a30a442504a2d0e1d4d534418a
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/image-fx-batch.mdx"
   class: authored
-  sha256: a12adba4eef5a4d17a381a3804454a15d331298a88d7e20f7e8f45386b58f19f
+  sha256: 4a173b4200eb8ffe30d44a7e28b533652426711b510935d8d0b4d8f1194af188
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/incident-war-room.mdx"
   class: authored
-  sha256: aca30fdadccb3db7fbf9476ca34393f771905d13097ec695187fc1b32e4e742a
+  sha256: 8a1a7ebafa2a65eb2a15ef85b20a7b40577d926b2880a3722db0321a97c0b523
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/invoice-chaser.mdx"
   class: authored
-  sha256: 4882e245a60379939ec6beda0b6062e0eb198386243f5e539f5b1897a586bf6b
+  sha256: 274063f9c6b88f416139342f6a9c70100229f9b657055683482f8d765ff10566
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/local-first-daily-brief.mdx"
   class: authored
-  sha256: b1ff5ac30bf66a395c4b04f9d19c27df6fd2f1ff7ae7b938df7b99a6fa686ad5
+  sha256: 64bfcefa3800f67beb472014c91ec72db4b25ee32b04fc03eab5d47cecfd69f0
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/localization-factory.mdx"
   class: authored
-  sha256: d89dbaa665b324034c0d2f13104fbfdc4d0d42ef3dc5f6853fe643d26aadb33b
+  sha256: 4d66acb72206b6246af1cf552f9c9b34b5d6234c40140e2e49c1b13a639cd78a
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/meeting-actions.mdx"
   class: authored
-  sha256: 7c894543c13614330fc72d05d38f36875b96a525846dbe17db3be3ada576f3e8
+  sha256: 2fc43d906a7030433fbe820be1f8d59c3c7bf87bede4e64de5e37df0a4fa013c
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/model-bench.mdx"
   class: authored
-  sha256: a6ed6bdda4e9092fe4706e9b728f5b0dfb07775088b914f06e3b812690a7af21
+  sha256: d8a53ccde8e7b88a0f7de2228abfa62e955f739fbbd247aa8af188beabe16206
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/og-images.mdx"
   class: authored
@@ -194,47 +194,47 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/pr-review-fanout.mdx"
   class: authored
-  sha256: 5bd551a40f664de6643a31ac06c24c581d54778cc4293be49f3bca526113cb6a
+  sha256: cefc9a303e2d0b1e376b89f44490f83cd02c031aef7441e765851f9d7a10b051
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/price-watch.mdx"
   class: authored
-  sha256: be3c3e4c07f715e5e6758aae6eb1e870c363574baf319fb5c370007b28665175
+  sha256: f9bb1bfac5ae06b0b373ffb88fb68fc5418284fd904d41858dfc966f69ea0468
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/release-notes.mdx"
   class: authored
-  sha256: d809feb43de5e815c91f58ace318455e10ac5bdb18fd80c739f37a3c00913815
+  sha256: 8fa2cf477e80a8ed813f632b843c99f2c8c1b7eecbe8117ae2c03c8803972dcb
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/release-radar.mdx"
   class: authored
-  sha256: 01a7eac381ec2f95708b580e461d0077ca2e97cd1b1106f8ce0850e9dffd464c
+  sha256: ce539dbf92085eef68028cedff71ca42f16c973d950f53d4a848e3cb7c642bb1
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/release-train.mdx"
   class: authored
-  sha256: 131ad1136ddd832613bd9a298cfc07a948ee6e66b7e8f32cb80b91c6e335356a
+  sha256: 59d5921d1e3806b5fe501732068c7510c13e866292d0abc8795e89d68bd81ee5
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/resume-screener.mdx"
   class: authored
-  sha256: 277aa1d927486deba701b91818893112d3bd861a7ad3fbc03525065794248eab
+  sha256: 11d428001f2d0f3714409af399609239d866ab25443ede2cb2149119502fdbcd
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/seo-content-brief.mdx"
   class: authored
-  sha256: 2ee2012ff7e65e6641f8c350b89249efe6b1c9a00fb6620cc1364513d258f3ff
+  sha256: 1564ceb668e3a6eb89f3f31aeb236a002ef017dcfb376983c90d9392ba59ee83
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/social-repurpose.mdx"
   class: authored
-  sha256: 2b2e9a866d57a8b4af91ffd8ed1464b017e5ed0d78983b698f53c3ebb1e7b5e5
+  sha256: edcbfd97d9e33cec8efbe5aa745fa28e960cf7e51753bd6507c2fc275c1f72ed
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/standup-digest.mdx"
   class: authored
-  sha256: 5e82e2436e19c2713aa60d0cead2b333a126234c57c2097410f80a00bd0b9e7c
+  sha256: c54aaa6c7e659ea1ef833fed1f88a979dfc11155836dd9910787551d59782711
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/support-triage.mdx"
   class: authored
-  sha256: a9c8151d2766f491cd938bdf021f4a1134ae9e30121995dbfb2eda63d35bdfc9
+  sha256: fc43d5e3f3ca8bd05949e26230748348fef7348bc84249f4e2844acdb2809924
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "examples/transcript-shownotes.mdx"
   class: authored
-  sha256: 4316412517081f55e99fed9c92b01e3a1e6eeda88466b10623dfd6d23078f1ec
+  sha256: 03021a2af8daf1a2189d6bbd316676af8aefbee395e4278cf5b619074dc1137a
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "getting-started/agents.mdx"
   class: authored
@@ -246,7 +246,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "getting-started/first-workflow.mdx"
   class: authored
-  sha256: 80f50865588392d97a2e825eb4738bedc015d7c386b18e52bb67e31b352a98f9
+  sha256: 584d9341cd6bf66dbc5f89f99e639ba984cbeb744cf7c968f4a0e08989af0eef
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "getting-started/installation.mdx"
   class: authored
@@ -254,7 +254,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "getting-started/your-machine.mdx"
   class: authored
-  sha256: 8f9b433fb11b30064d2af58e298090359c194c897fd4c7fef76da95b1c1ec6a6
+  sha256: f35ca2779477180ddaf97ff2f040b888f2f58569a32eb95903c25bd32bd5940a
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "global.css"
   class: authored
@@ -262,7 +262,7 @@ files:
   evidence: "hand-written polish layer · its own header: 'colors + fonts live in docs.json · pinned to … nika-spec design/tokens.yaml … this file = the polish layer'"
 - path: "guides/agent-authoring.mdx"
   class: authored
-  sha256: fbeb2c0507b31dda7ae417c5e7d8c02bdf8f45629f37cfd1593e8284f7d1c98d
+  sha256: 511bf2adc1f41da2e460c74fc2ee293cd733ea382503da7d20ec5aa733386c20
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/charts.mdx"
   class: authored
@@ -270,7 +270,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/cost-honesty.mdx"
   class: authored
-  sha256: 6ebb98c11f00eda0096d0b7fb1df4b9c141aeb0e634037102a236fad72416db3
+  sha256: 90570c6d3765c52e19e78d0917132a48eee926114da203f6f64d3db65a187f98
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/docker-ai-workflow.mdx"
   class: authored
@@ -282,7 +282,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/image-generation.mdx"
   class: authored
-  sha256: 8a8619cac866f2684248ea2bbcd838ee5c02bc5540a5a77a7c062ffd47e0c882
+  sha256: 1db7037a3671dacc414b8ddc3b63714761f22b93e680ef856eada473cac15d03
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/local-models.mdx"
   class: authored
@@ -290,15 +290,15 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/observability.mdx"
   class: authored
-  sha256: 1ae3e41146b8e2cc4953674a5c5186f54b2df0035e88baf8448a2ab2562dc4d3
+  sha256: 9b8664d849f52ea45a1af400382f6eb60b0141c6ffd013e4b4d5ce886e7b68ab
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/patterns.mdx"
   class: authored
-  sha256: 402da863f1d237b1aea8d7b0097512dd31b2f933c5e4bb003b30704ddb3d157d
+  sha256: 7cd3688b8ee730e1d971411e4b9bdfffae04d17ca1beb33842f1d1fd5d99dec2
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/resume.mdx"
   class: authored
-  sha256: 8b725916bef407646909f8ab7530eb76ce17c33bd7adb43d726a97489eb4bad8
+  sha256: 0b7f4af1c488512cab643a7fd19618d8e46742a4c5525c90859a54660767cce4
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/sharing.mdx"
   class: authored
@@ -310,15 +310,15 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/templates.mdx"
   class: authored
-  sha256: 745ee1da8287a8d0e3e8ec2e5bcf7d0756b230e3b3214a71c68b3d2d5070f404
+  sha256: 654ad71966e2ede4ca04137b796e2670825311fd42be45dc1d5cbeec5a5b260b
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/testing.mdx"
   class: authored
-  sha256: fcb9d9a12731b94a2f949c4fc32bac7c1312aaac1460a0f81b529fbb62844e80
+  sha256: 784a38e56ce50692e4b8254ad5886e8029f9736a36018e21de0d1a67016dbc20
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "guides/troubleshooting.mdx"
   class: authored
-  sha256: 5d217dbdb8582d2331af2728850f400931a8efcb9df72e88de64fdae70442f99
+  sha256: 73c5e4aefc3cfbb7b302131853b7d2ed2047ff1fc589499b1ed1593866786d92
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "images/favicon.svg"
   class: authored
@@ -469,7 +469,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "integrations/pre-commit.mdx"
   class: authored
-  sha256: 85d2b9f8d927a98012d243a8ab4f20c2a11758aa17df9e6264b135958dc7501b
+  sha256: 44e45561e8e31e331d96d5754bc846c715723877ea60f60b5427092e2e61db5b
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "integrations/quickstart.mdx"
   class: authored
@@ -477,7 +477,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "introduction.mdx"
   class: authored
-  sha256: caf96b4fb324555996438e1496956dfe81bacc0e87b3134614de939a6366ee5b
+  sha256: fe30b2644324c623c1855385291ea713ceba17693524b5ede6ffb821c08f0750
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "lefthook.yml"
   class: authored
@@ -497,7 +497,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/cli.mdx"
   class: authored
-  sha256: 057afd414991623deb8ee11ec225f3f170b962aa7be6c12941f4b9aeffaace23
+  sha256: b582040850fdd6489162a6a94157c721d64ea642de9ffb139e588d0a28ec532c
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/constellation.mdx"
   class: authored
@@ -518,7 +518,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/mcp-catalog.mdx"
   class: authored
-  sha256: 5d8a23bc2fce2f10a34032cf2452f8eb3cd17eda76aa39eb194d181c51310ced
+  sha256: 6965fe1d075e4f347059803a3473c8ebc07e0ba2ab90dbe93f97f53229512260
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
   note: "frontmatter description hand-types '105 MCP server entries … snapshot 2026-04-17' — outside count-drift-gate's checked classes (providers · builtins · extract modes), so it can rot silently"
 - path: "reference/mcp-server.mdx"
@@ -539,7 +539,7 @@ files:
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "reference/yaml-syntax.mdx"
   class: authored
-  sha256: 99cc42e33644607da98ba4d9de26b79b46ae33ea03e13489230c262a5293ca55
+  sha256: dc277723f508133e72e05f2dc843d5a3cfeef191b9ec4b842eaf0b59f200ce51
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - path: "scripts/count-drift-gate.py"
   class: authored

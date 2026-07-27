@@ -49,14 +49,17 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large or any provider
 
-vars:
+const:
   post_path: "./blog/launch-post.md"
+permits:
+  tools: ["nika:read", "nika:write"]
+  fs: { write: ["./social-bundle.md"] }
 
 tasks:
   post:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.post_path }}" }
+      args: { path: "${{ const.post_path }}" }
 
   # Three rewrites · no deps between them · they run concurrently.
   thread:
@@ -132,7 +135,7 @@ outputs:
 ## Make it yours
 
 - Add a fourth branch (YouTube description, Mastodon, press blurb): it's three lines and it runs in the same wave.
-- Pin a glossary: put your brand terms in a `vars:` entry and interpolate it into each prompt.
+- Pin a glossary: put your brand terms in a `const:` entry and interpolate it into each prompt.
 - Want every language too? Chain this into [Localization factory](/examples/localization-factory).
 
 <Card title="Level up · T2 chains" icon="rocket" href="/examples/release-notes">

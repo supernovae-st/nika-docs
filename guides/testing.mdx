@@ -36,7 +36,7 @@ workflow:
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 
-vars:
+inputs:
   ticket:
     type: string
     default: "Payment page returns a 502 after checkout."
@@ -44,7 +44,7 @@ vars:
 tasks:
   classify:
     infer:
-      prompt: "Classify this ticket: ${{ vars.ticket }}"
+      prompt: "Classify this ticket: ${{ inputs.ticket }}"
       max_tokens: 300
       schema:
         type: object
@@ -144,7 +144,7 @@ shows the re-pinned golden in the diff — both are reviewable.
 
 ## Related
 
-- [Concepts · Workflows](/concepts/workflows): typed `vars:` in,
+- [Concepts · Workflows](/concepts/workflows): typed `inputs:` in,
   typed `outputs:` out — the callable contract the golden pins.
 - [Reference · CLI](/reference/cli): every `nika test` flag.
 - [Guides · Troubleshooting](/guides/troubleshooting): when `nika check`

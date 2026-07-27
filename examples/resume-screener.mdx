@@ -59,18 +59,29 @@ permits:                    # the file IS the blast radius · no net category at
   fs:                       # CVs cannot leave this machine even if a prompt is hijacked
     read: ["./hiring/inbox/**"]
     write: ["./hiring/out/**", "./hiring/shortlist-brief.md"]
+  exec: false               # no shells either · four tools and one local model
   tools: ["nika:glob", "nika:read", "nika:jq", "nika:write"]
 
-vars:
-  role: "Senior Rust engineer"
-  cv_glob: "./hiring/inbox/*.md"
-  shortlist_size: 5
+inputs:
+  role:
+    type: string
+    default: "Senior Rust engineer"
+    description: "The role every CV is scored against"
+
+config:
+  shortlist_size:
+    type: integer
+    default: 5
+    description: "How many candidates reach the brief"
+
+const:
+  cv_glob: "./hiring/inbox/*.md"   # the pool the permit above pins · never caller-movable
 
 tasks:
   pool:
     invoke:
       tool: "nika:glob"
-      args: { pattern: "${{ vars.cv_glob }}" }
+      args: { pattern: "${{ const.cv_glob }}" }
 
   cvs:
     with:
@@ -105,7 +116,7 @@ tasks:
       recover: null
     infer:
       prompt: |
-        Role · ${{ vars.role }}
+        Role · ${{ inputs.role }}
         Candidate file · ${{ with.cv_path }}
         CV ·
         ${{ item.text }}
@@ -137,7 +148,7 @@ tasks:
       tool: "nika:jq"
       args:
         input: "${{ with.ranked }}"
-        expression: ".[:${{ vars.shortlist_size }}]"
+        expression: ".[:${{ config.shortlist_size }}]"
 
   brief:
     with:

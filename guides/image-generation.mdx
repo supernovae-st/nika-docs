@@ -165,7 +165,7 @@ tasks:
 
 ```yaml
   hero:
-    for_each: ${{ vars.locales }}       # ["fr", "es", "ja"]
+    for_each: ${{ const.locales }}      # ["fr", "es", "ja"]
     max_parallel: 3
     with: { locale: ${{ item }} }
     invoke:

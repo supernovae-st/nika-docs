@@ -33,10 +33,16 @@ human-gated-ship, an etl-state whose delta fans out. Start from the
 template matching the **outer** shape.
 
 <Info>
-  The YAML below is projected verbatim from
+  The YAML below is normally **projected** from
   [`nika-spec/templates/`](https://github.com/supernovae-st/nika-spec/tree/main/templates)
-  (the source of truth, validated by the conformance runner). These
-  copies cannot drift.
+  — the source of truth, validated by the conformance runner — by
+  `nika-spec/scripts/showcase-projector.py`.
+
+  It is **ahead of that projection right now**: these copies were migrated
+  by hand to the 0.106 grammar, and four of them gained the `permits:`
+  block an effect-bearing workflow now requires. The templates upstream
+  need the same pass, after which the projector reclaims these blocks and
+  the two surfaces agree again.
 </Info>
 
 ## chain
@@ -52,15 +58,22 @@ workflow:
 
 model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
-vars:
+const:
   source: "./README.md"             # SLOT: your input — README.md exists in ANY repo, so the
                                     # skeleton runs green BEFORE you point it at real data
+
+permits:                            # the blast radius · default-deny once present
+  exec: false                       # no program launches from this shape
+  tools: ["nika:read", "nika:write"]
+  fs:
+    read: ["./README.md"]           # SLOT: same path as const.source · move one, move both
+    write: ["./output.md"]          # SLOT: same path as the persist destination
 
 tasks:
   gather:
     invoke:                         # SLOT: the fact source · nika:read / nika:fetch / exec
       tool: "nika:read"
-      args: { path: "${{ vars.source }}" }
+      args: { path: "${{ const.source }}" }
 
   think:
     with:
@@ -95,9 +108,13 @@ workflow:
   id: gate-and-act-template     # SLOT: kebab-case workflow id
   description: "watch a value · act only when the condition holds"   # SLOT
 
-vars:
+const:
   source_url: "https://api.example.com/v1/value"   # SLOT: what to watch
-  threshold: 100                    # SLOT: the trigger condition value
+
+config:
+  threshold:                        # SLOT: the trigger condition value · a dial, not the subject
+    type: integer
+    default: 100
 
 secrets:
   webhook:
@@ -107,12 +124,20 @@ secrets:
       - to: "nika:notify"
         host_from_self: true        # the secret value IS the destination URL
 
+permits:
+  exec: false
+  tools: ["nika:fetch", "nika:notify"]
+  net:
+    http:
+      - "api.example.com"           # SLOT: the watched host · same as const.source_url
+      - "hooks.slack.com"           # SLOT: the webhook host · nothing else may leave
+
 tasks:
   check:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.source_url }}"
+        url: "${{ const.source_url }}"
         mode: jq
         jq: "."
     output:
@@ -126,7 +151,7 @@ tasks:
     with:
       value: ${{ tasks.check.value }}   # the binding IS the edge · check → act
     # when: is a SKIP gate — routing, not failure (a skipped task is not an error)
-    when: ${{ with.value > vars.threshold }}   # SLOT: the CEL condition
+    when: ${{ with.value > config.threshold }}   # SLOT: the CEL condition
     invoke:
       tool: "nika:notify"           # SLOT: the action · notify / write / exec
       args:
@@ -153,14 +178,20 @@ workflow:
 
 model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
 
-vars:
+const:
   collection_source: "./items"      # SLOT: where the collection comes from
+
+permits:
+  exec: false
+  tools: ["nika:glob", "nika:jq"]
+  fs:
+    read: ["./items/**"]            # SLOT: the tree the glob walks · same as const.collection_source
 
 tasks:
   discover:
     invoke:                         # SLOT: glob / fetch sitemap / exec + jq split
       tool: "nika:glob"
-      args: { pattern: "${{ vars.collection_source }}/*.md" }
+      args: { pattern: "${{ const.collection_source }}/*.md" }
 
   process:
     with:
@@ -214,9 +245,18 @@ workflow:
   id: etl-state-template        # SLOT: kebab-case workflow id
   description: "read state · fetch fresh · diff · process the delta · save state"   # SLOT
 
-vars:
+const:
   source_url: "https://api.example.com/v1/records"   # SLOT: the data source
   state_path: "./state/etl-state.json"               # SLOT: the cursor file
+
+permits:
+  exec: false
+  tools: ["nika:fetch", "nika:jq", "nika:json_diff", "nika:read", "nika:write"]
+  net:
+    http: ["api.example.com"]       # SLOT: the data-source host · same as const.source_url
+  fs:
+    read: ["./state/etl-state.json"]    # SLOT: the cursor file · same as const.state_path
+    write: ["./state/etl-state.json"]   # the same file, read AND written — that is why it is const
 
 tasks:
   # First run · no state file yet · recover to an empty list.
@@ -228,7 +268,7 @@ tasks:
   previous:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.state_path }}" }
+      args: { path: "${{ const.state_path }}" }
     on_error:
       on_codes: [NIKA-BUILTIN-READ-001]   # not-found ONLY · a permission error still fails loudly
       recover: ${{ tasks.empty.output }}
@@ -237,7 +277,7 @@ tasks:
     invoke:
       tool: "nika:fetch"            # SLOT: fetch / read / exec · the fresh data
       args:
-        url: "${{ vars.source_url }}"
+        url: "${{ const.source_url }}"
         mode: jq
         jq: ".records"
     on_error:
@@ -269,7 +309,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "${{ vars.state_path }}"
+        path: "${{ const.state_path }}"
         content: "${{ with.fresh }}"
         create_dirs: true
         overwrite: true
@@ -295,16 +335,20 @@ workflow:
 
 model: ollama/qwen3.5:4b           # SLOT: a tool-calling model · local by default
 
-vars:
+inputs:
   goal:
     type: string
     required: true
     description: "What the agent must accomplish"   # SLOT
 
+permits:
+  exec: false
+  tools: ["nika:assert", "nika:done", "nika:read"]   # the agent's grant + the confirm gate
+
 tasks:
   plan:
     infer:
-      prompt: "Break '${{ vars.goal }}' into at most 4 concrete steps."   # SLOT
+      prompt: "Break '${{ inputs.goal }}' into at most 4 concrete steps."   # SLOT
       schema:
         type: object
         required: [steps]
@@ -395,7 +439,7 @@ tasks:
 
   human:
     after:
-      gates: succeeded              # state, no data · no question until the board is green
+      gates: success                # state, no data · no question until the board is green
     invoke:
       # the prompt PAUSES the run (exit 4 · not a failure) — answer and resume:
       #   nika run --resume <trace> --answer human=yes
@@ -445,16 +489,24 @@ workflow:
 
 model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
 
-vars:
+const:
   site_url: "https://example.com"   # SLOT: the site to understand
   out_path: "./out/brief.json"      # SLOT: where the brief lands
+
+permits:
+  exec: false
+  tools: ["nika:fetch", "nika:write"]
+  net:
+    http: ["example.com"]           # SLOT: the crawled host · same as const.site_url
+  fs:
+    write: ["./out/brief.json"]     # SLOT: same path as const.out_path
 
 tasks:
   crawl_site:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.site_url }}"
+        url: "${{ const.site_url }}"
         traverse: { max_pages: 5 }  # SLOT: crawl bound · 1..=25 (robots honored)
 
   brief:
@@ -485,7 +537,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "${{ vars.out_path }}"
+        path: "${{ const.out_path }}"
         create_dirs: true
         content: "${{ with.brief }}"   # ALWAYS pass content
 
@@ -507,9 +559,19 @@ workflow:
 
 model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
 
-vars:
-  subject: "a calm cosmic landing hero"   # SLOT: what the asset is about
+inputs:
+  subject:                          # SLOT: what the asset is about · the caller's subject
+    type: string
+    default: "a calm cosmic landing hero"   # a default keeps the skeleton green with zero args
+
+const:
   out_dir: "./out/assets"           # SLOT: where assets land
+
+permits:
+  exec: false
+  tools: ["nika:image_generate", "nika:jq", "nika:write"]
+  fs:
+    write: ["./out/assets/**"]      # SLOT: the asset tree · same as const.out_dir
 
 tasks:
   brief:
@@ -517,7 +579,7 @@ tasks:
       max_tokens: 600
       prompt: |
         # SLOT: the creative direction · style · constraints
-        Write one vivid, concrete image prompt for: ${{ vars.subject }}.
+        Write one vivid, concrete image prompt for: ${{ inputs.subject }}.
         No text in the image · no watermark · a calm central zone.
       schema:
         type: object
@@ -534,7 +596,7 @@ tasks:
       args:
         provider: mock              # SLOT: local | openai | gemini | xai (local/mock first)
         prompt: "${{ with.brief_image_prompt }}"
-        output_dir: "${{ vars.out_dir }}"
+        output_dir: "${{ const.out_dir }}"
         filename_prefix: "asset"    # SLOT: filename stem
 
   manifest:
@@ -555,7 +617,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "${{ vars.out_dir }}/manifest.json"
+        path: "${{ const.out_dir }}/manifest.json"
         create_dirs: true
         content: "${{ with.manifest }}"
 
@@ -577,7 +639,7 @@ workflow:
 
 model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
 
-vars:
+const:
   api_base: "https://api.example.com"     # SLOT: the product API base
   asset_path: "./out/assets/asset-1.png"  # SLOT: the file to upload
 
@@ -589,17 +651,23 @@ secrets:
       - to: "nika:fetch"            # the send · default-deny otherwise
       - to: "outputs"               # the return value derives from the authed response
 
+permits:
+  exec: false
+  tools: ["nika:fetch"]
+  net:
+    http: ["api.example.com"]       # SLOT: the product API host · same as const.api_base
+
 tasks:
   upload:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.api_base }}/upload"   # SLOT: the upload endpoint
+        url: "${{ const.api_base }}/upload"   # SLOT: the upload endpoint
         method: POST
         headers:
           x-api-key: "${{ secrets.API_KEY }}"  # SLOT: the auth header name
         multipart:
-          - { name: file, path: "${{ vars.asset_path }}" }
+          - { name: file, path: "${{ const.asset_path }}" }
           # SLOT: extra text fields · { name: directory, value: "assets" }
         mode: jq
         jq: ".url"                  # SLOT: where the response carries the asset URL
@@ -610,7 +678,7 @@ tasks:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.api_base }}/create"   # SLOT: the create endpoint
+        url: "${{ const.api_base }}/create"   # SLOT: the create endpoint
         method: POST
         headers:
           x-api-key: "${{ secrets.API_KEY }}"

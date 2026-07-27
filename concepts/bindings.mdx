@@ -8,8 +8,8 @@ icon: "link"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 A **binding** is a template expression wrapped in `${{ … }}`. It resolves
-at runtime against a typed scope (inputs, task outputs, environment
-variables, secrets) and substitutes into the field. What's inside
+at runtime against a typed scope (the four value authorities, task-scope
+bindings, task records) and substitutes into the field. What's inside
 `${{ }}` is [CEL](https://cel.dev) (Common Expression Language), the
 same expression language GitHub Actions and Kubernetes admission
 policies use. Nika does not invent a DSL.
@@ -38,9 +38,9 @@ ${{ <expression> }}
 Four examples, each a valid `Templatable::Template`:
 
 ```yaml
-prompt: "${{ vars.target }}"
+prompt: "${{ inputs.target }}"
 prompt: "${{ with.model_family }}"
-command: ["echo", "${{ env.HOME }}/output.txt"]
+command: ["echo", "${{ const.output_dir }}/report.txt"]
 with:
   title: ${{ tasks.fetch_issue.output.title }}   # tasks.* lives at the boundary
 ```
@@ -48,19 +48,33 @@ with:
 Whitespace inside `${{ }}` is ignored. Nested `${{ }}` is rejected at
 parse time.
 
-## Scopes
+## The six namespaces
 
-Every binding resolves against one of five named scopes. The resolver
+Every binding resolves against one of six named namespaces. The resolver
 refuses unknown top-level names at validation time, so `${{ tsaks.foo }}`
-is caught before the run starts.
+is caught before the run starts — and a value-namespace read outside the
+closed family (`${{ params.X }}` and friends) refuses `NIKA-VALUES-003`.
 
-| Scope | Source | Example |
+| Namespace | Source | Example |
 |---|---|---|
-| `vars.*` | Workflow inputs, declared in the envelope `vars:` block (typed or untyped) | `vars.target` |
+| `inputs.*` | Typed workflow inputs, declared in the envelope `inputs:` block — supplied by the caller at launch | `inputs.target` |
+| `config.*` | Typed non-sensitive runtime config, declared in `config:` — supplied by the deployment, may appear in logs | `config.log_level` |
+| `const.*` | Named constants declared in `const:` — a fixed value baked into the file | `const.output_dir` |
+| `secrets.*` | Vault/env/file-backed secret references (masked in logs) | `secrets.api_key` |
 | `with.*` | The task's **data boundary** — per-task `with:` block; each `tasks.*` reference in a value declares a typed edge, the body reads the binding | `with.model_family` |
 | `tasks.<name>.output` | The result record of a completed task (`.output` · `.status` · `.error` · `.duration_ms` · named bindings) — **boundary surfaces only** (see below) | `tasks.greet.output` |
-| `env.*` | Non-sensitive runtime config, declared in the envelope `env:` block | `env.HOME`, `env.REGION` |
-| `secrets.*` | Vault/env/file-backed secret references (masked in logs) | `secrets.api_key` |
+
+The first four are the **value authorities** — the closed family every
+workflow value is declared under, one role each, no alias. `with` and
+`tasks` are the **runtime namespaces**: legal in `${{ }}`, never value
+authorities.
+
+`${{ vars.X }}` and `${{ env.X }}` are dead reads (`NIKA-VALUES-001` /
+`NIKA-VALUES-002`). Each old use classifies into the authority its role
+commands — a typed parameter into `inputs:`, a fixed value into `const:`,
+non-sensitive runtime configuration into `config:`, a governed store
+reference into `secrets:`. Classification, never a bulk rename: the
+question is what the value *plays*, not what it was spelled.
 
 Task names are validated at parse time (`snake_case`, unique). A
 binding that references a task not present in the file fails with a
@@ -94,24 +108,25 @@ summarize:
     prompt: "Summarize · ${{ with.article }}"
 ```
 
-The task body is a **pure function of its declared inputs** (`with` ·
-`vars` · `env` · `secrets` · the loop locals): every cross-task dependency
-is visible at the boundary, named, and typed by its edge role.
+The task body is a **pure function of its declared inputs** (`with` · the
+four value authorities `inputs` · `config` · `const` · `secrets` · the loop
+locals): every cross-task dependency is visible at the boundary, named, and
+typed by its edge role.
 
 ## Typed resolution
 
-Nika knows the expected type of every binding target. If `vars.count`
+Nika knows the expected type of every binding target. If `inputs.count`
 is declared `integer` and you drop it into a field typed as a list,
 validation fails *before* the run starts.
 
 ```yaml
-vars:
+inputs:
   count:
     type: integer
 
 tasks:
   loop:
-    for_each: "${{ vars.count }}"      # fails — for_each needs a list
+    for_each: "${{ inputs.count }}"      # fails — for_each needs a list
     infer:
       model: ollama/<model>     # <provider>/<name>
       prompt: "Iteration ${{ item }}"
@@ -131,9 +146,13 @@ the analyzer and propagates through bindings:
 - `exec` stdout → tainted (subshell could have been influenced).
 - `infer` / `agent` output → tainted (prompt injection vector).
 - `invoke` output → tainted (MCP servers are third-party).
-- `vars.*` from the CLI → tainted (user-provided at runtime).
-- `context.*`, `env.*`, `nika.*` → **trusted** (workflow author owns
-  them).
+- `inputs.*` → tainted (caller-supplied at launch).
+- `config.*` → tainted (deployment-supplied, from outside the file).
+- literals, `const.*`, `secrets.*` → **trusted** (the file owns them).
+
+Integrity is orthogonal to confidentiality: a secret is *trusted* (the
+author put it there) and *confidential* (it must not leak). One untrusted
+operand taints the whole interpolation.
 
 Passing tainted data to a *privileged sink* (notably `exec.command`)
 without an explicit sanitizer raises a `NIKA-SEC`-family error (the
@@ -176,7 +195,7 @@ What's inside `${{ }}` is the **v0.1 CEL subset**
 
 | Form | Example |
 |---|---|
-| Field access | `vars.topic` · `tasks.build.status` |
+| Field access | `inputs.topic` · `tasks.build.status` |
 | Index access | `tasks.list.output[0]` · `obj['key-with-dash']` |
 | Comparison | `==` `!=` `<` `<=` `>` `>=` |
 | Boolean | `&&` `\|\|` `!` |
@@ -231,20 +250,24 @@ indentation.
 
 ## Null handling
 
-Defaults live in declarations, not in expressions. A bare `vars:` value
-IS the default; a typed var declares whether it's required:
+Defaults live in declarations, not in expressions. Which declaration
+depends on who owns the value:
 
 ```yaml
-vars:
-  tone: "neutral"          # default — override from the CLI
+inputs:
   topic:
     type: string
-    required: true         # validated before anything runs
+    required: true         # the caller MUST supply it · validated before anything runs
+  tone:
+    type: string
+    default: "neutral"     # the caller MAY override it from the CLI
+const:
+  house_style: "sober"     # nobody overrides it · the file owns it
 ```
 
-If `vars.optional_field` is absent and has no `default:`, the
-workflow fails to load: a miette diagnostic points at the declaration
-site and the usage site.
+If `inputs.optional_field` is required and the caller supplies nothing,
+the run is refused before it starts: a miette diagnostic points at the
+declaration site and the usage site.
 
 ## What bindings are **not**
 

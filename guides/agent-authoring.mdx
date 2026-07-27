@@ -66,8 +66,8 @@ flowchart LR
     | `NIKA-VAR-021` | you referenced `${{ tasks.X.* }}` in a verb body, `when:` or `for_each:`: hoist it into `with:` and read `${{ with.<name> }}` (`nika check --fix` applies it) |
     | `NIKA-PARSE-024` | `depends_on:` is dead: data → a `with:` binding · control → `after: { x: success }` (`nika check --fix` migrates) |
     | `NIKA-DAG-001` | cycle: remove the back-edge |
-    | `NIKA-DAG-005` | unknown `after:` predicate: the set is closed — `success` · `failed` · `skipped` · `terminal` |
-    | `NIKA-VAR-001` | undeclared name: declare it in `vars:`/`secrets:` or fix the typo |
+    | `NIKA-DAG-005` | unknown `after:` predicate: the set is closed — `success` · `failure` · `skipped` · `terminal` (the participial `succeeded`/`failed` are dead spellings · `nika check --fix` respells them) |
+    | `NIKA-VAR-001` | undeclared name: declare it under the authority its role commands — `inputs:` · `config:` · `const:` · `secrets:` — or fix the typo |
     | `NIKA-PROVIDER` | `model:` must be `<provider>/<name>` with a canonical prefix |
     | `NIKA-PARSE` (duplicate id) | two tasks share an id: rename one |
   </Step>
@@ -85,10 +85,11 @@ them; knowing them just saves round-trips:
    DAG has no invisible edges (`NIKA-VAR-021` otherwise, and
    `depends_on:` is dead: `NIKA-PARSE-024`).
 4. **`when:` is a `${{ }}` CEL boolean or the literal `true`/`false`** ·
-   `${{ vars.count }}` is not a condition; `${{ vars.count > 0 }}` is;
+   `${{ inputs.count }}` is not a condition; `${{ inputs.count > 0 }}` is;
    a bare string without `${{ }}` is rejected. It reads local namespaces
-   only (`vars` · `env` · `with` · `item`/`index`), post-gate; the
-   always-pattern is `after: { x: terminal }`, never a `when:` trick.
+   only (the value authorities `inputs` · `config` · `const` · `secrets`,
+   plus `with` · `item`/`index`), post-gate; the always-pattern is
+   `after: { x: terminal }`, never a `when:` trick.
 5. **The CEL function set is closed** · `size()` · the `has()` presence
    macro · the `contains`/`startsWith`/`endsWith` string tests · the
    `?:` conditional (`cel-subset/0.1`). Everything else — arithmetic,
@@ -104,6 +105,17 @@ them; knowing them just saves round-trips:
    hint; `nika check --native-strict` fails on any that remain, and a
    surviving `exec:` gets an exec-ledger row (task · command · why ·
    unlock) in the workflow header.
+10. **Every value lands under one of four authorities** · `inputs:`
+    (the caller supplies it) · `config:` (the deployment supplies it) ·
+    `const:` (the file owns it) · `secrets:` (a governed store). `vars:`
+    and `env:` are dead envelope fields (`NIKA-VALUES-001` /
+    `NIKA-VALUES-002`) — classify by the role the value plays, never
+    rename in bulk.
+11. **A body with effects carries `permits:`** · an absent block is
+    **zero** authority, not a free pass: the check refuses with
+    `NIKA-AUTH-006` before a token is spent, and the run refuses with
+    `NIKA-SEC-004`. Write the block with `nika check --infer-permits`,
+    which prints the tightest one and is paste-ready.
 
 ## After valid: the judgment layer
 

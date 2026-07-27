@@ -49,8 +49,14 @@ workflow:
   id: etl-quarantine
   description: "CSV batch → schema gate → quarantine the bad · aggregate the good"
 
-vars:
+const:
   batch_csv: "./data/incoming/orders.csv"
+permits:
+  exec: false
+  tools: ["nika:convert", "nika:jq", "nika:read", "nika:validate", "nika:write"]
+  fs:
+    read: ["./data/incoming/orders.csv"]
+    write: ["./data/quarantine/orders-rejected.json", "./data/reports/daily-totals.json"]
 
 tasks:
   # A deterministic empty fallback · the recover target when parsing dies.
@@ -62,7 +68,7 @@ tasks:
   raw:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.batch_csv }}" }
+      args: { path: "${{ const.batch_csv }}" }
 
   rows:
     with:

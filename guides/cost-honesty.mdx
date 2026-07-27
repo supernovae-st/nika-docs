@@ -108,7 +108,7 @@ tasks:
   think:
     infer:
       model: ollama/qwen3.5:4b
-      prompt: "${{ vars.question }}"
+      prompt: "${{ inputs.question }}"
       max_tokens: 600        # the ceiling lever — every infer should carry one
 ```
 

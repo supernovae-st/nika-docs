@@ -76,8 +76,9 @@ and features we haven't imagined **without breaking changes to the public API**.
 
     ```yaml illustration · the envelope pin
     nika: v1
-    workflow: my-flow
-    tasks: [...]
+    workflow:
+      id: my-flow
+    tasks: { ... }
     ```
 
     `v1` is the only value for the lifetime of the v1 contract: minor
@@ -99,7 +100,8 @@ and features we haven't imagined **without breaking changes to the public API**.
 
     ```yaml illustration · RESERVED future extension fields (rejected today)
     nika: v1
-    workflow: my-flow
+    workflow:
+      id: my-flow
     nika.cache: { ttl: 3600 }      # nika.* core extension · a future additive minor
     x-my-org-metric: 42             # x-* community overlay · reserved · NOT valid v0.1
     ```
