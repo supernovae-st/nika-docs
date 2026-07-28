@@ -28,7 +28,7 @@ permits:
 tasks:
   collect:
     exec:
-      command: ["printf", "'feat:", "resume\nfix:", "deadline'"]
+      command: ["printf", "feat: resume\nfix: deadline"]
 
   draft:
     with:
@@ -41,7 +41,7 @@ tasks:
     after:
       draft: success
     exec:
-      command: ["printf", "'stamped'"]
+      command: ["printf", "stamped"]
 
 outputs:
   notes: "${{ tasks.draft.output }}"
@@ -53,24 +53,18 @@ Any `--json` run is a recording ([Traces & replay](/concepts/traces)):
 nika run release-notes.nika.yaml --json > .nika/traces/release-notes.ndjson
 ```
 
-<Warning>
-  **Owed a re-capture.** The workflow above now declares a `permits:`
-  block, so this captured render line (`engine floor`) is stale. A capture
-  is evidence, not prose — it is re-run, never retyped. Re-capture against
-  the 0.106 binary the day the tag ships.
-</Warning>
-
 Resume from it:
 
 ```text
 $ nika run release-notes.nika.yaml --resume .nika/traces/release-notes.ndjson
   🦋 nika · release-notes · 3 tasks
-     permits ✓ engine floor (no boundary declared)
+     permits ✓ declared boundary · default-deny
 
-  ✔  collect  cache hit
-  ✔  draft    cache hit
-  ✔  stamp    cache hit
-  ── 3/3 done · $0.000 · elapsed 0.0s ────────────────────────────
+  ↷  collect  cache hit (resume)
+  ↷  draft    cache hit (resume)
+  ↷  stamp    cache hit (resume)
+  ── 3/3 done · $0.00 · elapsed 0.0s ─────────────────────────────
+    trace: .nika/traces/2026-07-28T07-01-41Z-1a95.ndjson · 8 events · chain 1a101794c8877565c74eb34149b1530d9b59f987f422b9ff4b19acde2d8b5be0
 
   resumed · 3 skipped (cache hit) · 0 ran live
 ```
@@ -159,7 +153,7 @@ permits:
 tasks:
   build:
     exec:
-      command: ["printf", "'build", "ok'"]
+      command: ["printf", "build ok"]
 
   approve:
     after:
@@ -174,7 +168,7 @@ tasks:
       approved: ${{ tasks.approve.output }}
     when: "${{ with.approved == true }}"
     exec:
-      command: ["printf", "'shipped'"]
+      command: ["printf", "shipped"]
 ```
 
 ```bash

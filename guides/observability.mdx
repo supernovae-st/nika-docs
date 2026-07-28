@@ -74,22 +74,16 @@ light up as their dependencies clear, in the wave order `inspect`
 predicted. Piped (CI logs, `tee`), the same run prints one plain,
 deterministic frame instead — `∥` marks tasks that ran in parallel:
 
-<Warning>
-  **Owed a re-capture.** The workflow above now declares a `permits:`
-  block, so this captured render line (`engine floor`) is stale. A capture
-  is evidence, not prose — it is re-run, never retyped. Re-capture against
-  the 0.106 binary the day the tag ships.
-</Warning>
-
 ```text
 $ nika run standup-digest.nika.yaml
   🦋 nika · standup-digest · 3 tasks
-     permits ✓ engine floor (no boundary declared)
+     permits ✓ declared boundary · default-deny
 
-  ✔  commits  exec · sleep       416ms ∥
-  ✔  tickets  exec · sleep       312ms ∥
-  ✔  digest   infer · mock/echo    0ms
-  ── 3/3 done · $0.000 · elapsed 0.4s ────────────────────────────
+  ✔  commits  exec · sleep  428ms
+  ✔  tickets  exec · sleep  313ms ∥
+  ✔  digest   infer · mock/echo  0ms
+  ── 3/3 done · ≥ $0.00 (1 unpriced) · elapsed 0.4s ──────────────
+    trace: .nika/traces/2026-07-28T06-58-44Z-bb6e.ndjson · 15 events · chain b35e86afcb024cab8b17cc0c7701d99034ecf5aa70ab4fc5e28d6225933b13be
 ```
 
 Four render modes, one per audience:
@@ -98,7 +92,7 @@ Four render modes, one per audience:
 |---|---|
 | *(none, terminal)* | Live animated storyboard, then waterfall + verdict card |
 | `--no-progress` | One plain final frame (the CI-stable surface · default when piped) |
-| `--quiet` | The final verdict line only — `✔  standup-digest · 3 tasks · 0.4s · $0.000` |
+| `--quiet` | The final verdict line only — `✔  standup-digest · 3 tasks · 0.4s · ≥ $0.00 (1 unpriced)` |
 | `--json` | Pure NDJSON events on stdout, progress to stderr (the machine lane · see [Traces](/concepts/traces)) |
 
 ## After · the waterfall and the verdict card

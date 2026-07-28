@@ -16,19 +16,11 @@ diagnosis with a fix line per gap.
 nika welcome
 ```
 
-<Warning>
-  **Owed a re-capture.** This transcript is a verbatim capture against
-  the released `nika 0.105.0`. The rest of this page teaches the 0.106
-  grammar; a captured screen is evidence, so it is never hand-edited to
-  match — it is re-run. Re-capture it against the 0.106 binary the day the
-  tag ships (grep this repo for `Owed a re-capture` to find every one).
-</Warning>
-
-Captured verbatim against the released `nika 0.105.0` on a machine with no
+Captured verbatim against the released `nika 0.106.0` on a machine with no
 keys, no configs, no editors wired — the stranger's first screen:
 
 ```text
-🦋 nika 0.105.0 — Intent as Code. The workflow language for AI.
+🦋 nika 0.106.0 — Intent as Code. The workflow language for AI.
    one file · 4 verbs · one binary · audited BEFORE it runs
    every run records a tamper-evident, hash-chained trace
 
@@ -52,10 +44,10 @@ a whole workflow is one file
 
 start here (offline · zero keys)
   nika examples run 01-hello --model mock/echo   # offline proof · zero keys
+  nika init                                      # found this repo (wizard)
   nika new                                       # guided first workflow
-  nika init                                      # brief editor + agents
 
-learn: nika.sh · docs: docs.nika.sh
+learn: nika.sh · docs: docs.nika.sh · ⭐ github.com/supernovae-st/nika
 ```
 
 Three details worth noticing: the seven-line workflow **is real** (an
@@ -89,20 +81,12 @@ Three honesty rules shape everything below:
 
 ## A fresh machine, honestly
 
-<Warning>
-  **Owed a re-capture.** This transcript is a verbatim capture against
-  the released `nika 0.105.0`. The rest of this page teaches the 0.106
-  grammar; a captured screen is evidence, so it is never hand-edited to
-  match — it is re-run. Re-capture it against the 0.106 binary the day the
-  tag ships (grep this repo for `Owed a re-capture` to find every one).
-</Warning>
-
-Captured verbatim against `nika 0.105.0` on a machine with no keys, no
+Captured verbatim against `nika 0.106.0` on a machine with no keys, no
 configs, no editors wired — the worst case, and every line hands over:
 
 ```text
 ✔ 9 ok · 17 warn · 0 fail
-✔ binary     v0.105.0 · self-contained (spec v1 embedded)
+✔ binary     v0.106.0 · self-contained (spec v1 embedded)
 ⚠ config     none — built-in defaults
 ✔ lsp        available via `nika lsp` (editor language server)
 ✔ traces     keep 10 per workflow · max age 30d · budget 256MB (NIKA_TRACE_KEEP · NIKA_TRACE_MAX_AGE_DAYS · NIKA_TRACE_BUDGET_MB)

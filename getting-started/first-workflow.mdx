@@ -111,16 +111,8 @@ Example output:
 **cost before a token is spent** (an unbounded task reads `FLOOR`, a
 local model reads *unpriced — not « free »* — the whole vocabulary
 lives in [Cost honesty](/guides/cost-honesty)), what it touches, and
-<Warning>
-  **Owed a re-capture.** This transcript is a verbatim capture against
-  the released `nika 0.105.0`. The rest of this page teaches the 0.106
-  grammar; a captured screen is evidence, so it is never hand-edited to
-  match — it is re-run. Re-capture it against the 0.106 binary the day the
-  tag ships (grep this repo for `Owed a re-capture` to find every one).
-</Warning>
-
 the flight recorder hand-off. Captured verbatim against the released
-`0.105.0` on the chain skeleton after one recorded run:
+`0.106.0` on the chain skeleton after one recorded run:
 
 ```text
 cost before a token is spent
@@ -130,7 +122,7 @@ cost before a token is spent
 
 flight recorder
   1 run in .nika/traces · latest:
-  nika trace show .nika/traces/2026-07-24T14-20-29Z-4536.ndjson
+  nika trace show .nika/traces/2026-07-28T06-55-19Z-7ef1.ndjson
   nika trace verify <same file>   # prove the hash chain
 ```
 
