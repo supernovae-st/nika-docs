@@ -283,11 +283,116 @@ absent means **zero** authority, and the check refuses the body with
 `NIKA-AUTH-006` before a single token is spent.
 
 <Note>
-  v1 workflows are **single-file**: there is no `include:` / `import:`
-  (static composition is a candidate for a later additive minor · see the
-  spec's out-of-scope list). To reuse a sub-DAG today, call it with
-  `invoke: nika:run_workflow`.
+  There is no `include:` / `import:` — a workflow never splices another
+  file's text into its own. Reuse happens through **composition**: one
+  workflow *calls* another as a typed, bounded step. See below.
 </Note>
+
+## Composition · one workflow calls another
+
+`invoke:` is a **tagged union**: exactly one of `tool:` (a builtin or an MCP
+tool) or `workflow:` (another workflow). Same verb, same call site — the
+field IS the semantics. There is no fifth verb and no `nika:*` builtin that
+launches a workflow.
+
+The child is an ordinary workflow. Nothing marks it as "a child":
+
+```yaml word-count.nika.yaml
+nika: v1
+workflow:
+  id: word-count
+  description: "Count the words in a piece of text · the reusable child."
+
+inputs:
+  text: { type: string, required: true }
+
+permits:
+  tools: ["nika:jq"]
+
+tasks:
+  count:
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: { text: "${{ inputs.text }}" }
+        expression: '{ words: (.text | split(" ") | length) }'
+    returns:
+      object:
+        words: integer
+
+outputs:
+  words: "${{ tasks.count.output.words }}"
+```
+
+The parent calls it by **static path**, passes `args:` that fit the child's
+`inputs:`, and reads the child's `outputs:` back as that task's output:
+
+```yaml brief-with-stats.nika.yaml
+nika: v1
+workflow:
+  id: brief-with-stats
+  description: "Write a brief, then measure it by calling a child workflow."
+
+model: mock/echo
+
+inputs:
+  topic: { type: string, required: true }
+
+permits:
+  tools: ["nika:jq"]           # the child's tools, hoisted · see the boundary note
+
+tasks:
+  brief:
+    infer:
+      prompt: "Write three bullet points on ${{ inputs.topic }}."
+
+  measure:
+    with:
+      body: "${{ tasks.brief.output }}"
+    invoke:
+      workflow: "./word-count.nika.yaml"
+      args:
+        text: "${{ with.body }}"
+    returns:
+      object:
+        words: integer
+
+outputs:
+  brief: "${{ tasks.brief.output }}"
+  words: "${{ tasks.measure.output.words }}"
+```
+
+```bash
+nika run brief-with-stats.nika.yaml --var topic="local-first AI"
+```
+
+### The rules the checker enforces
+
+- **Static target** — `workflow:` is a filesystem path or a pinned
+  `registry:owner/name@version`. A `${{ }}`-templated target is refused
+  (`NIKA-COMP-001`): a call graph you cannot draw before the run is a call
+  graph you cannot bound.
+- **Typed call** — the parent's `args:` must fit the child's `inputs:`, and
+  what the parent declares in `returns:` must fit the child's `outputs:`
+  (`NIKA-COMP-004`). The child's contract is *derived from its body*, never
+  annotated twice.
+- **Zero implicit authority** — a child never gains a capability its parent
+  lacks (`NIKA-COMP-002`).
+- **Acyclic** — a static cycle or self-launch is refused (`NIKA-COMP-003`).
+
+<Warning>
+  **The parent's `permits:` must cover the child's effects.** Authority flows
+  down, never up: the child above invokes `nika:jq`, so the parent declares
+  `nika:jq` too — drop it and the check fails `NIKA-COMP-002`. On that parent
+  `nika check` also prints an advisory `NIKA-DRIFT-001` hint saying the entry
+  "admits no tool the body invokes" — it is counting only the parent's *own*
+  tasks. Under composition the entry is load-bearing: keep it. The hint is
+  advisory and does not fail the check.
+</Warning>
+
+Each child keeps its **own** hash-chained trace; the parent's trace records
+the child's outcome, so a run is a forest of chains rather than one flattened
+stream. Full contract: [spec 14 · Composition](https://github.com/supernovae-st/nika-spec/blob/main/spec/14-composition.md).
 
 ### Supply values at launch · `--var`
 

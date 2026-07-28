@@ -109,6 +109,69 @@ randomness. A declared contradiction refuses at parse (`NIKA-PARSE-026` ·
 `NIKA-PARSE-027`); `entropy: none` with a live randomness source consumed
 refuses at check (`NIKA-PARSE-028`).
 
+## Types and policy
+
+Two optional envelope keys that most workflows never need — and that the
+checker enforces the moment they appear.
+
+`types:` declares named PascalCase types once; `returns:` (and `outputs:`)
+then reference them by name instead of restating the shape. `policy:`
+declares the limits the run must obey, checked **before** any token is spent.
+
+```yaml typed-triage.nika.yaml
+nika: v1
+workflow:
+  id: typed-triage
+
+types:
+  Finding:
+    object:
+      severity: { enum: ["low", "medium", "high"] }
+      summary: string
+      line: { integer: { min: 1 } }
+
+permits:
+  tools: ["nika:jq"]
+
+policy:
+  limits:
+    max_tasks: 20
+
+tasks:
+  classify:
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: { severity: "high", summary: "unbounded retry", line: 42 }
+        expression: "."
+    returns: Finding
+
+outputs:
+  severity: "${{ tasks.classify.output.severity }}"
+```
+
+The type grammar is closed: the primitives (`null` · `bool` · `integer` ·
+`number` · `string` · `bytes` · `uri` · `path` · `duration` · `timestamp`), a
+PascalCase reference to one of your own, or a constructor — `object:` ·
+`array:` · `map:` · `union:` · `enum:` · plus the refinements `integer:`/
+`number:` (`min`/`max`) and `string:` (`pattern`/`min_len`/`max_len`). An
+unknown name is `NIKA-TYPE-001`; a recursive `types:` graph is
+`NIKA-TYPE-002`.
+
+The policy rule set is closed per minor. Rather than trust a list here, ask
+the binary — a refused `policy:` block prints the whole current set:
+
+```bash
+nika explain NIKA-POLICY-001
+```
+
+Today that set is six families — `require` · `forbid` · `allow` · `limits` ·
+`prefer` · `optimize` — carrying `require.human_gate_before` ·
+`forbid.exec_after` (both over `exec`/`write`/`net`/`tools`) ·
+`allow.providers` · `limits.max_tasks` · `prefer.providers` · `optimize`
+(`cost`/`latency`/`quality`). A violated hard rule is `NIKA-POLICY-001` at
+check time, naming rule, task and witness.
+
 ## A task
 
 ```yaml
@@ -125,13 +188,50 @@ refuses at check (`NIKA-PARSE-028`).
   on_error: { ... }          # optional recovery · recover/skip/fail_workflow + on_codes
   output: { <name>: <jq> }   # optional named jq bindings over the raw output
   on_finally: [ ... ]        # optional cleanup steps · run if the task STARTED
+  returns: <type>            # optional · the task's output contract (a type expression)
+  declassify: [ ... ]        # optional · raise ONE binding untrusted → trusted
+  inert: "<because>"         # optional · this fetch is a code-bearing artifact, never loaded
 
   # exactly one verb block:
   infer: { ... }
   exec: { ... }
-  invoke: { ... }
+  invoke: { ... }            # tool: <builtin|mcp> XOR workflow: <path|registry ref>
   agent: { ... }
 ```
+
+The eighteen modifiers above are the complete task surface. `returns:`,
+`declassify:` and `inert:` are the three that carry a contract of their own:
+
+| Modifier | What it declares |
+|---|---|
+| `returns:` | The task's output type, as a [type expression](#types-and-policy) — exclusive with a verb-level `schema:` (`NIKA-TYPE-003`). Under composition it is how the parent states the child's shape. |
+| `declassify:` | The **only** door through the permit-parameterization taint. Each entry raises exactly one binding: `from:` (a dotted path) · `to: trusted` · a non-empty `because:`. It lifts the taint law only — the value is still matched against the declared boundary, so it is never a permit bypass. |
+| `inert:` | The **only** door through the data-as-code sink. A `nika:fetch` whose resolved URL names a code-bearing class (`.pkl` · `.py` · `.so` · the closed NEP-0006 list) is refused with `NIKA-SEC-008`; a non-empty `inert:` string declares the artifact will never be loaded or run. It lifts that law only — never the `net.http` boundary, never the SSRF floor. |
+
+```yaml inert-fetch.nika.yaml
+nika: v1
+workflow:
+  id: inert-fetch
+
+permits:
+  net: { http: ["example.com"] }
+  tools: ["nika:fetch"]
+
+tasks:
+  audit_weights:
+    inert: "checksum audit only · the file is hashed, never deserialized"
+    invoke:
+      tool: "nika:fetch"
+      args: { url: "https://example.com/model.pkl" }
+
+outputs:
+  status: "${{ tasks.audit_weights.output.status }}"
+```
+
+Drop the `inert:` line and that same file fails the check with
+`NIKA-SEC-008`. Both doors are greppable by design: a reviewer can find every
+place a law was waived, and each one carries its written justification into
+the run receipt.
 
 `tasks.*` crosses a task boundary through exactly **two doors** — `with:`
 (data · observations) and `after:` (control) — and the engine computes the

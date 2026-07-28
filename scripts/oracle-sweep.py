@@ -25,23 +25,39 @@ if shutil.which("nika") is None:
 
 SKIP = re.compile(r"skeleton|illustration|modeline", re.I)
 FENCE = re.compile(r"```yaml([^\n]*)\n(.*?)```", re.DOTALL)
+# A fence may name its file (```yaml child.nika.yaml). Named fences are
+# materialized as SIBLINGS before judging, so a composition parent can
+# resolve `invoke: workflow: ./child.nika.yaml` — the multi-file examples
+# get judged like every other block instead of being exempted.
+NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika\.yaml)\s*$")
 
 bad = 0
 total = 0
 for fp in sorted(DOCS.rglob("*.mdx")):
     if "node_modules" in str(fp):
         continue
-    for info, body in FENCE.findall(fp.read_text()):
-        if "nika: v1" not in body or SKIP.search(info):
-            continue
+    fences = FENCE.findall(fp.read_text())
+    runnable = [(i, b) for i, b in fences if "nika: v1" in b and not SKIP.search(i)]
+    if not runnable:
+        continue
+    page_dir = tempfile.mkdtemp(prefix="oracle-")
+    # every named block on the page is a sibling the others may reference
+    for info, body in runnable:
+        m = NAMED.match(info)
+        if m:
+            (pathlib.Path(page_dir) / m.group(1)).write_text(body)
+    for info, body in runnable:
         total += 1
-        with tempfile.NamedTemporaryFile("w", suffix=".nika.yaml", delete=False) as f:
-            f.write(body)
-            path = f.name
-        r = subprocess.run(["nika", "check", path], capture_output=True, text=True)
+        m = NAMED.match(info)
+        # re-assert THIS fence's bytes (pages reuse one filename across
+        # progressive versions — each version is judged as itself)
+        name = m.group(1) if m else f"block-{total}.nika.yaml"
+        path = pathlib.Path(page_dir) / name
+        path.write_text(body)
+        r = subprocess.run(["nika", "check", str(path)], capture_output=True, text=True)
         if r.returncode != 0:
             bad += 1
-            print(f"✗ {fp.relative_to(DOCS)}")
+            print(f"✗ {fp.relative_to(DOCS)}  [{name}]")
             for e in [l for l in (r.stdout + r.stderr).splitlines() if "✖" in l or "✗" in l][:3]:
                 print(f"   · {e.strip()[:110]}")
 

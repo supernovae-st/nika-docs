@@ -20,6 +20,15 @@ read_config:
     args: { path: "./config.yaml" }
 ```
 
+The tables below name every builtin so you know what exists offline. For the
+**argument contract** of any one of them, ask your installed binary rather
+than a page that can drift:
+
+```bash
+nika catalog --tools          # every builtin, by category, with one-line contracts
+nika catalog --tools --json   # the model-facing JSON Schemas (args · required)
+```
+
 <Info>
   **Canonical source:** [`nika-spec/stdlib/builtins-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/builtins-v0.1.md),
   the Apache-2.0 language spec. The set was curated by the Rams
@@ -75,11 +84,11 @@ gate:
 | `nika:glob` | Glob match. Returns an array of paths. |
 | `nika:grep` | Recursive grep. Returns an array of `{ path, line, match }`. |
 
-## Data (8)
+## Data (9)
 
-`jq` is THE data language: map, filter, reshape, merge. The other seven
+`jq` is THE data language: map, filter, reshape, merge. The other eight
 cover what jq genuinely cannot do: diff, validate, delete-on-null merge,
-format conversion, generation, time, hashing.
+format conversion, generation, time, hashing, adjudication.
 
 | Builtin | What it does |
 |---|---|
@@ -91,6 +100,7 @@ format conversion, generation, time, hashing.
 | `nika:uuid` | Generate a UUID: `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
 | `nika:date` | Timestamp arithmetic: op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
 | `nika:hash` | Content hashing: default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
+| `nika:decide` | The deterministic decision kernel ([spec 11](https://github.com/supernovae-st/nika-spec/blob/main/spec/11-decision.md)): evaluates a portable Decision Bundle (`bundle:`) against an EvidenceSnapshot (`evidence:`) and returns the full receipt — outcome, term-by-term contributions, intervals, conflicts with their witnesses, determination provenance. **The model never decides**: an `infer:` task collects the facts, this applies the rubric. Same evidence, same verdict, forever. |
 
 ```yaml
 # recursive deep-merge of two task outputs — pure jq, no extra builtin
@@ -132,10 +142,11 @@ budget_check:
     args: { view: cost }
 ```
 
-## Media (3)
+## Media (4)
 
 | Builtin | What it does |
 |---|---|
+| `nika:chart` | **Deterministic chart rendering** from rows + a semantic spec (`bar` · `line` · `area_band` · `scatter` · `heatmap`): a byte-identical SVG lands at `out:` (permit-gated write) and its sha256 rides the outputs as a trace-chain receipt. Pure compute + one write — no network, no clock, re-runs idempotent; optional Vega-Lite sibling via `compile_to:`. Full guide: [Charts](/guides/charts). |
 | `nika:image_generate` | Provider-backed image **generation and editing** as an *asset pipeline*: renders land under a declared `output_dir:` (rides `permits.fs.write`), and `mode: edit` sources are read permit-gated (`permits.fs.read` — the mirror boundary); outputs and a provenance manifest carry paths + dimensions + sha256, and an edit records its `source_images` — **image bytes never ride workflow outputs**. Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). Full guide: [Image generation](/guides/image-generation) — sovereign quickstart · editing · cookbook · honesty rules. |
 | `nika:tts_generate` | Speech synthesis on the same asset-pipeline contract (full guide: [Speech generation](/guides/speech-generation)): ONE audio file lands under `output_dir:` (permit-gated), output + manifest carry path + sha256 + `duration_ms` (wav-exact, mp3 honestly null) — **audio bytes never ride outputs**. Providers (sovereign-first): `local` (any OpenAI-speech-compatible server — LocalAI · Kokoro-FastAPI · Speaches — via `NIKA_TTS_LOCAL_URL`) · `openai` (`gpt-4o-mini-tts`) · `elevenlabs` (`ELEVENLABS_API_KEY`) · `mock` (real deterministic WAV, offline). |
 | `nika:image_fx` | **Deterministic artistic effects** on a PNG — dither (bayer · blue-noise · ign · floyd_steinberg · atkinson · jjn) · palette mapping (Oklab) · duotone · pixelate · halftone · grain · vignette · chromatic aberration · scanlines · glitch · ascii (png/text/ansi). Zero providers, zero network: **byte-identical output forever** for identical `(input, args)` — the artifact's sha256 joins the trace chain, re-render IS the tamper check, and the full recipe (contract tag `image_fx/v1` · input sha256 · seed · ops) rides the PNG itself as a `nika` tEXt chunk. `input:` read + `out:` write both ride `permits.fs`. Full guide: [Image effects](/guides/image-effects) — the receipts story · op table · cookbook. |
