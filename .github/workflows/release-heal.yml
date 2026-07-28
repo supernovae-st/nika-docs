@@ -23,7 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # The deploy key, not GITHUB_TOKEN: main is protected and the token
+      # push dies on GH006 (proven v0.106.0 night, run 30314689242 — the
+      # hand did the heal's job that once). A write deploy key clears the
+      # classic protection while enforce_admins stays off — the registry
+      # recipe of 2026-07-23, applied here.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ssh-key: ${{ secrets.HEAL_DEPLOY_KEY }}
       - name: Snapshot tracks the published release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
