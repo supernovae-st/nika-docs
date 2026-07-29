@@ -140,6 +140,8 @@ Pull requests are welcome.
 
 **This building** · THE MANUAL · explains the language; same projection law as the showroom.
 
+**Root** · neither · this building projects both. Language facts come from nika-spec (the canon snippet, the showcase markers), engine facts from the released binary · nothing authoritative is typed here.
+
 **Consumes** · the spec (canon snippets, projected) · the engine (status snapshot, refreshed).
 
 **Serves** · readers at [docs.nika.sh](https://docs.nika.sh).
