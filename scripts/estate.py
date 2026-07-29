@@ -1,196 +1,143 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-or-later
-# Copyright (C) 2026 SuperNovae Studio <contact@supernovae.studio>
-#
-# estate.py — the provenance manifest: every tracked file declares what it IS.
-#
-# OBSERVATION MODE (E0): estate.yaml declares provenance — authored ·
-# generated · pinned-copy · foreign — it enforces nothing. The point is to
-# make the repo's derivation topology explicit: which files a human writes,
-# which files a tool re-derives (and from what, gated by which CI check),
-# so drift between "what we believe" and "what is" becomes observable.
-#
-# Classification is EVIDENCE-driven, never assumed: the script reads the
-# generation markers inside the files themselves (the three AUTO-GENERATED
-# snippet headers · the _ecosystem.mdx "Edit HERE" header) and knows the
-# named roles of the root/gate files. A docs page is authored by
-# construction here (AGENTS.md rule 1: pages import the generated snippets
-# rather than being generated). A file with no such evidence lands in
-# `authored` with `note: unverified-default` — honesty over completeness.
-#
-# Derived, never authored (the house projection pattern): --write
-# regenerates estate.yaml from the tracked tree; --check re-emits and
-# byte-compares. On divergence --check exits 5 (the ssot-compiler
-# convention — deliberately distinct from the sibling gates' exit 1, so an
-# estate divergence is distinguishable in CI logs).
-#
-# Usage:
-#   python3 scripts/estate.py --write   # regenerate estate.yaml
-#   python3 scripts/estate.py --check   # drift gate (exit 5 on divergence)
+"""estate.py — the estate manifest generator. THE canonical implementation.
+
+    Every artifact is AUTHORED bytes or a proven derivation
+    (hashed inputs, tool, pin) -> output + proof.
+
+This file has ONE home: github.com/supernovae-st/nika-estate. Every repo that
+carries an estate runs a byte-identical copy of it, mirrored and gated exactly
+like the spec pack. If you are reading this inside another repository and feel
+the urge to edit it, that is the lost gesture: change it upstream, mirror it
+down, and the gate will tell you when the copy drifts.
+
+What stays per-repo is the DATA, never the tool:
+
+    scripts/estate_rules.py     FILES = [...]      the per-file exceptions
+                                PATTERNS = [...]   ordered globs, first-match-wins
+
+Both live next to this file in the consuming repo. This script imports them
+and refuses to run without them, because a manifest with no rules would
+silently declare an empty estate and pass.
+
+    python3 scripts/estate.py --write    regenerate estate.yaml
+    python3 scripts/estate.py --check    re-emit and byte-compare
+
+    exit 0  in sync          exit 3  coverage hole or stale rule
+    exit 2  bad usage        exit 5  drift
+
+Dependency-free by design: the hundred-year machinery must run on a stock
+interpreter in 2126, with no package manager still alive to serve it.
+"""
 
 import hashlib
+import importlib.util
 import json
 import pathlib
+import re
 import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ESTATE = ROOT / "estate.yaml"
-ESTATE_SCHEMA = 1
+ESTATE_SCHEMA = 2
 SELF = "scripts/estate.py"
+RULES = "scripts/estate_rules.py"
 
+# The six classes. This vocabulary is the law and it is NOT per-repo: a repo
+# that re-words a definition to fit its own domain has forked the law without
+# saying so. The words below are the ones in nika-estate/SCHEMA.md.
 CLASSES = {
     "authored": "a human writes here",
-    "generated": "derived by a tool from declared inputs — regenerate, never hand-edit",
-    "pinned-copy": "byte-copy pinned to an upstream rev",
+    "authored-pin": "a hand-meaningful pin a bot lane advances via PR-only \u2014 never HEAD; the derivations' INPUT",
+    "generated": "derived by a tool from declared inputs \u2014 regenerate, never hand-edit",
+    "pinned-copy": "byte-copy vendored from an upstream source by a declared lane, provenance declared, integrity-gated",
+    "testimonial": "captured evidence \u2014 fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output",
     "foreign": "pointer to a third-party sovereign source",
 }
 
-GATE_YML = ".github/workflows/gate.yml"
-HEAL_YML = ".github/workflows/release-heal.yml"
 
-
-def tracked_files() -> list:
-    out = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z"],
-                         capture_output=True, check=True)
-    files = {f for f in out.stdout.decode().split("\0") if f}
-    # The generator always classifies itself; the manifest never lists
-    # itself (its sha256 cannot contain its own hash).
-    files.add(SELF)
-    files.discard("estate.yaml")
-    return sorted(files)
-
-
-# The generated snippets — classification fires ONLY when the in-file
-# AUTO-GENERATED marker is actually present (evidence-driven, never assumed).
-# _status-snapshot.mdx used to sit here and carried a `note` saying its header
-# over-claimed. 2026-07-27 the header was rewritten to stop over-claiming, so
-# the file now classifies as `authored` (below) — where a mostly-hand-typed
-# file always belonged.
-GENERATED_SNIPPETS = {
-    "snippets/_canon.mdx": {
-        "evidence": "in-file marker: '{/* _canon.mdx — AUTO-GENERATED by scripts/canon-projectors.py (nika-spec repo) from canon.yaml'",
-        "derivation": {
-            "tool": "python3 scripts/canon-projectors.py --write (runs in the supernovae-st/nika-spec checkout — the tool does NOT live in this repo)",
-            "gate": "EXTERNAL — canon-projectors.py --check is wired into the SuperNovae run-all audit (its own marker's claim); no step in .github/workflows/gate.yml re-proves this file",
-            "inputs": ["supernovae-st/nika-spec canon.yaml (the Nika language single source of truth)"],
-        },
-    },
-    "snippets/_showcase.mdx": {
-        "evidence": "in-file marker: '{/* _showcase.mdx — AUTO-GENERATED by scripts/showcase-projector.py (nika-spec repo) from examples/showcase/'",
-        "derivation": {
-            "tool": "python3 scripts/showcase-projector.py --write (runs in the supernovae-st/nika-spec checkout — the tool does NOT live in this repo)",
-            "gate": "NONE in this repo — no gate.yml step re-derives the showcase counts; sync rides the spec-side projector runs",
-            "inputs": ["supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"],
-        },
-    },
-}
-
-AUTHORED_EVIDENCE = {
-    "README.md": "prose entry surface · no generation marker",
-    "AGENTS.md": "hand-written agent entry per the AGENTS.md convention · it STATES the projection rules the snippets follow",
-    "DEPLOY.md": "hand-written deploy runbook (Mintlify dashboard + DNS steps · two owners)",
-    "SECURITY.md": "hand-written security policy (copy-paste surface + llms.txt threat model)",
-    "LICENSE": "verbatim GNU AGPL-3.0 license text (FSF canonical text · hand-placed · matches the engine's license)",
-    ".nvmrc": "hand-pinned Node major for the local mint preview",
-    "docs.json": "hand-written Mintlify config (nav + theme + metadata) · no generation marker",
-    "global.css": "hand-written polish layer · its own header: 'colors + fonts live in docs.json · pinned to … nika-spec design/tokens.yaml … this file = the polish layer'",
-    "lefthook.yml": "hand-written pre-push gate config (mint broken-links · link-audit · teach-parity · oracle-sweep)",
-    ".github/dependabot.yml": "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)",
-    GATE_YML: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)",
-    HEAL_YML: "hand-written bot workflow (it edits snippets/_status-snapshot.mdx — nothing writes it)",
-    "scripts/count-drift-gate.py": "hand-written gate · 'the count-rot ratchet' design prose header",
-    "scripts/link-audit.py": "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)",
-    "scripts/oracle-sweep.py": "hand-written gate · SPDX header + the copy-paste-invariant design prose",
-    "scripts/teach-parity.py": "hand-written gate · docstring narrates its birth (the untaught `nika context` catch)",
-    "scripts/mintlify-snapshot.sh": "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)",
-    SELF: "hand-written estate projector (this manifest's generator)",
-    "snippets/_ecosystem.mdx": "its own header: 'Edit HERE, never per-page' — the one hand-edited snippet (a single-source link mesh, not a projection)",
-    "snippets/_status-snapshot.mdx": "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields",
-}
-
-AUTHORED_NOTES = {
-    "docs.json": "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)",
-    HEAL_YML: "release-heal rewrites the version + lastUpdated fields of snippets/_status-snapshot.mdx on a daily cron — bot-maintained fields in ANOTHER file, this one stays hand-written",
-    "snippets/_status-snapshot.mdx": "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands.",
-}
-
-MDX_NOTES = {
-    "reference/error-codes.mdx": "its own prose claims 'The tables below are generated from that registry' (the spec's canon.yaml) — but no projector writes this file and no gate re-proves the tables: a hand-baked derivation snapshot, not a projection",
-    "reference/mcp-catalog.mdx": "frontmatter description hand-types '105 MCP server entries … snapshot 2026-04-17' — outside count-drift-gate's checked classes (providers · builtins · extract modes), so it can rot silently",
-}
-
-
-_VIDEO_STEMS = None
-
-
-def video_stems() -> set:
-    global _VIDEO_STEMS
-    if _VIDEO_STEMS is None:
-        _VIDEO_STEMS = {pathlib.Path(f).stem for f in tracked_files()
-                        if f.startswith("videos/") and f.endswith((".mp4", ".webm"))}
-    return _VIDEO_STEMS
-
-
-def classify(rel: str, body: bytes) -> dict:
-    text = None
+def _repo_slug() -> str:
+    """owner/name, from the origin remote. Derived, never typed."""
     try:
-        text = body.decode()
-    except UnicodeDecodeError:
-        pass
+        url = subprocess.run(["git", "-C", str(ROOT), "remote", "get-url", "origin"],
+                             capture_output=True, check=True).stdout.decode().strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("estate.py: no origin remote \u2014 cannot derive the repo slug", file=sys.stderr)
+        sys.exit(3)
+    slug = url.rsplit(":", 1)[-1].split("/")[-2:] if "/" in url else [url]
+    return "/".join(slug).removesuffix(".git")
 
-    # Generated snippets — ONLY when the in-file marker is present.
-    if (rel in GENERATED_SNIPPETS and text is not None
-            and "AUTO-GENERATED by" in "\n".join(text.splitlines()[:4])):
-        spec = GENERATED_SNIPPETS[rel]
-        out = {"class": "generated", "evidence": spec["evidence"],
-               "derivation": spec["derivation"]}
-        if "note" in spec:
-            out["note"] = spec["note"]
-        return out
 
-    if rel in AUTHORED_EVIDENCE:
-        out = {"class": "authored", "evidence": AUTHORED_EVIDENCE[rel]}
-        if rel in AUTHORED_NOTES:
-            out["note"] = AUTHORED_NOTES[rel]
-        return out
+def _load_rules():
+    """FILES + PATTERNS from the consuming repo. Absent is fatal, never empty."""
+    path = ROOT / RULES
+    if not path.is_file():
+        print(f"estate.py: {RULES} not found \u2014 the tool is shared, the rules are yours",
+              file=sys.stderr)
+        sys.exit(3)
+    spec = importlib.util.spec_from_file_location("estate_rules", path)
+    mod = importlib.util.module_from_spec(spec)
+    # The tool hands its well-known names down; the rules may cite them.
+    mod.ROOT, mod.SELF, mod.RULES, mod.CLASSES = ROOT, SELF, RULES, CLASSES
+    spec.loader.exec_module(mod)
+    for name in ("FILES", "PATTERNS"):
+        if not hasattr(mod, name):
+            print(f"estate.py: {RULES} declares no {name}", file=sys.stderr)
+            sys.exit(3)
+    bad = {f["class"] for f in mod.FILES} | {p["class"] for p in mod.PATTERNS}
+    bad -= set(CLASSES)
+    if bad:
+        print(f"estate.py: {RULES} uses classes outside the law: {sorted(bad)}", file=sys.stderr)
+        sys.exit(3)
+    return mod.FILES, mod.PATTERNS
 
-    # Docs pages: authored by construction (AGENTS.md rule 1 — pages import
-    # the generated snippets; volatile counts never live in page bodies).
-    if rel.endswith(".mdx") and text is not None:
-        out = {"class": "authored",
-               "evidence": "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"}
-        if rel in MDX_NOTES:
-            out["note"] = MDX_NOTES[rel]
-        return out
 
-    # Media — no in-repo derivation evidence exists for any of it; tailored
-    # evidence per family, honest unverified-default on all of it.
-    if rel.startswith("videos/") and rel.endswith((".mp4", ".webm")):
-        return {"class": "authored",
-                "evidence": "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo",
-                "note": "unverified-default"}
-    if rel.startswith("images/") and rel.endswith(".png"):
-        stem = pathlib.Path(rel).stem
-        if stem in video_stems():
-            return {"class": "authored",
-                    "evidence": f"poster frame paired with videos/{stem}.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo",
-                    "note": "unverified-default"}
-        if stem.startswith("og-"):
-            return {"class": "authored",
-                    "evidence": "Open Graph card bitmap wired in docs.json metadata · production pipeline is not in this repo",
-                    "note": "unverified-default"}
-        return {"class": "authored",
-                "evidence": "bitmap asset · no in-repo derivation evidence",
-                "note": "unverified-default"}
-    if rel.startswith("images/") and rel.endswith(".svg"):
-        return {"class": "authored",
-                "evidence": "brand vector asset (logo/favicon family) · the brand pipeline lives outside this repo",
-                "note": "unverified-default"}
+REPO = _repo_slug()
+FILES, PATTERNS = _load_rules()
 
-    # No evidence → honesty over completeness.
-    return {"class": "authored", "evidence": "no generation marker or known role found",
-            "note": "unverified-default"}
+
+def glob_to_re(glob: str) -> "re.Pattern":
+    """Translate the manifest glob dialect to an anchored regex.
+
+    `**` matches across path segments · `*` within one segment · `?` one
+    non-slash char. Deterministic, dependency-free (pathlib.full_match
+    needs 3.13; CI runners float)."""
+    out, i = [], 0
+    while i < len(glob):
+        c = glob[i]
+        if c == "*":
+            if glob[i : i + 2] == "**":
+                out.append(".*")
+                i += 2
+            else:
+                out.append("[^/]*")
+                i += 1
+        elif c == "?":
+            out.append("[^/]")
+            i += 1
+        else:
+            out.append(re.escape(c))
+            i += 1
+    return re.compile("".join(out) + r"\Z")
+
+
+def tracked_index() -> dict:
+    """path → index blob sha, from `git ls-files -s -z`."""
+    out = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-s", "-z"],
+                         capture_output=True, check=True)
+    index = {}
+    for rec in out.stdout.decode().split("\0"):
+        if not rec:
+            continue
+        meta, path = rec.split("\t", 1)
+        _mode, sha, _stage = meta.split(" ")
+        index[path] = sha
+    # The generator always classifies itself (a files: row hashing real
+    # bytes, so it works pre-commit too); the manifest never lists itself
+    # (its sha256 cannot contain its own hash).
+    index.setdefault(SELF, "")
+    index.pop("estate.yaml", None)
+    return index
 
 
 def q(s) -> str:
@@ -199,52 +146,129 @@ def q(s) -> str:
 
 
 def render() -> str:
-    rows = []
+    index = tracked_index()
+    universe = sorted(index)
+
+    # files: precedence — validate, hash real bytes.
+    file_paths = [f["path"] for f in FILES]
+    if len(set(file_paths)) != len(file_paths):
+        print("estate.py: duplicate files: entries", file=sys.stderr)
+        sys.exit(3)
+    stale = [p for p in file_paths if p not in index or not (ROOT / p).is_file()]
+    if stale:
+        print("estate.py: stale files: exceptions (not in the tracked tree):",
+              file=sys.stderr)
+        for p in stale:
+            print(f"  - {p}", file=sys.stderr)
+        sys.exit(3)
+    taken = set(file_paths)
+
+    # patterns: first-match-wins over the remainder.
+    compiled = [(glob_to_re(p["glob"]), p) for p in PATTERNS]
+    matches = {p["glob"]: [] for p in PATTERNS}
+    uncovered = []
+    for path in universe:
+        if path in taken:
+            continue
+        for rx, p in compiled:
+            if rx.match(path):
+                matches[p["glob"]].append(path)
+                break
+        else:
+            uncovered.append(path)
+    if uncovered:
+        print("estate.py: COVERAGE HOLE — tracked files matched by no "
+              "files: entry and no pattern (totality is the whole point):",
+              file=sys.stderr)
+        for p in uncovered:
+            print(f"  - {p}", file=sys.stderr)
+        sys.exit(3)
+
     counts = {c: 0 for c in CLASSES}
-    unverified = 0
-    for rel in tracked_files():
-        body = (ROOT / rel).read_bytes()
-        row = classify(rel, body)
-        row["path"] = rel
-        row["sha256"] = hashlib.sha256(body).hexdigest()
-        counts[row["class"]] += 1
-        if row.get("note") == "unverified-default":
-            unverified += 1
-        rows.append(row)
+    for f in FILES:
+        counts[f["class"]] += 1
+    for p in PATTERNS:
+        counts[p["class"]] += len(matches[p["glob"]])
+    # Every unverified thing, however it got classified. A files: row can be
+    # as honest about its ignorance as a pattern row, and the count is the
+    # repo's honesty budget: it must not shrink because a file moved shape.
+    unverified = sorted(
+        [f["path"] for f in FILES if f.get("note") == "unverified-default"]
+        + [m for p in PATTERNS if p.get("note") == "unverified-default"
+           for m in matches[p["glob"]]])
 
     lines = [
         "# GENERATED by scripts/estate.py — do not hand-edit.",
         "# The estate manifest: every tracked file declares its provenance.",
         "# OBSERVATION MODE (E0): this declares what IS — it enforces nothing.",
+        "# SCHEMA 2 — the glob estate: ordered patterns (first-match-wins) cover",
+        "# the tree in bulk; files: carries the per-file exceptions. Per pattern:",
+        "# match_count + one aggregate sha256 over the sorted (blob-sha, path)",
+        "# pairs of its matches — coverage drift and content drift both surface.",
         "# Re-generate: python3 scripts/estate.py --write",
         "# Check:       python3 scripts/estate.py --check   (re-emits · byte-compares · exit 5 on divergence)",
         f"estate_schema: {ESTATE_SCHEMA}",
         "mode: observation",
-        "repo: supernovae-st/nika-docs",
+        f"repo: {REPO}",
         "classes:",
     ]
     for c in CLASSES:
         lines.append(f"  {c}: {q(CLASSES[c])}")
     lines.append("summary:")
+    lines.append(f"  classified_files: {len(universe)}")
+    lines.append(f"  file_rows: {len(FILES)}")
+    lines.append(f"  pattern_rows: {len(PATTERNS)}")
+    lines.append("  by_class:")
     for c in CLASSES:
-        lines.append(f"  {c}: {counts[c]}")
-    lines.append(f"  unverified-default: {unverified}")
+        lines.append(f"    {c}: {counts[c]}")
+    lines.append(f"  unverified-default: {len(unverified)}")
+
     lines.append("files:")
-    for row in rows:
-        lines.append(f"- path: {q(row['path'])}")
-        lines.append(f"  class: {row['class']}")
-        lines.append(f"  sha256: {row['sha256']}")
-        lines.append(f"  evidence: {q(row['evidence'])}")
-        if "derivation" in row:
-            d = row["derivation"]
+    for f in sorted(FILES, key=lambda f: f["path"]):
+        body = (ROOT / f["path"]).read_bytes()
+        lines.append(f"- path: {q(f['path'])}")
+        lines.append(f"  class: {f['class']}")
+        lines.append(f"  sha256: {hashlib.sha256(body).hexdigest()}")
+        lines.append(f"  evidence: {q(f['evidence'])}")
+        if "derivation" in f:
+            d = f["derivation"]
             lines.append("  derivation:")
             lines.append(f"    tool: {q(d['tool'])}")
             lines.append(f"    gate: {q(d['gate'])}")
             lines.append("    inputs:")
             for i in d["inputs"]:
                 lines.append(f"    - {q(i)}")
-        if "note" in row:
-            lines.append(f"  note: {q(row['note'])}")
+        if "note" in f:
+            lines.append(f"  note: {q(f['note'])}")
+
+    lines.append("patterns:")
+    for p in PATTERNS:
+        matched = matches[p["glob"]]
+        agg = hashlib.sha256(
+            "".join(f"{index[m]}  {m}\n" for m in matched).encode()
+        ).hexdigest()
+        lines.append(f"- glob: {q(p['glob'])}")
+        lines.append(f"  class: {p['class']}")
+        lines.append(f"  match_count: {len(matched)}")
+        lines.append(f"  aggregate_sha256: {agg}")
+        lines.append(f"  evidence: {q(p['evidence'])}")
+        if "derivation" in p:
+            d = p["derivation"]
+            lines.append("  derivation:")
+            lines.append(f"    tool: {q(d['tool'])}")
+            lines.append(f"    gate: {q(d['gate'])}")
+            lines.append("    inputs:")
+            for i in d["inputs"]:
+                lines.append(f"    - {q(i)}")
+        if "note" in p:
+            lines.append(f"  note: {q(p['note'])}")
+
+    lines.append("unverified:")
+    if unverified:
+        for m in unverified:
+            lines.append(f"- {q(m)}")
+    else:
+        lines[-1] = "unverified: []"
     return "\n".join(lines) + "\n"
 
 
@@ -256,8 +280,8 @@ def main() -> int:
     rendered = render()
     if mode == "--write":
         ESTATE.write_text(rendered)
-        n = rendered.count("\n- path: ")
-        print(f"✓ estate.yaml · {n} files classified")
+        n = rendered.count("\n- glob: ") + rendered.count("\n- path: ")
+        print(f"✓ estate.yaml · schema {ESTATE_SCHEMA} · {n} rows")
         return 0
     if not ESTATE.is_file() or ESTATE.read_text() != rendered:
         print("✗ estate drift · estate.yaml diverges from the tracked tree — run scripts/estate.py --write", file=sys.stderr)
