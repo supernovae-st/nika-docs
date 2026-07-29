@@ -26,6 +26,27 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 | **`.mcpb` bundles** | one-click MCP bundle (macOS arm64 · Linux x64) with checksums | [Claude Desktop guide](/integrations/clients/claude-desktop) |
 | **Docker image** | the read-only oracle in a container (`integrations/mcp/Dockerfile` in the kit) | [nika-agents kit](https://github.com/supernovae-st/nika-agents) |
 
+## Keeping the suite fresh
+
+Every surface below invokes the **binary**, and the plugin kits ride its
+release train — but no surface updates another: brew never touches a
+plugin, a marketplace never touches the binary. The ladder, per surface:
+
+| Surface | Update gesture | Note |
+|---|---|---|
+| **Binary** | `brew upgrade nika` | patch releases ship binary-only |
+| **Claude Code plugin** | `claude plugin marketplace update nika` **then** `claude plugin update nika@nika` | TWO rungs — the clone, then the install; restart after |
+| **Codex plugin** | `codex plugin marketplace upgrade nika` | the per-version cache refreshes on your next run |
+| **Cursor** | marketplace installs self-manage; a local drop re-syncs via the kit's `scripts/update-mirrors.sh` | — |
+| **Every surface at once** | `scripts/update-mirrors.sh` in a [nika-agents](https://github.com/supernovae-st/nika-agents) checkout | `--check` reports drift read-only (CI-able) |
+
+<Info>
+`nika doctor` is the coherence oracle: it reads what each client
+actually loads, names any kit lagging or leading the binary's train,
+and prints the exact per-client fix. Drift is advisory (warn · exit 0)
+— a diagnosis never breaks automation.
+</Info>
+
 ## IDEs & editors
 
 | Surface | Mechanism | Where |

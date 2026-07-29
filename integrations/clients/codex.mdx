@@ -36,6 +36,21 @@ Then `nika init` in the repo — the agent-teaching surface (`AGENTS.md`,
 rules, the repo skill) is what makes the oracle useful
 ([agents guide](/getting-started/agents)).
 
+## Keep it fresh
+
+Two things move, on the same release train — the plugin never updates
+the binary, and brew never updates the plugin:
+
+```sh
+brew upgrade nika                       # the binary
+codex plugin marketplace upgrade nika   # the plugin kit (the per-version
+                                        # cache refreshes on your next run)
+```
+
+`nika doctor` answers "is my suite coherent?" — it names any kit lagging
+or leading the binary's train, with the exact fix per client. Drift is
+advisory (warn · exit 0), so it never breaks automation.
+
 ## Verify
 
 Codex's MCP server list shows `nika` with the nine `nika_*` tools
