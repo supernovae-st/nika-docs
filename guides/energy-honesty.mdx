@@ -1,0 +1,98 @@
+---
+title: "Energy honesty"
+sidebarTitle: "Energy honesty"
+description: "What a run draws from the wall — the cost-honesty doctrine in watt-hours. Unknown stays unknown: never 0 Wh."
+icon: "bolt"
+---
+
+> The doctrine in one line: **unknown stays unknown**. An energy figure
+> Nika cannot prove is never rendered as `0 Wh`, a local model is
+> *unpriced* — your hardware, your watts — never « free », and every
+> figure carries WHO measured it and WHAT it covers, so two honest
+> numbers stay comparable.
+
+<Note>
+**Status** · the doctrine and the data rail ship today — the model
+catalog carries sourced energy facts (schema `@1.3`, absence over
+guess). The `ENERGY` line in `nika check` and the `--max-energy-wh`
+gate are specified by
+[NEP-0018](https://github.com/supernovae-st/nika-spec/blob/main/governance/nep-0018-energy-honesty.md)
+(Draft) and land with its implementation. This page states the contract
+those surfaces honor — it does not claim they render yet.
+</Note>
+
+## The vocabulary
+
+Energy speaks the same four words as [cost](/guides/cost-honesty),
+with the same semantics:
+
+| Word | Meaning |
+|---|---|
+| **floor** (`≥`) | the provable minimum — real draw can only be higher |
+| **ceiling** (`≤`) | the provable worst case — a task's `max_tokens` cap × a sourced per-token figure |
+| **UNBOUNDED** | a task whose energy has no provable limit, with the WHY (`no max_tokens declared` — you can fix that one) |
+| **unpriced** | tokens will be spent but no sourced figure exists for the model — local models live here **by design** |
+
+## A fact, not a vibe
+
+An energy figure enters the catalog as a five-field fact or not at all:
+
+```toml
+energy = { wh_per_mtok_out = 42.0,
+           provenance = "independent-measured",
+           scope = "gpu",
+           source = "ml.energy leaderboard v3.0 · H100 · vLLM · conversation workload (arXiv 2505.06371)",
+           measured_at = "2025-12" }
+```
+
+That row is real — the first sourced figure in the catalog
+(`groq / qwen/qwen3-32b`). Open-weight models are the measurable
+frontier: a third party can put them on a bench. Closed APIs stay
+**unpriced** until a vendor discloses or an independent methodology
+covers them — that asymmetry is honest, and the catalog keeps it.
+
+Two axes make two honest numbers comparable:
+
+- **`provenance`** — who produced the number: `measured-local` (a probe
+  on your machine) · `independent-measured` (a third-party benchmark) ·
+  `vendor-claim` · `independent-estimate` (modelling, labelled as such —
+  an estimate may enter explicitly, never as a silent default).
+- **`scope`** — what it covers: `gpu` (accelerator only) · `device`
+  (whole host) · `fleet` (host + idle + datacenter PUE). A GPU-only
+  figure is roughly **half** a fleet figure for the same model: without
+  this axis, two truthful numbers are silently incomparable.
+
+And the unit is per million **output** tokens (`wh_per_mtok_out`)
+because decode dominates measured inference energy (≥96% in the
+ML.energy v3.0 methodology) — a per-total figure would dilute the
+number with nearly-free prefill and reward long prompts.
+
+## Why never `0 Wh`
+
+`0 Wh` would claim free inference. Nothing is: a local model draws from
+your wall, an unmeasured cloud call draws from someone's datacenter.
+The catalog refuses a zero at build time — the null is the **absent**
+fact, and an absent fact renders **unpriced**, exactly as an unpriced
+model renders on the cost side. If you have never seen an energy number
+in a Nika surface, that is the feature: no number was provable, so no
+number was shown.
+
+## What lands with NEP-0018
+
+The specified surfaces, stated here so their contract is public before
+their code:
+
+- an `ENERGY` reading beside `COST` in `nika check` — bounded part as
+  `≤ N Wh` with the scope axis named, every uncapped task named with its
+  reason, unmeasured models `unpriced`, mixed scopes never silently
+  summed;
+- energy aggregation in `nika:inspect` under the same markers;
+- `--max-energy-wh` — a block-before-spend gate symmetric to
+  [`--max-cost-usd`](/guides/cost-honesty): refusal, not remorse.
+
+## Why watt-hours, not CO₂e
+
+Carbon intensity varies by grid, hour and region — a gCO₂e constant
+hides a location assumption inside a number. Watt-hours are the
+measurable; a carbon projection needs YOUR grid factor as an explicit
+input, and may arrive later as exactly that. First the honest unit.
