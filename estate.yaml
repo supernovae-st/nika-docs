@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: c7d5793272859bd872c6b7ab812a0a0051a4ab4d406c70137dd73400b6977e63
+  sha256: c45acbf26ad11140f4425d0cfc3a9eb9505653dde726e440f42ccbe54b7bf8f0
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -57,7 +57,7 @@ files:
   evidence: "hand-written deploy runbook (Mintlify dashboard + DNS steps · two owners)"
 - path: "ESTATE_PIN"
   class: authored-pin
-  sha256: e51cd1e4b2fb74b8ffea6df4ec25d00a1aafbc4278cd07e7ebc0a2cde1f2460c
+  sha256: fd046d6a6a48fbc66de664e12bd5dc2a1d5e1817b7e1b2b592abb573af3236ad
   evidence: "its own header: 'Bump deliberately: edit this' · the rev the shared estate tool is mirrored from, and the INPUT the mirror gate compares against"
 - path: "LICENSE"
   class: pinned-copy
@@ -135,7 +135,7 @@ files:
   evidence: "hand-written gate · 'the count-rot ratchet' design prose header"
 - path: "scripts/estate.py"
   class: pinned-copy
-  sha256: a77b3331d08ab86531f86a1bc33e9e5f0bf1fbe378803b39b2e73a42c83d93fa
+  sha256: 50db0f9ca61796ead540cf71e66f27bc2fbd1a4214245f5d49d86b1bd379a71f
   evidence: "the shared estate tool, mirrored byte-for-byte from supernovae-st/nika-estate · editing it here is a lost gesture: change it upstream, bump ESTATE_PIN, re-mirror"
   derivation:
     tool: "curl the tool from nika-estate at the rev named in ESTATE_PIN"
@@ -145,7 +145,7 @@ files:
     - "supernovae-st/nika-estate@<ESTATE_PIN>:scripts/estate.py"
 - path: "scripts/estate_rules.py"
   class: authored
-  sha256: 1475fccbf5de216d30c63789a47bd3a7fe9e79d2cab30d347df304dba58fbcc7
+  sha256: 69bb4dad4c156a1665f911c2eb3b863d89ebf1c03568dc483c1c1bb84773465b
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
