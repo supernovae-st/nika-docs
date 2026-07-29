@@ -19,7 +19,7 @@ once.
 
 ## The shape
 
-{/* showcase:dag-begin t1-social-repurpose.nika.yaml */}
+{/* showcase:dag-begin social-repurpose.nika.yaml */}
 ```mermaid
 flowchart LR
   post["post · nika:read"]:::invoke
@@ -40,8 +40,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t1-social-repurpose.nika.yaml */}
-```yaml t1-social-repurpose.nika.yaml
+{/* showcase:begin social-repurpose.nika.yaml */}
+```yaml social-repurpose.nika.yaml
 nika: v1
 workflow:
   id: social-repurpose
@@ -49,35 +49,43 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large or any provider
 
-const:
-  post_path: "./blog/launch-post.md"
+vars:
+  # The sample post ships with the repo. Point this at your own and move the
+  # read permit with it — `permits:` cannot interpolate (NIKA-AUTH-007).
+  post_path: "examples/fixtures/launch-post.md"
 permits:
   tools: ["nika:read", "nika:write"]
-  fs: { write: ["./social-bundle.md"] }
+  # One file in, one file out · each named exactly, no subtree granted.
+  fs:
+    read: ["examples/fixtures/launch-post.md"]
+    write: ["out/social-bundle.md"]
 
 tasks:
   post:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ const.post_path }}" }
+      args: { path: "${{ vars.post_path }}" }
 
   # Three rewrites · no deps between them · they run concurrently.
   thread:
     with:
       post: ${{ tasks.post.output }}
     infer:
+      max_tokens: 700
       prompt: "Turn this post into a 6-tweet thread · keep the voice · ${{ with.post }}"
 
   linkedin:
     with:
       post: ${{ tasks.post.output }}
     infer:
+      max_tokens: 500
       prompt: "Rewrite this post for LinkedIn · hook first · ${{ with.post }}"
 
   newsletter:
     with:
       post: ${{ tasks.post.output }}
     infer:
+      max_tokens: 200
       prompt: "Write a 3-sentence newsletter blurb for this post · ${{ with.post }}"
 
   bundle:
@@ -88,7 +96,11 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./social-bundle.md"
+        path: out/social-bundle.md
+        create_dirs: true
+        # Prose artifact → a `content: |` block with interpolations is right
+        # here. A `.json` artifact is the opposite case: one `${{ … }}` value,
+        # never hand-typed braces (that emits unquoted fields).
         content: |
           # Social bundle
 

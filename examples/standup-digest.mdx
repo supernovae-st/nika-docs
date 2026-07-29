@@ -18,7 +18,7 @@ the three standup bullets in your tone.
 
 ## The shape
 
-{/* showcase:dag-begin t1-standup-digest.nika.yaml */}
+{/* showcase:dag-begin standup-digest.nika.yaml */}
 ```mermaid
 flowchart LR
   today["today · nika:date"]:::invoke
@@ -36,18 +36,19 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t1-standup-digest.nika.yaml */}
-```yaml t1-standup-digest.nika.yaml
+{/* showcase:begin standup-digest.nika.yaml */}
+```yaml standup-digest.nika.yaml
 nika: v1
 workflow:
   id: standup-digest
   description: "Read yesterday's commits, write today's standup note"
 
-model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-haiku-4-5 (fast one-liner job)
+model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (a fast one-liner job)
+
 permits:
   tools: ["nika:date", "nika:write"]
-  exec: ["git"]
-  fs: { write: ["./standup-note.md"] }
+  exec: ["git"]              # the ONE program this workflow may run
+  fs: { write: ["out/standup-note.md"] }
 
 tasks:
   # No deps between these two → the engine runs them in parallel.
@@ -65,13 +66,14 @@ tasks:
       today: ${{ tasks.today.output }}
       history: ${{ tasks.history.output }}
     infer:
+      max_tokens: 400          # a standup note is short · the ceiling says so
       prompt: |
         Date · ${{ with.today }}
         Commits since yesterday ·
         ${{ with.history }}
 
         Write my standup note · 3 bullets · done / doing / blocked.
-        Plain words · no fluff.
+        Plain words · no fluff. If there are no commits, say so in one line.
 
   save:
     with:
@@ -79,7 +81,8 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./standup-note.md"
+        path: out/standup-note.md
+        create_dirs: true
         content: "${{ with.digest }}"
 
 outputs:

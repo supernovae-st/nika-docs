@@ -18,15 +18,19 @@ object, and the announcement quotes the same headline the CHANGELOG got.
 
 ## The shape
 
-{/* showcase:dag-begin t2-release-notes.nika.yaml */}
+{/* showcase:dag-begin release-notes.nika.yaml */}
 ```mermaid
 flowchart LR
   history["history · git"]:::exec
   notes["notes · typed"]:::infer
+  existing["existing · nika:read"]:::invoke
+  copy["copy · nika:write"]:::invoke
   changelog["changelog · nika:edit"]:::invoke
   announce["announce · nika:notify"]:::invoke
   history --> notes
+  existing --> copy
   notes --> changelog
+  copy -.->|success| changelog
   notes --> announce
   changelog -.->|success| announce
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
@@ -37,17 +41,26 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t2-release-notes.nika.yaml */}
-```yaml t2-release-notes.nika.yaml
+{/* showcase:begin release-notes.nika.yaml */}
+```yaml release-notes.nika.yaml
 nika: v1
 workflow:
   id: release-notes
   description: "git log → typed release notes → CHANGELOG insert → team ping"
 
-model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large
+# A NON-thinking local model, deliberately: a thinking model can spend the
+# whole `max_tokens` budget in its think block and return before the JSON
+# (engine#428). Schema showcases pick a model that answers directly.
+model: ollama/llama3.2:3b
 
-const:
+vars:
+  announce:
+    type: bool
+    default: false
+    description: "Actually send the team ping (needs TEAM_WEBHOOK_URL)"
   since_tag: "v0.80.0"
+  changelog_src: "examples/fixtures/CHANGELOG.md" # point this at YOUR CHANGELOG.md
+  changelog_out: "out/CHANGELOG.md"                        # the working copy this run edits
 
 secrets:
   team_webhook:
@@ -57,52 +70,99 @@ secrets:
       - to: "nika:notify"
         host_from_self: true
 permits:
-  tools: ["nika:edit", "nika:notify"]
-  exec: ["git"]
-  fs: { read: ["./CHANGELOG.md"], write: ["./CHANGELOG.md"] }
+  tools: ["nika:edit", "nika:notify", "nika:read", "nika:write"]
+  exec: ["git"]                   # the ONE program this workflow may run
+  fs:
+    # The workflow never edits your changelog in place — it copies it and
+    # edits the copy, so you move the result when the diff looks right.
+    #
+    # The working copy appears in BOTH lists, and that is not redundancy:
+    # `nika:edit` reads the file before it writes it, so a write-only grant
+    # is refused with NIKA-SEC-004 · outside permits.fs.read. Every in-place
+    # builtin owes both halves.
+    read: ["examples/fixtures/CHANGELOG.md", "out/CHANGELOG.md"]
+    write: ["out/CHANGELOG.md"]
+  net:
+    # `host_from_self:` above sanctions the FLOW (the secret may be the URL) —
+    # it does not grant the capability. The host stays unknown at check, so it
+    # is judged at RUN against this bound: name the announce host here or the
+    # send is refused mid-run, after the tokens are already spent.
+    http: ["hooks.slack.com"]
 
 tasks:
   history:
     exec:
-      command: ["git", "log", "${{ const.since_tag }}..HEAD", "--oneline", "--no-merges"]
+      command: ["git", "log", "${{ vars.since_tag }}..HEAD", "--oneline", "--no-merges"]
+    on_error:
+      # No such tag here (or not a repo at all) → a sample log takes over and
+      # the rest of the chain is exercised exactly as it would be on the day.
+      recover: |
+        a1b2c3d feat(api): pagination cursors on every list endpoint
+        d4e5f6a fix(auth): refresh tokens no longer rotate on read
+        7g8h9i0 refactor(store): drop the legacy write path
 
   notes:
     with:
       history: ${{ tasks.history.output }}
     infer:
+      max_tokens: 1000
       prompt: |
         Write release notes from these commits ·
         ${{ with.history }}
         Tone · plain, direct, no marketing fluff.
       schema:
         type: object
+        additionalProperties: false
         required: [headline, body]
         properties:
           headline: { type: string }
           breaking: { type: array, items: { type: string } }
           body: { type: string }
 
+  # Copy-then-edit · `nika:edit` is strictly in place and throws when `find:`
+  # matches nothing (NIKA-BUILTIN-EDIT-001), so its target must exist and must
+  # carry the anchor. Read yours, write the working copy, edit THAT.
+  existing:
+    invoke:
+      tool: "nika:read"
+      args: { path: "${{ vars.changelog_src }}" }
+
+  copy:
+    with:
+      existing: ${{ tasks.existing.output }}
+    invoke:
+      tool: "nika:write"
+      args:
+        path: "${{ vars.changelog_out }}"
+        content: "${{ with.existing }}"
+        create_dirs: true
+        overwrite: true
+
   changelog:
     with:
       notes_headline: ${{ tasks.notes.output.headline }}
       notes_body: ${{ tasks.notes.output.body }}
+    after:
+      copy: succeeded              # state, no data · the anchor is on disk before we edit
     invoke:
       tool: "nika:edit"
       args:
-        path: "./CHANGELOG.md"
-        find: "# Changelog"
+        path: "${{ vars.changelog_out }}"
+        find: "# Changelog"      # a LITERAL string · not a regex
+        count: 1                 # the top anchor only · never every occurrence
         replace: |
           # Changelog
 
-          ## ${{ const.since_tag }}..HEAD · ${{ with.notes_headline }}
+          ## ${{ vars.since_tag }}..HEAD · ${{ with.notes_headline }}
 
           ${{ with.notes_body }}
 
   announce:
     with:
       notes_headline: ${{ tasks.notes.output.headline }}
+    when: ${{ vars.announce == true }}   # OFF by default · a rehearsal must not ping the team
     after:
-      changelog: success
+      changelog: succeeded
     invoke:
       tool: "nika:notify"
       args:

@@ -18,7 +18,7 @@ your writer a typed brief: title, angle, outline, keywords.
 
 ## The shape
 
-{/* showcase:dag-begin t2-seo-content-brief.nika.yaml */}
+{/* showcase:dag-begin seo-content-brief.nika.yaml */}
 ```mermaid
 flowchart LR
   map["map · nika:fetch"]:::invoke
@@ -36,34 +36,62 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t2-seo-content-brief.nika.yaml */}
-```yaml t2-seo-content-brief.nika.yaml
+{/* showcase:begin seo-content-brief.nika.yaml */}
+```yaml seo-content-brief.nika.yaml
 nika: v1
 workflow:
   id: seo-content-brief
   description: "Competitor sitemap → top page → gap analysis → typed brief"
 
-model: ollama/qwen3.5:4b   # local · zero key · swap for openai/gpt-5.2
+# A NON-thinking local model, deliberately: a thinking model can spend the
+# whole `max_tokens` budget in its think block and return before the JSON
+# (engine#428). Schema showcases pick a model that answers directly.
+model: ollama/llama3.2:3b
 
-inputs:
+vars:
   topic:
     type: string
-    required: true
-    description: "The keyword/topic you want to rank for"
-const:
+    # Slug-shaped on purpose: this value lands in a FILENAME below, and a
+    # caller-supplied string that reaches a path is the tainted-value case the
+    # checker polices (NIKA-AUTH-008). Keep it to one path segment — `*` in
+    # the write bound never crosses `/`, so `a/b` is refused, by design.
+    default: "rust-async-runtimes"
+    description: "The keyword/topic you want to rank for (one path segment)"
   competitor_sitemap: "https://competitor.example.com/sitemap.xml"
 permits:
   tools: ["nika:fetch", "nika:write"]
+  fs:
+    # One brief per topic, written DIRECTLY in out/briefs/. `*` matches a
+    # single path segment and never crosses `/`, so a topic carrying a slash
+    # is refused instead of steering the write into a subtree — which is
+    # exactly why this is `out/briefs/*.json` and not `out/briefs/**`.
+    write: ["out/briefs/*.json"]
+  net:
+    # Both fetches stay on the competitor's own host: the sitemap, then a URL
+    # that same sitemap listed. Net entries are exact host names, never globs —
+    # add YOUR competitor's host here when you point the const at it, or the
+    # fetch is refused at run and the recover path quietly takes over.
+    http: ["competitor.example.com"]
 
 tasks:
   map:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ const.competitor_sitemap }}"
+        url: "${{ vars.competitor_sitemap }}"
         mode: sitemap
     output:
       top: ".[:5] | map(.loc)"
+    on_error:
+      # The recovery stands in for the RAW response, so it has the shape a
+      # sitemap fetch returns — a root array of {loc, …} — and the `output:`
+      # jq above slices it exactly as it would slice the live one. Recover the
+      # BINDING's shape instead and the jq runs against the wrong thing and
+      # throws NIKA-VAR-004.
+      recover:
+        - { loc: "https://competitor.example.com/blog/async-runtimes-compared" }
+        - { loc: "https://competitor.example.com/blog/tokio-vs-smol" }
+        - { loc: "https://competitor.example.com/blog/choosing-an-executor" }
 
   top_page:
     with:
@@ -73,14 +101,22 @@ tasks:
       args:
         url: "${{ with.map_top }}"
         mode: article
+    on_error:
+      recover: |
+        Async runtimes compared — we benchmarked four executors on the same
+        workload. Tokio wins on ecosystem breadth; smol wins on binary size.
+        We did not cover structured concurrency, cancellation safety, or how
+        any of this behaves under a blocking call, which is where most teams
+        actually get hurt.
 
   brief:
     with:
       map_top: ${{ tasks.map.top }}
       top_page: ${{ tasks.top_page.output }}
     infer:
+      max_tokens: 1200
       prompt: |
-        Topic to rank for · ${{ inputs.topic }}
+        Topic to rank for · ${{ vars.topic }}
         Competitor's top URLs · ${{ with.map_top }}
         Their best page on it ·
         ${{ with.top_page }}
@@ -89,6 +125,7 @@ tasks:
         missed · angle for search intent.
       schema:
         type: object
+        additionalProperties: false
         required: [title, angle, outline, keywords]
         properties:
           title: { type: string }
@@ -102,7 +139,8 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./briefs/${{ inputs.topic }}.json"
+        # `.json` content is ONE interpolated value — the engine serializes it.
+        path: "out/briefs/${{ vars.topic }}.json"
         content: "${{ with.brief }}"
         create_dirs: true
 

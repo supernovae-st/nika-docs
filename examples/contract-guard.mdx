@@ -21,7 +21,7 @@ doesn't hold.
 
 ## The shape
 
-{/* showcase:dag-begin t2-contract-guard.nika.yaml */}
+{/* showcase:dag-begin contract-guard.nika.yaml */}
 ```mermaid
 flowchart LR
   contract["contract · nika:read"]:::invoke
@@ -43,46 +43,58 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t2-contract-guard.nika.yaml */}
-```yaml t2-contract-guard.nika.yaml
+{/* showcase:begin contract-guard.nika.yaml */}
+```yaml contract-guard.nika.yaml
 nika: v1
 workflow:
   id: contract-guard
   description: "Local-model clause extraction → schema gate → risk memo"
 
-model: ollama/qwen3.5:4b   # the whole review runs offline · zero cloud
+# Local · the whole review runs offline, zero cloud. Also a NON-thinking
+# model on purpose: a thinking model can spend the whole `max_tokens` budget
+# in its think block and return before the JSON (engine#428).
+model: ollama/llama3.2:3b
 
-inputs:
+vars:
   contract_path:
     type: string
-    required: true
+    default: "examples/fixtures/contract.md"
     description: "Path to the contract (markdown or plain text)"
 permits:
   tools: ["nika:assert", "nika:read", "nika:validate", "nika:write"]
-  fs: { write: ["./legal/risk-memo.md"] }
+  fs:
+    # `permits:` cannot interpolate (NIKA-AUTH-007), so this literal does not
+    # follow `inputs.contract_path` around: passing --var without editing this
+    # line is refused at run with NIKA-SEC-004. Deliberate — a reviewer can
+    # see every file this workflow may open by reading four words.
+    read: ["examples/fixtures/contract.md"]
+    write: ["out/risk-memo.md"]
 
 tasks:
   contract:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ inputs.contract_path }}" }
+      args: { path: "${{ vars.contract_path }}" }
 
   clauses:
     with:
       contract: ${{ tasks.contract.output }}
     infer:
+      max_tokens: 1600
       prompt: |
         Extract every risk-bearing clause from this contract ·
         ${{ with.contract }}
         Quote each clause verbatim · classify its risk.
       schema:
         type: object
+        additionalProperties: false
         required: [clauses]
         properties:
           clauses:
             type: array
             items:
               type: object
+              additionalProperties: false
               required: [quote, type, risk]
               properties:
                 quote: { type: string }
@@ -103,7 +115,7 @@ tasks:
           properties:
             clauses:
               type: array
-              minItems: 1
+              minItems: 1        # an empty extraction is a FAILED extraction
 
   gate:
     with:
@@ -118,8 +130,9 @@ tasks:
     with:
       clauses: ${{ tasks.clauses.output.clauses }}
     after:
-      gate: success              # state, no data · the assert passed or the memo is cancelled
+      gate: succeeded              # state, no data · the assert passed or the memo is cancelled
     infer:
+      max_tokens: 1200
       prompt: |
         Write a one-page risk memo from these clauses ·
         ${{ with.clauses }}
@@ -131,7 +144,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./legal/risk-memo.md"
+        path: out/risk-memo.md
         content: "${{ with.memo }}"
         create_dirs: true
 

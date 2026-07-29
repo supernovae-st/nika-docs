@@ -20,7 +20,7 @@ in jq, deterministically.
 
 ## The shape
 
-{/* showcase:dag-begin t2-etl-quarantine.nika.yaml */}
+{/* showcase:dag-begin etl-quarantine.nika.yaml */}
 ```mermaid
 flowchart LR
   empty_batch["empty_batch · nika:jq"]:::invoke
@@ -42,18 +42,23 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t2-etl-quarantine.nika.yaml */}
-```yaml t2-etl-quarantine.nika.yaml
+{/* showcase:begin etl-quarantine.nika.yaml */}
+```yaml etl-quarantine.nika.yaml
 nika: v1
 workflow:
   id: etl-quarantine
   description: "CSV batch → schema gate → quarantine the bad · aggregate the good"
 
-const:
-  batch_csv: "./data/incoming/orders.csv"
+vars:
+  batch_csv: "examples/fixtures/orders.csv"
 permits:
   tools: ["nika:convert", "nika:jq", "nika:read", "nika:validate", "nika:write"]
-  fs: { write: ["./data/quarantine/orders-rejected.json", "./data/reports/daily-totals.json"] }
+  # The batch comes in at ONE path and leaves at TWO · each named exactly.
+  # Note what is NOT granted: `out/**` would have handed the whole artifact
+  # tree to a pipeline that only ever writes these two files.
+  fs:
+    read: ["examples/fixtures/orders.csv"]
+    write: ["out/quarantine/orders-rejected.json", "out/reports/daily-totals.json"]
 
 tasks:
   # A deterministic empty fallback · the recover target when parsing dies.
@@ -65,7 +70,7 @@ tasks:
   raw:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ const.batch_csv }}" }
+      args: { path: "${{ vars.batch_csv }}" }
 
   rows:
     with:
@@ -117,7 +122,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./data/quarantine/orders-rejected.json"
+        path: out/quarantine/orders-rejected.json
         content: "${{ with.errors }}"
         create_dirs: true
 
@@ -128,7 +133,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./data/reports/daily-totals.json"
+        path: out/reports/daily-totals.json
         content: "${{ with.totals }}"
         create_dirs: true
 

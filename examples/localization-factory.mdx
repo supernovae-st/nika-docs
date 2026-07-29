@@ -19,7 +19,7 @@ tree appears under `i18n/fr/` with the original paths preserved.
 
 ## The shape
 
-{/* showcase:dag-begin t3-localization-factory.nika.yaml */}
+{/* showcase:dag-begin localization-factory.nika.yaml */}
 ```mermaid
 flowchart LR
   files["files · nika:glob"]:::invoke
@@ -42,8 +42,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t3-localization-factory.nika.yaml */}
-```yaml t3-localization-factory.nika.yaml
+{/* showcase:begin localization-factory.nika.yaml */}
+```yaml localization-factory.nika.yaml
 nika: v1
 workflow:
   id: localization-factory
@@ -51,29 +51,51 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local default · swap for mistral/mistral-large (EU model for EU locales)
 
-const:
+vars:
   lang: "fr"
-  source_glob: "./docs/**/*.md"
+  # The committed rehearsal tree. Point this at ./docs (or wherever yours
+  # lives) and change `permits.fs.read` to match, in the same edit.
+  source_root: "./examples/fixtures/docs"
+
 permits:
   tools: ["nika:glob", "nika:jq", "nika:read", "nika:write"]
+  fs:
+    # `nika:glob` opens the ROOT of its pattern, so the bound has to cover
+    # the directory AND everything under it — `**` does both (it matches the
+    # dir itself and any descendant at any depth). A bound naming only the
+    # `.md` files refuses the glob before it lists anything:
+    # `NIKA-SEC-004 · ./examples/…/docs resolves outside permits.fs.read`.
+    read: ["./examples/fixtures/docs/**"]
+    # The mirror is as deep as the source tree, so this one earns its `**`:
+    # every locale lands under ./i18n/ and nothing lands outside it. Naming
+    # the locale (`./i18n/fr/**`) would be tighter but would have to be
+    # re-edited for every value of `const.lang` — the bound is the tree the
+    # factory owns.
+    write: ["./i18n/**"]
 
 tasks:
+  # ── the collection is discovered, never declared ────────────────────
   files:
     invoke:
       tool: "nika:glob"
       args:
-        pattern: "${{ const.source_glob }}"
+        pattern: "${{ vars.source_root }}/**/*.md"
         exclude: ["**/node_modules/**"]
 
+  # ── stage 1 · read every file, 8 at a time ─────────────────────────
   texts:
     with:
       files: ${{ tasks.files.output }}
     for_each: ${{ with.files }}
-    max_parallel: 8
+    max_parallel: 8                    # local disk · the only cost is file handles
     invoke:
       tool: "nika:read"
       args: { path: "${{ item }}" }
 
+  # ── the zip · path + text, and the source root comes off ───────────
+  # `texts` is an array in the SAME ORDER as `files`, so transpose pairs
+  # them index-for-index. `ltrimstr` makes each path relative to the source
+  # root — that stripped path is what the mirror tree is built from.
   pairs:
     with:
       files: ${{ tasks.files.output }}
@@ -82,22 +104,31 @@ tasks:
       tool: "nika:jq"
       args:
         input: ["${{ with.files }}", "${{ with.texts }}"]
-        expression: "transpose | map({path: .[0], text: .[1]})"
+        expression: >-
+          transpose
+          | map({ path: (.[0] | ltrimstr("${{ vars.source_root }}/")), text: .[1] })
 
+  # ── stage 2 · translate every file, 3 at a time ────────────────────
   translated:
     with:
       pairs: ${{ tasks.pairs.output }}
     for_each: ${{ with.pairs }}
-    max_parallel: 3                    # rate-limit the provider
-    fail_fast: false                   # finish the batch · a failed file yields null at its index
+    max_parallel: 3                    # rate-limit the provider, not the disk
+    fail_fast: false                   # finish the batch · one bad file is not a batch failure
     on_error:
-      recover: null                    # null keeps the transpose zip aligned (order preserved)
+      recover: null                    # null holds the index open so the zip below stays aligned
     infer:
+      max_tokens: 4000                 # a doc page, not a book · the cost ceiling is a real number
       prompt: |
-        Translate to ${{ const.lang }} · keep markdown structure, code blocks
-        untouched, and the original tone ·
+        Translate to ${{ vars.lang }} · keep the markdown structure, leave
+        code blocks untouched, and keep the original tone ·
         ${{ item.text }}
 
+  # ── the fan-in · drop the files that failed, keep their paths ──────
+  # Second transpose, same law: `translated` is index-aligned with `pairs`
+  # because `recover: null` filled the failures in place. `select(.[1] !=
+  # null)` is where a failed translation leaves the batch — by VALUE, after
+  # the fact, not by aborting the fan-out.
   bundle:
     with:
       pairs: ${{ tasks.pairs.output }}
@@ -106,8 +137,12 @@ tasks:
       tool: "nika:jq"
       args:
         input: ["${{ with.pairs }}", "${{ with.translated }}"]
-        expression: "transpose | map(select(.[1] != null)) | map({path: .[0].path, text: .[1]})"
+        expression: >-
+          transpose
+          | map(select(.[1] != null))
+          | map({ path: .[0].path, text: .[1] })
 
+  # ── stage 3 · write the mirror ─────────────────────────────────────
   mirror:
     with:
       bundle: ${{ tasks.bundle.output }}
@@ -116,14 +151,14 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./i18n/${{ const.lang }}/${{ item.path }}"
+        path: "./i18n/${{ vars.lang }}/${{ item.path }}"
         content: "${{ item.text }}"
-        create_dirs: true
+        create_dirs: true              # the mirror's subdirectories do not exist yet
 
 outputs:
-  files:
-    value: ${{ tasks.files.output }}
-    description: "Every source file that was mirrored"
+  translated:
+    value: ${{ tasks.bundle.output }}
+    description: "Every file that made it through, as {path, text} · the mirror's manifest"
 ```
 {/* showcase:end */}
 

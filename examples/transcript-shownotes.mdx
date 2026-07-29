@@ -23,7 +23,7 @@ infer, so the cost of an episode is the cost of one call, visible in
 
 ## The shape
 
-{/* showcase:dag-begin t2-transcript-shownotes.nika.yaml */}
+{/* showcase:dag-begin transcript-shownotes.nika.yaml */}
 ```mermaid
 flowchart LR
   raw["raw · nika:read"]:::invoke
@@ -41,8 +41,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t2-transcript-shownotes.nika.yaml */}
-```yaml t2-transcript-shownotes.nika.yaml
+{/* showcase:begin transcript-shownotes.nika.yaml */}
+```yaml transcript-shownotes.nika.yaml
 nika: v1
 workflow:
   id: transcript-shownotes
@@ -50,21 +50,23 @@ workflow:
 
 model: ollama/llama3.2:3b # local · zero key · deliberately NOT the qwen3.5 convention: a thinking model can burn max_tokens in its think block before the JSON (engine#428) — schema showcases pick a non-thinking model
 
-const:
-  transcript: "./data/transcript.txt"
+vars:
+  transcript: "examples/fixtures/episode-transcript.txt"
 
 permits:
   exec: false
+  tools: ["nika:jq", "nika:read", "nika:write"]
   fs:
-    read: ["data/**"]
-    write: ["out/**"]
-  tools: ["nika:read", "nika:jq", "nika:write"]
+    # One file in, one page out — each named exactly. `data/**` would have
+    # handed a whole tree to a workflow that reads a single transcript.
+    read: ["examples/fixtures/episode-transcript.txt"]
+    write: ["out/show-notes.md"]
 
 tasks:
   raw:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ const.transcript }}" }
+      args: { path: "${{ vars.transcript }}" }
 
   # ONE bounded model call · the schema is the contract, not a suggestion.
   notes:

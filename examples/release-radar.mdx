@@ -19,7 +19,7 @@ The missing state file recovers to an empty list.
 
 ## The shape
 
-{/* showcase:dag-begin t2-release-radar.nika.yaml */}
+{/* showcase:dag-begin release-radar.nika.yaml */}
 ```mermaid
 flowchart LR
   no_state["no_state · nika:jq"]:::invoke
@@ -40,8 +40,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t2-release-radar.nika.yaml */}
-```yaml t2-release-radar.nika.yaml
+{/* showcase:begin release-radar.nika.yaml */}
+```yaml release-radar.nika.yaml
 nika: v1
 workflow:
   id: release-radar
@@ -49,11 +49,20 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for any provider in the catalog
 
-const:
+vars:
   releases_feed: "https://github.com/tokio-rs/tokio/releases.atom"
-  state_path: "./state/release-radar.json"
+  state_path: "out/release-radar.json"
 permits:
   tools: ["nika:fetch", "nika:jq", "nika:json_diff", "nika:read", "nika:write"]
+  fs:
+    # The state-file pattern touches exactly ONE path, on both sides: read
+    # last run's state, write the next. `const.state_path` names it and a run
+    # cannot move a const, so the same literal is the whole boundary —
+    # `create_dirs:` makes out/ underneath it on the first run.
+    read: ["out/release-radar.json"]
+    write: ["out/release-radar.json"]
+  net:
+    http: ["github.com"]   # the feed's host · net entries are exact names, never globs
 
 tasks:
   # First run has no state file · recover to an empty list.
@@ -65,7 +74,7 @@ tasks:
   previous:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ const.state_path }}" }
+      args: { path: "${{ vars.state_path }}" }
     on_error:
       on_codes: [NIKA-BUILTIN-READ-001]   # not-found ONLY · a permission error still fails loudly
       recover: ${{ tasks.no_state.output }}
@@ -74,10 +83,20 @@ tasks:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ const.releases_feed }}"
+        url: "${{ vars.releases_feed }}"
         mode: feed
     output:
       entries: "[.items[] | {title, url, published}]"
+    on_error:
+      # No network → this sample stands in for the RAW feed response, so it
+      # carries `items:` exactly as `mode: feed` returns it and the `output:`
+      # jq above runs over it unchanged. Recovering the BINDING's shape
+      # instead makes the jq throw NIKA-VAR-004 — the recovery must mirror the
+      # response, never the binding.
+      recover:
+        items:
+          - { title: "tokio 1.48.0", url: "https://github.com/tokio-rs/tokio/releases/tag/tokio-1.48.0", published: "2026-07-21T09:14:00Z" }
+          - { title: "tokio 1.47.1", url: "https://github.com/tokio-rs/tokio/releases/tag/tokio-1.47.1", published: "2026-07-02T16:40:00Z" }
 
   fresh:
     with:
@@ -95,6 +114,7 @@ tasks:
       entries: ${{ tasks.feed.entries }}
     when: ${{ size(with.fresh) > 0 }}
     infer:
+      max_tokens: 500
       prompt: |
         New releases appeared on our dependency radar (RFC 6902 patch
         against last run) ·
@@ -109,7 +129,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "${{ const.state_path }}"
+        path: "${{ vars.state_path }}"
         content: "${{ with.entries }}"
         create_dirs: true
         overwrite: true
@@ -118,6 +138,11 @@ outputs:
   new_entries:
     value: ${{ tasks.fresh.output }}
     description: "RFC 6902 ops · empty = nothing new since last run"
+  # Untyped on purpose: `digest` is `when:`-gated, so on a quiet week it is
+  # SKIPPED and this reads null. Exporting it is also what keeps those tokens
+  # from being dead spend — an infer whose output nothing consumes is paid for
+  # and thrown away, and `check` says so.
+  briefing: ${{ tasks.digest.output }}
 ```
 {/* showcase:end */}
 

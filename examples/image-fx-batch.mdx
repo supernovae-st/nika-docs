@@ -22,68 +22,92 @@ repo.
 
 ## The shape
 
-{/* showcase:dag-begin t1-image-fx-batch.nika.yaml */}
+{/* showcase:dag-begin image-fx-batch.nika.yaml */}
 ```mermaid
 flowchart LR
   shots["shots · nika:glob"]:::invoke
+  jobs["jobs · nika:jq"]:::invoke
   stylize["stylize · ∥ for_each · nika:image_fx"]:::invoke
-  shots --> stylize
+  shots --> jobs
+  jobs --> stylize
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
 {/* showcase:dag-end */}
 
 ## The file
 
-{/* showcase:begin t1-image-fx-batch.nika.yaml */}
-```yaml t1-image-fx-batch.nika.yaml
+{/* showcase:begin image-fx-batch.nika.yaml */}
+```yaml image-fx-batch.nika.yaml
 nika: v1
 workflow:
   id: image-fx-batch
   description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
 
-const:
-  photos: "./photos" # the input folder · every .png in it gets the treatment
+vars:
+  # Two sample photos ship with the repo. Point this at your own folder and
+  # move `permits.fs.read` with it — a const is baked in, never caller-supplied,
+  # so the two lines stay in step by editing, not by magic.
+  photos: "examples/fixtures/photos"
 
 permits:
   exec: false
+  tools: ["nika:glob", "nika:image_fx", "nika:jq"]
   fs:
-    # a RELATIVE glob walks from `.` (the engine gates the walk root), so
-    # the read boundary is the cwd subtree — and `const.photos` is caller-
-    # overridable, so no narrower literal glob can be proven to cover it.
-    # Fixing the folder? Tighten this to `photos/**`. The write stays tight
-    read: ["**"]
-    write: ["out/**"]
-  tools: ["nika:glob", "nika:image_fx"]
+    # ONE entry that has to cover TWO different reads, and this is the trap:
+    #   · `nika:glob` gates its WALK ROOT — the directory itself
+    #   · `nika:image_fx` gates each MATCHED FILE underneath it
+    # Measured against 0.106.0: granting only `…/photos` passes `check` with
+    # zero hints and then dies at run — NIKA-SEC-004 on the first photo.
+    # Granting only `…/photos/*.png` is worse: `check` calls the entry drift
+    # (it matches no literal the body names) and the glob is refused at run.
+    # `**` covers the directory AND every descendant, so one entry is honest
+    # here; `["…/photos", "…/photos/*.png"]` is the two-entry equivalent.
+    read: ["examples/fixtures/photos/**"]
+    # The renders land FLAT in one directory, so `*` is enough: it matches a
+    # single path segment and never crosses `/`, which means a photo whose
+    # name contained a slash could not steer a write into a subtree.
+    write: ["out/darkroom/*"]
 
 tasks:
   # The folder is the work list — no hand-maintained array to drift.
   shots:
     invoke:
       tool: "nika:glob"
-      args: { pattern: "${{ const.photos }}/*.png" }
+      args: { pattern: "${{ vars.photos }}/*.png" }
+
+  # Derive {src, out} pairs · jq does the string work, natively.
+  jobs:
+    with:
+      shots: ${{ tasks.shots.output }}
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: "${{ with.shots }}"
+        expression: 'map({ src: ., out: ("out/darkroom/" + (split("/") | last)) })'
 
   # One deterministic darkroom pass per photo · the ops run IN ORDER.
   stylize:
     with:
-      shots: ${{ tasks.shots.output }}
-    for_each: ${{ with.shots }}
+      jobs: ${{ tasks.jobs.output }}
+    for_each: ${{ with.jobs }}
     max_parallel: 4
     invoke:
       tool: "nika:image_fx"
       args:
-        input: "${{ item }}"
+        input: "${{ item.src }}"
+        out: "${{ item.out }}"
+        seed: 0                       # explicit · the render is a function of (bytes · ops · seed)
         ops:
           - grayscale: {}
           - dither: { mode: bayer4 }
           - pixelate: { block: 4 }
-        out: "out/${{ item }}"
 
 outputs:
   rendered:
-    # an empty ./photos skips the fan-out (its output is null) — the guard
-    # keeps the typed contract honest on the very first exploratory run
+    # an empty folder skips the fan-out (its output is null) — the guard keeps
+    # the typed contract honest on the very first exploratory run
     value: "${{ tasks.stylize.output != null ? tasks.stylize.output : [] }}"
-    description: "The stylized artifact receipts · one per input photo"
+    description: "The stylized artifact receipts · one per input photo · path + sha256"
 ```
 {/* showcase:end */}
 

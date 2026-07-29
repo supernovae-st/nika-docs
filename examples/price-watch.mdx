@@ -18,7 +18,7 @@ time to buy.
 
 ## The shape
 
-{/* showcase:dag-begin t1-price-watch.nika.yaml */}
+{/* showcase:dag-begin price-watch.nika.yaml */}
 ```mermaid
 flowchart LR
   check["check · nika:fetch"]:::invoke
@@ -30,14 +30,14 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t1-price-watch.nika.yaml */}
-```yaml t1-price-watch.nika.yaml
+{/* showcase:begin price-watch.nika.yaml */}
+```yaml price-watch.nika.yaml
 nika: v1
 workflow:
   id: price-watch
   description: "Watch a product price, ping me when it drops below my target"
 
-const:
+vars:
   product_api: "https://api.shop.example.com/v1/products/macbook-air"
   alert_below: 899
 
@@ -50,34 +50,49 @@ secrets:
         host_from_self: true
 permits:
   tools: ["nika:fetch", "nika:notify"]
+  net:
+    # TWO hosts, for two different reasons.
+    #
+    # `api.shop.example.com` is what `const.product_api` names — a literal
+    # `check` can read, so a mismatch here is caught before the run.
+    #
+    # `hooks.slack.com` is the ALERT host, and it is the entry people leave
+    # out. `host_from_self:` above sanctions the FLOW (this secret may be the
+    # URL) — it does not grant the capability. The host stays unknown at
+    # check, so it is judged at RUN against this bound: name the escalation
+    # host here or the send is refused mid-run, the first time the price
+    # actually drops. Swap it for wherever YOUR webhook lives.
+    http: ["api.shop.example.com", "hooks.slack.com"]
 
 tasks:
   check:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ const.product_api }}"
+        url: "${{ vars.product_api }}"
         mode: jq
         jq: "."
     output:                           # named jq bindings over the raw response
       price: ".price"
       name: ".name"
     on_error:
-      # Offline rehearsal · a sample ABOVE the target — the gate below
-      # stays closed and the dry run ends green with the alert skipped.
+      # Offline rehearsal · a sample ABOVE the target, so the gate below stays
+      # closed and the dry run ends green with the alert skipped. The alert
+      # path is therefore NOT exercised offline — which is exactly why the
+      # `net:` bound above has to be right by reading, not by running.
       recover: { price: 949, name: "MacBook Air (offline sample)" }
 
   alert:
     with:
       price: ${{ tasks.check.price }}     # value edges · the named bindings cross the boundary here
       name: ${{ tasks.check.name }}
-    when: ${{ with.price < const.alert_below }}
+    when: ${{ with.price < vars.alert_below }}
     invoke:
       tool: "nika:notify"
       args:
         channel: webhook
         target: "${{ secrets.alerts_webhook }}"
-        message: "Price drop · ${{ with.name }} is now ${{ with.price }} (target ${{ const.alert_below }})"
+        message: "Price drop · ${{ with.name }} is now ${{ with.price }} (target ${{ vars.alert_below }})"
         severity: info
 
 outputs:

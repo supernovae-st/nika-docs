@@ -21,7 +21,7 @@ every time the data is identical.
 
 ## The shape
 
-{/* showcase:dag-begin t2-csv-chart-report.nika.yaml */}
+{/* showcase:dag-begin csv-chart-report.nika.yaml */}
 ```mermaid
 flowchart LR
   raw["raw · nika:read"]:::invoke
@@ -42,28 +42,33 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t2-csv-chart-report.nika.yaml */}
-```yaml t2-csv-chart-report.nika.yaml
+{/* showcase:begin csv-chart-report.nika.yaml */}
+```yaml csv-chart-report.nika.yaml
 nika: v1
 workflow:
   id: csv-chart-report
   description: "CSV → aggregate → rendered bar chart + markdown report · offline · deterministic"
 
-const:
-  sales_csv: "./data/sales.csv" # columns · region,revenue (revenue a plain number)
+vars:
+  sales_csv: "examples/fixtures/sales.csv" # columns · region,revenue (revenue a plain number)
 
 permits:
   exec: false
+  tools: ["nika:chart", "nika:convert", "nika:jq", "nika:read", "nika:write"]
   fs:
-    read: ["data/**"]
+    # The one CSV this reads, named exactly. `data/**` would have granted a
+    # whole tree to a workflow that opens a single file.
+    read: ["examples/fixtures/sales.csv"]
+    # Two artifacts land here — the SVG and the report page. `**` because the
+    # chart and the report are written by two different builtins into the
+    # same tree, and both are covered by one honest entry.
     write: ["out/**"]
-  tools: ["nika:read", "nika:convert", "nika:jq", "nika:chart", "nika:write"]
 
 tasks:
   raw:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ const.sales_csv }}" }
+      args: { path: "${{ vars.sales_csv }}" }
 
   rows:
     with:
@@ -116,7 +121,7 @@ tasks:
     with:
       rows_md: ${{ tasks.rows_md.output }}
     after:
-      chart: success
+      chart: succeeded
     invoke:
       tool: "nika:write"
       args:

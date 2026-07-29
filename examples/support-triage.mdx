@@ -18,7 +18,7 @@ sortable v7 batch id) and pages only when `urgent` is non-empty.
 
 ## The shape
 
-{/* showcase:dag-begin t2-support-triage.nika.yaml */}
+{/* showcase:dag-begin support-triage.nika.yaml */}
 ```mermaid
 flowchart LR
   batch["batch · nika:uuid"]:::invoke
@@ -40,17 +40,20 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t2-support-triage.nika.yaml */}
-```yaml t2-support-triage.nika.yaml
+{/* showcase:begin support-triage.nika.yaml */}
+```yaml support-triage.nika.yaml
 nika: v1
 workflow:
   id: support-triage
   description: "Ticket queue → typed triage → urgent escalation → triage board"
 
-model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (triage wants speed)
+# A NON-thinking local model, deliberately: a thinking model can spend the
+# whole `max_tokens` budget in its think block and return before the JSON
+# (engine#428). Schema showcases pick a model that answers directly.
+model: ollama/llama3.2:3b   # local · zero key · swap for groq/llama-3.3-70b (triage wants speed)
 
-const:
-  queue_path: "./support/overnight-queue.json"
+vars:
+  queue_path: "examples/fixtures/support-queue.json"
 
 secrets:
   oncall_webhook:
@@ -61,6 +64,18 @@ secrets:
         host_from_self: true
 permits:
   tools: ["nika:jq", "nika:notify", "nika:read", "nika:uuid", "nika:write"]
+  fs:
+    read: ["examples/fixtures/support-queue.json"]
+    # One board per batch id. `*` matches a single segment and never crosses
+    # `/`, so the uuid can never steer the write out of out/ — `out/**` would
+    # let it.
+    write: ["out/triage-*.json"]
+  net:
+    # `host_from_self:` above sanctions the FLOW (the secret may be the URL) —
+    # it does not grant the capability. The host stays unknown at check, so it
+    # is judged at RUN against this bound: name the escalation host here or the
+    # send is refused mid-run, after the tokens are already spent.
+    http: ["hooks.slack.com"]
 
 tasks:
   batch:
@@ -71,24 +86,27 @@ tasks:
   queue:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ const.queue_path }}" }
+      args: { path: "${{ vars.queue_path }}" }
 
   triage:
     with:
       queue: ${{ tasks.queue.output }}
     infer:
+      max_tokens: 1500                 # the whole queue in one call · a ceiling, not UNBOUNDED
       prompt: |
         Triage every ticket in this queue ·
         ${{ with.queue }}
         For each · classify category and urgency, draft a 2-sentence first reply.
       schema:
         type: object
+        additionalProperties: false    # a deterministic shape across providers
         required: [tickets]
         properties:
           tickets:
             type: array
             items:
               type: object
+              additionalProperties: false
               required: [id, category, urgency, first_reply]
               properties:
                 id: { type: string }
@@ -125,8 +143,12 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./support/triage-${{ with.batch }}.json"
+        # A `.json` artifact takes ONE interpolated value as `content:` and
+        # lets the engine serialize it. Typing `{ "tickets": ${{ … }} }` by
+        # hand emits unquoted fields and the board stops being JSON.
+        path: "out/triage-${{ with.batch }}.json"
         content: "${{ with.tickets }}"
+        create_dirs: true
 
 outputs:
   tickets:

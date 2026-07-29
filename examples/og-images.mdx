@@ -18,7 +18,7 @@ provenance manifest out, ready for the site build to pick up.
 
 ## The shape
 
-{/* showcase:dag-begin t1-og-images.nika.yaml */}
+{/* showcase:dag-begin og-images.nika.yaml */}
 ```mermaid
 flowchart LR
   hero["hero · nika:image_generate"]:::invoke
@@ -28,27 +28,34 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin t1-og-images.nika.yaml */}
-```yaml t1-og-images.nika.yaml
+{/* showcase:begin og-images.nika.yaml */}
+```yaml og-images.nika.yaml
 nika: v1
 workflow:
   id: og-images
-  description: "Generate the launch OG hero image set into ./assets/og"
+  description: "Generate the launch OG hero image set into out/og"
 
 permits:
-  fs: { write: ["./assets/og/**"] }   # the ONLY place assets may land
   tools: ["nika:image_generate"]
+  fs:
+    # `check` judges the `output_dir:` ARGUMENT; the RUN gates every FINAL
+    # file path under it — the images, their provenance sidecars and
+    # manifest.json. `**` covers the directory AND every descendant, so one
+    # entry answers both. Granting the bare directory (`out/og`) passes
+    # `check` and then dies at run on the first asset: measured, and the
+    # reason this comment exists.
+    write: ["out/og/**"]
 
 tasks:
   hero:
     invoke:
       tool: "nika:image_generate"
       args:
-        provider: mock                # offline + deterministic · flip to gemini/openai to render for real
+        provider: mock                # offline + deterministic · flip to local/gemini/openai to render for real
         prompt: "OG hero — a monarch butterfly over a deep-blue nebula, editorial photo, negative space left"
         aspect_ratio: "16:9"          # exact WxH is an openai gpt-image-2 feature · gemini folds to a size class
         n: 2                          # two variants to A/B
-        output_dir: "./assets/og"
+        output_dir: "out/og"
         filename_prefix: "launch-hero"
         metadata: { campaign: "launch", page_slug: "home" }
 

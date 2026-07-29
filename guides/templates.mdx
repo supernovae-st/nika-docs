@@ -56,29 +56,51 @@ workflow:
   id: chain-template            # SLOT: kebab-case workflow id
   description: "gather → think → persist"   # SLOT: one honest sentence
 
-model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
+# SLOT: provider/model · local · zero key. Measured seat — `ollama/llama3.2:3b`
+# answers this prompt in ~50s. `--model mock/echo` needs no seat at all and is
+# the path this file guarantees.
+model: ollama/llama3.2:3b
 
-const:
-  source: "./README.md"             # SLOT: your input — README.md exists in ANY repo, so the
-permits:
+vars:
+  source: "./README.md"             # SLOT: your input · README.md exists in most repos
+  destination: "./output.md"        # SLOT: where the result lands
+
+permits:                            # the blast radius · default-deny once present
   tools: ["nika:read", "nika:write"]
-  fs: { read: ["./README.md"], write: ["./output.md"] }
-
-                                    # skeleton runs green BEFORE you point it at real data
+  # Two literal paths, one each way. `check` can read these (they come from
+  # `const:`) and proves them against the boundary before anything runs — keep
+  # them in step with the two `const:` entries above.
+  fs:
+    read: ["./README.md"]
+    write: ["./output.md"]
 
 tasks:
   gather:
     invoke:                         # SLOT: the fact source · nika:read / nika:fetch / exec
       tool: "nika:read"
-      args: { path: "${{ const.source }}" }
+      args: { path: "${{ vars.source }}" }
+    on_error:
+      # Offline rehearsal. A freshly scaffolded directory has no README, and a
+      # skeleton that dies on its first run teaches nothing — so a not-found
+      # recovers into a literal standing in for the real document. `on_codes:`
+      # keeps that narrow: ONLY not-found is forgiven, a permission error
+      # still fails loudly. Delete this block once the source really exists.
+      on_codes: [NIKA-BUILTIN-READ-001]
+      recover: "REHEARSAL · no source document here yet."
 
   think:
     with:
       gather: ${{ tasks.gather.output }}
     infer:
+      max_tokens: 800               # SLOT: the spend ceiling · sized for the SEAT, not the answer
+      # SLOT: the one model job. Keep slot markers OUT of the block below —
+      # everything indented under `prompt: |` is prompt TEXT, so a stray
+      # `# SLOT:` line is sent to the model verbatim (visible in the mock
+      # echo). Comments belong out here, where YAML eats them.
       prompt: |
-        # SLOT: the one model job · interpolate ${{ with.gather }}
-        Summarize · ${{ with.gather }}
+        Summarize the following in a short paragraph.
+
+        ${{ with.gather }}
 
   persist:
     with:
@@ -86,8 +108,8 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./output.md"         # SLOT: destination
-        content: "${{ with.think }}"   # ALWAYS pass content · a write without it writes nothing
+        path: "${{ vars.destination }}"   # SLOT: destination · same path as permits.fs.write
+        content: "${{ with.think }}"       # ALWAYS pass content · a write without it writes nothing
 
 outputs:
   result: ${{ tasks.think.output }}  # SLOT: the callable contract
@@ -105,9 +127,19 @@ workflow:
   id: gate-and-act-template     # SLOT: kebab-case workflow id
   description: "watch a value · act only when the condition holds"   # SLOT
 
-const:
+vars:
   source_url: "https://api.example.com/v1/value"   # SLOT: what to watch
   threshold: 100                    # SLOT: the trigger condition value
+
+permits:                            # the blast radius · default-deny once present
+  tools: ["nika:fetch", "nika:notify"]
+  net:
+    http:
+      - "api.example.com"           # SLOT: the watched host from const.source_url
+      - "hooks.slack.com"           # SLOT: the host ALERTS_WEBHOOK_URL points at.
+                                    #   `host_from_self` below means the host is not
+                                    #   knowable at check — it is judged at RUN against
+                                    #   this list, so an unnamed host fails mid-flight.
 
 secrets:
   webhook:
@@ -122,7 +154,7 @@ tasks:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ const.source_url }}"
+        url: "${{ vars.source_url }}"
         mode: jq
         jq: "."
     output:
@@ -136,7 +168,7 @@ tasks:
     with:
       value: ${{ tasks.check.value }}   # the binding IS the edge · check → act
     # when: is a SKIP gate — routing, not failure (a skipped task is not an error)
-    when: ${{ with.value > const.threshold }}   # SLOT: the CEL condition
+    when: ${{ with.value > vars.threshold }}   # SLOT: the CEL condition
     invoke:
       tool: "nika:notify"           # SLOT: the action · notify / write / exec
       args:
@@ -161,21 +193,41 @@ workflow:
   id: fanout-template           # SLOT: kebab-case workflow id
   description: "discover N items · process in parallel · merge"   # SLOT
 
-model: ollama/qwen3.5:4b           # SLOT: provider/model · local · zero key
+# SLOT: provider/model · local · zero key. Measured seat — `ollama/llama3.2:3b`.
+# `--model mock/echo` needs no seat and is the path this file guarantees.
+model: ollama/llama3.2:3b
 
-const:
+run:
+  # A `timeout:` is a deadline, and a deadline needs a clock. Declaring it says
+  # out loud which one: `system` is the ambient wall clock (the honest default);
+  # `virtual` drives a simulated clock for deterministic tests.
+  clock: system
+
+vars:
   collection_source: "./items"      # SLOT: where the collection comes from
 
 permits:
   tools: ["nika:glob", "nika:jq"]
   fs:
-    read: ["./items/**"]
+    # `nika:glob` is gated on the DIRECTORY it walks, not on the files it
+    # returns — measured: with `./items/*.md` here (the pattern) the run dies
+    # `NIKA-SEC-004 · ./items resolves outside the declared permits.fs.read
+    # boundary`, because `*` never crosses `/` and so never matches `./items`
+    # itself. Grant the directory. A deeper pattern (`./items/**/*.md`) walks
+    # deeper and needs `./items/**`.
+    #
+    # HONEST HINT · `check` reports NIKA-DRIFT-001 here ("matches no path the
+    # body reads") because its drift detector does not model a glob as a read.
+    # The runtime does. Following that hint deletes the entry and kills the run
+    # — keep it. Coverage decision:
+    # the nika engine repo · docs/plans/2026-07-28-verdict-coverage.md
+    read: ["./items"]
 
 tasks:
   discover:
     invoke:                         # SLOT: glob / fetch sitemap / exec + jq split
       tool: "nika:glob"
-      args: { pattern: "${{ const.collection_source }}/*.md" }
+      args: { pattern: "${{ vars.collection_source }}/*.md" }
 
   process:
     with:
@@ -191,6 +243,7 @@ tasks:
     on_error:
       recover: null                 # a failed item yields null at its index · the batch lives
     infer:                          # SLOT: the per-item job (any verb)
+      max_tokens: 500               # SLOT: the per-ITEM ceiling · multiply by the fan width
       prompt: |
         Process this item · ${{ item }}
 
@@ -209,8 +262,10 @@ tasks:
     with:
       survivors: ${{ tasks.survivors.output }}
     infer:
+      max_tokens: 800               # SLOT: the fan-in ceiling
+      # SLOT: the fan-in · the survivors array (failed items filtered). Keep
+      # slot markers out of the block below — it is prompt TEXT, not YAML.
       prompt: |
-        # SLOT: the fan-in · the survivors array (failed items filtered)
         Merge these results into one report · ${{ with.survivors }}
 
 outputs:
@@ -229,30 +284,63 @@ workflow:
   id: etl-state-template        # SLOT: kebab-case workflow id
   description: "read state · fetch fresh · diff · process the delta · save state"   # SLOT
 
-const:
+vars:
   source_url: "https://api.example.com/v1/records"   # SLOT: the data source
   state_path: "./state/etl-state.json"               # SLOT: the cursor file
 
-tasks:
-  # First run · no state file yet · recover to an empty list.
-  empty:
-    invoke:
-      tool: "nika:jq"
-      args: { input: [], expression: "." }
+permits:                            # the blast radius · default-deny once present
+  tools: ["nika:read", "nika:write", "nika:fetch", "nika:jq", "nika:json_diff", "nika:prompt"]
+  fs:                               # the cursor file, read then rewritten — one path, both ways
+    read: ["./state/etl-state.json"]    # SLOT: keep in step with const.state_path
+    write: ["./state/etl-state.json"]   # SLOT: idem — the job writes nothing else
+  net: { http: ["api.example.com"] }    # SLOT: the source host from const.source_url
 
-  previous:
+tasks:
+  # NEP-0002 · the Rule of Two, as a check. This run holds all three legs at
+  # once: it reads a private file, ingests UNTRUSTED network content, and
+  # persists that content into the very file the NEXT run reads as trusted
+  # state. One human decision has to dominate EVERY path to that write — so the
+  # gate sits before the first network touch, not next to the write (a gate the
+  # fetch can route around dominates nothing). Blocking on purpose: a `default:`
+  # here would disarm it, and the checker knows — measured, adding `default:`
+  # flips TRIFECTA to `✖ NIKA-SEC-009 lethal trifecta complete`.
+  approve:
+    invoke:
+      tool: "nika:prompt"
+      args:
+        message: "Fetch ${{ vars.source_url }} and persist it into ${{ vars.state_path }}?"
+
+  previous_raw:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ const.state_path }}" }
+      args: { path: "${{ vars.state_path }}" }
     on_error:
       on_codes: [NIKA-BUILTIN-READ-001]   # not-found ONLY · a permission error still fails loudly
-      recover: ${{ tasks.empty.output }}
+      recover: "[]"                       # first run · the STRING "[]", so `previous` parses it
+                                          # exactly like a real file — one code path, not two
+
+  previous:
+    with:
+      raw: ${{ tasks.previous_raw.output }}
+    invoke:
+      # `nika:read` hands back TEXT, and `nika:json_diff` compares VALUES. Feed
+      # it the raw string and the diff degrades to a single
+      # `{"op":"replace","path":""}` carrying the entire new document — it looks
+      # like it works, and it reports "everything changed" forever. Measured.
+      # `fromjson` is what makes the next task an actual diff.
+      tool: "nika:jq"
+      args:
+        input: "${{ with.raw }}"
+        expression: "fromjson"
 
   fresh:
+    with:
+      go: ${{ tasks.approve.output }}   # the binding IS the edge · the gate dominates the fetch
+    when: ${{ with.go == true }}        # declined → no network touch at all
     invoke:
       tool: "nika:fetch"            # SLOT: fetch / read / exec · the fresh data
       args:
-        url: "${{ const.source_url }}"
+        url: "${{ vars.source_url }}"
         mode: jq
         jq: ".records"
     on_error:
@@ -281,11 +369,14 @@ tasks:
   save_state:
     with:
       fresh: ${{ tasks.fresh.output }}
+      go: ${{ tasks.approve.output }}   # the binding IS the edge · the gate dominates the write
+    when: ${{ with.go == true }}        # a refusal is a VALUE · the write is skipped, never failed
     invoke:
       tool: "nika:write"
       args:
-        path: "${{ const.state_path }}"
-        content: "${{ with.fresh }}"
+        path: "${{ vars.state_path }}"
+        content: "${{ with.fresh }}"    # a VALUE · the engine serializes it, and the next run's
+                                        # `fromjson` reads it straight back
         create_dirs: true
         overwrite: true
 
@@ -308,22 +399,41 @@ workflow:
   id: agent-loop-template       # SLOT: kebab-case workflow id
   description: "plan → budgeted agent → typed result"   # SLOT
 
-model: ollama/qwen3.5:4b           # SLOT: a tool-calling model · local by default
+# SLOT: a TOOL-CALLING model · local by default. This seat is measured, not
+# assumed: `ollama/qwen2.5:14b` completes the planning call in ~65s under the
+# ceiling below. A reasoning seat (`ollama/qwen3.5:4b`) spends its whole
+# budget thinking and never emits JSON here — the guaranteed offline path is
+# `--model mock/echo`, which needs no seat at all.
+model: ollama/qwen2.5:14b
 
-inputs:
+vars:
   goal:
     type: string
     required: true
+    # A `required:` input still carries a `default:` here so the skeleton
+    # RUNS the moment it is scaffolded. Replace the default with your job;
+    # `--var goal=…` overrides it at any time.
+    default: "list the risks of running an agent without a turn budget"   # SLOT
     description: "What the agent must accomplish"   # SLOT
-permits:
-  tools: ["nika:assert", "nika:done", "nika:read"]
+
+permits:                            # the blast radius · default-deny once present
+  # Exactly what the body invokes: `nika:assert` (the confirm task) plus the
+  # two the agent may call. No `fs:` — see the note on `tools:` below.
+  tools: ["nika:assert", "nika:done", "nika:jq"]
 
 tasks:
   plan:
     infer:
-      prompt: "Break '${{ inputs.goal }}' into at most 4 concrete steps."   # SLOT
+      prompt: "Break '${{ vars.goal }}' into at most 4 concrete steps."   # SLOT
+      # SLOT: the spend ceiling for the planning call. Size it for the SEAT,
+      # not for the answer: a reasoning model spends tokens thinking before
+      # it emits the first brace, and a ceiling that cuts it off mid-thought
+      # fails NIKA-INFER-002 ("no JSON value found · the reply was cut off at
+      # the token limit"). Measured — 400 starves qwen3.5:4b on this prompt.
+      max_tokens: 2000
       schema:
         type: object
+        additionalProperties: false
         required: [steps]
         properties:
           steps: { type: array, items: { type: string } }
@@ -332,18 +442,35 @@ tasks:
     with:
       steps: ${{ tasks.plan.output.steps }}
     agent:
-      # The done-contract belongs IN the prompt: the final message must
-      # carry the schema'd shape, so SAY so — a live model that is not
-      # told finishes in prose and fails NIKA-INFER-002 (proven on GPT).
-      system: "Work the plan step by step. When finished, reply with ONLY your final result as an object carrying a `findings` array (one short string each), then call nika:done."   # SLOT
+      # Say what the JOB is. Do NOT describe the output shape.
+      #
+      # The engine binds `schema:` to the FINAL answer: a free-text answer
+      # that does not conform is RE-ASKED with the schema wired, bounded by a
+      # retry budget. Measured on ollama/qwen3.5:4b — this task, with zero
+      # shape instruction, returns a clean typed object.
+      #
+      # Hand-instructing "reply with the object, then call nika:done" is
+      # actively harmful: a `nika:done` carrying `result:` is validated
+      # DIRECTLY and is NEVER re-asked (nika-verb-agent/src/lib.rs · "a miss
+      # is a verdict, never a re-ask"), so a model that hands its JSON back
+      # as a *string* dies NIKA-INFER-002 with the budget already spent.
+      # Measured twice on that exact instruction. Let the engine own shape.
+      system: "You are a careful analyst. Work the plan step by step and report what you actually found."   # SLOT
       prompt: "Plan · ${{ with.steps }}"
       tools:                        # SLOT: the MINIMUM grant for the job
-        - "nika:read"
-        - "nika:done"
+        # Pure compute — this pair needs no filesystem, so the skeleton runs
+        # anywhere. Granting the agent a tool here is only HALF a grant: every
+        # call still crosses the workflow boundary above. Adding `nika:read`
+        # to this list WITHOUT adding `permits.fs.read` fails at run with
+        # `NIKA-SEC-004 · agent tool "nika:read" refused by the security
+        # boundary` — measured, mid-loop, after the turns are paid for.
+        - "nika:jq"
+        - "nika:done"               # the early-exit sentinel · loop-owned
       max_turns: 15                 # SLOT: the loop bound
       max_tokens_total: 80000       # SLOT: the spend bound
       schema:                       # SLOT: the typed final-message contract
         type: object
+        additionalProperties: false
         required: [findings]
         properties:
           findings: { type: array, items: { type: string } }
@@ -379,6 +506,10 @@ workflow:
 permits:                            # SLOT: the blast radius · default-deny once present
   exec: ["echo"]                    # SLOT: ONLY the programs the gates + act run (argv form)
   tools: ["nika:assert", "nika:prompt", "nika:notify"]
+  # `host_from_self` below sanctions the FLOW (the secret may BE the URL) — it
+  # does not grant the capability to reach anyone. The host stays unknown at
+  # check, so it is judged at RUN against this list: name the webhook host here
+  # or the record is refused mid-run, after the ship already happened.
   net: { http: ["hooks.slack.com"] }   # SLOT: the webhook host · nothing else may leave
 
 secrets:
@@ -412,13 +543,17 @@ tasks:
 
   human:
     after:
-      gates: success              # state, no data · no question until the board is green
+      gates: succeeded              # state, no data · no question until the board is green
     invoke:
-      # the prompt PAUSES the run (exit 4 · not a failure) — answer and resume:
-      #   nika run --resume <trace> --answer human=yes
+      # On a terminal this ASKS. Headless, it answers with `default:` below.
+      # Under `--output json` the run PAUSES durably (exit 4 · not a failure)
+      # and prints its own resume line:
+      #   nika run <file> --resume <trace> --answer human=true
       tool: "nika:prompt"
       args:
         message: "All gates GREEN. Proceed?"   # SLOT: the decision, fully informed
+        # Fail CLOSED. The unattended answer to "should I do the irreversible
+        # thing" is no — `default: true` would hand CI a rubber stamp.
         default: false
 
   act:
@@ -443,6 +578,13 @@ tasks:
         target: "${{ secrets.webhook }}"
         message: "Run finished · act=${{ with.acted }}"   # SLOT · success | failure | skipped
         severity: info
+    on_error:
+      # Rehearsal only. With TEAM_WEBHOOK_URL unset the reference cannot resolve
+      # and this task fails NIKA-VAR-001 (measured) — which would make the
+      # skeleton red on a machine that has no webhook. Recovering keeps the
+      # scaffold runnable; DELETE this block for real use, because a ship whose
+      # audit trail silently vanished is exactly what this task exists to prevent.
+      recover: "REHEARSAL · no webhook configured · nothing was sent"
 
 outputs:
   acted: ${{ tasks.act.status }}
@@ -460,27 +602,44 @@ workflow:
   id: website-brief-template    # SLOT: kebab-case workflow id
   description: "crawl → brief → persist"   # SLOT: one honest sentence
 
-model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
+# SLOT: provider/model · local · zero key. The schema below has five required
+# fields, so give it a seat that holds structure — `ollama/qwen2.5:14b` is
+# measured on this shape. `--model mock/echo` needs no seat at all.
+model: ollama/qwen2.5:14b
 
-const:
+vars:
   site_url: "https://example.com"   # SLOT: the site to understand
   out_path: "./out/brief.json"      # SLOT: where the brief lands
+
+permits:                            # the blast radius · default-deny once present
+  tools: ["nika:fetch", "nika:write"]
+  net: { http: ["example.com"] }    # SLOT: the host from const.site_url. ONE entry is
+                                    #   enough — `traverse:` is a same-origin BFS (+ the
+                                    #   robots probe), so the crawl never leaves this host.
+  fs: { write: ["./out/brief.json"] }   # SLOT: the one file · keep in step with const.out_path
+                                        #   (the infer step needs no grant — it is pure compute)
 
 tasks:
   crawl_site:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ const.site_url }}"
+        url: "${{ vars.site_url }}"
         traverse: { max_pages: 5 }  # SLOT: crawl bound · 1..=25 (robots honored)
+    on_error:
+      # Offline rehearsal · a literal standing in for the crawl digest, so the
+      # brief step runs with no network at all. Delete once the site is real.
+      recover: "REHEARSAL DIGEST · Example Co · a small tool company · plain blue and white pages · buttons, a pricing table, one logo."
 
   brief:
     with:
       crawl_site: ${{ tasks.crawl_site.output }}
     infer:
       max_tokens: 1200
+      # SLOT: the one model job · what should the brief capture? Keep slot
+      # markers out of the block below — it is prompt TEXT, not YAML, so a
+      # stray comment line is sent to the model verbatim.
       prompt: |
-        # SLOT: the one model job · what should the brief capture?
         From this site crawl, produce a creative brief: the domain of
         activity, the dominant visual theme, the audience, the usable
         colors and image assets.
@@ -502,9 +661,12 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "${{ const.out_path }}"
+        path: "${{ vars.out_path }}"
         create_dirs: true
-        content: "${{ with.brief }}"   # ALWAYS pass content
+        # The path ends `.json`, so `content:` is ONE interpolation of a value
+        # the engine serializes. Typing `{ "domain": ${{ … }} }` by hand emits
+        # unquoted fields and the artifact stops being JSON.
+        content: "${{ with.brief }}"
 
 outputs:
   brief: ${{ tasks.brief.output }}   # SLOT: the callable contract
@@ -522,21 +684,36 @@ workflow:
   id: media-asset-pack-template # SLOT: kebab-case workflow id
   description: "brief → render → manifest"  # SLOT: one honest sentence
 
-model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
+# SLOT: provider/model · local · zero key. Measured seat — `ollama/qwen2.5:14b`
+# holds the small schema below. `--model mock/echo` needs no seat at all.
+model: ollama/qwen2.5:14b
 
-const:
+vars:
   subject: "a calm cosmic landing hero"   # SLOT: what the asset is about
   out_dir: "./out/assets"           # SLOT: where assets land
-permits:
+
+permits:                            # the blast radius · default-deny once present
   tools: ["nika:image_generate", "nika:jq", "nika:write"]
+  fs:
+    write:
+      # Two entries, and both earn their place: `check` judges the `output_dir:`
+      # ARGUMENT (`./out/assets`), while the RUN gates every FINAL file path under
+      # it — the asset, its provenance manifest, and manifest.json. Grant only the
+      # directory and the file sails through check, then dies at run on the first
+      # asset. `*` is one segment and never crosses `/`, which is all this needs:
+      # image_generate lands its files flat, so no subtree grant is warranted.
+      - "./out/assets"              # SLOT: keep in step with const.out_dir
+      - "./out/assets/*"            # SLOT: idem · the files that land inside it
 
 tasks:
   brief:
     infer:
       max_tokens: 600
+      # SLOT: the creative direction · style · constraints. Keep slot markers
+      # out of the block below — it is prompt TEXT, not YAML, so a stray
+      # comment line is sent to the model verbatim.
       prompt: |
-        # SLOT: the creative direction · style · constraints
-        Write one vivid, concrete image prompt for: ${{ const.subject }}.
+        Write one vivid, concrete image prompt for: ${{ vars.subject }}.
         No text in the image · no watermark · a calm central zone.
       schema:
         type: object
@@ -553,7 +730,7 @@ tasks:
       args:
         provider: mock              # SLOT: local | openai | gemini | xai (local/mock first)
         prompt: "${{ with.brief_image_prompt }}"
-        output_dir: "${{ const.out_dir }}"
+        output_dir: "${{ vars.out_dir }}"
         filename_prefix: "asset"    # SLOT: filename stem
 
   manifest:
@@ -574,8 +751,11 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "${{ const.out_dir }}/manifest.json"
+        path: "${{ vars.out_dir }}/manifest.json"
         create_dirs: true
+        # `.json` path → `content:` is ONE interpolation of a value the engine
+        # serializes. `nika:jq` above BUILT that value; hand-typing braces
+        # around an interpolation emits unquoted fields and breaks the artifact.
         content: "${{ with.manifest }}"
 
 outputs:
@@ -592,11 +772,9 @@ Call a product API natively: `multipart:` upload (masked secrets header) → JSO
 nika: v1
 workflow:
   id: api-upload-and-create-template  # SLOT: kebab-case workflow id
-  description: "upload → create → result"   # SLOT: one honest sentence
+  description: "upload + create in one authenticated call"   # SLOT: one honest sentence
 
-model: ollama/qwen3.5:4b            # SLOT: provider/model · local · zero key
-
-const:
+vars:
   api_base: "https://api.example.com"     # SLOT: the product API base
   asset_path: "./out/assets/asset-1.png"  # SLOT: the file to upload
 
@@ -608,35 +786,48 @@ secrets:
       - to: "nika:fetch"            # the send · default-deny otherwise
       - to: "outputs"               # the return value derives from the authed response
 
+permits:                            # the blast radius · default-deny once present
+  tools: ["nika:fetch"]
+  # `egress:` above sanctions the FLOW (this secret may ride a fetch); it does
+  # NOT grant the capability to reach anyone. The host is the separate, required
+  # half — an unlisted host is refused at RUN, mid-flight, with the bytes
+  # already on the wire.
+  net: { http: ["api.example.com"] }   # SLOT: the host from const.api_base
+  fs:
+    # A `multipart:` file part names a path, and that read crosses the boundary
+    # like any other: measured, without this entry the call dies `NIKA-SEC-004 ·
+    # ./out/assets/asset-1.png resolves outside the declared permits.fs.read
+    # boundary`. One exact file, never the tree it sits in.
+    #
+    # HONEST HINT · `check` reports NIKA-DRIFT-001 here ("matches no path the
+    # body reads") because its drift detector does not model a multipart part as
+    # a read. The runtime does. Following that hint deletes the entry and kills
+    # the run — keep it. Coverage decision:
+    # the nika engine repo · docs/plans/2026-07-28-verdict-coverage.md
+    read: ["./out/assets/asset-1.png"]   # SLOT: keep in step with const.asset_path
+
 tasks:
-  upload:
+  create:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ const.api_base }}/upload"   # SLOT: the upload endpoint
+        url: "${{ vars.api_base }}/items"   # SLOT: the create endpoint
         method: POST
         headers:
           x-api-key: "${{ secrets.API_KEY }}"  # SLOT: the auth header name
         multipart:
-          - { name: file, path: "${{ const.asset_path }}" }
-          # SLOT: extra text fields · { name: directory, value: "assets" }
-        mode: jq
-        jq: ".url"                  # SLOT: where the response carries the asset URL
-
-  create:
-    with:
-      upload: ${{ tasks.upload.output }}
-    invoke:
-      tool: "nika:fetch"
-      args:
-        url: "${{ const.api_base }}/create"   # SLOT: the create endpoint
-        method: POST
-        headers:
-          x-api-key: "${{ secrets.API_KEY }}"
-        body:                       # SLOT: the create payload (objects auto-JSON)
-          asset_url: "${{ with.upload }}"
+          # Exactly one of `path:` (file) or `value:` (text) per part — a part
+          # carrying both, or neither, is refused before anything is sent.
+          - { name: file, path: "${{ vars.asset_path }}" }
+          - { name: title, value: "Rehearsal item" }   # SLOT: the metadata fields
         mode: jq
         jq: "{ id: .id, url: .url }"   # SLOT: the fields downstream needs
+    on_error:
+      # Offline rehearsal · a literal shaped EXACTLY like what the jq above
+      # projects, so `outputs.result` has the same shape on both paths. It also
+      # absorbs the unset key: a `secrets:` entry whose env var is missing fails
+      # NIKA-VAR-001, and a recover catches that too (measured).
+      recover: { id: "rehearsal-0001", url: "https://app.example.com/items/rehearsal-0001" }
 
 outputs:
   result: ${{ tasks.create.output }}   # SLOT: the callable contract
@@ -661,9 +852,11 @@ workflow:
   id: docker-report-template    # SLOT: kebab-case workflow id
   description: "read the daemon's state · explain it · keep the report"   # SLOT
 
-model: ollama/qwen3.5:4b            # SLOT: local-first · mock/echo for offline rehearsal
+# SLOT: local-first · `--model mock/echo` for the offline rehearsal. Measured
+# seat — `ollama/llama3.2:3b` answers this prose prompt in well under a minute.
+model: ollama/llama3.2:3b
 
-permits:
+permits:                            # the blast radius · default-deny once present
   exec:
     - "docker"                      # SLOT: the ONE program the reads may launch
   tools:
@@ -677,19 +870,31 @@ tasks:
   # scheduler proves it from the DAG, nobody orders it.
   ps:
     exec:
-      # SLOT: argv ARRAY form — one program, exactly these arguments
+      # SLOT: argv ARRAY form — one program, exactly these arguments. The array
+      # is why there is no shell here: no word-splitting, no globbing, nothing
+      # to quote wrong. `permits.exec` above is the provable allowlist.
       command: ["docker", "ps", "--all", "--format", "{{.Names}}\t{{.Status}}\t{{.Image}}"]
+    on_error:
+      # Offline rehearsal · a host with no daemon answers with a literal that
+      # LOOKS like the real thing, so `diagnose` reads the same shape either
+      # way. Delete this once the daemon is really there.
+      recover: "REHEARSAL\tno docker daemon on this host\tn/a"
 
   df:
     exec:
       command: ["docker", "system", "df"]   # SLOT: the second read (drop the task if one suffices)
+    on_error:
+      recover: "REHEARSAL · disk usage unavailable without a daemon"
 
   diagnose:
     with:
       ps: ${{ tasks.ps.output }}
       df: ${{ tasks.df.output }}
     infer:
-      # SLOT: what should the model DO with the readings?
+      max_tokens: 600               # SLOT: the spend ceiling for this call
+      # SLOT: what should the model DO with the readings? Keep slot markers out
+      # of the block below — everything indented under `prompt: |` is prompt
+      # TEXT, and a stray comment line is sent to the model verbatim.
       prompt: |
         You are reading a Docker host's state. Containers (name·status·image):
         ${{ with.ps }}
@@ -700,7 +905,6 @@ tasks:
         Write a short health report: what is running, what exited, what
         looks unhealthy (restart loops · old exits), and whether disk
         usage needs attention. Plain prose, no preamble.
-      max_tokens: 600               # SLOT: the spend ceiling for this call
 
   keep:
     with:

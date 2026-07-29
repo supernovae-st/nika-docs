@@ -21,10 +21,11 @@ the retro is scheduled.
 
 ## The shape
 
-{/* showcase:dag-begin t4-incident-war-room.nika.yaml */}
+{/* showcase:dag-begin incident-war-room.nika.yaml */}
 ```mermaid
 flowchart TD
-  logs["logs · journalctl"]:::exec
+  approve["approve · nika:prompt"]:::invoke
+  deploys["deploys · git"]:::exec
   status_history["status_history · nika:fetch"]:::invoke
   runbook["runbook · nika:read"]:::invoke
   timeline["timeline · typed"]:::infer
@@ -33,18 +34,22 @@ flowchart TD
   confirmed["confirmed · nika:assert"]:::invoke
   postmortem["postmortem · thinking"]:::infer
   save["save · nika:write"]:::invoke
-  ping["ping · nika:emit"]:::invoke
-  logs --> timeline
+  alert["alert · nika:notify"]:::invoke
+  approve --> deploys
+  approve --> status_history
+  approve --> runbook
+  deploys --> timeline
   status_history --> timeline
   runbook --> timeline
   timeline -.->|success| settle
+  approve --> recheck
   settle -.->|success| recheck
   recheck --> confirmed
   timeline --> postmortem
   confirmed -.->|success| postmortem
   postmortem --> save
-  save --> ping
-  save -.->|terminal| ping
+  save --> alert
+  save -.->|terminal| alert
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef exec fill:#ff7a3c22,stroke:#ff7a3c,color:#ff7a3c
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
@@ -53,78 +58,169 @@ flowchart TD
 
 ## The file
 
-{/* showcase:begin t4-incident-war-room.nika.yaml */}
-```yaml t4-incident-war-room.nika.yaml
+{/* showcase:begin incident-war-room.nika.yaml */}
+```yaml incident-war-room.nika.yaml
 nika: v1
 workflow:
   id: incident-war-room
-  description: "parallel evidence → typed timeline → settle + recheck → postmortem draft"
+  description: "parallel evidence → typed timeline → settle + recheck → refuse or draft → record"
 
-model: ollama/qwen3.5:4b   # local default · the synthesis task below overrides to a stronger model
+model: ollama/qwen3.5:4b   # local · zero key · `--model mock/echo` rehearses the whole file
 
-const:
+vars:
+  alert:
+    type: bool
+    default: false
+    description: "Ping on-call when the run settles. OFF by default so a rehearsal touches no webhook."
+  settle:
+    type: string
+    default: "30s"
+    description: "How long to let the fix propagate before the confirming re-poll"
+  status_url:
+    type: string
+    default: "https://status.internal.example.com/v1/services/checkout-api"
+    description: "The service status endpoint · polled twice"
   service: "checkout-api"
-  status_url: "https://status.internal.example.com/v1/services/checkout-api"
   log_window: "90 minutes ago"
+  runbook: "./examples/fixtures/checkout-api-runbook.md"
 
 secrets:
   oncall_webhook:
     source: env
     key: ONCALL_WEBHOOK_URL
-    egress:                       # sanction the on_finally ping · the secret IS the URL
+    egress:                       # sanction the one send · the secret IS the URL
       - to: "nika:notify"
         host_from_self: true
 permits:
-  tools: ["nika:notify", "nika:assert", "nika:emit", "nika:fetch", "nika:read", "nika:wait", "nika:write"]
-  exec: ["journalctl"]
+  exec: ["git"]
+  tools: ["nika:assert", "nika:fetch", "nika:notify", "nika:prompt", "nika:read", "nika:wait", "nika:write"]
+  net:
+    http:
+      # The status host is judged here even though the URL arrives as an input:
+      # an input moves the ARGUMENT, never the wall. Point --var status_url at
+      # another host and the poll is refused NIKA-SEC-004 until you name it here.
+      - "status.internal.example.com"
+      # `host_from_self:` above sanctions the FLOW (the secret may be the URL) —
+      # it does not grant the capability. The host stays unknown at check, so it
+      # is judged at RUN against this bound: name the escalation host here or the
+      # send is refused mid-run, after the tokens are already spent.
+      - "hooks.slack.com"         # swap for wherever ONCALL_WEBHOOK_URL points
+  fs:
+    # The write path is built from `const.service`, so it is pinned before the
+    # run starts — but `check` reads straight past a const embedded in a longer
+    # string, so it is not declared for you. Written out literally, because a
+    # permit bound IS the wall and cannot interpolate (NIKA-AUTH-007).
+    read: ["./examples/fixtures/checkout-api-runbook.md"]
+    write: ["./incidents/checkout-api-postmortem.md"]
 
 tasks:
-  # ── the gather wave · all three run in parallel ──
-  logs:
+  # ── the human gate · FIRST, before any evidence is gathered ──
+  #
+  # All three trifecta legs are live here: a private read (the runbook),
+  # untrusted ingress (the status endpoint), and external egress (git, the
+  # status host, the write, the webhook). NEP-0002 requires a blocking human
+  # gate that DOMINATES every path to every egress-capable task, so it belongs
+  # at the root — a gate placed later cannot dominate, because the gathered
+  # evidence reaches the postmortem along its own data edge.
+  #
+  # On-call is already at the keyboard during an incident, so one confirmation
+  # up front costs nothing and authorizes the whole envelope at once.
+  approve:
+    invoke:
+      # blocking · no `default:` · a gate with a default is not a gate, and the
+      # checker agrees in both directions: add `default:` here and NIKA-SEC-009
+      # fires instead, because a defaulted prompt no longer dominates anything.
+      # The [headless-prompt] hint is the price of a real gate — pay it here.
+      # Pauses the run (exit 4) — resume with
+      #   nika run <file> --resume <trace> --answer approve=true
+      tool: "nika:prompt"
+      args:
+        message: |
+          Incident war-room for ${{ vars.service }} will:
+            · read git history for the last ${{ vars.log_window }}
+            · poll ${{ vars.status_url }} (twice, ${{ vars.settle }} apart)
+            · read ${{ vars.runbook }}
+            · write ./incidents/${{ vars.service }}-postmortem.md
+            · ping the on-call webhook (armed: ${{ vars.alert }})
+
+          Proceed? [yes/no]
+
+  # ── the gather wave · all three run in parallel, one per verb ──
+
+  # « What shipped just before it broke? » is the first question of every
+  # incident, and the runbook says so out loud.
+  deploys:
+    with:
+      go: ${{ tasks.approve.output }}
+    when: ${{ with.go == true }}
     exec:
-      command: ["journalctl", "-u", "${{ const.service }}", "--since", "${{ const.log_window }}", "--no-pager"]
-      capture: structured
+      command: ["git", "--no-pager", "log", "--oneline", "--since=${{ vars.log_window }}"]
+    on_error:
+      # Missing evidence is EVIDENCE. The stand-in is labelled so the timeline
+      # below is told the deploy log was unreadable and cannot quietly invent a
+      # release that never happened.
+      recover: "(deploy log unavailable · git could not be read here)"
 
   status_history:
+    with:
+      go: ${{ tasks.approve.output }}
+    when: ${{ with.go == true }}
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ const.status_url }}"
+        url: "${{ vars.status_url }}"
         mode: jq
         jq: ".history"
     retry:
-      max_attempts: 4
+      # A status page mid-incident is exactly the endpoint that flaps. Retry is
+      # safe here because a GET is idempotent — the checker warns [retry-effects]
+      # when you retry something that is not.
+      max_attempts: 3
       backoff_strategy: exponential
       jitter: true
+    on_error:
+      recover: []                 # offline · no history to reconstruct from
 
   runbook:
+    with:
+      go: ${{ tasks.approve.output }}
+    when: ${{ with.go == true }}
     invoke:
       tool: "nika:read"
-      args: { path: "./runbooks/${{ const.service }}.md" }
+      args: { path: "${{ vars.runbook }}" }
 
-  # ── reconstruct · typed timeline ──
+  # ── reconstruct · a TYPED timeline, not a paragraph ──
   timeline:
-    with:                               # three value edges · the gather wave feeds the synthesis
-      logs: ${{ tasks.logs.output.stdout }}
+    with:                               # three value edges · the wave joins here
+      deploys: ${{ tasks.deploys.output }}
       history: ${{ tasks.status_history.output }}
       runbook: ${{ tasks.runbook.output }}
+    when: ${{ with.runbook != null }}   # « no » at the gate → nothing to reconstruct
     infer:
+      max_tokens: 1500
       prompt: |
-        Service logs ·
-        ${{ with.logs }}
+        Deploys in the window ·
+        ${{ with.deploys }}
         Status history · ${{ with.history }}
         Runbook · ${{ with.runbook }}
 
-        Reconstruct the incident timeline as events.
+        Reconstruct the incident timeline as events. Every event cites the
+        evidence it came from; if a source says it is unavailable, say the
+        timeline is incomplete rather than filling the gap.
       schema:
+        # `additionalProperties: false` on EVERY object node — without it the
+        # shape is a suggestion and each provider returns a slightly different
+        # object. A typed timeline is the whole point of this task.
         type: object
+        additionalProperties: false
         required: [events]
         properties:
           events:
             type: array
             items:
               type: object
-              required: [at, what]
+              additionalProperties: false
+              required: [at, what, evidence]
               properties:
                 at: { type: string }
                 what: { type: string }
@@ -133,20 +229,29 @@ tasks:
   # ── settle, then confirm recovery before claiming it ──
   settle:
     after:
-      timeline: success
+      timeline: succeeded              # state, no data · wait only once there is something to confirm
     invoke:
       tool: "nika:wait"
-      args: { duration: "60s" }
+      args: { duration: "${{ vars.settle }}" }
 
   recheck:
     after:
-      settle: success
+      settle: succeeded
+    with:
+      go: ${{ tasks.approve.output }}   # the second network touch re-reads the decision too
+    when: ${{ with.go == true }}
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ const.status_url }}"
+        url: "${{ vars.status_url }}"
         mode: jq
         jq: ".current.state"
+    on_error:
+      # The rehearsal's stand-in says the service came back, so the green path
+      # is the one you see offline. Point --var status_url at a real endpoint
+      # and anything other than « operational » blocks the draft below — that
+      # refusal is the designed path, not a bug in the file.
+      recover: "operational"
 
   confirmed:
     with:
@@ -160,18 +265,20 @@ tasks:
   # ── the draft · only after recovery is proven ──
   postmortem:
     with:
-      events: ${{ tasks.timeline.output.events }}
+      events: ${{ tasks.timeline.output }}
     after:
-      confirmed: success             # state, no data · recovery proven or no draft
+      confirmed: succeeded             # state, no data · recovery proven or no draft
     infer:
-      model: anthropic/claude-sonnet-4-6   # per-task override · thinking budget
+      max_tokens: 2000
       prompt: |
         Timeline · ${{ with.events }}
         Write the postmortem draft · summary · impact · root-cause
         hypotheses · 3 follow-up actions with owners left blank.
       thinking:
+        # A reasoning budget, honoured by seats that support extended thinking
+        # and ignored by the ones that do not — declaring it never fails a run.
         enabled: true
-        budget_tokens: 6000
+        budget_tokens: 4000
 
   save:
     with:
@@ -179,38 +286,37 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./incidents/${{ const.service }}-postmortem.md"
+        path: "./incidents/${{ vars.service }}-postmortem.md"
         content: "${{ with.postmortem }}"
         create_dirs: true
 
-  # the always-pattern · the on-call ping fires on EVERY outcome:
-  # including the designed failure path (recovery NOT confirmed → the
-  # assert fails → save is cancelled → this still runs · `after:
-  # terminal` admits all four settled states · 03 §gate algebra).
-  ping:
+  # ── the record · lands on EVERY outcome, including the refused one ──
+  #
+  # `after: {save: terminal}` admits all four settled states, so this task runs
+  # when the draft lands AND when `confirmed` refused it and `save` was
+  # cancelled — which is precisely the outcome on-call needs to hear about.
+  # It is a TASK, not an `on_finally:` hook: cleanup errors are LOGGED and DO
+  # NOT PROPAGATE (03 §on_finally · best-effort lane), so a webhook that dies
+  # in a hook dies in silence — measured, the run stays green with nothing
+  # sent. An alert you cannot trust to fail loudly is not an alert.
+  alert:
     after:
       save: terminal
     with:
+      armed: ${{ vars.alert }}
       outcome: ${{ tasks.save.status }}   # observe WHAT happened · same pass-set as the after edge
+    when: ${{ with.armed == true }}       # OFF by default · a rehearsal touches no webhook
     invoke:
-      tool: "nika:emit"
+      tool: "nika:notify"
       args:
-        event_type: "incident.postmortem.drafted"
-        payload:
-          service: "${{ const.service }}"
-          status: "${{ with.outcome }}"
-    on_finally:
-      - invoke:
-          tool: "nika:notify"
-          args:
-            channel: webhook
-            target: "${{ secrets.oncall_webhook }}"
-            message: "Postmortem draft run finished for ${{ const.service }} · ${{ with.outcome }}"
-            severity: info
+        channel: webhook
+        target: "${{ secrets.oncall_webhook }}"
+        message: "${{ vars.service }} war-room settled · postmortem draft ${{ with.outcome }}"
+        severity: warning
 
 outputs:
-  events:
-    value: ${{ tasks.timeline.output.events }}
+  timeline:
+    value: ${{ tasks.timeline.output }}
     description: "The reconstructed, typed incident timeline"
   postmortem: ${{ tasks.postmortem.output }}
 ```
