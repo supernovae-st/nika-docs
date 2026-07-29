@@ -144,7 +144,7 @@ Pull requests are welcome.
 
 **Truth lives** · see « Generated content: never hand-edit » above — a fact is imported, never typed.
 
-All the buildings: [nika](https://github.com/supernovae-st/nika) · [nika-spec](https://github.com/supernovae-st/nika-spec) · [nika.sh](https://github.com/supernovae-st/nika.sh) · [nika-client](https://github.com/supernovae-st/nika-client) · [nika-vscode](https://github.com/supernovae-st/nika-vscode) · [nika-agents](https://github.com/supernovae-st/nika-agents) · [nika-registry](https://github.com/supernovae-st/nika-registry) · [homebrew-tap](https://github.com/supernovae-st/homebrew-tap) · [nika-site-audit](https://github.com/supernovae-st/nika-site-audit)
+All the buildings: [nika-spec](https://github.com/supernovae-st/nika-spec) · [nika](https://github.com/supernovae-st/nika) · [nika.sh](https://github.com/supernovae-st/nika.sh) · [nika-docs](https://github.com/supernovae-st/nika-docs) · [nika-client](https://github.com/supernovae-st/nika-client) · [nika-vscode](https://github.com/supernovae-st/nika-vscode) · [nika-agents](https://github.com/supernovae-st/nika-agents) · [homebrew-tap](https://github.com/supernovae-st/homebrew-tap) · [nika-registry](https://github.com/supernovae-st/nika-registry) · [nika-site-audit](https://github.com/supernovae-st/nika-site-audit)
 
 Every fact has one home · everything else is a gated projection.
 The living map: [nika.sh/map](https://nika.sh/map).
