@@ -121,19 +121,34 @@ Pull requests are welcome.
 5. Keep conventions above (vocabulary, headings, voice) + the generated-content
    rules (no hand-edits to projected blocks · no hardcoded counts).
 
-## Related repositories
+<!-- city:map -->
+## The city · where this repo sits
 
-| Repo | Purpose |
-|---|---|
-| [`supernovae-st/nika`](https://github.com/supernovae-st/nika) | Rust engine, the workflow runtime itself (AGPL) |
-| [`supernovae-st/nika-spec`](https://github.com/supernovae-st/nika-spec) | The open workflow language spec (Apache-2.0), the language the engine implements |
-| [`supernovae-st/nika.sh`](https://github.com/supernovae-st/nika.sh) | The site (Vite + React + r3f): [nika.sh](https://nika.sh) |
-| [`supernovae-st/nika-client`](https://github.com/supernovae-st/nika-client) | TypeScript SDK for consuming the Nika daemon |
-| [`supernovae-st/nika-vscode`](https://github.com/supernovae-st/nika-vscode) | VS Code / Cursor / Windsurf extension (Marketplace + OpenVSX) |
-| [`supernovae-st/nika-agents`](https://github.com/supernovae-st/nika-agents) | Agent plugin marketplace: the authoring skill + MCP oracle (Claude Code + Codex) |
-| [`supernovae-st/nika-registry`](https://github.com/supernovae-st/nika-registry) | Share workflows; every entry machine-re-proven |
-| [`supernovae-st/homebrew-tap`](https://github.com/supernovae-st/homebrew-tap) | Homebrew formula |
-| [`supernovae-st/nika-site-audit`](https://github.com/supernovae-st/nika-site-audit) | Example workflow: audit a website with Nika |
+```
+📜 nika-spec ──── the civil code · the law tables, the corpus, the exam
+    │ sync-pack: byte-gated mirror        │ projectors: drift-gated
+    ▼                                     ▼
+⚙️ nika ───────── the engine + the catalog (the yellow pages)
+    │ the release train                  🖥️ nika.sh · 📖 nika-docs   ◀── you are here
+    ▼                                     the showroom · the manual
+📦 homebrew-tap · npm · Docker ── the docks
+🔌 nika-client · 🎨 nika-vscode · 🤖 nika-agents ── the doors
+🏪 nika-registry ── the market · 🔍 nika-site-audit ── the witness
+```
+
+**This building** · THE MANUAL · explains the language; same projection law as the showroom.
+
+**Consumes** · the spec (canon snippets, projected) · the engine (status snapshot, refreshed).
+
+**Serves** · readers at [docs.nika.sh](https://docs.nika.sh).
+
+**Truth lives** · see « Generated content: never hand-edit » above — a fact is imported, never typed.
+
+All the buildings: [nika](https://github.com/supernovae-st/nika) · [nika-spec](https://github.com/supernovae-st/nika-spec) · [nika.sh](https://github.com/supernovae-st/nika.sh) · [nika-client](https://github.com/supernovae-st/nika-client) · [nika-vscode](https://github.com/supernovae-st/nika-vscode) · [nika-agents](https://github.com/supernovae-st/nika-agents) · [nika-registry](https://github.com/supernovae-st/nika-registry) · [homebrew-tap](https://github.com/supernovae-st/homebrew-tap) · [nika-site-audit](https://github.com/supernovae-st/nika-site-audit)
+
+Every fact has one home · everything else is a gated projection.
+The living map: [nika.sh/map](https://nika.sh/map).
+<!-- /city:map -->
 
 ## License
 
