@@ -41,10 +41,10 @@ plugin, a marketplace never touches the binary. The ladder, per surface:
 | **Every surface at once** | `scripts/update-mirrors.sh` in a [nika-agents](https://github.com/supernovae-st/nika-agents) checkout | `--check` reports drift read-only (CI-able) |
 
 <Info>
-`nika doctor` is the coherence oracle: it reads what each client
-actually loads, names any kit lagging or leading the binary's train,
-and prints the exact per-client fix. Drift is advisory (warn · exit 0)
-— a diagnosis never breaks automation.
+`nika doctor` is the coherence oracle: from v0.107 it reads what each
+client actually loads, names any kit lagging or leading the binary's
+train, and prints the exact per-client fix. Drift is advisory
+(warn · exit 0) — a diagnosis never breaks automation.
 </Info>
 
 ## IDEs & editors
