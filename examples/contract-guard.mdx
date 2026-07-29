@@ -55,7 +55,7 @@ workflow:
 # in its think block and return before the JSON (engine#428).
 model: ollama/llama3.2:3b
 
-vars:
+inputs:
   contract_path:
     type: string
     default: "examples/fixtures/contract.md"
@@ -74,7 +74,7 @@ tasks:
   contract:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.contract_path }}" }
+      args: { path: "${{ inputs.contract_path }}" }
 
   clauses:
     with:
@@ -130,7 +130,7 @@ tasks:
     with:
       clauses: ${{ tasks.clauses.output.clauses }}
     after:
-      gate: succeeded              # state, no data · the assert passed or the memo is cancelled
+      gate: success              # state, no data · the assert passed or the memo is cancelled
     infer:
       max_tokens: 1200
       prompt: |

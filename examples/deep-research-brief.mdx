@@ -48,7 +48,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · `--model mock/echo` rehearses the whole file
 
-vars:
+inputs:
   topic:
     type: string
     default: "local-first AI runtimes"
@@ -85,13 +85,13 @@ tasks:
     invoke:
       tool: "nika:jq"
       args:
-        input: "${{ vars.topic }}"
+        input: "${{ inputs.topic }}"
         expression: 'ascii_downcase | gsub("[^a-z0-9]+"; "-") | gsub("^-|-$"; "")'
 
   plan:
     infer:
       max_tokens: 400              # planning is short · cap it and the cost report is a ceiling
-      prompt: "Break '${{ vars.topic }}' into 4 sharp research queries · no overlap."
+      prompt: "Break '${{ inputs.topic }}' into 4 sharp research queries · no overlap."
       schema:
         # `additionalProperties: false` on every object node — without it the
         # shape is a suggestion and each provider answers with a slightly

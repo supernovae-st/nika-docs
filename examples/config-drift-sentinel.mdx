@@ -62,11 +62,13 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-haiku-4-5 (explain is cheap)
 
-vars:
+inputs:
   config_url:
     type: string
     default: "https://api.internal.example.com/v1/config"
     description: "The live-config endpoint · the placeholder resolves nowhere, which is what makes the default run a rehearsal"
+
+const:
   # The committed rehearsal baseline. Point this at your real intended state
   # and change `permits.fs.read` in the same edit — a permit is a literal you
   # can read, it cannot interpolate a const (`NIKA-AUTH-007`).
@@ -78,7 +80,7 @@ vars:
   # This is a BARE LITERAL, deliberately. A typed constant is `{ type, value }`
   # and nothing else: an object missing either key is read as a literal object
   # (`01-envelope.md:273`). Writing `{ type: object, default: {} }` here would
-  # declare nothing — `${{ vars.approved_overrides }}` would resolve to that
+  # declare nothing — `${{ const.approved_overrides }}` would resolve to that
   # whole three-key map. Measured, with `{ replicas: 6 }` as the baseline:
   #   {"default":{},"description":"…","replicas":6,"type":"object"}
   # No error, no warning. The sentinel would just spend every morning diffing
@@ -136,14 +138,14 @@ tasks:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.config_url }}"
+        url: "${{ inputs.config_url }}"
         mode: raw
 
   # ── what prod is supposed to be · also bytes ───────────────────────
   baseline_raw:
     invoke:
       tool: "nika:read"              # returns a STRING · a file is text until you parse it
-      args: { path: "${{ vars.baseline_path }}" }
+      args: { path: "${{ const.baseline_path }}" }
 
   # Provenance over the exact response bytes, taken BEFORE the parse: two
   # different JSON texts that mean the same thing hash differently, and that
@@ -183,7 +185,7 @@ tasks:
       tool: "nika:json_merge_patch"     # RFC 7396 · objects merge, null deletes
       args:
         target: "${{ with.baseline }}"
-        patch: "${{ vars.approved_overrides }}"
+        patch: "${{ const.approved_overrides }}"
 
   # ── the difference, as data ────────────────────────────────────────
   drift:
@@ -206,7 +208,7 @@ tasks:
     invoke:
       tool: "nika:jq"
       args:
-        input: { patch: "${{ with.patch }}", prefixes: "${{ vars.paging_prefixes }}" }
+        input: { patch: "${{ with.patch }}", prefixes: "${{ const.paging_prefixes }}" }
         expression: >-
           .prefixes as $p
           | .patch

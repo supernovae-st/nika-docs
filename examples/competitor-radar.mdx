@@ -65,7 +65,7 @@ model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-sonn
 run:
   clock: system            # `pages` declares a `timeout:` · name the clock it rides
 
-vars:
+inputs:
   sitemap_url:
     type: string
     default: "https://nika.sh/sitemap.xml"
@@ -122,7 +122,7 @@ tasks:
       args:
         op: subtract
         base: "${{ with.now }}"
-        duration: "${{ vars.window_days }}d"
+        duration: "${{ inputs.window_days }}d"
 
   cutoff_day:
     with:
@@ -139,7 +139,7 @@ tasks:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "${{ vars.sitemap_url }}"
+        url: "${{ inputs.sitemap_url }}"
         mode: sitemap                  # → [{loc, lastmod, changefreq, priority}, …]
 
   # `lastmod` is optional in the sitemap protocol, so `// ""` sends an entry
@@ -159,7 +159,7 @@ tasks:
           | .entries
           | map(select((.lastmod // "") >= $c))
           | sort_by(.lastmod) | reverse
-          | .[:${{ vars.max_pages }}]
+          | .[:${{ inputs.max_pages }}]
           | map(.loc)
 
   # ── read them all at once ──────────────────────────────────────────

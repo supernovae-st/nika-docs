@@ -51,7 +51,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local default · swap for mistral/mistral-large (EU model for EU locales)
 
-vars:
+const:
   lang: "fr"
   # The committed rehearsal tree. Point this at ./docs (or wherever yours
   # lives) and change `permits.fs.read` to match, in the same edit.
@@ -79,7 +79,7 @@ tasks:
     invoke:
       tool: "nika:glob"
       args:
-        pattern: "${{ vars.source_root }}/**/*.md"
+        pattern: "${{ const.source_root }}/**/*.md"
         exclude: ["**/node_modules/**"]
 
   # ── stage 1 · read every file, 8 at a time ─────────────────────────
@@ -106,7 +106,7 @@ tasks:
         input: ["${{ with.files }}", "${{ with.texts }}"]
         expression: >-
           transpose
-          | map({ path: (.[0] | ltrimstr("${{ vars.source_root }}/")), text: .[1] })
+          | map({ path: (.[0] | ltrimstr("${{ const.source_root }}/")), text: .[1] })
 
   # ── stage 2 · translate every file, 3 at a time ────────────────────
   translated:
@@ -120,7 +120,7 @@ tasks:
     infer:
       max_tokens: 4000                 # a doc page, not a book · the cost ceiling is a real number
       prompt: |
-        Translate to ${{ vars.lang }} · keep the markdown structure, leave
+        Translate to ${{ const.lang }} · keep the markdown structure, leave
         code blocks untouched, and keep the original tone ·
         ${{ item.text }}
 
@@ -151,7 +151,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "./i18n/${{ vars.lang }}/${{ item.path }}"
+        path: "./i18n/${{ const.lang }}/${{ item.path }}"
         content: "${{ item.text }}"
         create_dirs: true              # the mirror's subdirectories do not exist yet
 

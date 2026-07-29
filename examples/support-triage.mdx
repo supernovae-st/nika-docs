@@ -52,7 +52,7 @@ workflow:
 # (engine#428). Schema showcases pick a model that answers directly.
 model: ollama/llama3.2:3b   # local · zero key · swap for groq/llama-3.3-70b (triage wants speed)
 
-vars:
+const:
   queue_path: "examples/fixtures/support-queue.json"
 
 secrets:
@@ -86,7 +86,7 @@ tasks:
   queue:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.queue_path }}" }
+      args: { path: "${{ const.queue_path }}" }
 
   triage:
     with:

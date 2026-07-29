@@ -53,11 +53,13 @@ workflow:
 # (engine#428). Schema showcases pick a model that answers directly.
 model: ollama/llama3.2:3b
 
-vars:
+inputs:
   announce:
     type: bool
     default: false
     description: "Actually send the team ping (needs TEAM_WEBHOOK_URL)"
+
+const:
   since_tag: "v0.80.0"
   changelog_src: "examples/fixtures/CHANGELOG.md" # point this at YOUR CHANGELOG.md
   changelog_out: "out/CHANGELOG.md"                        # the working copy this run edits
@@ -92,7 +94,7 @@ permits:
 tasks:
   history:
     exec:
-      command: ["git", "log", "${{ vars.since_tag }}..HEAD", "--oneline", "--no-merges"]
+      command: ["git", "log", "${{ const.since_tag }}..HEAD", "--oneline", "--no-merges"]
     on_error:
       # No such tag here (or not a repo at all) → a sample log takes over and
       # the rest of the chain is exercised exactly as it would be on the day.
@@ -125,7 +127,7 @@ tasks:
   existing:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.changelog_src }}" }
+      args: { path: "${{ const.changelog_src }}" }
 
   copy:
     with:
@@ -133,7 +135,7 @@ tasks:
     invoke:
       tool: "nika:write"
       args:
-        path: "${{ vars.changelog_out }}"
+        path: "${{ const.changelog_out }}"
         content: "${{ with.existing }}"
         create_dirs: true
         overwrite: true
@@ -143,26 +145,26 @@ tasks:
       notes_headline: ${{ tasks.notes.output.headline }}
       notes_body: ${{ tasks.notes.output.body }}
     after:
-      copy: succeeded              # state, no data · the anchor is on disk before we edit
+      copy: success              # state, no data · the anchor is on disk before we edit
     invoke:
       tool: "nika:edit"
       args:
-        path: "${{ vars.changelog_out }}"
+        path: "${{ const.changelog_out }}"
         find: "# Changelog"      # a LITERAL string · not a regex
         count: 1                 # the top anchor only · never every occurrence
         replace: |
           # Changelog
 
-          ## ${{ vars.since_tag }}..HEAD · ${{ with.notes_headline }}
+          ## ${{ const.since_tag }}..HEAD · ${{ with.notes_headline }}
 
           ${{ with.notes_body }}
 
   announce:
     with:
       notes_headline: ${{ tasks.notes.output.headline }}
-    when: ${{ vars.announce == true }}   # OFF by default · a rehearsal must not ping the team
+    when: ${{ inputs.announce == true }}   # OFF by default · a rehearsal must not ping the team
     after:
-      changelog: succeeded
+      changelog: success
     invoke:
       tool: "nika:notify"
       args:

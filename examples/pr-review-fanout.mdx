@@ -63,7 +63,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local tool-calling model · swap for anthropic/claude-sonnet-4-6 for depth
 
-vars:
+const:
   base_ref: "main"
   review_root: "src/"      # the swarm's territory · keep in step with permits.fs.read
 
@@ -99,7 +99,7 @@ tasks:
   # reviewed, and asking an agent to read it just burns a turn on an error.
   changed:
     exec:
-      command: ["git", "diff", "--name-only", "--diff-filter=d", "${{ vars.base_ref }}...HEAD"]
+      command: ["git", "diff", "--name-only", "--diff-filter=d", "${{ const.base_ref }}...HEAD"]
 
   files:
     with:
@@ -111,7 +111,7 @@ tasks:
         expression: >-
           split("\n")
           | map(select(length > 0))
-          | map(select(startswith("${{ vars.review_root }}")))
+          | map(select(startswith("${{ const.review_root }}")))
 
   # The deterministic pass. Debt does not need a model to be found, and this
   # runs whether or not anything changed.

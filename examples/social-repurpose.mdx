@@ -49,7 +49,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large or any provider
 
-vars:
+const:
   # The sample post ships with the repo. Point this at your own and move the
   # read permit with it — `permits:` cannot interpolate (NIKA-AUTH-007).
   post_path: "examples/fixtures/launch-post.md"
@@ -64,7 +64,7 @@ tasks:
   post:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.post_path }}" }
+      args: { path: "${{ const.post_path }}" }
 
   # Three rewrites · no deps between them · they run concurrently.
   thread:

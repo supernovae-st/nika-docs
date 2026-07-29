@@ -49,7 +49,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (drafting is a fast-model job)
 
-vars:
+const:
   ledger_csv: "examples/fixtures/invoices.csv"
 permits:
   tools: ["nika:convert", "nika:jq", "nika:prompt", "nika:read", "nika:write"]
@@ -64,7 +64,7 @@ tasks:
   ledger:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.ledger_csv }}" }
+      args: { path: "${{ const.ledger_csv }}" }
 
   rows:
     with:

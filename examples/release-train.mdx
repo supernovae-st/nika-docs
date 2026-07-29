@@ -79,7 +79,7 @@ run:
   # `clock: virtual` swaps in a simulated clock for tests (F-P3).
   clock: system
 
-vars:
+inputs:
   version:
     type: string
     required: true
@@ -150,7 +150,7 @@ tasks:
           - "${{ with.declared }}"
           - "${{ with.notes }}"
           - "${{ with.schema }}"
-          - "${{ vars.version }}"
+          - "${{ inputs.version }}"
         expression: |
           . as [$declared, $notes, $schema, $asked]
           | { version_matches: (($declared | rtrimstr("\n")) == $asked),
@@ -171,7 +171,7 @@ tasks:
 
   t1:
     after:
-      gates_green: succeeded           # state, no data · the clock stops on a green board
+      gates_green: success           # state, no data · the clock stops on a green board
     invoke:
       tool: "nika:date"
       args: { op: now }
@@ -210,8 +210,8 @@ tasks:
           Board · ${{ with.board }}
           Green in ${{ with.gate_time }} min.
 
-          Ship ${{ vars.version }} · departure window opens in ${{ vars.hold_for }}?
-          (depart armed: ${{ vars.depart }})
+          Ship ${{ inputs.version }} · departure window opens in ${{ inputs.hold_for }}?
+          (depart armed: ${{ inputs.depart }})
 
   # ── hold until the window · an absolute instant, computed AFTER the signature ──
   #
@@ -240,7 +240,7 @@ tasks:
       args:
         op: add
         base: "${{ with.at }}"
-        duration: "${{ vars.hold_for }}"
+        duration: "${{ inputs.hold_for }}"
 
   hold:
     with:
@@ -260,12 +260,12 @@ tasks:
   # ── the irreversible step · armed, and only after the hold ──
   ship:
     after:
-      hold: succeeded
+      hold: success
     with:
-      depart: ${{ vars.depart }}
+      depart: ${{ inputs.depart }}
     when: ${{ with.depart == true }}   # dry-run by default · a rehearsal ships nothing
     exec:
-      # argv, never a shell string: `${{ vars.version }}` is substituted as ONE
+      # argv, never a shell string: `${{ inputs.version }}` is substituted as ONE
       # argument and cannot break out into a second command.
       #
       # Default capture (stdout) on purpose. `capture: structured` would turn a
@@ -274,12 +274,12 @@ tasks:
       # below must not be lied to about. The checker flags that shape when
       # nothing reads `exit_code` ([swallowed-exit]); here the honest answer is
       # not to read the code but to let a failed release FAIL, NIKA-EXEC-001.
-      command: ["./scripts/release.sh", "${{ vars.version }}"]
+      command: ["./scripts/release.sh", "${{ inputs.version }}"]
     timeout: "30m"
 
   verify:
     after:
-      ship: succeeded                  # never probe prod for a release that did not go out
+      ship: success                  # never probe prod for a release that did not go out
     invoke:
       tool: "nika:fetch"
       args:
@@ -295,7 +295,7 @@ tasks:
 
   live:
     with:
-      version_live: ${{ tasks.verify.output == vars.version }}   # the whole check crosses as ONE boundary expression
+      version_live: ${{ tasks.verify.output == inputs.version }}   # the whole check crosses as ONE boundary expression
     invoke:
       tool: "nika:assert"
       args:
@@ -328,8 +328,8 @@ tasks:
       args:
         event_type: "release.train.departed"
         payload:
-          version: "${{ vars.version }}"
-          departed: "${{ vars.depart }}"
+          version: "${{ inputs.version }}"
+          departed: "${{ inputs.depart }}"
           # The engine's word, not a paraphrase: `cancelled` here means the
           # verification never got to run, which is the truth on a rehearsal and
           # on a red board alike. `departed:` above is what disambiguates them.

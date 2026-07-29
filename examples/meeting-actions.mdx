@@ -47,7 +47,7 @@ workflow:
 # (engine#428). Schema showcases pick a model that answers directly.
 model: ollama/llama3.2:3b
 
-vars:
+inputs:
   transcript_path:
     type: string
     default: "examples/fixtures/meeting-transcript.txt"
@@ -67,7 +67,7 @@ tasks:
   transcript:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.transcript_path }}" }
+      args: { path: "${{ inputs.transcript_path }}" }
 
   extract:
     with:
@@ -110,7 +110,7 @@ tasks:
 
   trace:
     after:
-      extract: succeeded
+      extract: success
     invoke:
       tool: "nika:log"
       args:

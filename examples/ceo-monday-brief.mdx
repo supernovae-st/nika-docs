@@ -68,7 +68,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # local · zero key · `--model mock/echo` rehearses the whole file
 
-vars:
+inputs:
   alert:
     type: bool
     default: false
@@ -77,6 +77,8 @@ vars:
     type: string
     default: "./examples/fixtures/ceo-kpis.csv"
     description: "The weekly numbers · columns incl. weekly_revenue"
+
+const:
   watch_query: "AI workflow engines"
 
 secrets:
@@ -136,9 +138,9 @@ tasks:
           This Monday brief will:
             · fetch public news from hn.algolia.com
             · run git in this repo
-            · read ${{ vars.kpi_sheet }}
+            · read ${{ inputs.kpi_sheet }}
             · write ./briefs/<date>-monday.md
-            · ping the founders webhook (armed: ${{ vars.alert }})
+            · ping the founders webhook (armed: ${{ inputs.alert }})
 
           Proceed? [yes/no]
 
@@ -150,7 +152,7 @@ tasks:
     invoke:
       tool: "nika:fetch"
       args:
-        url: "https://hn.algolia.com/api/v1/search?query=${{ vars.watch_query }}"
+        url: "https://hn.algolia.com/api/v1/search?query=${{ const.watch_query }}"
         mode: jq
         jq: ".hits[:10] | map(.title)"
     on_error:
@@ -184,7 +186,7 @@ tasks:
     when: ${{ with.go == true }}
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.kpi_sheet }}" }
+      args: { path: "${{ inputs.kpi_sheet }}" }
 
   rows:
     with:
@@ -282,7 +284,7 @@ tasks:
     after:
       save: terminal
     with:
-      armed: ${{ vars.alert }}
+      armed: ${{ inputs.alert }}
       outcome: ${{ tasks.save.status }}   # observe WHAT happened · same pass-set as the after edge
       day: ${{ tasks.stamp.day }}
     when: ${{ with.armed == true }}       # OFF by default · a rehearsal touches no webhook

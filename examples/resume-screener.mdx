@@ -55,7 +55,7 @@ workflow:
 
 model: ollama/qwen3.5:4b   # PII stays on the machine · the whole screen is offline
 
-vars:
+const:
   role: "Senior Rust engineer"
   shortlist_size: 5
   # The committed rehearsal inbox. Point this at ./hiring/inbox (or wherever
@@ -90,7 +90,7 @@ tasks:
   pool:
     invoke:
       tool: "nika:glob"
-      args: { pattern: "${{ vars.cv_glob }}" }
+      args: { pattern: "${{ const.cv_glob }}" }
 
   cvs:
     with:
@@ -135,7 +135,7 @@ tasks:
     infer:
       max_tokens: 1200                 # a rubric row, not an essay
       prompt: |
-        Role · ${{ vars.role }}
+        Role · ${{ const.role }}
         Candidate file · ${{ with.cv_path }}
         CV ·
         ${{ item.text }}
@@ -179,7 +179,7 @@ tasks:
       tool: "nika:jq"
       args:
         input: "${{ with.ranked }}"
-        expression: ".[:${{ vars.shortlist_size }}]"
+        expression: ".[:${{ const.shortlist_size }}]"
 
   brief:
     with:

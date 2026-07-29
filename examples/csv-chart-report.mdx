@@ -49,7 +49,7 @@ workflow:
   id: csv-chart-report
   description: "CSV → aggregate → rendered bar chart + markdown report · offline · deterministic"
 
-vars:
+const:
   sales_csv: "examples/fixtures/sales.csv" # columns · region,revenue (revenue a plain number)
 
 permits:
@@ -68,7 +68,7 @@ tasks:
   raw:
     invoke:
       tool: "nika:read"
-      args: { path: "${{ vars.sales_csv }}" }
+      args: { path: "${{ const.sales_csv }}" }
 
   rows:
     with:
@@ -121,7 +121,7 @@ tasks:
     with:
       rows_md: ${{ tasks.rows_md.output }}
     after:
-      chart: succeeded
+      chart: success
     invoke:
       tool: "nika:write"
       args:

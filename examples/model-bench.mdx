@@ -48,7 +48,7 @@ workflow:
 
 model: ollama/qwen3.5:4b # the house default · contenders below pick their own seats
 
-vars:
+const:
   question:
     # A TYPED constant is `{ type, value }` — both keys, exactly those two.
     # `{ type, default }` is not a declaration at all (01-envelope.md §const:
@@ -65,19 +65,19 @@ tasks:
   ask_incumbent:
     infer:
       model: ollama/qwen2.5:14b # the quality bar · the seat to beat
-      prompt: "${{ vars.question }}"
+      prompt: "${{ const.question }}"
       max_tokens: 600
 
   ask_challenger:
     infer:
       model: ollama/llama3.2:3b # another family · same size class
-      prompt: "${{ vars.question }}"
+      prompt: "${{ const.question }}"
       max_tokens: 600
 
   ask_tiny:
     infer:
       model: ollama/qwen2.5:0.5b # the "is small enough?" probe
-      prompt: "${{ vars.question }}"
+      prompt: "${{ const.question }}"
       max_tokens: 600
 
   tabulate:

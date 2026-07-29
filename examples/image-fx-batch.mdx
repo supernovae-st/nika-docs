@@ -43,7 +43,7 @@ workflow:
   id: image-fx-batch
   description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
 
-vars:
+const:
   # Two sample photos ship with the repo. Point this at your own folder and
   # move `permits.fs.read` with it — a const is baked in, never caller-supplied,
   # so the two lines stay in step by editing, not by magic.
@@ -73,7 +73,7 @@ tasks:
   shots:
     invoke:
       tool: "nika:glob"
-      args: { pattern: "${{ vars.photos }}/*.png" }
+      args: { pattern: "${{ const.photos }}/*.png" }
 
   # Derive {src, out} pairs · jq does the string work, natively.
   jobs:
