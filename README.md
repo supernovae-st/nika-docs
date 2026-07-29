@@ -121,6 +121,8 @@ Pull requests are welcome.
 5. Keep conventions above (vocabulary, headings, voice) + the generated-content
    rules (no hand-edits to projected blocks · no hardcoded counts).
 
+![nika check audits the workflow (plan, permits, cost, secrets, types, the lethal-trifecta gate), then nika run executes it locally and seals the hash-chained trace — the audit-then-run story](https://raw.githubusercontent.com/supernovae-st/nika/main/media/nika-hero.gif)
+
 <!-- city:map -->
 ## The city · where this repo sits
 
