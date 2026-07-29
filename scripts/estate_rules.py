@@ -79,7 +79,6 @@ _AUTHORED = {
     "scripts/oracle-sweep.py": "hand-written gate · SPDX header + the copy-paste-invariant design prose",
     "scripts/teach-parity.py": "hand-written gate · docstring narrates its birth (the untaught `nika context` catch)",
     "scripts/mintlify-snapshot.sh": "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)",
-    SELF: "the shared estate tool, mirrored byte-for-byte from supernovae-st/nika-estate",  # noqa: F821
     RULES: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours",  # noqa: F821
     "snippets/_ecosystem.mdx": "its own header: 'Edit HERE, never per-page' — the one hand-edited snippet (a single-source link mesh, not a projection)",
     "snippets/_status-snapshot.mdx": "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields",
@@ -100,6 +99,17 @@ _LICENSE_EVIDENCE = ("verbatim GNU AGPL-3.0 text from the FSF, placed here byte 
 
 
 # ── FILES · the per-file exceptions, computed from what the tree shows ──────
+
+_MIRROR_ROWS = [
+    {"path": SELF, "class": "pinned-copy", "evidence": "the shared estate tool, mirrored byte-for-byte from supernovae-st/nika-estate · editing it here is a lost gesture: change it upstream, bump ESTATE_PIN, re-mirror",
+      "derivation": {
+            "tool": "curl the tool from nika-estate at the rev named in ESTATE_PIN",
+            "gate": "the `mirror` job byte-compares scripts/estate.py against nika-estate@ESTATE_PIN and fails the run on any difference",
+            "inputs": ["ESTATE_PIN", "supernovae-st/nika-estate@<ESTATE_PIN>:scripts/estate.py"],
+        }},
+    {"path": "ESTATE_PIN", "class": "authored-pin",
+      "evidence": "its own header: 'Bump deliberately: edit this' \u00b7 the rev the shared estate tool is mirrored from, and the INPUT the mirror gate compares against"},
+]
 
 FILES = []
 
@@ -170,3 +180,6 @@ PATTERNS = [
      "evidence": "no generation marker or known role found",
      "note": "unverified-default"},
 ]
+
+for _r in _MIRROR_ROWS:
+    FILES.append(_r)

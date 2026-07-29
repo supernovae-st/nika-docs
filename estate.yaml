@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 151
-  file_rows: 31
+  classified_files: 153
+  file_rows: 32
   pattern_rows: 6
   by_class:
     authored: 148
-    authored-pin: 0
+    authored-pin: 1
     generated: 2
-    pinned-copy: 1
+    pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 23
+  unverified-default: 24
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 167f52271ea6ca19e1639f0186876fe6a5ef570b3b81eb354b6e861c1ac2b674
+  sha256: c7d5793272859bd872c6b7ab812a0a0051a4ab4d406c70137dd73400b6977e63
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -55,6 +55,10 @@ files:
   class: authored
   sha256: 5f76c7e3996f36402436108a007868a87c10620f6d13a7922edd043e822dfe25
   evidence: "hand-written deploy runbook (Mintlify dashboard + DNS steps · two owners)"
+- path: "ESTATE_PIN"
+  class: authored-pin
+  sha256: e51cd1e4b2fb74b8ffea6df4ec25d00a1aafbc4278cd07e7ebc0a2cde1f2460c
+  evidence: "its own header: 'Bump deliberately: edit this' · the rev the shared estate tool is mirrored from, and the INPUT the mirror gate compares against"
 - path: "LICENSE"
   class: pinned-copy
   sha256: 8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef
@@ -130,12 +134,18 @@ files:
   sha256: 78689def3114c2bd68cdd4c3630e3bbcca6b3755c76ba1957e3b771a2be9bd37
   evidence: "hand-written gate · 'the count-rot ratchet' design prose header"
 - path: "scripts/estate.py"
-  class: authored
-  sha256: e969a7fcbcb573fcd06e4aae41e8b4faa88f19415a20ec42e0ceb464ca964a27
-  evidence: "the shared estate tool, mirrored byte-for-byte from supernovae-st/nika-estate"
+  class: pinned-copy
+  sha256: a77b3331d08ab86531f86a1bc33e9e5f0bf1fbe378803b39b2e73a42c83d93fa
+  evidence: "the shared estate tool, mirrored byte-for-byte from supernovae-st/nika-estate · editing it here is a lost gesture: change it upstream, bump ESTATE_PIN, re-mirror"
+  derivation:
+    tool: "curl the tool from nika-estate at the rev named in ESTATE_PIN"
+    gate: "the `mirror` job byte-compares scripts/estate.py against nika-estate@ESTATE_PIN and fails the run on any difference"
+    inputs:
+    - "ESTATE_PIN"
+    - "supernovae-st/nika-estate@<ESTATE_PIN>:scripts/estate.py"
 - path: "scripts/estate_rules.py"
   class: authored
-  sha256: 37921b9600850ec65e086f49500e01fbfdb3c14af2cfa1489b4b4489be08c947
+  sha256: 1475fccbf5de216d30c63789a47bd3a7fe9e79d2cab30d347df304dba58fbcc7
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
@@ -212,11 +222,12 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 0
-  aggregate_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  match_count: 1
+  aggregate_sha256: 3a7b99ceb31be51bc6d5c5690dc45436ea4143cfea12666b514f8503e4604129
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
+- ".gitignore"
 - "images/favicon.svg"
 - "images/logo-dark.svg"
 - "images/logo-light.svg"
