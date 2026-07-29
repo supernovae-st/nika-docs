@@ -214,13 +214,8 @@ permits:
     # `NIKA-SEC-004 · ./items resolves outside the declared permits.fs.read
     # boundary`, because `*` never crosses `/` and so never matches `./items`
     # itself. Grant the directory. A deeper pattern (`./items/**/*.md`) walks
-    # deeper and needs `./items/**`.
-    #
-    # HONEST HINT · `check` reports NIKA-DRIFT-001 here ("matches no path the
-    # body reads") because its drift detector does not model a glob as a read.
-    # The runtime does. Following that hint deletes the entry and kills the run
-    # — keep it. Coverage decision:
-    # the nika engine repo · docs/plans/2026-07-28-verdict-coverage.md
+    # deeper and needs `./items/**`. The drift detector models the walk root
+    # as a read (2026-07-29) — the former NIKA-DRIFT-001 false hint is closed.
     read: ["./items"]
 
 tasks:
@@ -294,6 +289,8 @@ permits:                            # the blast radius · default-deny once pres
     read: ["./state/etl-state.json"]    # SLOT: keep in step with const.state_path
     write: ["./state/etl-state.json"]   # SLOT: idem — the job writes nothing else
   net: { http: ["api.example.com"] }    # SLOT: the source host from const.source_url
+policy:                              # NEP-0014 · the gate runs under a NAMED endorsement mode
+  endorsement: solo
 
 tasks:
   # NEP-0002 · the Rule of Two, as a check. This run holds all three legs at
@@ -519,6 +516,8 @@ secrets:
     egress:
       - to: "nika:notify"
         host_from_self: true        # the secret value IS the destination URL
+policy:                              # NEP-0014 · the gate runs under a NAMED endorsement mode
+  endorsement: solo
 
 tasks:
   # ── the verification wave · all checks run in parallel ──
@@ -797,13 +796,9 @@ permits:                            # the blast radius · default-deny once pres
     # A `multipart:` file part names a path, and that read crosses the boundary
     # like any other: measured, without this entry the call dies `NIKA-SEC-004 ·
     # ./out/assets/asset-1.png resolves outside the declared permits.fs.read
-    # boundary`. One exact file, never the tree it sits in.
-    #
-    # HONEST HINT · `check` reports NIKA-DRIFT-001 here ("matches no path the
-    # body reads") because its drift detector does not model a multipart part as
-    # a read. The runtime does. Following that hint deletes the entry and kills
-    # the run — keep it. Coverage decision:
-    # the nika engine repo · docs/plans/2026-07-28-verdict-coverage.md
+    # boundary`. One exact file, never the tree it sits in. The drift detector
+    # models a multipart part as a read (2026-07-29) — the former NIKA-DRIFT-001
+    # false hint is closed.
     read: ["./out/assets/asset-1.png"]   # SLOT: keep in step with const.asset_path
 
 tasks:

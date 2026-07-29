@@ -25,6 +25,15 @@ if shutil.which("nika") is None:
 
 SKIP = re.compile(r"skeleton|illustration|modeline", re.I)
 FENCE = re.compile(r"```yaml([^\n]*)\n(.*?)```", re.DOTALL)
+# The one deliberate red — the SEC-009 witness (NEP-0002): the spec keeps
+# examples/release-radar.nika.yaml red on purpose (engine repo ·
+# docs/plans/2026-07-28-verdict-coverage.md §DECIDED · SEC-009 — a prompt
+# added just to turn it green would be ceremony on a file people copy), and
+# the docs mirror that block verbatim. Inverted assertion, never a skip:
+# the fence MUST fail with exactly this code — a green means the lane broke,
+# any other code means a new defect is hiding behind the expected one.
+DELIBERATE_RED = {"release-radar.nika.yaml": "NIKA-SEC-009"}
+CODE = re.compile(r"NIKA-[A-Z]+-\d+")
 # A fence may name its file (```yaml child.nika.yaml). Named fences are
 # materialized as SIBLINGS before judging, so a composition parent can
 # resolve `invoke: workflow: ./child.nika.yaml` — the multi-file examples
@@ -55,6 +64,16 @@ for fp in sorted(DOCS.rglob("*.mdx")):
         path = pathlib.Path(page_dir) / name
         path.write_text(body)
         r = subprocess.run(["nika", "check", str(path)], capture_output=True, text=True)
+        expected = DELIBERATE_RED.get(name)
+        if expected:
+            emitted = {c for l in (r.stdout + r.stderr).splitlines() if "✖" in l
+                       for c in CODE.findall(l)}
+            if r.returncode == 0 or emitted != {expected}:
+                bad += 1
+                print(f"✗ {fp.relative_to(DOCS)}  [{name}] · deliberate red broke")
+                print(f"   · expected exactly {expected} · got rc={r.returncode} "
+                      f"{sorted(emitted) or 'no codes'}")
+            continue
         if r.returncode != 0:
             bad += 1
             print(f"✗ {fp.relative_to(DOCS)}  [{name}]")
