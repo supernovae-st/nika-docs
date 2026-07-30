@@ -21,13 +21,16 @@ object, and the announcement quotes the same headline the CHANGELOG got.
 {/* showcase:dag-begin release-notes.nika.yaml */}
 ```mermaid
 flowchart LR
+  approve["approve · nika:prompt"]:::invoke
   history["history · git"]:::exec
   notes["notes · typed"]:::infer
   existing["existing · nika:read"]:::invoke
   copy["copy · nika:write"]:::invoke
   changelog["changelog · nika:edit"]:::invoke
   announce["announce · nika:notify"]:::invoke
+  approve -.->|success| history
   history --> notes
+  approve -.->|success| existing
   existing --> copy
   notes --> changelog
   copy -.->|success| changelog
@@ -72,7 +75,7 @@ secrets:
       - to: "nika:notify"
         host_from_self: true
 permits:
-  tools: ["nika:edit", "nika:notify", "nika:read", "nika:write"]
+  tools: ["nika:edit", "nika:notify", "nika:prompt", "nika:read", "nika:write"]
   exec: ["git"]                   # the ONE program this workflow may run
   fs:
     # The workflow never edits your changelog in place — it copies it and
@@ -92,7 +95,22 @@ permits:
     http: ["hooks.slack.com"]
 
 tasks:
+  # The human gate (NEP-0002 · v2.2). `git log` output is UNTRUSTED content —
+  # a hostile branch writes its own commit subjects — and this workflow pairs
+  # it with a private `fs.read` and a webhook: the lethal trifecta, unless a
+  # human dominates the path. The gate comes FIRST and BOTH roots hang off it
+  # (`history` carries the untrusted content, `existing` carries the private
+  # read); a gate on a sibling branch dominates nothing. Non-interactive runs
+  # answer it in one pass with `--answer approve=true`.
+  approve:
+    invoke:
+      tool: "nika:prompt"
+      args:
+        mode: "confirm"
+        message: "read the git history since ${{ const.since_tag }}, rewrite the changelog copy, and ping the team if announce is on?"
+
   history:
+    after: { approve: success }
     exec:
       command: ["git", "log", "${{ const.since_tag }}..HEAD", "--oneline", "--no-merges"]
     on_error:
@@ -125,6 +143,7 @@ tasks:
   # matches nothing (NIKA-BUILTIN-EDIT-001), so its target must exist and must
   # carry the anchor. Read yours, write the working copy, edit THAT.
   existing:
+    after: { approve: success }
     invoke:
       tool: "nika:read"
       args: { path: "${{ const.changelog_src }}" }
