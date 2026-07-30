@@ -74,7 +74,8 @@ train, and prints the exact per-client fix. Drift is advisory
 | **Gemini CLI · Qwen Code** | `mcpServers` stanza in the user-scope `settings.json` | [Gemini CLI](/integrations/clients/gemini-cli) · [Qwen Code](/integrations/clients/qwen-code) |
 | **Kimi Code CLI** | `mcpServers` entry in `~/.kimi-code/mcp.json` + the `.agents/skills` authoring skill discovered natively | [Kimi Code guide](/integrations/clients/kimi-code) |
 | **Warp (Oz)** | reads the Claude Code and Codex configs plus the project `.mcp.json` natively — `nika wire claude` or `nika init` opens this door | [MCP clients](/integrations/mcp-clients) |
-| **GitHub Copilot CLI** | reads the project `.mcp.json` (cwd up to repo root) and `AGENTS.md` — `nika init` covers both | [MCP clients](/integrations/mcp-clients) |
+| **GitHub Copilot CLI** | reads the project `.mcp.json` (cwd up to repo root) and `AGENTS.md` — `nika init` covers both · `copilot mcp add nika -- nika mcp` for the machine level | [MCP clients](/integrations/mcp-clients) |
+| **Amp** | reads `AGENTS.md` and the `.agents/skills` dir natively (both written by `nika init`) · `amp mcp add nika -- nika mcp` wires the oracle | [MCP clients](/integrations/mcp-clients) |
 | **Cline · Continue** | `cline_mcp_settings.json` (hot-reloaded) · own-file `~/.continue/mcpServers/nika.json` | [Cline](/integrations/clients/cline) · [Continue](/integrations/clients/continue) |
 | **Open WebUI · AnythingLLM · Cherry Studio · Jan** | mcpo recipe · generic stdio stanza | [Open WebUI](/integrations/clients/open-webui) · [AnythingLLM](/integrations/clients/anythingllm) · [Cherry Studio](/integrations/clients/cherry-studio) · [Jan](/integrations/clients/jan) |
 | **Aider** | no MCP — `AGENTS.md` (written by `nika init`) covers it | [MCP clients → Aider](/integrations/mcp-clients#aider) |
