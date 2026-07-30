@@ -1,0 +1,55 @@
+---
+title: "Use Nika with Kimi Code CLI"
+description: "Add the read-only Nika oracle to kimi-code's mcp.json — the exact file contract, the one trap from the legacy CLI, and the deterministic proof."
+sidebarTitle: "Kimi Code"
+icon: "moon"
+---
+
+[Kimi Code CLI](https://github.com/MoonshotAI/kimi-code) reads MCP servers
+from `mcp.json` at two levels: user `~/.kimi-code/mcp.json` (shared across
+projects) and project `.kimi-code/mcp.json` (a same-named project entry
+wins). The binary comes first: `brew install supernovae-st/tap/nika`
+([other paths](/getting-started/installation)).
+
+Add the `nika` entry to `~/.kimi-code/mcp.json`:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+Or conversationally: `/mcp-config` in the TUI adds servers without
+hand-editing JSON · `/mcp` shows connection status.
+
+<Warning>
+The legacy kimi-cli taught `kimi mcp add …` — **that subcommand does not
+exist in kimi-code**, its successor. The file above is the contract.
+Kimi's own docs also warn that project-level stdio entries execute when a
+session starts: trust-scope the project file accordingly.
+</Warning>
+
+## Prove it (deterministic · verified live 2026-07-31 · kimi-code 0.30.0 · nika 0.106.1)
+
+A headless run emits one JSON object per line, tool calls included — the
+oracle answering IS the receipt:
+
+```sh
+kimi -p "Call the mcp__nika__nika_canon tool with no arguments and stop." \
+  --output-format stream-json
+```
+
+The stream carries
+`"tool_calls":[{"function":{"name":"mcp__nika__nika_canon"}}]` — the
+server loaded and the agent reached it. `kimi doctor` validates the
+config files (exit 0/1).
+
+## The repo side
+
+`nika init` writes the `.agents/skills` authoring skill — kimi-code scans
+four skill tiers including project and user `.agents/skills/`, so the
+skill surfaces as `/skill:nika-authoring` with zero extra wiring. Note
+that kimi-code does not auto-load `AGENTS.md` today: the skill and the
+oracle carry the teaching ([agents guide](/getting-started/agents)).
+
+Division of labor unchanged: Kimi orchestrates and writes code · Nika
+runs the repeatable work as a checkable file with receipts — `nika check`
+before, `--max-cost-usd` during, `nika trace verify` after.

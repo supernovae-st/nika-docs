@@ -187,6 +187,7 @@
                   "integrations/clients/grok-build",
                   "integrations/clients/gemini-cli",
                   "integrations/clients/qwen-code",
+                  "integrations/clients/kimi-code",
                   "integrations/clients/cline",
                   "integrations/clients/continue",
                   "integrations/clients/lm-studio",
