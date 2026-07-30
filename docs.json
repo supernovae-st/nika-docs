@@ -184,6 +184,7 @@
                   "integrations/clients/windsurf",
                   "integrations/clients/zed",
                   "integrations/clients/codex",
+                  "integrations/clients/grok-build",
                   "integrations/clients/gemini-cli",
                   "integrations/clients/qwen-code",
                   "integrations/clients/cline",

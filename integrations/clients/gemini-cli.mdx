@@ -5,6 +5,16 @@ sidebarTitle: "Gemini CLI"
 icon: "gem"
 ---
 
+<Note>
+**Where Gemini CLI stands** · on 2026-06-18 Google ended the consumer
+service (AI Pro, Ultra and free tiers) in favor of
+[Antigravity CLI](https://antigravity.google/docs/gcli-migration) ·
+enterprise access and paid API keys continue, and the
+[OSS repo](https://github.com/google-gemini/gemini-cli) stays active. This
+guide remains valid for those paths; an Antigravity guide follows once our
+wiring is live-proven.
+</Note>
+
 [Gemini CLI](https://github.com/google-gemini/gemini-cli) reads MCP servers
 from `mcpServers` in its user-scope `~/.gemini/settings.json`. The binary
 comes first: `brew install supernovae-st/tap/nika`
@@ -16,9 +26,9 @@ Add the `nika` entry to `~/.gemini/settings.json`:
 { "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
 ```
 
-`nika wire gemini` ships in the next release and writes exactly this —
-it touches only the `mcpServers` key, so every other setting in the shared
-file survives, and re-running prints `· current` (idempotent).
+`nika wire gemini` writes exactly this · it touches only the `mcpServers`
+key, so every other setting in the shared file survives, and re-running
+prints `· current` (idempotent).
 
 <Note>
 Gemini CLI's policy parser splits server names on underscores — a server

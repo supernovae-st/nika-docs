@@ -1,0 +1,72 @@
+---
+title: "Use Nika with Grok Build"
+description: "Grok reads the Claude Code kit natively: two commands install the full Nika plugin (skills, subagents, commands, hooks, oracle) · zero commands on a machine that already runs it in Claude Code."
+sidebarTitle: "Grok Build"
+icon: "bolt"
+---
+
+Grok Build reads Claude Code marketplaces, plugins, skills, MCPs, agents,
+hooks and instruction files natively (per xAI's own compatibility contract),
+so the Nika kit installs unported. Binary first
+(`brew install supernovae-st/tap/nika` ·
+[other paths](/getting-started/installation)):
+
+```sh
+grok plugin marketplace add supernovae-st/nika-agents
+grok plugin install nika@nika --trust
+```
+
+`--trust` is load-bearing, not ceremony: without it grok refuses the install
+outright (plugins can run hooks, MCP servers and skills on your machine),
+and even a later trust grant is what activates the plugin's hooks and MCP.
+
+## Zero-config on a Claude Code machine
+
+If the machine already runs the Nika plugin in Claude Code, grok picks up
+the marketplace and the components from the Claude surfaces on its own ·
+components dedup by name and a grok-side install takes priority. Verified
+live: adding the marketplace answered `already configured` before we ever
+taught grok about it.
+
+## What loads (verified live 2026-07-30 · grok 0.2.117 · nika 0.106.1)
+
+- the 4 skills (authoring · debugging · operating · migration)
+- the 6 `/nika:*` commands (check · explain · new · trace · permits · doctor)
+- the 3 subagents (`nika:nika-author` · `nika:nika-debugger` · `nika:nika-migrator`)
+- the hook file (session map · check-on-edit · guard-run · claude dialect,
+  registered as a unit)
+- the read-only MCP oracle (9 tools · no execution by design)
+
+## Prove it (deterministic · no model call · CI-able)
+
+```sh
+grok inspect --json      # every component with its origin (the nika plugin path)
+grok mcp doctor --json   # nika: command found · server started · handshake OK · 9 tools discovered
+```
+
+Trust those two outputs, not a model's enumeration · `inspect` names each
+loaded skill, agent, hook and MCP server with the file it came from.
+
+## Optional native presence
+
+The project `.mcp.json` that ships with the kit is read natively. For a
+machine-level stanza in grok's own dialect:
+
+```toml
+# ~/.grok/config.toml
+[mcp_servers.nika]
+command = "nika"
+args = ["mcp"]
+```
+
+## Caveats worth knowing
+
+- Plugins stay OFF until enabled, and a plugin's hooks and MCP stay inactive
+  until trusted · the refusal message teaches the exact re-run.
+- Enterprise deployments can require pinned-commit installs
+  (`require_sha`) · release tags satisfy it.
+- Grok enforces version floors at startup · pin deliberately in CI.
+
+Then `nika init` in the repo · the agent-teaching surface (`AGENTS.md`, the
+`.agents/skills` authoring skill, editor wiring) is read natively and is
+what makes the oracle useful ([agents guide](/getting-started/agents)).

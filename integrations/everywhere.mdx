@@ -64,9 +64,10 @@ train, and prints the exact per-client fix. Drift is advisory
 
 | Surface | Mechanism | Where |
 |---|---|---|
-| **Claude Code** | first-party plugin (`.claude-plugin` · `/nika:check` · `/nika:explain` · `/nika:new` · skill) + `nika wire claude` | [Claude Code guide](/integrations/clients/claude-code) |
+| **Claude Code** | first-party plugin (`.claude-plugin` · the six `/nika:*` commands · 4 skills · 3 subagents) + `nika wire claude` | [Claude Code guide](/integrations/clients/claude-code) |
 | **Claude Desktop** | `claude_desktop_config.json` stanza + one-click `.mcpb` bundles | [Claude Desktop guide](/integrations/clients/claude-desktop) |
 | **Codex** | first-party plugin (`.codex-plugin` · same commands) + `nika wire codex` | [Codex guide](/integrations/clients/codex) |
+| **Grok Build** | reads the Claude Code kit natively · one marketplace add installs the full plugin (skills · subagents · commands · hooks · oracle) | [Grok Build guide](/integrations/clients/grok-build) |
 | **Hermes** | skill pack (`skills/autonomous-ai-agents/nika` · guard-scanned SAFE) | [Hermes guide](/integrations/hermes) |
 | **OpenCode** | `opencode.json` MCP stanza + native `.agents/` reading — `nika init` suffices | [OpenCode guide](/integrations/opencode) |
 | **goose** | MCP extension stanza + native `AGENTS.md` reading | [goose guide](/integrations/clients/goose) |
@@ -81,7 +82,7 @@ train, and prints the exact per-client fix. Drift is advisory
 | Element | What it is | Lives at |
 |---|---|---|
 | **SKILL.md pack** | the authoring skill (check-before-run law · cost honesty) — installable via `npx skills add supernovae-st/nika-agents` | [nika-agents kit](https://github.com/supernovae-st/nika-agents) |
-| **Plugin commands** | `/nika:check` · `/nika:explain` · `/nika:new` mirrored from the engine | kit `.agents/plugins/nika/` |
+| **Plugin commands** | the six `/nika:*` commands (check · explain · new · trace · permits · doctor) mirrored from the engine | kit `.agents/plugins/nika/` |
 | **`nika-author` subagent** | routes an intent to a template, fills the `# SLOT:` markers, loops `nika check` until rc=0 — read-only | kit `.agents/plugins/nika/agents/` |
 | **Integration kit contract** | « You want to support Nika? Copy this folder » — pinned mirrors, drift-gated in CI | [kit README](https://github.com/supernovae-st/nika-agents#readme) |
 
