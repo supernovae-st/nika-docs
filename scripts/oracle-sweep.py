@@ -25,14 +25,16 @@ if shutil.which("nika") is None:
 
 SKIP = re.compile(r"skeleton|illustration|modeline", re.I)
 FENCE = re.compile(r"```yaml([^\n]*)\n(.*?)```", re.DOTALL)
-# The one deliberate red — the SEC-009 witness (NEP-0002): the spec keeps
-# examples/release-radar.nika.yaml red on purpose (engine repo ·
-# docs/plans/2026-07-28-verdict-coverage.md §DECIDED · SEC-009 — a prompt
-# added just to turn it green would be ceremony on a file people copy), and
-# the docs mirror that block verbatim. Inverted assertion, never a skip:
-# the fence MUST fail with exactly this code — a green means the lane broke,
-# any other code means a new defect is hiding behind the expected one.
-DELIBERATE_RED = {"release-radar.nika.yaml": "NIKA-SEC-009"}
+# No deliberate reds today. release-radar carried one (the SEC-009
+# witness · verdict-coverage 2026-07-28 §DECIDED) until 2026-07-31, when
+# the registry proof pass superseded it: the same file ships as an
+# installable entry whose cert says conformance=pass, its two trifecta
+# twins already carry the canonical NEP-0020 gate, and the refusal
+# witness lives where witnesses belong — the spec's conformance fixture
+# pair (trifecta-realized-flow-ungated / -human-gate-dominates). The
+# inverted-assertion MECHANISM stays: register any future witness here
+# as {"file.nika.yaml": "NIKA-CODE"} and a green means the lane broke.
+DELIBERATE_RED: dict[str, str] = {}
 CODE = re.compile(r"NIKA-[A-Z]+-\d+")
 # A fence may name its file (```yaml child.nika.yaml). Named fences are
 # materialized as SIBLINGS before judging, so a composition parent can
