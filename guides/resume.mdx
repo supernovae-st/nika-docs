@@ -134,11 +134,16 @@ An unknown task id is refused before the run, like an unknown `--var` key.
 
 ## The durable human gate · pause and answer
 
-A [`nika:prompt`](/concepts/verbs#invoke) task blocks on a human. Under a
-non-interactive surface (`--json` · CI) with no usable `default:`, the
-run does not hang and does not fail — it **pauses durably**: the trace
-records a `workflow_paused` event with the prompt payload, and the
-process exits with code **4**.
+A [`nika:prompt`](/concepts/verbs#invoke) task waits on a human. **At a
+terminal, the gate asks you directly** (confirm `[y/N]` · choice by
+number or value · input verbatim) and the run continues through the
+same attested resume path. Anywhere no human can answer (a pipe · CI ·
+an agent · `--json`) with no usable `default:`, the run does not hang
+and does not fail — it **pauses durably**: the trace records a
+`workflow_paused` event with the prompt payload, the process exits with
+code **4**, and the frame prints the exact resume line (your
+`--var`/`--model` included). Pre-answer in one pass with
+`--answer <task>=<value>` at launch.
 
 ```yaml gated-ship.nika.yaml
 nika: v1
