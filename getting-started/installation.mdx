@@ -77,14 +77,18 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 ```bash
 nika --version
+nika try       # see a canonical workflow WORK — offline, zero keys, nothing written
 nika doctor    # providers + editor/agent readiness + exact fixes
 nika init      # repo-local schema + AGENTS.md
 nika wire all  # explicit MCP wiring for agent clients
 ```
 
-`nika init` scaffolds repo-local schema wiring and agent context. Newer
-binaries also expose `nika wire cursor` / `nika wire all` for explicit MCP
-client setup. Installers do not mutate editor configs automatically.
+`nika try` is the zero-risk first contact: it rehearses a canonical
+example under the mock provider — nothing written, nothing owned, and
+bare `nika try` lists what there is to see. `nika init` scaffolds
+repo-local schema wiring and agent context. Newer binaries also expose
+`nika wire cursor` / `nika wire all` for explicit MCP client setup.
+Installers do not mutate editor configs automatically.
 
 ## Platforms
 

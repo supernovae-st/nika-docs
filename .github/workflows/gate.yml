@@ -49,11 +49,27 @@ jobs:
           tar xzf "${asset}"
           sudo mv nika /usr/local/bin/nika
           nika --version
+      # shell: bash turns on pipefail — without it the default `bash -e {0}`
+      # lets `tee` swallow the gate's red exit code (the verdict must never
+      # ride a pipe unprotected).
       - name: count-drift gate (wire-asserted)
+        shell: bash
         run: |
           python3 scripts/count-drift-gate.py | tee /tmp/cdg.out
           if grep -q "skipped" /tmp/cdg.out; then
             echo "::error::tool-count check skipped despite the install — wire assertion did not run"
+            exit 1
+          fi
+      # teach-parity is the inverse of oracle-sweep: it proves every RELEASED
+      # subcommand has a reference/cli.mdx row. It soft-skips without a
+      # binary — the install above makes a skip here a wiring failure, so a
+      # skip fails loudly instead of passing quietly.
+      - name: teach-parity gate (released-subcommand coverage)
+        shell: bash
+        run: |
+          python3 scripts/teach-parity.py | tee /tmp/tp.out
+          if grep -q "SKIP" /tmp/tp.out; then
+            echo "::error::teach-parity skipped despite the install — the released-binary derivation did not run"
             exit 1
           fi
 
