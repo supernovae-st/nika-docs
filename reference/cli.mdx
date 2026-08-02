@@ -34,13 +34,12 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika spec --schema` | Print the embedded JSON Schema |
 | `nika catalog [--json]` | The embedded provider/model catalog (models · capabilities · env vars) — `--json` emits the versioned machine projection (`catalog_version: 1`) |
 | `nika catalog --tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
-| `nika examples list|show|run` | Browse or run embedded examples |
-| `nika new --from <template> <dest>` | Instantiate an embedded workflow template |
+| `nika new [intent] [dest]` | The ONE creation door (0.107): plain words route across the whole catalog · an example slug lands verbatim with its ingredients · a skeleton name instantiates (`nika new '?'` lists the set) — the old `nika examples` tree and `nika new --from` died with 0.107 |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
 | `nika sign <file>` | Sign a workflow file (author-binding) — mints `<file>.minisig` · `--check` verifies the signature against the trusted key |
 | `nika key mint|fingerprint|rotate` | The run-signing key lifecycle — mint · TOFU fingerprint · rotate (old public keys stay verifiable) |
-| `nika evidence <trace>` | Export the evidence pack for one run — journal + manifest + receipt + VERIFY.md, what an auditor reads without trusting us |
-| `nika receipt explain <file>` | Read a run receipt — render the readable projection of an evidence pack's `receipt.json` (stable text · a READING, never a proof — `nika trace verify` owns the proof) |
+| `nika trace evidence <trace>` | Export the evidence pack for one run — journal + manifest + receipt + VERIFY.md, what an auditor reads without trusting us (moved under `trace` in 0.107 — one door on a run's dossier) |
+| `nika trace receipt explain <file>` | Read a run receipt — render the readable projection of an evidence pack's `receipt.json` (stable text · a READING, never a proof — `nika trace verify` owns the proof) |
 | `nika trace verify|reproduce|replay|show|outputs|export|peek|flow` | Prove, replay, summarize, inspect, or export a recorded run — `verify` walks the tamper-evidence hash chain and names the first broken link (several traces verify per-file, worst exit wins — a shell glob just works) · `peek` renders a task's full recorded value, and a FAILED task's recorded failure + its explain line · `reproduce` re-runs and classifies every divergence — `export` projects the journal to OTLP/JSON lines (Jaeger UI, or POST to any OTLP/HTTP endpoint; a local file, zero collector, zero vendor) |
 | `nika dap` | Debug Adapter Protocol server over stdio — time-travel a recorded run in any DAP client (VS Code F5) |
 | `nika lsp` | Run the language server over stdio |

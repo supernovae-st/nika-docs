@@ -46,9 +46,10 @@ Public documentation for Nika — the open workflow language for AI
    NEVER the default example (presentation order per
    supernovae-alignment Rule 3 · local → mistral → anthropic → openai).
 7. Commit trailer: `Co-Authored-By: Nika 🦋 <nika@supernovae.studio>`.
-8. **These docs teach 0.106 and only 0.106.** No dual grammar, no "if
-   you are on 0.105" branch, no alias (`no-legacy-no-back-compat`). The
-   two flag-days: every value lands under one of four authorities —
+8. **These docs teach 0.107 and only 0.107.** No dual grammar, no "if
+   you are on 0.106" branch, no alias (`no-legacy-no-back-compat`). The
+   value/permits grammar is the 0.106 law, re-verified against the 0.107
+   binary (2026-08-02): every value lands under one of four authorities —
    `inputs:` (the caller supplies it) · `config:` (the deployment) ·
    `const:` (the file owns it) · `secrets:` (a governed store); `vars:`
    and `env:` are dead (`NIKA-VALUES-001`/`-002`, and the envelope `env:`
