@@ -62,8 +62,8 @@ In a Hermes session:
 > hello.nika.yaml from the chain template, check it, and run it with the
 > mock model. Report the trace verify verdict.
 
-Expected: `nika --version` → `nika examples run 01-hello --model mock/echo`
-(offline, zero keys) → `nika new --from chain` → `nika check --json` →
+Expected: `nika --version` → `nika try 01-hello`
+(offline, zero keys) → `nika new chain hello.nika.yaml` → `nika check --json` →
 mock run → `nika trace verify <trace>` exit 0 (path from the run card's
 `trace:` line — the bare form is a usage error).
 

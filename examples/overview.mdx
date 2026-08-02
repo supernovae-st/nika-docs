@@ -13,11 +13,12 @@ these pages is a complete one you can run right now. The whole gallery
 ships inside the binary:
 
 ```bash
-nika examples run showcase/t1-meeting-actions     # local · ollama/llama3.2:3b · zero key
+nika try 01-hello                    # the mock rehearsal · zero keys · nothing written
+nika new meeting-actions             # take an example, fixtures included, then run it
 ```
 
-No Ollama on this machine yet? Add `--model mock/echo` to preview any
-example offline with zero setup, then come back with the real model.
+`nika try` previews an example offline with zero setup; `nika new`
+lands the file with its fixture ingredients so the real run works.
 
 The YAML you read here is projected verbatim from
 [`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),

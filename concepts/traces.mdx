@@ -38,8 +38,8 @@ Since 0.94 the redirect is optional: **every run writes its own journal**
 to `.nika/traces/<timestamp>-<id>.ndjson` by default, and the verdict
 line prints the path. `--resume`, `nika trace show|replay` and the editor
 read it directly. Opt out per run with `--no-trace-file`, or globally
-with `NIKA_NO_TRACE_FILE` (`nika examples run` never journals — a staged
-temp-file run is not a workspace run).
+with `NIKA_NO_TRACE_FILE` (`nika try` never journals — the mock
+rehearsal is not a workspace run).
 
 ## The event stream
 
