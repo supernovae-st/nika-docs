@@ -137,7 +137,7 @@ An unknown task id is refused before the run, like an unknown `--var` key.
 A [`nika:prompt`](/concepts/verbs#invoke) task waits on a human. **At a
 terminal, the gate asks you directly** (confirm `[y/N]` · choice by
 number or value · input verbatim) and the run continues through the
-same attested resume path. Anywhere no human can answer (a pipe · CI ·
+same verified resume path. Anywhere no human can answer (a pipe · CI ·
 an agent · `--json`) with no usable `default:`, the run does not hang
 and does not fail — it **pauses durably**: the trace records a
 `workflow_paused` event with the prompt payload, the process exits with
