@@ -126,19 +126,19 @@ outputs:
 ## Run it
 
 ```bash
-git clone https://github.com/supernovae-st/nika-spec && cd nika-spec
-nika run examples/showcase/t1-image-fx-batch.nika.yaml
-ls out/
+nika new image-fx-batch fx.nika.yaml   # the file + its two sample photos land beside you
+nika run fx.nika.yaml                  # offline · $0.00 · deterministic renders
+ls out/darkroom/
 ```
 
 <Note>
-  This workflow is newer than the currently shipped engine pack:
-  `nika examples run showcase/t1-image-fx-batch` says `unknown example`
-  until the next engine tag re-vendors the pack. Until then, run it
-  from the spec checkout as above — the file is the same one the pack
-  will embed, sha-pinned in the spec manifest.
+  The 0.107 pack embeds this workflow: `nika new image-fx-batch <dest>`
+  lands the file verbatim **with its ingredients** (the two sample
+  photos, at the exact relative path the yaml names). Proven against the
+  released `0.107.0`: the taken copy runs offline end-to-end — `3/3 done
+  · $0.00`, two renders in `out/darkroom/`.
 </Note>
 
 Point `const.photos` at any directory of PNG files. Because every op is
-deterministic, the diff of `fx-out/` across two runs is empty — which
-makes the output safe to commit, and the workflow safe to put in CI.
+deterministic, the diff of `out/darkroom/` across two runs is empty —
+which makes the output safe to commit, and the workflow safe to put in CI.
