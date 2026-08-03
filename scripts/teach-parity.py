@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """teach-parity: the CLI surface and the docs match, BOTH directions.
 
-Direction 1 (born 2026-07-12) · every RELEASED subcommand has a row in
-reference/cli.mdx. From the empirical catch that `nika context` shipped
-in 0.99.0 with no row, and the same-night merges would have repeated it.
+Direction 1 · every subcommand the binary ships has a row in
+reference/cli.mdx. A verb a reader cannot find is a verb they do not use.
 
-Direction 2 (born 2026-08-03) · every subcommand the docs HAND a reader
-in a shell fence still exists. The gap was structural: oracle-sweep
-judges ```yaml fences against the binary, direction 1 judges the cli.mdx
-table — nothing judged the ```sh/```bash blocks, which is exactly where
-five pages went on teaching `nika examples run …` after the tree died at
-0.107 (measured: rc=2 · "unrecognized subcommand"). A reader copying a
-"## Run it" block met a dead end the whole surface swore was live.
+Direction 2 · every subcommand the docs HAND a reader in a shell fence
+resolves. One direction alone is blind in one eye: the first cannot see
+a taught command that no longer exists, the second cannot see a shipped
+command nobody wrote down. A reader copying a "## Run it" block must
+never meet a dead end the surface swore was live.
 
 Both directions read the SAME derivation — the released binary's own
 `--help`. Zero hand-maintained lists, so the gate cannot rot into a

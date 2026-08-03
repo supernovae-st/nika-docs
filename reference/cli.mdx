@@ -34,7 +34,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika spec --schema` | Print the embedded JSON Schema |
 | `nika catalog [--json]` | The embedded provider/model catalog (models · capabilities · env vars) — `--json` emits the versioned machine projection (`catalog_version: 1`) |
 | `nika catalog --tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
-| `nika new [intent] [dest]` | The ONE creation door (0.107): plain words route across the whole catalog · an example slug lands verbatim with its ingredients · a skeleton name instantiates (`nika new '?'` lists the set) — the old `nika examples` tree and `nika new --from` died with 0.107 |
+| `nika new [intent] [dest]` | The ONE creation door: plain words route across the whole catalog · an example slug lands verbatim with its ingredients · a skeleton name instantiates (`nika new '?'` lists the set) |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
 | `nika sign <file>` | Sign a workflow file (author-binding) — mints `<file>.minisig` · `--check` verifies the signature against the trusted key |
 | `nika key mint|fingerprint|rotate` | The run-signing key lifecycle — mint · TOFU fingerprint · rotate (old public keys stay verifiable) |

@@ -145,7 +145,7 @@ files:
     - "supernovae-st/nika-estate@<ESTATE_PIN>:scripts/estate.py"
 - path: "scripts/estate_rules.py"
   class: authored
-  sha256: 69bb4dad4c156a1665f911c2eb3b863d89ebf1c03568dc483c1c1bb84773465b
+  sha256: 83dda647a82e3edd44a2b3f63d545e68b3a5ca89ce949b05a5c84439b61c0ad8
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
@@ -161,8 +161,8 @@ files:
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/teach-parity.py"
   class: authored
-  sha256: 1b2ff913c953371601bb7b222291c0075940c40a67180b1e6162d8747d205aed
-  evidence: "hand-written gate · docstring narrates its birth (the untaught `nika context` catch)"
+  sha256: a9ef6ccda86bdd24357b0c2cb90dcd326c633329bccdbf050726e6b0ef0234b8
+  evidence: "hand-written gate · docstring states its law (both directions read the binary's own --help)"
 - path: "snippets/_canon.mdx"
   class: generated
   sha256: 0ae2fbd3e4e6679f8fcc7130a03710f4475536a4e95fbeb6232982429bae3f6a
@@ -194,7 +194,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 105
-  aggregate_sha256: b2891b341fb75f13137816f6315c72a6002e270937583db8b4c59dd99f8219ca
+  aggregate_sha256: 650fb9755053098507ab63f381c214820a6409350b3a81dd0ca267a147f2e9c0
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

@@ -77,7 +77,7 @@ _AUTHORED = {
     "scripts/count-drift-gate.py": "hand-written gate · 'the count-rot ratchet' design prose header",
     "scripts/link-audit.py": "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)",
     "scripts/oracle-sweep.py": "hand-written gate · SPDX header + the copy-paste-invariant design prose",
-    "scripts/teach-parity.py": "hand-written gate · docstring narrates its birth (the untaught `nika context` catch)",
+    "scripts/teach-parity.py": "hand-written gate · docstring states its law (both directions read the binary's own --help)",
     "scripts/mintlify-snapshot.sh": "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)",
     RULES: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours",  # noqa: F821
     "snippets/_ecosystem.mdx": "its own header: 'Edit HERE, never per-page' — the one hand-edited snippet (a single-source link mesh, not a projection)",
