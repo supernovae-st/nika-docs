@@ -19,7 +19,16 @@ def walk(o):
             nav_pages.add(v) if isinstance(v, str) else walk(v)
 walk(json.load(open('docs.json'))['navigation'])
 
-for f in glob.glob('**/*.mdx', recursive=True):
+corpus = glob.glob('**/*.mdx', recursive=True)
+# A gate that walks nothing reports clean. This site has ~110 pages; a
+# harvest near zero means the cwd or the glob moved, and the audit went
+# blind — which is the failure, not a pass.
+if len(corpus) < 20:
+    findings.append(
+        f'link-audit walked {len(corpus)} .mdx files — the corpus moved, '
+        'this audit is blind (run it from the docs root)')
+
+for f in corpus:
     s = open(f).read()
     for m in re.finditer(r'(?:href=["\']|\]\()(/[a-z0-9\-/#]+)', s):
         base = m.group(1).split('#')[0].lstrip('/')

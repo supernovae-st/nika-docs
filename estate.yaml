@@ -149,7 +149,7 @@ files:
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
-  sha256: a98a87ccb09494be875c9e0404a56418100becad002920ab3eebec6a88608a6c
+  sha256: 12e63163dcf41b3cc7259255899c4f0edf1cfd2561b57b363b04a25556c188d9
   evidence: "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)"
 - path: "scripts/mintlify-snapshot.sh"
   class: authored
