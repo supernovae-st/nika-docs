@@ -162,19 +162,12 @@ this time".
 ## Run it
 
 ```bash
+nika try transcript-shownotes      # see it work · offline · nothing written
 ollama pull llama3.2:3b
-git clone https://github.com/supernovae-st/nika-spec && cd nika-spec
-nika run examples/showcase/t2-transcript-shownotes.nika.yaml
+nika new transcript-shownotes      # take it · the sample transcript lands beside it
+nika run transcript-shownotes.nika.yaml
 open out/show-notes.md
 ```
-
-<Note>
-  This workflow is newer than the currently shipped engine pack:
-  `nika examples run showcase/t2-transcript-shownotes` says
-  `unknown example` until the next engine tag re-vendors the pack.
-  Until then, run it from the spec checkout as above — the file is the
-  same one the pack will embed, sha-pinned in the spec manifest.
-</Note>
 
 Feed it any meeting transcript instead: the schema does not care
 whether the speakers were recording a podcast or arguing about a

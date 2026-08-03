@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
-"""teach-parity: every RELEASED subcommand has a row in reference/cli.mdx.
+"""teach-parity: the CLI surface and the docs match, BOTH directions.
 
-The inverse of oracle-sweep (which proves taught things EXIST): this gate
-proves existing things are TAUGHT. Born 2026-07-12 from the empirical
-catch that `nika context` shipped in 0.99.0 with no cli.mdx row, and the
-same-night merges (model · registry refs) would have repeated the class
-at the next release.
+Direction 1 (born 2026-07-12) · every RELEASED subcommand has a row in
+reference/cli.mdx. From the empirical catch that `nika context` shipped
+in 0.99.0 with no row, and the same-night merges would have repeated it.
 
-Derives the subcommand set from the released binary on PATH (the same
-truth source oracle-sweep uses) — zero hand-maintained lists here.
-Soft-skips when the binary is absent (CI without brew).
+Direction 2 (born 2026-08-03) · every subcommand the docs HAND a reader
+in a shell fence still exists. The gap was structural: oracle-sweep
+judges ```yaml fences against the binary, direction 1 judges the cli.mdx
+table — nothing judged the ```sh/```bash blocks, which is exactly where
+five pages went on teaching `nika examples run …` after the tree died at
+0.107 (measured: rc=2 · "unrecognized subcommand"). A reader copying a
+"## Run it" block met a dead end the whole surface swore was live.
+
+Both directions read the SAME derivation — the released binary's own
+`--help`. Zero hand-maintained lists, so the gate cannot rot into a
+mirror of what it is meant to judge. Soft-skips when the binary is
+absent (CI without brew).
 """
 
+import os
 import pathlib
 import re
 import shutil
@@ -49,23 +57,85 @@ def released_subcommands() -> list[str]:
     return [s for s in subs if s not in EXEMPT]
 
 
+# A shell fence (```sh · ```bash · ```console · ```shell) is a block the
+# reader COPIES. Everything else is prose about commands, not an offer.
+SHELL_FENCE = re.compile(r"```(?:sh|bash|console|shell)[^\n]*\n(.*?)```", re.DOTALL)
+# `nika <sub>` at the head of a copyable line. A `$`/`>` prompt is
+# tolerated; a continuation (`--flag`) or a comment is not a command.
+TAUGHT_CALL = re.compile(r"^\s*(?:[$>]\s*)?nika\s+([a-z][a-z0-9-]*)", re.M)
+
+
+def taught_subcommands() -> dict[str, list[str]]:
+    """Every `nika <sub>` handed to a reader in a shell fence → its files."""
+    found: dict[str, list[str]] = {}
+    for path in sorted(DOCS_ROOT.rglob("*.mdx")):
+        if "node_modules" in path.parts:
+            continue
+        for body in SHELL_FENCE.findall(path.read_text(encoding="utf-8")):
+            for sub in TAUGHT_CALL.findall(body):
+                where = str(path.relative_to(DOCS_ROOT))
+                if where not in found.setdefault(sub, []):
+                    found[sub].append(where)
+    return found
+
+
+def door_exists(sub: str) -> bool:
+    """Does `nika <sub>` resolve? PROBED, never inferred from `--help`.
+
+    `--help` lists the operator surface, not the whole surface: `catalog`
+    and `completions` both answer rc=0 while staying hidden from it. A
+    gate that read the help text alone would condemn two live doors —
+    measured 2026-08-03, the first run of this direction did exactly
+    that, and the docs it accused were right.
+    """
+    return (
+        subprocess.run(
+            ["nika", sub, "--help"],
+            capture_output=True,
+            text=True,
+            env={"NO_COLOR": "1", "PATH": os.environ.get("PATH", "/usr/bin:/bin")},
+        ).returncode
+        == 0
+    )
+
+
 def main() -> int:
     if shutil.which("nika") is None:
         print("teach-parity: SKIP (nika binary absent — run where the release is installed)")
         return 0
+    released = released_subcommands()
     taught = CLI_MDX.read_text()
+
+    # Direction 1 · every released subcommand has its row.
     missing = [
         sub
-        for sub in released_subcommands()
+        for sub in released
         if not re.search(rf"\| *`nika {re.escape(sub)}[ `\[]", taught)
     ]
+    # Direction 2 · every subcommand a shell fence hands out still exists.
+    # `--version`/`--help` style calls never reach here (the pattern wants
+    # a bare word). The authority is the PROBE, not the help text — the
+    # help lists the operator surface, the binary has more doors.
+    dead = {
+        sub: files
+        for sub, files in taught_subcommands().items()
+        if sub not in EXEMPT and not door_exists(sub)
+    }
+
     if missing:
         print(
             "teach-parity: RED — released subcommand(s) with no reference/cli.mdx row: "
             + " · ".join(missing)
         )
+    if dead:
+        for sub, files in sorted(dead.items()):
+            print(
+                f"teach-parity: RED — the docs hand `nika {sub}`, which the released "
+                f"binary does not have: {' · '.join(files)}"
+            )
+    if missing or dead:
         return 1
-    print("teach-parity: GREEN — every released subcommand is taught")
+    print("teach-parity: GREEN — the CLI surface and the docs match, both directions")
     return 0
 
 

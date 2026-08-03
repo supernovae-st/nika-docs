@@ -160,18 +160,11 @@ outputs:
 ## Run it
 
 ```bash
-git clone https://github.com/supernovae-st/nika-spec && cd nika-spec
-nika run examples/showcase/t2-csv-chart-report.nika.yaml
+nika try csv-chart-report      # see it work · offline · nothing written
+nika new csv-chart-report      # take it · the sample CSV lands beside it
+nika run csv-chart-report.nika.yaml
 open out/revenue-report.md
 ```
-
-<Note>
-  This workflow is newer than the currently shipped engine pack:
-  `nika examples run showcase/t2-csv-chart-report` says
-  `unknown example` until the next engine tag re-vendors the pack.
-  Until then, run it from the spec checkout as above — the file is the
-  same one the pack will embed, sha-pinned in the spec manifest.
-</Note>
 
 Swap the bundled sample for your own export by pointing
 `const.sales_csv` at it — the aggregation key and the chart spec are

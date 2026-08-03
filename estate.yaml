@@ -161,7 +161,7 @@ files:
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/teach-parity.py"
   class: authored
-  sha256: 7c18d14810e3ebcbc85fb1e69741fa9291ccb5a7adad96df06fd694ae5f5a5de
+  sha256: 1b2ff913c953371601bb7b222291c0075940c40a67180b1e6162d8747d205aed
   evidence: "hand-written gate · docstring narrates its birth (the untaught `nika context` catch)"
 - path: "snippets/_canon.mdx"
   class: generated
@@ -187,14 +187,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: f0e8853f5269899fcc157209bcdf07b1ee11bd9e7f3155db73e79f941f200ca7
+  sha256: 0653e018576cd6cba12c003dc004597fa09bacef52d2bad0afe10a539488e2d3
   evidence: "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields"
   note: "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 105
-  aggregate_sha256: f184c5ed583434d9623494d9bf3965c53287d5cd379b6ee1ca7c9523c4f220c0
+  aggregate_sha256: b2891b341fb75f13137816f6315c72a6002e270937583db8b4c59dd99f8219ca
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

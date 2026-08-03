@@ -148,18 +148,11 @@ when all you need is identity, don't ask for the body.
 ## Run it
 
 ```bash
-git clone https://github.com/supernovae-st/nika-spec && cd nika-spec
-nika run examples/showcase/t2-bookmark-triage.nika.yaml
+nika try bookmark-triage      # see it work · offline · nothing written
+nika new bookmark-triage      # take it · the sample export lands beside it
+nika run bookmark-triage.nika.yaml
 open out/bookmarks.md
 ```
-
-<Note>
-  This workflow is newer than the currently shipped engine pack:
-  `nika examples run showcase/t2-bookmark-triage` says
-  `unknown example` until the next engine tag re-vendors the pack.
-  Until then, run it from the spec checkout as above — the file is the
-  same one the pack will embed, sha-pinned in the spec manifest.
-</Note>
 
 Replace `inputs.bookmarks` with your own export (most browsers dump
 bookmarks to HTML — one jq pass turns that into the URL list this file
