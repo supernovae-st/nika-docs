@@ -21,21 +21,26 @@ The missing state file recovers to an empty list.
 
 {/* showcase:dag-begin release-radar.nika.yaml */}
 ```mermaid
-flowchart LR
+flowchart TD
   approve["approve · nika:prompt"]:::invoke
   no_state["no_state · nika:jq"]:::invoke
   previous["previous · nika:read"]:::invoke
   feed["feed · nika:fetch"]:::invoke
+  previous_parsed["previous_parsed · nika:jq"]:::invoke
   fresh["fresh · nika:json_diff"]:::invoke
   digest["digest"]:::infer
   save_state["save_state · nika:write"]:::invoke
   approve --> no_state
   approve --> previous
   approve --> feed
-  previous --> fresh
+  previous --> previous_parsed
+  approve --> fresh
+  previous_parsed --> fresh
   feed --> fresh
+  approve --> digest
   fresh --> digest
   feed --> digest
+  approve --> save_state
   feed --> save_state
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
@@ -58,6 +63,8 @@ const:
   state_path: "out/release-radar.json"
 permits:
   tools: ["nika:fetch", "nika:jq", "nika:json_diff", "nika:prompt", "nika:read", "nika:write"]
+  net:
+    http: ["github.com"]   # the feed's host · net entries are exact names, never globs
   fs:
     # The state-file pattern touches exactly ONE path, on both sides: read
     # last run's state, write the next. `const.state_path` names it and a run
@@ -65,8 +72,6 @@ permits:
     # `create_dirs:` makes out/ underneath it on the first run.
     read: ["out/release-radar.json"]
     write: ["out/release-radar.json"]
-  net:
-    http: ["github.com"]   # the feed's host · net entries are exact names, never globs
 
 tasks:
   # The human gate first (NIKA-SEC-009 · NEP-0002, the Rule of Two as a
@@ -111,22 +116,40 @@ tasks:
         url: "${{ const.releases_feed }}"
         mode: feed
     output:
-      entries: "[.items[] | {title, url, published}]"
+      entries: "[.items[] | {title, link}]"
     on_error:
-      # No network → this sample stands in for the RAW feed response, so it
-      # carries `items:` exactly as `mode: feed` returns it and the `output:`
-      # jq above runs over it unchanged. Recovering the BINDING's shape
-      # instead makes the jq throw NIKA-VAR-004 — the recovery must mirror the
-      # response, never the binding.
+      # No network → this sample stands in for the RAW feed response: it
+      # carries `items:` under the keys `mode: feed` actually returns
+      # (probed live on this feed: title · link · id · author · content —
+      # there is no `published` field), so the `output:` jq above runs over
+      # it unchanged. Recovering the BINDING's shape instead makes the jq
+      # throw NIKA-VAR-004 — the recovery must mirror the response, never
+      # the binding.
       recover:
         items:
-          - { title: "tokio 1.48.0", url: "https://github.com/tokio-rs/tokio/releases/tag/tokio-1.48.0", published: "2026-07-21T09:14:00Z" }
-          - { title: "tokio 1.47.1", url: "https://github.com/tokio-rs/tokio/releases/tag/tokio-1.47.1", published: "2026-07-02T16:40:00Z" }
+          - { title: "tokio 1.48.0", link: "https://github.com/tokio-rs/tokio/releases/tag/tokio-1.48.0" }
+          - { title: "tokio 1.47.1", link: "https://github.com/tokio-rs/tokio/releases/tag/tokio-1.47.1" }
+
+  # `nika:read` hands back a STRING — a file is text until you parse it.
+  # Measured: diffing the unparsed read against the entries array emits ONE
+  # whole-document `replace` op at path "" on every run after the first,
+  # so everything is reported as new, forever. The first-run recovery is
+  # already an array; the guard keeps both shapes.
+  previous_parsed:
+    with:
+      previous: ${{ tasks.previous.output }}
+    invoke:
+      tool: "nika:jq"
+      args:
+        input: "${{ with.previous }}"
+        expression: 'if type == "string" then fromjson else . end'
 
   fresh:
     with:
-      previous: ${{ tasks.previous.output }}
+      go: ${{ tasks.approve.output }}
+      previous: ${{ tasks.previous_parsed.output }}
       entries: ${{ tasks.feed.entries }}
+    when: ${{ with.go == true }}
     invoke:
       tool: "nika:json_diff"
       args:
@@ -135,9 +158,10 @@ tasks:
 
   digest:
     with:
+      go: ${{ tasks.approve.output }}
       fresh: ${{ tasks.fresh.output }}
       entries: ${{ tasks.feed.entries }}
-    when: ${{ size(with.fresh) > 0 }}
+    when: ${{ with.go == true && size(with.fresh) > 0 }}
     infer:
       max_tokens: 500
       prompt: |
@@ -150,7 +174,9 @@ tasks:
 
   save_state:
     with:
+      go: ${{ tasks.approve.output }}
       entries: ${{ tasks.feed.entries }}
+    when: ${{ with.go == true }}
     invoke:
       tool: "nika:write"
       args:

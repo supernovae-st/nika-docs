@@ -62,11 +62,14 @@ const:
 
 permits:
   exec: false
+  tools: ["nika:fetch", "nika:jq", "nika:write"]
   net:
     http: ["example.com", "github.com", "this-domain-does-not-exist-0000.invalid"]
   fs:
-    write: ["out/**"]
-  tools: ["nika:fetch", "nika:jq", "nika:write"]
+    # One report, one literal: the body's only write is this exact static path,
+    # so the grant names it — the audit line reads `risk supervised` where
+    # `out/**` read `risk unbounded`.
+    write: ["out/bookmarks.md"]
 
 tasks:
   # The fan-out · one metadata fetch per URL · a dead link recovers to a

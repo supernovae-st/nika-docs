@@ -27,7 +27,7 @@ flowchart LR
   trace["trace · nika:log"]:::invoke
   transcript --> extract
   extract --> save
-  extract -.->|success| trace
+  save -.->|success| trace
   classDef infer fill:#5b8cff22,stroke:#5b8cff,color:#5b8cff
   classDef invoke fill:#22d3ee22,stroke:#22d3ee,color:#22d3ee
 ```
@@ -40,7 +40,7 @@ flowchart LR
 nika: v1
 workflow:
   id: meeting-actions
-  description: "Transcript → typed action items {owner, task, due}"
+  description: "Transcript → typed action items {owner, task, due} · ready to paste into an email or tracker"
 
 # A NON-thinking local model, deliberately: a thinking model can spend the
 # whole `max_tokens` budget in its think block and return before the JSON
@@ -110,7 +110,7 @@ tasks:
 
   trace:
     after:
-      extract: success
+      save: success
     invoke:
       tool: "nika:log"
       args:

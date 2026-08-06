@@ -271,6 +271,7 @@
             "group": "T4 · Epic",
             "pages": [
               "examples/deep-research-brief",
+              "examples/corpus-digest",
               "examples/incident-war-room",
               "examples/ceo-monday-brief",
               "examples/release-train"

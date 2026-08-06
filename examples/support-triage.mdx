@@ -64,18 +64,18 @@ secrets:
         host_from_self: true
 permits:
   tools: ["nika:jq", "nika:notify", "nika:read", "nika:uuid", "nika:write"]
-  fs:
-    read: ["examples/fixtures/support-queue.json"]
-    # One board per batch id. `*` matches a single segment and never crosses
-    # `/`, so the uuid can never steer the write out of out/ — `out/**` would
-    # let it.
-    write: ["out/triage-*.json"]
   net:
     # `host_from_self:` above sanctions the FLOW (the secret may be the URL) —
     # it does not grant the capability. The host stays unknown at check, so it
     # is judged at RUN against this bound: name the escalation host here or the
     # send is refused mid-run, after the tokens are already spent.
     http: ["hooks.slack.com"]
+  fs:
+    read: ["examples/fixtures/support-queue.json"]
+    # One board per batch id. `*` matches a single segment and never crosses
+    # `/`, so the uuid can never steer the write out of out/ — `out/**` would
+    # let it.
+    write: ["out/triage-*.json"]
 
 tasks:
   batch:

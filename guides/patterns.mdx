@@ -1,7 +1,7 @@
 ---
 title: "How to write Nika"
 sidebarTitle: "Patterns"
-description: "The twelve patterns of well-written Nika: each one taught by a canonical example, each anti-pattern named."
+description: "The thirteen patterns of well-written Nika: each one taught by a canonical example, each anti-pattern named."
 icon: "compass-drafting"
 ---
 
@@ -11,7 +11,7 @@ import { SHOWCASE } from "/snippets/_showcase.mdx";
 Nika is a small language ({CANON.verbs} verbs, {CANON.namespaces}
 namespaces, one expression surface), so good Nika is mostly about
 shape: where the determinism lives, where the model is allowed to
-think, and how data crosses task boundaries. These twelve patterns are
+think, and how data crosses task boundaries. These thirteen patterns are
 how the {SHOWCASE.count} showcase workflows are written. Each links
 the canonical example that embodies it.
 
@@ -106,7 +106,34 @@ three cost profiles, every intermediate auditable on disk.
 **Anti-pattern** · one giant agent loop with no plan, no budget and no
 typed output. Nothing about it can be audited or bounded.
 
-Taught by · [Deep research brief](/examples/deep-research-brief).
+Taught by · [Deep research brief](/examples/deep-research-brief) ·
+[Corpus digest](/examples/corpus-digest).
+
+## 5b · Context folding · fresh windows over a folded corpus
+
+The corpus-scale variant of « plan, then execute »: when the input is
+too big for one window, never let any window hold it. A fast pass plans
+a focus per unit **from identifiers alone** (paths, titles, ids · never
+contents), a `for_each` wave processes each unit in its **own fresh
+window** (one slice, one focus, zero history), jq merges and ranks the
+typed results deterministically, and the synthesis reads only that
+deck. The corpus lives in the dataflow; window size stops scaling with
+corpus size, and the deck in `outputs:` is an audit surface: everything
+the synthesis saw, nothing it didn't.
+
+Two disciplines make the fold sovereign. The discovered collection is
+the spine · model assignments join it by key, so a hallucinated
+identifier drives nothing. And the per-unit schema carries **no
+identifier** · transpose re-attaches identity, so a model cannot
+misfile its own result.
+
+**Anti-pattern** · concatenating the corpus into one prompt and asking
+for a summary. Past a few documents you pay more for worse recall, and
+nothing in the middle was actually read.
+
+Taught by · [Corpus digest](/examples/corpus-digest) ·
+[Localization factory](/examples/localization-factory) (the mechanical
+fold · no plan stage).
 
 ## 6 · Three gates, three meanings
 

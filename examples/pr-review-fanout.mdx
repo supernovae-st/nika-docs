@@ -64,7 +64,7 @@ for both branches before `summary`:
 nika: v1
 workflow:
   id: pr-review-fanout
-  description: "changed files → one read-only review agent each → merged REVIEW.md"
+  description: "review a pull request · changed files → one read-only review agent per file → merged REVIEW.md"
 
 model: ollama/qwen3.5:4b   # local tool-calling model · swap for anthropic/claude-sonnet-4-6 for depth
 
@@ -73,7 +73,6 @@ const:
   review_root: "src/"      # the swarm's territory · keep in step with permits.fs.read
 
 permits:
-  tools: ["nika:done", "nika:grep", "nika:jq", "nika:prompt", "nika:read", "nika:write"]
   # The argv form (`exec.command:`) runs one named program with its arguments
   # and no shell between them, which is what makes a program allowlist mean
   # something. A `exec.shell:` task is refused against a list — measured:
@@ -86,6 +85,7 @@ permits:
   # `fs:` boundary below, which is why the header's second `Needs ·` line is
   # about git's global config rather than about git.
   exec: ["git"]
+  tools: ["nika:done", "nika:grep", "nika:jq", "nika:prompt", "nika:read", "nika:write"]
   fs:
     # `./src/**` covers the directory AND every descendant at any depth, which
     # is what both consumers need: `nika:grep` opens `./src` itself, and the
@@ -109,6 +109,7 @@ tasks:
   # it), and each root CONSUMES the answer affirmatively (NEP-0020 — a
   # bare `after:` admits the refusal: it settles success with value
   # false). Under `--answer approve=true` the CI one-pass answers it here.
+  # The one [headless-prompt] hint is the price of a real gate — pay it here.
   approve:
     invoke:
       tool: "nika:prompt"
@@ -129,7 +130,7 @@ tasks:
   files:
     with:
       changed: ${{ tasks.changed.output }}
-    when: ${{ with.changed != null }}  # a refused gate skips the diff → nothing to split
+    when: ${{ with.changed != null && size(with.changed) > 0 }}  # a refused gate skips the diff (null) · an empty diff has nothing to split
     invoke:
       tool: "nika:jq"
       args:
@@ -219,7 +220,7 @@ tasks:
     with:
       merged: ${{ tasks.merged.output }}
       todo_sweep: ${{ tasks.todo_sweep.output }}
-    when: ${{ with.todo_sweep != null }}  # a refused gate skips the sweep → no page to write
+    when: ${{ with.todo_sweep != null && size(with.todo_sweep) > 0 }}  # skipped (null) or an empty sweep · no page to write
     infer:
       max_tokens: 2500                 # a review page · not the whole diff back
       prompt: |
@@ -232,7 +233,7 @@ tasks:
   save:
     with:
       summary: ${{ tasks.summary.output }}
-    when: ${{ with.summary != null }}   # a refused gate skips the summary → no REVIEW.md
+    when: ${{ with.summary != null && size(with.summary) > 0 }}   # skipped (null) or an EMPTY answer · never a 0-byte REVIEW.md
     invoke:
       tool: "nika:write"
       args:

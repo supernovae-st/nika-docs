@@ -77,8 +77,14 @@ secrets:
       - to: "nika:notify"
         host_from_self: true
 permits:
-  tools: ["nika:edit", "nika:notify", "nika:prompt", "nika:read", "nika:write"]
   exec: ["git"]                   # the ONE program this workflow may run
+  tools: ["nika:edit", "nika:notify", "nika:prompt", "nika:read", "nika:write"]
+  net:
+    # `host_from_self:` above sanctions the FLOW (the secret may be the URL) —
+    # it does not grant the capability. The host stays unknown at check, so it
+    # is judged at RUN against this bound: name the announce host here or the
+    # send is refused mid-run, after the tokens are already spent.
+    http: ["hooks.slack.com"]
   fs:
     # The workflow never edits your changelog in place — it copies it and
     # edits the copy, so you move the result when the diff looks right.
@@ -89,12 +95,6 @@ permits:
     # builtin owes both halves.
     read: ["examples/fixtures/CHANGELOG.md", "out/CHANGELOG.md"]
     write: ["out/CHANGELOG.md"]
-  net:
-    # `host_from_self:` above sanctions the FLOW (the secret may be the URL) —
-    # it does not grant the capability. The host stays unknown at check, so it
-    # is judged at RUN against this bound: name the announce host here or the
-    # send is refused mid-run, after the tokens are already spent.
-    http: ["hooks.slack.com"]
 
 tasks:
   # The human gate (NEP-0002 · v2.2). `git log` output is UNTRUSTED content —
@@ -132,7 +132,7 @@ tasks:
   notes:
     with:
       history: ${{ tasks.history.output }}
-    when: ${{ with.history != null }}  # a refused gate skips history → nothing to draft
+    when: ${{ with.history != null && size(with.history) > 0 }}  # a refused gate skips history (null) · an empty log has nothing to draft either
     infer:
       max_tokens: 1000
       prompt: |
@@ -163,7 +163,7 @@ tasks:
   copy:
     with:
       existing: ${{ tasks.existing.output }}
-    when: ${{ with.existing != null }}  # a refused gate skips the read → nothing to copy
+    when: ${{ with.existing != null && size(with.existing) > 0 }}  # a refused gate skips the read (null) · an empty file has nothing to copy
     invoke:
       tool: "nika:write"
       args:

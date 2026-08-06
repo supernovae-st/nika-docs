@@ -54,7 +54,8 @@ The default shape for « take real data, produce words, save them ».
 nika: v1
 workflow:
   id: chain-template            # SLOT: kebab-case workflow id
-  description: "gather → think → persist"   # SLOT: one honest sentence
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "gather → think → persist"
 
 # SLOT: provider/model · local · zero key. Measured seat — `ollama/llama3.2:3b`
 # answers this prompt in ~50s. `--model mock/echo` needs no seat at all and is
@@ -85,6 +86,9 @@ tasks:
       # recovers into a literal standing in for the real document. `on_codes:`
       # keeps that narrow: ONLY not-found is forgiven, a permission error
       # still fails loudly. Delete this block once the source really exists.
+      # In an EMPTY directory check prints one [inputs] hint that this read
+      # would fail — the run does not: this recover carries it (measured ·
+      # rc=0 · « 1 recovered »). The hint retires once your source exists.
       on_codes: [NIKA-BUILTIN-READ-001]
       recover: "REHEARSAL · no source document here yet."
 
@@ -110,6 +114,13 @@ tasks:
       args:
         path: "${{ const.destination }}"   # SLOT: destination · same path as permits.fs.write
         content: "${{ with.think }}"       # ALWAYS pass content · a write without it writes nothing
+    on_error:
+      # Golden rehearsal. Under `nika test` the mock plane simulates the
+      # MODEL, not effects — this write is refused (NIKA-452) so the pin
+      # lane needs this recover to walk its own scaffold. `nika run` never
+      # fires it on success (a recover only runs on failure). Delete this
+      # block once pointed at real data, so a genuine write failure is loud.
+      recover: "REHEARSAL · write refused under nika test — the real run persists to the destination"
 
 outputs:
   result: ${{ tasks.think.output }}  # SLOT: the callable contract
@@ -125,7 +136,8 @@ Watch something, act only when a condition holds (often zero model calls).
 nika: v1
 workflow:
   id: gate-and-act-template     # SLOT: kebab-case workflow id
-  description: "watch a value · act only when the condition holds"   # SLOT
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "watch a value · act only when the condition holds"
 
 const:
   source_url: "https://api.example.com/v1/value"   # SLOT: what to watch
@@ -191,7 +203,8 @@ The same work for every item of a runtime collection, fully leashed.
 nika: v1
 workflow:
   id: fanout-template           # SLOT: kebab-case workflow id
-  description: "discover N items · process in parallel · merge"   # SLOT
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "do the same step for each item · discover the collection · process in parallel · merge"
 
 # SLOT: provider/model · local · zero key. Measured seat — `ollama/llama3.2:3b`.
 # `--model mock/echo` needs no seat and is the path this file guarantees.
@@ -207,16 +220,19 @@ const:
   collection_source: "./items"      # SLOT: where the collection comes from
 
 permits:
-  tools: ["nika:glob", "nika:jq"]
+  tools: ["nika:glob", "nika:jq", "nika:read"]
   fs:
-    # `nika:glob` is gated on the DIRECTORY it walks, not on the files it
-    # returns — measured: with `./items/*.md` here (the pattern) the run dies
-    # `NIKA-SEC-004 · ./items resolves outside the declared permits.fs.read
-    # boundary`, because `*` never crosses `/` and so never matches `./items`
-    # itself. Grant the directory. A deeper pattern (`./items/**/*.md`) walks
-    # deeper and needs `./items/**`. The drift detector models the walk root
-    # as a read (2026-07-29) — the former NIKA-DRIFT-001 false hint is closed.
-    read: ["./items"]
+    # TWO entries, and both earn their place. `nika:glob` is gated on the
+    # DIRECTORY it walks, not on the files it returns — measured: with
+    # `./items/*.md` here (the pattern) the run dies `NIKA-SEC-004 ·
+    # ./items resolves outside the declared permits.fs.read boundary`,
+    # because `*` never crosses `/` and so never matches `./items` itself.
+    # And `nika:read` is gated on the FILES — a directory grant does not
+    # cover its children (measured: dir-only here made every per-item read
+    # die SEC-004, `recover: null` swallowed each, and the model was
+    # handed nulls — a green run inventing content). A deeper pattern
+    # (`./items/**/*.md`) walks deeper and needs `./items/**` for both.
+    read: ["./items", "./items/*"]
 
 tasks:
   discover:
@@ -224,10 +240,32 @@ tasks:
       tool: "nika:glob"
       args: { pattern: "${{ const.collection_source }}/*.md" }
 
-  process:
+  # `discover` hands back PATH STRINGS — a prompt that interpolates the raw
+  # item shows the model a FILENAME, never the file (measured: a green run
+  # whose fluent « report » was invented from the names alone — check, mock
+  # rehearsal and run all green around it). Reading the item is its own fan.
+  # Delete this task — and fan `process` over `discover` — when your items
+  # already ARE the content (an inline list · fetched records). Need each
+  # content paired with its path? `resume-screener` shows the transpose.
+  read:
     with:
       discover: ${{ tasks.discover.output }}
     for_each: ${{ with.discover }}
+    max_parallel: 8
+    fail_fast: false
+    on_error:
+      recover: null                 # an unreadable item yields null · the batch lives
+    invoke:
+      tool: "nika:read"
+      args: { path: "${{ item }}" }
+
+  process:
+    with:
+      read: ${{ tasks.read.output }}
+    # The quiet-day guard: an EMPTY discovery skips the `read` fan, and a
+    # skipped task hands NULL — which a bare for_each refuses (NIKA-VAR-006).
+    # The ternary keeps the no-items day green end to end.
+    for_each: "${{ with.read == null ? [] : with.read }}"
     max_parallel: 4                 # SLOT: the polite ceiling
     fail_fast: false
     timeout: "60s"                  # SLOT: per-iteration bound
@@ -277,18 +315,19 @@ Incremental runs: only what changed since last time, survive bad input.
 nika: v1
 workflow:
   id: etl-state-template        # SLOT: kebab-case workflow id
-  description: "read state · fetch fresh · diff · process the delta · save state"   # SLOT
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "only what changed since last run · read state · fetch fresh · diff · process the delta · save state"
 
 const:
   source_url: "https://api.example.com/v1/records"   # SLOT: the data source
   state_path: "./state/etl-state.json"               # SLOT: the cursor file
 
 permits:                            # the blast radius · default-deny once present
-  tools: ["nika:read", "nika:write", "nika:fetch", "nika:jq", "nika:json_diff", "nika:prompt"]
+  tools: ["nika:fetch", "nika:jq", "nika:json_diff", "nika:prompt", "nika:read", "nika:write"]
+  net: { http: ["api.example.com"] }    # SLOT: the source host from const.source_url
   fs:                               # the cursor file, read then rewritten — one path, both ways
     read: ["./state/etl-state.json"]    # SLOT: keep in step with const.state_path
     write: ["./state/etl-state.json"]   # SLOT: idem — the job writes nothing else
-  net: { http: ["api.example.com"] }    # SLOT: the source host from const.source_url
 
 tasks:
   # NEP-0002 · the Rule of Two, as a check. This run holds all three legs at
@@ -392,7 +431,8 @@ validate the typed result. Never ship an unleashed agent.
 nika: v1
 workflow:
   id: agent-loop-template       # SLOT: kebab-case workflow id
-  description: "plan → budgeted agent → typed result"   # SLOT
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "open-ended research / review / triage · plan → budgeted agent → typed result"
 
 # SLOT: a TOOL-CALLING model · local by default. This seat is measured, not
 # assumed: `ollama/qwen2.5:14b` completes the planning call in ~65s under the
@@ -496,7 +536,8 @@ Anything irreversible: parallel gates, a hard assert, a human GO, and an
 nika: v1
 workflow:
   id: human-gated-ship-template  # SLOT: kebab-case workflow id
-  description: "verify in parallel · human GO · act · record"   # SLOT
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "verify in parallel · human GO · act · record"
 
 permits:                            # SLOT: the blast radius · default-deny once present
   exec: ["echo"]                    # SLOT: ONLY the programs the gates + act run (argv form)
@@ -521,11 +562,22 @@ tasks:
     exec:
       command: ["echo", "ok"]        # SLOT: gate 1 (argv form · injection-safe)
       capture: structured
+    on_error:
+      # Golden rehearsal · `nika test` refuses exec (NIKA-SEC-001 · the mock
+      # plane simulates the model, not effects). Catch-all ON PURPOSE — never
+      # `on_codes: [NIKA-SEC-001]`: that code is also a real blocklist stop,
+      # and a narrow forgiveness would swallow a security refusal. The shape
+      # matches `capture: structured` so the gates expression reads it.
+      # Delete once the gate runs a real check.
+      recover: { exit_code: 0, stdout: "REHEARSAL", stderr: "" }
 
   check_b:
     exec:
       command: ["echo", "ok"]        # SLOT: gate 2
       capture: structured
+    on_error:
+      # Same rehearsal armor as check_a · delete once real.
+      recover: { exit_code: 0, stdout: "REHEARSAL", stderr: "" }
 
   gates:
     with:
@@ -540,10 +592,11 @@ tasks:
     after:
       gates: success              # state, no data · no question until the board is green
     invoke:
-      # On a terminal this ASKS. Headless, it answers with `default:` below.
-      # Under `--output json` the run PAUSES durably (exit 4 · not a failure)
-      # and prints its own resume line:
-      #   nika run <file> --resume <trace> --answer human=true
+      # On a terminal this ASKS. Headless, it answers with `default:` below —
+      # the run completes, it does not pause (measured · act settles skipped).
+      # The durable pause belongs to a prompt with NO default: headless it
+      # PAUSES (exit 4 · not a failure) and prints its own resume line:
+      #   nika run <file> --resume <trace> --answer human=true · or false
       tool: "nika:prompt"
       args:
         message: "All gates GREEN. Proceed?"   # SLOT: the decision, fully informed
@@ -595,7 +648,8 @@ Understand a site from a URL: bounded `traverse:` crawl → one typed brief → 
 nika: v1
 workflow:
   id: website-brief-template    # SLOT: kebab-case workflow id
-  description: "crawl → brief → persist"   # SLOT: one honest sentence
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "crawl → brief → persist"
 
 # SLOT: provider/model · local · zero key. The schema below has five required
 # fields, so give it a seat that holds structure — `ollama/qwen2.5:14b` is
@@ -662,6 +716,12 @@ tasks:
         # the engine serializes. Typing `{ "domain": ${{ … }} }` by hand emits
         # unquoted fields and the artifact stops being JSON.
         content: "${{ with.brief }}"
+    on_error:
+      # Golden rehearsal · `nika test` refuses effects (NIKA-452 · the mock
+      # plane simulates the model, not effects) — this recover lets the pin
+      # lane walk the scaffold. Never fires on a successful real write.
+      # Delete once wired, so a genuine write failure is loud.
+      recover: "REHEARSAL · write refused under nika test — the real run persists the brief"
 
 outputs:
   brief: ${{ tasks.brief.output }}   # SLOT: the callable contract
@@ -677,7 +737,8 @@ Generate assets from a brief: typed creative direction → `nika:image_generate`
 nika: v1
 workflow:
   id: media-asset-pack-template # SLOT: kebab-case workflow id
-  description: "brief → render → manifest"  # SLOT: one honest sentence
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "brief → generate image assets → manifest"
 
 # SLOT: provider/model · local · zero key. Measured seat — `ollama/qwen2.5:14b`
 # holds the small schema below. `--model mock/echo` needs no seat at all.
@@ -727,6 +788,12 @@ tasks:
         prompt: "${{ with.brief_image_prompt }}"
         output_dir: "${{ const.out_dir }}"
         filename_prefix: "asset"    # SLOT: filename stem
+    on_error:
+      # Golden rehearsal · the image tool is an EFFECT, refused under
+      # `nika test` even on `provider: mock` (the plane simulates the
+      # model, not effects). The literal keeps the manifest jq's shape
+      # (`.images`) intact. Delete once a real seat renders.
+      recover: { images: [] }
 
   manifest:
     with:
@@ -752,6 +819,10 @@ tasks:
         # serializes. `nika:jq` above BUILT that value; hand-typing braces
         # around an interpolation emits unquoted fields and breaks the artifact.
         content: "${{ with.manifest }}"
+    on_error:
+      # Golden rehearsal · same NIKA-452 refusal as `render` above. Never
+      # fires on a successful real write. Delete once wired.
+      recover: "REHEARSAL · write refused under nika test — the real run lands the manifest"
 
 outputs:
   manifest: ${{ tasks.manifest.output }}  # SLOT: the callable contract
@@ -767,7 +838,8 @@ Call a product API natively: `multipart:` upload (masked secrets header) → JSO
 nika: v1
 workflow:
   id: api-upload-and-create-template  # SLOT: kebab-case workflow id
-  description: "upload + create in one authenticated call"   # SLOT: one honest sentence
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "upload + create in one authenticated call"
 
 const:
   api_base: "https://api.example.com"     # SLOT: the product API base
@@ -841,7 +913,8 @@ The audited-ops shape: read a system's real state via a pinned CLI (argv-array e
 nika: v1
 workflow:
   id: docker-report-template    # SLOT: kebab-case workflow id
-  description: "read the daemon's state · explain it · keep the report"   # SLOT
+  # SLOT: one honest sentence — `nika new` matches intents against these words
+  description: "read the daemon's state · explain it · keep the report"
 
 # SLOT: local-first · `--model mock/echo` for the offline rehearsal. Measured
 # seat — `ollama/llama3.2:3b` answers this prose prompt in well under a minute.
@@ -905,9 +978,17 @@ tasks:
       args:
         path: "./docker-health.md"  # SLOT: same path as permits.fs.write
         content: "${{ with.diagnose }}"
+    on_error:
+      # Golden rehearsal · `nika test` refuses effects (NIKA-452) — the pin
+      # lane recovers into this marker (outputs.report pins it · honest and
+      # deterministic). Never fires on a successful real write. Delete once
+      # the report really lands, so a genuine write failure is loud.
+      recover: "REHEARSAL · write refused under nika test — the real run lands ./docker-health.md"
 
 outputs:
-  report: ${{ tasks.keep.output }}
+  report:
+    value: ${{ tasks.keep.output }}
+    description: "Where the report landed — nika:write hands back the path it wrote"
 ```
 {/* template:end */}
 

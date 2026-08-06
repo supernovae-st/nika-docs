@@ -51,7 +51,7 @@ flowchart TD
 nika: v1
 workflow:
   id: resume-screener
-  description: "glob CVs → local-model rubric per candidate → deterministic shortlist"
+  description: "screen resumes · glob CVs → local-model rubric per candidate → deterministic hiring shortlist"
 
 model: ollama/qwen3.5:4b   # PII stays on the machine · the whole screen is offline
 
@@ -196,7 +196,7 @@ tasks:
   save:
     with:
       brief: ${{ tasks.brief.output }}
-    when: ${{ with.brief != null }}    # a skipped task reads null downstream · gate on the VALUE
+    when: ${{ with.brief != null && size(with.brief) > 0 }}    # skipped (null) or an EMPTY answer · gate on the VALUE, both ways
     invoke:
       tool: "nika:write"
       args:
