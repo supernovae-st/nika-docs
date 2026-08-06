@@ -145,12 +145,27 @@ nika trace export .nika/traces/standup.ndjson -o run.otlp.jsonl   # choose the p
 ```
 
 Each verb becomes a span (duration, tokens, the ADR-099 identity
-hashes). Drag the file into the Jaeger UI (≥ 1.60), or POST the lines to
-any OTLP/HTTP endpoint (Grafana Tempo, Langfuse, your own collector).
-Task outputs stay **local** by default; `--include-content` widens the
-exported file to carry them as span attributes when you explicitly want
-them. The export is a projection of the journal — it never re-runs
-anything.
+hashes). An `infer:` or `agent:` task also carries the **model** it ran
+on, in the standard [OpenTelemetry GenAI semantic
+conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/):
+`gen_ai.provider.name`, `gen_ai.request.model`, `gen_ai.response.model`
+— the current names, so any GenAI-aware viewer (Grafana, Langfuse,
+Phoenix) reads which model produced which output with no translation.
+Drag the file into the Jaeger UI (≥ 1.60), or POST the lines to any
+OTLP/HTTP endpoint. Task outputs stay **local** by default;
+`--include-content` widens the exported file to carry them as span
+attributes when you explicitly want them. The export is a projection of
+the journal — it never re-runs anything.
+
+<Info>
+  Because the model, provider, tokens, cost, and status ride every run's
+  own trace, **your runs are your own analytics store** — query them with
+  `jq`, feed them to any OTel-native eval tool, on files you own, with no
+  vendor and no cloud. (A first-class `--format dataset` export for
+  fine-tuning / eval sets is on the roadmap — it waits on a content-policy
+  decision, since a training set needs the input prompts a trace does not
+  capture by default.)
+</Info>
 
 ## Terminals & CI
 
