@@ -97,11 +97,44 @@ the original run: same storyboard, same timing, same verdict card.
   machine, any number of times.
 </Warning>
 
+## Tamper-evidence · every event, hash-chained
+
+The trace is not just a log — it is a **hash chain**. Every event the
+engine emits carries a link over the one before it: task boundaries,
+each permit check, every tool call an `agent:` loop makes, the run seal
+at the end. Nothing the engine did is off the chain, and nothing can be
+edited, reordered, or dropped from the middle without breaking it.
+
+```bash
+nika trace verify .nika/traces/review.ndjson
+```
+
+`verify` walks the chain and then climbs a proof ladder, reporting the
+highest tier honestly attained:
+
+- **CHAINED** — the links hold; the sequence is intact.
+- **SEALED** — a signature over the whole chain verifies against a
+  custody key (the run was signed).
+- **ANCHORED** — a detached sidecar verifies **fully offline** against a
+  public transparency log entry + an RFC 3161 timestamp (`nika trace
+  anchor` is the opt-in network act that mints it).
+- **REPLAYED** — a fresh run reproduces the recorded one.
+
+Three refusals name themselves rather than hide in a tier: a broken
+chain is `TAMPERED`, lines appended after the seal are `SEAL BURIED`
+(forgery, never a crash), a sidecar that vouches for nothing is `ANCHOR
+FORGED`. This is the property no scrollback and no vendor dashboard
+gives you: the evidence proves *itself*, on your machine, without
+trusting the tool that wrote it.
+
 ## Why this matters
 
 - **The run is auditable.** Which tasks ran, in what order, how long
   each took, what it cost, which permits were checked: it is all in the
   file, not in someone's scrollback.
+- **The run is verifiable.** Every event is hash-chained and the whole
+  chain verifies offline (`nika trace verify`) — tamper-evident by
+  construction, not by trust.
 - **The run is shareable.** Attach the `.ndjson` to a PR or an issue.
   A reviewer replays it locally and sees exactly what you saw, without
   credentials and without re-running anything.
