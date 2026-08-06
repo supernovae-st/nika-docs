@@ -12,6 +12,17 @@ skipping every task whose recorded work is still valid** (ADR-099).
 No daemon, no run store, no new artifact — the reader of a file you
 already have.
 
+That sentence is the whole architecture, so it deserves saying plainly:
+durable-execution systems anchor recovery in standing infrastructure —
+a database, an embedded log server, or a managed cloud — and pay for it
+with author-facing rules (deterministic code, side effects quarantined
+into steps, versioning APIs, replay-test suites). Nika anchors recovery
+in the hash-chained trace every run already writes. **No server, no
+database — the trace is the checkpoint**: readable with `cat`, diffable
+with git, owned by you. Two hashes decide skip-or-rerun; recorded work
+replays from the trace; everything else honestly re-executes. No
+determinism is ever demanded of your workflow.
+
 ## Record, then resume
 
 ```yaml release-notes.nika.yaml
@@ -105,6 +116,15 @@ that is the point: crash-resume without re-spending tokens. There are no
 determinism rules, no replay constraints, no workflow versioning:
 durability is the engine's problem, never yours. A task that does not
 match simply re-runs live, side effects included.
+
+<Warning>
+  **The honest limit — at-least-once, not exactly-once.** Completed work
+  never re-fires, but a crash *in the middle* of a side effect can
+  double-fire it on re-run — the same caveat every database-backed
+  durable-execution system documents for its own steps. Idempotency keys
+  are a deliberate deferral: make external effects idempotent via their
+  own arguments, or fence the node with `--from` discipline.
+</Warning>
 
 ## `--from` · force a re-run the hashes cannot see
 
@@ -233,3 +253,22 @@ interactively (a human at the terminal), the prompt simply asks.
   input re-runs exactly the tasks that consume it).
 - [Guides · Testing](/guides/testing): the offline golden gate for the
   same files.
+
+## Further reading
+
+The design has a lineage, and naming it beats pretending novelty:
+
+- **Build Systems à la Carte** — Mokhov, Mitchell & Peyton Jones, ICFP
+  2018 ([doi:10.1145/3236774](https://doi.org/10.1145/3236774)). The
+  formal frame for hash-keyed skip-or-rerun: `--resume` is a build
+  system's verifying trace applied to a workflow DAG.
+- **Durable Functions: Semantics for Stateful Serverless** — Burckhardt
+  et al., OOPSLA 2021
+  ([doi:10.1145/3485510](https://doi.org/10.1145/3485510)). The
+  semantics of replay-based durable execution — and of the determinism
+  obligation that comes with it, which content-addressed resume
+  structurally avoids.
+- **Nextflow** — Di Tommaso et al., Nature Biotechnology 2017
+  ([doi:10.1038/nbt.3820](https://doi.org/10.1038/nbt.3820)). Scientific
+  computing proved content-addressed `-resume` a decade ago; its
+  ecosystem calls it the single most-loved feature.
