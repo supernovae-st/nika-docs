@@ -1,0 +1,94 @@
+---
+title: "Run it with what you already have"
+sidebarTitle: "Harness access (experimental)"
+description: "Point an agent task at the harness you already pay for — gemini-cli, qwen-code, codex, claude — under nika's authority, billed honestly."
+icon: "key"
+---
+
+import { CANON } from "/snippets/_canon.mdx";
+
+<Warning>
+Experimental — behind the `access-harness` build feature, OFF by
+default. This page describes a design-partner surface: the wire can
+move before it stabilizes, and every run tells you so.
+</Warning>
+
+`model:` picks the intelligence. **Access** picks the path the run
+takes to reach it. Today that path is an API key, a local server, or
+the mock. The harness class adds the one you already pay for: the
+agent harness on your machine, driving its own subscription, with nika
+in charge of what it may do.
+
+Your workflow never changes. The same `agent:` task runs on a
+provider key or on your harness — the access layer decides, at
+admission, with a witness.
+
+## What you need
+
+One of the supported harnesses, signed in the way IT expects (nika
+never holds its credential — the harness owns its auth store):
+
+| Harness | Driven through | Serves |
+|---|---|---|
+| Gemini CLI | `gemini --experimental-acp` | `gemini/…` models |
+| Qwen Code | `qwen --acp` | `qwen/…` models |
+| Codex | `@zed-industries/codex-acp` (pinned) | `openai/…` models |
+| Claude Agent | `@zed-industries/claude-agent-acp` (pinned) | `anthropic/…` models |
+
+`nika doctor` shows what this machine detected — the binary, the
+version against its pin, and whether the harness's own status surface
+reports a sign-in. Nothing is probed silently, no credential file is
+ever opened.
+
+## Run it
+
+Build with the feature, then declare the adapter:
+
+```bash
+cargo build --release --features access-harness
+export NIKA_HARNESS_ADAPTER=gemini-cli   # the registry row's id
+nika run flow.nika.yaml
+```
+
+An agent task whose model the harness can serve is planned onto it.
+Pin it explicitly when you mean it:
+
+```bash
+nika run flow.nika.yaml --access gemini-cli
+```
+
+A pin is a pin: unsatisfied refuses with the witnesses, never a silent
+fallback to a metered key.
+
+## The authority bridge
+
+The harness asks before it acts. Nika answers with your workflow's
+`permits:` block, not with the harness's defaults:
+
+- **Inside your grants** — the ask is allowed once (never
+  "allow always") and the decision is witnessed in the trace.
+- **Outside them** — the run pauses and shows you the harness's
+  question, word for word. Answer once with
+  `nika run --resume <trace> --answer <task>=true` (or `false`).
+  Nothing the harness asked for runs before you answer.
+
+## The honest receipt
+
+A harness run's trace row says `access: harness` and
+`billing: unknown` — because your plan's quota is the harness's
+business until the harness itself reports it. What you will never see
+is a fabricated `$0.00`: the ledger records the lane as
+`subscription_quota`, priced when evidence exists, absent when it
+doesn't.
+
+## Kill-switch
+
+One adapter refusing to behave? Take it off the machine without
+touching the rest:
+
+```bash
+export NIKA_HARNESS_DISABLE=codex-acp
+```
+
+A disabled adapter is no candidate at all — a pin naming it refuses in
+plain words.
