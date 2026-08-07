@@ -57,6 +57,7 @@ train, and prints the exact per-client fix. Drift is advisory
 | **Zed** | `nika wire zed` (0.99+) | [Zed guide](/integrations/clients/zed) |
 | **JetBrains (Junie)** | project-scope `.junie/mcp/mcp.json` stanza | [Junie guide](/integrations/clients/junie) |
 | **Cursor forks / VSCodium** | extension via [OpenVSX](https://open-vsx.org/extension/supernovae/nika) | — |
+| **LM Studio** | `nika wire lmstudio` writes the MCP stanza | [LM Studio guide](/integrations/clients/lm-studio) |
 | **Neovim** | via the mcphub.nvim registry (covers avante · codecompanion) | [MCP clients](/integrations/mcp-clients) |
 | **Any editor with YAML-LSP** | the `# yaml-language-server: $schema=` modeline `nika init` writes | [Editors guide](/getting-started/editors) |
 
@@ -68,6 +69,7 @@ train, and prints the exact per-client fix. Drift is advisory
 | **Claude Desktop** | `claude_desktop_config.json` stanza + one-click `.mcpb` bundles | [Claude Desktop guide](/integrations/clients/claude-desktop) |
 | **Codex** | first-party plugin (`.codex-plugin` · same commands) + `nika wire codex` | [Codex guide](/integrations/clients/codex) |
 | **Grok Build** | reads the Claude Code kit natively · one marketplace add installs the full plugin (skills · subagents · commands · hooks · oracle) | [Grok Build guide](/integrations/clients/grok-build) |
+| **OpenClaude** | its loader reads the Claude Code marketplace layout · `openclaude plugin marketplace add supernovae-st/nika-plugins && openclaude plugin install nika@nika` installs the whole bundle unported | [kit dossier](https://github.com/supernovae-st/nika-plugins/tree/main/integrations/openclaude) |
 | **Hermes** | skill pack (`skills/autonomous-ai-agents/nika` · guard-scanned SAFE) | [Hermes guide](/integrations/hermes) |
 | **OpenCode** | `opencode.json` MCP stanza + native `.agents/` reading — `nika init` suffices | [OpenCode guide](/integrations/opencode) |
 | **goose** | MCP extension stanza + native `AGENTS.md` reading | [goose guide](/integrations/clients/goose) |
@@ -79,6 +81,7 @@ train, and prints the exact per-client fix. Drift is advisory
 | **Cline · Continue** | `cline_mcp_settings.json` (hot-reloaded) · own-file `~/.continue/mcpServers/nika.json` | [Cline](/integrations/clients/cline) · [Continue](/integrations/clients/continue) |
 | **Open WebUI · AnythingLLM · Cherry Studio · Jan** | mcpo recipe · generic stdio stanza | [Open WebUI](/integrations/clients/open-webui) · [AnythingLLM](/integrations/clients/anythingllm) · [Cherry Studio](/integrations/clients/cherry-studio) · [Jan](/integrations/clients/jan) |
 | **Aider** | no MCP — `AGENTS.md` (written by `nika init`) covers it | [MCP clients → Aider](/integrations/mcp-clients#aider) |
+| **Any MCP client** | `nika mcp` over stdio · the `server.json` registry shape and the Docker image cover hosted listers | [MCP clients](/integrations/mcp-clients) |
 | **Any AGENTS.md reader** | `nika init` writes 7 agent-facing files (AGENTS.md · `.cursor/{rules,mcp.json}` included) | [Quickstart](/integrations/quickstart) |
 
 ## Skills & plugins (the teaching surfaces)
