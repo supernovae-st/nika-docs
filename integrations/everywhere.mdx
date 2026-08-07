@@ -24,7 +24,7 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 | **nix flake** | `nix run github:supernovae-st/nika` — builds the exact release source, store-cached | [Installation](/getting-started/installation) |
 | **GitHub CLI extension** | `gh extension install supernovae-st/gh-nika` → `gh nika check/run` — pass-through to a PATH `nika`, else a one-time checksum-verified release fetch (Actions runners · Codespaces) | [gh-nika](https://github.com/supernovae-st/gh-nika) |
 | **`.mcpb` bundles** | one-click MCP bundle (macOS arm64 · Linux x64) with checksums | [Claude Desktop guide](/integrations/clients/claude-desktop) |
-| **Docker image** | the read-only oracle in a container (`integrations/mcp/Dockerfile` in the kit) | [nika-agents kit](https://github.com/supernovae-st/nika-agents) |
+| **Docker image** | the read-only oracle in a container (`integrations/mcp/Dockerfile` in the kit) | [nika-plugins kit](https://github.com/supernovae-st/nika-plugins) |
 
 ## Keeping the suite fresh
 
@@ -38,7 +38,7 @@ plugin, a marketplace never touches the binary. The ladder, per surface:
 | **Claude Code plugin** | `claude plugin marketplace update nika` **then** `claude plugin update nika@nika` | TWO rungs — the clone, then the install; restart after |
 | **Codex plugin** | `codex plugin marketplace upgrade nika` | the per-version cache refreshes on your next run |
 | **Cursor** | marketplace installs self-manage; a local drop re-syncs via the kit's `scripts/update-mirrors.sh` | — |
-| **Every surface at once** | `scripts/update-mirrors.sh` in a [nika-agents](https://github.com/supernovae-st/nika-agents) checkout | `--check` reports drift read-only (CI-able) |
+| **Every surface at once** | `scripts/update-mirrors.sh` in a [nika-plugins](https://github.com/supernovae-st/nika-plugins) checkout | `--check` reports drift read-only (CI-able) |
 
 <Info>
 `nika doctor` is the coherence oracle: from v0.107 it reads what each
@@ -85,21 +85,21 @@ train, and prints the exact per-client fix. Drift is advisory
 
 | Element | What it is | Lives at |
 |---|---|---|
-| **SKILL.md pack** | the authoring skill (check-before-run law · cost honesty) — installable via `npx skills add supernovae-st/nika-agents` | [nika-agents kit](https://github.com/supernovae-st/nika-agents) |
+| **SKILL.md pack** | the authoring skill (check-before-run law · cost honesty) — installable via `npx skills add supernovae-st/nika-plugins` | [nika-plugins kit](https://github.com/supernovae-st/nika-plugins) |
 | **Plugin commands** | the six `/nika:*` commands (check · explain · new · trace · permits · doctor) mirrored from the engine | kit `.agents/plugins/nika/` |
 | **`nika-author` subagent** | routes an intent to a template, fills the `# SLOT:` markers, loops `nika check` until rc=0 — read-only | kit `.agents/plugins/nika/agents/` |
-| **Integration kit contract** | « You want to support Nika? Copy this folder » — pinned mirrors, drift-gated in CI | [kit README](https://github.com/supernovae-st/nika-agents#readme) |
+| **Integration kit contract** | « You want to support Nika? Copy this folder » — pinned mirrors, drift-gated in CI | [kit README](https://github.com/supernovae-st/nika-plugins#readme) |
 
 ## MCP (the read-only oracle)
 
 `nika mcp` exposes 9 tools — validate, explain, examples, schema, cost — **no
-execution, no mutation, by design** ([threat model](https://github.com/supernovae-st/nika-agents/blob/main/integrations/mcp/THREAT-MODEL.md)).
+execution, no mutation, by design** ([threat model](https://github.com/supernovae-st/nika-plugins/blob/main/integrations/mcp/THREAT-MODEL.md)).
 
 | Element | Where |
 |---|---|
 | Full tool reference | [MCP server reference](/reference/mcp-server) |
 | Per-client wiring (one dedicated page per client — the matrix) | [MCP clients](/integrations/mcp-clients) |
-| `server.json` (registry shape) + bundles + Dockerfile | [kit `integrations/mcp/`](https://github.com/supernovae-st/nika-agents/tree/main/integrations/mcp) |
+| `server.json` (registry shape) + bundles + Dockerfile | [kit `integrations/mcp/`](https://github.com/supernovae-st/nika-plugins/tree/main/integrations/mcp) |
 
 ## CI/CD
 
@@ -121,10 +121,10 @@ execution, no mutation, by design** ([threat model](https://github.com/supernova
 
 Marketplaces and directories where you'll find us today — the public
 submissions ledger (with pinned descriptions and review cadence) lives in
-[`listings.yaml`](https://github.com/supernovae-st/nika-agents/blob/main/listings.yaml).
+[`listings.yaml`](https://github.com/supernovae-st/nika-plugins/blob/main/listings.yaml).
 
 - [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika-lang) · [OpenVSX](https://open-vsx.org/extension/supernovae/nika) — the extension
-- [skills.sh](https://skills.sh/supernovae-st/nika-agents) — the skill pack
+- [skills.sh](https://skills.sh/supernovae-st/nika-plugins) — the skill pack
 - GitHub topics + release feeds — engine · kit · action · docs · spec · client
 - More MCP registries and community catalogs are in flight — the ledger above
   is the always-current truth (every submission registers there the day it
@@ -140,6 +140,6 @@ every push.
 
 <Tip>
 Something missing? The kit contract makes adding a surface a folder-copy:
-[`nika-agents`](https://github.com/supernovae-st/nika-agents) — and the
+[`nika-plugins`](https://github.com/supernovae-st/nika-plugins) — and the
 [integration quickstart](/integrations/quickstart) is the 10-minute path.
 </Tip>
