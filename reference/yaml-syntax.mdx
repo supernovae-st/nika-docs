@@ -14,53 +14,68 @@ icon: "file-code"
 ## Top level
 
 ```yaml the envelope · a skeleton, not a runnable file
-nika: v1                     # required · language + contract version (single marker)
-workflow:                    # required · the identity object
-  id: <identifier>           #   required · kebab-case · unique within file
-  description: <string>      #   optional · human-readable
+nika: <identifier>           # required · the mark AND the file's name · kebab-case
 
 model: <provider>/<name>     # optional · default model for infer/agent tasks
 
-# the four value authorities · one role each · no other value namespace exists
+# the three value authorities · one role each · no other value namespace exists
 inputs: { ... }              # optional · TYPED · the caller supplies at launch · ${{ inputs.* }}
-config: { ... }              # optional · TYPED · the deployment supplies · logged · ${{ config.* }}
 const:  { ... }              # optional · fixed in the file · never caller-supplied · ${{ const.* }}
 secrets: { ... }             # optional · vault/env/file references · masked · ${{ secrets.* }}
 
 permits: { ... }             # optional KEY · but ABSENT = zero authority (see below)
-policy: { ... }              # optional · the run's declared limits
-types: { ... }               # optional · named PascalCase type declarations
 run: { ... }                 # optional · the run's entropy + clock declaration
 
 tasks: { ... }               # required · non-empty MAP · the key IS the task id
 
 outputs: { ... }             # optional · the workflow's return value
-assert: [ ... ]              # optional · the author's obligations, checked
 ```
 
-## The four value authorities
+## `nika:` — the mark and the name
 
-Every value a workflow declares lands under exactly one of four authorities.
+One line opens every file. The key `nika` says *this byte-stream is a Nika
+file*; the value is the file's **name**, kebab-case (`^[a-z][a-z0-9-]*$`),
+carried into journal events, traces and error messages.
+
+```yaml
+nika: scrape-and-summarize
+```
+
+The same word means the same thing in both document types — a project file
+(`nika.yaml`) names the project, a workflow file (`deploy.nika.yaml`) names
+the workflow. **Which kind of file it is comes from one key: `tasks:`.**
+A document with a task map is a workflow; a document without one is a
+project. That rule holds without the filename, which is the case that
+matters — a registry blob, an HTTP body, a `nika check -` pipe and a chat
+paste all arrive with no `.nika.yaml` to read.
+
+A missing `nika:` is `NIKA-PARSE-002`; a value outside kebab-case is
+`NIKA-PARSE-003`.
+
+## The three value authorities
+
+Every value a workflow declares lands under exactly one of three authorities.
 The family is closed — a value-namespace read outside it is `NIKA-VALUES-003`.
 
 | Authority | Who supplies it | Shape | Integrity |
 |---|---|---|---|
 | `inputs:` | the **caller**, at launch (`--var k=v` · an MCP `nika.run_workflow` argument) | `{ type, required?, default?, description? }` · `type:` required | untrusted |
-| `config:` | the **deployment** · may appear in logs and traces | `{ type, default?, description? }` · `type:` required · never `required:` | untrusted |
 | `const:` | the **file** · immutable across the run, never caller-supplied | a bare literal, or `{ type, value }` | trusted |
 | `secrets:` | a **governed store** · masked everywhere | `{ source: vault\|env\|file, key\|path, egress? }` | trusted |
 
 ```yaml
 inputs:
-  topic:    { type: string, required: true, description: "Subject to research" }
-  bullets:  { type: integer, default: 3 }
-config:
-  log_level: { type: string, default: "info" }
+  topic:     { type: string, required: true, description: "Subject to research" }
+  bullets:   { type: integer, default: 3 }
+  log_level: { type: string, required: false, default: "info" }   # a deployment knob
 const:
   output_dir: "./output"                 # the file owns the destination
 secrets:
   api_key: { source: env, key: MISTRAL_API_KEY }
 ```
+
+A deployment knob is an `inputs:` entry with `required: false` and a
+`default:` — the caller may override it, the file still runs without one.
 
 The integrity column is not decoration: under a `permits:` block an
 **untrusted** value that reaches a verb argument is re-gated on its canonical
@@ -68,14 +83,8 @@ resolved form, and an escape is refused `NIKA-AUTH-008`. That is the practical
 reason a destination the boundary pins belongs in `const:` — a caller cannot
 move it out from under the permit.
 
-`vars:` and `env:` are **dead envelope fields** (`NIKA-VALUES-001` /
-`NIKA-VALUES-002`), and so are the `${{ vars.X }}` / `${{ env.X }}` reads.
-There is no alias: each old use **classifies** into the authority its role
-commands — a typed parameter is an `inputs:` declaration, a fixed value a
-`const:` entry, non-sensitive runtime configuration a `config:` declaration, a
-governed store reference a `secrets:` entry. `nika check --fix` migrates the
-provable cases. (The `env:` **inside** an `exec:` block is a different field
-and is alive: it is the child process's environment map.)
+(The `env:` **inside** an `exec:` block is not a value authority: it is one
+child process's environment map.)
 
 ## `permits:` — the key is optional, the authority is not
 
@@ -109,33 +118,17 @@ randomness. A declared contradiction refuses at parse (`NIKA-PARSE-026` ·
 `NIKA-PARSE-027`); `entropy: none` with a live randomness source consumed
 refuses at check (`NIKA-PARSE-028`).
 
-## Types and policy
+## Types
 
-Two optional envelope keys that most workflows never need — and that the
-checker enforces the moment they appear.
-
-`types:` declares named PascalCase types once; `returns:` (and `outputs:`)
-then reference them by name instead of restating the shape. `policy:`
-declares the limits the run must obey, checked **before** any token is spent.
+A type expression is written **inline**, wherever a contract is declared: a
+task's `returns:`, an `inputs:` entry's `type:`, a typed `outputs:` value, a
+typed `const:`.
 
 ```yaml typed-triage.nika.yaml
-nika: v1
-workflow:
-  id: typed-triage
-
-types:
-  Finding:
-    object:
-      severity: { enum: ["low", "medium", "high"] }
-      summary: string
-      line: { integer: { min: 1 } }
+nika: typed-triage
 
 permits:
   tools: ["nika:jq"]
-
-policy:
-  limits:
-    max_tasks: 20
 
 tasks:
   classify:
@@ -144,33 +137,25 @@ tasks:
       args:
         input: { severity: "high", summary: "unbounded retry", line: 42 }
         expression: "."
-    returns: Finding
+    returns:
+      object:
+        severity: { enum: ["low", "medium", "high"] }
+        summary: string
+        line: { integer: { min: 1 } }
 
 outputs:
   severity: "${{ tasks.classify.output.severity }}"
 ```
 
-The type grammar is closed: the primitives (`null` · `bool` · `integer` ·
-`number` · `string` · `bytes` · `uri` · `path` · `duration` · `timestamp`), a
-PascalCase reference to one of your own, or a constructor — `object:` ·
-`array:` · `map:` · `union:` · `enum:` · plus the refinements `integer:`/
-`number:` (`min`/`max`) and `string:` (`pattern`/`min_len`/`max_len`). An
-unknown name is `NIKA-TYPE-001`; a recursive `types:` graph is
-`NIKA-TYPE-002`.
+The grammar is closed: the primitives (`null` · `bool` · `integer` ·
+`number` · `string` · `bytes` · `uri` · `path` · `duration` · `timestamp`),
+or a constructor — `object:` · `array:` · `map:` · `union:` · `enum:` · plus
+the refinements `integer:`/`number:` (`min`/`max`) and `string:`
+(`pattern`/`min_len`/`max_len`). A name in type position resolves to nothing
+and refuses with `NIKA-TYPE-001`, which teaches the inline form.
 
-The policy rule set is closed per minor. Rather than trust a list here, ask
-the binary — a refused `policy:` block prints the whole current set:
-
-```bash
-nika explain NIKA-POLICY-001
-```
-
-Today that set is six families — `require` · `forbid` · `allow` · `limits` ·
-`prefer` · `optimize` — carrying `require.human_gate_before` ·
-`forbid.exec_after` (both over `exec`/`write`/`net`/`tools`) ·
-`allow.providers` · `limits.max_tasks` · `prefer.providers` · `optimize`
-(`cost`/`latency`/`quality`). A violated hard rule is `NIKA-POLICY-001` at
-check time, naming rule, task and witness.
+No `returns:` at all is legal and honest: the output is `Unknown`, the static
+walk stops there, and nothing is invented.
 
 ## A task
 
@@ -178,19 +163,19 @@ check time, naming rule, task and witness.
 <identifier>:                # the map KEY is the identity (snake_case · unique)
 
   with: { ... }              # optional · the DATA boundary · each tasks.* ref = one typed edge
-  after: { <id>: <pred> }    # optional · the CONTROL boundary · pred ∈ success|failure|skipped|terminal
+  group: <name>              # optional · fan-in MEMBERSHIP · this task joins the set
+  after: { <id>: <pred> }    # optional · the CONTROL boundary · pred ∈ success|failure|skipped|terminal|unwind
   when: <expression>         # optional · LOCAL business condition · evaluated POST-gate
-  for_each: <expression>     # optional fan-out (an array · local read)
-  max_parallel: <int>        # optional · cap concurrent iterations
-  fail_fast: <bool>          # optional · default true · false = collect errors
+  for_each:                  # optional fan-out · one block
+    items: <expression>      #   the collection · evaluated ONCE, before the fan-out
+    max_parallel: <int>      #   optional · cap concurrent iterations
+    fail_fast: <bool>        #   optional · default true · false = finish the batch
   timeout: "<duration>"      # optional · quoted Go-duration · per-iteration on for_each
   retry: { ... }             # optional retry policy (max_attempts · backoff · on_codes)
-  on_error: { ... }          # optional recovery · recover/skip/fail_workflow + on_codes
+  on_error: { ... }          # optional recovery · recover XOR skip, + on_codes
   output: { <name>: <jq> }   # optional named jq bindings over the raw output
-  on_finally: [ ... ]        # optional cleanup steps · run if the task STARTED
   returns: <type>            # optional · the task's output contract (a type expression)
-  declassify: [ ... ]        # optional · raise ONE binding untrusted → trusted
-  inert: "<because>"         # optional · this fetch is a code-bearing artifact, never loaded
+  lift: [ ... ]              # optional · open ONE named law, in writing
 
   # exactly one verb block:
   infer: { ... }
@@ -199,19 +184,21 @@ check time, naming rule, task and witness.
   agent: { ... }
 ```
 
-The eighteen modifiers above are the complete task surface. `returns:`,
-`declassify:` and `inert:` are the three that carry a contract of their own:
+The eleven modifiers above are the complete task surface. Two of them carry a
+contract of their own:
 
 | Modifier | What it declares |
 |---|---|
-| `returns:` | The task's output type, as a [type expression](#types-and-policy) — exclusive with a verb-level `schema:` (`NIKA-TYPE-003`). Under composition it is how the parent states the child's shape. |
-| `declassify:` | The **only** door through the permit-parameterization taint. Each entry raises exactly one binding: `from:` (a dotted path) · `to: trusted` · a non-empty `because:`. It lifts the taint law only — the value is still matched against the declared boundary, so it is never a permit bypass. |
-| `inert:` | The **only** door through the data-as-code sink. A `nika:fetch` whose resolved URL names a code-bearing class (`.pkl` · `.py` · `.so` · the closed NEP-0006 list) is refused with `NIKA-SEC-008`; a non-empty `inert:` string declares the artifact will never be loaded or run. It lifts that law only — never the `net.http` boundary, never the SSRF floor. |
+| `returns:` | The task's output type, as an inline [type expression](#types) — exclusive with a verb-level `schema:` (`NIKA-TYPE-003`). Under composition it is how the parent states the child's shape. |
+| `lift:` | The **single** construct that opens a named law, with the reason written next to it. `law:` is a closed enum — v1 knows `taint` and `data-as-code`; `because:` is mandatory and non-empty; `from:` (one binding) is required by `taint` and forbidden elsewhere. A lift moves exactly one law: it never widens `permits:`, never touches the `net.http` boundary, never lowers the SSRF floor. |
 
-```yaml inert-fetch.nika.yaml
-nika: v1
-workflow:
-  id: inert-fetch
+Twenty-four error-bearing laws exist and **two have a door**. A `lift:` that
+lifts nothing — the named law would not have fired on this task — is refused
+with `NIKA-AUTH-011`, never a silent no-op: a trapdoor whose whole value is
+being countable and reviewable must refuse to be written when it does nothing.
+
+```yaml lift-fetch.nika.yaml
+nika: lift-fetch
 
 permits:
   net: { http: ["example.com"] }
@@ -219,19 +206,61 @@ permits:
 
 tasks:
   audit_weights:
-    inert: "checksum audit only · the file is hashed, never deserialized"
     invoke:
       tool: "nika:fetch"
       args: { url: "https://example.com/model.pkl" }
+    lift:
+      - law: data-as-code
+        because: "checksum audit only · the file is hashed, never deserialized"
 
 outputs:
   status: "${{ tasks.audit_weights.output.status }}"
 ```
 
-Drop the `inert:` line and that same file fails the check with
-`NIKA-SEC-008`. Both doors are greppable by design: a reviewer can find every
-place a law was waived, and each one carries its written justification into
-the run receipt.
+Drop the `lift:` block and that same file fails the check with
+`NIKA-SEC-008` — a `nika:fetch` whose resolved URL names a code-bearing class
+(`.pkl` · `.py` · `.so` · the closed NEP-0006 list) is refused before it runs.
+The `taint` law has the same shape, and names the binding it raises:
+
+```yaml
+    lift:
+      - law: taint
+        from: inputs.p
+        because: "vendor inventory path, deployment-controlled, reviewed at release time"
+```
+
+Every lift is greppable by design, recorded in the run receipt and projected
+in the check certificate: a reviewer can find every place a law was opened,
+and each one carries its written justification.
+
+## Cleanup that always runs
+
+Cleanup is a **task**, on an `unwind` edge:
+
+```yaml
+tasks:
+  process:
+    exec:
+      shell: "./process.sh > /tmp/output.json"
+
+  drop_temp:
+    after: { process: unwind }              # an E_f edge · never schedules in the precedence graph
+    exec:
+      command: ["rm", "-f", "/tmp/output.json"]
+```
+
+`unwind` is not a settle-state comparison like `success` or `terminal`. It
+fires on Ctrl+C and on timeout for a producer that **started**; it runs
+*before* the producer's failure settles outward, so cleanup can undo a side
+effect before anything downstream observes it; and its own failure never
+propagates — the producer's status reflects its own verb only. Default
+timeout 30 seconds, overridable with the task's own `timeout:`. An unwind
+task reads its producer and nothing else (a sibling may still be running, so
+the read would race — `NIKA-VAR-021`). Over a `for_each` producer it runs
+**once**, after every iteration completes.
+
+A record that must land on *every* workflow outcome is a different thing:
+one terminal task, `after: { <id>: terminal }`.
 
 `tasks.*` crosses a task boundary through exactly **two doors** — `with:`
 (data · observations) and `after:` (control) — and the engine computes the
@@ -311,9 +340,10 @@ It's 100% machine-authoritative. This doc is a readable summary.
 
 ## Contract version policy
 
-`nika: v1` is a **single version marker**: `v1` is the only value for the
-entire lifetime of the v1 contract. Minor additions (a new optional field, a
-new builtin) are **additive** and never change it (no `@minor` bumps, no
-`nika migrate` for them). There is no `nika: v2` — ever:
-pre-1.0 grammar changes happen inside `v1` (the pre-1.0 stability contract) ·
-after engine 1.0.0 the grammar is additive only.
+There is no version field to write. The `nika:` **key** is the mark that says
+*this file speaks Nika*, and an engine that does not speak the contract says
+exactly that rather than « unknown key ». Minor additions (a new optional
+field, a new builtin) are **additive**: nothing in the file changes, no
+`@minor` bump, no `nika migrate`. Pre-1.0 grammar changes happen inside the
+v1 contract (the pre-1.0 stability contract) · after engine 1.0.0 the grammar
+is additive only.
