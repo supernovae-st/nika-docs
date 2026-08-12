@@ -113,43 +113,36 @@ Passing tainted data to a privileged sink without going through a data
 channel raises a typed taint violation: taint is a property of the
 **data**, not of who runs the workflow.
 
-## The authored door
+## The two authored doors
 
 Some legitimate workflows do need to cross one of these lines. Nika refuses
-to let that happen silently: there is exactly **one** construct that opens a
-law, it is authored, it carries a written justification, and it lands in the
-run receipt and the check certificate.
+to let that happen silently: there are exactly two doors, both authored, both
+requiring a written justification, both recorded in the run receipt.
+
+| Door | Lifts | Shape |
+|---|---|---|
+| `declassify:` | the **permit-parameterization taint** — an untrusted binding used where a permit is matched | a list; each entry names `from:` (one dotted binding), `to: trusted`, and a non-empty `because:` |
+| `inert:` | the **data-as-code sink** — a `nika:fetch` whose resolved URL names a code-bearing class (`NIKA-SEC-008`) | a non-empty string; the string IS the justification |
 
 ```yaml
 load_inventory:
   invoke:
     tool: "nika:read"
     args: { path: "${{ inputs.p }}" }
-  lift:
-    - law: taint
-      from: inputs.p
+  declassify:
+    - from: inputs.p
+      to: trusted
       because: "deployment-controlled inventory path, reviewed at release"
 ```
 
-`law:` is a closed enum. Twenty-four error-bearing laws exist and **two have
-a door**:
-
-| `law:` | What it opens | Shape |
-|---|---|---|
-| `taint` | the **permit-parameterization taint** — an untrusted binding used where a permit is matched | `from:` names one dotted binding · `because:` non-empty |
-| `data-as-code` | the **data-as-code sink** — a `nika:fetch` whose resolved URL names a code-bearing class (`NIKA-SEC-008`) | `because:` non-empty · `from:` is forbidden here |
-
-A lift moves exactly **one** law and nothing else. It never widens
+Each door lifts **one** law and nothing else. `declassify:` does not widen
 `permits:` — the value is still matched against the declared boundary, so it
-can never become a permit bypass — never touches the `net.http` boundary,
-never lowers the SSRF floor, and there is no implicit declassification.
-A lift whose named law would not have fired on that task is refused with
-`NIKA-AUTH-011`, never accepted as a silent no-op: a trapdoor whose whole
-value is being countable must refuse to be written when it counts nothing.
+can never become a permit bypass, and there is no implicit declassification.
+`inert:` does not touch the `net.http` boundary or the SSRF floor.
 
-Because it is a plain YAML key, `grep -rn 'lift:'` over a repo returns every
-place a law was opened, with the reason attached. That is the point: the
-escape hatch is auditable by construction.
+Because both are plain YAML keys, `grep -rn 'declassify:\|inert:'` over a
+repo returns every place a law was waived, with the reason attached. That is
+the point: the escape hatch is auditable by construction.
 
 ## Trust levels + prompt injection
 

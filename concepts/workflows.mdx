@@ -23,7 +23,10 @@ the dependency graph allows.
 ## Minimal workflow
 
 ```yaml
-nika: hello
+nika: v1
+workflow:
+  id: hello
+  description: "A minimal workflow."
 
 tasks:
   greet:
@@ -32,25 +35,23 @@ tasks:
       model: ollama/<model>      # <provider>/<name>
 ```
 
-One required line (`nika:`) and a non-empty `tasks:`, the whole minimum to be
-a valid workflow. Fields carry source spans through `Spanned<T>` so
-diagnostics point at the exact byte range.
+Two required lines (`nika:` + `workflow:`) and a non-empty `tasks:`, the
+whole minimum to be a valid workflow. Fields carry source spans through
+`Spanned<T>` so diagnostics point at the exact byte range.
 
-## One header line, and it carries the name
+## Why one version marker (not a K8s envelope)
 
-The envelope is **one header line** · `nika: <id>`. The key says *this
-byte-stream is a Nika file* — the `#!/bin/sh` / `%PDF-` job, done by the key
-and never by the value. The value is the file's name, kebab-case, carried
-into journal events, traces and error messages.
+The envelope is **one header line** · `nika: v1`. Earlier drafts explored a
+Kubernetes-style `apiVersion` + `kind` + `metadata` + `spec` envelope, but
+the spec rejected it: that is two version-ish fields and ceremony a workflow
+file does not need. Modern specs converge on a single version marker:
+OpenAPI writes `openapi: 3.1.0`, Docker Compose dropped its `version:` field
+entirely. Nika takes the proven path: **the language name as the key, the
+contract version as the value.**
 
-That matters off disk. On disk `.nika.yaml` says what a file is; as a
-registry blob, an HTTP body, a `nika check -` pipe or a chat paste the
-extension is gone and the first line is the only discriminator. It still is.
-
-- **No `kind:` field.** One key tells the two document types apart: a
-  document with `tasks:` is a **workflow**, a document without one is a
-  **project** (`nika.yaml`). The rule holds at full coverage and holds
-  without the filename.
+- No separate `kind:` field: the presence of `workflow:` is itself the
+  document-type discriminator. Future document types (if any ever ship) use
+  their own top-level key.
 - The engine's internal canonical URI stays `https://nika.sh/spec/v1` for
   RDF / conformance tooling, but the author never types a URL.
 
@@ -64,22 +65,27 @@ envelope's fields — nothing hidden, nothing extra:
 
 | Field | Purpose |
 |---|---|
-| `nika` | The mark and the name — kebab-case, required. |
+| `nika` | The language contract version (exactly `v1`). |
+| `workflow` | The identity object — kebab-case `id:` (the document-type discriminator) + optional `description:`. |
 | `model` | Workflow-level default `<provider>/<name>` for `infer` / `agent` tasks. |
 | `inputs` | **Value authority** · typed parameters the caller supplies at launch (`--var key=value`) · `${{ inputs.X }}`. |
+| `config` | **Value authority** · typed non-sensitive runtime config the deployment supplies · `${{ config.X }}`. |
 | `const` | **Value authority** · named constants fixed in the file, never caller-supplied · `${{ const.X }}`. |
 | `secrets` | **Value authority** · masked store references · `${{ secrets.X }}`. |
 | `permits` | The declared capability boundary. Absent = **zero** authority; present = default-deny per category. |
+| `policy` | The run's declared limits. |
+| `types` | Named PascalCase type declarations, referenced by `returns:` and typed `outputs:`. |
 | `run` | The run's entropy + clock declaration — randomness and time are declared, never ambient. |
 | `tasks` | The DAG payload — a non-empty map, the key IS the task id. |
 | `outputs` | The workflow's return contract. |
+| `assert` | The author's obligations, judged by the engine. |
 
-The three value authorities are a **closed family**: `inputs` · `const` ·
-`secrets`. A read outside it is `NIKA-VALUES-003`. A deployment knob is an
-`inputs:` entry with `required: false` and a `default:` — the caller may
-override it, the file still runs without one. (The `env:` field *inside* an
-`exec:` block is not a value authority: it is one child process's
-environment map.)
+The four value authorities are a **closed family**: `inputs` · `config` ·
+`const` · `secrets`. The pre-flip `vars:` and `env:` blocks are dead
+(`NIKA-VALUES-001` / `NIKA-VALUES-002`) and no alias survives — each old
+use classifies into the authority its role commands. (The `env:` field
+*inside* an `exec:` block is a different thing and is alive: it is the
+child process's environment map.)
 
 Every field is span-carrying (`Spanned<T>`): source spans survive
 all the way into the diagnostic layer (ADR-010 miette bridge).
@@ -167,37 +173,30 @@ deploy:
 ```
 
 The predicate set is **closed** (`NIKA-DAG-005` otherwise): `success` ·
-`failure` · `skipped` · `terminal` — where `terminal` admits any terminal
+`failed` · `skipped` · `terminal` — where `terminal` admits any terminal
 state, `cancelled` included (the always-pattern: « run once X is settled,
-whatever happened ») — plus `unwind`, the cleanup attachment that never
-enters the precedence graph.
+whatever happened »).
 
 Fan-out over a collection (`files` here is a jq
 [output binding](/concepts/bindings) on `list_files`, e.g.
 `output: { files: 'split("\n")' }` — the collection crosses the boundary
-through `with:`, then `for_each.items:` reads the binding):
+through `with:`, then `for_each:` reads the binding):
 
 ```yaml
 analyze_each:
   with:
     files: ${{ tasks.list_files.files }}
-  for_each:
-    items: "${{ with.files }}"
-    max_parallel: 4              # optional · cap concurrent iterations
+  for_each: "${{ with.files }}"
   infer:
     model: ollama/<model>        # <provider>/<name>
     prompt: "Review this file: ${{ item }}"
 ```
 
-One block, and the concurrency is declared where the fan-out is:
-`max_parallel:` and `fail_fast:` are sub-fields of `for_each:`, never
-task-level knobs sitting beside it.
-
 Conditional execution: `when:` is a **local business condition**, evaluated
-*after* the gate admits the task. It reads local namespaces only (`inputs` ·
-`const` · `with` · the `for_each` locals `item`/`index`) — a `tasks.*`
-reference inside `when:` is refused at parse time (`NIKA-VAR-021`): the
-binding creates the edge, `when:` reads the binding.
+*after* the gate admits the task. It reads local namespaces only (`vars` ·
+`env` · `with` · the `for_each` locals) — a `tasks.*` reference inside
+`when:` is refused at parse time (`NIKA-VAR-021`): the binding creates the
+edge, `when:` reads the binding.
 
 ```yaml
 deploy:
@@ -247,14 +246,16 @@ required, and speaks the full type grammar): that is what lets the engine
 validate what a caller passes and generate a callable schema for
 `nika.run_workflow` over MCP.
 
-A value the caller may override belongs here — including a deployment dial,
-which is an entry with `required: false` and a `default:`. A value the file
-owns and nobody overrides is a `const:` entry; a credential is a `secrets:`
-reference. Three authorities, one role each — pick by the role the value
-plays.
+A value the caller may override belongs here. A value the file owns and
+nobody overrides is a `const:` entry; a deployment dial is a `config:`
+declaration; a credential is a `secrets:` reference. Four authorities, one
+role each — pick by the role the value plays.
 
 ```yaml research-brief.nika.yaml
-nika: research-brief
+nika: v1
+workflow:
+  id: research-brief
+  description: "Bullet-point brief on a topic supplied at launch."
 
 model: mock/echo                       # swap for ollama/qwen3.5:4b or any provider
 
@@ -297,7 +298,10 @@ launches a workflow.
 The child is an ordinary workflow. Nothing marks it as "a child":
 
 ```yaml word-count.nika.yaml
-nika: word-count
+nika: v1
+workflow:
+  id: word-count
+  description: "Count the words in a piece of text · the reusable child."
 
 inputs:
   text: { type: string, required: true }
@@ -324,7 +328,10 @@ The parent calls it by **static path**, passes `args:` that fit the child's
 `inputs:`, and reads the child's `outputs:` back as that task's output:
 
 ```yaml brief-with-stats.nika.yaml
-nika: brief-with-stats
+nika: v1
+workflow:
+  id: brief-with-stats
+  description: "Write a brief, then measure it by calling a child workflow."
 
 model: mock/echo
 
@@ -418,8 +425,8 @@ nika run: --var oops: unknown input — the workflow declares: topic · bullets
 ```
 
 `--var` reaches `inputs:` and nothing else. A `const:` entry is immutable
-across the run by construction and a `secrets:` entry comes from a governed
-store — neither is a launch flag.
+across the run by construction, and a `config:` value comes from the
+deployment — neither is a launch flag.
 
 ## Outputs and events
 
