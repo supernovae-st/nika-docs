@@ -101,6 +101,44 @@ Installers do not mutate editor configs automatically.
 | Windows | `x86_64-pc-windows-msvc` | 🧭 planned post-1.0 |
 | WASM (sandboxed) | `wasm32-wasip2` | 🧭 planned · a future major |
 
+## Servers and headless Linux
+
+Nika jails every `exec:` child and external MCP spawn inside an OS
+sandbox when the host provides one: **Seatbelt** on macOS (ships with the
+OS, nothing to install), **bubblewrap** on Linux. A minimal VPS image
+usually does not carry bubblewrap — install it once:
+
+```bash
+# Debian / Ubuntu
+apt install bubblewrap
+```
+
+Without a backend the host answers `noop`, and what that means depends on
+what the workflow declares:
+
+- **No `permits:` block** — the run proceeds (best effort). The exec
+  blocklist floor still applies; nothing else changes.
+- **A `permits:` block plus `exec:` tasks** — the run refuses to start
+  (`NIKA-1710`). A declared boundary the host cannot enforce is a broken
+  promise, so the engine fails closed instead of running unjailed.
+
+The posture is one knob, read once at launch:
+
+```bash
+NIKA_SANDBOX=auto     # default · the behavior above
+NIKA_SANDBOX=require  # refuse ANY unconfined start, permits or not
+NIKA_SANDBOX=off      # proceed unconfined — attested
+```
+
+`off` is a waiver, not a silent escape: the run's journal records
+`sandbox_policy` and `sandbox_waived` on its opening frame, so a sealed
+trace shows you chose it. An unknown value refuses to start (`NIKA-1711`)
+— a typo'd security knob never loudly defaults.
+
+`nika doctor` shows the selection (the sandbox row names the backend or
+`noop`), and `nika explain NIKA-1710` teaches the refusal with the
+per-OS fix.
+
 ## Trust but verify
 
 <Check>
