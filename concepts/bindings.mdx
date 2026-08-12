@@ -26,7 +26,7 @@ the unresolved expression. See
   There are no template filters: anything beyond a reference or a
   boolean is a jq expression or a task. Engine-side, taint propagation
   and typed scope lookup mature across admission rounds; the syntax
-  below is the frozen `nika: v1` contract.
+  below is the frozen v1 contract.
 </Info>
 
 ## Shape
@@ -48,9 +48,9 @@ with:
 Whitespace inside `${{ }}` is ignored. Nested `${{ }}` is rejected at
 parse time.
 
-## The six namespaces
+## The five namespaces
 
-Every binding resolves against one of six named namespaces. The resolver
+Every binding resolves against one of five named namespaces. The resolver
 refuses unknown top-level names at validation time, so `${{ tsaks.foo }}`
 is caught before the run starts — and a value-namespace read outside the
 closed family (`${{ params.X }}` and friends) refuses `NIKA-VALUES-003`.
@@ -58,23 +58,21 @@ closed family (`${{ params.X }}` and friends) refuses `NIKA-VALUES-003`.
 | Namespace | Source | Example |
 |---|---|---|
 | `inputs.*` | Typed workflow inputs, declared in the envelope `inputs:` block — supplied by the caller at launch | `inputs.target` |
-| `config.*` | Typed non-sensitive runtime config, declared in `config:` — supplied by the deployment, may appear in logs | `config.log_level` |
 | `const.*` | Named constants declared in `const:` — a fixed value baked into the file | `const.output_dir` |
 | `secrets.*` | Vault/env/file-backed secret references (masked in logs) | `secrets.api_key` |
 | `with.*` | The task's **data boundary** — per-task `with:` block; each `tasks.*` reference in a value declares a typed edge, the body reads the binding | `with.model_family` |
 | `tasks.<name>.output` | The result record of a completed task (`.output` · `.status` · `.error` · `.duration_ms` · named bindings) — **boundary surfaces only** (see below) | `tasks.greet.output` |
 
-The first four are the **value authorities** — the closed family every
+The first three are the **value authorities** — the closed family every
 workflow value is declared under, one role each, no alias. `with` and
 `tasks` are the **runtime namespaces**: legal in `${{ }}`, never value
-authorities.
+authorities. A read outside the family (`${{ params.X }}` and friends)
+refuses `NIKA-VALUES-003`.
 
-`${{ vars.X }}` and `${{ env.X }}` are dead reads (`NIKA-VALUES-001` /
-`NIKA-VALUES-002`). Each old use classifies into the authority its role
-commands — a typed parameter into `inputs:`, a fixed value into `const:`,
-non-sensitive runtime configuration into `config:`, a governed store
-reference into `secrets:`. Classification, never a bulk rename: the
-question is what the value *plays*, not what it was spelled.
+Pick by the role the value plays: a typed parameter the caller supplies is
+an `inputs:` declaration, a deployment knob is the same declaration with
+`required: false` and a `default:`, a value the file owns is a `const:`
+entry, a credential is a `secrets:` reference.
 
 Task names are validated at parse time (`snake_case`, unique). A
 binding that references a task not present in the file fails with a
@@ -85,9 +83,9 @@ miette diagnostic pointing at the exact byte range.
 The `tasks` namespace is **boundary-only**. A `${{ tasks.X.* }}` reference
 is legal in exactly five places: `with:` values (the binding IS the edge) ·
 `after:` keys (the entry names the producer) · `on_error.recover:` (a
-fallback reads a settled record) · `on_finally:` blocks (the **parent**
-task only) · workflow `outputs:` (the run's exports read the settled
-world).
+fallback reads a settled record) · an `unwind` task's body (which reads the
+**producer it unwinds**, and nothing else) · workflow `outputs:` (the run's
+exports read the settled world).
 
 Everywhere else — verb fields (`prompt:` · `command:` · `args:` · …),
 `when:`, `for_each:` — a `tasks.*` reference is refused at parse time
@@ -109,9 +107,9 @@ summarize:
 ```
 
 The task body is a **pure function of its declared inputs** (`with` · the
-four value authorities `inputs` · `config` · `const` · `secrets` · the loop
-locals): every cross-task dependency is visible at the boundary, named, and
-typed by its edge role.
+three value authorities `inputs` · `const` · `secrets` · the loop locals):
+every cross-task dependency is visible at the boundary, named, and typed by
+its edge role.
 
 ## Typed resolution
 
@@ -126,7 +124,8 @@ inputs:
 
 tasks:
   loop:
-    for_each: "${{ inputs.count }}"      # fails — for_each needs a list
+    for_each:
+      items: "${{ inputs.count }}"      # fails — the collection needs a list
     infer:
       model: ollama/<model>     # <provider>/<name>
       prompt: "Iteration ${{ item }}"
@@ -146,8 +145,7 @@ the analyzer and propagates through bindings:
 - `exec` stdout → tainted (subshell could have been influenced).
 - `infer` / `agent` output → tainted (prompt injection vector).
 - `invoke` output → tainted (MCP servers are third-party).
-- `inputs.*` → tainted (caller-supplied at launch).
-- `config.*` → tainted (deployment-supplied, from outside the file).
+- `inputs.*` → tainted (caller-supplied at launch, from outside the file).
 - literals, `const.*`, `secrets.*` → **trusted** (the file owns them).
 
 Integrity is orthogonal to confidentiality: a secret is *trusted* (the

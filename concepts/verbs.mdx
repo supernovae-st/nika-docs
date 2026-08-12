@@ -16,7 +16,7 @@ schema-version bump, not a patch release.
 <Info>
   All four verbs execute end-to-end today: every snippet on this page is
   runnable with `nika run` at v{STATUS.version}. Verb grammar is frozen by
-  the `nika: v1` language envelope: these four, forever.
+  the v1 language envelope: these four, forever.
 </Info>
 
 ## Why four?
@@ -143,7 +143,7 @@ tasks:
           Authorization: "Bearer ${{ secrets.github_token }}"
 ```
 
-A credential is a `secrets:` reference — never a `config:` value, never a
+A credential is a `secrets:` reference — never an `inputs:` value, never a
 literal. And a secret reaching any sink is a blocking leak by default
 (`NIKA-SEC-006`): the `egress:` entry is the author sanctioning one
 specific destination, statically checkable, and it never widens
