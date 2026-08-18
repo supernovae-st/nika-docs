@@ -48,7 +48,18 @@ for fp in sorted(DOCS.rglob("*.mdx")):
     if "node_modules" in str(fp):
         continue
     fences = FENCE.findall(fp.read_text())
-    runnable = [(i, b) for i, b in fences if "nika: v1" in b and not SKIP.search(i)]
+    # EVERY nika document fence is judged — anything opening with a
+    # COLUMN-0 `nika:` line (the type discriminant · spec 01: a top-level
+    # `nika:` names the language; a nested `nika:` is some other tool's
+    # key, a Goose extension or a GitHub Actions job) — never only the ones
+    # spelled `nika: v1`. The narrower filter (until 2026-08-18) made a
+    # fence written in the 0.109 envelope (`nika: <name>`) invisible to
+    # this gate: the released binary refuses it, and a reader would copy
+    # it, but the sweep never looked (a green from an instrument that did
+    # not look). The judge stays the released binary; a next-language
+    # fence on the stable docs is exactly what this gate must turn red.
+    runnable = [(i, b) for i, b in fences
+                if re.search(r"^nika:\s*\S", b, re.M) and not SKIP.search(i)]
     if not runnable:
         continue
     page_dir = tempfile.mkdtemp(prefix="oracle-")
