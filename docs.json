@@ -52,7 +52,7 @@
     "twitter:card": "summary_large_image"
   },
   "banner": {
-    "content": "🦋 Nika is out: `brew install supernovae-st/tap/nika` runs today. 1.0 + Product Hunt: August 1. [Changelog →](/changelog/releases)",
+    "content": "🦋 0.109 · the nine-key release. Your 0.108 files migrate with `nika check --fix`; the refusal names every hand move. [What changed →](/changelog/releases)",
     "dismissible": true
   },
   "navbar": {

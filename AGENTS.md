@@ -38,7 +38,7 @@ Public documentation for Nika — the open workflow language for AI
    `snippets/_ecosystem.mdx` (site · spec · engine · SDK · brew ·
    studio). Include it rather than hand-writing link lists per page.
 6. Expression canon: `${{ … }}` = CEL (conditions + references) ·
-   `output:`/`nika:jq` = jq (extraction + transform) · NO template
+   `extract:`/`nika:jq` = jq (extraction + transform) · NO template
    filters. Model id in examples: `ollama/qwen3.5:4b` (local-first ·
    sovereignty default · the SAME model the engine's own scaffold and
    the brew caveat teach — one first experience across the funnel) ·
@@ -46,18 +46,29 @@ Public documentation for Nika — the open workflow language for AI
    NEVER the default example (presentation order per
    supernovae-alignment Rule 3 · local → mistral → anthropic → openai).
 7. Commit trailer: `Co-Authored-By: Nika 🦋 <nika@supernovae.studio>`.
-8. **These docs teach 0.107 and only 0.107.** No dual grammar, no "if
-   you are on 0.106" branch, no alias (`no-legacy-no-back-compat`). The
-   value/permits grammar is the 0.106 law, re-verified against the 0.107
-   binary (2026-08-02): every value lands under one of four authorities —
-   `inputs:` (the caller supplies it) · `config:` (the deployment) ·
-   `const:` (the file owns it) · `secrets:` (a governed store); `vars:`
-   and `env:` are dead (`NIKA-VALUES-001`/`-002`, and the envelope `env:`
-   only — `exec.env:` is alive). And an absent `permits:` block declares
-   **zero** authority (`NIKA-AUTH-006`), so every effect-bearing example
-   carries one. Also: `after:` is `success`/`failure` (not `succeeded`/
-   `failed`), and `bool` is the boolean spelling — but raw JSON Schema
-   under `infer.schema:` is a different language and is never touched.
+8. **These docs teach 0.109 and only 0.109.** No dual grammar, no "if
+   you are on 0.108" branch, no alias (`no-legacy-no-back-compat`). The
+   envelope is the nine keys (`nika` · `model` · `inputs` · `const` ·
+   `secrets` · `permits` · `run` · `tasks` · `outputs`), re-verified
+   against the 0.109 binary (2026-08-19): the identity is `nika: <id>`
+   (kebab-case · the description is a `#` comment above it · no
+   `workflow:` block), every value lands under one of three authorities —
+   `inputs:` (the caller supplies it · a deployment knob is an entry with
+   `required: false` + `default:`) · `const:` (the file owns it) ·
+   `secrets:` (a governed store); `config:` is not a field, `vars:` and
+   `env:` are dead (`NIKA-VALUES-001`/`-002`, and the envelope `env:`
+   only — `exec.env:` is alive). A task's jq bindings are `extract:`,
+   cleanup is a task on an `unwind` edge (`after: {x: unwind}`), the
+   fan-out leash lives inside `for_each:` (`items` · `max_parallel` ·
+   `fail_fast`), a law opens through `lift:` only, and `graph_format` is
+   3. An absent `permits:` block declares **zero** authority
+   (`NIKA-AUTH-006`), so every effect-bearing example carries one. Also:
+   `after:` is `success`/`failure` (not `succeeded`/`failed`), and `bool`
+   is the boolean spelling — but raw JSON Schema under `infer.schema:` is
+   a different language and is never touched. Every authored yaml fence
+   is judged by `scripts/oracle-sweep.py` on the released binary;
+   `scripts/mdx-yaml-fix.py` runs the binary's own `--fix` through the
+   fences in place.
 9. **Two regions of this repo are PROJECTED, not authored** — never
    hand-edit them, the next projection reverts you:
    - `{/* showcase:begin … */}` and `{/* template:begin … */}` blocks in
@@ -66,10 +77,8 @@ Public documentation for Nika — the open workflow language for AI
    - `{/* errors-*:begin */}` tables in `reference/error-codes.mdx` ←
      `nika-spec` `canon/diagnostics/registry.yaml`, same projector.
 
-   The projector serves those blocks through
-   `nika-spec/scripts/grammar_door.py`, which **downcasts the ratified
-   pack to whatever the RELEASED binary speaks** (`NIKA_SERVED_GRAMMAR`,
-   default `w105`) — that is why served examples can lag the spec by one
-   grammar. It flips to identity with `NIKA_SERVED_GRAMMAR=wnew` at the
-   release train. Changing a served example for real means changing the
-   spec file and re-projecting, not editing the mirror.
+   The projector serves the spec's source as identity (the grammar door
+   that once downcast the pack to the released binary is gone since
+   nika-spec `2b3d6ac3e`): a served example IS the spec file. Changing
+   one for real means changing the spec file and re-projecting, not
+   editing the mirror.
