@@ -14,12 +14,13 @@ import { CANON } from "/snippets/_canon.mdx";
   <Accordion title="Can I run Nika today?" icon="play">
     Yes. Install the latest tagged release with Homebrew or `install.sh`,
     then run `nika check` and `nika run` locally. The engine is still
-    pre-1.0 and hardening toward the 1.0 launch, but the `nika: v1`
-    language envelope is already stable.
+    pre-1.0 and hardening toward the 1.0 launch; a grammar change before
+    1.0 ships with its `nika check --fix` migration.
   </Accordion>
   <Accordion title="Why is the language v1 but the engine pre-1.0?" icon="code-branch">
-    Two independent axes. The **language envelope `nika: v1` is frozen
-    forever**: files you write never break. The **engine** follows real
+    Two independent axes. The **language** is versioned by the spec and
+    changes only with a migration the binary applies (`nika check --fix`);
+    after 1.0 it is additive only. The **engine** follows real
     semver toward 1.0 (`0.90` release-candidate today, then `1.0.0`, `1.1`, …).
     Same model as SQL or GraphQL: the contract is stable, implementations
     iterate.
@@ -60,10 +61,10 @@ flag ([error model](/reference/error-codes)). The frequent ones:
 
 | Symptom | Code family | What it means · what to do |
 |---|---|---|
-| « parse error » on a file that looks fine | `NIKA-PARSE` | Usually the envelope: `nika: v1` exactly (not `v1.0` · not `1`), `workflow:` kebab-case, `tasks:` present. |
+| « parse error » on a file that looks fine | `NIKA-PARSE` | Usually the envelope: `nika: <name>` (a kebab-case identifier — `nika: v1` + `workflow:` is the previous envelope, `nika check --fix` migrates it), `tasks:` present. |
 | `tasks.X` read refused at check time | `NIKA-VAR-021` · `NIKA-PARSE-024` | A `tasks.*` reference outside the boundary (verb body · `when:` · `for_each:`): hoist it into `with:` — the binding IS the edge (`nika check --fix` applies it). A lingering `depends_on:` is `NIKA-PARSE-024`: data → `with:`, control → `after:`. |
 | `jq`/`fromjson` fails on fetch output (« expecting value, byte 0 ») | `NIKA-BUILTIN-JQ` | The fetch used the default `mode: markdown` (built for pages — it escapes JSON bodies). APIs take `mode: raw`, or `mode: jq` + `jq:` so the shaping rides the fetch. |
-| « unknown binding » | `NIKA-VAR` · `NIKA-VALUES` | Six namespaces only — the four value authorities (`inputs` · `config` · `const` · `secrets`) plus `with` and `tasks`. Typos like `tsaks.` are caught at validation; a read of the dead `vars`/`env` namespaces is `NIKA-VALUES-001`/`-002`, and any other value namespace is `NIKA-VALUES-003`. |
+| « unknown binding » | `NIKA-VAR` · `NIKA-VALUES` | Five namespaces only — the three value authorities (`inputs` · `const` · `secrets`) plus `with` and `tasks`. Typos like `tsaks.` are caught at validation; a read of the dead `vars`/`env` namespaces is `NIKA-VALUES-001`/`-002`, and any other value namespace is `NIKA-VALUES-003`. |
 | « no boundary declared » on a workflow that touches something | `NIKA-AUTH-006` | An absent `permits:` block declares ZERO authority, not a free pass. Run `nika check --infer-permits` — it prints the tightest block the body needs, ready to paste. |
 | provider call fails once then works | `NIKA-PROVIDER` (`transient: true`) | The engine retries with backoff per your `retry:`. Declare it instead of wrapping logic. |
 | fetch refuses a URL | `NIKA-SEC` | SSRF defense: private networks and cloud metadata are blocked by default ([security model](/concepts/security)). |

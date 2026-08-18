@@ -44,10 +44,7 @@ flowchart LR
 
 {/* showcase:begin localization-factory.nika.yaml */}
 ```yaml localization-factory.nika.yaml
-nika: v1
-workflow:
-  id: localization-factory
-  description: "glob docs → parallel read → parallel translate → mirror tree"
+nika: localization-factory
 
 model: ollama/qwen3.5:4b   # local default · swap for mistral/mistral-large (EU model for EU locales)
 
@@ -86,8 +83,9 @@ tasks:
   texts:
     with:
       files: ${{ tasks.files.output }}
-    for_each: ${{ with.files }}
-    max_parallel: 8                    # local disk · the only cost is file handles
+    for_each:
+      items: ${{ with.files }}
+      max_parallel: 8                    # local disk · the only cost is file handles
     invoke:
       tool: "nika:read"
       args: { path: "${{ item }}" }
@@ -112,9 +110,10 @@ tasks:
   translated:
     with:
       pairs: ${{ tasks.pairs.output }}
-    for_each: ${{ with.pairs }}
-    max_parallel: 3                    # rate-limit the provider, not the disk
-    fail_fast: false                   # finish the batch · one bad file is not a batch failure
+    for_each:
+      items: ${{ with.pairs }}
+      max_parallel: 3                    # rate-limit the provider, not the disk
+      fail_fast: false                   # finish the batch · one bad file is not a batch failure
     on_error:
       recover: null                    # null holds the index open so the zip below stays aligned
     infer:
@@ -146,8 +145,9 @@ tasks:
   mirror:
     with:
       bundle: ${{ tasks.bundle.output }}
-    for_each: ${{ with.bundle }}
-    max_parallel: 8
+    for_each:
+      items: ${{ with.bundle }}
+      max_parallel: 8
     invoke:
       tool: "nika:write"
       args:

@@ -116,33 +116,36 @@ channel raises a typed taint violation: taint is a property of the
 ## The two authored doors
 
 Some legitimate workflows do need to cross one of these lines. Nika refuses
-to let that happen silently: there are exactly two doors, both authored, both
-requiring a written justification, both recorded in the run receipt.
+to let that happen silently: there is exactly one door, `lift:`, authored,
+naming the law it opens, requiring a written justification, recorded in the
+run receipt.
 
-| Door | Lifts | Shape |
+| `lift:` entry | Lifts | Shape |
 |---|---|---|
-| `declassify:` | the **permit-parameterization taint** — an untrusted binding used where a permit is matched | a list; each entry names `from:` (one dotted binding), `to: trusted`, and a non-empty `because:` |
-| `inert:` | the **data-as-code sink** — a `nika:fetch` whose resolved URL names a code-bearing class (`NIKA-SEC-008`) | a non-empty string; the string IS the justification |
+| `law: taint` | the **permit-parameterization taint** — an untrusted binding used where a permit is matched | `from:` (one dotted binding) + a non-empty `because:` |
+| `law: data-as-code` | the **data-as-code sink** — a `nika:fetch` whose resolved URL names a code-bearing class (`NIKA-SEC-008`) | a non-empty `because:` · no `from:` |
 
 ```yaml
 load_inventory:
   invoke:
     tool: "nika:read"
     args: { path: "${{ inputs.p }}" }
-  declassify:
-    - from: inputs.p
-      to: trusted
+  lift:
+    - law: taint
+      from: inputs.p
       because: "deployment-controlled inventory path, reviewed at release"
 ```
 
-Each door lifts **one** law and nothing else. `declassify:` does not widen
+Each entry lifts **one** law and nothing else. `law: taint` does not widen
 `permits:` — the value is still matched against the declared boundary, so it
 can never become a permit bypass, and there is no implicit declassification.
-`inert:` does not touch the `net.http` boundary or the SSRF floor.
+`law: data-as-code` does not touch the `net.http` boundary or the SSRF floor.
+(`declassify:` and `inert:` were the two earlier spellings; both merged into
+`lift:` in 0.109 — the law is a parameter of one door, not two keywords.)
 
-Because both are plain YAML keys, `grep -rn 'declassify:\|inert:'` over a
-repo returns every place a law was waived, with the reason attached. That is
-the point: the escape hatch is auditable by construction.
+Because it is one plain YAML key, `grep -rn 'lift:'` over a repo returns
+every place a law was opened, with the reason attached. That is the point:
+the escape hatch is auditable by construction.
 
 ## Trust levels + prompt injection
 

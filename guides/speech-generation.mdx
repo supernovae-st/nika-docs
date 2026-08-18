@@ -24,9 +24,8 @@ prints a `tts` line naming what's wired.
 
 ## Quickstart
 
-```yaml nika: v1
-workflow:
-  id: narrate
+```yaml
+nika: narrate
 permits:
   fs: { write: ["./out/**"] }
   tools: ["nika:tts_generate"]
@@ -70,9 +69,8 @@ out/
 
 **An LLM writes the script, another model speaks it — one run:**
 
-```yaml nika: v1
-workflow:
-  id: script-to-speech
+```yaml
+nika: script-to-speech
 model: gemini/gemini-2.5-flash
 permits:
   fs: { write: ["./out/**"] }

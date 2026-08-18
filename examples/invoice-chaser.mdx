@@ -42,10 +42,7 @@ flowchart LR
 
 {/* showcase:begin invoice-chaser.nika.yaml */}
 ```yaml invoice-chaser.nika.yaml
-nika: v1
-workflow:
-  id: invoice-chaser
-  description: "chase unpaid invoices · ledger CSV → overdue filter → drafted reminder emails → human gate → drafts file"
+nika: invoice-chaser
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (drafting is a fast-model job)
 

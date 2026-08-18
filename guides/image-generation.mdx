@@ -39,9 +39,8 @@ export NIKA_IMAGE_LOCAL_URL=http://localhost:11434
 export NIKA_IMAGE_LOCAL_URL=http://localhost:1234
 ```
 
-```yaml nika: v1
-workflow:
-  id: og-hero-sovereign
+```yaml
+nika: og-hero-sovereign
 permits:
   fs: { write: ["./assets/**"] }
   tools: ["nika:image_generate"]
@@ -131,9 +130,8 @@ never an estimate dressed as truth.
 
 **An LLM writes the brief, another provider renders it:**
 
-```yaml nika: v1
-workflow:
-  id: brief-to-image
+```yaml
+nika: brief-to-image
 model: gemini/gemini-2.5-flash
 permits:
   fs: { write: ["./out/**"] }

@@ -29,10 +29,8 @@ schema workflow runs offline, end to end, through the same runtime,
 bindings, and typed-outputs validation as a live run.
 
 ```yaml triage.nika.yaml
-nika: v1
-workflow:
-  id: ticket-triage
-  description: "Classify a support ticket into a typed verdict."
+# Classify a support ticket into a typed verdict.
+nika: ticket-triage
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 

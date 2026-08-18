@@ -67,7 +67,7 @@ flowchart LR
     | `NIKA-PARSE-024` | `depends_on:` is dead: data → a `with:` binding · control → `after: { x: success }` (`nika check --fix` migrates) |
     | `NIKA-DAG-001` | cycle: remove the back-edge |
     | `NIKA-DAG-005` | unknown `after:` predicate: the set is closed — `success` · `failure` · `skipped` · `terminal` (the participial `succeeded`/`failed` are dead spellings · `nika check --fix` respells them) |
-    | `NIKA-VAR-001` | undeclared name: declare it under the authority its role commands — `inputs:` · `config:` · `const:` · `secrets:` — or fix the typo |
+    | `NIKA-VAR-001` | undeclared name: declare it under the authority its role commands — `inputs:` · `const:` · `secrets:` — or fix the typo |
     | `NIKA-PROVIDER` | `model:` must be `<provider>/<name>` with a canonical prefix |
     | `NIKA-PARSE` (duplicate id) | two tasks share an id: rename one |
   </Step>
@@ -79,7 +79,7 @@ These catch ~90% of LLM-written errors. The validator enforces all of
 them; knowing them just saves round-trips:
 
 1. **One verb per task** · `infer`, `exec`, `invoke` or `agent`.
-2. **snake_case task ids** (CEL-safe) · **kebab-case `workflow:`**.
+2. **snake_case task ids** (CEL-safe) · **kebab-case `nika:` name**.
 3. **`tasks.*` crosses a boundary through `with:` or `after:` only** ·
    the binding IS the edge, the body reads `${{ with.<name> }}` — the
    DAG has no invisible edges (`NIKA-VAR-021` otherwise, and
@@ -105,11 +105,12 @@ them; knowing them just saves round-trips:
    hint; `nika check --native-strict` fails on any that remain, and a
    surviving `exec:` gets an exec-ledger row (task · command · why ·
    unlock) in the workflow header.
-10. **Every value lands under one of four authorities** · `inputs:`
-    (the caller supplies it) · `config:` (the deployment supplies it) ·
-    `const:` (the file owns it) · `secrets:` (a governed store). `vars:`
-    and `env:` are dead envelope fields (`NIKA-VALUES-001` /
-    `NIKA-VALUES-002`) — classify by the role the value plays, never
+10. **Every value lands under one of three authorities** · `inputs:`
+    (the caller supplies it · a deployment knob is an input with a
+    `default:`) · `const:` (the file owns it) · `secrets:` (a governed
+    store). `vars:`, `env:` and `config:` are dead envelope fields
+    (`NIKA-VALUES-001` / `NIKA-VALUES-002` / `NIKA-PARSE-005`) —
+    classify by the role the value plays, never
     rename in bulk.
 11. **A body with effects carries `permits:`** · an absent block is
     **zero** authority, not a free pass: the check refuses with
@@ -122,7 +123,7 @@ them; knowing them just saves round-trips:
 Validity is the floor. The [twelve patterns](/guides/patterns) are the
 ceiling: deterministic core, typed boundaries, the right gate
 (`when` = skip · `assert` = fail · `prompt` = human), sovereignty for
-sensitive data, budgets on agents, `on_finally` evidence. Every
+sensitive data, budgets on agents, `unwind` evidence. Every
 pattern links the canonical example that embodies it.
 
 <Columns cols={2}>

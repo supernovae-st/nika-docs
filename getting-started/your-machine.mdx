@@ -21,23 +21,24 @@ keys, no configs, no editors wired — the stranger's first screen (only the
 workspace path is shortened to `~/demo`):
 
 ```text
-🦋 nika 0.107.0 — Intent as Code. The workflow language for AI.
+🦋 nika 0.109.0 — Intent as Code. The workflow language for AI.
    one file · 4 verbs · one binary · audited BEFORE it runs
    every run records a tamper-evident, hash-chained trace
 
 this machine
-  editors    cursor ✗ · windsurf ✗ · claude ✗ · zed ✗ · hermes ✗ · vscode ✗   → nika wire cursor
+  editors    cursor ✗ · windsurf ✗ · claude ✗ · zed ✗ · hermes ✗ · vscode ✗
+             6 unwired · one command each → nika wire cursor
   local      ollama · lmstudio · llamacpp · localai · vllm · no key needed
   state      installed · no inference path — proof → nika try 01-hello
-  workspace  ~/demo · git ✗ · no workflows yet · agents not briefed → nika init
+  workspace  ~/demo
+             git ✗ · no workflows yet · agents not briefed → nika init
+
 
 this binary
-  4 verbs · 28 builtins · 15 providers · 39 examples · 10 templates
+  4 verbs · 28 builtins · 15 providers · 48 examples · 10 templates
 
 a whole workflow is one file
-  nika: v1
-  workflow:
-    id: hello
+  nika: hello
   model: mock/echo
   tasks:
     greet:
@@ -51,7 +52,7 @@ start here (offline · zero keys)
 learn: nika.sh · docs: docs.nika.sh · ⭐ github.com/supernovae-st/nika
 ```
 
-Three details worth noticing: the seven-line workflow **is real** (an
+Three details worth noticing: the five-line workflow **is real** (an
 engine test pins that it checks clean — the sample only appears while
 your workspace has zero workflows), every count on the « this binary »
 line is derived live from the embedded pack (never hand-typed — the

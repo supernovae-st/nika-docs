@@ -11,10 +11,8 @@ happen?* (before), *what is happening?* (during), *what happened?*
 real output from this workflow:
 
 ```yaml standup-digest.nika.yaml
-nika: v1
-workflow:
-  id: standup-digest
-  description: "Pull commits and tickets in parallel, then digest."
+# Pull commits and tickets in parallel, then digest.
+nika: standup-digest
 
 model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
 

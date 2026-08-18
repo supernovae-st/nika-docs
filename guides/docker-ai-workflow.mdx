@@ -20,10 +20,8 @@ declared · 0 hints):
 # | task | command          | why no native path               | unlock that removes it |
 # | ps   | docker ps        | product CLI · no MCP surface yet | a docker MCP server    |
 # | df   | docker system df | same                             | same                   |
-nika: v1
-workflow:
-  id: docker-health-report
-  description: read the Docker daemon's state, have a local model explain it, keep the report
+# read the Docker daemon's state, have a local model explain it, keep the report
+nika: docker-health-report
 
 model: ollama/qwen3.5:4b
 

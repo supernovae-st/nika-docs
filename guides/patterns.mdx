@@ -180,16 +180,20 @@ Taught by · [PR review fan-out](/examples/pr-review-fanout) (the
 read-only swarm) · [Code review](https://github.com/supernovae-st/nika-spec/blob/main/examples/23-code-review.nika.yaml)
 (foundation).
 
-## 9 · Evidence always lands · `on_finally`
+## 9 · Evidence always lands · `unwind` and `terminal`
 
-Two tools, one rule. **`on_finally:`** is per-task cleanup: it fires
-when that task *ran* (success, failure, timeout, mid-flight cancel).
-**A terminal `after: {…: terminal}` task** is the always-pattern: it
-runs once its producers settle, whatever happened — `terminal` admits
-every terminal state (success · failure · skipped · cancelled). Pair it
-with a `.status` observation in `with:` when the body branches on the
-outcome. Cleanup belongs to the task; the record that must land at 3am
-belongs to a terminal task.
+Two predicates, one rule. **An `after: {…: unwind}` task** is per-task
+cleanup: it runs once its producer has *settled*, whatever happened
+(success, failure, timeout, mid-flight cancel), and it is the only task
+allowed to read that producer's record while siblings may still be
+running — `graph_format: 3` projects it as a `finally` node. **A
+terminal `after: {…: terminal}` task** is the always-pattern: it runs
+once its producers settle, whatever happened — `terminal` admits every
+terminal state (success · failure · skipped · cancelled). Pair it with a
+`.status` observation in `with:` when the body branches on the outcome.
+Cleanup is a task joined by `unwind` (the old `on_finally:` list inside a
+task body is gone); the record that must land at 3am belongs to a
+terminal task.
 
 Taught by · [Incident war room](/examples/incident-war-room) ·
 [Release train](/examples/release-train) (the departure record is an
@@ -197,7 +201,7 @@ Taught by · [Incident war room](/examples/incident-war-room) ·
 
 ## 10 · One data language · jq, once
 
-`output:` bindings, `nika:jq`, the fan-in zip (`transpose`), the
+`extract:` bindings, `nika:jq`, the fan-in zip (`transpose`), the
 state diff: all of it is the same jq. Don't invent per-task string
 parsing and don't ask the model to reshape JSON. One transform
 language is already there.
@@ -235,15 +239,12 @@ workflows replayable.
 ## The shape of a well-written file
 
 ```yaml the shape · a skeleton, not a runnable file
-nika: v1                      # the contract · one line · forever
-workflow:
-  id: kebab-case-name     # resource name
-  description: "…"              # one honest sentence
+# one honest sentence about the workflow · prose lives above the mark
+nika: kebab-case-name         # the mark AND the name · one line
 
 model: mock/echo              # mock-first · sovereignty is one line away
 
-inputs:                       # typed · what the CALLER supplies · required: true documents itself
-config:                       # typed · the DEPLOYMENT's dials · may appear in logs
+inputs:                       # typed · what the CALLER supplies · a deployment dial is an input with a default
 const:                        # fixed in the file · the destinations the boundary pins
 secrets:                      # vault/env-backed · never inline
 

@@ -55,10 +55,7 @@ flowchart TD
 
 {/* showcase:begin competitor-radar.nika.yaml */}
 ```yaml competitor-radar.nika.yaml
-nika: v1
-workflow:
-  id: competitor-radar
-  description: "competitor watch · their sitemap says what shipped or changed this week → parallel page reads → one Monday brief"
+nika: competitor-radar
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for anthropic/claude-sonnet-4-6 for a sharper read
 
@@ -166,9 +163,10 @@ tasks:
   pages:
     with:
       urls: ${{ tasks.recent.output }}
-    for_each: ${{ with.urls }}
-    max_parallel: 4                    # be a good guest · four in flight, no more
-    fail_fast: false                   # one dead page must not kill the radar
+    for_each:
+      items: ${{ with.urls }}
+      max_parallel: 4                    # be a good guest · four in flight, no more
+      fail_fast: false                   # one dead page must not kill the radar
     on_error:
       recover: null                    # that page yields null at its index · the batch lives
     timeout: "30s"                     # somebody else's server, somebody else's bad day

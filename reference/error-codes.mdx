@@ -73,8 +73,8 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | Code | Failure | Category | `transient` |
 |---|---|---|---|
 | `NIKA-PARSE-001` | the YAML itself does not parse (syntax error) | `parse_error` | false |
-| `NIKA-PARSE-002` | missing envelope field (nika: / workflow: / non-empty tasks:) | `validation_error` | false |
-| `NIKA-PARSE-003` | nika: version marker is not exactly v1 | `parse_error` | false |
+| `NIKA-PARSE-002` | missing envelope field (nika: / non-empty tasks:) | `validation_error` | false |
+| `NIKA-PARSE-003` | nika: is not a kebab-case id (^[a-z][a-z0-9-]*$) | `parse_error` | false |
 | `NIKA-PARSE-004` | workflow: id violates ^[a-z][a-z0-9-]*$ | `validation_error` | false |
 | `NIKA-PARSE-005` | unknown field — strict mode rejects anything outside the closed v1 set | `validation_error` | false |
 | `NIKA-PARSE-006` | task id violates ^[a-z][a-z0-9_]*$ (snake_case · CEL-safe · no hyphens) | `validation_error` | false |
@@ -84,13 +84,11 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-PARSE-010` | timeout: violates the quoted Go-duration contract (positive · max 24h · descending units) | `validation_error` | false |
 | `NIKA-PARSE-011` | retry: block violates the spec shape | `validation_error` | false |
 | `NIKA-PARSE-012` | on_error: block violates the spec shape (fields mutually exclusive) | `validation_error` | false |
-| `NIKA-PARSE-013` | with:/output: binding uses a reserved name (output · status · error · started_at · ended_at · duration_ms) | `validation_error` | false |
+| `NIKA-PARSE-013` | with:/extract: binding uses a reserved name (output · status · error · started_at · ended_at · duration_ms) | `validation_error` | false |
 | `NIKA-PARSE-014` | secrets: entry is not a store reference — inline literals forbidden | `validation_error` | false |
 | `NIKA-PARSE-017` | duplicate mapping key — no silent last-wins | `validation_error` | false |
 | `NIKA-PARSE-018` | missing required field in a verb body (infer.prompt · exec.command · invoke.tool) | `validation_error` | false |
 | `NIKA-PARSE-019` | generic structural validation — wrong YAML shape for a field | `validation_error` | false |
-| `NIKA-PARSE-020` | workflow: is a scalar — the envelope became an object (workflow: then id: &lt;value&gt;) | `validation_error` | false |
-| `NIKA-PARSE-021` | top-level description: — it moved into workflow.description | `validation_error` | false |
 | `NIKA-PARSE-022` | tasks: is a sequence — it became a map keyed by task id (drop `- id:`, the key IS the identity) | `validation_error` | false |
 | `NIKA-PARSE-023` | a task carries an id: field — the map key is the identity, the field is gone | `validation_error` | false |
 | `NIKA-PARSE-024` | a task carries depends_on: — dead since W2 (data → with: bindings · control → after: predicates · check --fix migrates) | `validation_error` | false |
@@ -108,8 +106,9 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-DAG-005` | after: predicate outside the closed set (success · failure · skipped · terminal) | `validation_error` | false |
 | `NIKA-DAG-006` | statically dead task — an incoming edge's pass-set excludes every reachable producer state, or the when: gate is false under every reachable upstream combination (gate algebra v2) | `validation_error` | false |
 | `NIKA-DAG-007` | status compared against a literal outside the vocabulary (success · failure · skipped · cancelled) — == never matches, != always holds | `validation_error` | false |
+| `NIKA-DAG-008` | a group.&lt;name&gt; fold names a group no task declares — including a bare group and the group a renamed member left empty | `validation_error` | false |
+| `NIKA-DAG-009` | an unwind task declares group: — cleanup never enters G_p, so it cannot be a fan-in member | `validation_error` | false |
 | `NIKA-TYPE-001` | unknown type name (in types: · returns: · an outputs: type) — did-you-mean when close | `validation_error` | false |
-| `NIKA-TYPE-002` | recursive type reference — the types: graph must be acyclic | `validation_error` | false |
 | `NIKA-TYPE-003` | returns: and schema: on the same task — one contract, one spelling | `validation_error` | false |
 | `NIKA-TYPE-004` | returns: type unreachable from the declared decode: (an object contract over decode: text · …) | `validation_error` | false |
 | `NIKA-TYPE-005` | a secret-carrying type in a lowered position (reserved with secret&lt;T&gt; · W4) | `security_error` | false |
@@ -124,11 +123,12 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-VAR-007` | bytes value substituted into a string position | `variable_error` | false |
 | `NIKA-VAR-008` | unclosed $&#123;&#123; opener | `validation_error` | false |
 | `NIKA-VAR-020` | bare tasks.X is the envelope, not a value — the projection set (.output/.status/.error/.duration_ms) is closed and required (04 §namespaces · 0.103 · #75 D2) | `validation_error` | false |
-| `NIKA-VAR-021` | a tasks.* reference outside the boundary (with: · after: · on_error.recover · on_finally parent-only · workflow outputs) — hoist it into with: (check --fix applies it) | `validation_error` | false |
+| `NIKA-VAR-021` | a tasks.* reference outside the boundary (with: · after: · on_error.recover · an unwind task reading its producer · workflow outputs) — hoist it into with: (check --fix applies it) | `validation_error` | false |
 | `NIKA-VAR-009` | typed outputs value did not match its declared type: at run end (the output half of the callable contract) | `validation_error` | false |
 | `NIKA-INFER-001` | provider call failed (HTTP error · provider refusal) | `provider_error` | engine-assessed |
 | `NIKA-INFER-002` | structured output failed schema validation (after any engine-internal retries) | `validation_error` | false |
 | `NIKA-INFER-003` | the provider reported no token usage for a priced model — the ledger cannot bill the call honestly (fail-closed · R3-F1) | `validation_error` | false |
+| `NIKA-INFER-004` | the provider spent tokens yet the visible answer is empty — a thinking model ate the budget on its reasoning trace (fail-closed · #651 · raise max_tokens or use a no-think variant) | `validation_error` | false |
 | `NIKA-EXEC-001` | non-zero exit code (default capture modes) | `process_error` | false |
 | `NIKA-EXEC-002` | spawn failure (command not found · permission) | `process_error` | false |
 | `NIKA-INVOKE-001` | unknown tool (unresolvable nika:/mcp: id) | `validation_error` | false |
@@ -142,7 +142,6 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-MCP-002` | MCP tool call failed (transport · tool-side error) | `tool_error` | engine-assessed |
 | `NIKA-DECIDE-001` | the decision bundle is malformed or violates its own laws (float weight · undeclared evidence key in rules · identity key feeding a technical dimension · missing contradictory fixture · monotonicity violated by the bundle's own fixtures) (spec 11) | `validation_error` | false |
 | `NIKA-DECIDE-002` | the evidence snapshot does not satisfy the bundle's evidence schema (type misfit · unauthorized source · integrity below the declared floor · undeclared key) (spec 11) | `validation_error` | false |
-| `NIKA-POLICY-001` | a hard policy: rule is violated (require.human_gate_before · forbid.exec_after · allow.providers · limits.max_tasks) — the diagnostic names rule + task + witness (order rules: the path) · check-time, before any token (spec 10) | `security_error` | false |
 | `NIKA-PORT-001` | a gateway artifact (deployment bundle · capabilities report · lowering report · fidelity report · authority delta) is malformed or violates its laws (unknown promoted · permissive_unsafe without refusal · disclosure subset-chain violated · child authority exceeding parent) (spec 12) | `validation_error` | false |
 | `NIKA-PORT-002` | policy lowering is permissive_unsafe — the backend would allow what the policy forbids · refused with the divergence witness (spec 12) | `security_error` | false |
 | `NIKA-SEC-001` | exec refused before the child spawns — either the shell floor (a destructive/privilege pattern · always-on · independent of permits:) or the mock plane under `nika test`, which refuses EVERY command by design (it simulates the model, not effects) · under test the exit is `nika run` for real effects, or an `on_error: recover` rehearsal on the task | `security_error` | false |
@@ -152,13 +151,13 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-SEC-005` | SSRF block — a nika:fetch/nika:notify URL resolves to a loopback/private/link-local/metadata target (always-on engine floor · independent of permits:) | `security_error` | false |
 | `NIKA-SEC-006` | secret flow — a secrets.&lt;name&gt; value reaches an unsanctioned sink (exec argument · invoke payload · infer/agent prompt) · the diagnostic carries the taint path + the egress clause that would sanction it (spec 10 · flow rules in 01 §egress) | `security_error` | false |
 | `NIKA-SEC-007` | secret egress — a tainted value reaches the workflow boundary (outputs:) · the diagnostic carries the taint path (spec 10 · the to: outputs sanction in 01 §egress) | `security_error` | false |
-| `NIKA-SEC-008` | data-as-code sink · a nika:fetch resolved URL path names a code-bearing class (serialized-executable · script/interpreter · executable binary/module · the closed NEP-0006 list) and the task declares no inert: door · the read hides an execution sink (F-O7 · NEP-0006) | `security_error` | false |
+| `NIKA-SEC-008` | data-as-code sink · a nika:fetch resolved URL path names a code-bearing class (serialized-executable · script/interpreter · executable binary/module · the closed NEP-0006 list) and the task declares no door — no lift: entry naming the data-as-code law · the read hides an execution sink (F-O7 · NEP-0006) | `security_error` | false |
 | `NIKA-SEC-009` | lethal trifecta complete — the declared boundary grants private read (fs.read non-empty) + untrusted ingress (a nika:fetch builtin invoked · an mcp:* tool invoked · an agent: whose whitelist admits ingress) + external egress (net.http non-empty · an escaping fs.write glob · exec enabled), the untrusted content REACHES an egress-capable task's effect surface (a realized flow), and no blocking invoke: nika:prompt (no default:) dominates it (NEP-0002 v2.0 · the Rule of Two as a static check) | `security_error` | false |
 | `NIKA-SEC-010` | the approval-capability law is violated · a rate-limited approval burst (the N+1th distinct mint of a run) · an approval whose resolved content hash differs from the shown hash (content_mismatch) · a ticket replayed across runs or steps (scope_mismatch) · or the static heterogeneous-batch refusal (one prompt unleashing two or more effect classes) — the 6th invariant (NEP-0013 · F-P4) | `security_error` | false |
 | `NIKA-SEC-011` | preview-commit divergence — the commit digest recomputed at the sink over the exact bytes about to fire differs from the preview digest computed at resolution (one bit of rendered argv · a permuted context field · a mutated tool argument) · the step refuses fail-closed and the receipt carries divergence:&#123;preview, commit&#125; — judged = executed at the action scale (NEP-0015 · F-P6) | `security_error` | false |
 | `NIKA-SEC-012` | unordered shared writes — two tasks incomparable in the DAG closure whose literal nika:write/nika:edit paths collide with no ordering edge (after: · with:) to serialize them, or a for_each fan writing one constant path · parallelism is safe exactly where the writes are provably disjoint (NEP-0014 law 1 · F-P15) | `security_error` | false |
-| `NIKA-SEC-013` | the endorsement mode law — a human gate (invoke: nika:prompt) declared under a policy: block that names no endorsement mode refuses fail-closed (endorsement.undeclared_mode · F-F5 · zero implicit escape), and endorsement: solo carried by a workflow with more than one gate refuses as the declaration lying (endorsement.solo_count · exactly one endorser) (NEP-0017 · F-P23) | `security_error` | false |
 | `NIKA-SEC-014` | the affirmative-consent law — a confirm-mode human gate (invoke: nika:prompt · mode absent or confirm) reaches an egress-capable task over a route no affirmative gate closes: a REFUSED confirm settles success with value false, so a bare after: &#123; gate: success &#125; edge, a when: that never reads the answer, and a when: provably true on the refusal all let the effect through · the gate is credited only when every route consumes the answer and proves false on it (the Kleene-falsifiable when: · when: false · a closer confirm gate owns its closure) · an undecidable gate (a nested binding · a non-fragment expression) defers to the advisory hint, never a refusal (NEP-0020 · P0-2 of the 2026-07-30 audit) | `security_error` | false |
+| `NIKA-SEC-015` | the order law — an exec: task sits transitively downstream of a net-effecting task (nika:fetch · nika:notify) over the derived graph (with: data edges ∪ after: control edges) · content the workflow did not author must not reach a shell · UNCONDITIONAL: no block declares it and none can disable it | `security_error` | false |
 | `NIKA-TIMEOUT-001` | task (or for_each iteration) exceeded timeout: | `timeout_error` | false |
 | `NIKA-CANCEL-001` | task cancelled (workflow failure gate · user cancellation) | `cancelled` | false |
 | `NIKA-ASSERT-001` | an assert: claims a level the evidence does not support (a StaticProof the IR cannot decide · a mis-leveled obligation · spec 15) | `validation_error` | false |
@@ -171,6 +170,7 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-AUTH-008` | an untrusted value reaches a permitted verb's argument and its canonical resolved form escapes the step's permit — re-gate refused (F-O1 · NEP-0004) | `security_error` | false |
 | `NIKA-AUTH-009` | a permits env: entry names a dangerous-floor variable · the engine strips the name unconditionally, the grant can never take effect: an inert dead grant (F-O4 · NEP-0005) | `security_error` | false |
 | `NIKA-AUTH-010` | a permits net.http: entry carries the *. subdomain wildcard · the grant delegates the boundary to the zone operator (every host under the suffix, present and future) — refused: name exact hosts, or the bare * when allow-all is genuinely intended (F-P5 · NEP-0008) | `security_error` | false |
+| `NIKA-AUTH-011` | a lift: entry whose named law would not have fired on this task — a trapdoor that lifts nothing is refused, never a silent no-op (10 §the authored doors rule 6) | `validation_error` | false |
 | `NIKA-VALUES-001` | vars: is a dead envelope field (R3a · the E-split) | `validation_error` | false |
 | `NIKA-VALUES-002` | env: is a dead envelope field (R3a · the E-split) | `validation_error` | false |
 | `NIKA-VALUES-003` | a value-namespace read outside the four-authority family (R3a · LAW-SURFACE-0201) | `validation_error` | false |
@@ -211,7 +211,6 @@ never repurposed:
 | `NIKA-DECIDE` |  | 001-099 |
 | `NIKA-DRIFT` |  | 001-099 |
 | `NIKA-PARSE` | YAML parse + envelope validation | 001-099 |
-| `NIKA-POLICY` |  | 001-099 |
 | `NIKA-PORT` |  | 001-099 |
 | `NIKA-PROVIDER` | Provider adapter errors | 001-099 |
 | `NIKA-SEC` | Security policy violations (SSRF · blocklist) | 001-099 |

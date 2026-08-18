@@ -32,10 +32,7 @@ flowchart LR
 
 {/* showcase:begin price-watch.nika.yaml */}
 ```yaml price-watch.nika.yaml
-nika: v1
-workflow:
-  id: price-watch
-  description: "Watch a product price, ping me when it drops below my target"
+nika: price-watch
 
 const:
   product_api: "https://api.shop.example.com/v1/products/macbook-air"
@@ -72,7 +69,7 @@ tasks:
         url: "${{ const.product_api }}"
         mode: jq
         jq: "."
-    output:                           # named jq bindings over the raw response
+    extract:                           # named jq bindings over the raw response
       price: ".price"
       name: ".name"
     on_error:
