@@ -51,11 +51,19 @@ NUM = r"(?:\d+|" + "|".join(WORDS) + r")"
 # prose and have nowhere to interpolate from:
 #   layers (six + the L0.5 half) · gates (12 per admission) · patterns
 #   (the FCI set) · verbs (see check (e), which asserts rather than trusts)
+# The 0.109 flag-day moved four more nouns in one release (fourteen envelope
+# keys became nine · four value authorities became three · six binding
+# namespaces became five · eighteen task modifiers became eleven): a
+# description that spells any of them is the next « 14 canonical
+# providers ». They are language facts, not projections — a page body may
+# state them next to the fence that proves them, a description may not.
 VOLATILE_NOUNS = (
     r"(?:canonical\s+)?providers?|builtins?|extract modes?|templates?|"
     r"error codes?|error namespaces?|capability rules?|hygiene vectors?|"
     r"ADRs?|decision records?|crates?|showcase workflows?|"
-    r"MCP servers?|MCP server entries|satellites?"
+    r"MCP servers?|MCP server entries|satellites?|"
+    r"(?:value\s+)?authorit(?:y|ies)|(?:task\s+)?modifiers?|"
+    r"(?:binding\s+|value\s+)?namespaces?|(?:envelope\s+|top-level\s+)?keys?"
 )
 COUNT_RE = re.compile(rf"\b{NUM}[- ]+(?:{VOLATILE_NOUNS})\b", re.I)
 
