@@ -38,10 +38,7 @@ flowchart LR
 
 {/* showcase:begin image-fx-batch.nika.yaml */}
 ```yaml image-fx-batch.nika.yaml
-nika: v1
-workflow:
-  id: image-fx-batch
-  description: "Folder of PNG files → deterministic art (grayscale · dither · pixelate) · offline batch"
+nika: image-fx-batch
 
 const:
   # Two sample photos ship with the repo. Point this at your own folder and
@@ -89,8 +86,9 @@ tasks:
   stylize:
     with:
       jobs: ${{ tasks.jobs.output }}
-    for_each: ${{ with.jobs }}
-    max_parallel: 4
+    for_each:
+      items: ${{ with.jobs }}
+      max_parallel: 4
     invoke:
       tool: "nika:image_fx"
       args:

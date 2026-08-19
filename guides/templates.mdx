@@ -38,11 +38,9 @@ template matching the **outer** shape.
   — the source of truth, validated by the conformance runner — by
   `nika-spec/scripts/showcase-projector.py`.
 
-  It is **ahead of that projection right now**: these copies were migrated
-  by hand to the 0.106 grammar, and four of them gained the `permits:`
-  block an effect-bearing workflow now requires. The templates upstream
-  need the same pass, after which the projector reclaims these blocks and
-  the two surfaces agree again.
+  These blocks are that projection again (2026-08-19 · spec
+  `f308fa32e` · the released 0.109 grammar, `NIKA_SERVED_GRAMMAR=wnew`):
+  what you copy here is byte-for-byte what `nika new <template>` writes.
 </Info>
 
 ## chain
@@ -51,11 +49,7 @@ The default shape for « take real data, produce words, save them ».
 
 {/* template:begin chain.nika.yaml */}
 ```yaml chain.nika.yaml
-nika: v1
-workflow:
-  id: chain-template            # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "gather → think → persist"
+nika: chain-template       # SLOT: kebab-case workflow id
 
 # SLOT: provider/model · local · zero key. Measured seat — `ollama/llama3.2:3b`
 # answers this prompt in ~50s. `--model mock/echo` needs no seat at all and is
@@ -133,11 +127,7 @@ Watch something, act only when a condition holds (often zero model calls).
 
 {/* template:begin gate-and-act.nika.yaml */}
 ```yaml gate-and-act.nika.yaml
-nika: v1
-workflow:
-  id: gate-and-act-template     # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "watch a value · act only when the condition holds"
+nika: gate-and-act-template       # SLOT: kebab-case workflow id
 
 const:
   source_url: "https://api.example.com/v1/value"   # SLOT: what to watch
@@ -169,7 +159,7 @@ tasks:
         url: "${{ const.source_url }}"
         mode: jq
         jq: "."
-    output:
+    extract:
       value: ".value"               # SLOT: the jq path to the watched field
     on_error:
       # Offline rehearsal · a sample UNDER the threshold — the gate stays
@@ -200,11 +190,7 @@ The same work for every item of a runtime collection, fully leashed.
 
 {/* template:begin fanout.nika.yaml */}
 ```yaml fanout.nika.yaml
-nika: v1
-workflow:
-  id: fanout-template           # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "do the same step for each item · discover the collection · process in parallel · merge"
+nika: fanout-template       # SLOT: kebab-case workflow id
 
 # SLOT: provider/model · local · zero key. Measured seat — `ollama/llama3.2:3b`.
 # `--model mock/echo` needs no seat and is the path this file guarantees.
@@ -250,9 +236,10 @@ tasks:
   read:
     with:
       discover: ${{ tasks.discover.output }}
-    for_each: ${{ with.discover }}
-    max_parallel: 8
-    fail_fast: false
+    for_each:
+      items: ${{ with.discover }}
+      max_parallel: 8
+      fail_fast: false
     on_error:
       recover: null                 # an unreadable item yields null · the batch lives
     invoke:
@@ -265,9 +252,10 @@ tasks:
     # The quiet-day guard: an EMPTY discovery skips the `read` fan, and a
     # skipped task hands NULL — which a bare for_each refuses (NIKA-VAR-006).
     # The ternary keeps the no-items day green end to end.
-    for_each: "${{ with.read == null ? [] : with.read }}"
-    max_parallel: 4                 # SLOT: the polite ceiling
-    fail_fast: false
+    for_each:
+      items: "${{ with.read == null ? [] : with.read }}"
+      max_parallel: 4                 # SLOT: the polite ceiling
+      fail_fast: false
     timeout: "60s"                  # SLOT: per-iteration bound
     retry:
       max_attempts: 3
@@ -312,11 +300,7 @@ Incremental runs: only what changed since last time, survive bad input.
 
 {/* template:begin etl-state.nika.yaml */}
 ```yaml etl-state.nika.yaml
-nika: v1
-workflow:
-  id: etl-state-template        # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "only what changed since last run · read state · fetch fresh · diff · process the delta · save state"
+nika: etl-state-template       # SLOT: kebab-case workflow id
 
 const:
   source_url: "https://api.example.com/v1/records"   # SLOT: the data source
@@ -428,11 +412,7 @@ validate the typed result. Never ship an unleashed agent.
 
 {/* template:begin agent-loop.nika.yaml */}
 ```yaml agent-loop.nika.yaml
-nika: v1
-workflow:
-  id: agent-loop-template       # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "open-ended research / review / triage · plan → budgeted agent → typed result"
+nika: agent-loop-template       # SLOT: kebab-case workflow id
 
 # SLOT: a TOOL-CALLING model · local by default. This seat is measured, not
 # assumed: `ollama/qwen2.5:14b` completes the planning call in ~65s under the
@@ -533,11 +513,7 @@ Anything irreversible: parallel gates, a hard assert, a human GO, and an
 
 {/* template:begin human-gated-ship.nika.yaml */}
 ```yaml human-gated-ship.nika.yaml
-nika: v1
-workflow:
-  id: human-gated-ship-template  # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "verify in parallel · human GO · act · record"
+nika: human-gated-ship-template       # SLOT: kebab-case workflow id
 
 permits:                            # SLOT: the blast radius · default-deny once present
   exec: ["echo"]                    # SLOT: ONLY the programs the gates + act run (argv form)
@@ -645,11 +621,7 @@ Understand a site from a URL: bounded `traverse:` crawl → one typed brief → 
 
 {/* template:begin website-brief.nika.yaml */}
 ```yaml website-brief.nika.yaml
-nika: v1
-workflow:
-  id: website-brief-template    # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "crawl → brief → persist"
+nika: website-brief-template       # SLOT: kebab-case workflow id
 
 # SLOT: provider/model · local · zero key. The schema below has five required
 # fields, so give it a seat that holds structure — `ollama/qwen2.5:14b` is
@@ -734,11 +706,7 @@ Generate assets from a brief: typed creative direction → `nika:image_generate`
 
 {/* template:begin media-asset-pack.nika.yaml */}
 ```yaml media-asset-pack.nika.yaml
-nika: v1
-workflow:
-  id: media-asset-pack-template # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "brief → generate image assets → manifest"
+nika: media-asset-pack-template       # SLOT: kebab-case workflow id
 
 # SLOT: provider/model · local · zero key. Measured seat — `ollama/qwen2.5:14b`
 # holds the small schema below. `--model mock/echo` needs no seat at all.
@@ -835,11 +803,7 @@ Call a product API natively: `multipart:` upload (masked secrets header) → JSO
 
 {/* template:begin api-upload-and-create.nika.yaml */}
 ```yaml api-upload-and-create.nika.yaml
-nika: v1
-workflow:
-  id: api-upload-and-create-template  # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "upload + create in one authenticated call"
+nika: api-upload-and-create-template       # SLOT: kebab-case workflow id
 
 const:
   api_base: "https://api.example.com"     # SLOT: the product API base
@@ -910,11 +874,7 @@ The audited-ops shape: read a system's real state via a pinned CLI (argv-array e
 
 {/* template:begin docker-report.nika.yaml */}
 ```yaml docker-report.nika.yaml
-nika: v1
-workflow:
-  id: docker-report-template    # SLOT: kebab-case workflow id
-  # SLOT: one honest sentence — `nika new` matches intents against these words
-  description: "read the daemon's state · explain it · keep the report"
+nika: docker-report-template       # SLOT: kebab-case workflow id
 
 # SLOT: local-first · `--model mock/echo` for the offline rehearsal. Measured
 # seat — `ollama/llama3.2:3b` answers this prose prompt in well under a minute.

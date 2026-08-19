@@ -12,13 +12,16 @@ The canonical schema lives at:
 It's a standard [JSON Schema draft 2020-12](https://json-schema.org/)
 document. Your editor's YAML LSP can consume it directly.
 
-## Contract version
+## The mark
 
-`nika: v1`, the first line of every workflow. A **single version marker**:
-the key `nika` declares "this is a Nika workflow", the value `v1` pins the
-language contract version. There is no separate `schema:` or `apiVersion:`
-field (the engine's internal canonical URI stays `https://nika.sh/spec/v1`
-for RDF / conformance tooling, but the author never types a URL).
+`nika: <name>`, the first line of every workflow. The key `nika` declares
+"this is a Nika document", the value is the workflow's own kebab-case
+identifier — there is no version to pin and no separate `schema:` or
+`apiVersion:` field (the engine's internal canonical URI stays
+`https://nika.sh/spec/v1` for RDF / conformance tooling, but the author
+never types a URL). A `tasks:` key makes the document a workflow; the
+project file `nika.yaml` (no `tasks:`) is the one document that still
+spells `nika: v1`.
 
 ## Point your editor
 
@@ -27,9 +30,7 @@ language server consumes the JSON Schema directly:
 
 ```yaml the modeline · paste at the top of any workflow
 # yaml-language-server: $schema=https://nika.sh/schema/workflow.json
-nika: v1
-workflow:
-  id: my-workflow-id
+nika: my-workflow-id
 ```
 
 See [editor setup](/getting-started/editors) for per-IDE instructions.
@@ -43,10 +44,10 @@ nika check workflow.nika.yaml --strict   # + extra lints
 
 ## Versioning policy
 
-- `v1` is the **only value for the entire lifetime** of the v1 contract.
-- Minor additions (a new optional field, a new builtin) are **additive**
-  and never change the marker: no `@minor` bumps, no `nika migrate` for them.
-- **There is no `nika: v2` — ever**: pre-1.0 grammar changes happen inside
-  `v1` (the pre-1.0 stability contract) · after engine 1.0.0 the grammar is
-  additive only.
-- Anti-pattern: `nika: v1.0` · `nika: "1"` · `nika: 1.0`. The value is exactly `v1`.
+- The envelope carries **no version marker** — the mark is the name.
+- Minor additions (a new optional field, a new builtin) are **additive**.
+- A grammar change before 1.0 ships with its migration (`nika check --fix`)
+  and a refusal that names the move (the pre-1.0 stability contract);
+  after engine 1.0.0 the grammar is additive only.
+- Anti-pattern: `nika: v1` + `workflow: { id }` — the previous envelope
+  (through 0.108); `nika check --fix` moves the id onto `nika:`.

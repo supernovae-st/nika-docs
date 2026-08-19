@@ -58,9 +58,7 @@ All provider env vars listed in [Providers catalog](/reference/providers-catalog
 Create `hello.nika.yaml`:
 
 ```yaml hello.nika.yaml
-nika: v1
-workflow:
-  id: hello
+nika: hello
 
 tasks:
   greet:
@@ -71,8 +69,7 @@ tasks:
 
 Three things to notice:
 
-- **`nika: v1`** declares the workflow language + pins the contract version (a single version marker · `v1` forever).
-- **`workflow:`** is an object — `id:` (kebab-case) names the run.
+- **`nika: <name>`** is the mark and the name — the language as the key, the workflow's kebab-case identifier as the value (no version to pin).
 - **`tasks:`** is a map keyed by task id; each task declares one verb (here, `infer`).
 
 ## 3. Check it, then run it
@@ -135,9 +132,7 @@ ceiling.
 ## 4. Add a second task that depends on the first
 
 ```yaml hello.nika.yaml
-nika: v1
-workflow:
-  id: hello
+nika: hello
 
 tasks:
   greet:
@@ -179,9 +174,7 @@ consume nothing — use `after: { tests: success }`, the control door.)
 ## 5. Get structured output
 
 ```yaml hello.nika.yaml
-nika: v1
-workflow:
-  id: hello-structured
+nika: hello-structured
 
 tasks:
   names:

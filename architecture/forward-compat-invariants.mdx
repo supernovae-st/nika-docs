@@ -67,26 +67,25 @@ and features we haven't imagined **without breaking changes to the public API**.
     Invariant #19: every `#[non_exhaustive]` struct ships a `new()` constructor.
   </Accordion>
 
-  <Accordion title="FCI-003: Single version marker per on-disk artifact" icon="file-code">
-    A workflow pins its contract with **one header line** · `nika: v1` (a
-    single version marker · the language name as key, the contract version
-    as value · supersedes the older K8s `apiVersion:` and `schema:
-    nika/workflow@X` forms). Parsers reject any other value (`v1.0` · `v2` …)
-    with a clear error.
+  <Accordion title="FCI-003: One mark per on-disk artifact" icon="file-code">
+    A workflow opens with **one header line** · `nika: <name>` (the
+    language name as key, the workflow's own identifier as value · the
+    nine-key envelope of 0.109 · supersedes the `nika: v1` + `workflow:
+    { id }` form and the older K8s `apiVersion:` / `schema:
+    nika/workflow@X` forms). The document type is the `tasks:` key: present
+    = a workflow · absent = the project file `nika.yaml`, whose mark stays
+    `nika: v1`, frozen. Parsers refuse the previous envelope with a clear
+    error and `nika check --fix` migrates it.
 
-    ```yaml illustration · the envelope pin
-    nika: v1
-    workflow:
-      id: my-flow
+    ```yaml illustration · the envelope mark
+    nika: my-flow
     tasks: { ... }
     ```
 
-    `v1` is the only value for the lifetime of the v1 contract: minor
-    additions are **additive** and never change it. There is no `nika: v2` —
-    ever: pre-1.0 grammar changes happen inside `v1` (the pre-1.0 stability
-    contract) · after engine 1.0.0 the grammar is additive only.
-    Non-workflow artifacts (package manifests, events) carry their own
-    schema version field.
+    A grammar change before 1.0 ships with its migration and a refusal that
+    names the move (the pre-1.0 stability contract) · after engine 1.0.0 the
+    grammar is additive only. Non-workflow artifacts (package manifests,
+    events, the project file) carry their own frozen schema marker.
   </Accordion>
 
   <Accordion title="FCI-004: Extension namespaces (`nika.*` core + `x-*` community)" icon="plug">
@@ -99,9 +98,7 @@ and features we haven't imagined **without breaking changes to the public API**.
     live `x-*` surface today is the pck registry.
 
     ```yaml illustration · RESERVED future extension fields (rejected today)
-    nika: v1
-    workflow:
-      id: my-flow
+    nika: my-flow
     nika.cache: { ttl: 3600 }      # nika.* core extension · a future additive minor
     x-my-org-metric: 42             # x-* community overlay · reserved · NOT valid v0.1
     ```

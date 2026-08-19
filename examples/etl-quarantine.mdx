@@ -44,10 +44,7 @@ flowchart LR
 
 {/* showcase:begin etl-quarantine.nika.yaml */}
 ```yaml etl-quarantine.nika.yaml
-nika: v1
-workflow:
-  id: etl-quarantine
-  description: "CSV batch → schema gate → quarantine the bad · aggregate the good"
+nika: etl-quarantine
 
 const:
   batch_csv: "examples/fixtures/orders.csv"
