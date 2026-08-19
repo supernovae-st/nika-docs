@@ -12,30 +12,40 @@ DOCS = Path(__file__).resolve().parents[2]
 SWEEP = DOCS / "scripts" / "oracle-sweep.py"
 PLANT = DOCS / "getting-started" / "_mutation-arm-manifest.mdx"
 
-FENCE = """```yaml
+VALID_FENCE = """```yaml
 nika: v1
 ceiling: 0.50
 arm:
   - workflow: workflows/nightly.nika.yaml
     cadence: "TZ=UTC 0 3 * * *"
     plafond: 0.25
+    manqué: sauter
 ```
 """
 
 
-def test_invalid_manifest_is_named_and_refused() -> None:
+def run_sweep(fence: str) -> tuple[subprocess.CompletedProcess[str], str]:
+    PLANT.write_text(fence)
+    result = subprocess.run(
+        [sys.executable, str(SWEEP)],
+        cwd=DOCS,
+        env=os.environ.copy(),
+        capture_output=True,
+        text=True,
+    )
+    return result, result.stdout + result.stderr
+
+
+def test_manifest_uses_the_accepting_and_refusing_arm_judge() -> None:
     if not os.environ.get("NIKA_BIN") and not os.environ.get("PATH"):
         raise SystemExit("skip · no PATH")
-    PLANT.write_text(FENCE)
     try:
-        result = subprocess.run(
-            [sys.executable, str(SWEEP)],
-            cwd=DOCS,
-            env=os.environ.copy(),
-            capture_output=True,
-            text=True,
-        )
-        output = result.stdout + result.stderr
+        result, output = run_sweep(VALID_FENCE)
+        assert result.returncode == 0, output[-800:]
+        assert "2 project manifests · 0 invalid" in output, output[-800:]
+
+        invalid = VALID_FENCE.replace("    manqué: sauter\n", "")
+        result, output = run_sweep(invalid)
         assert result.returncode == 1, output[-800:]
         assert "_mutation-arm-manifest" in output, output[-800:]
         assert "project manifest" in output, output[-800:]
@@ -45,5 +55,5 @@ def test_invalid_manifest_is_named_and_refused() -> None:
 
 
 if __name__ == "__main__":
-    test_invalid_manifest_is_named_and_refused()
-    print("ok · project manifest is judged by arm and its refusal is visible")
+    test_manifest_uses_the_accepting_and_refusing_arm_judge()
+    print("ok · arm accepts the valid manifest and refuses its invalid twin")
