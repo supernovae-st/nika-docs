@@ -5,7 +5,7 @@ sidebarTitle: "Bindings"
 icon: "link"
 ---
 
-import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
 A **binding** is a template expression wrapped in `${{ … }}`. It resolves
 at runtime against a typed scope (the three value authorities, task-scope
@@ -48,9 +48,9 @@ with:
 Whitespace inside `${{ }}` is ignored. Nested `${{ }}` is rejected at
 parse time.
 
-## The six namespaces
+## The {CANON.namespaces} namespaces
 
-Every binding resolves against one of six named namespaces. The resolver
+Every binding resolves against one of {CANON.namespaces} named namespaces. The resolver
 refuses unknown top-level names at validation time, so `${{ tsaks.foo }}`
 is caught before the run starts — and a value-namespace read outside the
 closed family (`${{ params.X }}` and friends) refuses `NIKA-VALUES-003`.
