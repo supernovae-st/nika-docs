@@ -117,6 +117,13 @@ them; knowing them just saves round-trips:
     `NIKA-AUTH-006` before a token is spent, and the run refuses with
     `NIKA-SEC-004`. Write the block with `nika check --infer-permits`,
     which prints the tightest one and is paste-ready.
+12. **Extract facts, then the law** · the model emits closed numeric
+    facts (`type: integer` + a numeric `enum`). Scoring, routing,
+    publish/abstain is `nika:jq` or `nika:decide`. A second infer to
+    "pick the level" is the expensive mistake. The shape is
+    `13-extract-then-law`. Check `--native-strict`, probe builtins on
+    `mock/echo`, freeze the schema type, pin the glob
+    (`exclude: "**/README.md"`), then wire a paid model.
 
 ## After valid: the judgment layer
 

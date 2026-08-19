@@ -92,6 +92,15 @@ problems before any model is called, and points at the exact fix:
   work fully offline, and you can wire a real model later.
 </Tip>
 
+<Info>
+  **Before a paid model.** `nika check --native-strict` until zero hints.
+  Probe every new builtin on `mock/echo` first. Numeric facts are
+  `type: integer` (`enum: [0, 1, 3]`), never `enum: ["0","1","3"]`.
+  The model extracts facts — `nika:jq` or `nika:decide` is the law
+  (`nika try 13-extract-then-law`). Pin markdown globs
+  (`exclude: "**/README.md"`) before a fan-out infer. Then swap `model:`.
+</Info>
+
 Example output:
 
 ```
