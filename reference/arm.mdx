@@ -29,10 +29,6 @@ arm:
     manqué: rattraper-une-fois
     chevauchement: sauter
     après_saut: prochain-créneau
-  - workflow: workflows/sentinel.nika.yaml
-    cadence: "TZ=UTC 0 */3 * * *"
-    plafond: 0.10
-    manqué: sauter
   - workflow: workflows/on-event.nika.yaml
     cadence: on-webhook
     plafond: 0.05
@@ -45,12 +41,12 @@ arm:
 | `cadence` | yes | `on-webhook`, or a 5-field cron with the IANA zone inside (`"TZ=Europe/Paris 30 7 * * *"`) — the zone resolves against the embedded tzdb, never the host's |
 | `plafond` | yes | Per-tick cost ceiling in USD — no default exists (the pay law: a beat always names its own) |
 | `manqué` | yes | The missed-run policy — no default either (the run-missed law) |
-| `chevauchement` | no | Overlap — `sauter` (default · the safe value) · `file` (queue the new tick) · `remplacer` (replace the running tick) |
-| `après_saut` | no | After an overlap skip — `prochain-créneau` (default) · `à-complétion` (re-fire as soon as the running tick completes) |
+| `chevauchement` | no | Overlap — `sauter` (default) and `file` are live today. `remplacer` is accepted by the registry but the firer refuses it until serve v0.2 rather than approximating it |
+| `après_saut` | no | After an overlap skip — `prochain-créneau` is the live default. `à-complétion` is accepted by the registry but refused by the current firer until serve v0.2 |
 | `où` | no | `local` (default) · `cloud` — the calendar stays in the registry; a `cloud` beat skips honestly at fire today (the paid cloud lane is ③) |
 | `actif` + `raison` + `jusqu_au` | together | The suspension triple — `actif: false` requires the reason and the expiry date. **Deleting the line does not disarm** (law N4); the triple does |
-| `tolérance` | no | (m,k)-firm skip tolerance (`3/4`) — beyond it a skip is an outage, not a skip |
-| `décalage` | no | Deterministic jitter derived from the workflow path — `hash` only |
+| `tolérance` | no | Declares an (m,k)-firm skip tolerance (`3/4`). The current engine parses and reports it but does not enforce the outage threshold yet |
+| `décalage` | no | Reserved deterministic jitter (`hash` only). The current firer refuses it until serve v0.2; slots fire at their declared instant today |
 | `par` | no | Declares the human who armed it — proves nothing by itself (N3: the machine's key is what authorizes; a merge arms nothing) |
 
 `signature:` and `budget:` are reserved and **refused** today — they
@@ -60,7 +56,7 @@ fail loudly at parse time rather than silently doing nothing.
 
 | Value | What a silence does |
 |---|---|
-| `rattraper` | Fire every missed slot, oldest first |
+| `rattraper` | Reserved for serve v0.2. The current firer refuses it rather than silently collapsing several missed slots |
 | `rattraper-une-fois` | Fire ONE catch-up for the whole silence |
 | `sauter` | Never catch up — a skip is an event, never an execution |
 
@@ -81,7 +77,7 @@ $ nika arm
 
   [idle ] workflows/on-event.nika.yaml · on-webhook
          · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
-         → no upcoming slot (a webhook beat fires on its event)
+         → no upcoming slot (the clock never fires a webhook beat)
 
 nothing was scheduled — `nika arm` READS the file. The machine that fires them is the arming edge.
 ```
@@ -95,6 +91,10 @@ see fire. A `par:` line is shown for what it is: declared, not verified.
 Sidecar directories no registry entry names are the **orphelins** —
 reported, NEVER erased (law N4). Exit `0` clean · exit `2` when the
 registry refuses, and the refusal teaches the fix.
+
+`on-webhook` is a declaration seam today, not a live listener. The report
+shows no clock slot and `arm fire` records an honest webhook skip; an event
+bridge that actually delivers the beat has not shipped yet.
 
 ## `nika arm fire <label>` — the one firer
 
@@ -147,8 +147,10 @@ What a fire leaves — the sidecar `.nika/arm/<label>/`:
 
 Prints the disarm gesture (law N4): removing the line from the file is
 not it — `actif: false` + `raison:` + `jusqu_au:` is, because that
-leaves an auditable trail. `--write` also tears the emitted OS unit
-down.
+leaves an auditable trail. `--write` removes only generated unit files,
+journals the gesture, and prints the `launchctl bootout` or `systemctl
+--user disable --now` command for the operator; it never executes that
+unload command itself.
 
 ## `nika arm --emit` — the OS bridge
 
@@ -159,7 +161,7 @@ instead of reading the registry; add `--write` to install it:
 |---|---|
 | `--write` | Write the unit file instead of printing it |
 | `--out <dir>` | The directory the unit writes to |
-| `--mode user\|system` | The install scope — the operator's own agent (default posture) or a system-wide daemon |
+| `--mode user\|system` | `user` is the live scope (and default). `system` is present in the CLI vocabulary but refused until the root-scoped serve lane ships |
 | `--env-file <file>` | The env file the unit loads — provider keys live there, NEVER in the unit |
 | `--nika-bin <path>` | The nika binary the unit invokes |
 

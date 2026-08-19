@@ -46,11 +46,14 @@ Public documentation for Nika — the open workflow language for AI
    NEVER the default example (presentation order per
    supernovae-alignment Rule 3 · local → mistral → anthropic → openai).
 7. Commit trailer: `Co-Authored-By: Nika 🦋 <nika@supernovae.studio>`.
-8. **These docs teach 0.109 and only 0.109.** No dual grammar, no "if
-   you are on 0.108" branch, no alias (`no-legacy-no-back-compat`). The
+8. **These docs teach the current stable binary and only that binary.** The
+   exact version is the projection at `snippets/_status-snapshot.mdx`; never
+   freeze a release number in this rule. No dual grammar, no "if you are on
+   the previous release" branch, no alias (`no-legacy-no-back-compat`). The
    envelope is the nine keys (`nika` · `model` · `inputs` · `const` ·
    `secrets` · `permits` · `run` · `tasks` · `outputs`), re-verified
-   against the 0.109 binary (2026-08-19): the identity is `nika: <id>`
+   against the current stable binary at each projection (the nine-key
+   envelope shipped in 0.109): the identity is `nika: <id>`
    (kebab-case · the description is a `#` comment above it · no
    `workflow:` block), every value lands under one of three authorities —
    `inputs:` (the caller supplies it · a deployment knob is an entry with
