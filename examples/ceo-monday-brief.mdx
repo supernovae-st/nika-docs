@@ -310,7 +310,7 @@ outputs:
     revenue sum is jq arithmetic: deterministic, not model-guessed.
   </Step>
   <Step title="Dates come from a builtin">
-    `nika:date` + the `.iso[:10]` binding stamp the filename
+    `nika:date` + an `extract:` slice (`day: ".[:10]"`) stamp the filename
     `briefs/2026-06-15-monday.md`. Never let a model guess the date.
   </Step>
   <Step title="The run reports its own bill">
@@ -327,7 +327,7 @@ outputs:
 | 3-branch parallel gather | `news` · `pulse` · `kpi_raw` | [Workflows](/concepts/workflows) |
 | jq arithmetic (`add`) | `revenue` | [Builtins](/reference/builtins) |
 | `nika:inspect view: cost` | `bill` | [Builtins](/reference/builtins) |
-| `output:` binding on a builtin | `stamp` | [Bindings](/concepts/bindings) |
+| `extract:` binding on a builtin | `stamp` | [Bindings](/concepts/bindings) |
 
 ## Make it yours
 

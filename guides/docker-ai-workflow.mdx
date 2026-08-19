@@ -88,7 +88,7 @@ That refusal is the feature. A shell string can smuggle any program
 through a pipe; the **argv array** names exactly one program with exactly
 those arguments, so `permits.exec: ["docker"]` is a boundary the checker
 can actually prove. Transforms that would have lived in `| grep | awk`
-belong in `output:` bindings and `nika:jq` instead.
+belong in `extract:` bindings and `nika:jq` instead.
 
 ## What the audit says before a token is spent
 
