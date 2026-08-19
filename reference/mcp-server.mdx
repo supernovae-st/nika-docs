@@ -51,7 +51,7 @@ Projected from the live wire (`tools/list`), never hand-counted:
 | `nika_canon` | The spec canon SSOT (`canon.yaml`) — the locked counts and names. Cite it, never a remembered number. |
 | `nika_catalog` | The embedded provider/model catalog — models, capabilities, context windows, API-key env vars. |
 | `nika_tools` | The embedded builtin-tool catalog — every `nika:*` tool with its model-facing JSON Schema. |
-| `nika_inspect` | The typed graph of a checked workflow (`graph_format: 2`) — nodes, edges with their kinds, byte-parity with `nika inspect --format json` and the LSP. |
+| `nika_inspect` | The typed graph of a checked workflow (`graph_format: 3` · an unwind task is a `finally` node, its edge carries `predicate: unwind`) — nodes, edges with their kinds, byte-parity with `nika inspect --format json` and the LSP. Regenerate a pinned golden from the binary, never hand-edit it. |
 
 The split is deliberate: **validate** (`nika_check` · `nika_explain`) and
 **learn** (`nika_schema` · `nika_examples` · `nika_template` · `nika_canon` ·

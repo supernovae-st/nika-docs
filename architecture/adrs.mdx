@@ -174,9 +174,11 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
     supersedes it. The superseded ADR stays in the tree with
     `status: superseded` and `superseded_by:`. It has happened once so
     far: **ADR-021** (the K8s-style `apiVersion` envelope) was superseded
-    by **ADR-082**, which locked the single `nika: v1` version marker.
-    One ADR is also Rejected outright (**ADR-089**) and kept in the tree
-    as the record of a road not taken.
+    by **ADR-082**, which locked a single version marker · a decision
+    **ADR-113** (2026-08-13) then overtook by moving the envelope's
+    identity onto `nika:` itself (the version slot died, the value is the
+    file's name). One ADR is also Rejected outright (**ADR-089**) and kept
+    in the tree as the record of a road not taken.
   </Step>
 </Steps>
 
