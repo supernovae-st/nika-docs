@@ -22,7 +22,7 @@ re-check.**
 | « do this for EVERY item » | [`fanout`](#fanout) | runtime collection · the full leash (max_parallel · fail_fast · retry) |
 | « only what changed since last run » | [`etl-state`](#etl-state) | state read→diff→write · `on_error: recover:` quarantine |
 | « research / review / open-ended » | [`agent-loop`](#agent-loop) | plan-then-execute · default-deny tools · budgets · typed final message |
-| « anything irreversible (deploy · send · publish) » | [`human-gated-ship`](#human-gated-ship) | parallel gates · assert · `nika:prompt` GO · `on_finally` record |
+| « anything irreversible (deploy · send · publish) » | [`human-gated-ship`](#human-gated-ship) | parallel gates · assert · `nika:prompt` GO · `after: { act: terminal }` record |
 | « understand a site (domain · theme · assets) from a URL » | [`website-brief`](#website-brief) | fetch `traverse:` crawl · one typed infer · explicit persist · zero exec |
 | « generate image/audio assets from a brief » | [`media-asset-pack`](#media-asset-pack) | `nika:image_generate` · `nika:jq` manifest · local/mock provider first |
 | « call a product API: upload a file, then create from it » | [`api-upload-and-create`](#api-upload-and-create) | fetch `multipart:` upload · masked secrets header · mode/jq extraction |
@@ -509,7 +509,7 @@ outputs:
 ## human-gated-ship
 
 Anything irreversible: parallel gates, a hard assert, a human GO, and an
-`on_finally` record whatever happens.
+`after: { act: terminal }` record whatever happens.
 
 {/* template:begin human-gated-ship.nika.yaml */}
 ```yaml human-gated-ship.nika.yaml

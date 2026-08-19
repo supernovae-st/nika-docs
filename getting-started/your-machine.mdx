@@ -16,12 +16,12 @@ diagnosis with a fix line per gap.
 nika welcome
 ```
 
-Captured verbatim against the released `nika 0.107.0` on a machine with no
+Captured verbatim against the released `nika 0.109.2` on a machine with no
 keys, no configs, no editors wired — the stranger's first screen (only the
 workspace path is shortened to `~/demo`):
 
 ```text
-🦋 nika 0.109.1 — Intent as Code. The workflow language for AI.
+🦋 nika 0.109.2 — Intent as Code. The workflow language for AI.
    one file · 4 verbs · one binary · audited BEFORE it runs
    every run records a tamper-evident, hash-chained trace
 
@@ -84,15 +84,16 @@ Three honesty rules shape everything below:
 
 ## A fresh machine, honestly
 
-Captured verbatim against `nika 0.107.0` on a machine with no keys, no
+Captured verbatim against `nika 0.109.2` on a machine with no keys, no
 configs, no editors wired — the worst case, and the whole report:
 
 ```text
-✔ 10 ok · 18 warn · 0 fail
-✔ binary     v0.107.0 · self-contained (spec v1 embedded)
+✔ 11 ok · 18 warn · 0 fail
+✔ binary     v0.109.2 · self-contained (spec v1 embedded)
 ✔ lsp        available via `nika lsp` (editor language server)
 ✔ traces     keep 10 per workflow · max age 30d · budget 256MB (NIKA_TRACE_KEEP · NIKA_TRACE_MAX_AGE_DAYS · NIKA_TRACE_BUDGET_MB)
 ✔ mcp        available via `nika mcp` (9 read-only tools · nika_check through nika_tools)
+✔ sandbox    seatbelt · exec and external MCP spawns confined to the declared boundary
 ✔ sidecar    local inference built in — `nika model serve --model <path.gguf>` (loopback · OpenAI-compatible)
 ⚠ models     none pulled yet — the sidecar has nothing to serve
   fix: nika model pull Qwen/Qwen3-4B-Instruct-2507-GGUF
@@ -115,6 +116,7 @@ Read it in one pass:
 | Row | What it tells you |
 |---|---|
 | `binary` | The engine is self-contained — spec, schema, examples, templates all embedded. No install step is missing. |
+| `sandbox` | The jail this host actually has (seatbelt on macOS · bubblewrap on Linux). A `permits:` file will not start on a host that cannot confine (`NIKA-1710`). |
 | `traces` | The flight-recorder retention bounds (`.nika/traces/`): keep-last-N per workflow, age cap, size budget — each env override named inline. |
 | `registry` | The client matrix: how many agent clients the binary knows, how many `nika wire` can write, how many this machine was probed for. |
 | `local` | The keyless, sovereign path — these providers need a running server, not an account. |
