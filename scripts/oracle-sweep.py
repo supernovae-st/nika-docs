@@ -72,8 +72,27 @@ def is_workflow_fence(body: str) -> bool:
     return False
 
 
+# A project manifest (`nika.yaml`) opens with the SAME `nika:` line as a
+# workflow but is a different artifact: its fields are `ceiling:` + `arm:`,
+# so the nine-key workflow envelope refuses it (NIKA-PARSE-005 on `ceiling`)
+# and `nika check` is simply the wrong judge. `nika arm` is the manifest
+# judge (exit 0 clean · 2 the registry refuses). Discriminant · an `arm:`
+# key at the envelope's own indent, so a nested `arm:` never qualifies.
+def is_manifest_fence(body: str) -> bool:
+    for line in body.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if not ENVELOPE.match(line):
+            return False
+        indent = line[: len(line) - len(line.lstrip())]
+        return bool(re.search(r"(?m)^" + re.escape(indent) + r"arm:[ \t]*$", body))
+    return False
+
+
 bad = 0
 total = 0
+manifests_total = 0
 for fp in sorted(DOCS.rglob("*.mdx")):
     if "node_modules" in str(fp):
         continue
@@ -84,8 +103,20 @@ for fp in sorted(DOCS.rglob("*.mdx")):
             print(f"✗ {fp.relative_to(DOCS)}  [for_each scalar]")
             print("   · for_each: is a BLOCK (`items` · max_parallel · fail_fast) "
                   "· a bare ${{ }} is NIKA-PARSE-019 · knobs as siblings are NIKA-PARSE-005")
-    runnable = [(i, b) for i, b in fences
-                if is_workflow_fence(b) and not SKIP.search(i)]
+    enveloped = [(i, b) for i, b in fences
+                 if is_workflow_fence(b) and not SKIP.search(i)]
+    manifests = [(i, b) for i, b in enveloped if is_manifest_fence(b)]
+    runnable = [(i, b) for i, b in enveloped if not is_manifest_fence(b)]
+    for info, body in manifests:
+        manifests_total += 1
+        mdir = tempfile.mkdtemp(prefix="oracle-manifest-")
+        (pathlib.Path(mdir) / "nika.yaml").write_text(body)
+        r = subprocess.run([NIKA, "arm"], cwd=mdir, capture_output=True, text=True)
+        if r.returncode != 0:
+            bad += 1
+            print(f"✗ {fp.relative_to(DOCS)}  [project manifest]")
+            for e in [l for l in (r.stdout + r.stderr).splitlines() if "✗" in l][:3]:
+                print(f"   · {e.strip()[:110]}")
     if not runnable:
         continue
     page_dir = tempfile.mkdtemp(prefix="oracle-")
@@ -119,5 +150,6 @@ for fp in sorted(DOCS.rglob("*.mdx")):
             for e in [l for l in (r.stdout + r.stderr).splitlines() if "✖" in l or "✗" in l][:3]:
                 print(f"   · {e.strip()[:110]}")
 
-print(f"oracle-sweep: {total} workflow blocks · {bad} invalid (judge: {NIKA})")
+print(f"oracle-sweep: {total} workflow blocks · {manifests_total} project manifests "
+      f"· {bad} invalid (judge: {NIKA})")
 sys.exit(1 if bad else 0)
