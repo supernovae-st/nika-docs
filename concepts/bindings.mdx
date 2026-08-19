@@ -22,7 +22,7 @@ the unresolved expression. See
 <Info>
   **Two expression layers, locked by the spec:** [CEL](https://cel.dev)
   inside `${{ }}` (conditions + value substitution) and **jq** inside
-  `output:` bindings + the `nika:jq` builtin (extraction + transform).
+  `extract:` bindings + the `nika:jq` builtin (extraction + transform).
   There are no template filters: anything beyond a reference or a
   boolean is a jq expression or a task. Engine-side, taint propagation
   and typed scope lookup mature across admission rounds; the syntax
@@ -127,7 +127,8 @@ inputs:
 
 tasks:
   loop:
-    for_each: "${{ inputs.count }}"      # fails — for_each needs a list
+    for_each:
+      items: "${{ inputs.count }}"      # fails — items needs a list
     infer:
       model: ollama/<model>     # <provider>/<name>
       prompt: "Iteration ${{ item }}"

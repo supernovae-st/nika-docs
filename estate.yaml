@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 159
+  classified_files: 161
   file_rows: 32
   pattern_rows: 6
   by_class:
-    authored: 154
+    authored: 156
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 26
+  unverified-default: 28
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -157,7 +157,7 @@ files:
   evidence: "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)"
 - path: "scripts/oracle-sweep.py"
   class: authored
-  sha256: ae5042404e72a09556fa7a972970bc5a87b54f7c24fb9eae59454aeb7860e9d2
+  sha256: d328cc716aad3f8fce7455dee5fd3d4b7602036dd652280d8a4bf1b865ed83e9
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/teach-parity.py"
   class: authored
@@ -194,7 +194,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 107
-  aggregate_sha256: c180f94ba916c4da5af6ba0ff2db5bd8bd8005d23dd67ff36332b9d1798899ea
+  aggregate_sha256: a5ae491783781a05d389991d91a7347cbfb9d53bf22eb25ec3de32d1edba7e90
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -222,8 +222,8 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 3
-  aggregate_sha256: d097fe59d1f74e61b5fbc0d2e59b518104c1ea8fa74cdab5a958ee336365f000
+  match_count: 5
+  aggregate_sha256: c35454425e9bd7b9f709c1c10b0880c452dbdd21d2f597bd4d660a1e5202dc2f
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -241,6 +241,8 @@ unverified:
 - "images/workflow-gallery.png"
 - "scripts/mdx-yaml-fix.py"
 - "scripts/tests/test_mdx_yaml_fix.py"
+- "scripts/tests/test_oracle_sweep_bare_foreach.py"
+- "scripts/tests/test_oracle_sweep_sees_nine_key.py"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"
 - "videos/dag-execution.mp4"

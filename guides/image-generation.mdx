@@ -163,8 +163,9 @@ tasks:
 
 ```yaml
   hero:
-    for_each: ${{ const.locales }}      # ["fr", "es", "ja"]
-    max_parallel: 3
+    for_each:
+      items: ${{ const.locales }}      # ["fr", "es", "ja"]
+      max_parallel: 3
     with: { locale: ${{ item }} }
     invoke:
       tool: "nika:image_generate"

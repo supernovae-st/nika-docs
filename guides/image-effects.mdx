@@ -112,7 +112,8 @@ One recipe, one hash, forever. Batch-style a hundred campaign images with
   variants:
     with:
       src: ${{ tasks.generate.output.images[0].path }}
-    for_each: ["bw", "gameboy", "cga"]
+    for_each:
+      items: ["bw", "gameboy", "cga"]
     invoke:
       tool: "nika:image_fx"
       args:

@@ -258,7 +258,7 @@ outputs:
   <Step title="The collection is computed, not hardcoded">
     The URL list crosses the boundary
     (`map_recent: ${{ tasks.map.recent }}` in `with:`), then
-    `for_each: ${{ with.map_recent }}` fans out: eight URLs this week,
+    `for_each: { items: ${{ with.map_recent }} }` fans out: eight URLs this week,
     three next week. The DAG doesn't change.
   </Step>
   <Step title="Resilience is per-iteration">
