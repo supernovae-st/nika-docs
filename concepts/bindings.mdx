@@ -148,8 +148,7 @@ the analyzer and propagates through bindings:
 - `exec` stdout → tainted (subshell could have been influenced).
 - `infer` / `agent` output → tainted (prompt injection vector).
 - `invoke` output → tainted (MCP servers are third-party).
-- `inputs.*` → tainted (caller-supplied at launch).
-- `config.*` → tainted (deployment-supplied, from outside the file).
+- `inputs.*` → tainted (caller-supplied at launch — a deployment knob is an input with a default).
 - literals, `const.*`, `secrets.*` → **trusted** (the file owns them).
 
 Integrity is orthogonal to confidentiality: a secret is *trusted* (the
@@ -207,7 +206,7 @@ What's inside `${{ }}` is the **v0.1 CEL subset**
 | Grouping | `( … )` |
 
 There are **no template filters** (`\| upper`, `\| truncate`, …). Anything
-that transforms data is a **jq expression**, in an `output:` binding or
+that transforms data is a **jq expression**, in an `extract:` binding or
 through the `nika:jq` builtin. Two layers, one job each:
 
 ```yaml
@@ -292,8 +291,8 @@ analyzer and renderable by any graph surface — `nika inspect <file>
 - **ADR-014**: sealed kernel traits. The resolver runs at L3 and never
   crosses into arbitrary user-provided evaluator code.
 - **ADR-021**: YAML envelope convention. `${{ }}` bindings appear
-  inside `spec:` (workflow) or inside reusable skill / agent documents,
-  and resolve against the same scope shape.
+  inside the nine-key document (or inside reusable skill / agent
+  documents) and resolve against the same scope shape.
 
 ## Read next
 
@@ -308,6 +307,6 @@ analyzer and renderable by any graph surface — `nika inspect <file>
     Each verb's taint classification and sanitizer expectations.
   </Card>
   <Card title="YAML reference" icon="file-code" href="/reference/yaml-syntax">
-    Full binding grammar and filter catalog.
+    Full binding grammar and CEL subset.
   </Card>
 </CardGroup>

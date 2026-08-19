@@ -102,13 +102,13 @@ outputs:
 <Steps>
   <Step title="Fetch ONE field, not a page">
     `mode: jq` extracts structured JSON from the API response, and the
-    `output:` block binds named fields: `${{ tasks.check.price }}` is a
+    `extract:` block binds named fields: `${{ tasks.check.price }}` is a
     number, not a blob of HTML.
   </Step>
   <Step title="CEL gates the alert">
     The named binding crosses in `with:`
     (`price: ${{ tasks.check.price }}`), then
-    `when: ${{ with.price < config.alert_below }}` is a plain CEL
+    `when: ${{ with.price < const.alert_below }}` is a plain CEL
     comparison. False → the task is skipped, not failed.
   </Step>
   <Step title="The webhook stays secret">
@@ -122,7 +122,7 @@ outputs:
 | Construct | Where | Reference |
 |---|---|---|
 | `nika:fetch` `mode: jq` | `check` | [Builtins](/reference/builtins) |
-| `output:` jq bindings | `check.output` | [Bindings](/concepts/bindings) |
+| `extract:` jq bindings | `check.price` | [Bindings](/concepts/bindings) |
 | `when:` CEL comparison | `alert` | [Workflows](/concepts/workflows) |
 | `secrets:` | envelope | [YAML syntax](/reference/yaml-syntax) |
 

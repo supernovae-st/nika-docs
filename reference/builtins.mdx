@@ -92,7 +92,7 @@ format conversion, generation, time, hashing, adjudication.
 
 | Builtin | What it does |
 |---|---|
-| `nika:jq` | Run a jq expression: the single transform-and-extraction language, same jq as `output:` bindings. |
+| `nika:jq` | Run a jq expression: the single transform-and-extraction language, same jq as `extract:` bindings. |
 | `nika:json_diff` | JSON diff. Returns RFC 6902 JSON Patch (jq can't diff). |
 | `nika:validate` | Validate data against a JSON Schema: `format: json \| yaml`, returns `{ valid, errors }`. |
 | `nika:json_merge_patch` | RFC 7396 merge patch: `null` deletes a key, the semantics jq's `*` merge does not provide. |

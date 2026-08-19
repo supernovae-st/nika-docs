@@ -162,7 +162,7 @@ outputs:
 
 <Steps>
   <Step title="Sitemap mode + a jq slice">
-    `mode: sitemap` returns the URL list; the `output:` binding
+    `mode: sitemap` returns the URL list; the `extract:` binding
     `top: ".[:5] | map(.loc)"` keeps just the head of it, as bare
     `loc` URLs. Bindings are jq: slices, filters, everything.
   </Step>
@@ -183,7 +183,7 @@ outputs:
 | Construct | Where | Reference |
 |---|---|---|
 | `mode: sitemap` → `mode: article` | `map` · `top_page` | [Builtins](/reference/builtins) |
-| `output:` jq slice | `map.output.top` | [Bindings](/concepts/bindings) |
+| `extract:` jq slice | `map.top` | [Bindings](/concepts/bindings) |
 | CEL index access | `top_page.with` | [Workflows](/concepts/workflows) |
 | `create_dirs: true` | `save.args` | [Builtins](/reference/builtins) |
 

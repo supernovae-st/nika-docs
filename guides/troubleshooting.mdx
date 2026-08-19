@@ -41,7 +41,7 @@ import { CANON } from "/snippets/_canon.mdx";
     Always `${{ … }}`: what's inside is CEL. The bare `{{ … }}` form is
     legacy and rejected by the validator. Same rule: there are **no
     template filters** (`| upper`, `| truncate`): transforms are jq, in
-    `output:` bindings or `nika:jq`.
+    `extract:` bindings or `nika:jq`.
   </Accordion>
   <Accordion title="My YAML is valid, so why does nika check still fail?" icon="shield-check">
     Schema-valid ≠ spec-valid. The validator also enforces the semantic

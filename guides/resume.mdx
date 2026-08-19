@@ -92,10 +92,10 @@ vs live. A resumed run never pretends work happened silently.
 A task skips **iff** the trace holds its completed record and
 
 1. the **task definition** hashes the same (the verb body, `with:`,
-   `output:`, `retry:` / `on_error:`, `when:`, `for_each:` — as now
+   `extract:`, `retry:` / `on_error:`, `when:`, `for_each:` — as now
    written), and
 2. the **resolved inputs** hash the same (what its `${{ }}` references
-   actually resolved to — upstream outputs, `inputs`, `config`, `const`).
+   actually resolved to — upstream outputs, `inputs`, `const`, `secrets`).
 
 Edit a prompt → that task re-runs. Pass a different `--var` → the tasks
 that consume it re-run, and the mismatch cascades exactly as far as the
