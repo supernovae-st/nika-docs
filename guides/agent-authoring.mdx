@@ -121,9 +121,22 @@ them; knowing them just saves round-trips:
     facts (`type: integer` + a numeric `enum`). Scoring, routing,
     publish/abstain is `nika:jq` or `nika:decide`. A second infer to
     "pick the level" is the expensive mistake. The shape is
-    `13-extract-then-law`. Check `--native-strict`, probe builtins on
+    `13-extract-then-law`. Prove the law on const fixtures
+    (`unproven-law`). The named bundle is `14-decide-publish`.
+    Check `--native-strict`, probe builtins on
     `mock/echo`, freeze the schema type, pin the glob
     (`exclude: "**/README.md"`), then wire a paid model.
+13. **After valid, ask if there is a better one-way** · a green check
+    is legal, not best. `nika check --json` reports `paid_ready`,
+    `compiled` (the law is proven) and `next` (the first repair).
+    `nika explain <file>` prints a **before a paid model** panel for
+    the paid-run family. Hint `infer-as-law` fires when a prompt asks
+    the model to assign a belt. Recurse: two
+    example reads · decompose (`for_each` / a child workflow) · verify
+    with jq, not a second infer. Handoff only when findings are gone
+    AND `paid_ready` is true (or an honest-red note remains,
+    CONVENTIONS §10). The MCP `nika_check` oracle fails
+    `infer-as-law` and `digit-string-enum` by default.
 
 ## After valid: the judgment layer
 
