@@ -132,7 +132,7 @@ merged:
 
 | Builtin | What it does |
 |---|---|
-| `nika:inspect` | Workflow introspection. One builtin, four `view:` modes: `cost` (running USD by task/provider), `records` (full execution record), `dag_info` (nodes/edges/waves), `threads` (engine pool state, advisory). |
+| `nika:inspect` | Workflow introspection. Four `view:` modes: `cost` · `records` · `dag_info` · `threads`. Live cell seeded at run start (`available: true`). Teaching shape: `16-inspect-self`. |
 | `nika:compose` | The agent loop's self-check: pass a drafted workflow YAML, get the full `nika check` verdict back as JSON — never executed. Loop-only, like `nika:done` (valid only inside an `agent:` tools whitelist · grant after `nika:done`). Teaching shape: `15-compose-self-check`. Standalone `invoke:` is `NIKA-BUILTIN-COMPOSE-001`. |
 
 ```yaml

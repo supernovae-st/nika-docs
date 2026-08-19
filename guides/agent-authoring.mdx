@@ -126,13 +126,15 @@ them; knowing them just saves round-trips:
     Check `--native-strict`, probe builtins on
     `mock/echo`, freeze the schema type, pin the glob
     (`exclude: "**/README.md"`), then wire a paid model.
-13. **`nika:compose` is loop-only** · grant it on `agent.tools` after
+13. **`nika:inspect` is live** · `view: cost|records|dag_info|threads`.
+    The runtime seeds the DAG at run start. Shape: `16-inspect-self`.
+14. **`nika:compose` is loop-only** · grant it on `agent.tools` after
     `nika:done`. The model drafts YAML, gets the full `nika check`
     JSON, iterates until `valid`. A standalone `invoke:` is
     `NIKA-BUILTIN-COMPOSE-001`. Checking never executes. Shape:
     `15-compose-self-check`. Parent→child calls stay
     `10-compose-pipeline`.
-14. **After valid, ask if there is a better one-way** · a green check
+15. **After valid, ask if there is a better one-way** · a green check
     is legal, not best. `nika check --json` reports `paid_ready`,
     `compiled` (the law is proven) and `next` (the first repair).
     `nika explain <file>` prints a **before a paid model** panel for
