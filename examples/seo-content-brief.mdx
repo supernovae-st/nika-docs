@@ -189,7 +189,7 @@ outputs:
 
 ## Make it yours
 
-- Brief the top THREE pages instead of one: bind `top: ${{ tasks.map.top }}` in `with:` and fan out with `for_each: ${{ with.top }}`. The fan-out tier shows how ([Competitor radar](/examples/competitor-radar)).
+- Brief the top THREE pages instead of one: bind `top: ${{ tasks.map.top }}` in `with:` and fan out with `for_each: { items: ${{ with.top }} }`. The fan-out tier shows how ([Competitor radar](/examples/competitor-radar)).
 - Feed your own sitemap too and ask the model for internal-linking opportunities.
 - Pipe the brief straight into a draft: a second `infer` consuming `${{ tasks.brief.output.outline }}`.
 

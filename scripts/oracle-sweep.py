@@ -53,6 +53,14 @@ NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika\.yaml)\s*$")
 # old detector was `"nika: v1" in b` and made a nine-key fence
 # (`nika: <name>`) invisible to this gate.
 ENVELOPE = re.compile(r"^\s*nika:\s")
+# Fragments never reach `nika check` (no envelope), so a scalar
+# `for_each: ${{ … }}` used to ship as live teaching while PARSE-019
+# (and sibling knobs, PARSE-005) refuse it on the binary. Catch the
+# dead form in EVERY yaml fence — skeleton/illustration/modeline
+# included, because those pages are where a reader copies the shape.
+BARE_FOREACH = re.compile(
+    r"(?m)^[ \t]*for_each:[ \t]+(\$\{\{|\$[A-Za-z_]|[\[\'\"])"
+)
 
 
 def is_workflow_fence(body: str) -> bool:
@@ -70,6 +78,12 @@ for fp in sorted(DOCS.rglob("*.mdx")):
     if "node_modules" in str(fp):
         continue
     fences = FENCE.findall(fp.read_text())
+    for info, body in fences:
+        if BARE_FOREACH.search(body):
+            bad += 1
+            print(f"✗ {fp.relative_to(DOCS)}  [for_each scalar]")
+            print("   · for_each: is a BLOCK (`items` · max_parallel · fail_fast) "
+                  "· a bare ${{ }} is NIKA-PARSE-019 · knobs as siblings are NIKA-PARSE-005")
     runnable = [(i, b) for i, b in fences
                 if is_workflow_fence(b) and not SKIP.search(i)]
     if not runnable:

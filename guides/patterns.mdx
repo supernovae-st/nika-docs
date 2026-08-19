@@ -84,10 +84,13 @@ belt-and-braces) · [Support triage](/examples/support-triage) (enums).
 
 ## 4 · Fan out with a leash
 
-`for_each` over a runtime collection is the power move. Bound it with
-`max_parallel` (providers rate-limit, GPUs thrash), make it resilient
-with `fail_fast: false` (collect errors instead of aborting the batch)
-and give each iteration its own `retry` and `timeout`.
+`for_each` over a runtime collection is the power move. The leash lives
+*inside the block* (`items` · `max_parallel` · `fail_fast`) — a bare
+`${{ }}` after `for_each:` is `NIKA-PARSE-019`, and knobs as task
+siblings are `NIKA-PARSE-005`. Bound `max_parallel` (providers
+rate-limit, GPUs thrash), set `fail_fast: false` (collect errors
+instead of aborting the batch) and give each iteration its own `retry`
+and `timeout`.
 
 **Anti-pattern** · an unbounded fan-out against a rate-limited API, or
 leaving `fail_fast` on its default (true) for a batch where one bad
@@ -322,9 +325,10 @@ what it is:
 scrape_all:
   with:
     pages: ${{ tasks.discover.pages }}
-  for_each: ${{ with.pages }}
-  max_parallel: 5
-  fail_fast: false
+  for_each:
+    items: ${{ with.pages }}
+    max_parallel: 5
+    fail_fast: false
   on_error: { recover: null }        # this iteration yields null · the batch lives
   invoke:
     tool: "nika:fetch"
@@ -356,8 +360,9 @@ build_matrix:
 test_all:
   with:
     matrix: ${{ tasks.build_matrix.output }}
-  for_each: ${{ with.matrix }}
-  max_parallel: 3
+  for_each:
+    items: ${{ with.matrix }}
+    max_parallel: 3
   exec:
     command: ["./test.sh", "--os", "${{ item.os }}", "--node", "${{ item.ver }}"]
 ```

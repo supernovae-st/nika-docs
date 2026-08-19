@@ -174,28 +174,30 @@ deploy:
 ```
 
 The predicate set is **closed** (`NIKA-DAG-005` otherwise): `success` ·
-`failed` · `skipped` · `terminal` — where `terminal` admits any terminal
+`failure` · `skipped` · `terminal` — where `terminal` admits any terminal
 state, `cancelled` included (the always-pattern: « run once X is settled,
-whatever happened »).
+whatever happened »). The participial spellings `succeeded` and `failed`
+are dead; `nika check --fix` respells them.
 
 Fan-out over a collection (`files` here is a jq
-[output binding](/concepts/bindings) on `list_files`, e.g.
-`output: { files: 'split("\n")' }` — the collection crosses the boundary
+[extract binding](/concepts/bindings) on `list_files`, e.g.
+`extract: { files: 'split("\n")' }` — the collection crosses the boundary
 through `with:`, then `for_each:` reads the binding):
 
 ```yaml
 analyze_each:
   with:
     files: ${{ tasks.list_files.files }}
-  for_each: "${{ with.files }}"
+  for_each:
+    items: ${{ with.files }}
   infer:
     model: ollama/<model>        # <provider>/<name>
     prompt: "Review this file: ${{ item }}"
 ```
 
 Conditional execution: `when:` is a **local business condition**, evaluated
-*after* the gate admits the task. It reads local namespaces only (`vars` ·
-`env` · `with` · the `for_each` locals) — a `tasks.*` reference inside
+*after* the gate admits the task. It reads local namespaces only (`inputs` ·
+`const` · `secrets` · `with` · the `for_each` locals) — a `tasks.*` reference inside
 `when:` is refused at parse time (`NIKA-VAR-021`): the binding creates the
 edge, `when:` reads the binding.
 
