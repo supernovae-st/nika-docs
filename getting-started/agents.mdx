@@ -122,10 +122,15 @@ The server exposes two tool families — **validate** and **learn**:
 
 ```text
 agent writes review.nika.yaml        (from AGENTS.md + a template)
-  → nika check review.nika.yaml      (agent self-repairs from the findings)
+  → nika check --native-strict       (agent self-repairs from the findings)
+  → nika run --model mock/echo       (shape proof · zero keys)
   → you read the file                (it's YAML, review it like code)
   → nika run review.nika.yaml        (you, or your CI, not the agent)
 ```
+
+The model extracts facts. `nika:jq` or `nika:decide` is the law — do
+not pay a second infer to pick a level. Numeric facts are
+`type: integer`. The teaching file is `nika try 13-extract-then-law`.
 
 The division of labor is the point: the **agent authors**, the **file is
 the contract**, the **human approves**, the **runtime enforces**.
