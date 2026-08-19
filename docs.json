@@ -315,6 +315,7 @@
             "group": "CLI & errors",
             "pages": [
               "reference/cli",
+              "reference/arm",
               "reference/machine-surfaces",
               "reference/error-codes",
               "reference/mcp-server"

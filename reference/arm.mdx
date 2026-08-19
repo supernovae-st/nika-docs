@@ -1,0 +1,190 @@
+---
+title: "Arming a project"
+description: "Declare beats in nika.yaml and let the machine fire them — the read-only report, the one firer, the OS bridge, and the resident firer."
+sidebarTitle: "arm / serve"
+icon: "bell"
+---
+
+<Info>
+  **The file proposes, the machine disposes.** Arming a project means
+  declaring *beats* in `nika.yaml` — what runs, when, under which
+  policies — and letting the machinery fire them: an OS unit
+  (`launchd` · `systemd`), or the resident `nika serve` where no OS
+  scheduler exists. Reading this page schedules nothing; firing is
+  always a machine act.
+</Info>
+
+## The `arm:` block
+
+Each entry under `arm:` in `nika.yaml` is one beat:
+
+```yaml
+nika: v1
+ceiling: 0.50            # the run default when a beat says nothing — a beat always says its own
+
+arm:
+  - workflow: workflows/nightly-report.nika.yaml
+    cadence: "TZ=Europe/Paris 30 7 * * *"
+    plafond: 0.20
+    manqué: rattraper-une-fois
+    chevauchement: sauter
+    après_saut: prochain-créneau
+  - workflow: workflows/sentinel.nika.yaml
+    cadence: "TZ=UTC 0 */3 * * *"
+    plafond: 0.10
+    manqué: sauter
+  - workflow: workflows/on-event.nika.yaml
+    cadence: on-webhook
+    plafond: 0.05
+    manqué: sauter
+```
+
+| Key | Required | What it means |
+|---|---|---|
+| `workflow` | yes | The workflow to fire — a repo-relative `*.nika.yaml` path |
+| `cadence` | yes | `on-webhook`, or a 5-field cron with the IANA zone inside (`"TZ=Europe/Paris 30 7 * * *"`) — the zone resolves against the embedded tzdb, never the host's |
+| `plafond` | yes | Per-tick cost ceiling in USD — no default exists (the pay law: a beat always names its own) |
+| `manqué` | yes | The missed-run policy — no default either (the run-missed law) |
+| `chevauchement` | no | Overlap — `sauter` (default · the safe value) · `file` (queue the new tick) · `remplacer` (replace the running tick) |
+| `après_saut` | no | After an overlap skip — `prochain-créneau` (default) · `à-complétion` (re-fire as soon as the running tick completes) |
+| `où` | no | `local` (default) · `cloud` — the calendar stays in the registry; a `cloud` beat skips honestly at fire today (the paid cloud lane is ③) |
+| `actif` + `raison` + `jusqu_au` | together | The suspension triple — `actif: false` requires the reason and the expiry date. **Deleting the line does not disarm** (law N4); the triple does |
+| `tolérance` | no | (m,k)-firm skip tolerance (`3/4`) — beyond it a skip is an outage, not a skip |
+| `décalage` | no | Deterministic jitter derived from the workflow path — `hash` only |
+| `par` | no | Declares the human who armed it — proves nothing by itself (N3: the machine's key is what authorizes; a merge arms nothing) |
+
+`signature:` and `budget:` are reserved and **refused** today — they
+fail loudly at parse time rather than silently doing nothing.
+
+### The miss policies (`manqué:`)
+
+| Value | What a silence does |
+|---|---|
+| `rattraper` | Fire every missed slot, oldest first |
+| `rattraper-une-fois` | Fire ONE catch-up for the whole silence |
+| `sauter` | Never catch up — a skip is an event, never an execution |
+
+## `nika arm` — the report
+
+Bare, the verb READS the registry and reports what is armed, what
+fired, and what fires next — it schedules nothing:
+
+```text
+$ nika arm
+2 beats in /home/alice/project/nika.yaml
+
+  [armed] workflows/nightly-report.nika.yaml · TZ=Europe/Paris 30 7 * * *
+         ✓ PROUVÉ · fired · 2026-08-19T07:30:01+02:00 · slot 2026-08-19T07:30:00+02:00 · 0 sauts / 12 tirs
+         → 2026-08-20 07:30 CEST
+         → 2026-08-21 07:30 CEST
+         → 2026-08-22 07:30 CEST
+
+  [idle ] workflows/on-event.nika.yaml · on-webhook
+         · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
+         → no upcoming slot (a webhook beat fires on its event)
+
+nothing was scheduled — `nika arm` READS the file. The machine that fires them is the arming edge.
+```
+
+The proof line separates **PROUVÉ** from **DÉCLARÉ** (law N3): the
+registry *declares*, only the sidecar *proves* the machine fired. A beat
+carrying the suspension triple is reported `idle` and never computed —
+asking a disarmed beat for its next slot would print a date nobody will
+see fire. A `par:` line is shown for what it is: declared, not verified.
+
+Sidecar directories no registry entry names are the **orphelins** —
+reported, NEVER erased (law N4). Exit `0` clean · exit `2` when the
+registry refuses, and the refusal teaches the fix.
+
+## `nika arm fire <label>` — the one firer
+
+```text
+$ nika arm fire nightly-report
+fired nightly-report · slot 2026-08-19T07:30:00+02:00 · exit 0
+```
+
+ONE function applies the on-time window, the miss policy, the overlap
+lock, the per-tick ceiling and the firing record — the emitted OS units
+and `nika serve` both end here, so the law lives exactly once. The label
+is the workflow file's radical (`workflows/doctor.nika.yaml` → `doctor`;
+a radical collision takes `-2`, `-3` in file order).
+
+The stdout contract: a decision prints **exactly one line** —
+`fired …` · `skipped …` · `paused …` · `failed …` — so a launchd or
+serve log stays byte-pure. Two honest exceptions: a registry refusal
+(exit `2`) teaches multi-line, and an environment death (exit `3`)
+rides stderr.
+
+What a fire guarantees:
+
+- The per-beat lock is taken BEFORE the decision and held until AFTER
+  the receipt lands — **at-least-once**: a crash between the claim and
+  its receipt leaves a *visible* orphan the report names, never a silent
+  double-fire. Exactly-once is never promised; when the workflow's
+  effects are idempotent, the result is effectively-once.
+- Every fire is a FRESH run (law N2): a run you pause is parked with its
+  trace (`paused … · trace …`), never resumed by the firer.
+- The clock is injectable (hidden `--now`) so a replay and a test are
+  deterministic.
+
+| Exit | Meaning |
+|---|---|
+| `0` | Clean — fired, or honestly skipped by policy |
+| `1` | The run itself failed (the workflow's exit) |
+| `2` | The registry refused — the message teaches the fix |
+| `3` | Environment death before the run started |
+| `4` | The run was paused and parked with its trace |
+
+What a fire leaves — the sidecar `.nika/arm/<label>/`:
+
+| File | Role |
+|---|---|
+| `history.ndjson` | The versioned ledger (`nika/arm-event@1`) — one event per decision, hash-chained, verified before every append |
+| `last.json` | The projection of the last firing — what the report reads |
+| `ledger.lock` | The inner ledger lock — serializes verify + append |
+
+## `nika arm disarm <label>`
+
+Prints the disarm gesture (law N4): removing the line from the file is
+not it — `actif: false` + `raison:` + `jusqu_au:` is, because that
+leaves an auditable trail. `--write` also tears the emitted OS unit
+down.
+
+## `nika arm --emit` — the OS bridge
+
+`--emit launchd|systemd` prints the OS unit that fires the beats
+instead of reading the registry; add `--write` to install it:
+
+| Flag | With `--emit` |
+|---|---|
+| `--write` | Write the unit file instead of printing it |
+| `--out <dir>` | The directory the unit writes to |
+| `--mode user\|system` | The install scope — the operator's own agent (default posture) or a system-wide daemon |
+| `--env-file <file>` | The env file the unit loads — provider keys live there, NEVER in the unit |
+| `--nika-bin <path>` | The nika binary the unit invokes |
+
+`launchd` emits a macOS user agent
+(`~/Library/LaunchAgents/nika.arm.<radical>.plist`); `systemd` emits a
+user timer + service pair. Any of these flags set WITHOUT `--emit`
+refuses honestly — a flag that does nothing is a lie.
+
+## `nika serve` — the resident firer
+
+The SAME `fire`, with the wall clock in place of the OS — for the
+machines where no OS scheduler exists (a container, a bare server, a VM
+you own):
+
+```text
+$ nika serve --once     # one sweep: fire every due beat, then exit
+$ nika serve --dry      # decide, run nothing, record nothing
+```
+
+Exit `0` clean · `1` otherwise. The hidden `--now` / `--until` pair
+injects the clock so a replay stays deterministic.
+
+<Warning>
+  **The honesty contract.** Delivery is at-least-once and exactly-once
+  is never claimed: a crash between the claim and the receipt leaves a
+  visible orphan, not a silent double-fire. Keep a fired workflow's
+  effects idempotent and the result is effectively-once.
+</Warning>
