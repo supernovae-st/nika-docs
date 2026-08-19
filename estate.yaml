@@ -157,7 +157,7 @@ files:
   evidence: "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)"
 - path: "scripts/oracle-sweep.py"
   class: authored
-  sha256: e37689c1e6dc9bac67ab7253706f0a281d776d1243a0d987daa5c0a186527cd7
+  sha256: ae5042404e72a09556fa7a972970bc5a87b54f7c24fb9eae59454aeb7860e9d2
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/teach-parity.py"
   class: authored
@@ -187,14 +187,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 0fd7c9371039757f5912106af8a32117715be4ea99caeb602a948b495af00c07
+  sha256: 76c9604e3ba2c9c660086170f924c4360acbc9093640bcfefb20618308dcdb18
   evidence: "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields"
   note: "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 107
-  aggregate_sha256: 59f28e841f7bffa906826e48ed84484b1c89a741b5d4b66018f82fe31294da10
+  aggregate_sha256: c180f94ba916c4da5af6ba0ff2db5bd8bd8005d23dd67ff36332b9d1798899ea
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -223,7 +223,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 3
-  aggregate_sha256: fb2fd6ecd08cd6946ed53493f4a0abd86f33b4a75f2c7205e393da81526d3e16
+  aggregate_sha256: d097fe59d1f74e61b5fbc0d2e59b518104c1ea8fa74cdab5a958ee336365f000
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:

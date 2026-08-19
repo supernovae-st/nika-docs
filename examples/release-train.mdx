@@ -17,8 +17,8 @@ Release day choreography: tests, lint and audit run as one parallel
 wave; an assert refuses departure on any red; the conductor signs with
 full information (« gates GREEN in 12 min · ship 1.4.0 in the 09:00Z
 window? »); the train holds until the window; ships; re-polls prod
-until it reports the new version; and `on_finally` files the departure
-record either way.
+until it reports the new version; and `after: { live: terminal }` files
+the departure record either way.
 
 ## The shape
 
@@ -356,7 +356,7 @@ outputs:
   <Step title="The record always lands">
     `verify` re-polls prod (retry × 5, exponential) until it reports
     the shipped version · the final assert refuses to claim success
-    otherwise · `on_finally` emits the journal event + team ping with
+    otherwise · `after: { live: terminal }` emits the journal event with
     the REAL status, even on failure.
   </Step>
 </Steps>
@@ -368,13 +368,13 @@ outputs:
 | `nika:wait` `until:` (absolute) | `hold` | [Builtins](/reference/builtins) |
 | `nika:date` `op: diff` | `gate_time` | [Builtins](/reference/builtins) |
 | parallel gate wave + asserts | `tests`/`lint`/`audit` → `gates_green` | [Workflows](/concepts/workflows) |
-| `on_finally:` departure record | `live` | [Workflows](/concepts/workflows) |
+| `after: { live: terminal }` departure record | `record` | [Workflows](/concepts/workflows) |
 
 ## Make it yours
 
 - Generate the notes on the same train: insert [Release notes](/examples/release-notes) between `approved` and `hold`.
 - Canary first: duplicate `ship`/`verify` against staging, gate prod behind a second assert.
-- The `config.window` dial makes this a scheduled artifact: your cron passes next Tuesday 09:00Z, the train handles the rest.
+- The `inputs.hold_for` dial makes this a scheduled artifact: your cron passes next Tuesday 09:00Z, the train handles the rest.
 
 <Card title="Back to all examples" icon="rocket" href="/examples/overview">
   The full gallery: four tiers, every construct taught by a real job.

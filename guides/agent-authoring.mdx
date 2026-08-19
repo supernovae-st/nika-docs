@@ -87,7 +87,7 @@ them; knowing them just saves round-trips:
 4. **`when:` is a `${{ }}` CEL boolean or the literal `true`/`false`** ·
    `${{ inputs.count }}` is not a condition; `${{ inputs.count > 0 }}` is;
    a bare string without `${{ }}` is rejected. It reads local namespaces
-   only (the value authorities `inputs` · `config` · `const` · `secrets`,
+   only (the value authorities `inputs` · `const` · `secrets`,
    plus `with` · `item`/`index`), post-gate; the always-pattern is
    `after: { x: terminal }`, never a `when:` trick.
 5. **The CEL function set is closed** · `size()` · the `has()` presence

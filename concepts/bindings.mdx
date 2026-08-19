@@ -63,7 +63,7 @@ closed family (`${{ params.X }}` and friends) refuses `NIKA-VALUES-003`.
 | `with.*` | The task's **data boundary** — per-task `with:` block; each `tasks.*` reference in a value declares a typed edge, the body reads the binding | `with.model_family` |
 | `tasks.<name>.output` | The result record of a completed task (`.output` · `.status` · `.error` · `.duration_ms` · named bindings) — **boundary surfaces only** (see below) | `tasks.greet.output` |
 
-The first four are the **value authorities** — the closed family every
+The first three are the **value authorities** — the closed family every
 workflow value is declared under, one role each, no alias. `with` and
 `tasks` are the **runtime namespaces**: legal in `${{ }}`, never value
 authorities.

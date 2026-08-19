@@ -8,8 +8,8 @@ icon: "fire-extinguisher"
 > **T4 epic · SRE / on-call**: three evidence sources gathered in
 > parallel, a typed timeline, then the honest part: `nika:wait` a settle
 > window, re-poll the status API, and `nika:assert` refuses to draft a
-> « resolved » postmortem while prod still burns. `on_finally:` files
-> the journal event and the ping NO MATTER WHAT.
+> « resolved » postmortem while prod still burns. `after: { save: terminal }`
+> files the journal event and the ping NO MATTER WHAT.
 
 ## The job
 
@@ -334,10 +334,11 @@ outputs:
     re-poll reads `.current.state`, and the assert fails the run,
     loudly, if it isn't `operational`. No optimistic postmortems.
   </Step>
-  <Step title="on_finally always reports">
-    Whether `save` success, failed or timed out, the `nika:emit`
-    journal event and the on-call ping fire. Cleanup hooks are
-    best-effort and never mask the main outcome.
+  <Step title="the record always lands">
+    Whether `save` succeeds, fails or is cancelled, the `nika:notify`
+    ping fires on the `terminal` edge. Cleanup that must fail loudly
+    rides `terminal`, not `unwind` — unwind errors are logged and do
+    not propagate.
   </Step>
 </Steps>
 
@@ -348,13 +349,13 @@ outputs:
 | `capture: structured` | `logs` | [The 4 verbs](/concepts/verbs) |
 | `nika:wait` | `settle` | [Builtins](/reference/builtins) |
 | `nika:assert` recovery gate | `confirmed` | [Builtins](/reference/builtins) |
-| `on_finally:` | `save` | [Workflows](/concepts/workflows) |
+| `after: { save: terminal }` | `alert` | [Workflows](/concepts/workflows) |
 
 ## Make it yours
 
 - Pull the incident channel export as a fourth evidence source and let the timeline cite humans, not just machines.
 - Auto-file the retro: `nika:fetch method: POST` to your calendar/issue API with `${{ tasks.timeline.output.events[0].at }}` as the anchor.
-- Track MTTR over time: the `on_finally` event stream is already your dataset.
+- Track MTTR over time: the always-fires `alert` stream is already your dataset.
 
 <Card title="Next · CEO Monday brief" icon="briefcase" href="/examples/ceo-monday-brief">
   The closer: a three-branch gather, jq arithmetic, a thinking

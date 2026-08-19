@@ -13,8 +13,9 @@
 #     spaces in): the indent is stripped before the oracle reads the block
 #     and put back on every line on splice-back;
 #   · skips fences whose info-string says skeleton · illustration ·
-#     modeline (not runnable by declaration) and fences that carry no
-#     column-0 `nika:` line (fragments · the oracle needs a whole file);
+#     modeline (not runnable by declaration) and fences whose first
+#     content line is not `^\s*nika:\s` (fragments · a nested `nika:`
+#     is another tool's key · the oracle needs a whole file);
 #   · REFUSES to touch a fence inside a projected region
 #     ({/* showcase:begin */} … {/* template:begin */} … {/* errors-*:begin */})
 #     and the projected snippets · those re-project from nika-spec, a hand
@@ -48,7 +49,7 @@ SKIP_INFO = re.compile(r"skeleton|illustration|modeline", re.I)
 NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika\.yaml)\s*$")
 # the trap: the whole info-string IS an envelope line (` ```yaml nika: v1 `)
 TITLE_ENVELOPE = re.compile(r"^\s*(nika:\s*\S+)\s*$")
-ENVELOPE = re.compile(r"^nika:\s*\S", re.M)
+ENVELOPE = re.compile(r"^\s*nika:\s", re.M)
 REGION_BEGIN = re.compile(r"\{/\*\s*([a-z0-9-]+):begin\b")
 REGION_END = re.compile(r"\{/\*\s*([a-z0-9-]+):end\b")
 REFUSAL = re.compile(r"✗|✖")
