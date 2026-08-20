@@ -72,6 +72,7 @@ jobs:
             echo "::error::teach-parity skipped despite the install — the released-binary derivation did not run"
             exit 1
           fi
+          python3 scripts/tests/test_teach_parity_retired_new.py
 
   oracle-sweep:
     runs-on: ubuntu-latest
