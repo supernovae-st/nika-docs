@@ -1,0 +1,114 @@
+---
+title: "Glossary"
+description: "Every word Nika uses that you cannot guess from English, defined once, with the page that owns it."
+sidebarTitle: "Glossary"
+icon: "book-a"
+---
+
+<Info>
+  This page exists because a word you cannot define is a wall. Each entry is
+  one sentence and a pointer to the page that owns the idea — the definition
+  lives there, this is only the door.
+</Info>
+
+## The file
+
+**Envelope** — the top-level keys a workflow file may carry, and only those:
+`nika` · `model` · `inputs` · `const` · `secrets` · `permits` · `run` ·
+`tasks` · `outputs`. Nine keys, closed. Anything else is refused by name.
+→ [Workflows](/concepts/workflows)
+
+**`nika:`** — the first line of every Nika file. The key says *this is a Nika
+file*; the value is the file's **name**, kebab-case. It is not a version, and
+there is no `nika: v2`. → [YAML syntax](/reference/yaml-syntax)
+
+**Workflow vs project file** — a document with a `tasks:` key is a
+**workflow**; a document without one is a **project file** (`nika.yaml`,
+which carries settings like a spend ceiling). The rule is the presence of
+`tasks:`, never the filename — so it still holds for a file pasted into a
+chat or piped on stdin, where the `.nika.yaml` suffix is gone.
+→ [YAML syntax](/reference/yaml-syntax)
+
+**Task** — one named unit of work, declaring exactly one of the four verbs
+(`infer` · `exec` · `invoke` · `agent`). → [Verbs](/concepts/verbs)
+
+## The graph
+
+**DAG** — *directed acyclic graph*: the shape your tasks form once their
+dependencies are drawn. Acyclic means no task may wait, however indirectly,
+on itself. → [Workflows](/concepts/workflows)
+
+**Wave** — a scheduling layer. Every task whose dependencies are already
+satisfied runs in the same wave, in parallel. `nika check` prints the wave
+plan before anything runs, so `3 waves · 5 tasks` means five tasks arranged
+into three rounds. → [Workflows](/concepts/workflows)
+
+**`with:` and `after:`** — the two edge kinds. `with:` is a **data** edge (a
+task reads another's output); `after:` is a **control** edge (a task waits,
+without reading). → [Bindings](/concepts/bindings)
+
+**`unwind`** — a cleanup edge. A task on an `unwind` edge runs whatever
+happened upstream, success or failure, so teardown is an ordinary task the
+graph can see rather than a special block hidden from it.
+→ [Workflows](/concepts/workflows)
+
+## The expressions
+
+**CEL** — [Common Expression Language](https://cel.dev), the small expression
+language `${{ … }}` speaks, and the language of a `when:` condition. It is
+not a template engine and not shell: it evaluates an expression and gives
+back a value. → [Bindings](/concepts/bindings)
+
+**`jq`** — the query language used to pull a field out of a result or reshape
+one, in `outputs:` and in extraction. Same `jq` as the command-line tool.
+→ [Bindings](/concepts/bindings)
+
+## Safety and cost
+
+**`permits:`** — the declared boundary of what a run may touch: which paths
+it may read or write, which hosts it may reach, whether it may execute. An
+absent `permits:` block is **zero** authority, never a default allowance.
+→ [Security](/concepts/security)
+
+**Blast radius** — everything a run could touch if it went wrong, read off
+the declared `permits:` before the run starts rather than discovered after.
+→ [Security](/concepts/security)
+
+**Lethal trifecta** — three grants that are each ordinary alone and dangerous
+together: access to private data, an untrusted input, and a way out to the
+network. When a workflow has all three *and* the untrusted content can
+actually reach the way out, `nika check` refuses it (`NIKA-SEC-009`) unless a
+human gate stands in the path. → [Security](/concepts/security)
+
+**`mock/echo`** — the test model. It needs no provider, no API key and no
+network, and it costs nothing, so a workflow can be rehearsed end to end
+before any real model is named. → [Providers](/concepts/providers)
+
+## Records and process
+
+**Trace** — the record a run leaves: one **NDJSON** file (one JSON object per
+line) holding what ran, in what order, and at what cost, hash-chained so a
+later edit is visible. → [Traces](/concepts/traces)
+
+**Hint** — advisory output from `nika check`, named like `native-first/002`.
+A hint never fails your check on its own; `--native-strict` is the flag that
+promotes the `native-first` family to a failure.
+→ [Machine surfaces](/reference/machine-surfaces)
+
+**NEP** — *Nika Enhancement Proposal*, the numbered process by which the
+language changes. A `NEP-00NN` reference in output points at the proposal
+that introduced the rule you just met.
+
+## Coming from somewhere else
+
+If your reflexes are GitHub Actions or Kubernetes, the mapping is short:
+
+| you would write | Nika calls it |
+|---|---|
+| `apiVersion:` + `kind:` | `nika: <name>` — one key, the mark and the name |
+| `name:` | the same `nika:` key |
+| `jobs:` + `steps:` | `tasks:` — a map of named tasks, one verb each |
+| `run: <shell string>` | `exec: { command: [argv…] }`, plus a `permits.exec` grant |
+| `on:` (triggers) | `arm:` in the project file → [arm / serve](/reference/arm) |
+
+→ [How Nika compares](/concepts/how-nika-compares)

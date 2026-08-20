@@ -214,7 +214,8 @@
               "concepts/traces",
               "concepts/security",
               "concepts/how-nika-compares",
-              "patterns/run-receipts"
+              "patterns/run-receipts",
+              "concepts/glossary"
             ]
           }
         ],
