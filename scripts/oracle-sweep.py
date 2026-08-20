@@ -76,8 +76,18 @@ def is_workflow_fence(body: str) -> bool:
 # workflow but is a different artifact: its fields are `ceiling:` + `arm:`,
 # so the nine-key workflow envelope refuses it (NIKA-PARSE-005 on `ceiling`)
 # and `nika check` is simply the wrong judge. `nika arm` is the manifest
-# judge (exit 0 clean · 2 the registry refuses). Discriminant · an `arm:`
-# key at the envelope's own indent, so a nested `arm:` never qualifies.
+# judge (exit 0 clean · 2 the registry refuses).
+#
+# The discriminant is the SPEC's, normative and 100%-covering (01-envelope
+# §The type discriminant) · a `tasks:` key means WORKFLOW, its absence
+# means PROJECT. The first cut of this function tested for `arm:` instead,
+# which is a PROXY: it happened to hold because the only manifest fence in
+# the docs carries `arm:`, and it would have gone red the day a page
+# documented `traces:` or `registry:` alone. The spec chose `tasks:`
+# precisely because it survives when the filename is gone — a registry
+# blob, an HTTP body, `nika check -` on stdin, a fence pasted in a chat.
+# Anchored to the envelope's own indent, so a nested `tasks:` (a fence
+# inside an <Accordion>, a `tasks:` under some other key) never qualifies.
 def is_manifest_fence(body: str) -> bool:
     for line in body.splitlines():
         stripped = line.strip()
@@ -86,7 +96,7 @@ def is_manifest_fence(body: str) -> bool:
         if not ENVELOPE.match(line):
             return False
         indent = line[: len(line) - len(line.lstrip())]
-        return bool(re.search(r"(?m)^" + re.escape(indent) + r"arm:[ \t]*$", body))
+        return not re.search(r"(?m)^" + re.escape(indent) + r"tasks:", body)
     return False
 
 
