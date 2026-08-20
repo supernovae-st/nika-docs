@@ -20,6 +20,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika welcome` | The mirror: what this machine has (editors · local models · key presence), what this binary carries, where to start — offline, always exit 0 |
 | `nika welcome --deep [--json]` | The whole workspace truth in one call: every workflow audited (verdict · tasks · waves · cost honesty · permits), recent runs folded from the flight recorder, the machine facts — capped and says so |
 | `nika try [slug]` | See a canonical workflow WORK — offline by default (the mock rehearsal · zero keys · zero flags), nothing written, nothing owned. Bare `nika try` lists what there is to see · `--model <provider>/<name>` runs the same example on a real seat |
+| `nika list` | List every `.nika.yaml` workflow below the current directory, one relative path per line — stable plain output for people and scripts |
 | `nika check <file>` | Static pre-flight audit before any run — `-` reads the workflow from stdin (0.94+) · `registry:owner/name` pulls a certified artifact first |
 | `nika run <file>` | Execute a checked workflow — `registry:owner/name` refs resolve through the verified cache, then the normal audit-before-run |
 | `nika model serve\|pull\|list\|rm` | The sovereign local lane: serve a GGUF through the in-process sidecar (`serve --model x.gguf` · loopback · in every release binary (0.101+) · qwen3-family GGUFs, a wrong family refuses in milliseconds), acquire from the Hugging Face Hub (`pull` — brings `tokenizer.json` along, borrowing it from the repo's declared base model when the mirror ships none), inventory and reclaim disk (`list` · `rm`) |
@@ -35,6 +36,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika catalog [--json]` | The embedded provider/model catalog (models · capabilities · env vars) — `--json` emits the versioned machine projection (`catalog_version: 1`) |
 | `nika catalog --tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
 | `nika new [intent] [dest]` | The ONE creation door: plain words route across the whole catalog · an example slug lands verbatim with its ingredients · a skeleton name instantiates (`nika new '?'` lists the set) |
+| `nika arm [fire\|disarm]` | Read the local beat registry and show what is armed plus the next firing time — scheduling nothing by default. `fire` evaluates and records one due beat; `disarm` teaches the explicit registry gesture |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
 | `nika sign <file>` | Sign a workflow file (author-binding) — mints `<file>.minisig` · `--check` verifies the signature against the trusted key |
 | `nika key mint|fingerprint|rotate` | The run-signing key lifecycle — mint · TOFU fingerprint · rotate (old public keys stay verifiable) |
