@@ -1,0 +1,81 @@
+---
+title: "Test and trace"
+description: "Rehearse workflows with mock goldens and verify the integrity of recorded run journals."
+sidebarTitle: "Test and trace"
+icon: "vial-circle-check"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+
+<LocalContract />
+
+Testing and trace verification answer different questions:
+
+- a golden asks whether behavior still matches an expectation;
+- trace verification asks whether recorded evidence stayed intact.
+
+## Run the golden
+
+```ts
+const golden = await nika.test('workflows/release.nika.yaml')
+
+if (!golden.passed) {
+  console.error(golden.output)
+  process.exit(golden.exitCode)
+}
+```
+
+The returned verdict preserves the engine exit code and combined output.
+
+## Update deliberately
+
+```ts
+await nika.test('workflows/release.nika.yaml', {
+  update: true,
+})
+```
+
+Updating the expectation is a separate action because replacing evidence
+must stay visible in review.
+
+## Verify a trace
+
+```ts
+const receipt = await nika.traceVerify(
+  '.nika/traces/release.ndjson',
+)
+
+if (!receipt.intact) {
+  throw new Error(receipt.output)
+}
+
+console.info('chain head', receipt.head)
+```
+
+The bare form checks the workspace latest on current engines. Pass a path
+when application state already owns the exact receipt identity.
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>PROOF LANES · DIFFERENT VERDICTS</span>
+  <pre tabIndex={0}>{`workflow ── test ─────────── behavior matches?
+
+run ─────── trace journal ── chain intact?
+                         └── show · replay · export`}</pre>
+</div>
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Receipts and replay" icon="link" href="/sdk/runtime/receipts">
+    Store and re-project the durable journal.
+  </Card>
+  <Card title="CI gate" icon="shield-check" href="/sdk/operations/ci">
+    Put the rehearsal before protected execution.
+  </Card>
+  <Card title="Testing guide" icon="flask" href="/guides/testing">
+    Learn goldens and mock-provider workflows.
+  </Card>
+  <Card title="Trace concepts" icon="timeline" href="/concepts/traces">
+    Read the journal and chain model.
+  </Card>
+</CardGroup>

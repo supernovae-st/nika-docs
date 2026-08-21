@@ -1,0 +1,75 @@
+---
+title: "Workflow registry"
+description: "List, page, reload and inspect raw workflow source through the preview service namespace."
+sidebarTitle: "Workflow registry"
+icon: "folder-open"
+---
+
+import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+<RemoteContract />
+
+`nika.workflows` exposes the service's workflow set without inventing a
+second workflow representation.
+
+## List ordinary catalogs
+
+```ts
+const workflows = await nika.workflows.list()
+console.log(workflows.map((workflow) => workflow.name))
+```
+
+`list()` requests bounded pages until `has_more` is false.
+
+## Own pagination at scale
+
+```ts
+let after: string | undefined
+
+do {
+  const page = await nika.workflows.listPage({
+    limit: 50,
+    after,
+  })
+
+  render(page.workflows)
+  after = page.has_more ? page.workflows.at(-1)?.name : undefined
+} while (after)
+```
+
+The cursor is the last workflow name, not an opaque integer offset.
+
+## Rescan or inspect
+
+```ts
+const refreshed = await nika.workflows.reload()
+const yaml = await nika.workflows.source('release.nika.yaml')
+```
+
+`source()` returns the actual YAML text. Send that text to a language-aware
+editor or audit surface. Do not downcast it to a partial application object.
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>WORKFLOW REGISTRY · PREVIEW</span>
+  <pre tabIndex={0}>{`directory
+   ├── reload ── rescan
+   ├── list ──── names + sizes
+   └── source ── raw .nika.yaml`}</pre>
+</div>
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
+    Submit a registered workflow.
+  </Card>
+  <Card title="Workflow concepts" icon="file-code" href="/concepts/workflows">
+    Keep the YAML as the language authority.
+  </Card>
+  <Card title="Schema reference" icon="brackets-curly" href="/reference/schema">
+    Validate the source in editors.
+  </Card>
+  <Card title="Examples" icon="rocket" href="/examples/overview">
+    Browse the projected workflow corpus.
+  </Card>
+</CardGroup>

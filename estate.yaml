@@ -18,11 +18,11 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 166
+  classified_files: 199
   file_rows: 32
   pattern_rows: 6
   by_class:
-    authored: 161
+    authored: 194
     authored-pin: 1
     generated: 2
     pinned-copy: 2
@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: 68b035fce1a5bcc0cfe5c4356bf28de702cfe8133b0558227ca74f23add58a12
+  sha256: 445fe8f4d8169614ec8abba0c749bfe0c0f60ec698c33081cc5e9feea962dd0c
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -78,12 +78,12 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: 85c9928827fdfa3e61c2e8e5d874f4fb51bcbe38f56df8a4cc7be4194b8addd0
+  sha256: 69ee658d2a0151addf17712fd868114a304e6710fcd00a13da4644c18756085c
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
   class: authored
-  sha256: b9252a1956bbd731ae846d6494cff0e44fe6260cf49449da627613705da46a5a
+  sha256: 800c58f30f02849dd36e167ba92ba4810f89464610dd85a80e3a4d1a11f38c4a
   evidence: "hand-written polish layer · its own header: 'colors + fonts live in docs.json · pinned to … nika-spec design/tokens.yaml … this file = the polish layer'"
 - path: "images/posters/chat-to-workflow.png"
   class: authored
@@ -157,7 +157,7 @@ files:
   evidence: "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)"
 - path: "scripts/oracle-sweep.py"
   class: authored
-  sha256: 64ed6e7781f425a691123b2806d1ad57b20a1ae058111667e5c4eec160d756e5
+  sha256: b4db967125aba14474b8b6e001e88f17a89d33061642064b6ac2fc34ad722d47
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/teach-parity.py"
   class: authored
@@ -174,7 +174,7 @@ files:
     - "supernovae-st/nika-spec canon.yaml (the Nika language single source of truth)"
 - path: "snippets/_ecosystem.mdx"
   class: authored
-  sha256: 4cbe30373a1f6ccbd9d6bd21a1f58e15ff7ed0ee7f5c393d78d47ae787d0ca88
+  sha256: 541d721284fc12d7116986965a40ee02c225664fc44546fa1e253a72843daa95
   evidence: "its own header: 'Edit HERE, never per-page' — the one hand-edited snippet (a single-source link mesh, not a projection)"
 - path: "snippets/_showcase.mdx"
   class: generated
@@ -193,8 +193,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 109
-  aggregate_sha256: a5fed2a920c88e00f27f40f13687d5057f4ae2f323803f1f3f02861069be5fb2
+  match_count: 142
+  aggregate_sha256: 524cab205c4c6946fd7e90ea39955fba849a3af64d9a2bf396c2b77cad491045
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

@@ -1,0 +1,98 @@
+---
+title: "Deployment topologies"
+description: "Choose LocalNika, the resident firer, an OS bridge, model serve or the preview remote client by job."
+sidebarTitle: "Deployment topologies"
+icon: "sitemap"
+---
+
+import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+
+The word “server” hides several boundaries. Start with who initiates work and
+what protocol crosses the process edge.
+
+## Decision table
+
+| Need | Use | Status | Boundary |
+|---|---|---|---|
+| Product code starts a workflow | `LocalNika` | Live | argv + NDJSON to the local binary |
+| The project clock starts work | `nika serve` | Live | `nika.yaml arm[]` to the resident firer |
+| The host scheduler starts work | `nika arm --emit` | Live | launchd or systemd to `nika arm fire` |
+| The engine needs local inference | `nika model serve` | Live | Loopback OpenAI-compatible model API |
+| An application needs remote workflow jobs | Root `Nika` client | Preview | Intended HTTP + SSE workflow API |
+
+## Request-driven application
+
+<LocalContract />
+
+```ts
+const handle = nika.run('workflows/support.nika.yaml', {
+  vars: { ticket: request.id },
+  signal: request.signal,
+})
+
+for await (const event of handle) render(event)
+```
+
+The application owns the user experience and cancellation. The engine owns
+workflow admission, execution and the receipt.
+
+## Clock-driven project
+
+```text
+container / bare VM ── nika serve ──────┐
+                                         ├── one firer ── run + ledger
+managed host ───────── launchd / systemd ┘
+```
+
+Both lanes consume the same `arm:` registry. Choose based on who should own
+process lifetime and wakeups, not because one lane changes workflow semantics.
+
+## Inference provider
+
+```sh
+nika model serve --model Qwen/Qwen3-0.6B-GGUF --port 8712
+```
+
+This process serves a model on loopback for the engine to call. It does not
+accept Nika workflow jobs.
+
+## Remote workflow horizon
+
+<RemoteContract />
+
+The root SDK already types jobs, workflow listing, SSE, artifacts and webhook
+verification. The reference engine does not ship the compatible workflow HTTP
+service today. `nika serve` and `nika model serve` are not substitutes.
+
+## Architecture view
+
+<div className="sdk-flight">
+  <span>PROCESS TOPOLOGY · NAME THE EDGE</span>
+  <pre tabIndex={0}>{`application ── LocalNika ── argv/NDJSON ── nika run       [ LIVE ]
+
+nika.yaml ──── nika serve / OS ─────────── arm fire       [ LIVE ]
+
+nika engine ── OpenAI-compatible loopback ─ model serve    [ LIVE ]
+
+application ── Nika client ── HTTP/SSE ─── workflow API   [ PREVIEW ]`}</pre>
+</div>
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Server surfaces" icon="server" href="/sdk/operations/server-surfaces">
+    The compact truth table for similarly named commands.
+  </Card>
+  <Card title="Resident server" icon="clock" href="/sdk/operations/resident-server">
+    Run the stable project clock.
+  </Card>
+  <Card title="Remote client" icon="satellite-dish" href="/sdk/remote/client">
+    Explore the preview HTTP contract.
+  </Card>
+  <Card title="Project setup" icon="folder-tree" href="/sdk/start/project-setup">
+    Place control, intent, application code and state.
+  </Card>
+</CardGroup>

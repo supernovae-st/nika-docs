@@ -1,0 +1,76 @@
+---
+title: "Remote client"
+description: "Configure the preview HTTP client with bounded retries, concurrency, polling and logging."
+sidebarTitle: "Remote client"
+icon: "satellite-dish"
+---
+
+import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+<RemoteContract />
+
+The root `Nika` class describes the intended application-to-service boundary.
+It is useful for adapters, fixtures and interface work today.
+
+## Construct from explicit values
+
+```ts
+import { Nika } from '@supernovae-st/nika-client'
+
+const nika = new Nika({
+  url: process.env.NIKA_URL!,
+  token: process.env.NIKA_TOKEN!,
+  timeout: 30_000,
+  retries: 2,
+  concurrency: 24,
+})
+```
+
+The constructor requires an HTTP or HTTPS origin and bearer token. It removes
+one trailing slash and uses native `fetch` by default.
+
+## Or read the environment
+
+```ts
+const nika = Nika.fromEnv({
+  timeout: 15_000,
+  concurrency: 8,
+})
+```
+
+`fromEnv()` reads `NIKA_URL` and `NIKA_TOKEN`, then applies overrides. Missing
+required values fail at construction.
+
+## Transport policy
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>HTTP CLIENT · BOUNDED BY DEFAULT</span>
+  <pre tabIndex={0}>{`request
+├── timeout
+├── concurrency semaphore
+├── retry: 429 + 5xx only
+└── response
+    ├── JSON resource
+    └── typed NikaError`}</pre>
+</div>
+
+Retries use exponential backoff and honor bounded `Retry-After`. Ordinary 4xx
+responses are not retried. Inject `fetch` for middleware or test fixtures,
+and use `logger` for metadata without recording authorization values.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
+    Submit, poll and cancel remote work.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/sdk/reference/configuration">
+    Every option and default.
+  </Card>
+  <Card title="Use LocalNika today" icon="terminal" href="/sdk/local/client">
+    The production path against the released binary.
+  </Card>
+  <Card title="Server surfaces" icon="server" href="/sdk/operations/server-surfaces">
+    Keep three server-shaped commands separate.
+  </Card>
+</CardGroup>

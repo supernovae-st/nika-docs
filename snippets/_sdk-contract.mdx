@@ -1,0 +1,53 @@
+{/* _sdk-contract.mdx: the SDK horizon and cross-link mesh, one source.
+    Every SDK page imports the live/preview contract from here. Edit HERE,
+    never per-page, when a compatible workflow HTTP service ships. */}
+
+export const SDK = {
+  package: "@supernovae-st/nika-client",
+  localModule: "@supernovae-st/nika-client/local",
+  source: "https://github.com/supernovae-st/nika-client",
+  site: "https://nika.sh/sdk",
+}
+
+export const LocalContract = () => (
+  <Tip>
+    <strong>Live surface.</strong> <code>@supernovae-st/nika-client/local</code>
+    drives the released <code>nika</code> binary through its versioned machine
+    contracts. It is the production path today.
+  </Tip>
+)
+
+export const RemoteContract = () => (
+  <Warning>
+    <strong>Preview surface.</strong> The root package types the intended
+    workflow HTTP and SSE API. The reference engine does not ship a compatible
+    workflow service today. Do not point it at the stable resident firer or
+    <code>nika model serve</code>.
+  </Warning>
+)
+
+export const SdkDoors = () => (
+  <CardGroup cols={3}>
+    <Card title="Start" icon="play" href="/sdk/start/quickstart">
+      Install both halves and complete one typed run.
+    </Card>
+    <Card title="Project" icon="folder-tree" href="/sdk/project/nika-yaml">
+      nika.yaml, arm policy, precedence and runtime state.
+    </Card>
+    <Card title="Local API" icon="terminal" href="/sdk/local/client">
+      Check, plan, run, test and verify through the released binary.
+    </Card>
+    <Card title="Runtime" icon="wave-pulse" href="/sdk/runtime/events">
+      Events, typed failures and durable receipts.
+    </Card>
+    <Card title="Remote API" icon="satellite-dish" href="/sdk/remote/client">
+      Preview jobs, SSE, artifacts, workflows and webhooks.
+    </Card>
+    <Card title="Operations" icon="shield-halved" href="/sdk/operations/ci">
+      Admission, resident serving, OS bridges and security.
+    </Card>
+    <Card title="Reference" icon="brackets-curly" href="/sdk/reference/methods">
+      Constructors, methods and exported types.
+    </Card>
+  </CardGroup>
+)

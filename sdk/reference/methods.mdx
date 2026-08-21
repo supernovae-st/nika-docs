@@ -1,0 +1,74 @@
+---
+title: "SDK method index"
+description: "Every LocalNika, jobs, workflows, health and webhook method in one compact reference."
+sidebarTitle: "Method index"
+icon: "list"
+---
+
+import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+## LocalNika
+
+<LocalContract />
+
+| Method | Returns | Machine twin |
+|---|---|---|
+| `version()` | `Promise<string>` | `nika --version` |
+| `check(file, options?)` | `Promise<LocalCheckReport>` | `nika check --json` |
+| `dryRunPlan(file)` | `Promise<LocalPlan>` | `nika run --dry-run --json` |
+| `run(file, options?)` | `RunHandle` | `nika run --json` |
+| `runToEnd(file, options?)` | `Promise<LocalRunOutcome>` | same stream, buffered |
+| `test(file, options?)` | `Promise<GoldenVerdict>` | `nika test` |
+| `traceVerify(path?)` | `Promise<TraceVerdict>` | `nika trace verify` |
+
+## Jobs
+
+<RemoteContract />
+
+| Method | Returns |
+|---|---|
+| `submit(workflow, inputs?, options?)` | `Promise<RunResponse>` |
+| `status(jobId)` | `Promise<NikaJob>` |
+| `cancel(jobId)` | `Promise<CancelResponse>` |
+| `run(workflow, inputs?, options?)` | `Promise<NikaJob>` |
+| `stream(jobId, options?)` | `AsyncIterable<NikaEvent>` |
+| `artifacts(jobId)` | `Promise<NikaArtifact[]>` |
+| `artifact(jobId, name)` | `Promise<string>` |
+| `artifactJson<T>(jobId, name)` | `Promise<T>` |
+| `artifactBinary(jobId, name)` | `Promise<Uint8Array>` |
+| `artifactStream(jobId, name)` | `Promise<ReadableStream<Uint8Array>>` |
+| `runAndCollect(workflow, inputs?, options?)` | `Promise<Record<string, unknown>>` |
+
+## Workflows
+
+| Method | Returns |
+|---|---|
+| `list()` | `Promise<WorkflowInfo[]>` |
+| `listPage(options?)` | `Promise<ListWorkflowsResponse>` |
+| `reload()` | `Promise<WorkflowInfo[]>` |
+| `source(name)` | `Promise<string>` |
+
+## System
+
+| Method | Returns |
+|---|---|
+| `nika.health()` | `Promise<NikaHealth>` |
+| `Nika.fromEnv(overrides?)` | `Nika` |
+| `Nika.verifyWebhook(body, signature, secret, tolerance?)` | `Promise<boolean>` |
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="sliders" href="/sdk/reference/configuration">
+    Constructor and transport defaults.
+  </Card>
+  <Card title="Types" icon="brackets-curly" href="/sdk/reference/types">
+    Expand every return shape.
+  </Card>
+  <Card title="Source" icon="github" href="https://github.com/supernovae-st/nika-client/tree/main/src">
+    Read the implementation.
+  </Card>
+  <Card title="SDK map" icon="diagram-project" href="https://nika.sh/sdk/reference">
+    See the visual reference system.
+  </Card>
+</CardGroup>

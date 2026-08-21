@@ -1,0 +1,111 @@
+---
+title: "TypeScript quickstart"
+description: "Install the client, audit a real workflow and complete one typed local run."
+sidebarTitle: "Quickstart"
+icon: "play"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<LocalContract />
+<ProjectContract />
+
+This path uses the released engine. No server, token or daemon is required.
+
+## 1. Install
+
+```sh
+brew install supernovae-st/tap/nika
+npm install @supernovae-st/nika-client
+nika init --project-file
+```
+
+Confirm that Node can see the same binary you use in the terminal:
+
+```sh
+nika --version
+npm ls @supernovae-st/nika-client
+```
+
+## 2. Take a proven workflow
+
+Start from the engine's teaching corpus instead of inventing a second example
+dialect:
+
+```sh
+nika try 01-hello
+```
+
+To keep the file in your application, copy the
+[first workflow](https://nika.sh/workflows/path/01-hello) to
+`workflows/hello.nika.yaml`.
+
+## 3. Audit, then run
+
+```ts
+import { LocalNika } from '@supernovae-st/nika-client/local'
+
+const nika = new LocalNika({ cwd: process.cwd() })
+const file = 'workflows/hello.nika.yaml'
+const report = await nika.check(file)
+
+if (!report.clean || report.cost?.has_unbounded) {
+  console.error(report.findings)
+  process.exit(2)
+}
+
+const run = await nika.runToEnd(file, {
+  model: 'mock/echo',
+  maxCostUsd: 0,
+})
+
+console.log({
+  ok: run.ok,
+  exitCode: run.exitCode,
+  events: run.events.length,
+})
+```
+
+Run it with your normal TypeScript runner:
+
+```sh
+npx tsx run.ts
+```
+
+## What just happened
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>LOCAL RUN · SETTLED CONTRACT</span>
+  <pre tabIndex={0}>{`workflow file
+    │
+    ├── check --json ── findings · permits · cost · waves
+    │          │ clean
+    │          ▼
+    └── run --json ──── NDJSON events ── outcome
+                              └────────── trace`}</pre>
+</div>
+
+`check()` returned the engine audit without spending. The engine discovered
+`nika.yaml` from `cwd`. `runToEnd()` used the same binary, buffered its journal
+and returned the locked exit contract.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Project setup" icon="folder-tree" href="/sdk/start/project-setup">
+    Place nika.yaml, workflows, application code and runtime state deliberately.
+  </Card>
+  <Card title="Project file" icon="file-code" href="/sdk/project/nika-yaml">
+    Read the released reader profiles and discovery law.
+  </Card>
+  <Card title="Check and plan" icon="list-check" href="/sdk/local/check-and-plan">
+    Turn the full report into an admission policy.
+  </Card>
+  <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">
+    Stream progress and pass caller-owned cancellation.
+  </Card>
+  <Card title="SDK map" icon="diagram-project" href="https://nika.sh/sdk">
+    See the complete application documentation graph.
+  </Card>
+</CardGroup>

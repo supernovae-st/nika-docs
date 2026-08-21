@@ -1,0 +1,81 @@
+---
+title: "Run events"
+description: "Consume the local NDJSON journal as an additive event stream and settle on the outcome."
+sidebarTitle: "Run events"
+icon: "wave-pulse"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+
+<LocalContract />
+
+The local event stream is the engine journal in motion. Every yielded object
+has a `kind` discriminator and may carry fields added by newer engines.
+
+## Build a tolerant reducer
+
+```ts
+type ViewState = {
+  active: Set<string>
+  settled: Set<string>
+}
+
+function reduce(state: ViewState, event: { kind: string; [key: string]: unknown }) {
+  switch (event.kind) {
+    case 'task_started':
+      state.active.add(String(event.task_id))
+      break
+    case 'task_completed':
+      state.active.delete(String(event.task_id))
+      state.settled.add(String(event.task_id))
+      break
+    default:
+      telemetry.debug('unrendered event', event.kind)
+  }
+}
+```
+
+Unknown kinds should remain visible to diagnostics without crashing an older
+interface. Existing meanings stay stable; the vocabulary can grow.
+
+## Keep settlement separate
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>RUN JOURNAL · TWO CONSUMERS</span>
+  <pre tabIndex={0}>{`stdout NDJSON
+      │
+      ├── event reducer ── live UI
+      │
+      └── outcome promise ── exit contract
+
+disk trace ─────────────── durable replay`}</pre>
+</div>
+
+The UI can miss a frame, remount or ignore a new event. The outcome remains
+the authority for completion and exit code.
+
+## Backpressure and cleanup
+
+`for await` applies natural backpressure to journal processing. Keep each
+event handler small. Send expensive storage or analytics work through a
+bounded queue so stdout cannot remain unread indefinitely.
+
+Always clear UI state in `finally` and use the caller's `AbortSignal` to end
+the child process when its request goes away.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">
+    Open the stream and await the outcome.
+  </Card>
+  <Card title="Errors and exits" icon="triangle-exclamation" href="/sdk/runtime/errors">
+    Keep run failure distinct from transport failure.
+  </Card>
+  <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">
+    Move from transient UI to durable proof.
+  </Card>
+  <Card title="Event concepts" icon="signal" href="/concepts/events">
+    Read the engine event vocabulary.
+  </Card>
+</CardGroup>

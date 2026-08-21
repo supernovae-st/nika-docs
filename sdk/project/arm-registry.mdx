@@ -1,0 +1,111 @@
+---
+title: "Arm registry"
+description: "Declare project beats with explicit cadence, spend, missed-run, overlap and suspension policy."
+sidebarTitle: "Arm registry"
+icon: "clock"
+---
+
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+
+`arm:` is the team registry of workflows the project proposes to fire. The
+file proposes. A machine edge disposes. Reading the file never schedules work.
+
+## One beat, complete
+
+```yaml
+nika: v1
+
+arm:
+  - workflow: workflows/daily-brief.nika.yaml
+    cadence: "TZ=Europe/Paris 30 7 * * 1-5"
+    où: local
+    plafond: 0.20
+    manqué: rattraper-une-fois
+    chevauchement: sauter
+    après_saut: prochain-créneau
+    par: operations
+```
+
+| Key | Requirement | Contract |
+|---|---|---|
+| `workflow` | Required | Repo-relative `*.nika.yaml` path |
+| `cadence` | Required | Readable schedule, TZ-prefixed cron, or `on-webhook` |
+| `plafond` | Required | Positive per-tick USD ceiling |
+| `manqué` | Required | `rattraper` · `rattraper-une-fois` · `sauter` |
+| `où` | Optional | `local` by default · `cloud` as the declared remote locus |
+| `chevauchement` | Optional | `sauter` by default · `file` for serialized overlap |
+| `après_saut` | Optional | What follows an overlap skip |
+| `actif` · `raison` · `jusqu_au` | Together | Auditable suspension state |
+| `tolérance` · `décalage` | Optional | Declared tolerance and deterministic jitter lanes |
+| `par` | Optional | Declared human, not machine authorization |
+
+`plafond` and `manqué` have no default. Choosing them implicitly would choose
+who pays or whether missed work is duplicated or lost.
+
+## Read before firing
+
+```sh
+nika arm
+```
+
+The report names each armed or suspended beat, its next slots, and whether a
+sidecar proves a previous fire. It ends by stating that nothing was scheduled.
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>DECLARATION IS NOT PROOF</span>
+  <pre tabIndex={0}>{`nika.yaml row ─────── DÉCLARÉ
+       │
+       ├── fire claim
+       ├── workflow run
+       └── receipt ────────── PROUVÉ
+
+project intent ≠ machine evidence`}</pre>
+</div>
+
+## Every door ends at one firer
+
+```text
+nika arm fire <label> ─────┐
+launchd / systemd unit ────┼── due window · miss · overlap · ceiling · ledger
+nika serve ────────────────┘
+```
+
+This convergence matters. Changing how the project wakes up does not change
+the firing law.
+
+## Suspend with a reason
+
+```yaml
+nika: v1
+
+arm:
+  - workflow: workflows/daily-brief.nika.yaml
+    cadence: "TZ=Europe/Paris 30 7 * * 1-5"
+    plafond: 0.20
+    manqué: sauter
+    actif: false
+    raison: maintenance fournisseur
+    jusqu_au: 2026-09-01
+```
+
+Deleting a row leaves no durable explanation. The suspension triple states
+that the beat is inactive, why, and until when.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Resident server" icon="server" href="/sdk/operations/resident-server">
+    Keep the project clock alive without turning it into an HTTP API.
+  </Card>
+  <Card title="OS schedulers" icon="calendar" href="/sdk/operations/os-schedulers">
+    Emit launchd or systemd user units.
+  </Card>
+  <Card title="Runtime state" icon="database" href="/sdk/project/runtime-state">
+    Read firing ledgers, watermarks and run traces.
+  </Card>
+  <Card title="Full arm reference" icon="book" href="/reference/arm">
+    Every policy, command, exit and sidecar file.
+  </Card>
+</CardGroup>

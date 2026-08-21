@@ -1,0 +1,98 @@
+---
+title: "Check and plan"
+description: "Read findings, cost, permits, requirements and wave shape before a run starts."
+sidebarTitle: "Check and plan"
+icon: "list-check"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+
+<LocalContract />
+
+Audit and planning are read-only. They let application policy decide whether
+a clean workflow belongs in this environment before the engine starts work.
+
+## Check returns a report
+
+```ts
+const report = await nika.check('workflows/release.nika.yaml', {
+  model: 'mock/echo',
+  nativeStrict: true,
+})
+
+if (!report.clean) {
+  for (const finding of report.findings) {
+    console.error(finding.code, finding.message)
+  }
+}
+```
+
+Findings do not throw. A spawn failure does. This distinction lets an editor
+or CI job render the whole refusal in one pass.
+
+## Read the full admission shape
+
+| Field | Meaning |
+|---|---|
+| `clean` | No blocking finding |
+| `findings` | Typed diagnostics with code, severity and optional task |
+| `cost` | Static minimum path cost plus `has_unbounded` |
+| `permits` | Declared and needed authority |
+| `requirements` | Models, secret names and environment needs |
+| `waves` | Planned concurrency shape |
+| `warnings` | Driver notes such as an unknown report version |
+| `raw` | Full engine payload, untouched |
+
+<Warning>
+  `min_path_total_usd` is a floor, not a ceiling. A task with `usd: null` is
+  unpriced, not free. Read `has_unbounded` beside the number.
+</Warning>
+
+## Ask for the machine plan
+
+```ts
+if (report.clean) {
+  const plan = await nika.dryRunPlan('workflows/release.nika.yaml')
+
+  console.log({
+    tasks: plan.tasks,
+    waves: plan.waves,
+    permits: plan.permits,
+    requirements: plan.requirements,
+  })
+}
+```
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>ADMISSION · ZERO EXECUTION</span>
+  <pre tabIndex={0}>{`check report
+    │ clean
+    ▼
+plan_version
+├── tasks + verbs
+├── waves
+├── permits
+├── requirements
+└── cost floor + unbounded flag`}</pre>
+</div>
+
+An older binary that predates the machine dry-run receives a teaching error
+that names the required engine floor. A dirty file rejects with its check
+report attached.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">
+    Execute only after admission.
+  </Card>
+  <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
+    Turn permits and cost into application policy.
+  </Card>
+  <Card title="Machine surfaces" icon="plug" href="/reference/machine-surfaces">
+    Read the version-envelope law.
+  </Card>
+  <Card title="Cost honesty" icon="scale-balanced" href="/guides/cost-honesty">
+    Understand floors, ranges and unpriced work.
+  </Card>
+</CardGroup>

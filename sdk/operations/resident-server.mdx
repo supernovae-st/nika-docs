@@ -1,0 +1,108 @@
+---
+title: "Resident server"
+description: "Operate the stable nika serve firer on a container, VM or bare server."
+sidebarTitle: "Resident server"
+icon: "server"
+---
+
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+
+`nika serve` is the released resident firer. It reads the `arm:` registry from
+`nika.yaml`, waits on the wall clock and ends each due beat at the same firing
+law as `nika arm fire`.
+
+<Warning>
+  `nika serve` is not an HTTP API. It accepts no SDK job request and exposes no
+  SSE endpoint. Do not point the root `Nika` client at it.
+</Warning>
+
+## Rehearse each operating mode
+
+```sh
+nika serve --dry
+nika serve --once
+nika serve
+```
+
+| Mode | Behavior |
+|---|---|
+| `--dry` | Preview calendar-due beats, run and record nothing |
+| `--once` | Perform one due sweep, then exit |
+| no mode | Remain resident and wait for the next slot |
+
+`--dry` is intentionally narrower than a real fire. It does not take the beat
+lock or apply the complete missed-run, overlap, cost and execution policy.
+
+## Reload without losing the last good registry
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>HOT RELOAD · INVALID EDITS DO NOT REPLACE VALID POLICY</span>
+  <pre tabIndex={0}>{`nika.yaml changes
+       │
+       ├── parses + validates ── replace registry
+       │
+       └── refuses ───────────── report error
+                                   └── keep last good registry`}</pre>
+</div>
+
+The server retries a refused edit on a later tick. This keeps a typo visible
+without silently replacing valid policy with an empty schedule.
+
+## Read process and beat outcomes separately
+
+Each beat prints one decision line and appends project state. A completed
+`--once` sweep exits clean even when an individual workflow failed or paused,
+so supervision must read the beat lines and ledgers, not only the outer process
+exit.
+
+```text
+resident process
+├── stdout line per beat
+├── .nika/arm/<label>/history.ndjson
+└── .nika/traces/<run>.ndjson
+```
+
+## Delivery and shutdown
+
+Ctrl-C and SIGTERM stop the resident loop at its signal boundaries. The ledger
+uses durable claims and receipts, which yields at-least-once delivery:
+
+```text
+claim appended ── workflow starts ── receipt appended
+       │                  │
+       └── crash here ────┴── visible unmatched claim
+```
+
+Exactly-once is never promised. Make the workflow's external effects
+idempotent when replay would otherwise duplicate harm.
+
+## Deployment checklist
+
+- Set a stable project `cwd` containing `nika.yaml`.
+- Install an explicit `nika` binary path.
+- Protect provider keys outside project source.
+- Persist `.nika/traces/` and `.nika/arm/` according to policy.
+- Capture stdout decision lines.
+- Send SIGTERM and allow the active firing boundary to settle.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Arm registry" icon="clock" href="/sdk/project/arm-registry">
+    The schedule and policy this process consumes.
+  </Card>
+  <Card title="OS schedulers" icon="calendar" href="/sdk/operations/os-schedulers">
+    Let launchd or systemd own wakeups instead.
+  </Card>
+  <Card title="Runtime state" icon="database" href="/sdk/project/runtime-state">
+    Persist the evidence behind each decision line.
+  </Card>
+  <Card title="Production runbook" icon="clipboard-check" href="/sdk/operations/server-runbook">
+    Boot, supervise, probe and investigate the process.
+  </Card>
+  <Card title="Deployment topologies" icon="sitemap" href="/sdk/operations/deployment-topologies">
+    Choose the right process boundary.
+  </Card>
+</CardGroup>

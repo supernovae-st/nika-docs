@@ -1,0 +1,84 @@
+---
+title: "Jobs"
+description: "Submit, poll, stream, cancel and settle remote workflow jobs through the preview namespace."
+sidebarTitle: "Jobs"
+icon: "list-check"
+---
+
+import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+<RemoteContract />
+
+`nika.jobs` owns the remote job lifecycle.
+
+## Submit and keep the identity
+
+```ts
+const { job_id } = await nika.jobs.submit(
+  'release.nika.yaml',
+  { channel: 'stable' },
+)
+
+await database.runs.insert({ jobId: job_id })
+```
+
+Persist `job_id` before opening a stream. Polling, reconnects, cancellation,
+artifacts and support tools all share it.
+
+## Choose waiting or streaming
+
+<Tabs>
+  <Tab title="Poll to terminal">
+    ```ts
+    const job = await nika.jobs.run('release.nika.yaml')
+    console.log(job.status, job.exit_code)
+    ```
+  </Tab>
+  <Tab title="Stream events">
+    ```ts
+    const { job_id } = await nika.jobs.submit('release.nika.yaml')
+    for await (const event of nika.jobs.stream(job_id)) {
+      render(event)
+    }
+    ```
+  </Tab>
+</Tabs>
+
+`run()` applies the configured poll interval, timeout and backoff. `stream()`
+uses SSE and ends only on a terminal event.
+
+## Cancel work, not just the request
+
+```ts
+await nika.jobs.cancel(job_id)
+const final = await nika.jobs.status(job_id)
+```
+
+Aborting a fetch stops the caller waiting. `jobs.cancel()` asks the service to
+cancel the job. Product interfaces often need both actions.
+
+## Lifecycle
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>REMOTE JOB · PREVIEW STATE MACHINE</span>
+  <pre tabIndex={0}>{`pending ──→ running ──→ completed
+   │           ├────────→ failed
+   └───────────└────────→ cancelled`}</pre>
+</div>
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="SSE streaming" icon="wave-pulse" href="/sdk/remote/streaming">
+    Reconnect without inventing terminal state.
+  </Card>
+  <Card title="Artifacts" icon="box-archive" href="/sdk/remote/artifacts">
+    Collect the job's outputs.
+  </Card>
+  <Card title="Errors" icon="triangle-exclamation" href="/sdk/runtime/errors">
+    Handle job failure and cancellation separately.
+  </Card>
+  <Card title="Method index" icon="list" href="/sdk/reference/methods">
+    Scan the complete namespace.
+  </Card>
+</CardGroup>

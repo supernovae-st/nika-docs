@@ -1,0 +1,79 @@
+---
+title: "Errors and exits"
+description: "Separate file findings, workflow failure, environment failure, cancellation and remote transport errors."
+sidebarTitle: "Errors and exits"
+icon: "triangle-exclamation"
+---
+
+import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+## Local failure model
+
+<LocalContract />
+
+Local calls use three channels:
+
+| Channel | Example | Handle it as |
+|---|---|---|
+| Resolved report | dirty `check()` | show every finding |
+| Resolved outcome | non-zero local run | branch on `exitCode` |
+| Rejected promise | binary cannot spawn | environment exception |
+
+```ts
+const report = await local.check(file)
+if (!report.clean) {
+  return { accepted: false, findings: report.findings }
+}
+
+const outcome = await local.runToEnd(file)
+if (!outcome.ok) {
+  return { accepted: true, exitCode: outcome.exitCode }
+}
+```
+
+Do not catch a dirty file as if the engine disappeared.
+
+## Remote hierarchy
+
+<RemoteContract />
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>REMOTE ERROR TREE · PREVIEW</span>
+  <pre tabIndex={0}>{`NikaError
+├── NikaAPIError
+├── NikaConnectionError
+├── NikaTimeoutError
+└── NikaJobError
+    └── NikaJobCancelledError`}</pre>
+</div>
+
+Catch from specific to general:
+
+```ts
+try {
+  return await nika.jobs.run('release.nika.yaml')
+} catch (error) {
+  if (error instanceof NikaJobCancelledError) return { state: 'cancelled' }
+  if (error instanceof NikaJobError) return { state: 'failed', exit: error.exitCode }
+  if (error instanceof NikaTimeoutError) return { state: 'timed-out' }
+  throw error
+}
+```
+
+## Diagnostics belong to the owning layer
+
+- Language findings link to the [error register](/reference/error-codes).
+- Engine exits keep the [machine surface contract](/reference/machine-surfaces).
+- Remote API errors carry status, response body and optional request id.
+- Product errors should wrap these facts, not replace them.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Type index" icon="brackets-curly" href="/sdk/reference/types">
+    Scan every exported result and error type.
+  </Card>
+  <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
+    Refuse before execution where possible.
+  </Card>
+</CardGroup>

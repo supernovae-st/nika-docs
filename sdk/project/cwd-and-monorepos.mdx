@@ -1,0 +1,119 @@
+---
+title: "CWD and monorepos"
+description: "Align project discovery, workflow paths, direct-run traces and armed state deliberately."
+sidebarTitle: "CWD and monorepos"
+icon: "folder-tree"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+<LocalContract />
+
+The working directory is not a convenience string. It selects relative
+workflow paths, starts project discovery and roots direct-run state.
+
+## Two roots can exist
+
+Project discovery walks from `cwd` toward its ancestors and stops at the first
+`nika.yaml`. Direct-run trace storage does not walk upward. It stays under the
+process room.
+
+<div className="sdk-flight">
+  <span>ROOT MAP · DISCOVERY WALKS, STORAGE STAYS</span>
+  <pre tabIndex={0}>{`/repo/apps/api/                 LocalNika cwd
+├── .nika/traces/              direct-run receipts
+└── ↑ discover
+    /repo/nika.yaml             governing project
+    /repo/.nika/arm/            firing ledger
+    /repo/.nika/traces/         arm / serve run receipts`}</pre>
+</div>
+
+The arm and serve paths enter the discovered project root before they fire.
+Their sidecar and triggered-run traces therefore share the project `.nika/`
+directory. A direct `nika run` or `LocalNika` call writes under its own `cwd`.
+
+## Recommended: align the process room
+
+Set `LocalNika.cwd` to the project root when one policy boundary and one
+evidence well are the goal.
+
+```ts
+// src/runtime/nika.ts
+import { fileURLToPath } from 'node:url'
+import { LocalNika } from '@supernovae-st/nika-client/local'
+
+const projectRoot = fileURLToPath(new URL('../../', import.meta.url))
+
+export const nika = new LocalNika({ cwd: projectRoot })
+
+await nika.runToEnd('workflows/release.nika.yaml')
+```
+
+That one choice aligns:
+
+- relative workflow arguments;
+- upward `nika.yaml` discovery;
+- direct-run `.nika/traces/`;
+- arm and serve `.nika/arm/` plus triggered-run traces.
+
+## Nested project files are real boundaries
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>MONOREPO · FIRST PROJECT FILE WINS</span>
+  <pre tabIndex={0}>{`/repo/nika.yaml                  platform project
+└── apps/
+    ├── api/nika.yaml           API project boundary
+    │   └── workflows/
+    └── worker/                 inherits /repo/nika.yaml`}</pre>
+</div>
+
+A nested `nika.yaml` is useful when a service needs a separate ceiling or
+project profile. It is not a path shortcut. Every process below it now sees a
+different control plane.
+
+<Warning>
+  Review a nested project file like a package boundary. Adding one changes
+  policy discovery for every CLI and SDK process started below that directory.
+</Warning>
+
+## Probe the production room
+
+Run checks from the exact directory the service manager or container will use:
+
+```sh
+cd /srv/nika/project
+nika arm
+nika trace ls
+nika serve --dry
+```
+
+A clean report from the repository root does not prove a nested service uses
+the same project file or reads the same trace store.
+
+## Path contract by operation
+
+| Operation | Project file | Workflow argument | Generated state |
+|---|---|---|---|
+| Direct `nika run` | First ancestor from `cwd` | Relative to `cwd` | `cwd/.nika/traces/` |
+| `LocalNika.run()` | First ancestor from constructor `cwd` | Relative to constructor `cwd` | `cwd/.nika/traces/` |
+| `nika arm fire` | First ancestor from process `cwd` | Relative to discovered project | `project/.nika/arm/` and `project/.nika/traces/` |
+| `nika serve` | First ancestor at startup | Relative to discovered project | `project/.nika/arm/` and `project/.nika/traces/` |
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Project setup" icon="folder-tree" href="/sdk/start/project-setup">
+    Build the root-aligned directory layout.
+  </Card>
+  <Card title="Runtime state" icon="database" href="/sdk/project/runtime-state">
+    Persist the two evidence lanes deliberately.
+  </Card>
+  <Card title="SDK configuration" icon="sliders" href="/sdk/reference/configuration">
+    Constructor and call-level precedence.
+  </Card>
+  <Card title="Resident server" icon="server" href="/sdk/operations/resident-server">
+    Operate the project-rooted firer.
+  </Card>
+</CardGroup>

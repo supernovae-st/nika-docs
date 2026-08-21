@@ -1,0 +1,106 @@
+---
+title: "Project runtime state"
+description: "Persist run traces, firing ledgers, receipts and cadence watermarks deliberately."
+sidebarTitle: "Runtime state"
+icon: "database"
+---
+
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+
+Source describes intent. `.nika/` records what the machine did. A production
+deployment should choose storage and retention for that distinction before it
+runs its first armed beat.
+
+## State map
+
+The unified tree below assumes the recommended setup: direct processes use the
+project root as `cwd`.
+
+<div className="sdk-flight">
+  <span>PROJECT STATE · TWO JOURNALS, TWO QUESTIONS</span>
+  <pre tabIndex={0}>{`<project>/.nika/
+├── traces/
+│   └── <run>.ndjson             what happened inside a workflow run?
+└── arm/
+    └── <label>/                 what happened at the project clock?
+        ├── history.ndjson       claims · skips · receipts
+        ├── last.json            latest slot-bearing decision
+        ├── watermark            latest recorded slot
+        └── ledger.lock          transient append lock`}</pre>
+</div>
+
+## Verify a run trace through the SDK
+
+```ts
+const verdict = await nika.traceVerify()
+
+if (!verdict.intact) {
+  throw new Error(verdict.output)
+}
+
+console.log(verdict.head, verdict.exitCode)
+```
+
+The SDK verifies the run journal. `nika arm` reads the arming sidecar. They are
+related evidence, but they are not interchangeable. A direct SDK run stores
+its journal under `cwd/.nika/traces`; arm and serve enter the project root
+before the workflow run starts.
+
+## Persist the clock on servers
+
+A resident server or OS unit needs a durable project state path. If a
+container discards `.nika/` on restart, it also discards recent traces and the
+watermark used to reason about missed slots.
+
+<Warning>
+  The firing contract is at-least-once. A crash after a durable claim and
+  before its receipt leaves an unmatched claim in `history.ndjson`. Keep
+  external effects idempotent when a repeated fire must be harmless.
+</Warning>
+
+## Source-control boundary
+
+```text .gitignore
+.nika/traces/
+.nika/arm/
+.env
+```
+
+Ignoring live state does not mean deleting it on deployment. Mount, back up or
+export it according to the workload's evidence and retention policy.
+
+## Evidence lifecycle
+
+```text
+project source ── review ── deploy
+                               │
+                               ├── arm claim
+                               ├── run trace
+                               ├── arm receipt
+                               └── selected evidence export
+```
+
+Export evidence deliberately. Do not turn the entire state directory into a
+public application artifact.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Receipts and replay" icon="rotate" href="/sdk/runtime/receipts">
+    Verify and replay the workflow journal.
+  </Card>
+  <Card title="Resident server" icon="server" href="/sdk/operations/resident-server">
+    Operate the process that writes arming state.
+  </Card>
+  <Card title="Arm registry" icon="clock" href="/sdk/project/arm-registry">
+    Understand what the ledger is proving.
+  </Card>
+  <Card title="CWD and monorepos" icon="folder-tree" href="/sdk/project/cwd-and-monorepos">
+    See exactly which root owns each state lane.
+  </Card>
+  <Card title="Trace concepts" icon="link" href="/concepts/traces">
+    The durable run journal and its integrity chain.
+  </Card>
+</CardGroup>

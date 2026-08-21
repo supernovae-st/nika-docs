@@ -1,0 +1,123 @@
+---
+title: "TypeScript SDK"
+description: "Build around a Nika run with a live local driver and a clearly marked preview remote client."
+sidebarTitle: "Overview"
+icon: "code"
+---
+
+import { SDK, LocalContract, RemoteContract, SdkDoors } from "/snippets/_sdk-contract.mdx"
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+import { Ecosystem } from "/snippets/_ecosystem.mdx"
+
+The SDK is the application seam around a Nika workflow. Your product owns
+the request, interface and business state. Nika owns the workflow contract,
+the execution boundary and the receipt.
+
+<div className="sdk-flight">
+  <span>APPLICATION FLIGHT COMPUTER · TYPESCRIPT</span>
+  <pre tabIndex={0}>{`nika.yaml ── ceiling + arm profile ───────── serve / OS       [ LIVE ]
+       │
+       ├── run-policy profile ─────────────── direct runs      [ LIVE ]
+       └── workflows/*.nika.yaml
+                   ├── LocalNika ── argv + NDJSON ── nika     [ LIVE ]
+                   │                                └── trace receipt
+                   └── Nika ─────── HTTP + SSE ── workflow API [ PREVIEW ]`}</pre>
+</div>
+
+<ProjectContract />
+<LocalContract />
+
+<RemoteContract />
+
+## Choose the surface
+
+| Need | Surface | Status |
+|---|---|---|
+| Govern the released project profiles | Root `nika.yaml` | Live, with the reader limit above |
+| Audit and run the installed engine | `LocalNika` from {SDK.localModule} | Live |
+| Stream local run events | `LocalNika.run()` | Live |
+| Rehearse with goldens and verify traces | `LocalNika.test()` · `traceVerify()` | Live |
+| Fire the project clock on a server | `nika serve` or emitted OS units | Live |
+| Design a remote jobs integration | `Nika` from {SDK.package} | Preview |
+| Consume remote SSE and artifacts | `nika.jobs.*` | Preview |
+
+The two modules share a package, not a deployment assumption. Import the
+local module when the application and engine share a machine. Import the
+root module only when a compatible workflow service exists at the other end.
+
+## Install both halves
+
+<CodeGroup>
+
+```sh macOS
+brew install supernovae-st/tap/nika
+npm install @supernovae-st/nika-client
+nika init --project-file
+```
+
+```sh Linux
+curl -LsSf https://nika.sh/install.sh | sh
+npm install @supernovae-st/nika-client
+nika init --project-file
+```
+
+</CodeGroup>
+
+Then probe the actual binary:
+
+```ts
+import { LocalNika } from '@supernovae-st/nika-client/local'
+
+const nika = new LocalNika()
+console.log(await nika.version())
+```
+
+## The application loop
+
+<Steps>
+  <Step title="Anchor the project">
+    Put `nika.yaml` at the project root and construct `LocalNika` with that
+    working directory. The engine discovers project policy around every run.
+  </Step>
+  <Step title="Audit">
+    Call `check()`. Findings resolve as typed data, so the interface can show
+    the complete refusal instead of catching one opaque exception.
+  </Step>
+  <Step title="Admit">
+    Read the cost floor, unbounded flag, permits and requirements. Product
+    policy decides whether the clean workflow may run here.
+  </Step>
+  <Step title="Run">
+    Stream events with `run()` or collect them with `runToEnd()`. Pass the
+    caller's cancellation signal and spend ceiling.
+  </Step>
+  <Step title="Keep the receipt">
+    Store the trace identity beside business state. Verify the chain before
+    treating a copied receipt as evidence.
+  </Step>
+</Steps>
+
+## Documentation graph
+
+<SdkDoors />
+
+## What the SDK does not own
+
+- It does not parse or enforce a second Nika language.
+- It does not turn an unpriced model into a zero-cost model.
+- It does not infer success from the last event a UI happened to recognize.
+- It does not turn the resident firer or local model endpoint into a
+  workflow HTTP service.
+
+<CardGroup cols={2}>
+  <Card title="Open the visual SDK map" icon="diagram-project" href="https://nika.sh/sdk">
+    The public site connects every guide to the language, workflows, boundary
+    and proof registers.
+  </Card>
+  <Card title="Read the source" icon="github" href={SDK.source}>
+    The package is Apache-2.0, zero dependency at runtime and tested against
+    both local machine contracts and remote fixtures.
+  </Card>
+</CardGroup>
+
+<Ecosystem />

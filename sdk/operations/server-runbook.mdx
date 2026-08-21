@@ -1,0 +1,151 @@
+---
+title: "Server runbook"
+description: "Boot, supervise, probe, deploy and investigate the stable resident firer."
+sidebarTitle: "Server runbook"
+icon: "clipboard-check"
+---
+
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+
+`nika serve` is a foreground process for one project. A production runbook
+should name its room, binary, state volume, signal path and evidence checks.
+
+## Boot gate
+
+Run every probe from the working directory production will use:
+
+```sh
+cd /srv/nika/project
+/usr/local/bin/nika --version
+/usr/local/bin/nika arm --plain
+/usr/local/bin/nika serve --dry --plain
+```
+
+This proves binary resolution, project discovery and cadence parsing before a
+resident process starts. `serve --dry` is only a calendar preview. It does not
+exercise provider credentials or external effects.
+
+## Supervise the foreground process
+
+The minimal systemd service contract is ordinary:
+
+```ini
+[Unit]
+Description=Nika resident project firer
+After=network-online.target
+
+[Service]
+Type=simple
+User=nika
+Group=nika
+WorkingDirectory=/srv/nika/project
+ExecStart=/usr/local/bin/nika serve --plain
+EnvironmentFile=/etc/nika/project.env
+Restart=on-failure
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Pin `WorkingDirectory` and `ExecStart`. Provider keys stay in the protected
+environment file. The project source and `.nika/` volume need only the access
+the workflows and evidence policy require.
+
+<Note>
+  Units emitted by `nika arm --emit systemd` are per-beat timer bridges. They
+  are not the service unit for the resident `nika serve` loop.
+</Note>
+
+## Probe the surfaces that exist
+
+`nika serve` does not listen on an HTTP port, so an HTTP health probe would be
+a fictional contract.
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>SERVER PROBES · EACH ANSWERS ONE QUESTION</span>
+  <pre tabIndex={0}>{`supervised process alive ───────── LIVENESS
+nika arm exits 0 ───────────────── CONFIG READINESS
+beat decision + arm ledger ─────── WORKLOAD TRUTH
+nika trace verify ──────────────── RUN INTEGRITY`}</pre>
+</div>
+
+Treat process liveness and workload success separately. A resident loop can be
+healthy while one workflow fails, and a completed `--once` sweep can exit zero
+after an individual beat failed or paused.
+
+## Deploy a project change
+
+<Steps>
+  <Step title="Stage the exact bytes">
+    Put the candidate `nika.yaml` and workflows in the release directory that
+    will become the production project room.
+  </Step>
+  <Step title="Preflight there">
+    Run `nika arm --plain` with the pinned binary. A clean report validates the
+    arm-ready project and cadence without scheduling work.
+  </Step>
+  <Step title="Switch deliberately">
+    Replace the project release or edit the registry. The resident loop swaps
+    only a valid registry and keeps the last good one after a refused edit.
+  </Step>
+  <Step title="Read the next decision">
+    Confirm the process remains live and inspect the next beat line plus its
+    sidecar evidence. Hot reload success is not the same as workflow success.
+  </Step>
+</Steps>
+
+## Investigate one surprising beat
+
+Follow one path instead of searching every log at once:
+
+```text
+stdout decision line
+        │ label + slot + exit + optional trace
+        ▼
+.nika/arm/<label>/history.ndjson
+        │ claim + receipt or visible unmatched claim
+        ▼
+.nika/traces/<run>.ndjson
+        │
+        └── nika trace verify <path>
+```
+
+```sh
+nika trace ls
+nika trace verify .nika/traces/<run>.ndjson
+```
+
+An unmatched claim is evidence of uncertainty after a crash. It is not proof
+that the external effect did or did not happen. Keep those effects idempotent
+and investigate the external system before replaying.
+
+## Production checklist
+
+- One explicit project `cwd`.
+- One pinned binary path and printed version.
+- An arm-ready `nika.yaml` for the current released cadence reader.
+- Provider secrets outside source and generated units.
+- Durable `project/.nika/` storage with chosen retention and access.
+- Captured stdout decision lines and stderr diagnostics.
+- SIGTERM delivery with enough time for the active firing boundary to settle.
+- An incident path from decision to ledger to verified trace.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Resident server" icon="server" href="/sdk/operations/resident-server">
+    Read reload, shutdown and delivery semantics.
+  </Card>
+  <Card title="CWD and monorepos" icon="folder-tree" href="/sdk/project/cwd-and-monorepos">
+    Align project discovery and state roots.
+  </Card>
+  <Card title="Runtime state" icon="database" href="/sdk/project/runtime-state">
+    Place ledgers, watermarks and traces.
+  </Card>
+  <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
+    Keep permits, secrets and spend explicit.
+  </Card>
+</CardGroup>

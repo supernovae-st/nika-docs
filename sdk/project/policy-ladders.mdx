@@ -1,0 +1,104 @@
+---
+title: "Project policy ladders"
+description: "Resolve run ceilings, trace retention and provenance through explicit precedence."
+sidebarTitle: "Policy ladders"
+icon: "stairs"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+<LocalContract />
+
+The SDK does not replace project policy. It supplies the invocation rung and
+the working directory that lets the engine discover the rest.
+
+## Run spend
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>SPEND LADDER · CLOSEST EXPLICIT DECISION WINS</span>
+  <pre tabIndex={0}>{`LocalNika maxCostUsd / --max-cost-usd
+                  ↓ wins
+nika.yaml ceiling
+                  ↓ otherwise
+engine built-in posture
+
+arm[].plafond = required for every scheduled tick`}</pre>
+</div>
+
+```ts
+await nika.runToEnd('workflows/release.nika.yaml', {
+  maxCostUsd: requestBudget,
+})
+```
+
+`maxCostUsd` is invocation-specific. Keep the project default in `nika.yaml`
+instead of copying it into every application call.
+
+## Trace retention
+
+```yaml
+nika: v1
+
+traces:
+  keep: 30d
+```
+
+The matching `NIKA_TRACE_*` environment knob wins over the project retention
+rung, then the engine default applies. This lets an immutable project run
+under different operational retention obligations.
+
+## Registry provenance
+
+```yaml
+nika: v1
+
+registry:
+  floor: provenanced
+```
+
+The project floor max-composes with the operator policy under `~/.nika`. A
+repository can demand stronger provenance. It cannot weaken the machine
+owner's floor.
+
+```text
+operator floor ─┐
+                ├── maximum ── admitted artifact tier
+project floor ──┘
+```
+
+## Keep one owner per decision
+
+| Decision | Owner |
+|---|---|
+| Project default spend | `nika.yaml ceiling` |
+| Request-specific spend | `LocalNika` call or CLI flag |
+| Scheduled tick spend | `arm[].plafond` |
+| Retention by host | Environment or project `traces.keep` |
+| Artifact provenance | Maximum of operator and project floors |
+| Workflow authority | The workflow's own `permits:` and `secrets:` |
+
+<Warning>
+  Do not create an application `nikaConfig` object that mirrors every project
+  key. That produces a second control plane with no precedence contract.
+  Construct `LocalNika` once with `cwd`; pass only invocation-specific inputs,
+  model, ceiling and cancellation per call.
+</Warning>
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="SDK configuration" icon="sliders" href="/sdk/reference/configuration">
+    Constructor and call-level options.
+  </Card>
+  <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
+    Permits, secrets, argv and cancellation.
+  </Card>
+  <Card title="Project file" icon="file-code" href="/sdk/project/nika-yaml">
+    The closed grammar behind these ladders.
+  </Card>
+  <Card title="Arm registry" icon="clock" href="/sdk/project/arm-registry">
+    Per-tick money and missed-run policy.
+  </Card>
+</CardGroup>

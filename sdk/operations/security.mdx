@@ -1,0 +1,85 @@
+---
+title: "Security boundary"
+description: "Preserve argv safety, default-deny permits, secret names, spend ceilings and caller cancellation."
+sidebarTitle: "Security boundary"
+icon: "shield"
+---
+
+import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+The SDK carries types and transport. The engine remains the policy enforcer.
+
+## Local seam
+
+<LocalContract />
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>PROCESS BOUNDARY · ONE ARGV VALUE</span>
+  <pre tabIndex={0}>{`unsafe  shell("nika run " + path)
+
+safe    spawn("nika", ["run", path, "--json"])
+                              └── never shell-parsed`}</pre>
+</div>
+
+`LocalNika` never wraps workflow paths in a shell string.
+
+## Admit authority before execution
+
+```ts
+const report = await nika.check(file)
+
+if (!report.clean || report.cost?.has_unbounded) {
+  throw new Error('workflow is not admitted here')
+}
+
+const plan = await nika.dryRunPlan(file)
+authorize(plan.permits, plan.requirements)
+
+await nika.runToEnd(file, {
+  maxCostUsd: 0.25,
+  signal: request.signal,
+})
+```
+
+Check these facts explicitly:
+
+- permitted filesystem paths, network hosts, programs and tools;
+- model and environment requirements;
+- secret names, never values;
+- the static cost floor and unbounded flag;
+- caller cancellation and runtime ceiling.
+
+## Remote seam
+
+<RemoteContract />
+
+Bearer tokens belong in governed environment or workload identity plumbing,
+not source. Custom loggers must not record authorization headers or webhook
+secrets. Verify webhooks against the raw body before parsing.
+
+## Threat boundaries
+
+| Boundary | Owner |
+|---|---|
+| Workflow grammar and permits | Engine |
+| Process argv and cancellation | Local SDK |
+| HTTP timeout, retry and concurrency | Remote SDK preview |
+| Secret storage and identity | Deployment |
+| Artifact destination and retention | Application |
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Security concepts" icon="shield" href="/concepts/security">
+    Read the default-deny engine model.
+  </Card>
+  <Card title="Cost honesty" icon="scale-balanced" href="/guides/cost-honesty">
+    Refuse unknown spend deliberately.
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/sdk/remote/webhooks">
+    Verify delivery before dispatch.
+  </Card>
+  <Card title="CI gate" icon="shield-check" href="/sdk/operations/ci">
+    Put admission before secrets.
+  </Card>
+</CardGroup>

@@ -1,0 +1,116 @@
+---
+title: "nika.yaml project file"
+description: "Use the released project control plane for policy, armed beats, retention and provenance."
+sidebarTitle: "nika.yaml"
+icon: "file-code"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { PROJECT, ProjectContract, ProjectDoors } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+
+`nika.yaml` governs the project around the SDK. A `*.nika.yaml` file carries
+one executable workflow. Keeping those roles separate is the foundation of a
+clean application integration.
+
+## Two valid released profiles
+
+Use the arm-ready profile when the project clock starts work:
+
+```yaml
+nika: v1
+
+ceiling: 0.50
+
+arm:
+  - workflow: workflows/daily-brief.nika.yaml
+    cadence: "TZ=Europe/Paris 30 7 * * 1-5"
+    où: local
+    plafond: 0.20
+    manqué: rattraper-une-fois
+    chevauchement: sauter
+```
+
+Use the run-policy profile when application code or an operator starts direct
+workflow runs:
+
+```yaml
+nika: v1
+
+ceiling: 0.50
+
+traces:
+  keep: 30d
+
+registry:
+  floor: provenanced
+```
+
+Both are live. They are separate because the current released cadence reader
+does not yet accept the direct-run `traces` and `registry` rungs. The closed
+project-shape vocabulary remains {PROJECT.keys}. An unknown key refuses with
+its line and the accepted set. A present file that silently ignores a typo
+would be more dangerous than an absent file, so the parser never drops one.
+
+| Block | Project job | Released consumer |
+|---|---|---|
+| `nika: v1` | Frozen project-file tag | All project readers |
+| `ceiling` | Default per-run USD ceiling | Direct runs and cadence |
+| `arm` | Team registry of workflow beats | `nika arm` and `nika serve` |
+| `traces.keep` | Project rung for run-journal retention | Direct run path |
+| `registry.floor` | Minimum admitted artifact provenance | Direct workflow operations |
+
+## Discover the governing file
+
+The engine walks from the current working directory toward its ancestors and
+uses the first `nika.yaml`, like Git finds `.git`.
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>DISCOVERY · FIRST PROJECT ROOT WINS</span>
+  <pre tabIndex={0}>{`/srv/project/apps/api/       ← LocalNika cwd
+          │
+          ├── no nika.yaml
+          ↑
+/srv/project/                ← nika.yaml found
+
+direct traces stay at cwd · arm state stays at project root`}</pre>
+</div>
+
+<LocalContract />
+
+```ts
+import { LocalNika } from '@supernovae-st/nika-client/local'
+
+export const nika = new LocalNika({
+  cwd: '/srv/project',
+})
+
+await nika.runToEnd('workflows/daily-brief.nika.yaml')
+```
+
+Prefer a `cwd` at the project root. It keeps workflow paths, project discovery
+and `.nika/` state aligned. The [CWD and monorepos](/sdk/project/cwd-and-monorepos)
+page documents the split when a nested process room is intentional.
+
+## Found and inspect
+
+```sh
+nika init --project-file
+nika arm
+```
+
+The init flag lays a commented starter and skips an existing file unless
+`--force` is explicit. `nika arm` validates an arm-ready project and cadence
+grammar, reports its armed beats and schedules nothing. A direct run consumes
+the run-policy profile through the normal project discovery path.
+
+<Warning>
+  Do not pass `nika.yaml` to `LocalNika.run()`. The local SDK runs a
+  `*.nika.yaml` workflow. The engine discovers `nika.yaml` from `cwd` and
+  applies its project policy around that run.
+</Warning>
+
+## Continue through the project
+
+<ProjectDoors />

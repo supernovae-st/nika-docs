@@ -52,7 +52,7 @@
     "twitter:card": "summary_large_image"
   },
   "banner": {
-    "content": "🦋 0.109 · the nine-key release. Your 0.108 files migrate with `nika check --fix`; the refusal names every hand move. [What changed →](/changelog/releases)",
+    "content": "🦋 Project arming and the resident firer are live. `nika.yaml` proposes; the machine disposes. [Read the current status →](/reference/status)",
     "dismissible": true
   },
   "navbar": {
@@ -108,7 +108,7 @@
           },
           {
             "label": "TypeScript SDK",
-            "href": "https://github.com/supernovae-st/nika-client"
+            "href": "/sdk/overview"
           },
           {
             "label": "Homebrew tap",
@@ -220,6 +220,83 @@
           }
         ],
         "icon": "book-open"
+      },
+      {
+        "tab": "SDK",
+        "icon": "code",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "sdk/overview"
+            ]
+          },
+          {
+            "group": "Start",
+            "pages": [
+              "sdk/start/quickstart",
+              "sdk/start/project-setup"
+            ]
+          },
+          {
+            "group": "Project · live",
+            "pages": [
+              "sdk/project/nika-yaml",
+              "sdk/project/cwd-and-monorepos",
+              "sdk/project/arm-registry",
+              "sdk/project/policy-ladders",
+              "sdk/project/runtime-state"
+            ]
+          },
+          {
+            "group": "Local API · live",
+            "pages": [
+              "sdk/local/client",
+              "sdk/local/check-and-plan",
+              "sdk/local/run-and-cancel",
+              "sdk/local/test-and-trace"
+            ]
+          },
+          {
+            "group": "Runtime · live",
+            "pages": [
+              "sdk/runtime/events",
+              "sdk/runtime/errors",
+              "sdk/runtime/receipts"
+            ]
+          },
+          {
+            "group": "Remote API · preview",
+            "pages": [
+              "sdk/remote/client",
+              "sdk/remote/jobs",
+              "sdk/remote/streaming",
+              "sdk/remote/artifacts",
+              "sdk/remote/workflows",
+              "sdk/remote/webhooks"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "sdk/operations/ci",
+              "sdk/operations/server-surfaces",
+              "sdk/operations/resident-server",
+              "sdk/operations/server-runbook",
+              "sdk/operations/os-schedulers",
+              "sdk/operations/deployment-topologies",
+              "sdk/operations/security"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "sdk/reference/configuration",
+              "sdk/reference/methods",
+              "sdk/reference/types"
+            ]
+          }
+        ]
       },
       {
         "tab": "Examples",

@@ -1,0 +1,52 @@
+{/* _project-contract.mdx: the released engine project-file contract.
+    Import this on every SDK page that crosses nika.yaml, arming or serve.
+    The project file is an engine control plane, not an SDK invention. */}
+
+export const PROJECT = {
+  file: "nika.yaml",
+  schema: "v1",
+  keys: "nika · ceiling · arm · traces · registry",
+  armKeys: "workflow · cadence · où · plafond · manqué · chevauchement · après_saut · actif · raison · jusqu_au · tolérance · décalage · par",
+  state: ".nika/traces · .nika/arm",
+}
+
+export const ProjectContract = () => (
+  <>
+    <Info>
+      <strong>Live project control plane.</strong> The released engine
+      discovers <code>nika.yaml</code> from the working directory toward its
+      ancestors. The file is optional when built-in defaults are enough. Its
+      project-shape grammar is closed: <code>nika</code> ·
+      <code>ceiling</code> · <code>arm</code> · <code>traces</code> ·
+      <code>registry</code>.
+    </Info>
+    <Warning>
+      <strong>Current released reader limit.</strong> Direct workflow operations
+      accept the <code>traces</code> and <code>registry</code> project-policy
+      rungs. The cadence path behind <code>nika arm</code> and
+      <code>nika serve</code> currently accepts only <code>nika</code>, optional
+      <code>ceiling</code> and <code>arm</code>. Keep those profiles separate
+      until the engine readers converge.
+    </Warning>
+  </>
+)
+
+export const ProjectDoors = () => (
+  <CardGroup cols={2}>
+    <Card title="Project file" icon="file-code" href="/sdk/project/nika-yaml">
+      Discovery, closed grammar and the released reader profiles.
+    </Card>
+    <Card title="CWD and monorepos" icon="folder-tree" href="/sdk/project/cwd-and-monorepos">
+      Align project discovery, direct traces and armed state.
+    </Card>
+    <Card title="Arm registry" icon="clock" href="/sdk/project/arm-registry">
+      Cadence, spend, silence, overlap and suspension policy.
+    </Card>
+    <Card title="Policy ladders" icon="stairs" href="/sdk/project/policy-ladders">
+      Invocation, environment, project and operator precedence.
+    </Card>
+    <Card title="Runtime state" icon="database" href="/sdk/project/runtime-state">
+      Traces, firing ledgers, watermarks and server persistence.
+    </Card>
+  </CardGroup>
+)

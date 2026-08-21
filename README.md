@@ -38,6 +38,7 @@ nika-docs/
 ├── concepts/              architecture · verbs · workflows · bindings · events · providers · security · …
 ├── examples/              overview + the tiered showcase workflows (PROJECTED; counts live in the projector)
 ├── integrations/          editor · CI · agent-client wiring (nested)
+├── sdk/                   TypeScript SDK · start · project control · local · runtime · remote preview · operations · reference
 ├── patterns/              cross-cutting pattern index
 ├── architecture/          layers · FCI · L0 decisions · admission · ADR index
 ├── reference/             YAML · CLI · schema · error codes · builtins · providers catalog · MCP catalog · MCP server · capabilities · constellation · design system · machine surfaces · status

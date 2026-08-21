@@ -1,0 +1,87 @@
+---
+title: "Server surfaces"
+description: "Separate the resident scheduler, local model endpoint and preview workflow HTTP service."
+sidebarTitle: "Server surfaces"
+icon: "server"
+---
+
+import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+Three surfaces can sound like a server. They do different jobs and accept
+different clients.
+
+## Truth table
+
+| Surface | Job | SDK relationship |
+|---|---|---|
+| `nika serve` | Fires armed local workflows from the `nika.yaml` project clock | Stable, not an HTTP listener |
+| `nika model serve` | Hosts a local model behind an OpenAI-compatible inference endpoint | A model provider for the engine |
+| Intended workflow HTTP API | Jobs, workflows, SSE, artifacts and webhooks | Root `Nika` client, preview |
+
+<ProjectContract />
+
+The resident firer and local model endpoint ship in the released engine. The
+workflow HTTP API does not. Similar names do not make them compatible
+protocols.
+
+## Local application path
+
+<LocalContract />
+
+```ts
+import { LocalNika } from '@supernovae-st/nika-client/local'
+
+const nika = new LocalNika({ cwd: process.cwd() })
+const result = await nika.runToEnd('workflow.nika.yaml')
+```
+
+This path requires no daemon.
+
+## Local model path
+
+```sh
+nika model serve --model Qwen/Qwen3-0.6B-GGUF
+```
+
+The engine calls that inference endpoint as a provider. Application code does
+not submit workflow jobs to it.
+
+## Remote workflow path
+
+<RemoteContract />
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>NAME COLLISION · THREE DIFFERENT BOUNDARIES</span>
+  <pre tabIndex={0}>{`nika.yaml arm[] ── nika serve ───────── local workflow runs  [ LIVE ]
+
+engine ─────────── nika model serve ──── local inference      [ LIVE ]
+
+application ───── Nika client ────────── workflow HTTP API    [ PREVIEW ]`}</pre>
+</div>
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Remote client" icon="satellite-dish" href="/sdk/remote/client">
+    Explore the intended application boundary.
+  </Card>
+  <Card title="Local models" icon="microchip" href="/guides/local-models">
+    Run inference on your own machine.
+  </Card>
+  <Card title="LocalNika" icon="terminal" href="/sdk/local/client">
+    Use the released application seam today.
+  </Card>
+  <Card title="ARM and servers" icon="server" href="/reference/arm">
+    Read the stable deployment reference.
+  </Card>
+  <Card title="Resident server" icon="clock" href="/sdk/operations/resident-server">
+    Operate the project clock on a container, VM or bare server.
+  </Card>
+  <Card title="Server runbook" icon="clipboard-check" href="/sdk/operations/server-runbook">
+    Supervise and probe the foreground process in production.
+  </Card>
+  <Card title="Deployment topologies" icon="sitemap" href="/sdk/operations/deployment-topologies">
+    Choose a boundary by the job it owns.
+  </Card>
+</CardGroup>

@@ -1,0 +1,94 @@
+---
+title: "CI gate"
+description: "Audit, inspect and rehearse a workflow before protected CI receives provider authority."
+sidebarTitle: "CI gate"
+icon: "shield-check"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+
+<LocalContract />
+
+The pull-request job should prove the file is clean, inspect the authority and
+spend shape, then rehearse the graph with the mock provider.
+
+## Admission script
+
+```ts
+import { LocalNika } from '@supernovae-st/nika-client/local'
+
+const nika = new LocalNika()
+const file = process.argv[2]
+const report = await nika.check(file, {
+  model: 'mock/echo',
+  nativeStrict: true,
+})
+
+if (!report.clean) {
+  console.error(report.findings)
+  process.exit(2)
+}
+
+if (report.cost?.has_unbounded) {
+  console.error('CI requires a bounded spend shape')
+  process.exit(2)
+}
+
+const plan = await nika.dryRunPlan(file)
+console.log(JSON.stringify({
+  waves: plan.waves,
+  permits: plan.permits,
+  requirements: plan.requirements,
+}, null, 2))
+
+const run = await nika.runToEnd(file, {
+  model: 'mock/echo',
+  maxCostUsd: 0,
+})
+
+if (!run.ok) process.exit(run.exitCode)
+```
+
+## Authority ladder
+
+<div className="sdk-flight">
+  <span>CI ADMISSION · SECRETS ARRIVE LAST</span>
+  <pre tabIndex={0}>{`pull request
+    │
+    ├── check ───── findings · permits · cost
+    ├── plan ────── waves · requirements
+    └── mock run ── graph behavior · receipt
+                         │ approved
+                         ▼
+protected job ───── provider secrets + deployment authority`}</pre>
+</div>
+
+The review job needs no provider key. Protected execution receives only the
+authority its environment and workflow declare.
+
+## Pin and print both versions
+
+```sh
+nika --version
+npm ls @supernovae-st/nika-client
+```
+
+Keep the engine and SDK release train visible in logs. Do not debug skew from
+an implicit global binary.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="GitHub Actions" icon="github" href="/integrations/github-actions">
+    Use the Nika action for PR comments and receipts.
+  </Card>
+  <Card title="Check and plan" icon="list-check" href="/sdk/local/check-and-plan">
+    Read every admission field.
+  </Card>
+  <Card title="Security" icon="shield" href="/sdk/operations/security">
+    Keep authority explicit.
+  </Card>
+  <Card title="Testing" icon="flask" href="/guides/testing">
+    Design deterministic mock goldens.
+  </Card>
+</CardGroup>

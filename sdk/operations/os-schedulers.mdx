@@ -1,0 +1,99 @@
+---
+title: "OS scheduler bridge"
+description: "Emit launchd or systemd user units that fire the project through one engine law."
+sidebarTitle: "OS schedulers"
+icon: "calendar"
+---
+
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<ProjectContract />
+
+Use the host scheduler when it already owns wakeups, restarts and process
+lifetime. Nika emits the bridge; the engine still owns cadence policy, spend,
+locking, firing and proof.
+
+## Preview generated units
+
+```sh
+nika arm --emit launchd
+nika arm --emit systemd
+```
+
+Without `--write`, the exact unit prints to stdout. Review its working
+directory, binary, calendar and environment-file path before installation.
+
+## Write a user-scoped unit
+
+```sh
+nika arm --emit systemd --write \
+  --mode user \
+  --nika-bin /usr/local/bin/nika \
+  --env-file /srv/nika/project.env
+```
+
+The live default is user scope. `launchd` writes a macOS user agent. `systemd`
+writes a user timer and service pair.
+
+| Option | Purpose |
+|---|---|
+| `--write` | Install rather than print |
+| `--out <dir>` | Override the generated output directory |
+| `--mode user` | Keep the unit under the operator account |
+| `--env-file <file>` | Load provider keys without embedding their values |
+| `--nika-bin <path>` | Pin the executable instead of trusting a login `PATH` |
+
+## One firing law
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>OS WAKEUP · ENGINE DECISION</span>
+  <pre tabIndex={0}>{`launchd calendar ─┐
+                   ├── nika arm fire <label>
+systemd timer ─────┘          │
+                              └── lock · ceiling · run · ledger`}</pre>
+</div>
+
+The generated unit does not reimplement Nika policy. It wakes the engine and
+the engine applies the same firer used by `nika serve`.
+
+## Keep secrets out of emitted bytes
+
+The unit carries the path to an environment file, never provider secret
+values. `nika.yaml` carries project policy, not credentials. The workflow
+declares secret names under its own `secrets:` contract.
+
+## Disarm as a state, not a deletion
+
+```yaml
+nika: v1
+
+arm:
+  - workflow: workflows/nightly-report.nika.yaml
+    cadence: "TZ=UTC 0 3 * * *"
+    plafond: 0.25
+    manqué: sauter
+    actif: false
+    raison: downstream maintenance
+    jusqu_au: 2026-09-01
+```
+
+The suspension remains reviewable. `nika arm disarm <label> --write` can remove
+generated unit files and teaches the host unload command, but it does not
+pretend that removing a unit edited project intent.
+
+## Continue
+
+<CardGroup cols={2}>
+  <Card title="Resident server" icon="server" href="/sdk/operations/resident-server">
+    Use the wall-clock loop where no OS scheduler exists.
+  </Card>
+  <Card title="Install the binary" icon="download" href="/getting-started/installation">
+    Install the binary for headless operation.
+  </Card>
+  <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
+    Keep authority outside generated files.
+  </Card>
+  <Card title="Arm reference" icon="book" href="/reference/arm">
+    Full command, policy and exit semantics.
+  </Card>
+</CardGroup>

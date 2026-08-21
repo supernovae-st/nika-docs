@@ -1,0 +1,140 @@
+---
+title: "Project setup"
+description: "Give workflows, binary resolution, traces and application code an explicit boundary."
+sidebarTitle: "Project setup"
+icon: "folder-tree"
+---
+
+import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { ProjectContract } from "/snippets/_project-contract.mdx"
+
+<LocalContract />
+<ProjectContract />
+
+The SDK should make the project boundary visible, not dissolve it into
+application objects. The root `nika.yaml` is the control plane. Each
+`*.nika.yaml` file is executable workflow intent.
+
+## Recommended layout
+
+<div className="sdk-flight sdk-flight-compact">
+  <span>PROJECT TREE · CONTROL PLANE + INTENT + PROOF</span>
+  <pre tabIndex={0}>{`project/
+├── nika.yaml                  # project profile + optional armed beats
+├── workflows/
+│   ├── daily-brief.nika.yaml  # workflow intent
+│   └── release.nika.yaml
+├── src/
+│   ├── nika.ts                # LocalNika construction
+│   └── release.ts             # product code
+├── .nika/
+│   ├── traces/                # run journals
+│   └── arm/                   # firing ledgers + watermarks
+├── package.json
+└── .gitignore`}</pre>
+</div>
+
+- `nika.yaml` governs project-wide spend and the released reader profile this
+  project uses.
+- `workflows/` is reviewed as intent.
+- `src/nika.ts` owns binary resolution and the working directory, not a
+  second copy of project policy.
+- `.nika/` is runtime state. Ignore it in source control and mount it
+  deliberately on a server.
+
+## Found the project
+
+```sh
+nika init --project-file --recipe starter
+nika arm
+```
+
+`--project-file` is the scripted door to the starter. It skips an existing
+file unless `--force` is explicit. Bare `nika arm` reads and validates the
+project and cadence grammar, reports what is armed, and schedules nothing.
+
+The starter is optional and comments every governing example. Start with the
+common rung that both released readers accept:
+
+```yaml
+nika: v1
+
+ceiling: 0.50
+```
+
+Add `arm:` when time or an event should start a workflow. Add `traces:` or
+`registry:` for direct-run policy. The current cadence path does not compose
+those two profiles yet, so the dedicated [project file](/sdk/project/nika-yaml)
+and [arm registry](/sdk/project/arm-registry) pages show valid copy-paste forms
+for each lane.
+
+## Create one client
+
+```ts
+// src/nika.ts
+import { LocalNika } from '@supernovae-st/nika-client/local'
+
+export const nika = new LocalNika({
+  bin: process.env.APP_NIKA_BIN,
+  cwd: new URL('..', import.meta.url).pathname,
+})
+```
+
+Binary resolution follows one ladder:
+
+1. `bin` passed to the constructor
+2. `NIKA_BIN`
+3. `nika` on `PATH`
+
+Use an explicit application variable for packaged services. Keep `PATH`
+convenient for local development. `cwd` anchors relative workflow paths,
+project-file discovery and the `.nika/` state directory.
+
+## Probe at startup
+
+```ts
+try {
+  console.info('nika engine', await nika.version())
+} catch (error) {
+  console.error('cannot start workflow runtime', error)
+  process.exit(3)
+}
+```
+
+A missing binary is an environment failure. A dirty workflow is different:
+`check()` resolves to a report so the caller can show every finding.
+
+## Keep receipts governed
+
+```text .gitignore
+.nika/traces/
+.nika/arm/
+.env
+```
+
+Traces may carry run metadata and outputs. Arm state carries firing claims,
+receipts and cadence watermarks. If a deployment retains them, choose the
+volume, retention window and access policy explicitly.
+
+## Connect the next systems
+
+<CardGroup cols={2}>
+  <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
+    Keep permits, secrets, argv and spend ceilings explicit.
+  </Card>
+  <Card title="LocalNika client" icon="terminal" href="/sdk/local/client">
+    Read every local method and its machine twin.
+  </Card>
+  <Card title="Workflow concepts" icon="file-code" href="/concepts/workflows">
+    The file remains the language contract.
+  </Card>
+  <Card title="Traces" icon="link" href="/concepts/traces">
+    Understand the durable journal under the SDK receipt.
+  </Card>
+  <Card title="Resident server" icon="server" href="/sdk/operations/resident-server">
+    Keep armed beats running on a container, VM or bare server.
+  </Card>
+  <Card title="Runtime state" icon="database" href="/sdk/project/runtime-state">
+    Persist traces and arming ledgers without committing them.
+  </Card>
+</CardGroup>

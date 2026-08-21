@@ -14,6 +14,14 @@ icon: "bell"
   always a machine act.
 </Info>
 
+<Warning>
+  **Current released reader limit.** Keep an armed `nika.yaml` to `nika`,
+  optional `ceiling` and `arm`. The `traces` and `registry` rungs are live on
+  the direct-run project path, but the cadence reader behind `nika arm` and
+  `nika serve` still refuses them. Do not combine the two profiles until the
+  engine readers converge.
+</Warning>
+
 ## The `arm:` block
 
 Each entry under `arm:` in `nika.yaml` is one beat:
