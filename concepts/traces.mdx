@@ -41,6 +41,13 @@ read it directly. Opt out per run with `--no-trace-file`, or globally
 with `NIKA_NO_TRACE_FILE` (`nika try` never journals — the mock
 rehearsal is not a workspace run).
 
+The journal keeps task outputs **verbatim** so a run can be replayed and
+verified. Hash-chained is not confidential: `.nika/traces/` inherits the
+sensitivity of whatever the workflow read, and on a shared or CI machine
+that directory is a second data-at-rest surface. Treat it like the files
+the run opened. A redaction posture that still verifies is a larger
+conversation; this page only names the consequence.
+
 ## The event stream
 
 A trace is the run's lifecycle spine. Each line is one event with a
