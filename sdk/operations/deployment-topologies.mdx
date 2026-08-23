@@ -1,6 +1,6 @@
 ---
 title: "Deployment topologies"
-description: "Choose LocalNika, the resident firer, an OS bridge, model serve or the preview remote client by job."
+description: "Choose LocalNika, the resident firer, loopback HTTP on nika serve --bind, an OS bridge or model serve by job."
 sidebarTitle: "Deployment topologies"
 icon: "sitemap"
 ---
@@ -18,10 +18,10 @@ what protocol crosses the process edge.
 | Need | Use | Status | Boundary |
 |---|---|---|---|
 | Product code starts a workflow | `LocalNika` | Live | argv + NDJSON to the local binary |
-| The project clock starts work | `nika serve` | Live | `nika.yaml arm[]` to the resident firer |
+| The project clock starts work | `nika serve` (no `--bind`) | Live | `nika.yaml arm[]` to the resident firer |
+| An application admits jobs over loopback HTTP | `nika serve --bind` | Live on 0.114.0 | Bearer + OpenAPI · **404: `/v1/run`, cancel, artifacts** |
 | The host scheduler starts work | `nika arm --emit` | Live | launchd or systemd to `nika arm fire` |
 | The engine needs local inference | `nika model serve` | Live | Loopback OpenAI-compatible model API |
-| An application needs remote workflow jobs | Root `Nika` client | Preview | Intended HTTP + SSE workflow API |
 
 ## Request-driven application
 
@@ -59,25 +59,26 @@ nika model serve --model Qwen/Qwen3-0.6B-GGUF --port 8712
 This process serves a model on loopback for the engine to call. It does not
 accept Nika workflow jobs.
 
-## Remote workflow horizon
+## Loopback HTTP (opt-in)
 
 <RemoteContract />
 
-The root SDK already types jobs, workflow listing, SSE, artifacts and webhook
-verification. The reference engine does not ship the compatible workflow HTTP
-service today. `nika serve` and `nika model serve` are not substitutes.
+Measured 2026-08-23 on `nika 0.114.0 (b1154df75)`. `nika serve --bind` is not
+`nika model serve`. It is also not bare `nika serve`. Cancel, artifacts and
+`POST /v1/run` are 404 on this binary — the OpenAPI document says so. The
+TypeScript root client's compatibility with this OpenAPI is unmeasured here.
 
 ## Architecture view
 
 <div className="sdk-flight">
   <span>PROCESS TOPOLOGY · NAME THE EDGE</span>
-  <pre tabIndex={0}>{`application ── LocalNika ── argv/NDJSON ── nika run       [ LIVE ]
+  <pre tabIndex={0}>{`application ── LocalNika ── argv/NDJSON ── nika run              [ LIVE ]
 
-nika.yaml ──── nika serve / OS ─────────── arm fire       [ LIVE ]
+nika.yaml ──── nika serve / OS ─────────── arm fire              [ LIVE ]
 
-nika engine ── OpenAI-compatible loopback ─ model serve    [ LIVE ]
+nika serve --bind ── Bearer ── jobs / SSE / workflows            [ LIVE · 404: run, cancel, artifacts ]
 
-application ── Nika client ── HTTP/SSE ─── workflow API   [ PREVIEW ]`}</pre>
+nika engine ── OpenAI-compatible loopback ─ model serve          [ LIVE ]`}</pre>
 </div>
 
 ## Continue
@@ -90,7 +91,7 @@ application ── Nika client ── HTTP/SSE ─── workflow API   [ PREVIE
     Run the stable project clock.
   </Card>
   <Card title="Remote client" icon="satellite-dish" href="/sdk/remote/client">
-    Explore the preview HTTP contract.
+    Typed client. Measure it against the OpenAPI of the binary you hold.
   </Card>
   <Card title="Project setup" icon="folder-tree" href="/sdk/start/project-setup">
     Place control, intent, application code and state.

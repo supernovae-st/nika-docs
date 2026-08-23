@@ -19,10 +19,18 @@ export const LocalContract = () => (
 
 export const RemoteContract = () => (
   <Warning>
-    <strong>Preview surface.</strong> The root package types the intended
-    workflow HTTP and SSE API. The reference engine does not ship a compatible
-    workflow service today. Do not point it at the stable resident firer or
-    <code>nika model serve</code>.
+    <strong>Loopback HTTP is live on the released binary, with named holes.</strong>
+    <code>nika serve --bind</code> + <code>--workflows</code> + <code>--token-file</code>
+    opens authenticated HTTP. Measured 2026-08-23 on <code>nika 0.114.0 (b1154df75)</code>:
+    <code>GET /health</code>, <code>GET /v1/openapi.json</code>, <code>POST /v1/jobs</code>,
+    <code>GET /v1/jobs/{"{id}"}</code>, <code>GET /v1/jobs/{"{id}"}/status</code>,
+    <code>GET /v1/jobs/{"{id}"}/events</code> (SSE), <code>GET /v1/workflows</code>
+    work. <code>POST /v1/run</code>, cancel, and artifacts return 404 — the binary's
+    own OpenAPI says <em>Cancel and artifacts are absent</em>. Bare
+    <code>nika serve</code> (no <code>--bind</code>) is still the resident ARM firer,
+    not HTTP. Do not point a client at <code>nika model serve</code>. The TypeScript
+    root client is a separate question: this page does not claim it speaks this
+    OpenAPI.
   </Warning>
 )
 
