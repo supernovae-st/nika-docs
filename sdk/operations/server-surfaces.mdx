@@ -1,6 +1,6 @@
 ---
 title: "Server surfaces"
-description: "Separate the resident scheduler, local model endpoint and preview workflow HTTP service."
+description: "Separate the resident firer, loopback HTTP on nika serve --bind, and local model serve."
 sidebarTitle: "Server surfaces"
 icon: "server"
 ---
@@ -13,17 +13,52 @@ different clients.
 
 ## Truth table
 
-| Surface | Job | SDK relationship |
+Measured 2026-08-23 against `nika 0.114.0 (b1154df75)` — the GitHub release a
+reader downloads. Engine `origin/main` was `80d62b8f` that afternoon (later
+than this tag). Pages follow the binary, not `main`.
+
+| Surface | Job | Status on 0.114.0 |
 |---|---|---|
-| `nika serve` | Fires armed local workflows from the `nika.yaml` project clock | Stable, not an HTTP listener |
-| `nika model serve` | Hosts a local model behind an OpenAI-compatible inference endpoint | A model provider for the engine |
-| Intended workflow HTTP API | Jobs, workflows, SSE, artifacts and webhooks | Root `Nika` client, preview |
+| `nika serve` (no `--bind`) | Fires armed local workflows from the `nika.yaml` project clock | Live · **not HTTP** |
+| `nika serve --bind` + `--workflows` + `--token-file` | Authenticated loopback HTTP · jobs, SSE, OpenAPI | Live · **holes named below** |
+| `nika model serve` | Hosts a local model behind an OpenAI-compatible inference endpoint | Live · a model provider, not a job API |
 
 <ProjectContract />
 
-The resident firer and local model endpoint ship in the released engine. The
-workflow HTTP API does not. Similar names do not make them compatible
-protocols.
+<RemoteContract />
+
+The OpenAPI document the binary serves (`GET /v1/openapi.json`) describes
+itself as *Authenticated loopback remote execution. Cancel and artifacts are
+absent.* Never say “remote execution” without those 404s.
+
+## What `--bind` actually answers
+
+Owner-only token file (`chmod 600`). Bytes never enter argv. A 20-character
+token was refused (`server credential source refused`); a 48-byte owner-only
+file was accepted.
+
+| Route | Measured |
+|---|---|
+| `GET /health` | 200 · no auth · `{status, service: nika-serve, engine_version, build_sha, api_version}` |
+| `GET /v1/openapi.json` | 200 · bearer |
+| `GET /v1/workflows` | 200 · `{"workflows":[…filenames]}` |
+| `GET /v1/workflows/:name` | 200 when `:name` is the contained filename (`hello.nika.yaml`) |
+| `POST /v1/jobs` | 202 with `Idempotency-Key` + a contained `.nika.yaml` path · 400 without the header |
+| `GET /v1/jobs/:id` | 200 after admit · id, status, execution_id, trace_id |
+| `GET /v1/jobs/:id/status` | 200 · status only |
+| `GET /v1/jobs/:id/events` | 200 `text/event-stream` · sequence / kind / status frames |
+| `GET /status` | **404** `route not found` |
+| `GET /events` | **404** `route not found` (SSE lives under the job id) |
+| `GET /v1/jobs` (list) | **404** `route not found` |
+| `POST /v1/run` | **404** `route not found` |
+| `POST /v1/jobs/:id/cancel` | **404** `route not found` |
+| `GET /v1/jobs/:id/artifacts` | **404** `route not found` |
+
+```sh
+nika serve --bind 127.0.0.1:18765 \
+  --workflows ./workflows \
+  --token-file .nika/serve.token
+```
 
 ## Local application path
 
@@ -47,36 +82,31 @@ nika model serve --model Qwen/Qwen3-0.6B-GGUF
 The engine calls that inference endpoint as a provider. Application code does
 not submit workflow jobs to it.
 
-## Remote workflow path
-
-<RemoteContract />
+## Name collision
 
 <div className="sdk-flight sdk-flight-compact">
   <span>NAME COLLISION · THREE DIFFERENT BOUNDARIES</span>
-  <pre tabIndex={0}>{`nika.yaml arm[] ── nika serve ───────── local workflow runs  [ LIVE ]
+  <pre tabIndex={0}>{`nika.yaml arm[] ── nika serve ──────────── local clock fires     [ LIVE ]
 
-engine ─────────── nika model serve ──── local inference      [ LIVE ]
+nika serve --bind ── Bearer + OpenAPI ──── jobs / SSE / workflows [ LIVE · 404: run, cancel, artifacts ]
 
-application ───── Nika client ────────── workflow HTTP API    [ PREVIEW ]`}</pre>
+engine ──────────── nika model serve ──── local inference         [ LIVE ]`}</pre>
 </div>
 
 ## Continue
 
 <CardGroup cols={2}>
-  <Card title="Remote client" icon="satellite-dish" href="/sdk/remote/client">
-    Explore the intended application boundary.
+  <Card title="Resident server" icon="clock" href="/sdk/operations/resident-server">
+    Default firer, and the `--bind` door on the same verb.
   </Card>
   <Card title="Local models" icon="microchip" href="/guides/local-models">
     Run inference on your own machine.
   </Card>
   <Card title="LocalNika" icon="terminal" href="/sdk/local/client">
-    Use the released application seam today.
+    Use the released argv path today.
   </Card>
   <Card title="ARM and servers" icon="server" href="/reference/arm">
     Read the stable deployment reference.
-  </Card>
-  <Card title="Resident server" icon="clock" href="/sdk/operations/resident-server">
-    Operate the project clock on a container, VM or bare server.
   </Card>
   <Card title="Server runbook" icon="clipboard-check" href="/sdk/operations/server-runbook">
     Supervise and probe the foreground process in production.

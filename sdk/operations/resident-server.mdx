@@ -9,13 +9,21 @@ import { ProjectContract } from "/snippets/_project-contract.mdx"
 
 <ProjectContract />
 
-`nika serve` is the released resident firer. It reads the `arm:` registry from
-`nika.yaml`, waits on the wall clock and ends each due beat at the same firing
-law as `nika arm fire`.
+`nika serve` with no `--bind` is the released resident firer. It reads the
+`arm:` registry from `nika.yaml`, waits on the wall clock and ends each due
+beat at the same firing law as `nika arm fire`. That default process is not
+HTTP.
+
+`--bind` + `--workflows` + `--token-file` on the **same verb** opens
+authenticated loopback HTTP. Measured 2026-08-23 on `nika 0.114.0 (b1154df75)`:
+`GET /health`, OpenAPI, jobs, job SSE and workflow listing work;
+`POST /v1/run`, cancel and artifacts return 404. The binary's OpenAPI says
+*Cancel and artifacts are absent.* `--once` and `--dry` cannot bind a listener.
 
 <Warning>
-  `nika serve` is not an HTTP API. It accepts no SDK job request and exposes no
-  SSE endpoint. Do not point the root `Nika` client at it.
+  Bare `nika serve` is the ARM firer, not HTTP. The HTTP door is opt-in
+  (`--bind`). Do not call that door “remote execution” without naming the 404s.
+  The TypeScript root client is not verified here against this OpenAPI.
 </Warning>
 
 ## Rehearse each operating mode
@@ -77,6 +85,20 @@ claim appended ── workflow starts ── receipt appended
 
 Exactly-once is never promised. Make the workflow's external effects
 idempotent when replay would otherwise duplicate harm.
+
+## Opt-in HTTP
+
+```sh
+umask 077
+# owner-only bearer file · bytes never enter argv
+nika serve --bind 127.0.0.1:18765 \
+  --workflows ./workflows \
+  --token-file .nika/serve.token
+```
+
+Listen line (measured): `nika serve · listening http://127.0.0.1:18765 · GET /health`.
+The route table lives at `GET /v1/openapi.json`. Full matrix:
+[server surfaces](/sdk/operations/server-surfaces).
 
 ## Deployment checklist
 
