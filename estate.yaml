@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 82a015840d75c9567713890de8ed2082dc0e96deb130e29821765d889ef55311
+  sha256: 2861e17fb83940c3efee588d2234b2bc51ee3207c7fefdeebb8a0897eb5e43bc
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored

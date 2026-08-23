@@ -106,7 +106,7 @@ jobs:
       # Cliquet: a planted `nika: v1` project fence must stay red on the
       # held binary. Without this, the seventh page re-teaches the retired
       # schema tag and oracle-sweep only notices after a reader copies it.
-      - name: retired nika: v1 project tag stays red
+      - name: "retired nika: v1 project tag stays red"
         run: python3 scripts/tests/test_oracle_sweep_retired_v1_tag.py
       # The spec clone below serves ONLY the design-token parity check.
       # clock: ratified-HEAD · because the docs THEME follows the spec design
