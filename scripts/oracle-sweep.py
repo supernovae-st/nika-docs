@@ -101,6 +101,25 @@ def is_manifest_fence(body: str) -> bool:
     return False
 
 
+def _judge_fail_lines(blob: str) -> list[str]:
+    """Lines the released binary uses to mark a refusal.
+
+    `nika arm` paints `✖ PROJECT` / `✗ PROJECT`. `nika run --dry-run`
+    (the sweep's first project judge) prints a bare
+    `nika.yaml:1 · project.identity · … retired schema tag` with no glyph
+    and exit 3 — matching only a ballot-X hid the class behind
+    `[project shape]`.
+    """
+    marked = [
+        line
+        for line in blob.splitlines()
+        if ("✗" in line or "✖" in line or "PARSE" in line or "project." in line)
+    ]
+    if marked:
+        return marked
+    return [line for line in blob.splitlines() if line.strip()][:3]
+
+
 def has_top_level_key(body: str, key: str) -> bool:
     """Does the project envelope carry `key:` at its own indentation?"""
     for line in body.splitlines():
@@ -152,8 +171,8 @@ for fp in sorted(DOCS.rglob("*.mdx")):
         if r.returncode != 0:
             bad += 1
             print(f"✗ {fp.relative_to(DOCS)}  [project shape]")
-            for e in [l for l in (r.stdout + r.stderr).splitlines() if "✗" in l][:3]:
-                print(f"   · {e.strip()[:110]}")
+            for e in _judge_fail_lines(r.stdout + r.stderr)[:3]:
+                print(f"   · {e.strip()[:240]}")
             continue
         if has_top_level_key(body, "arm"):
             cadence_manifests_total += 1
@@ -161,8 +180,8 @@ for fp in sorted(DOCS.rglob("*.mdx")):
             if r.returncode != 0:
                 bad += 1
                 print(f"✗ {fp.relative_to(DOCS)}  [project cadence]")
-                for e in [l for l in (r.stdout + r.stderr).splitlines() if "✗" in l][:3]:
-                    print(f"   · {e.strip()[:110]}")
+                for e in _judge_fail_lines(r.stdout + r.stderr)[:3]:
+                    print(f"   · {e.strip()[:240]}")
     if not runnable:
         continue
     page_dir = tempfile.mkdtemp(prefix="oracle-")
@@ -193,8 +212,8 @@ for fp in sorted(DOCS.rglob("*.mdx")):
         if r.returncode != 0:
             bad += 1
             print(f"✗ {fp.relative_to(DOCS)}  [{name}]")
-            for e in [l for l in (r.stdout + r.stderr).splitlines() if "✖" in l or "✗" in l][:3]:
-                print(f"   · {e.strip()[:110]}")
+            for e in _judge_fail_lines(r.stdout + r.stderr)[:3]:
+                print(f"   · {e.strip()[:240]}")
 
 print(f"oracle-sweep: {total} workflow blocks · {manifests_total} project shapes "
       f"· {cadence_manifests_total} cadence manifests · {bad} invalid (judge: {NIKA})")

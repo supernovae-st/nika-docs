@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 199
+  classified_files: 200
   file_rows: 32
   pattern_rows: 6
   by_class:
-    authored: 194
+    authored: 195
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 31
+  unverified-default: 32
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: d0869dbbb9df018bd3b9b118ee1ad65f2eb9ff0e209a41e8f76a80bac2461713
+  sha256: 2861e17fb83940c3efee588d2234b2bc51ee3207c7fefdeebb8a0897eb5e43bc
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -157,7 +157,7 @@ files:
   evidence: "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)"
 - path: "scripts/oracle-sweep.py"
   class: authored
-  sha256: b4db967125aba14474b8b6e001e88f17a89d33061642064b6ac2fc34ad722d47
+  sha256: abe5113b36a722eab9a5b595ca9df5387cf8144b25ae7272966f29faa4903d30
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/teach-parity.py"
   class: authored
@@ -187,14 +187,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 27f14617d92807b49b8d03d2297f0fe8dbc97230db1007735129caf297265af1
+  sha256: d88128ffc4699343f9a5cf9932e451a7392baeef7ceef792ecf97772449251cf
   evidence: "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields"
   note: "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 142
-  aggregate_sha256: 524cab205c4c6946fd7e90ea39955fba849a3af64d9a2bf396c2b77cad491045
+  aggregate_sha256: 80f304fa36c37a1029f730cc27f1570400f5d7b021046f281e0787a5ccadc69e
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -222,8 +222,8 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 8
-  aggregate_sha256: 77d97cee8a71d20d6d9ccd388d922d829af56c4567636de66fda6d712aba9e3e
+  match_count: 9
+  aggregate_sha256: a0e9f59e9d5d74026c457b96082ed4578c660241f787649febc7de2c0d5bad3a
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -244,6 +244,7 @@ unverified:
 - "scripts/tests/test_oracle_sweep_bare_foreach.py"
 - "scripts/tests/test_oracle_sweep_manifest.py"
 - "scripts/tests/test_oracle_sweep_manifest_without_arm.py"
+- "scripts/tests/test_oracle_sweep_retired_v1_tag.py"
 - "scripts/tests/test_oracle_sweep_sees_nine_key.py"
 - "scripts/tests/test_teach_parity_retired_new.py"
 - "videos/chat-to-workflow.mp4"

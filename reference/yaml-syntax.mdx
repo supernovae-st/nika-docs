@@ -34,11 +34,14 @@ outputs: { ... }             # optional · the workflow's return value
 
 Nine keys, closed. `nika:` is the type discriminant **and** the identity: a
 `tasks:` key makes the document a workflow, its absence makes it a project
-file (`nika.yaml`, whose mark stays `nika: v1`), and the filename carries no
-verdict — a registry blob, an HTTP body, a stdin pipe (`nika check -`) must
-say what they are by their bytes alone. `nika: v1` + `workflow: { id }` is the
-previous envelope (through 0.108): `nika check --fix` migrates it, moving the
-identity onto `nika:` and the `description:` prose into a comment above it.
+file (`nika.yaml`, whose mark is `nika: <project-name>` — a kebab-case
+identity, the same line `nika init --project-file` writes), and the filename
+carries no verdict — a registry blob, an HTTP body, a stdin pipe (`nika check -`)
+must say what they are by their bytes alone. `nika: v1` on a project file is
+the retired schema tag (the reader refuses it: the tag became the name).
+`nika: v1` + `workflow: { id }` is the previous *workflow* envelope (through
+0.108): `nika check --fix` migrates it, moving the identity onto `nika:` and
+the `description:` prose into a comment above it.
 
 ## The three value authorities
 
@@ -317,5 +320,6 @@ and the name, and there is nothing to bump. Minor additions (a new optional
 field, a new builtin) are **additive**; a grammar change before 1.0 ships
 with its migration in `nika check --fix` and its refusal naming the move
 (the pre-1.0 stability contract) · after engine 1.0.0 the grammar is
-additive only. The project file `nika.yaml` is the one document that still
-spells `nika: v1` — a tag frozen forever, on a file that carries no `tasks:`.
+additive only. The project file `nika.yaml` carries no `tasks:` and names
+the project (`nika: my-project`); `nika: v1` there is a retired schema tag,
+not an identity.
