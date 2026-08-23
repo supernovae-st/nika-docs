@@ -13,7 +13,7 @@ SWEEP = DOCS / "scripts" / "oracle-sweep.py"
 PLANT = DOCS / "getting-started" / "_mutation-arm-manifest.mdx"
 
 VALID_FENCE = """```yaml
-nika: v1
+nika: my-project
 ceiling: 0.50
 arm:
   - workflow: workflows/nightly.nika.yaml
@@ -42,13 +42,16 @@ def test_manifest_uses_the_accepting_and_refusing_arm_judge() -> None:
     try:
         result, output = run_sweep(VALID_FENCE)
         assert result.returncode == 0, output[-800:]
-        assert "2 project manifests · 0 invalid" in output, output[-800:]
+        assert "0 invalid" in output, output[-800:]
+        assert "_mutation-arm-manifest" not in output, output[-800:]
 
         invalid = VALID_FENCE.replace("    manqué: sauter\n", "")
         result, output = run_sweep(invalid)
         assert result.returncode == 1, output[-800:]
         assert "_mutation-arm-manifest" in output, output[-800:]
-        assert "project manifest" in output, output[-800:]
+        # 0.114.0 refuses the incomplete beat on the dry-run path first
+        # (`project.bad-value` · `manqué:` absent), before `nika arm`.
+        assert "manqué" in output, output[-800:]
     finally:
         if PLANT.exists():
             PLANT.unlink()

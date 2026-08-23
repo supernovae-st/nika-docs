@@ -19,7 +19,7 @@ clean application integration.
 Use the arm-ready profile when the project clock starts work:
 
 ```yaml
-nika: v1
+nika: my-project
 
 ceiling: 0.50
 
@@ -36,7 +36,7 @@ Use the run-policy profile when application code or an operator starts direct
 workflow runs:
 
 ```yaml
-nika: v1
+nika: my-project
 
 ceiling: 0.50
 
@@ -55,7 +55,7 @@ would be more dangerous than an absent file, so the parser never drops one.
 
 | Block | Project job | Released consumer |
 |---|---|---|
-| `nika: v1` | Frozen project-file tag | All project readers |
+| `nika: <project-name>` | Project identity (kebab-case name · not a schema tag) | All project readers |
 | `ceiling` | Default per-run USD ceiling | Direct runs and cadence |
 | `arm` | Team registry of workflow beats | `nika arm` and `nika serve` |
 | `traces.keep` | Project rung for run-journal retention | Direct run path |

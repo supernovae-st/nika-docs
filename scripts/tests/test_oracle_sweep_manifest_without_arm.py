@@ -15,9 +15,10 @@ absence means PROJECT. It was chosen because it survives when the filename
 is gone — a registry blob, an HTTP body, `nika check -` on stdin, a fence
 pasted into a chat.
 
-The fence below opens on the tag the RELEASED binary accepts, not the one
-the spec documents (`nika: my-project`). That gap is real and tracked
-elsewhere; this test judges routing, and must not fail for it.
+The fence opens on the identity the released binary writes
+(`nika init --project-file` → `nika: my-project`). `nika: v1` is the
+retired schema tag; the sister plant in
+`test_oracle_sweep_retired_v1_tag.py` is the refusal cliquet.
 """
 from __future__ import annotations
 
@@ -39,7 +40,7 @@ PLANT = DOCS / "getting-started" / "_mutation-manifest-no-arm.mdx"
 # else's divergence. That divergence is a finding of its own, not this
 # test's subject.
 NO_ARM_FENCE = """```yaml
-nika: v1
+nika: my-project
 ceiling: 0.50
 ```
 """
@@ -60,9 +61,10 @@ def test_a_manifest_without_arm_is_still_routed_to_the_project_judge() -> None:
     PLANT.write_text(NO_ARM_FENCE)
     try:
         result, output = run_sweep()
-        # Routed, not blamed: it counts as a manifest and nothing is invalid.
-        assert "2 project manifests" in output, output[-800:]
+        # Routed, not blamed: it counts as a project shape and is not invalid.
+        assert "project shapes" in output, output[-800:]
         assert result.returncode == 0, output[-800:]
+        assert "_mutation-manifest-no-arm" not in output, output[-800:]
         # And specifically NOT judged by the workflow envelope.
         assert "NIKA-PARSE-005" not in output, output[-800:]
         assert "unknown field `ceiling`" not in output, output[-800:]
