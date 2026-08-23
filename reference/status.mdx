@@ -6,43 +6,43 @@ icon: "gauge"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
 <Info>
-  This page is judged by the **downloadable release**, the binary a new
-  reader installs. `version` and `lastUpdated` come from that GitHub
-  release via `scripts/mintlify-snapshot.sh`. The provider count is the
-  length of `nika catalog --json` on that same binary.
-
-  Crate, test, ADR, hygiene, and capability-rule totals do **not** project
-  from the binary. They used to sit on this page next to the release
-  number and destablize first-time readers (a July engine-`main` SHA next
-  to a later release). They are gone from here. The engine repo still
-  carries them in its own `refresh-status.sh` block.
+  This page is judged by the **downloadable release** — `nika --version`
+  must print `{STATUS.version}` (`{STATUS.engineSha}`). Catalog counts
+  come from `nika catalog --json` on that binary. Language counts come
+  from `nika spec --canon` (projected into `CANON`). Crate, test, ADR and
+  hygiene totals do not project from the binary and are not on this page.
 </Info>
 
 ## At a glance
 
 <CardGroup cols={3}>
   <Card title="Release" icon="tag">
-    **v{STATUS.version}** · {STATUS.lastUpdated}
+    **v{STATUS.version}** · `{STATUS.engineSha}`
   </Card>
-  <Card title="Catalog providers" icon="server">
-    **{STATUS.providers}** entries in `nika catalog --json`
+  <Card title="Catalog" icon="server">
+    **{STATUS.providers}** providers in `nika catalog`
   </Card>
-  <Card title="How to verify" icon="terminal">
-    `nika --version` then `nika catalog`
+  <Card title="Language" icon="code">
+    **{CANON.verbs}** verbs · **{CANON.builtins}** builtins · **{CANON.templates}** skeletons
   </Card>
 </CardGroup>
 
 | field | value | projects from |
 |---|---|---|
-| workspace version | v{STATUS.version} | GitHub latest release |
+| workspace version | v{STATUS.version} | GitHub latest release / `nika --version` |
+| build | `{STATUS.engineSha}` | `nika --version` parenthetical |
 | snapshot day | {STATUS.lastUpdated} | the same release |
-| catalog providers | {STATUS.providers} | `nika catalog --json` `.providers.length` on that binary |
+| catalog providers | {STATUS.providers} | `nika catalog --json` `.providers.length` |
+| spec-named providers | {CANON.providers} | `nika spec --canon` · local {CANON.providersLocal} · cloud {CANON.providersCloud} · test {CANON.providersTest} |
+| builtins | {CANON.builtins} | `nika catalog --tools --json` / spec `--canon` |
+| skeletons | {CANON.templates} | `nika spec --canon` / `nika new '?'` |
 
-The language set (`nika spec --canon` providers) is a **different noun**
-from the catalog set. Do not swap them. See
-[Providers](/reference/providers-catalog).
+Two nouns, both true, never swapped: the **catalog** is every adapter the
+binary can reach; the **spec-named** set is the language stdlib a
+conformant engine must ship. See [Providers](/reference/providers-catalog).
 
 ## How to refresh
 

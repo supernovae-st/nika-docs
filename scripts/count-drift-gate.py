@@ -258,6 +258,60 @@ def main() -> int:
                         f"{SNIPPETS[ns]} does not define — this renders the "
                         f"literal text 'undefined' on a public page")
 
+    # (g) STATUS / CANON integers that claim to be the held binary must
+    # match it. Skips when nika is absent (same skip as the MCP tool count).
+    nika = shutil.which("nika")
+    if nika:
+        try:
+            ver = subprocess.run([nika, "--version"], capture_output=True,
+                                 text=True, timeout=15, check=True).stdout.strip()
+            sha_m = re.search(r"\(([^)]+)\)", ver)
+            catalog = json.loads(subprocess.run(
+                [nika, "catalog", "--json"], capture_output=True, text=True,
+                timeout=30, check=True).stdout)
+            tools = json.loads(subprocess.run(
+                [nika, "catalog", "--tools", "--json"], capture_output=True,
+                text=True, timeout=30, check=True).stdout)
+            canon_yaml = subprocess.run(
+                [nika, "spec", "--canon"], capture_output=True, text=True,
+                timeout=30, check=True).stdout
+            def canon_count(name: str) -> int | None:
+                m = re.search(rf"^{name}:\s*\n\s*count:\s*(\d+)", canon_yaml, re.M)
+                return int(m.group(1)) if m else None
+            snap = (ROOT / "snippets" / "_status-snapshot.mdx").read_text(encoding="utf-8")
+            ver_s = re.search(r'version:\s*"([^"]+)"', snap)
+            sha_s = re.search(r'engineSha:\s*"([^"]+)"', snap)
+            bin_ver = ver.split()[1]
+            if ver_s and ver_s.group(1) != bin_ver:
+                findings.append(
+                    f"snippets/_status-snapshot.mdx: version {ver_s.group(1)!r} "
+                    f"but `{nika} --version` is {bin_ver!r}")
+            if sha_s and sha_m and sha_s.group(1) != sha_m.group(1):
+                findings.append(
+                    f"snippets/_status-snapshot.mdx: engineSha {sha_s.group(1)!r} "
+                    f"but `{nika} --version` is {sha_m.group(1)!r}")
+            n_cat = len(catalog.get("providers") or [])
+            if values.get("STATUS.providers") != n_cat:
+                findings.append(
+                    f"STATUS.providers is {values.get('STATUS.providers')} but "
+                    f"`nika catalog --json` has {n_cat} providers")
+            n_tools = len(tools.get("tools") or [])
+            if values.get("CANON.builtins") != n_tools:
+                findings.append(
+                    f"CANON.builtins is {values.get('CANON.builtins')} but "
+                    f"`nika catalog --tools --json` has {n_tools} tools")
+            for name, key in (("templates", "CANON.templates"),
+                              ("providers", "CANON.providers"),
+                              ("builtins", "CANON.builtins"),
+                              ("verbs", "CANON.verbs")):
+                got = canon_count(name)
+                have = values.get(key)
+                if got is not None and have is not None and got != have:
+                    findings.append(
+                        f"{key} is {have} but `nika spec --canon` {name}.count is {got}")
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, json.JSONDecodeError, OSError) as e:
+            findings.append(f"held-binary count check failed to run: {e}")
+
     served = served_tool_count()
     if served is None:
         print("  (tool-count check skipped — nika not on PATH)")
