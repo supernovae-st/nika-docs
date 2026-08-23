@@ -1,6 +1,6 @@
 ---
 title: "Live state"
-description: "Live state of the Nika Diamond rewrite, snapshotted by hand from the engine's `scripts/refresh-status.sh` block. Read the provenance note before quoting it."
+description: "What the downloadable Nika binary is, as of the published GitHub release. A teaching page is judged by that binary, not by engine main."
 sidebarTitle: "Live state"
 icon: "gauge"
 ---
@@ -8,108 +8,72 @@ icon: "gauge"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 <Info>
-  Every number here imports `STATUS` from [`/snippets/_status-snapshot.mdx`](https://github.com/supernovae-st/nika-docs/blob/main/snippets/_status-snapshot.mdx).
-  **Mixed provenance, and worth knowing which is which:** `version` and
-  `lastUpdated` are auto-derived from the published release by
-  `scripts/mintlify-snapshot.sh`; the counts are a **hand-maintained periodic
-  snapshot** of the engine's canonical
-  [`scripts/refresh-status.sh`](https://github.com/supernovae-st/nika/blob/main/scripts/refresh-status.sh)
-  block. The engine's hygiene vector 23 guards that block *inside the engine
-  repo* — it cannot see this one. So a fresh `lastUpdated` is not evidence
-  that the counts are fresh.
+  This page is judged by the **downloadable release**, the binary a new
+  reader installs. `version` and `lastUpdated` come from that GitHub
+  release via `scripts/mintlify-snapshot.sh`. The provider count is the
+  length of `nika catalog --json` on that same binary.
 
-  **Counts as of engine `main` {STATUS.head}** · branch `{STATUS.branch}` ·
-  **snapshot refreshed** {STATUS.lastUpdated}.
+  Crate, test, ADR, hygiene, and capability-rule totals do **not** project
+  from the binary. They used to sit on this page next to the release
+  number and destablize first-time readers (a July engine-`main` SHA next
+  to a later release). They are gone from here. The engine repo still
+  carries them in its own `refresh-status.sh` block.
 </Info>
 
 ## At a glance
 
 <CardGroup cols={3}>
-  <Card title="Admitted" icon="cube">
-    **{STATUS.cratesAdmitted}** crates past 12 gates
+  <Card title="Release" icon="tag">
+    **v{STATUS.version}** · {STATUS.lastUpdated}
   </Card>
-  <Card title="Library tests" icon="flask">
-    **{STATUS.libTests}** passing · {STATUS.clippyWarnings} clippy warnings
+  <Card title="Catalog providers" icon="server">
+    **{STATUS.providers}** entries in `nika catalog --json`
   </Card>
-  <Card title="Hygiene" icon="shield-check">
-    **{STATUS.hygieneVectors}** vectors gate every push
-  </Card>
-  <Card title="ADRs" icon="scroll">
-    **{STATUS.adrs}** total · {STATUS.adrsAccepted} Accepted · {STATUS.adrsProposed} Proposed
-  </Card>
-  <Card title="Providers" icon="server">
-    **{STATUS.providers}** LLM providers in the catalog
-  </Card>
-  <Card title="Capability rules" icon="grid">
-    **{STATUS.capabilityRules}** rules in `model-capabilities.toml`
+  <Card title="How to verify" icon="terminal">
+    `nika --version` then `nika catalog`
   </Card>
 </CardGroup>
 
-## Canonical block
+| field | value | projects from |
+|---|---|---|
+| workspace version | v{STATUS.version} | GitHub latest release |
+| snapshot day | {STATUS.lastUpdated} | the same release |
+| catalog providers | {STATUS.providers} | `nika catalog --json` `.providers.length` on that binary |
 
-The engine's `refresh-status.sh` emits this block inside the engine repo
-(`ROADMAP.md`, `.claude/CLAUDE.md`). The rows below are a hand-copy of it,
-taken at `{STATUS.head}`.
-
-| field | value |
-|---|---|
-| branch | `{STATUS.branch}` |
-| HEAD | `{STATUS.head}` |
-| workspace version | v{STATUS.version} |
-| crates (workspace) | {STATUS.cratesWorkspace} |
-| crates (admitted) | {STATUS.cratesAdmitted} |
-| crates (WIP) | {STATUS.wipCrates.length} · {STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"} |
-| crates (projected horizon) | {STATUS.cratesTarget} · hard cap {STATUS.cratesCap} (ADR-037) |
-| library tests | {STATUS.libTests} passed, 0 failed |
-| clippy | {STATUS.clippyWarnings} warnings |
-| ADRs | {STATUS.adrs} ({STATUS.adrsAccepted} Accepted + {STATUS.adrsProposed} Proposed) |
-| hygiene vectors | {STATUS.hygieneVectors} |
-| providers (catalog records) | {STATUS.providers} |
-| capability rules | {STATUS.capabilityRules} |
-
-A per-vector green/yellow/red breakdown is deliberately absent: it is a live
-CI result, not a docs constant. Run `bash scripts/hygiene/check-all.sh
---format=json` in the engine repo for it.
+The language set (`nika spec --canon` providers) is a **different noun**
+from the catalog set. Do not swap them. See
+[Providers](/reference/providers-catalog).
 
 ## How to refresh
 
-<CodeGroup>
-```bash Engine repo · the counts
-git clone https://github.com/supernovae-st/nika.git
-cd nika
-bash scripts/refresh-status.sh              # full refresh (runs cargo test + clippy)
-bash scripts/refresh-status.sh --quick      # structural fields only, skips cargo
-# then hand-copy the regenerated block into this repo's snippets/_status-snapshot.mdx
+```bash
+bash scripts/mintlify-snapshot.sh           # version + lastUpdated ONLY
+nika catalog --json                         # provider length must match STATUS.providers
 ```
 
-```bash Docs repo · the release fields
-bash scripts/mintlify-snapshot.sh           # version + lastUpdated ONLY
-```
-</CodeGroup>
+Crate, test, ADR, and hygiene totals belong in the engine repo
+(`bash scripts/refresh-status.sh`). Do not copy them back onto this page.
 
 ## Drift protection, stated honestly
 
 <Warning>
-  Engine hygiene vector 23 (`check-status-claims-sync.sh`) parity-checks the
-  block against `ROADMAP.md` and `.claude/CLAUDE.md` **within the engine
-  repo**. It has no visibility into this repo, so nothing fails CI when the
-  counts here go stale. `scripts/mintlify-snapshot.sh` only rewrites
-  `version` and `lastUpdated` — it will happily bump the date on a page whose
-  counts are months old. Treat a recent `lastUpdated` as evidence about the
-  release, never about the crate, test, or ADR numbers.
+  `scripts/mintlify-snapshot.sh` only rewrites `version` and `lastUpdated`.
+  A fresh date is evidence about the **release**, nothing else. The
+  provider count on this page must match `nika catalog --json` on that
+  release binary. Engine hygiene vector 23 guards crate/test claims
+  **inside the engine repo** and cannot see this one.
 </Warning>
 
 ## What's admitted today
 
-**{STATUS.cratesAdmitted}** Diamond crates are admitted, with WIP
-**{STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}**. The
-admitted set spans the foundation crates, kernel traits, local/effect crates,
-providers, all four verbs, runtime, LSP, MCP, and CLI surfaces needed for the
-first public release candidate.
+The admitted crate set lives in the engine repo's `refresh-status.sh`
+block (`ROADMAP.md`, `.claude/CLAUDE.md`), judged there by hygiene vector
+23. This page does not copy those totals: they are not a fact about the
+binary a reader downloads.
 
 ## What's locked (decisions the project won't revisit)
 
-- **Crate count is a projection, never a gate**: ADR-037 revised the old 40-42 target to a **{STATUS.cratesTarget}** horizon (hard cap {STATUS.cratesCap}); crates are admitted when they pass the 12 gates, reached additively across 1.x minors.
+- **Crate count is a projection, never a gate**: ADR-037; crates are admitted when they pass the 12 gates, reached additively across 1.x minors.
 - **Real semver toward 1.0**: 0.90.0 is the first public release-candidate; 1.0 ships when release gates are green. Quality over speed.
 - **Layer discipline**: L0 zero I/O, L0.5 traits only, strict downward deps, cargo-deny enforced. See [Layers](/architecture/layers).
 - **12 gates per crate**: no exceptions. See [Admission](/architecture/admission).
@@ -132,8 +96,8 @@ first public release candidate.
     stay true end-to-end.
   </Accordion>
   <Accordion title="The Connectome (sovereign memory): post-foundation">
-    **Separate count** from the {STATUS.cratesTarget} Diamond crate horizon.
-    11 crates: 1 L2 orchestrator (`nika-connectome`) + 10 L1 satellites (hnsw,
+    Separate from the Diamond crate horizon.
+    One L2 orchestrator (`nika-connectome`) plus L1 satellites (hnsw,
     bm25, rrf, rerank, fsrs, rdfs-reasoner, temporal, graph-algos,
     autodesc-minimal, autodesc-full). Plugs into
     `MemoryStore` / `EmbeddingProvider` trait reservations in `nika-kernel`.
