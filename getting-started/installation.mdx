@@ -159,17 +159,24 @@ per-OS fix.
 
 The first run is a rehearsal. When you want a billed or local answer:
 
-- **The tool you already pay for.** `nika run --help` names `--access`
-  harness on this binary. A pin is a pin: unsatisfied refuses
-  (`NIKA-1801`), never substitutes. See
-  [Harness access](/guides/harness-access).
 - **A local server**, when you choose to run one — not a first-run
   download. [Local models](/guides/local-models).
 - **A cloud key**, when you choose to set one. Env var names live in
   [Providers catalog](/reference/providers-catalog).
 
-`nika doctor` reports key *presence* (never values) and which clients
-are wired.
+Run `nika doctor`. It reports key *presence* (never values) and which
+clients are wired, and it is the honest inventory of what **your** binary
+can reach — not what a flag mentions.
+
+<Note>
+  **The tool you already pay for** — running a workflow on an agent seat
+  you are already logged into, with no key of your own — is the
+  `--access harness` class. `nika run --help` names the flag on
+  v{STATUS.version}, but the class is not compiled into that release:
+  `nika doctor` prints no `access` line and no `harness` rows on it. It
+  ships in the next one. Until your own `nika doctor` shows those rows,
+  read [Harness access](/guides/harness-access) as what is coming.
+</Note>
 
 ## What gets installed
 
