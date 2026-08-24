@@ -60,6 +60,10 @@ jobs:
             echo "::error::tool-count check skipped despite the install — wire assertion did not run"
             exit 1
           fi
+          # check (g) re-asserts the snapshot against the release installed
+          # above, so a train that moves the front door reddens HERE instead
+          # of on a reader's terminal. The plant proves it both ways.
+          python3 scripts/tests/test_count_drift_first_contact.py
       # teach-parity is the inverse of oracle-sweep: it proves every RELEASED
       # subcommand has a reference/cli.mdx row. It soft-skips without a
       # binary — the install above makes a skip here a wiring failure, so a
