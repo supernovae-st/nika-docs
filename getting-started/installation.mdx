@@ -75,20 +75,25 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 ## First-run verification
 
+You already have Claude Code or Codex. You do not need a key and you do
+not need to pull a model for this step.
+
 ```bash
 nika --version
-nika try       # see a canonical workflow WORK — offline, zero keys, nothing written
-nika doctor    # providers + editor/agent readiness + exact fixes
-nika init      # repo-local schema + AGENTS.md
-nika wire all  # explicit MCP wiring for agent clients
+nika                 # the mirror, and the line to type next
+nika try 01-hello    # offline proof · zero keys · nothing written
 ```
 
-`nika try` is the zero-risk first contact: it rehearses a canonical
-example under the mock provider — nothing written, nothing owned, and
-bare `nika try` lists what there is to see. `nika init` scaffolds
-repo-local schema wiring and agent context. Newer binaries also expose
-`nika wire cursor` / `nika wire all` for explicit MCP client setup.
-Installers do not mutate editor configs automatically.
+Run `nika` with no arguments and read the line it offers. **Your** binary
+is the source of truth; on v{STATUS.version} that line is
+`{STATUS.firstCommand}`, and this page is gated on saying the same thing.
+
+It is the zero-risk first contact: a canonical example rehearsed under
+`mock/echo`, nothing written, nothing owned, done in a second. Bare `nika
+try` lists the rest of the shelf. `nika init` scaffolds repo-local schema
+wiring and agent context when you want a repo, not before. `nika wire
+<client>` is explicit MCP client setup. Installers do not mutate editor
+configs automatically.
 
 ## Platforms
 
@@ -150,21 +155,28 @@ per-OS fix.
   with SHA256 sums.
 </Check>
 
-## Provider keys
+## A real answer, later
 
-Nika needs a provider to run inference (local needs no key at all).
+The first run is a rehearsal. When you want a billed or local answer:
 
-```bash
-# Local · zero key (Ollama daemon)
-ollama pull llama3.2:3b
+- **A local server**, when you choose to run one — not a first-run
+  download. [Local models](/guides/local-models).
+- **A cloud key**, when you choose to set one. Env var names live in
+  [Providers catalog](/reference/providers-catalog).
 
-# Or export any cloud provider key (ephemeral)
-export MISTRAL_API_KEY=...
-export ANTHROPIC_API_KEY=sk-ant-...
-```
+Run `nika doctor`. It reports key *presence* (never values) and which
+clients are wired, and it is the honest inventory of what **your** binary
+can reach — not what a flag mentions.
 
-See [Providers catalog](/reference/providers-catalog) for all
-{STATUS.providers} providers with their env var names.
+<Note>
+  **The tool you already pay for** — running a workflow on an agent seat
+  you are already logged into, with no key of your own — is the
+  `--access harness` class. `nika run --help` names the flag on
+  v{STATUS.version}, but the class is not compiled into that release:
+  `nika doctor` prints no `access` line and no `harness` rows on it. It
+  ships in the next one. Until your own `nika doctor` shows those rows,
+  read [Harness access](/guides/harness-access) as what is coming.
+</Note>
 
 ## What gets installed
 
@@ -229,11 +241,11 @@ rm ~/.nika/bin/nika
   <Card title="Editor setup" icon="code" href="/getting-started/editors">
     Schema validation + LSP roadmap.
   </Card>
-  <Card title="Live state" icon="gauge" href="/reference/status">
-    Track live engine state.
+  <Card title="Your machine" icon="stethoscope" href="/getting-started/your-machine">
+    The mirror this binary prints.
   </Card>
-  <Card title="Architecture" icon="layer-group" href="/architecture/layers">
-    Why Nika is built this way.
+  <Card title="Agents" icon="robot" href="/getting-started/agents">
+    Claude Code and Codex you already have.
   </Card>
 </CardGroup>
 

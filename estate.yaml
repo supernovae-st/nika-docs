@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 200
+  classified_files: 202
   file_rows: 32
   pattern_rows: 6
   by_class:
-    authored: 195
+    authored: 197
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 32
+  unverified-default: 34
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 2861e17fb83940c3efee588d2234b2bc51ee3207c7fefdeebb8a0897eb5e43bc
+  sha256: 59122539f35793590a3cb69f2a711285b7ecb2ae8eca3eca480f575bf2f07787
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -131,7 +131,7 @@ files:
   note: "frontmatter description hand-types '105 MCP server entries … snapshot 2026-04-17' — outside count-drift-gate's checked classes (providers · builtins · extract modes), so it can rot silently"
 - path: "scripts/count-drift-gate.py"
   class: authored
-  sha256: c6e2bf6319f4ac7fcc4a93591eb7c948ecaf123c089e41ac238355f63e8ec0b4
+  sha256: 4494ccd1b9b55b20fbc24bd2da085a645b924f1bdaae4d46dc1f118b80301d4f
   evidence: "hand-written gate · 'the count-rot ratchet' design prose header"
 - path: "scripts/estate.py"
   class: pinned-copy
@@ -153,7 +153,7 @@ files:
   evidence: "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)"
 - path: "scripts/mintlify-snapshot.sh"
   class: authored
-  sha256: 158def65dcfcb258de3ff310243fc8ceae88bdc02fd1c6a3a8577346b30a89f2
+  sha256: 1f61eacbcba6d411a7f6fbf5c8f0b73447a497acb6f56d1bdb2353e84fe31ba2
   evidence: "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)"
 - path: "scripts/oracle-sweep.py"
   class: authored
@@ -187,14 +187,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 7bd587c1f64b9069edd3406772591f21c2eaa146edfe942354679273f6ae1be6
+  sha256: a3dcae1c607bbe86574a7b1e0f8b3da5c6ef26d86301c3d127e84531f1be646c
   evidence: "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields"
   note: "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 142
-  aggregate_sha256: 1aa80ee9c5bf428a915ec1fa31f9e912009f92f0128d13e1ab1d49f444294f4d
+  aggregate_sha256: 2c5a2eafbed888d403105c2a684f2de57ae8882566a7bfc38fbc415b03a396ff
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -222,8 +222,8 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 9
-  aggregate_sha256: a0e9f59e9d5d74026c457b96082ed4578c660241f787649febc7de2c0d5bad3a
+  match_count: 11
+  aggregate_sha256: 34c5194c491349ca784297d2a8dc34407c286ef245c6c4739e4df036ca43e22c
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -239,7 +239,9 @@ unverified:
 - "images/posters/permits-audit.png"
 - "images/posters/static-check-fix.png"
 - "images/workflow-gallery.png"
+- "scripts/first_command.py"
 - "scripts/mdx-yaml-fix.py"
+- "scripts/tests/test_count_drift_first_contact.py"
 - "scripts/tests/test_mdx_yaml_fix.py"
 - "scripts/tests/test_oracle_sweep_bare_foreach.py"
 - "scripts/tests/test_oracle_sweep_manifest.py"

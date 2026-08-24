@@ -28,6 +28,13 @@
 #   (f) every {STATUS.x} / {CANON.x} / {SHOWCASE.x} a page interpolates
 #       must EXIST in its snippet. Dropping a key renders the literal
 #       string "undefined" on a public page, and nothing else notices.
+#   (g) the first-contact command. A fenced command cannot interpolate,
+#       so the string IS duplicated across pages — and it moved twice in
+#       three releases (`nika try 01-hello` -> `nika new hello`) with
+#       three pages still teaching the old one. Every bare `nika try
+#       <slug>` / `nika new <slug>` must equal STATUS.firstCommand, which
+#       mintlify-snapshot.sh reads off the downloadable binary. A flagged
+#       variant is a deliberate lane and is left alone.
 # Exit 0 clean · 1 findings. Stdlib only (check c skips if nika absent).
 
 import json
@@ -36,6 +43,9 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from first_command import KNOWN_LABELS, read_first_command  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
@@ -178,6 +188,20 @@ def claim_lines(text: str):
                 in_update = False
             continue
         yield i, line
+
+
+# The pages a stranger can land on BEFORE owning a workflow — the only ones
+# where a bare `nika try <slug>` means "the first thing to type" rather than
+# "how to run THIS example". An examples/ page teaching its own slug is right;
+# a getting-started page teaching a retired front door is what cost us three
+# releases. A new front-of-funnel page belongs on this list, deliberately.
+FIRST_CONTACT = ("introduction.mdx", "getting-started/", "sdk/start/",
+                 "concepts/how-nika-compares.mdx")
+
+
+def first_contact(rel) -> bool:
+    p = rel.as_posix()
+    return any(p == e or p.startswith(e) for e in FIRST_CONTACT)
 
 
 def frontmatter_description(text: str) -> str | None:
@@ -332,12 +356,58 @@ def main() -> int:
                             f"{rel}: says {m.group(0)!r} but `nika mcp` "
                             f"serves {served} — update the prose")
 
+    # (g) the FIRST-CONTACT command. A fenced command cannot interpolate, so
+    # the string is unavoidably duplicated — which is exactly how it went
+    # stale in three pages at once. It stops being a hand-owned string here:
+    # every bare `nika try <slug>` / `nika new <slug>` (no flags — a flagged
+    # variant is a deliberate lane, not the front door) must be the command
+    # the snapshot projects off the downloadable binary.
+    snap = (ROOT / "snippets" / "_status-snapshot.mdx").read_text(encoding="utf-8")
+    fc = re.search(r'firstCommand:\s*"([^"]+)"', snap)
+    if not fc:
+        findings.append("snippets/_status-snapshot.mdx: no firstCommand — "
+                        "regenerate with scripts/mintlify-snapshot.sh")
+    else:
+        first = fc.group(1)
+        # CI installs the latest RELEASE above, so the snapshot itself gets
+        # re-asserted against the binary a reader downloads — otherwise the
+        # pages would only ever agree with a stamp nobody re-read.
+        nika = shutil.which("nika")
+        if nika:
+            live = read_first_command(nika)
+            if not live:
+                findings.append(
+                    "the welcome screen carries no known 'what to type next' label. "
+                    f"Known: {KNOWN_LABELS}. Teach the new shape in "
+                    "scripts/first_command.py")
+            elif live != first:
+                findings.append(
+                    f"snippets/_status-snapshot.mdx: firstCommand {first!r} but the "
+                    f"installed release prints {live!r} — re-run "
+                    "scripts/mintlify-snapshot.sh")
+                first = live
+        bare = re.compile(r"^nika (?:try|new) [a-z0-9][a-z0-9/._-]*\s*(?:#.*)?$")
+        for page in sorted(ROOT.rglob("*.mdx")):
+            rel = page.relative_to(ROOT)
+            if not first_contact(rel):
+                continue
+            for i, line in enumerate(page.read_text(encoding="utf-8").splitlines(), 1):
+                if not bare.match(line.strip()):
+                    continue
+                taught = line.strip().split("#")[0].strip()
+                if taught != first:
+                    findings.append(
+                        f"{rel}:{i}: teaches {taught!r} as first contact, but the "
+                        f"pinned binary prints {first!r} — the reader pastes a "
+                        "command their download refuses")
+
     if findings:
         print("count-drift-gate · FAIL")
         for f in findings:
             print(f"  ✗ {f}")
         return 1
-    print("count-drift-gate · OK (descriptions count-free · _canon.mdx present)")
+    print("count-drift-gate · OK (descriptions count-free · _canon.mdx present "
+          "· first contact follows the binary)")
     return 0
 
 

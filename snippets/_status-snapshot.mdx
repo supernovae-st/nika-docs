@@ -1,9 +1,13 @@
 {/* _status-snapshot.mdx — MIXED PROVENANCE. Read this before editing.
 
     FROM THE DOWNLOADABLE BINARY (scripts/mintlify-snapshot.sh, nika on PATH):
-      version · lastUpdated · engineSha · providers
+      version · lastUpdated · engineSha · providers · firstCommand
       providers = `nika catalog --json` `.providers.length` on that binary.
       A different noun from CANON.providers (the spec-named language set).
+      firstCommand = the line that binary prints as the next thing to type,
+      read in an EMPTY directory on a scratch HOME (what a stranger sees).
+      It moved twice in three releases while these pages taught the old one;
+      count-drift-gate check (g) is what stops that happening again.
 
     STILL HAND-MAINTAINED (engine-main snapshot · frozen pages interpolate these):
       head · crates* · libTests · clippyWarnings · adrs* · capabilityRules ·
@@ -20,6 +24,7 @@ export const STATUS = {
   branch: "main",
   version: "0.114.0",
   engineSha: "b1154df75",
+  firstCommand: "nika try 01-hello",
   cratesWorkspace: 56,
   cratesAdmitted: 54,
   cratesTarget: "50-90",
@@ -33,5 +38,5 @@ export const STATUS = {
   providers: 38,
   capabilityRules: 49,
   hygieneVectors: 40,
-  lastUpdated: "2026-08-23"
+  lastUpdated: "2026-08-24"
 };
