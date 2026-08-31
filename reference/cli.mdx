@@ -37,7 +37,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika catalog --tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
 | `nika new [intent] [dest]` | The ONE creation door: plain words route across the whole catalog · an example slug lands verbatim with its ingredients · a skeleton name instantiates (`nika new '?'` lists the set) |
 | `nika arm [fire\|disarm]` | Read the local beat registry and show what is armed plus the next firing time — scheduling nothing by default. `fire` evaluates and records one due beat; `disarm` teaches the explicit registry gesture |
-| `nika serve` | Resident ARM firer by default (the same `fire`, wall clock in place of the OS). `--bind` with `--workflows` and `--token-file` opens authenticated loopback HTTP: jobs, SSE and OpenAPI. Cancel, artifacts and `POST /v1/run` stay 404 |
+| `nika serve` | Resident ARM firer by default (the same `fire`, wall clock in place of the OS). `--bind` with `--workflows` and `--token-file` opens authenticated HTTP: jobs, SSE, cancellation, trace diagnostics, workflows, schedules and OpenAPI. Artifact routes and `POST /v1/run` are absent |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
 | `nika sign <file>` | Sign a workflow file (author-binding) — mints `<file>.minisig` · `--check` verifies the signature against the trusted key |
 | `nika key mint|fingerprint|rotate` | The run-signing key lifecycle — mint · TOFU fingerprint · rotate (old public keys stay verifiable) |

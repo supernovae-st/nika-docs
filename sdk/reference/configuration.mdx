@@ -1,92 +1,87 @@
 ---
 title: "SDK configuration"
-description: "Reference local binary options and preview HTTP, retry, polling, concurrency and logging options."
+description: "Exact local, remote and per-operation options for One SDK 0.116.0."
 sidebarTitle: "Configuration"
 icon: "sliders"
 ---
 
-import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SourceContract } from "/snippets/_sdk-contract.mdx"
 
-## Local options
+<SourceContract />
 
-<LocalContract />
+## Shared bounds
 
 ```ts
-interface LocalNikaOptions {
-  bin?: string
-  cwd?: string
+interface NikaSharedConfig {
+  eventBufferSize?: number      // default 256
+  machineBufferBytes?: number   // default 64 KiB
 }
 ```
 
-| Option | Default | Meaning |
-|---|---|---|
-| `bin` | explicit option, then `NIKA_BIN`, then `nika` on `PATH` | Executable to spawn |
-| `cwd` | current Node process directory | Base for relative workflows and traces |
-
-### Check options
+## Local by default
 
 ```ts
-interface CheckOptions {
+interface NikaLocalConfig extends NikaSharedConfig {
+  cwd?: string
+  bin?: string
+}
+```
+
+Engine resolution is explicit `bin`, then `NIKA_BIN`, then the exact optional
+platform package. Implicit `PATH` lookup is refused.
+
+## Remote when a URL is present
+
+```ts
+interface NikaRemoteConfig extends NikaSharedConfig {
+  url: string
+  token: string
+  allowInsecureHttp?: boolean
+  requestTimeout?: number       // default 30 seconds
+  fetch?: typeof globalThis.fetch
+  cwd?: string
+  bin?: string
+}
+```
+
+`cwd` and `bin` remain relevant remotely because immutable snapshot capture
+happens through a compatible local engine before HTTP admission.
+
+## Operation options
+
+```ts
+interface NikaCheckOptions {
   model?: string
   nativeStrict?: boolean
+  signal?: AbortSignal
 }
-```
 
-### Run options
-
-```ts
-interface RunOptions {
+interface NikaRunOptions {
   vars?: Record<string, string | number | boolean>
   model?: string
   maxCostUsd?: number
-  resume?: string
-  signal?: AbortSignal
+  idempotencyKey?: string
 }
+
+interface NikaEventsOptions {
+  signal?: AbortSignal
+  bufferSize?: number
+}
+
+interface NikaAttachRunOptions { lastEventId?: number }
+interface NikaTraceVerifyOptions { signal?: AbortSignal }
 ```
 
-The `vars` field maps to repeatable CLI `--var KEY=VALUE` overrides. It does
-not reintroduce a top-level `vars:` key in the workflow envelope.
-
-## Remote options
-
-<RemoteContract />
-
-| Option | Required | Default |
-|---|---:|---|
-| `url` | yes | none |
-| `token` | yes | none |
-| `timeout` | no | 30 seconds |
-| `retries` | no | 2 |
-| `concurrency` | no | 24 |
-| `pollInterval` | no | 2 seconds |
-| `pollTimeout` | no | 5 minutes |
-| `pollBackoff` | no | 1.5 |
-| `fetch` | no | bound `globalThis.fetch` |
-| `logger` | no | none |
-
-```ts
-const nika = Nika.fromEnv({
-  timeout: 15_000,
-  retries: 1,
-  concurrency: 8,
-})
-```
-
-`fromEnv()` reads `NIKA_URL` and `NIKA_TOKEN`.
-
-## Continue
+Remote `check` refuses `model` and `nativeStrict`. Remote `run` accepts
+`idempotencyKey` but refuses `vars`, `model` and `maxCostUsd` until the HTTP
+request envelope can carry them. Signals stop a request or observer; only
+`cancel(run)` cancels admitted work.
 
 <CardGroup cols={2}>
   <Card title="Method index" icon="list" href="/sdk/reference/methods">
-    See where every option is consumed.
+    See where each option is consumed.
   </Card>
   <Card title="Type index" icon="brackets-curly" href="/sdk/reference/types">
-    Read all exported result shapes.
-  </Card>
-  <Card title="Local client" icon="terminal" href="/sdk/local/client">
-    Configure the released path.
-  </Card>
-  <Card title="Remote client" icon="satellite-dish" href="/sdk/remote/client">
-    Configure the preview transport.
+    Read the exported projections.
   </Card>
 </CardGroup>

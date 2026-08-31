@@ -1,74 +1,40 @@
 ---
 title: "SDK method index"
-description: "Every LocalNika, jobs, workflows, health and webhook method in one compact reference."
+description: "The complete One SDK 0.116.0 lifecycle vocabulary."
 sidebarTitle: "Method index"
 icon: "list"
 ---
 
-import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SourceContract } from "/snippets/_sdk-contract.mdx"
 
-## LocalNika
+<SourceContract />
 
-<LocalContract />
+| Method | Returns | Local | HTTP |
+|---|---|:---:|:---:|
+| `check(workflow, options?)` | `Promise<NikaCheckResult>` | yes | yes |
+| `run(workflow, options?)` | `Promise<NikaRun>` | yes | yes |
+| `events(run, options?)` | `AsyncIterable<NikaEvent>` | yes | yes |
+| `cancel(run)` | `Promise<NikaCancelResult>` | yes | yes |
+| `traceVerify(receipt, options?)` | `Promise<NikaTraceVerifyResult>` | yes | typed unavailable verdict currently |
+| `attachRun(id, options?)` | `Promise<NikaRun>` | no | yes |
+| `status(run)` | `Promise<NikaRunStatus>` | no | yes |
+| `listWorkflows()` | `Promise<readonly string[]>` | no | yes |
+| `workflow(name)` | `Promise<NikaWorkflowMetadata>` | no | yes |
+| `schedule(workflow, options)` | `Promise<NikaScheduleApplyResult>` | no | yes |
+| `scheduleStatus(id)` | `Promise<NikaScheduleStatus>` | no | yes |
 
-| Method | Returns | Machine twin |
-|---|---|---|
-| `version()` | `Promise<string>` | `nika --version` |
-| `check(file, options?)` | `Promise<LocalCheckReport>` | `nika check --json` |
-| `dryRunPlan(file)` | `Promise<LocalPlan>` | `nika run --dry-run --json` |
-| `run(file, options?)` | `RunHandle` | `nika run --json` |
-| `runToEnd(file, options?)` | `Promise<LocalRunOutcome>` | same stream, buffered |
-| `test(file, options?)` | `Promise<GoldenVerdict>` | `nika test` |
-| `traceVerify(path?)` | `Promise<TraceVerdict>` | `nika trace verify` |
+`run.done` is the sole terminal result. Methods that require resident
+authority return typed compatibility errors in native mode. `events`,
+`cancel`, and `status` accept only a run owned by that client instance.
 
-## Jobs
-
-<RemoteContract />
-
-| Method | Returns |
-|---|---|
-| `submit(workflow, inputs?, options?)` | `Promise<RunResponse>` |
-| `status(jobId)` | `Promise<NikaJob>` |
-| `cancel(jobId)` | `Promise<CancelResponse>` |
-| `run(workflow, inputs?, options?)` | `Promise<NikaJob>` |
-| `stream(jobId, options?)` | `AsyncIterable<NikaEvent>` |
-| `artifacts(jobId)` | `Promise<NikaArtifact[]>` |
-| `artifact(jobId, name)` | `Promise<string>` |
-| `artifactJson<T>(jobId, name)` | `Promise<T>` |
-| `artifactBinary(jobId, name)` | `Promise<Uint8Array>` |
-| `artifactStream(jobId, name)` | `Promise<ReadableStream<Uint8Array>>` |
-| `runAndCollect(workflow, inputs?, options?)` | `Promise<Record<string, unknown>>` |
-
-## Workflows
-
-| Method | Returns |
-|---|---|
-| `list()` | `Promise<WorkflowInfo[]>` |
-| `listPage(options?)` | `Promise<ListWorkflowsResponse>` |
-| `reload()` | `Promise<WorkflowInfo[]>` |
-| `source(name)` | `Promise<string>` |
-
-## System
-
-| Method | Returns |
-|---|---|
-| `nika.health()` | `Promise<NikaHealth>` |
-| `Nika.fromEnv(overrides?)` | `Nika` |
-| `Nika.verifyWebhook(body, signature, secret, tolerance?)` | `Promise<boolean>` |
-
-## Continue
+The facade intentionally has no version, plan, buffered-run, golden-test,
+health, webhook, artifact or environment-constructor convenience methods.
 
 <CardGroup cols={2}>
   <Card title="Configuration" icon="sliders" href="/sdk/reference/configuration">
-    Constructor and transport defaults.
+    Constructor and operation options.
   </Card>
   <Card title="Types" icon="brackets-curly" href="/sdk/reference/types">
-    Expand every return shape.
-  </Card>
-  <Card title="Source" icon="github" href="https://github.com/supernovae-st/nika-client/tree/main/src">
-    Read the implementation.
-  </Card>
-  <Card title="SDK map" icon="diagram-project" href="https://nika.sh/sdk/reference">
-    See the visual reference system.
+    Expand the public projections.
   </Card>
 </CardGroup>

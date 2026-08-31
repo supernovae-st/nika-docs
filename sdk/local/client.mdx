@@ -1,82 +1,64 @@
 ---
-title: "LocalNika client"
-description: "Construct and probe the zero-dependency driver for the released Nika binary."
-sidebarTitle: "LocalNika client"
+title: "Local client"
+description: "Use the One SDK facade with its default native-process transport."
+sidebarTitle: "Local client"
 icon: "terminal"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SourceContract, LocalContract } from "/snippets/_sdk-contract.mdx"
 
+<SourceContract />
 <LocalContract />
-
-`LocalNika` is a thin process driver. It does not reimplement parsing,
-planning, policy or execution. It calls the binary's machine surfaces with an
-argv array and types the result.
 
 ## Construct the client
 
 ```ts
-import { LocalNika } from '@supernovae-st/nika-client/local'
+import { Nika } from '@supernovae-st/nika-client'
 
-const nika = new LocalNika({
+const nika = new Nika({
   bin: '/opt/nika/bin/nika',
   cwd: '/srv/workflows',
 })
 ```
 
-Both options are optional. `bin` resolves through the explicit option,
-`NIKA_BIN`, then `PATH`. `cwd` controls relative workflow paths and the trace
-store used by the child process.
+Both options are optional. Binary resolution is strict: explicit `bin`, then
+`NIKA_BIN`, then the exact optional platform package. The client refuses an
+implicit `PATH` lookup. `cwd` anchors relative workflow paths and project
+discovery.
 
-## Probe the engine
+## Probe compatibility with a check
+
+The One SDK has no separate version method. Make a real, read-only check at
+startup when the application cannot operate without Nika:
 
 ```ts
-const version = await nika.version()
-console.info({ version })
+const report = await nika.check('workflows/health.nika.yaml', {
+  nativeStrict: true,
+})
+
+if (!report.clean) console.error(report)
 ```
 
-The probe rejects when the binary cannot be spawned or reports a non-zero
-exit. Run it at process startup when the application cannot operate without
-Nika.
+The engine owns the open report shape. Known fields aid TypeScript completion;
+future engine fields pass through unchanged.
 
-## Method map
+## Native method boundary
 
-<div className="sdk-flight sdk-flight-compact">
-  <span>LOCALNIKA · RELEASED MACHINE SURFACES</span>
-  <pre tabIndex={0}>{`version ───────────── nika --version
-check ─────────────── nika check --json
-dryRunPlan ────────── nika run --dry-run --json
-run / runToEnd ────── nika run --json
-test ──────────────── nika test
-traceVerify ───────── nika trace verify`}</pre>
-</div>
-
-The mapping matters: if a payload evolves, the engine owns its version
-envelope and the SDK preserves unknown fields through `raw`.
-
-## No shell around paths
-
-The driver uses `spawn(binary, args)`. A workflow path is one argv value,
-never text concatenated into a shell command.
+Local mode supports `check`, `run`, `events`, `cancel` and `traceVerify`.
+`attachRun`, `status`, workflow discovery and schedules require resident HTTP
+authority and return typed compatibility errors in native mode.
 
 <Info>
-  This protects the application seam. It does not grant workflow authority.
-  The engine still enforces permits, secrets and its hardened runtime floor.
+  The driver spawns a binary with an argv array. This protects the application
+  seam from shell interpolation; the engine still enforces permits, secrets,
+  spend and its hardened runtime floor.
 </Info>
 
-## Continue
-
 <CardGroup cols={2}>
-  <Card title="Check and plan" icon="list-check" href="/sdk/local/check-and-plan">
-    Read the complete admission report.
+  <Card title="Check" icon="list-check" href="/sdk/local/check-and-plan">
+    Read the engine-owned admission report.
   </Card>
-  <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">
-    Consume the journal and settled outcome.
-  </Card>
-  <Card title="Configuration" icon="sliders" href="/sdk/reference/configuration">
-    Constructor and run option reference.
-  </Card>
-  <Card title="Source" icon="github" href="https://github.com/supernovae-st/nika-client/blob/main/src/local/index.ts">
-    Read the exact process boundary.
+  <Card title="Run lifecycle" icon="circle-play" href="/sdk/local/run-and-cancel">
+    Observe, settle and cancel without conflating them.
   </Card>
 </CardGroup>

@@ -1,6 +1,6 @@
 ---
 title: "Server surfaces"
-description: "Separate the resident firer, loopback HTTP on nika serve --bind, and local model serve."
+description: "Separate the resident firer, authenticated nika serve HTTP and local model serving."
 sidebarTitle: "Server surfaces"
 icon: "server"
 ---
@@ -8,51 +8,39 @@ icon: "server"
 import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
 import { ProjectContract } from "/snippets/_project-contract.mdx"
 
-Three surfaces can sound like a server. They do different jobs and accept
-different clients.
+Three surfaces sound like servers but accept different clients.
 
-## Truth table
-
-Measured 2026-08-23 against `nika 0.114.0 (b1154df75)` — the GitHub release a
-reader downloads. Engine `origin/main` was `80d62b8f` that afternoon (later
-than this tag). Pages follow the binary, not `main`.
-
-| Surface | Job | Status on 0.114.0 |
+| Surface | Job | HTTP workflow API |
 |---|---|---|
-| `nika serve` (no `--bind`) | Fires armed local workflows from the `nika.yaml` project clock | Live · **not HTTP** |
-| `nika serve --bind` + `--workflows` + `--token-file` | Authenticated loopback HTTP · jobs, SSE, OpenAPI | Live · **holes named below** |
-| `nika model serve` | Hosts a local model behind an OpenAI-compatible inference endpoint | Live · a model provider, not a job API |
+| `nika serve` without `--bind` | Fires the `nika.yaml` project clock | no |
+| `nika serve --bind` | Authenticated resident jobs and schedules | yes |
+| `nika model serve` | OpenAI-compatible local inference provider | no |
 
 <ProjectContract />
-
 <RemoteContract />
 
-The OpenAPI document the binary serves (`GET /v1/openapi.json`) describes
-itself as *Authenticated loopback remote execution. Cancel and artifacts are
-absent.* Never say “remote execution” without those 404s.
+## OpenAPI 0.116.0 route truth
 
-## What `--bind` actually answers
-
-Owner-only token file (`chmod 600`). Bytes never enter argv. A 20-character
-token was refused (`server credential source refused`); a 48-byte owner-only
-file was accepted.
-
-| Route | Measured |
+| Method and path | Contract |
 |---|---|
-| `GET /health` | 200 · no auth · `{status, service: nika-serve, engine_version, build_sha, api_version}` |
-| `GET /v1/openapi.json` | 200 · bearer |
-| `GET /v1/workflows` | 200 · `{"workflows":[…filenames]}` |
-| `GET /v1/workflows/:name` | 200 when `:name` is the contained filename (`hello.nika.yaml`) |
-| `POST /v1/jobs` | 202 with `Idempotency-Key` + a contained `.nika.yaml` path · 400 without the header |
-| `GET /v1/jobs/:id` | 200 after admit · id, status, execution_id, trace_id |
-| `GET /v1/jobs/:id/status` | 200 · status only |
-| `GET /v1/jobs/:id/events` | 200 `text/event-stream` · sequence / kind / status frames |
-| `GET /status` | **404** `route not found` |
-| `GET /events` | **404** `route not found` (SSE lives under the job id) |
-| `GET /v1/jobs` (list) | **404** `route not found` |
-| `POST /v1/run` | **404** `route not found` |
-| `POST /v1/jobs/:id/cancel` | **404** `route not found` |
-| `GET /v1/jobs/:id/artifacts` | **404** `route not found` |
+| `GET /health` | unauthenticated health and supported capabilities |
+| `GET /v1/openapi.json` | authenticated contract document |
+| `POST /v1/check` | workflow check |
+| `POST /v1/jobs` | idempotent admission |
+| `GET /v1/jobs/{id}` | durable job projection |
+| `GET /v1/jobs/{id}/status` | current status |
+| `GET /v1/jobs/{id}/events` | SSE event stream |
+| `POST /v1/jobs/{id}/cancel` | idempotent cancellation |
+| `GET /v1/jobs/{id}/trace/verify` | typed verification diagnostic |
+| `GET /v1/workflows` | contained names |
+| `GET /v1/workflows/{name}` | path-free metadata |
+| `GET /v1/schedules/{id}` | schedule status |
+| `PUT /v1/schedules/{id}` | CAS-backed schedule apply |
+
+The contract has no `POST /v1/run`, job-list, artifact, schedule-list,
+schedule-delete, trigger or backfill routes. Remote trace verification
+currently resolves a typed `unavailable` verdict because the server has no
+path-free journal authority; the diagnostic route itself is live.
 
 ```sh
 nika serve --bind 127.0.0.1:18765 \
@@ -65,13 +53,15 @@ nika serve --bind 127.0.0.1:18765 \
 <LocalContract />
 
 ```ts
-import { LocalNika } from '@supernovae-st/nika-client/local'
+import { Nika } from '@supernovae-st/nika-client'
 
-const nika = new LocalNika({ cwd: process.cwd() })
-const result = await nika.runToEnd('workflow.nika.yaml')
+const nika = new Nika({ cwd: process.cwd() })
+const run = await nika.run('workflow.nika.yaml')
+const result = await run.done
 ```
 
-This path requires no daemon.
+This path needs no resident server. The npm registry still serves client
+`0.115.0`; these examples target reviewed source `0.116.0`.
 
 ## Local model path
 
@@ -79,37 +69,18 @@ This path requires no daemon.
 nika model serve --model Qwen/Qwen3-0.6B-GGUF
 ```
 
-The engine calls that inference endpoint as a provider. Application code does
+The engine calls this inference endpoint as a provider. Application code does
 not submit workflow jobs to it.
-
-## Name collision
-
-<div className="sdk-flight sdk-flight-compact">
-  <span>NAME COLLISION · THREE DIFFERENT BOUNDARIES</span>
-  <pre tabIndex={0}>{`nika.yaml arm[] ── nika serve ──────────── local clock fires     [ LIVE ]
-
-nika serve --bind ── Bearer + OpenAPI ──── jobs / SSE / workflows [ LIVE · 404: run, cancel, artifacts ]
-
-engine ──────────── nika model serve ──── local inference         [ LIVE ]`}</pre>
-</div>
-
-## Continue
 
 <CardGroup cols={2}>
   <Card title="Resident server" icon="clock" href="/sdk/operations/resident-server">
-    Default firer, and the `--bind` door on the same verb.
+    Operate the default firer and opt-in HTTP door.
+  </Card>
+  <Card title="Remote client" icon="satellite-dish" href="/sdk/remote/client">
+    Configure the matching One SDK transport.
   </Card>
   <Card title="Local models" icon="microchip" href="/guides/local-models">
     Run inference on your own machine.
-  </Card>
-  <Card title="LocalNika" icon="terminal" href="/sdk/local/client">
-    Use the released argv path today.
-  </Card>
-  <Card title="ARM and servers" icon="server" href="/reference/arm">
-    Read the stable deployment reference.
-  </Card>
-  <Card title="Server runbook" icon="clipboard-check" href="/sdk/operations/server-runbook">
-    Supervise and probe the foreground process in production.
   </Card>
   <Card title="Deployment topologies" icon="sitemap" href="/sdk/operations/deployment-topologies">
     Choose a boundary by the job it owns.

@@ -1,6 +1,6 @@
 ---
 title: "SSE streaming"
-description: "Consume typed server-sent events with idle detection and Last-Event-Id reconnection."
+description: "Observe a run through bounded additive event views and durable recovery."
 sidebarTitle: "SSE streaming"
 icon: "wave-pulse"
 ---
@@ -9,80 +9,53 @@ import { RemoteContract } from "/snippets/_sdk-contract.mdx"
 
 <RemoteContract />
 
-A dropped connection is not a completed workflow. The preview stream requires
-a terminal event and reconnects from the last event id after transport loss.
-
-## Consume the union
-
 ```ts
-for await (const event of nika.jobs.stream(job_id)) {
-  switch (event.type) {
-    case 'task_start':
-      ui.start(event.task_id, event.verb)
-      break
-    case 'task_complete':
-      ui.complete(event.task_id, event.duration_ms)
-      break
-    case 'artifact_written':
-      ui.addArtifact(event.path, event.size)
-      break
+for await (const event of nika.events(run, { bufferSize: 64 })) {
+  render(event)
+  if (event.sequence !== undefined) {
+    await persistSequence(run.id, event.sequence)
   }
 }
 ```
 
-Terminal types are `completed`, `failed` and `cancelled`.
+`NikaEvent` is open to additive fields and event kinds. Render only what the
+application understands, preserve sequence when it is present, and use
+`run.done` for terminal truth.
 
-## Tune the connection
+Each subscriber has a bounded queue. If a consumer falls behind, the SDK
+throws `NikaEventBufferOverflowError` rather than silently losing evidence.
+
+## Stop one view
 
 ```ts
-const events = nika.jobs.stream(job_id, {
-  idleTimeout: 120_000,
-  maxReconnects: 5,
-  reconnectDelay: 2_000,
-  signal: request.signal,
+const controller = new AbortController()
+
+for await (const event of nika.events(run, {
+  signal: controller.signal,
+})) {
+  render(event)
+}
+```
+
+The signal stops only this subscriber. Call `nika.cancel(run)` to ask the
+server to cancel engine work.
+
+## Resume from application state
+
+```ts
+const recovered = await nika.attachRun(jobId, {
+  lastEventId: lastCommittedSequence,
 })
 ```
 
-Set the idle timeout above the longest legitimate silence. Keep reconnects
-bounded so an outage cannot pin a worker forever.
-
-## Resume without duplicates
-
-<div className="sdk-flight">
-  <span>SSE CONTINUITY · LAST-EVENT-ID</span>
-  <pre tabIndex={0}>{`id: 41  task_complete
-       │
-       × TCP connection closes
-       │
-       └── reconnect header: Last-Event-Id: 41
-                                      │
-                                      ▼
-id: 42  artifact_written`}</pre>
-</div>
-
-The parser accepts standard multi-line `data:` fields, tracks `id:` and ignores
-comments and keep-alive frames.
-
-## Failure rules
-
-- User abort: stop, do not reconnect.
-- Idle timeout: fail with `NikaTimeoutError`.
-- Non-retryable client error: fail immediately.
-- Transport close before a terminal event: reconnect within the cap.
-
-## Continue
+The HTTP adapter uses the persisted cursor for SSE continuity. The application
+owns when a sequence is durable.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
-    Persist the identity before opening the stream.
+    Own identity and recovery around the stream.
   </Card>
-  <Card title="Run events" icon="signal" href="/sdk/runtime/events">
+  <Card title="Runtime events" icon="signal" href="/sdk/runtime/events">
     Build a tolerant presentation reducer.
-  </Card>
-  <Card title="Artifacts" icon="box-archive" href="/sdk/remote/artifacts">
-    Follow artifact events to typed downloads.
-  </Card>
-  <Card title="Type index" icon="brackets-curly" href="/sdk/reference/types">
-    Read the full discriminated union.
   </Card>
 </CardGroup>

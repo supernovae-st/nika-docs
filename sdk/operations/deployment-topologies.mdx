@@ -1,6 +1,6 @@
 ---
 title: "Deployment topologies"
-description: "Choose LocalNika, the resident firer, loopback HTTP on nika serve --bind, an OS bridge or model serve by job."
+description: "Choose local Nika, the resident firer, authenticated HTTP, an OS bridge or model serve by job."
 sidebarTitle: "Deployment topologies"
 icon: "sitemap"
 ---
@@ -17,9 +17,9 @@ what protocol crosses the process edge.
 
 | Need | Use | Status | Boundary |
 |---|---|---|---|
-| Product code starts a workflow | `LocalNika` | Live | argv + NDJSON to the local binary |
+| Product code starts a workflow | local `Nika` | Live in source 0.116 | native process |
 | The project clock starts work | `nika serve` (no `--bind`) | Live | `nika.yaml arm[]` to the resident firer |
-| An application admits jobs over loopback HTTP | `nika serve --bind` | Live on 0.114.0 | Bearer + OpenAPI · **404: `/v1/run`, cancel, artifacts** |
+| An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Live in source/engine 0.116 | Bearer + OpenAPI · cancellation live |
 | The host scheduler starts work | `nika arm --emit` | Live | launchd or systemd to `nika arm fire` |
 | The engine needs local inference | `nika model serve` | Live | Loopback OpenAI-compatible model API |
 
@@ -28,12 +28,12 @@ what protocol crosses the process edge.
 <LocalContract />
 
 ```ts
-const handle = nika.run('workflows/support.nika.yaml', {
+const run = await nika.run('workflows/support.nika.yaml', {
   vars: { ticket: request.id },
-  signal: request.signal,
 })
 
-for await (const event of handle) render(event)
+for await (const event of nika.events(run)) render(event)
+const result = await run.done
 ```
 
 The application owns the user experience and cancellation. The engine owns
@@ -63,20 +63,19 @@ accept Nika workflow jobs.
 
 <RemoteContract />
 
-Measured 2026-08-23 on `nika 0.114.0 (b1154df75)`. `nika serve --bind` is not
-`nika model serve`. It is also not bare `nika serve`. Cancel, artifacts and
-`POST /v1/run` are 404 on this binary — the OpenAPI document says so. The
-TypeScript root client's compatibility with this OpenAPI is unmeasured here.
+`nika serve --bind` is not `nika model serve`, and it is not bare `nika serve`.
+OpenAPI `0.116.0` makes cancellation live. Artifact routes, job listing and
+`POST /v1/run` remain absent.
 
 ## Architecture view
 
 <div className="sdk-flight">
   <span>PROCESS TOPOLOGY · NAME THE EDGE</span>
-  <pre tabIndex={0}>{`application ── LocalNika ── argv/NDJSON ── nika run              [ LIVE ]
+  <pre tabIndex={0}>{`application ── Nika ── native process ── nika run                 [ LIVE ]
 
 nika.yaml ──── nika serve / OS ─────────── arm fire              [ LIVE ]
 
-nika serve --bind ── Bearer ── jobs / SSE / workflows            [ LIVE · 404: run, cancel, artifacts ]
+nika serve --bind ── Bearer ── jobs / SSE / cancel / workflows    [ LIVE · no run route or artifacts ]
 
 nika engine ── OpenAI-compatible loopback ─ model serve          [ LIVE ]`}</pre>
 </div>

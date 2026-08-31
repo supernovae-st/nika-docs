@@ -21,24 +21,24 @@ safe    spawn("nika", ["run", path, "--json"])
                               └── never shell-parsed`}</pre>
 </div>
 
-`LocalNika` never wraps workflow paths in a shell string.
+Local `Nika` transport never wraps workflow paths in a shell string.
 
 ## Admit authority before execution
 
 ```ts
 const report = await nika.check(file)
 
-if (!report.clean || report.cost?.has_unbounded) {
+if (!report.clean) {
   throw new Error('workflow is not admitted here')
 }
 
-const plan = await nika.dryRunPlan(file)
-authorize(plan.permits, plan.requirements)
+authorizeEngineReport(report)
 
-await nika.runToEnd(file, {
+const run = await nika.run(file, {
   maxCostUsd: 0.25,
-  signal: request.signal,
 })
+request.signal.addEventListener('abort', () => void nika.cancel(run), { once: true })
+const result = await run.done
 ```
 
 Check these facts explicitly:
@@ -47,23 +47,23 @@ Check these facts explicitly:
 - model and environment requirements;
 - secret names, never values;
 - the static cost floor and unbounded flag;
-- caller cancellation and runtime ceiling.
+- explicit `cancel(run)` and runtime ceiling.
 
 ## Remote seam
 
 <RemoteContract />
 
 Bearer tokens belong in governed environment or workload identity plumbing,
-not source. Custom loggers must not record authorization headers or webhook
-secrets. Verify webhooks against the raw body before parsing.
+not source. The SDK exposes no logger or webhook verifier; keep application
+logging and delivery secrets outside the Nika transport.
 
 ## Threat boundaries
 
 | Boundary | Owner |
 |---|---|
 | Workflow grammar and permits | Engine |
-| Process argv and cancellation | Local SDK |
-| HTTP timeout, retry and concurrency | Remote SDK preview |
+| Process argv and cancellation verb | One SDK |
+| HTTP admission timeout and bounded event views | One SDK |
 | Secret storage and identity | Deployment |
 | Artifact destination and retention | Application |
 

@@ -1,7 +1,7 @@
 ---
-title: "Artifacts"
-description: "List, parse, download and stream remote workflow outputs through explicit byte paths."
-sidebarTitle: "Artifacts"
+title: "Outputs and artifacts"
+description: "Use run outputs honestly while artifact HTTP routes remain absent."
+sidebarTitle: "Outputs and artifacts"
 icon: "box-archive"
 ---
 
@@ -9,83 +9,34 @@ import { RemoteContract } from "/snippets/_sdk-contract.mdx"
 
 <RemoteContract />
 
-Artifact format is part of the contract. Choose text, JSON, bytes or a stream
-instead of forcing every output through one convenience method.
+OpenAPI `0.116.0` has no artifact list, download or streaming route, and One
+SDK exposes no artifact methods. Do not construct URLs or convenience methods
+that the server does not advertise.
 
-## Inspect before download
+Engine-owned outputs arrive on events and the terminal result:
 
 ```ts
-const artifacts = await nika.jobs.artifacts(job_id)
-
-for (const artifact of artifacts) {
-  console.log(
-    artifact.name,
-    artifact.size,
-    artifact.format,
-    artifact.content_type,
-  )
+for await (const event of nika.events(run)) {
+  if (event.outputs) preview(event.outputs)
 }
+
+const result = await run.done
+await persistOutputs(run.id, result.outputs)
 ```
 
-## Pick the representation
+`outputs` is `Record<string, unknown>` because the workflow defines its own
+shape. Validate it at the application boundary before mapping it into business
+state.
 
-<CodeGroup>
-
-```ts Text
-const markdown = await nika.jobs.artifact(job_id, 'report.md')
-```
-
-```ts JSON
-const result = await nika.jobs.artifactJson<Result>(
-  job_id,
-  'result.json',
-)
-```
-
-```ts Bytes
-const image = await nika.jobs.artifactBinary(job_id, 'cover.png')
-```
-
-```ts Stream
-const source = await nika.jobs.artifactStream(job_id, 'dataset.csv')
-await source.pipeTo(destination)
-```
-
-</CodeGroup>
-
-`artifactStream()` keeps large outputs out of the heap and preserves platform
-backpressure.
-
-## Convenience collection
-
-```ts
-const outputs = await nika.jobs.runAndCollect(
-  'research.nika.yaml',
-  { topic: 'workflow engines' },
-)
-```
-
-The convenience method waits for completion, lists artifacts and downloads
-non-binary outputs in bounded batches. It deliberately skips binary artifacts.
-
-<Warning>
-  Do not use `runAndCollect()` as an unbounded data-export path. Inspect sizes
-  and use streams when an output can grow with user input.
-</Warning>
-
-## Continue
+When a workflow writes files, the engine owns their placement and authority.
+Remote retrieval requires a separate application-controlled store until a
+future published OpenAPI contract adds artifact routes.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
-    Own the lifecycle that produced the files.
+    Keep outputs attached to the run identity.
   </Card>
-  <Card title="SSE streaming" icon="wave-pulse" href="/sdk/remote/streaming">
-    React to artifact-written events.
-  </Card>
-  <Card title="Security" icon="shield" href="/sdk/operations/security">
-    Govern output destinations and retention.
-  </Card>
-  <Card title="Method index" icon="list" href="/sdk/reference/methods">
-    Compare every artifact method.
+  <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">
+    Store proof beside the terminal result.
   </Card>
 </CardGroup>

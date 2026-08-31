@@ -1,81 +1,47 @@
 ---
 title: "Run events"
-description: "Consume the local NDJSON journal as an additive event stream and settle on the outcome."
+description: "Consume an additive, bounded event view without replacing terminal truth."
 sidebarTitle: "Run events"
 icon: "wave-pulse"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
-
-<LocalContract />
-
-The local event stream is the engine journal in motion. Every yielded object
-has a `kind` discriminator and may carry fields added by newer engines.
-
-## Build a tolerant reducer
-
 ```ts
-type ViewState = {
-  active: Set<string>
-  settled: Set<string>
-}
+type ViewState = { active: Set<string> }
 
-function reduce(state: ViewState, event: { kind: string; [key: string]: unknown }) {
+function reduce(state: ViewState, event: NikaEvent) {
   switch (event.kind) {
     case 'task_started':
       state.active.add(String(event.task_id))
       break
     case 'task_completed':
       state.active.delete(String(event.task_id))
-      state.settled.add(String(event.task_id))
       break
     default:
       telemetry.debug('unrendered event', event.kind)
   }
 }
+
+const run = await nika.run('workflow.nika.yaml')
+for await (const event of nika.events(run)) reduce(view, event)
+const result = await run.done
 ```
 
-Unknown kinds should remain visible to diagnostics without crashing an older
-interface. Existing meanings stay stable; the vocabulary can grow.
+Kinds and fields are engine-owned and additive. Unknown events should remain
+visible to diagnostics without crashing an older interface. Never infer
+completion from the last recognized kind; use `run.done`.
 
-## Keep settlement separate
+Each event subscriber has a bounded queue. A slow consumer receives
+`NikaEventBufferOverflowError` instead of silent loss. Tune a view with
+`bufferSize`, bounded by the client's `eventBufferSize`.
 
-<div className="sdk-flight sdk-flight-compact">
-  <span>RUN JOURNAL · TWO CONSUMERS</span>
-  <pre tabIndex={0}>{`stdout NDJSON
-      │
-      ├── event reducer ── live UI
-      │
-      └── outcome promise ── exit contract
-
-disk trace ─────────────── durable replay`}</pre>
-</div>
-
-The UI can miss a frame, remount or ignore a new event. The outcome remains
-the authority for completion and exit code.
-
-## Backpressure and cleanup
-
-`for await` applies natural backpressure to journal processing. Keep each
-event handler small. Send expensive storage or analytics work through a
-bounded queue so stdout cannot remain unread indefinitely.
-
-Always clear UI state in `finally` and use the caller's `AbortSignal` to end
-the child process when its request goes away.
-
-## Continue
+An `AbortSignal` stops only its observer. It does not end engine work. Call
+`nika.cancel(run)` when cancellation is intended.
 
 <CardGroup cols={2}>
   <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">
-    Open the stream and await the outcome.
-  </Card>
-  <Card title="Errors and exits" icon="triangle-exclamation" href="/sdk/runtime/errors">
-    Keep run failure distinct from transport failure.
+    Open the view and await terminal settlement.
   </Card>
   <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">
-    Move from transient UI to durable proof.
-  </Card>
-  <Card title="Event concepts" icon="signal" href="/concepts/events">
-    Read the engine event vocabulary.
+    Move from transient presentation to durable proof.
   </Card>
 </CardGroup>

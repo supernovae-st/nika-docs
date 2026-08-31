@@ -18,7 +18,7 @@ the working directory that lets the engine discover the rest.
 
 <div className="sdk-flight sdk-flight-compact">
   <span>SPEND LADDER · CLOSEST EXPLICIT DECISION WINS</span>
-  <pre tabIndex={0}>{`LocalNika maxCostUsd / --max-cost-usd
+  <pre tabIndex={0}>{`Nika run maxCostUsd / --max-cost-usd
                   ↓ wins
 nika.yaml ceiling
                   ↓ otherwise
@@ -28,9 +28,10 @@ arm[].plafond = required for every scheduled tick`}</pre>
 </div>
 
 ```ts
-await nika.runToEnd('workflows/release.nika.yaml', {
+const run = await nika.run('workflows/release.nika.yaml', {
   maxCostUsd: requestBudget,
 })
+const result = await run.done
 ```
 
 `maxCostUsd` is invocation-specific. Keep the project default in `nika.yaml`
@@ -73,7 +74,7 @@ project floor ──┘
 | Decision | Owner |
 |---|---|
 | Project default spend | `nika.yaml ceiling` |
-| Request-specific spend | `LocalNika` call or CLI flag |
+| Request-specific spend | `Nika.run()` call or CLI flag |
 | Scheduled tick spend | `arm[].plafond` |
 | Retention by host | Environment or project `traces.keep` |
 | Artifact provenance | Maximum of operator and project floors |
@@ -82,8 +83,8 @@ project floor ──┘
 <Warning>
   Do not create an application `nikaConfig` object that mirrors every project
   key. That produces a second control plane with no precedence contract.
-  Construct `LocalNika` once with `cwd`; pass only invocation-specific inputs,
-  model, ceiling and cancellation per call.
+  Construct `Nika` once with `cwd`; pass only invocation-specific inputs,
+  model and ceiling per run. Cancellation is the separate `cancel(run)` verb.
 </Warning>
 
 ## Continue

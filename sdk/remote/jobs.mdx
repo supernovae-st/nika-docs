@@ -1,6 +1,6 @@
 ---
-title: "Jobs"
-description: "Submit, poll, stream, cancel and settle remote workflow jobs through the preview namespace."
+title: "Remote jobs"
+description: "Admit, persist, recover, observe and cancel resident HTTP jobs."
 sidebarTitle: "Jobs"
 icon: "list-check"
 ---
@@ -9,76 +9,68 @@ import { RemoteContract } from "/snippets/_sdk-contract.mdx"
 
 <RemoteContract />
 
-`nika.jobs` owns the remote job lifecycle.
-
-## Submit and keep the identity
+## Admit and persist identity
 
 ```ts
-const { job_id } = await nika.jobs.submit(
-  'release.nika.yaml',
-  { channel: 'stable' },
-)
+const run = await nika.run('release.nika.yaml', {
+  idempotencyKey: crypto.randomUUID(),
+})
 
-await database.runs.insert({ jobId: job_id })
+await database.runs.insert({ jobId: run.id, lastEventId: 0 })
 ```
 
-Persist `job_id` before opening a stream. Polling, reconnects, cancellation,
-artifacts and support tools all share it.
+HTTP admission captures workflow bytes locally, then submits `POST /v1/jobs`.
+Remote run options currently accept `idempotencyKey`; `vars`, `model` and
+`maxCostUsd` are refused because their request envelopes do not exist.
 
-## Choose waiting or streaming
-
-<Tabs>
-  <Tab title="Poll to terminal">
-    ```ts
-    const job = await nika.jobs.run('release.nika.yaml')
-    console.log(job.status, job.exit_code)
-    ```
-  </Tab>
-  <Tab title="Stream events">
-    ```ts
-    const { job_id } = await nika.jobs.submit('release.nika.yaml')
-    for await (const event of nika.jobs.stream(job_id)) {
-      render(event)
-    }
-    ```
-  </Tab>
-</Tabs>
-
-`run()` applies the configured poll interval, timeout and backoff. `stream()`
-uses SSE and ends only on a terminal event.
-
-## Cancel work, not just the request
+## Observe and settle
 
 ```ts
-await nika.jobs.cancel(job_id)
-const final = await nika.jobs.status(job_id)
+for await (const event of nika.events(run)) {
+  if (event.sequence !== undefined) {
+    await saveCheckpoint(run.id, event.sequence)
+  }
+}
+
+const result = await run.done
 ```
 
-Aborting a fetch stops the caller waiting. `jobs.cancel()` asks the service to
-cancel the job. Product interfaces often need both actions.
+## Recover after a process restart
 
-## Lifecycle
+```ts
+const recovered = await nika.attachRun(saved.jobId, {
+  lastEventId: saved.lastEventSequence,
+})
 
-<div className="sdk-flight sdk-flight-compact">
-  <span>REMOTE JOB · PREVIEW STATE MACHINE</span>
-  <pre tabIndex={0}>{`pending ──→ running ──→ completed
-   │           ├────────→ failed
-   └───────────└────────→ cancelled`}</pre>
-</div>
+for await (const event of nika.events(recovered)) {
+  if (event.sequence !== undefined) {
+    await saveCheckpoint(recovered.id, event.sequence)
+  }
+}
 
-## Continue
+const result = await recovered.done
+```
+
+Persist the job id and the last durably consumed sequence. Reattachment avoids
+resubmitting a workflow merely because the Node process restarted.
+
+## Read status or cancel
+
+```ts
+console.log(await nika.status(run))
+const cancellation = await nika.cancel(run)
+const result = await run.done
+```
+
+OpenAPI `0.116.0` exposes `POST /v1/jobs/{id}/cancel`; cancellation is not a
+404. The API has no job-list route, so application indexes remain
+application-owned.
 
 <CardGroup cols={2}>
   <Card title="SSE streaming" icon="wave-pulse" href="/sdk/remote/streaming">
-    Reconnect without inventing terminal state.
-  </Card>
-  <Card title="Artifacts" icon="box-archive" href="/sdk/remote/artifacts">
-    Collect the job's outputs.
+    Preserve sequence continuity across observers.
   </Card>
   <Card title="Errors" icon="triangle-exclamation" href="/sdk/runtime/errors">
-    Handle job failure and cancellation separately.
-  </Card>
-  <Card title="Method index" icon="list" href="/sdk/reference/methods">
-    Scan the complete namespace.
+    Separate run failure from boundary failure.
   </Card>
 </CardGroup>
