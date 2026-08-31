@@ -62,7 +62,7 @@ const cancellation = await nika.cancel(run)
 const result = await run.done
 ```
 
-OpenAPI `0.116.0` exposes `POST /v1/jobs/{id}/cancel`; cancellation is not a
+OpenAPI `0.116.2` exposes `POST /v1/jobs/{id}/cancel`; cancellation is not a
 404. The API has no job-list route, so application indexes remain
 application-owned.
 

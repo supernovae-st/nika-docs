@@ -29,6 +29,15 @@ if not NIKA:
 
 SKIP = re.compile(r"skeleton|illustration|modeline", re.I)
 FENCE = re.compile(r"```yaml([^\n]*)\n(.*?)```", re.DOTALL)
+# An MCP workflow is not a standalone document: the released checker
+# deliberately fails closed unless its concrete server exists in the project
+# registry. A page may therefore carry the registry next to the workflow as a
+# named JSON fence. Materialize exactly that governed path in the page's
+# scratch project so the oracle judges the complete copyable example, not an
+# invented globally-configured machine.
+MCP_REGISTRY_FENCE = re.compile(
+    r"```json\s+(\.nika/mcp_servers\.json)\s*\n(.*?)```", re.DOTALL
+)
 # No deliberate reds today. release-radar carried one (the SEC-009
 # witness · verdict-coverage 2026-07-28 §DECIDED) until 2026-07-31, when
 # the registry proof pass superseded it: the same file ships as an
@@ -140,7 +149,9 @@ cadence_manifests_total = 0
 for fp in sorted(DOCS.rglob("*.mdx")):
     if "node_modules" in str(fp):
         continue
-    fences = FENCE.findall(fp.read_text())
+    text = fp.read_text()
+    fences = FENCE.findall(text)
+    mcp_registries = MCP_REGISTRY_FENCE.findall(text)
     for info, body in fences:
         if BARE_FOREACH.search(body):
             bad += 1
@@ -185,6 +196,10 @@ for fp in sorted(DOCS.rglob("*.mdx")):
     if not runnable:
         continue
     page_dir = tempfile.mkdtemp(prefix="oracle-")
+    for name, body in mcp_registries:
+        registry = pathlib.Path(page_dir) / name
+        registry.parent.mkdir(parents=True, exist_ok=True)
+        registry.write_text(body)
     # every named block on the page is a sibling the others may reference
     for info, body in runnable:
         m = NAMED.match(info)
@@ -198,7 +213,12 @@ for fp in sorted(DOCS.rglob("*.mdx")):
         name = m.group(1) if m else f"block-{total}.nika.yaml"
         path = pathlib.Path(page_dir) / name
         path.write_text(body)
-        r = subprocess.run([NIKA, "check", str(path)], capture_output=True, text=True)
+        r = subprocess.run(
+            [NIKA, "check", str(path)],
+            cwd=page_dir,
+            capture_output=True,
+            text=True,
+        )
         expected = DELIBERATE_RED.get(name)
         if expected:
             emitted = {c for l in (r.stdout + r.stderr).splitlines() if "✖" in l
