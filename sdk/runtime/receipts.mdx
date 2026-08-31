@@ -1,50 +1,37 @@
 ---
-title: "Receipts and replay"
-description: "Keep a hash-chained run journal that survives the process and the interface."
-sidebarTitle: "Receipts and replay"
+title: "Receipts and verification"
+description: "Persist engine-issued proof and return it unchanged for verification."
+sidebarTitle: "Receipts"
 icon: "link"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
-
-<LocalContract />
-
-A live stream is presentation. A trace is evidence.
-
-<div className="sdk-flight">
-  <span>RECEIPT PATH · NO RE-EXECUTION</span>
-  <pre tabIndex={0}>{`run
-├── stdout NDJSON ─────────────── live interface
-└── .nika/traces/<run>.ndjson
-             │
-             ├── verify ───────── chain intact?
-             ├── show ─────────── final frames
-             ├── replay ───────── original event timing
-             └── export ───────── OTLP projection`}</pre>
-</div>
-
-## Store identity, not a shadow journal
-
-Keep the trace path or run identity beside the application's business record.
-Do not copy selected event fields into a second log and call that the receipt.
+A live event view is presentation. The engine-issued receipt on the terminal
+result is the typed proof seam.
 
 ```ts
-const verdict = await nika.traceVerify(tracePath)
+const run = await nika.run('workflow.nika.yaml')
+const result = await run.done
 
-await auditStore.write({
-  tracePath,
-  intact: verdict.intact,
-  chainHead: verdict.head,
-})
+if (!result.receipt) throw new Error('run did not issue a receipt')
+
+await auditStore.write({ runId: run.id, receipt: result.receipt })
+
+const verdict = await nika.traceVerify(result.receipt)
+if (!verdict.verified) {
+  throw new Error(verdict.output ?? verdict.reason ?? 'verification failed')
+}
 ```
 
-## Verify before trust
+`NikaReceipt` is an opaque readonly record. The SDK never constructs it,
+extracts a path from it, enriches it by reading a workflow, or implements
+cryptography. It asks the authoritative engine to verify the object unchanged.
 
-`traceVerify()` is offline. It does not call a model or execute a task. A
-broken or unchained journal remains readable, but should not be presented as
-verified evidence.
+Local verification can return `verified` or `invalid`. The remote endpoint
+currently returns a typed `unavailable` verdict with reason
+`trace_journal_unavailable` because it has no path-free journal authority. The
+diagnostic route exists; this is not a 404.
 
-## Re-project with the engine
+CLI trace inspection remains available for operators:
 
 ```sh
 nika trace show .nika/traces/<run>.ndjson
@@ -52,28 +39,13 @@ nika trace replay .nika/traces/<run>.ndjson
 nika trace export .nika/traces/<run>.ndjson
 ```
 
-Replay passes recorded events through the renderer. It never reruns the
-workflow.
-
-## Retention
-
-Trace content is local by default. Choose retention, redaction and export
-policy from the workflow's data sensitivity. Content-inclusive telemetry is
-an explicit widening, not a default.
-
-## Continue
+Replay reprojects recorded events; it never reruns the workflow.
 
 <CardGroup cols={2}>
   <Card title="Test and trace" icon="vial-circle-check" href="/sdk/local/test-and-trace">
-    Compare behavior and verify integrity.
-  </Card>
-  <Card title="Trace concepts" icon="timeline" href="/concepts/traces">
-    Learn the journal and chain model.
+    Keep goldens and proof verification distinct.
   </Card>
   <Card title="Run receipts pattern" icon="receipt" href="/patterns/run-receipts">
     Carry receipts through application boundaries.
-  </Card>
-  <Card title="Observability" icon="eye" href="/guides/observability">
-    Inspect before, during and after a run.
   </Card>
 </CardGroup>

@@ -25,7 +25,7 @@ application objects. The root `nika.yaml` is the control plane. Each
 │   ├── daily-brief.nika.yaml  # workflow intent
 │   └── release.nika.yaml
 ├── src/
-│   ├── nika.ts                # LocalNika construction
+│   ├── nika.ts                # Nika construction
 │   └── release.ts             # product code
 ├── .nika/
 │   ├── traces/                # run journals
@@ -73,9 +73,9 @@ for each lane.
 
 ```ts
 // src/nika.ts
-import { LocalNika } from '@supernovae-st/nika-client/local'
+import { Nika } from '@supernovae-st/nika-client'
 
-export const nika = new LocalNika({
+export const nika = new Nika({
   bin: process.env.APP_NIKA_BIN,
   cwd: new URL('..', import.meta.url).pathname,
 })
@@ -85,17 +85,20 @@ Binary resolution follows one ladder:
 
 1. `bin` passed to the constructor
 2. `NIKA_BIN`
-3. `nika` on `PATH`
+3. exact optional platform package
 
-Use an explicit application variable for packaged services. Keep `PATH`
-convenient for local development. `cwd` anchors relative workflow paths,
+Use an explicit application variable for packaged services. Implicit `PATH`
+lookup is refused. `cwd` anchors relative workflow paths,
 project-file discovery and the `.nika/` state directory.
 
 ## Probe at startup
 
 ```ts
 try {
-  console.info('nika engine', await nika.version())
+  const report = await nika.check('workflows/daily-brief.nika.yaml', {
+    nativeStrict: true,
+  })
+  console.info('nika engine ready', report.clean)
 } catch (error) {
   console.error('cannot start workflow runtime', error)
   process.exit(3)
@@ -123,7 +126,7 @@ volume, retention window and access policy explicitly.
   <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
     Keep permits, secrets, argv and spend ceilings explicit.
   </Card>
-  <Card title="LocalNika client" icon="terminal" href="/sdk/local/client">
+  <Card title="Local client" icon="terminal" href="/sdk/local/client">
     Read every local method and its machine twin.
   </Card>
   <Card title="Workflow concepts" icon="file-code" href="/concepts/workflows">

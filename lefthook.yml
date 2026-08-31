@@ -18,6 +18,8 @@ pre-push:
         || echo "⚠ mint CLI absent — MDX-parse gate SKIPPED (install: npm i -g mint)"'
     link-audit:
       run: python3 scripts/link-audit.py
+    sdk-contract:
+      run: python3 scripts/sdk_contract_gate.py
     teach-parity:
       # the inverse of oracle-sweep: every RELEASED subcommand has a
       # reference/cli.mdx row (soft-skips when the binary is absent)

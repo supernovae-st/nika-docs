@@ -15,15 +15,14 @@ beat at the same firing law as `nika arm fire`. That default process is not
 HTTP.
 
 `--bind` + `--workflows` + `--token-file` on the **same verb** opens
-authenticated loopback HTTP. Measured 2026-08-23 on `nika 0.114.0 (b1154df75)`:
-`GET /health`, OpenAPI, jobs, job SSE and workflow listing work;
-`POST /v1/run`, cancel and artifacts return 404. The binary's OpenAPI says
-*Cancel and artifacts are absent.* `--once` and `--dry` cannot bind a listener.
+authenticated HTTP. OpenAPI `0.116.0` includes jobs, job SSE, cancellation,
+trace diagnostics, workflow discovery and schedule read/write. Artifact routes,
+job listing and `POST /v1/run` are absent. `--once` and `--dry` cannot bind a
+listener.
 
 <Warning>
   Bare `nika serve` is the ARM firer, not HTTP. The HTTP door is opt-in
-  (`--bind`). Do not call that door “remote execution” without naming the 404s.
-  The TypeScript root client is not verified here against this OpenAPI.
+  (`--bind`). Name the live route contract and its absent routes explicitly.
 </Warning>
 
 ## Rehearse each operating mode

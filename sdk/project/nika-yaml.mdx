@@ -68,7 +68,7 @@ uses the first `nika.yaml`, like Git finds `.git`.
 
 <div className="sdk-flight sdk-flight-compact">
   <span>DISCOVERY · FIRST PROJECT ROOT WINS</span>
-  <pre tabIndex={0}>{`/srv/project/apps/api/       ← LocalNika cwd
+  <pre tabIndex={0}>{`/srv/project/apps/api/       ← Nika cwd
           │
           ├── no nika.yaml
           ↑
@@ -80,13 +80,14 @@ direct traces stay at cwd · arm state stays at project root`}</pre>
 <LocalContract />
 
 ```ts
-import { LocalNika } from '@supernovae-st/nika-client/local'
+import { Nika } from '@supernovae-st/nika-client'
 
-export const nika = new LocalNika({
+export const nika = new Nika({
   cwd: '/srv/project',
 })
 
-await nika.runToEnd('workflows/daily-brief.nika.yaml')
+const run = await nika.run('workflows/daily-brief.nika.yaml')
+const result = await run.done
 ```
 
 Prefer a `cwd` at the project root. It keeps workflow paths, project discovery
@@ -106,7 +107,7 @@ grammar, reports its armed beats and schedules nothing. A direct run consumes
 the run-policy profile through the normal project discovery path.
 
 <Warning>
-  Do not pass `nika.yaml` to `LocalNika.run()`. The local SDK runs a
+  Do not pass `nika.yaml` to `Nika.run()`. The SDK runs a
   `*.nika.yaml` workflow. The engine discovers `nika.yaml` from `cwd` and
   applies its project policy around that run.
 </Warning>

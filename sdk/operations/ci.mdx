@@ -15,9 +15,9 @@ spend shape, then rehearse the graph with the mock provider.
 ## Admission script
 
 ```ts
-import { LocalNika } from '@supernovae-st/nika-client/local'
+import { Nika } from '@supernovae-st/nika-client'
 
-const nika = new LocalNika()
+const nika = new Nika()
 const file = process.argv[2]
 const report = await nika.check(file, {
   model: 'mock/echo',
@@ -25,28 +25,18 @@ const report = await nika.check(file, {
 })
 
 if (!report.clean) {
-  console.error(report.findings)
+  console.error(report)
   process.exit(2)
 }
 
-if (report.cost?.has_unbounded) {
-  console.error('CI requires a bounded spend shape')
-  process.exit(2)
-}
-
-const plan = await nika.dryRunPlan(file)
-console.log(JSON.stringify({
-  waves: plan.waves,
-  permits: plan.permits,
-  requirements: plan.requirements,
-}, null, 2))
-
-const run = await nika.runToEnd(file, {
+const run = await nika.run(file, {
   model: 'mock/echo',
   maxCostUsd: 0,
 })
 
-if (!run.ok) process.exit(run.exitCode)
+for await (const event of nika.events(run)) console.log(event)
+const result = await run.done
+if (result.status !== 'succeeded') process.exit(result.exitCode ?? 1)
 ```
 
 ## Authority ladder
@@ -55,8 +45,7 @@ if (!run.ok) process.exit(run.exitCode)
   <span>CI ADMISSION · SECRETS ARRIVE LAST</span>
   <pre tabIndex={0}>{`pull request
     │
-    ├── check ───── findings · permits · cost
-    ├── plan ────── waves · requirements
+    ├── check ───── engine-owned admission report
     └── mock run ── graph behavior · receipt
                          │ approved
                          ▼
@@ -75,6 +64,12 @@ npm ls @supernovae-st/nika-client
 
 Keep the engine and SDK release train visible in logs. Do not debug skew from
 an implicit global binary.
+
+<Warning>
+  The `0.116.0` source contract is ready, but npm currently serves `0.115.0`.
+  Keep this example gated until `npm view @supernovae-st/nika-client version`
+  reports `0.116.0`; do not claim an unpublished package is pinned in CI.
+</Warning>
 
 ## Continue
 

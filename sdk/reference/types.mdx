@@ -1,95 +1,81 @@
 ---
 title: "SDK type index"
-description: "Reports, plans, outcomes, events, jobs, artifacts, workflows and error classes."
+description: "Open engine projections, run lifecycle types, proof and error taxonomy."
 sidebarTitle: "Type index"
 icon: "brackets-curly"
 ---
 
-import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SourceContract } from "/snippets/_sdk-contract.mdx"
 
-## Local types
+<SourceContract />
 
-<LocalContract />
+## Run lifecycle
 
-### LocalCheckReport
+```ts
+interface NikaRun {
+  readonly id: string
+  readonly done: Promise<NikaRunResult>
+}
 
-| Field | Type |
-|---|---|
-| `reportVersion` | `number` |
-| `clean` · `parseFatal` | `boolean` |
-| `cost` | `LocalCost \| null` |
-| `waves` | `unknown[]` |
-| `requirements` | `Record<string, unknown> \| null` |
-| `findings` | `LocalFinding[]` |
-| `permits` | `LocalPermits \| null` |
-| `exitCode` | `number` |
-| `warnings` | `string[]` |
-| `raw` | `Record<string, unknown> \| null` |
+interface NikaRunResult {
+  id: string
+  status: NikaRunStatus
+  transport: 'native-process' | 'http'
+  exitCode?: number
+  outputs?: Record<string, unknown>
+  receipt?: NikaReceipt
+  error?: NikaMachineError
+  [key: string]: unknown
+}
+```
 
-### LocalPlan and outcomes
+`NikaRunStatus`, `NikaEvent`, `NikaCheckResult` and engine-owned metadata are
+additive. Known words aid completion without closing the vocabulary.
 
-<div className="sdk-flight sdk-flight-compact">
-  <span>LOCAL TYPES · VERSIONED SUBSET + RAW ESCAPE HATCH</span>
-  <pre tabIndex={0}>{`LocalPlan
-├── planVersion · workflow
-├── tasks[] · waves[][]
-├── cost · permits · requirements
-├── warnings[]
-└── raw
+## Events and proof
 
-LocalRunOutcome ── exitCode · ok · events[]
-GoldenVerdict ──── passed · exitCode · output
-TraceVerdict ───── intact · head · exitCode · output`}</pre>
-</div>
+```ts
+interface NikaEvent {
+  kind?: string
+  status?: NikaRunStatus
+  sequence?: number
+  receipt?: NikaReceipt
+  outputs?: Record<string, unknown>
+  [key: string]: unknown
+}
 
-`NikaEvent` guarantees `kind: string` and stays open to additive engine fields.
+type NikaReceipt = Readonly<Record<string, unknown>>
 
-## Remote types
+interface NikaTraceVerifyResult {
+  verified: boolean
+  verdict?: 'verified' | 'invalid' | 'unavailable' | (string & {})
+  reason?: string
+  trace_id?: string
+  exitCode?: number
+  output?: string
+  [key: string]: unknown
+}
+```
 
-<RemoteContract />
+## Errors
 
-`JobStatus` is `pending | running | completed | failed | cancelled`.
+```text
+NikaError
+├── NikaConfigurationError
+├── NikaTransportError
+│   └── NikaProtocolError
+├── NikaCompatibilityError
+├── NikaOperationError
+├── NikaEventBufferOverflowError
+└── NikaRunOwnershipError
 
-The remote `NikaEvent` union contains:
+NikaEngineUnavailable
+```
 
-- `started`
-- `task_start`
-- `task_complete`
-- `task_failed`
-- `artifact_written`
-- `completed`
-- `failed`
-- `cancelled`
+`NikaEngineUnavailable` is exported separately by binary resolution. Schedule
+types are exported for the exact CAS-backed resident schedule contract; inspect
+the pinned source declarations for their additive engine-owned fields.
 
-`NikaJob` carries the job identity, status, workflow, timestamps and optional
-exit code and output. `NikaArtifact` carries name, size, format, content type
-and optional checksum.
-
-## Error classes
-
-<div className="sdk-flight sdk-flight-compact">
-  <span>REMOTE ERRORS · CATCH SPECIFIC FIRST</span>
-  <pre tabIndex={0}>{`NikaError
-├── NikaAPIError          status · body · requestId?
-├── NikaConnectionError   cause?
-├── NikaTimeoutError
-└── NikaJobError          job · exitCode?
-    └── NikaJobCancelledError`}</pre>
-</div>
-
-## Continue
-
-<CardGroup cols={2}>
-  <Card title="Errors and exits" icon="triangle-exclamation" href="/sdk/runtime/errors">
-    Apply the types to product control flow.
-  </Card>
-  <Card title="Run events" icon="wave-pulse" href="/sdk/runtime/events">
-    Reduce the additive local journal.
-  </Card>
-  <Card title="SSE streaming" icon="signal" href="/sdk/remote/streaming">
-    Consume the remote discriminated union.
-  </Card>
-  <Card title="Source types" icon="github" href="https://github.com/supernovae-st/nika-client/blob/main/src/types.ts">
-    Read the exact declarations.
-  </Card>
-</CardGroup>
+<Card title="Pinned source types" icon="github" href="https://github.com/supernovae-st/nika-client/blob/2f27b0eb865bbe2a89a59bc0b5c0dfef6eb37da1/src/types.ts">
+  Read the exact `0.116.0` declarations.
+</Card>

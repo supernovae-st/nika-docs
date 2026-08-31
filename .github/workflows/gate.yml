@@ -26,6 +26,10 @@ jobs:
           python-version: '3.12'
       - name: link + canon audit
         run: python3 scripts/link-audit.py
+      - name: One SDK 0.116 contract ratchet
+        run: |
+          python3 scripts/sdk_contract_gate.py
+          python3 scripts/tests/test_sdk_contract_gate.py
       # the estate manifest re-emits and byte-compares — a red here means a
       # PR changed tracked files without `python3 scripts/estate.py --write`.
       - name: Estate manifest observes (non-blocking · E0)

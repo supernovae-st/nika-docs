@@ -29,7 +29,7 @@ this machine
   editors    cursor ✗ · windsurf ✗ · claude ✗ · zed ✗ · hermes ✗ · vscode ✗
              6 unwired · one command each → nika wire cursor
   local      ollama · lmstudio · llamacpp · localai · vllm · no key needed
-  state      installed · no inference path — proof → nika try 01-hello
+  state      installed · no inference path — start → nika new hello
   workspace  ~/demo
              git ✗ · no workflows yet · agents not briefed → nika init
 
@@ -45,7 +45,7 @@ a whole workflow is one file
       infer: { prompt: "say hello to the operator", max_tokens: 50 }
 
 start here (offline · zero keys)
-  nika try 01-hello   # offline proof · zero keys
+  nika new hello      # local starter · zero keys
   nika init           # found this repo (wizard)
   nika new            # guided first workflow
 
@@ -59,8 +59,8 @@ line is derived live from the embedded pack (never hand-typed — the
 `15 providers` are the runnable cloud + local set; the
 [catalog](/reference/providers-catalog) counts 17 with the deterministic
 `mock`), and the `state` row names the gap, never a vendor: no inference
-path yet, and the proof door is one command (`nika try 01-hello` —
-offline, zero keys, nothing written).
+path yet, and the starter door is one command (`nika new hello` —
+offline, zero keys, no provider call).
 `--json` emits the machine mirror (`welcome_version: 1`); `--ascii`
 swaps every glyph for CI logs.
 

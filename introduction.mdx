@@ -12,14 +12,12 @@ download a model either. Install Nika, run one command, see it finish.
 
 ```bash
 brew install supernovae-st/tap/nika   # or: curl -LsSf https://nika.sh/install.sh | sh
-nika try 01-hello
+nika new hello
 ```
 
 That second line is what an empty directory makes `nika` offer on
-v{STATUS.version}: `{STATUS.firstCommand}`. It completes in a second,
-offline, with nothing written. The mock echoed the prompt — a rehearsal,
-not a billed answer. Keep a file with `nika new snippets/hello`, then
-`nika check` and `nika run`.
+v{STATUS.version}: `{STATUS.firstCommand}`. It creates a local starter without
+spending. Then use `nika check` and `nika run` when you are ready to execute.
 
 Useful AI work shouldn't disappear into chats. **Nika turns repeatable AI
 work into files you can run, review, diff and share**: one `.nika.yaml`

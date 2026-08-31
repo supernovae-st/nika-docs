@@ -1,18 +1,14 @@
 ---
 title: "Remote client"
-description: "Configure the preview HTTP client with bounded retries, concurrency, polling and logging."
+description: "Select authenticated nika serve HTTP with the same Nika facade."
 sidebarTitle: "Remote client"
 icon: "satellite-dish"
 ---
 
-import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SourceContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
+<SourceContract />
 <RemoteContract />
-
-The root `Nika` class describes the intended application-to-service boundary.
-It is useful for adapters, fixtures and interface work today.
-
-## Construct from explicit values
 
 ```ts
 import { Nika } from '@supernovae-st/nika-client'
@@ -20,57 +16,38 @@ import { Nika } from '@supernovae-st/nika-client'
 const nika = new Nika({
   url: process.env.NIKA_URL!,
   token: process.env.NIKA_TOKEN!,
-  timeout: 30_000,
-  retries: 2,
-  concurrency: 24,
+  cwd: process.cwd(),
+  requestTimeout: 30_000,
 })
 ```
 
-The constructor requires an HTTP or HTTPS origin and bearer token. It removes
-one trailing slash and uses native `fetch` by default.
+Supplying `url` selects HTTP. There is no environment-reading constructor:
+read and validate deployment configuration in your application. A remote
+client still resolves a compatible local engine from `bin`, `NIKA_BIN`, or the
+exact platform package so it can capture immutable workflow bytes.
 
-## Or read the environment
+Plain HTTP is refused unless `allowInsecureHttp: true` is explicit. Reserve
+that option for deliberate loopback use. URLs cannot carry credentials,
+queries or fragments; bearer tokens must be 32–512 visible ASCII bytes.
 
 ```ts
-const nika = Nika.fromEnv({
-  timeout: 15_000,
-  concurrency: 8,
+const loopback = new Nika({
+  url: 'http://127.0.0.1:8787',
+  token,
+  allowInsecureHttp: true,
+  cwd: process.cwd(),
 })
 ```
 
-`fromEnv()` reads `NIKA_URL` and `NIKA_TOKEN`, then applies overrides. Missing
-required values fail at construction.
-
-## Transport policy
-
-<div className="sdk-flight sdk-flight-compact">
-  <span>HTTP CLIENT · BOUNDED BY DEFAULT</span>
-  <pre tabIndex={0}>{`request
-├── timeout
-├── concurrency semaphore
-├── retry: 429 + 5xx only
-└── response
-    ├── JSON resource
-    └── typed NikaError`}</pre>
-</div>
-
-Retries use exponential backoff and honor bounded `Retry-After`. Ordinary 4xx
-responses are not retried. Inject `fetch` for middleware or test fixtures,
-and use `logger` for metadata without recording authorization values.
-
-## Continue
+`requestTimeout` bounds HTTP admission. `fetch`, `eventBufferSize` and
+`machineBufferBytes` are the other transport seams. The SDK does not expose
+automatic retry or concurrency policy as constructor options.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
-    Submit, poll and cancel remote work.
+    Admit, recover, observe and cancel durable jobs.
   </Card>
   <Card title="Configuration" icon="sliders" href="/sdk/reference/configuration">
-    Every option and default.
-  </Card>
-  <Card title="Use LocalNika today" icon="terminal" href="/sdk/local/client">
-    The production path against the released binary.
-  </Card>
-  <Card title="Server surfaces" icon="server" href="/sdk/operations/server-surfaces">
-    Keep three server-shaped commands separate.
+    Read the exact local and remote unions.
   </Card>
 </CardGroup>

@@ -1,6 +1,6 @@
 ---
 title: "Test and trace"
-description: "Rehearse workflows with mock goldens and verify the integrity of recorded run journals."
+description: "Keep CLI goldens separate from typed receipt verification."
 sidebarTitle: "Test and trace"
 icon: "vial-circle-check"
 ---
@@ -9,73 +9,36 @@ import { LocalContract } from "/snippets/_sdk-contract.mdx"
 
 <LocalContract />
 
-Testing and trace verification answer different questions:
+Golden testing is an engine CLI operation:
 
-- a golden asks whether behavior still matches an expectation;
-- trace verification asks whether recorded evidence stayed intact.
+```sh
+nika test workflows/release.nika.yaml
+nika test workflows/release.nika.yaml --update
+```
 
-## Run the golden
+One SDK `0.116.0` does not duplicate that command as a client method. Receipt
+verification is part of the SDK because it belongs to the run lifecycle.
 
 ```ts
-const golden = await nika.test('workflows/release.nika.yaml')
+const run = await nika.run('workflows/release.nika.yaml')
+const result = await run.done
 
-if (!golden.passed) {
-  console.error(golden.output)
-  process.exit(golden.exitCode)
+if (!result.receipt) throw new Error('run did not issue a receipt')
+
+const verdict = await nika.traceVerify(result.receipt)
+if (!verdict.verified) {
+  throw new Error(verdict.output ?? verdict.reason ?? 'trace verification failed')
 }
 ```
 
-The returned verdict preserves the engine exit code and combined output.
-
-## Update deliberately
-
-```ts
-await nika.test('workflows/release.nika.yaml', {
-  update: true,
-})
-```
-
-Updating the expectation is a separate action because replacing evidence
-must stay visible in review.
-
-## Verify a trace
-
-```ts
-const receipt = await nika.traceVerify(
-  '.nika/traces/release.ndjson',
-)
-
-if (!receipt.intact) {
-  throw new Error(receipt.output)
-}
-
-console.info('chain head', receipt.head)
-```
-
-The bare form checks the workspace latest on current engines. Pass a path
-when application state already owns the exact receipt identity.
-
-<div className="sdk-flight sdk-flight-compact">
-  <span>PROOF LANES · DIFFERENT VERDICTS</span>
-  <pre tabIndex={0}>{`workflow ── test ─────────── behavior matches?
-
-run ─────── trace journal ── chain intact?
-                         └── show · replay · export`}</pre>
-</div>
-
-## Continue
+`traceVerify(receipt)` accepts an engine-issued `NikaReceipt` object only. It does not
+accept a path and does not reconstruct or verify the chain in TypeScript.
 
 <CardGroup cols={2}>
-  <Card title="Receipts and replay" icon="link" href="/sdk/runtime/receipts">
-    Store and re-project the durable journal.
-  </Card>
-  <Card title="CI gate" icon="shield-check" href="/sdk/operations/ci">
-    Put the rehearsal before protected execution.
+  <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">
+    Store proof beside application state.
   </Card>
   <Card title="Testing guide" icon="flask" href="/guides/testing">
     Learn goldens and mock-provider workflows.
-  </Card>
-  <Card title="Trace concepts" icon="timeline" href="/concepts/traces">
-    Read the journal and chain model.
   </Card>
 </CardGroup>

@@ -1,6 +1,6 @@
 ---
 title: "Run and cancel"
-description: "Stream a local run, await its settled outcome and pass caller-owned cancellation."
+description: "Separate admission, observation, terminal settlement and cancellation."
 sidebarTitle: "Run and cancel"
 icon: "circle-play"
 ---
@@ -9,84 +9,63 @@ import { LocalContract } from "/snippets/_sdk-contract.mdx"
 
 <LocalContract />
 
-A local run exposes two truths at once: the journal while work is happening
-and the outcome after the child process settles.
-
-## Stream and settle
+## Admit, observe and settle
 
 ```ts
-const handle = nika.run('workflows/release.nika.yaml', {
+const run = await nika.run('workflows/release.nika.yaml', {
   maxCostUsd: 0.25,
 })
 
-for await (const event of handle) {
+const watching = (async () => {
+  for await (const event of nika.events(run)) {
+    timeline.accept(event)
+  }
+})()
+
+const result = await run.done
+await watching
+
+if (result.status !== 'succeeded') {
+  process.exit(result.exitCode ?? 1)
+}
+```
+
+`run()` is asynchronous admission and returns a `NikaRun` containing `id` and
+`done`. The run itself is not an async iterator. Subscribe through
+`nika.events(run)`; terminal truth lives only in `run.done`.
+
+## Stop observation without cancelling
+
+```ts
+const observer = new AbortController()
+
+for await (const event of nika.events(run, {
+  signal: observer.signal,
+  bufferSize: 64,
+})) {
   timeline.accept(event)
 }
-
-const outcome = await handle.outcome
-if (!outcome.ok) process.exit(outcome.exitCode)
 ```
 
-The handle is an `AsyncIterable` and owns an `outcome` promise. Keep both.
-A UI can ignore an event kind it does not render, but it must not infer
-success from the last kind it recognized.
+Aborting the observer stops only that view. It never cancels engine work.
 
-## Buffer when progress is not visible
+## Cancel explicitly
 
 ```ts
-const outcome = await nika.runToEnd('workflows/release.nika.yaml', {
-  model: 'mock/echo',
-  maxCostUsd: 0,
-})
+const cancellation = await nika.cancel(run)
+const result = await run.done
 
-console.log(outcome.events)
+console.log(cancellation.accepted, result.status)
 ```
 
-`runToEnd()` drains the same iterator and returns the accumulated events.
-It is convenient for a worker, test or command whose interface does not need
-live progress.
-
-## Let the caller cancel
-
-```ts
-const controller = new AbortController()
-const timer = setTimeout(() => controller.abort(), 30_000)
-
-try {
-  await nika.runToEnd('workflows/release.nika.yaml', {
-    signal: controller.signal,
-  })
-} finally {
-  clearTimeout(timer)
-}
-```
-
-Pass the request or job owner's signal. Do not create a hidden process timeout
-that the caller cannot observe or cancel.
-
-## Exit contract
-
-| Exit | Meaning |
-|---|---|
-| `0` | Completed |
-| `1` | Workflow ran and failed |
-| `2` | Findings or start refusal |
-| `3` | Environment failure |
-| `4` | Durable pause |
-
-## Continue
+Cancellation is idempotent for a run owned by this client. Passing a run from
+another client instance throws `NikaRunOwnershipError`.
 
 <CardGroup cols={2}>
-  <Card title="Run events" icon="wave-pulse" href="/sdk/runtime/events">
+  <Card title="Events" icon="wave-pulse" href="/sdk/runtime/events">
     Design an additive event reducer.
   </Card>
-  <Card title="Errors and exits" icon="triangle-exclamation" href="/sdk/runtime/errors">
-    Keep refusal classes separate.
-  </Card>
   <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">
-    Preserve proof after the stream closes.
-  </Card>
-  <Card title="Method index" icon="list" href="/sdk/reference/methods">
-    Scan every local and remote method.
+    Preserve and verify engine-issued proof.
   </Card>
 </CardGroup>

@@ -22,7 +22,7 @@ process room.
 
 <div className="sdk-flight">
   <span>ROOT MAP · DISCOVERY WALKS, STORAGE STAYS</span>
-  <pre tabIndex={0}>{`/repo/apps/api/                 LocalNika cwd
+  <pre tabIndex={0}>{`/repo/apps/api/                 Nika cwd
 ├── .nika/traces/              direct-run receipts
 └── ↑ discover
     /repo/nika.yaml             governing project
@@ -32,23 +32,24 @@ process room.
 
 The arm and serve paths enter the discovered project root before they fire.
 Their sidecar and triggered-run traces therefore share the project `.nika/`
-directory. A direct `nika run` or `LocalNika` call writes under its own `cwd`.
+directory. A direct `nika run` or local `Nika` call writes under its own `cwd`.
 
 ## Recommended: align the process room
 
-Set `LocalNika.cwd` to the project root when one policy boundary and one
+Set `Nika`'s `cwd` to the project root when one policy boundary and one
 evidence well are the goal.
 
 ```ts
 // src/runtime/nika.ts
 import { fileURLToPath } from 'node:url'
-import { LocalNika } from '@supernovae-st/nika-client/local'
+import { Nika } from '@supernovae-st/nika-client'
 
 const projectRoot = fileURLToPath(new URL('../../', import.meta.url))
 
-export const nika = new LocalNika({ cwd: projectRoot })
+export const nika = new Nika({ cwd: projectRoot })
 
-await nika.runToEnd('workflows/release.nika.yaml')
+const run = await nika.run('workflows/release.nika.yaml')
+const result = await run.done
 ```
 
 That one choice aligns:
@@ -97,7 +98,7 @@ the same project file or reads the same trace store.
 | Operation | Project file | Workflow argument | Generated state |
 |---|---|---|---|
 | Direct `nika run` | First ancestor from `cwd` | Relative to `cwd` | `cwd/.nika/traces/` |
-| `LocalNika.run()` | First ancestor from constructor `cwd` | Relative to constructor `cwd` | `cwd/.nika/traces/` |
+| Local `Nika.run()` | First ancestor from constructor `cwd` | Relative to constructor `cwd` | `cwd/.nika/traces/` |
 | `nika arm fire` | First ancestor from process `cwd` | Relative to discovered project | `project/.nika/arm/` and `project/.nika/traces/` |
 | `nika serve` | First ancestor at startup | Relative to discovered project | `project/.nika/arm/` and `project/.nika/traces/` |
 

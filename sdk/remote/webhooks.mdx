@@ -1,7 +1,7 @@
 ---
-title: "Webhooks"
-description: "Verify timestamped HMAC-SHA256 signatures against the raw request body."
-sidebarTitle: "Webhooks"
+title: "Application webhooks"
+description: "Own webhook delivery and verification outside the One SDK contract."
+sidebarTitle: "Application webhooks"
 icon: "webhook"
 ---
 
@@ -9,68 +9,32 @@ import { RemoteContract } from "/snippets/_sdk-contract.mdx"
 
 <RemoteContract />
 
-The signature verifier is a shipped SDK utility. The service that would send
-workflow webhooks remains on the preview horizon.
+One SDK `0.116.0` exposes no webhook verifier, and the server OpenAPI exposes no
+webhook registration or delivery routes. Do not call an SDK static verifier or
+claim a Nika signature format.
 
-## Preserve the raw body
-
-```ts
-const rawBody = await request.text()
-const signature = request.headers.get('X-Nika-Signature') ?? ''
-
-const valid = await Nika.verifyWebhook(
-  rawBody,
-  signature,
-  process.env.NIKA_WEBHOOK_SECRET!,
-)
-```
-
-The signed payload is `<timestamp>.<raw body>`. Verify before JSON parsing;
-parse and reserialization can change bytes.
-
-## Reject before dispatch
+If your application emits webhooks after `run.done`, that is an
+application-owned integration:
 
 ```ts
-if (!valid) {
-  return new Response('invalid signature', { status: 401 })
-}
+const result = await run.done
 
-const event = JSON.parse(rawBody)
-await dispatch(event)
+await applicationWebhookQueue.enqueue({
+  runId: run.id,
+  status: result.status,
+  outputs: result.outputs,
+})
 ```
 
-The header shape is `t=<unix timestamp>,v1=<hex signature>`. The verifier:
-
-- refuses malformed fields;
-- refuses timestamps outside the tolerance;
-- computes HMAC-SHA256 with Web Crypto;
-- compares equal-length signatures in constant time.
-
-Pass a fourth argument to change the default tolerance:
-
-```ts
-await Nika.verifyWebhook(rawBody, signature, secret, 60)
-```
-
-## Test without a service
-
-Build fixture signatures with Web Crypto in application tests. Keep replay
-tests for stale timestamps, modified bodies, wrong secrets and malformed
-headers.
-
-## Continue
+Use the receiving platform's published signing library and contract. Store the
+Nika run id and receipt alongside delivery state so workflow proof and webhook
+delivery remain separate authorities.
 
 <CardGroup cols={2}>
-  <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
-    Keep secrets and trust transitions explicit.
+  <Card title="Security" icon="shield" href="/sdk/operations/security">
+    Keep tokens, receipts and application secrets in their own boundaries.
   </Card>
-  <Card title="Remote errors" icon="triangle-exclamation" href="/sdk/runtime/errors">
-    Decide how invalid delivery reaches product state.
-  </Card>
-  <Card title="Type index" icon="brackets-curly" href="/sdk/reference/types">
-    Read the remote event and error shapes.
-  </Card>
-  <Card title="Source" icon="github" href="https://github.com/supernovae-st/nika-client/blob/main/src/webhook.ts">
-    Inspect the exact verifier.
+  <Card title="Run lifecycle" icon="circle-play" href="/sdk/remote/jobs">
+    Drive product state from the terminal result.
   </Card>
 </CardGroup>

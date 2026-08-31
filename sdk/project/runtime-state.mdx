@@ -34,19 +34,24 @@ project root as `cwd`.
 ## Verify a run trace through the SDK
 
 ```ts
-const verdict = await nika.traceVerify()
+const run = await nika.run('workflows/release.nika.yaml')
+const result = await run.done
 
-if (!verdict.intact) {
-  throw new Error(verdict.output)
+if (!result.receipt) throw new Error('run did not issue a receipt')
+
+const verdict = await nika.traceVerify(result.receipt)
+
+if (!verdict.verified) {
+  throw new Error(verdict.output ?? verdict.reason ?? 'verification failed')
 }
 
-console.log(verdict.head, verdict.exitCode)
+console.log(verdict.verdict, verdict.trace_id, verdict.exitCode)
 ```
 
-The SDK verifies the run journal. `nika arm` reads the arming sidecar. They are
-related evidence, but they are not interchangeable. A direct SDK run stores
-its journal under `cwd/.nika/traces`; arm and serve enter the project root
-before the workflow run starts.
+The SDK returns the engine-issued receipt to the engine for verification. It
+does not accept a trace path or inspect the journal in TypeScript. `nika arm`
+reads the arming sidecar. They are related evidence, but they are not
+interchangeable.
 
 ## Persist the clock on servers
 

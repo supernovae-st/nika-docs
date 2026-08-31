@@ -81,16 +81,15 @@ not need to pull a model for this step.
 ```bash
 nika --version
 nika                 # the mirror, and the line to type next
-nika try 01-hello    # offline proof · zero keys · nothing written
+nika new hello       # local starter · zero keys · no provider call
 ```
 
 Run `nika` with no arguments and read the line it offers. **Your** binary
 is the source of truth; on v{STATUS.version} that line is
 `{STATUS.firstCommand}`, and this page is gated on saying the same thing.
 
-It is the zero-risk first contact: a canonical example rehearsed under
-`mock/echo`, nothing written, nothing owned, done in a second. Bare `nika
-try` lists the rest of the shelf. `nika init` scaffolds repo-local schema
+It is the zero-spend first contact: a local starter created without a provider
+call. `nika init` scaffolds repo-local schema
 wiring and agent context when you want a repo, not before. `nika wire
 <client>` is explicit MCP client setup. Installers do not mutate editor
 configs automatically.
