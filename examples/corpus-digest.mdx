@@ -53,15 +53,13 @@ nika: corpus-digest
 run:
   clock: system   # the `timeout:` deadlines below ride the wall clock · said out loud (see 03)
 
-# A small NON-thinking seat, on purpose: two of the four model stages are
-# forms to fill, and a thinking seat DELIBERATES on forms (measured: the
-# corpus default qwen3.5:4b burned caps of 600, 2000 and 3000 tokens
-# reasoning before the JSON and never closed it · NIKA-INFER-002). One
-# resident seat also spares the model-swap thrash of per-task overrides
-# on a single GPU (measured: alternating two seats sent every stage cold
-# and timed the synthesis out). Upgrade path: point `brief` at a
-# thinking seat via its own `model:` when your machine holds both.
-model: ollama/llama3.2:3b   # local · zero key · `--model mock/echo` rehearses the whole file
+# The house local seat. The embedded catalog marks qwen3.5:4b as a
+# non-reasoning model, so this workflow declares no `thinking:` block.
+# Its generous output ceilings leave room for complete typed forms.
+# One resident seat also spares the model-swap
+# thrash of per-task overrides on a single GPU (measured: alternating two
+# seats sent every stage cold and timed the synthesis out).
+model: ollama/qwen3.5:4b   # local · zero key · `--model mock/echo` rehearses the whole file
 
 inputs:
   question:
@@ -104,7 +102,7 @@ tasks:
       files: ${{ tasks.files.output }}
     timeout: "8m"                # a local seat may be slow · bounded, not instant
     infer:
-      max_tokens: 3000           # the form is short · the cap is margin, not hope
+      max_tokens: 6000           # the form plus margin, not hope
       prompt: |
         Assign one focus of 3 to 8 words to each file path. The focuses
         serve this question: ${{ with.question }}
@@ -175,7 +173,7 @@ tasks:
     on_error:
       recover: null              # null holds the index open so the zip below stays aligned
     infer:
-      max_tokens: 3000           # a card, not an essay
+      max_tokens: 6000           # a complete card plus margin
       prompt: |
         Fill the card for ONE document. Claims are one sentence each,
         quotes are verbatim and short, relevance is 0 to 5 for the focus.
@@ -231,19 +229,13 @@ tasks:
     when: ${{ size(with.deck) > 0 }}
     timeout: "12m"               # judgment gets patience · still bounded
     infer:
-      max_tokens: 2000
+      max_tokens: 8000           # enough room to reconcile the full deck
       prompt: |
         Question · ${{ with.question }}
         Deck of source cards · ${{ with.deck }}
         Answer the question from the cards alone. Cite the `path` of every
         card you lean on. Where cards disagree, say so — do not resolve a
         conflict the sources did not resolve.
-      thinking:
-        # A reasoning budget, honoured by seats that support extended
-        # thinking and ignored by the ones that do not — declaring it
-        # never fails a run.
-        enabled: true
-        budget_tokens: 4000
 
 # Both the brief and the deck, so the fold is inspectable: the deck is
 # everything the synthesis was allowed to see. Read with `--output json`.
@@ -286,7 +278,7 @@ outputs:
 | `for_each` over a planned collection | `cards` | [YAML syntax](/reference/yaml-syntax) |
 | join-by-key in `nika:jq` (`from_entries`) | `slices` | [Builtins](/reference/builtins) |
 | `fail_fast: false` + `recover: null` fan-in | `cards` → `deck` | [YAML syntax · `on_error`](/reference/yaml-syntax) |
-| `thinking:` budget on the synthesis | `brief` | [The 4 verbs](/concepts/verbs) |
+| typed synthesis over the filtered deck | `brief` | [The 4 verbs](/concepts/verbs) |
 
 ## Make it yours
 

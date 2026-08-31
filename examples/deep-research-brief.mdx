@@ -25,7 +25,7 @@ flowchart LR
   slug["slug · nika:jq"]:::invoke
   plan["plan · typed"]:::infer
   investigate["investigate · 2 tools"]:::agent
-  brief["brief · thinking"]:::infer
+  brief["brief"]:::infer
   save["save · nika:write"]:::invoke
   plan --> investigate
   investigate --> brief
@@ -147,11 +147,12 @@ tasks:
         Write the executive brief · what's true · what's contested · what it
         means · what to do. Two pages max. Anything the sources do not support
         goes in « contested », never in « true ».
-      thinking:
-        # A reasoning budget, honoured by seats that support extended thinking
-        # and ignored by the ones that do not — declaring it never fails a run.
-        enabled: true
-        budget_tokens: 8000
+      # No `thinking:` block on purpose: the seat law REFUSES a thinking
+      # declaration on a model the catalog knows cannot reason (a dead
+      # declaration — the wire drops the budget), and the local seat this
+      # file runs on is exactly that. Seat `brief` on a reasoning-capable
+      # model via its own `model:` — THAT is what licenses
+      # `thinking: { enabled: true, budget_tokens: … }`.
 
   save:
     with:
