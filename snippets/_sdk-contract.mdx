@@ -5,7 +5,7 @@ export const SDK = {
   package: "@supernovae-st/nika-client",
   source: "https://github.com/supernovae-st/nika-client",
   sourceVersion: "0.116.0",
-  sourceCommit: "2f27b0eb865bbe2a89a59bc0b5c0dfef6eb37da1",
+  sourceCommit: "e5e79ee4d0eba4c33c043ca6fd413bc2646aa3c3",
   npmLatest: "0.115.0",
   site: "https://nika.sh/sdk",
 }
@@ -13,8 +13,8 @@ export const SDK = {
 export const SourceContract = () => (
   <Warning>
     These pages describe the reviewed <code>0.116.0</code> source contract at
-    <a href={`${SDK.source}/commit/${SDK.sourceCommit}`}> commit <code>2f27b0e</code></a>
-    and the released <code>nika 0.116.0</code> engine. The npm registry still
+    <a href={`${SDK.source}/commit/${SDK.sourceCommit}`}> commit <code>e5e79ee</code></a>
+    and the released <code>nika 0.116.2</code> engine. The npm registry still
     serves <code>0.115.0</code>. Do not assume the One SDK examples are present
     in the registry package until <code>npm view {SDK.package} version</code>
     reports <code>0.116.0</code>.
@@ -37,7 +37,7 @@ export const RemoteContract = () => (
     <strong>The same facade selects HTTP when <code>url</code> and
     <code>token</code> are present.</strong> A compatible local engine is still
     required to capture immutable workflow bytes before admission. OpenAPI
-    <code>0.116.0</code> includes jobs, SSE, cancellation, trace diagnostics,
+    <code>0.116.2</code> includes jobs, SSE, cancellation, trace diagnostics,
     workflows and schedule read/write. It does not include
     <code>POST /v1/run</code>, artifact routes, job listing, or schedule
     list/delete/trigger/backfill routes. These examples target source

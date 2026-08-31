@@ -39,6 +39,19 @@ references servers by id: Nika handles the rest.
 ## How to invoke one
 
 <CodeGroup>
+```json .nika/mcp_servers.json
+{
+  "mcp_servers_format": 1,
+  "servers": {
+    "firecrawl": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "network": { "allowlist": ["api.firecrawl.dev"] }
+    }
+  }
+}
+```
+
 ```yaml workflow.nika.yaml
 nika: scrape-and-summarise
 
@@ -62,6 +75,9 @@ tasks:
 ```
 
 ```bash Required env
+# Pin the server's current tool definitions after reviewing them.
+nika mcp approve firecrawl
+
 # Each server declares its env_var in mcp-servers.toml.
 # Firecrawl needs FIRECRAWL_API_KEY — read mcp-servers.toml for the full
 # list. Run `nika doctor` to inspect provider readiness.
