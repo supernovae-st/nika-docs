@@ -28,7 +28,12 @@ the package only after the pinned registry query reports that exact version:
 
 ```sh
 npm install @supernovae-st/nika-client@0.116.2
+node -p "require('@supernovae-st/nika-client/package.json').version"
 ```
+
+The second command proves the dependency installed in this project. It does not
+read the moving npm `latest` tag. The package metadata subpath is public from
+One SDK `0.116.2` onward.
 
 ## 2. Create a project and workflow
 
