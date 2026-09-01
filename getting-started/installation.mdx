@@ -152,6 +152,16 @@ per-OS fix.
   Release binaries are published at
   [github.com/supernovae-st/nika/releases](https://github.com/supernovae-st/nika/releases)
   with SHA256 sums.
+
+  If you download one platform archive rather than all four, verify only that
+  row. Running the checksum file wholesale reports the three archives you did
+  not download as failures:
+
+  ```bash
+  asset="$(find . -maxdepth 1 -name 'nika-*.tar.gz' -print -quit | sed 's#^./##')"
+  test -n "$asset"
+  grep -E "[[:space:]]${asset}$" SHA256SUMS | shasum -a 256 -c -
+  ```
 </Check>
 
 ## A real answer, later
