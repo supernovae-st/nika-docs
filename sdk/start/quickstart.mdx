@@ -20,26 +20,29 @@ Node.js 22 or newer and a compatible Nika engine.
 ```sh
 brew install supernovae-st/tap/nika
 nika --version
-npm view @supernovae-st/nika-client version
+npm view @supernovae-st/nika-client@0.116.2 version
 ```
 
-The engine release is `0.116.2`; npm currently reports `0.115.0`. The code
-below is the reviewed `0.116.0` source contract. Install the package only after
-the registry command reports `0.116.0`:
+The engine release and code below use the reviewed `0.116.2` contract. Install
+the package only after the pinned registry query reports that exact version:
 
 ```sh
-npm install @supernovae-st/nika-client@0.116.0
+npm install @supernovae-st/nika-client@0.116.2
 ```
 
 ## 2. Create a project and workflow
 
 ```sh
 nika init --project-file
-nika new hello
+mkdir -p workflows
+nika new 01-hello workflows/hello.nika.yaml
 ```
 
 Keep the generated `.nika.yaml` workflow in your application, for example as
 `workflows/hello.nika.yaml`.
+
+`nika.yaml` is the project control plane; `workflows/hello.nika.yaml` is the
+executable workflow. Pass only the latter to `check()` and `run()`.
 
 ## 3. Check, admit, observe, settle
 
