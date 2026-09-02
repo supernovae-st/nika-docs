@@ -274,7 +274,8 @@
               "sdk/remote/artifacts",
               "sdk/remote/workflows",
               "sdk/remote/webhooks"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Operations",
