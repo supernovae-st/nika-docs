@@ -221,6 +221,28 @@ golden diff carry it into review, which is where a rubric change belongs.
   rubric. Extraction quality is a separate exercise against real seats, where
   it costs money and is worth what it costs.
 
+## Cases · one workflow, N goldens
+
+A rule with a decision table is one workflow and several inputs, not
+several copies of the workflow. Since 0.117.0 a **case** names the golden
+and binds its inputs through the same door `nika run --var` uses:
+
+```bash
+$ nika test triage.nika.yaml --case refund --var kind=refund --update
+✔ golden written · triage.nika.yaml.refund.golden.json
+$ nika test triage.nika.yaml --case refund --var kind=refund
+✔ golden match · 1 key · 212 B · triage.nika.yaml.refund.golden.json
+$ nika test triage.nika.yaml --case escalate --var kind=outage --update
+✔ golden written · triage.nika.yaml.escalate.golden.json
+```
+
+Each case pins `<file>.<case>.golden.json`; a case re-run under other
+inputs is a mismatch (exit 1), never a silent pass. `--var` without
+`--case` is refused with the reason — a case is a file, and a golden
+needs its name — so the single `<file>.golden.json` keeps meaning « the
+declared defaults ». The no-golden hint echoes the flags a re-run must
+repeat.
+
 ## Exit codes · the CI contract
 
 | Exit | Meaning |
@@ -228,7 +250,7 @@ golden diff carry it into review, which is where a rubric change belongs.
 | `0` | Outputs match the golden (or `--update` pinned one) |
 | `1` | The mock run failed, or outputs drifted from the golden |
 | `2` | The file has validation findings (`nika check` would fail — fix those first) |
-| `3` | No golden yet (create with `--update`), or environment error |
+| `3` | No golden yet (create with `--update`), `--var` without `--case`, or environment error |
 
 `nika test` refuses to run a dirty file the same way `nika run` does: a
 workflow with check findings exits 2 before anything executes.

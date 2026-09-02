@@ -134,6 +134,36 @@ FORGED`. This is the property no scrollback and no vendor dashboard
 gives you: the evidence proves *itself*, on your machine, without
 trusting the tool that wrote it.
 
+### Gate CI on a tier · `--json`
+
+Since 0.117.0 the ladder has a machine face. One JSON document per trace
+(`verify_version` 1, additive like `check --json`): the attained `tier`,
+the `exit` class, the chain facts, one object per leg and the prose
+`lines` — so « at least SEALED » is a field read, never a grep:
+
+```bash
+nika trace verify .nika/traces/review.ndjson --json
+```
+
+```json
+{
+  "verify_version": 1,
+  "trace": ".nika/traces/review.ndjson",
+  "tier": "sealed",
+  "exit": 0,
+  "chain": { "events": 18, "head": "9f2c…", "headline": "intact" },
+  "seal": { "tier": "sealed", "key_id": "1e772a7b922d7be3", "source": "custody" },
+  "anchor": { "tier": "not-present" },
+  "replay": { "tier": "not-asked" },
+  "lines": ["SEALED — the run_sealed signature verifies · key 1e772a7b922d7be3", "…"]
+}
+```
+
+The non-ladder verdicts project too (`tier` is `broken`, `unchained`,
+`empty` or `unreadable`, with their exit class), and several traces stream
+as NDJSON, one document per line. `--sealed` and `--anchored` still turn a
+missing tier into exit 3, so a gate can demand the tier and read it.
+
 ## Why this matters
 
 - **The run is auditable.** Which tasks ran, in what order, how long
