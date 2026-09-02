@@ -49,8 +49,14 @@ Between release tags, progress lands on `main` as:
 
 ## History
 
-<Update label="v0.117.0" description="2026-09-02 · what a public gauntlet found, closed · one provider count · the golden test grows cases" tags={["release", "check", "cli"]}>
-  **The release after the third gauntlet.** Eight personas ran the 0.116.2
+<Update label="v0.117.1" description="2026-09-02 · what a public gauntlet found, closed · one provider count · the golden test grows cases" tags={["release", "check", "cli"]}>
+  **The release after the third gauntlet.** `v0.117.0` was tagged from
+  `226dc512` and its train failed at startup: the provenance job granted
+  the SLSA generator `contents: read` while the generator's nested
+  uploader declares `contents: write`, a declaration GitHub validates
+  when the reusable workflow is called. No asset shipped under that tag;
+  **this patch ships the same tree plus the grant and is the version
+  consumers install.** Eight personas ran the 0.116.2
   binary with nothing but its own help, the oracle and these pages; what
   defeated them was what the tool *said*, never the file. This release
   closes those findings and the P0 schedule audit beside them.
@@ -85,7 +91,7 @@ Between release tags, progress lands on `main` as:
   - **The serve OpenAPI document ships committed** beside the crate and is
     published on this site.
 
-  These docs teach 0.117.0 (measured 2026-09-02).
+  These docs teach 0.117.1 (measured 2026-09-02).
 </Update>
 
 <Update label="v0.109.2" description="2026-08-19 · the first published nine-key binary · Linux builders jail before the gates run" tags={["release", "language"]}>
