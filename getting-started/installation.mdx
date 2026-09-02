@@ -17,6 +17,20 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 ## Install today
 
 <Tabs>
+  <Tab title="npm">
+    ```bash
+    npm install -g @supernovae-st/nika-client
+    nika --version
+    ```
+    One package gives you the `nika` command and the TypeScript SDK. The
+    verified release binary for your platform arrives as an optional
+    dependency (macOS and Linux · arm64 and x64): the same bytes every other
+    door installs. Project-local works too: `npm install @supernovae-st/nika-client`,
+    then `npx nika …` and `import { Nika } from '@supernovae-st/nika-client'`.
+    The [SDK README](https://github.com/supernovae-st/nika-client#readme) carries
+    the full contract; the package version follows the engine's release train.
+  </Tab>
+
   <Tab title="Homebrew">
     ```bash
     brew install supernovae-st/tap/nika
