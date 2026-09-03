@@ -5,7 +5,10 @@ sidebarTitle: "Resume & pause"
 icon: "rotate-right"
 ---
 
-A long run dies at task 7 of 9 — laptop lid, ctrl-C, a provider hiccup.
+A long run dies at task 7 of 9 — laptop lid, a provider hiccup, a kill.
+(Ctrl-C is not a death since 0.118: the run cancels at its next wave
+boundary, in-flight work completes and is counted, the trace seals with
+`workflow_cancelled` and `--resume` picks up from it like any other.)
 With most tools that is 7 tasks of tokens re-spent. With Nika the run's
 own trace is the checkpoint: **`--resume` re-executes the workflow,
 skipping every task whose recorded work is still valid** (ADR-099).
@@ -268,3 +271,19 @@ The design has a lineage, and naming it beats pretending novelty:
   ([doi:10.1038/nbt.3820](https://doi.org/10.1038/nbt.3820)). Scientific
   computing proved content-addressed `-resume` a decade ago; its
   ecosystem calls it the single most-loved feature.
+
+## A trace is not a bearer artifact
+
+Since 0.117.2 the opening frame binds the trace to the project that wrote
+it (`project_root_fingerprint`). `--resume` judges that binding FIRST: a
+trace copied from another project refuses with exit `3` and one typed line
+on the `--json` stream — « a trace is not a bearer artifact: resume it from
+the project that wrote it, or run the workflow afresh here ». An older trace
+with no fingerprint is no claim.
+
+`--resume-unverified` waives the chain check for a trace whose journal was
+edited or truncated. It does NOT replay a human's yes: every recorded
+`nika:prompt` decision re-asks under the opt-out (a decision is a
+credential, and the chain that bound it to this run is waived), and the door
+says the project binding is a recorded field the waived chain no longer
+protects.

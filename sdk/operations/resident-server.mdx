@@ -96,6 +96,15 @@ nika serve --bind 127.0.0.1:18765 \
 ```
 
 Listen line (measured): `nika serve · listening http://127.0.0.1:18765 · GET /health`.
+
+`--workflows <dir>` scopes the served registry (0.117.2): the listing, the
+metadata route and the schedules see only the workflows under that directory,
+named from the project root (`flows/quick.nika.yaml`, never `quick`); a
+schedule naming a workflow outside it is refused with the teaching. Every HTTP
+job leaves the journal a `nika run` leaves, under the project's
+`.nika/traces/` (the trace the job receipt names exists on disk, and
+`nika trace verify` seals it) · a cancelled job ends with the one
+`execution.cancelled` terminal, never a failure.
 The route table lives at `GET /v1/openapi.json`. Full matrix:
 [server surfaces](/sdk/operations/server-surfaces).
 
