@@ -97,7 +97,7 @@ nika serve --bind 127.0.0.1:18765 \
 
 Listen line (measured): `nika serve · listening http://127.0.0.1:18765 · GET /health`.
 
-`--workflows <dir>` scopes the served registry (0.117.2): the listing, the
+`--workflows <dir>` scopes the served registry (0.118): the listing, the
 metadata route and the schedules see only the workflows under that directory,
 named from the project root (`flows/quick.nika.yaml`, never `quick`); a
 schedule naming a workflow outside it is refused with the teaching. Every HTTP
@@ -105,6 +105,19 @@ job leaves the journal a `nika run` leaves, under the project's
 `.nika/traces/` (the trace the job receipt names exists on disk, and
 `nika trace verify` seals it) · a cancelled job ends with the one
 `execution.cancelled` terminal, never a failure.
+
+`POST /v1/jobs` and `POST /v1/check` take two forms (0.118):
+`{"workflow": "<name>"}` for a workflow the served registry lists — the
+resident captures the world itself, exactly as a schedule fires — and the
+execution snapshot `nika check <file> --json --sdk-snapshot` prints, whose
+digests are optional caller-supplied integrity digests (absent, the resident
+computes them; present, they must match the bytes). A retry with the same
+`Idempotency-Key` finds its job before the registry is read again. The
+terminal event (`execution.settled` · `execution.cancelled`) carries the
+run's `settlement` whole (`status` · `cause` · `elapsed_ms` · `tasks` ·
+`spend` · `error`), the same object `run_settled` flattens; `nika doctor`
+says which resident runs (the stores' writer stamp beside the server lease);
+`nika explain <code>` teaches every resident code.
 The route table lives at `GET /v1/openapi.json`. Full matrix:
 [server surfaces](/sdk/operations/server-surfaces).
 

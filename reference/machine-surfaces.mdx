@@ -20,13 +20,13 @@ icon: "plug"
 | `nika catalog --json` | `catalog_version` | the provider/model vocabulary: models, capabilities, key env-var NAMES |
 | `nika catalog --tools --json` | `tools_version` | the builtin tool catalog with model-facing JSON Schemas per tool |
 | `nika inspect <file> --format json` | `graph_format` (`3`) | the ONE graph projection: nodes (id · `kind`: `task` · `finally` · verb · model/tool · when · fan-out · permits · cost interval) + **typed edges** (`kind`: `value` · `terminal-observation` · `failure-observation` · `control` + `predicate` · `recovery` · `finally` with `predicate: unwind` — `binding` on data edges) — mermaid and dot are derived from this, never parallel truths. Formats 1 and 2 are dead: a reader refuses a format it does not speak; a pinned golden is regenerated from the binary, never hand-edited; within format 3, evolution is additive-only |
-| `nika run <file> --json` | NDJSON stream | the live event stream, one JSON object per line — the same events the trace records · the last line is `run_settled` with `status` ∈ `succeeded` · `failed` · `paused` · `cancelled` (0.118) and the `error` cause on a failed run |
-| `nika trace ls --json` | — (stable shape) | the run inventory: every recorded trace with its state (`completed` · `failed` · `paused` · `cancelled` · `running`), age, size, resume marker (0.117.2) |
+| `nika run <file> --json` | NDJSON stream | the live event stream, one JSON object per line — the same events the trace records · the last line is `run_settled` with `status` ∈ `succeeded` · `failed` · `paused` · `cancelled` (0.118), the `error` cause on a failed run, `evidence` ∈ `sealed` · `unsealed` · `lost` · `none` (what the run left behind, said, never implied by an absent receipt) and the lanes that served |
+| `nika trace ls --json` | — (stable shape) | the run inventory: every recorded trace with its state (`succeeded` · `failed` · `paused` · `cancelled` · `running` · `dead`) and its writer's `liveness` (`alive` · `dead` · `unknown` — the lease beside the journal, never a guess), age, size, resume marker (0.118) |
 | `nika trace outputs --json` | — (stable shape) | one run's task projection: `state` and per task `status` · `error_code` · `recovered_from` · `integrity_source` (the upstream whose recovered fallback fed it) · a fan-out's `items` rows (0.118) |
 | `nika trace export` | OTLP | any recorded journal projected to OpenTelemetry (Jaeger · Grafana · Langfuse) |
 | `nika spec --canon` | `schema_version` | the embedded canon SSOT (counts and names — cite it, never a remembered number) |
 | `nika spec --schema` | JSON Schema `$id` | the embedded workflow schema — the same one editors validate against |
-| `nika spec --schema --project` | JSON Schema `$id` | the project file's schema (`nika.yaml` · `ceiling` · `traces` · `arm:` beats) — emitted from the parser, proven against its closed key sets (0.117.2) |
+| `nika spec --schema --project` | JSON Schema `$id` | the project file's schema (`nika.yaml` · `ceiling` · `traces` · `arm:` beats) — emitted from the parser, proven against its closed key sets (0.118) |
 
 `nika check -` reads the workflow from **stdin** — editors and agents
 audit keystroke-fresh buffers without touching the disk.

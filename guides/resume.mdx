@@ -75,7 +75,7 @@ $ nika run release-notes.nika.yaml --resume .nika/traces/release-notes.ndjson
   ↷  collect  cache hit (resume)
   ↷  draft    cache hit (resume)
   ↷  stamp    cache hit (resume)
-  ── 3/3 done · $0.00 · elapsed 0.0s ─────────────────────────────
+  ── 3/3 done · unmetered · elapsed 0.0s ─────────────────────────────
     trace: .nika/traces/2026-07-28T07-01-41Z-1a95.ndjson · 8 events · chain 1a101794c8877565c74eb34149b1530d9b59f987f422b9ff4b19acde2d8b5be0
 
   resumed · 3 skipped (cache hit) · 0 ran live
@@ -139,7 +139,7 @@ $ nika run release-notes.nika.yaml --resume .nika/traces/release-notes.ndjson --
   ✔  collect  cache hit
   ✔  draft    infer · mock/echo  0ms
   ✔  stamp    exec · printf      4ms
-  ── 3/3 done · $0.000 · elapsed 0.0s ────────────────────────────
+  ── 3/3 done · unmetered · elapsed 0.0s ────────────────────────────
 
   resumed · 1 skipped (cache hit) · 2 ran live
 ```
@@ -219,7 +219,7 @@ $ nika run gated-ship.nika.yaml --resume .nika/traces/gated-ship.ndjson --answer
   ✔  build    cache hit
   ✔  approve  invoke · nika:prompt  0ms
   ✔  ship     exec · printf         5ms
-  ── 3/3 done · $0.000 · elapsed 0.0s ────────────────────────────
+  ── 3/3 done · unmetered · elapsed 0.0s ────────────────────────────
 
   resumed · 1 skipped (cache hit) · 2 ran live
 ```
@@ -274,7 +274,7 @@ The design has a lineage, and naming it beats pretending novelty:
 
 ## A trace is not a bearer artifact
 
-Since 0.117.2 the opening frame binds the trace to the project that wrote
+Since 0.118 the opening frame binds the trace to the project that wrote
 it (`project_root_fingerprint`). `--resume` judges that binding FIRST: a
 trace copied from another project refuses with exit `3` and one typed line
 on the `--json` stream — « a trace is not a bearer artifact: resume it from
