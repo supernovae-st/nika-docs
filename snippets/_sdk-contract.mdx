@@ -26,7 +26,7 @@ export const LocalContract = () => (
     the package root and omit <code>url</code>. The client resolves the engine
     from <code>bin</code>, then <code>NIKA_BIN</code>, then the exact optional
     platform package. It deliberately refuses an implicit <code>PATH</code>
-    lookup. These examples target the pending
+    {" "}lookup. These examples target the pending
     <a href={SDK.sourceCandidate}> {SDK.sourceVersion} source candidate</a>.
   </Tip>
 )
@@ -34,13 +34,13 @@ export const LocalContract = () => (
 export const RemoteContract = () => (
   <Info>
     <strong>The same facade selects HTTP when <code>url</code> and
-    <code>token</code> are present.</strong> Contained served names go directly
+    {" "}<code>token</code> are present.</strong> Contained served names go directly
     to the resident and need no local binary or source. Explicit local paths
     such as <code>./workflow.nika.yaml</code> require a compatible local engine
     to capture an immutable snapshot. The candidate OpenAPI includes jobs,
     SSE, cancellation, trace diagnostics,
     workflows and schedule read/write. It does not include
-    <code>POST /v1/run</code>, artifact routes, job listing, or schedule
+    {" "}<code>POST /v1/run</code>, artifact routes, job listing, or schedule
     list/delete/trigger/backfill routes. These examples target the pending
     <a href={SDK.sourceCandidate}> {SDK.sourceVersion} source candidate</a>;
     its npm package and matching engine release are not yet published.
