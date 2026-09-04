@@ -15,9 +15,10 @@ tombstone: live pages may not teach its retired `--from` flag. Release
 history is exempt because it records the migration.
 
 Both directions read the SAME derivation — the released binary's own
-`--help`. Zero hand-maintained lists, so the gate cannot rot into a
-mirror of what it is meant to judge. Soft-skips when the binary is
-absent (CI without brew).
+`--help --all` command inventory. NIKA_BIN selects an explicit absolute
+engine path; otherwise the gate resolves `nika` on PATH once and uses it
+for every probe.
+Soft-skips only when no explicit binary was supplied and PATH has none.
 """
 
 import os
@@ -34,12 +35,28 @@ CLI_MDX = DOCS_ROOT / "reference" / "cli.mdx"
 EXEMPT = {"help"}
 
 
-def released_subcommands() -> list[str]:
+def resolve_nika() -> str | None:
+    """An explicit judge never silently falls back to another installation."""
+    explicit = os.environ.get("NIKA_BIN")
+    if explicit is not None:
+        path = pathlib.Path(explicit)
+        if not path.is_absolute():
+            raise ValueError("NIKA_BIN must be an absolute executable path")
+        if not path.is_file() or not os.access(path, os.X_OK):
+            raise ValueError(f"NIKA_BIN is not an executable file: {explicit}")
+        return str(path)
+    found = shutil.which("nika")
+    return str(pathlib.Path(found).absolute()) if found else None
+
+
+def released_subcommands(binary: str) -> list[str]:
     out = subprocess.run(
-        ["nika", "--help"],
+        [binary, "--help", "--all"],
         capture_output=True,
         text=True,
-        env={"NO_COLOR": "1", "PATH": "/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin"},
+        env={**os.environ, "NO_COLOR": "1"},
+        check=True,
+        timeout=10,
     ).stdout
     subs = []
     in_commands = False
@@ -55,6 +72,8 @@ def released_subcommands() -> list[str]:
             m = re.match(r"^  ([a-z][a-z0-9-]*)\s", line)
             if m:
                 subs.append(m.group(1))
+    if not subs:
+        raise ValueError("selected engine --help --all did not list any subcommands")
     return [s for s in subs if s not in EXEMPT]
 
 
@@ -94,31 +113,39 @@ def retired_new_forms() -> list[str]:
     return findings
 
 
-def door_exists(sub: str) -> bool:
+def door_exists(binary: str, sub: str) -> bool:
     """Does `nika <sub>` resolve? PROBED, never inferred from `--help`.
 
-    `--help` lists the operator surface, not the whole surface: `catalog`
-    and `completions` both answer rc=0 while staying hidden from it. A
-    gate that read the help text alone would condemn two live doors —
-    measured 2026-08-03, the first run of this direction did exactly
-    that, and the docs it accused were right.
+    The compact top-level `--help` is a teaching card. The full inventory
+    comes from `--help --all`, but each taught command still gets its own
+    probe so command resolution is tested independently of that listing.
     """
     return (
         subprocess.run(
-            ["nika", sub, "--help"],
+            [binary, sub, "--help"],
             capture_output=True,
             text=True,
-            env={"NO_COLOR": "1", "PATH": os.environ.get("PATH", "/usr/bin:/bin")},
+            env={**os.environ, "NO_COLOR": "1"},
+            timeout=10,
         ).returncode
         == 0
     )
 
 
 def main() -> int:
-    if shutil.which("nika") is None:
-        print("teach-parity: SKIP (nika binary absent — run where the release is installed)")
-        return 0
-    released = released_subcommands()
+    try:
+        binary = resolve_nika()
+        if binary is None:
+            print("teach-parity: SKIP (nika binary absent — run where the release is installed)")
+            return 0
+        return judge(binary)
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        print(f"teach-parity: RED — cannot judge selected engine: {error}", file=sys.stderr)
+        return 1
+
+
+def judge(binary: str) -> int:
+    released = released_subcommands(binary)
     taught = CLI_MDX.read_text()
 
     # Direction 1 · every released subcommand has its row.
@@ -130,11 +157,11 @@ def main() -> int:
     # Direction 2 · every subcommand a shell fence hands out still exists.
     # `--version`/`--help` style calls never reach here (the pattern wants
     # a bare word). The authority is the PROBE, not the help text — the
-    # help lists the operator surface, the binary has more doors.
+    # full inventory and per-command probe must agree on the selected binary.
     dead = {
         sub: files
         for sub, files in taught_subcommands().items()
-        if sub not in EXEMPT and not door_exists(sub)
+        if sub not in EXEMPT and not door_exists(binary, sub)
     }
     retired_new = retired_new_forms()
 

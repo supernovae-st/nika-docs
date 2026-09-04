@@ -81,6 +81,7 @@ jobs:
             exit 1
           fi
           python3 scripts/tests/test_teach_parity_retired_new.py
+          python3 scripts/tests/test_teach_parity_binary.py
 
   oracle-sweep:
     runs-on: ubuntu-latest
