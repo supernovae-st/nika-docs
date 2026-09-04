@@ -5,9 +5,9 @@ sidebarTitle: "CI gate"
 icon: "shield-check"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 The pull-request job should prove the file is clean, inspect the authority and
 spend shape, then rehearse the graph with the mock provider.

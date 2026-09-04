@@ -1,5 +1,7 @@
 {/* _sdk-contract.mdx: one source for the One SDK release horizon.
-    Keep registry availability separate from the source and engine contract. */}
+    Pass SDK explicitly as sdk: imported components must not rely on sibling
+    variable exports being in scope. Keep availability separate from
+    the source and engine contract. */}
 
 export const SDK = {
   package: "@supernovae-st/nika-client",
@@ -10,28 +12,28 @@ export const SDK = {
   site: "https://nika.sh/sdk",
 }
 
-export const SourceContract = () => (
+export const SourceContract = ({ sdk }) => (
   <Warning>
-    These pages describe the pending <code>{SDK.sourceVersion}</code> SDK source
-    candidate in <a href={SDK.sourceCandidate}>PR #86</a> and its matching engine
-    candidate in <a href={SDK.engineCandidate}>PR #1478</a>. Neither candidate
+    These pages describe the pending <code>{sdk.sourceVersion}</code> SDK source
+    candidate in <a href={sdk.sourceCandidate}>PR #86</a> and its matching engine
+    candidate in <a href={sdk.engineCandidate}>PR #1478</a>. Neither candidate
     is published. The merged source SHA and public package artifacts must be
     pinned before these examples become a released installation contract.
   </Warning>
 )
 
-export const LocalContract = () => (
+export const LocalContract = ({ sdk }) => (
   <Tip>
     <strong>One facade, local by default.</strong> Import <code>Nika</code> from
     the package root and omit <code>url</code>. The client resolves the engine
     from <code>bin</code>, then <code>NIKA_BIN</code>, then the exact optional
     platform package. It deliberately refuses an implicit <code>PATH</code>
     {" "}lookup. These examples target the pending
-    <a href={SDK.sourceCandidate}> {SDK.sourceVersion} source candidate</a>.
+    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} source candidate</a>.
   </Tip>
 )
 
-export const RemoteContract = () => (
+export const RemoteContract = ({ sdk }) => (
   <Info>
     <strong>The same facade selects HTTP when <code>url</code> and
     {" "}<code>token</code> are present.</strong> Contained served names go directly
@@ -42,7 +44,7 @@ export const RemoteContract = () => (
     workflows and schedule read/write. It does not include
     {" "}<code>POST /v1/run</code>, artifact routes, job listing, or schedule
     list/delete/trigger/backfill routes. These examples target the pending
-    <a href={SDK.sourceCandidate}> {SDK.sourceVersion} source candidate</a>;
+    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} source candidate</a>;
     its npm package and matching engine release are not yet published.
   </Info>
 )

@@ -5,9 +5,9 @@ sidebarTitle: "Workflow registry"
 icon: "folder-open"
 ---
 
-import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
-<RemoteContract />
+<RemoteContract sdk={SDK} />
 
 ```ts
 const names = await nika.listWorkflows()

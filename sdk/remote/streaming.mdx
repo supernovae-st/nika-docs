@@ -5,9 +5,9 @@ sidebarTitle: "SSE streaming"
 icon: "wave-pulse"
 ---
 
-import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
-<RemoteContract />
+<RemoteContract sdk={SDK} />
 
 ```ts
 for await (const event of nika.events(run, { bufferSize: 64 })) {

@@ -6,9 +6,9 @@ icon: "server"
 ---
 
 import { ProjectContract } from "/snippets/_project-contract.mdx"
-import { SourceContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 
-<SourceContract />
+<SourceContract sdk={SDK} />
 <ProjectContract />
 
 `nika serve` with no `--bind` is the released resident firer. It reads the

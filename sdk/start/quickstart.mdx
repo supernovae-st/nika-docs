@@ -5,11 +5,11 @@ sidebarTitle: "Quickstart"
 icon: "play"
 ---
 
-import { SourceContract, LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, SourceContract, LocalContract } from "/snippets/_sdk-contract.mdx"
 import { ProjectContract } from "/snippets/_project-contract.mdx"
 
-<SourceContract />
-<LocalContract />
+<SourceContract sdk={SDK} />
+<LocalContract sdk={SDK} />
 <ProjectContract />
 
 The default client is local. It needs no server or token, but it does need

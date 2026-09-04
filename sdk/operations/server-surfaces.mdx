@@ -5,7 +5,7 @@ sidebarTitle: "Server surfaces"
 icon: "server"
 ---
 
-import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
 import { ProjectContract } from "/snippets/_project-contract.mdx"
 
 Three surfaces sound like servers but accept different clients.
@@ -17,7 +17,7 @@ Three surfaces sound like servers but accept different clients.
 | `nika model serve` | OpenAI-compatible local inference provider | no |
 
 <ProjectContract />
-<RemoteContract />
+<RemoteContract sdk={SDK} />
 
 ## Candidate OpenAPI routes
 
@@ -50,7 +50,7 @@ nika serve --bind 127.0.0.1:18765 \
 
 ## Local application path
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 ```ts
 import { Nika } from '@supernovae-st/nika-client'

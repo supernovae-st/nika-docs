@@ -5,11 +5,11 @@ sidebarTitle: "CWD and monorepos"
 icon: "folder-tree"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 import { ProjectContract } from "/snippets/_project-contract.mdx"
 
 <ProjectContract />
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 The working directory is not a convenience string. It selects relative
 workflow paths, starts project discovery and roots direct-run state.

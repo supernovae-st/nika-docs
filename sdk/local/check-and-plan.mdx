@@ -5,9 +5,9 @@ sidebarTitle: "Check"
 icon: "list-check"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 ```ts
 const report = await nika.check('workflows/release.nika.yaml', {

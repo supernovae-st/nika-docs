@@ -8,10 +8,10 @@ icon: "code"
 import { SDK, SourceContract, LocalContract, RemoteContract, SdkDoors } from "/snippets/_sdk-contract.mdx"
 import { ProjectContract } from "/snippets/_project-contract.mdx"
 
-<SourceContract />
+<SourceContract sdk={SDK} />
 <ProjectContract />
-<LocalContract />
-<RemoteContract />
+<LocalContract sdk={SDK} />
+<RemoteContract sdk={SDK} />
 
 `Nika` is one application seam around the engine. Your product owns the
 request, interface and business state. Nika owns parsing, admission,

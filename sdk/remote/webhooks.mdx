@@ -5,9 +5,9 @@ sidebarTitle: "Application webhooks"
 icon: "webhook"
 ---
 
-import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
-<RemoteContract />
+<RemoteContract sdk={SDK} />
 
 The candidate SDK exposes no webhook verifier, and the server OpenAPI exposes no
 webhook registration or delivery routes. Do not call an SDK static verifier or

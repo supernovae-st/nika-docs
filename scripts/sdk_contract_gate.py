@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refuse retired pre-0.116 SDK contracts in active public documentation."""
+"""Refuse retired SDK contracts and unbound shared callouts in active docs."""
 
 from __future__ import annotations
 
@@ -71,10 +71,30 @@ def findings(root: pathlib.Path = ROOT) -> list[str]:
     failures: list[str] = []
     for path in active_documents(root):
         rel = path.relative_to(root).as_posix()
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        text = path.read_text(encoding="utf-8")
+        failures.extend(callout_bindings(text, rel))
+        for line_number, line in enumerate(text.splitlines(), 1):
             for rule in RULES:
                 if rule.pattern.search(line):
                     failures.append(f"{rel}:{line_number}: {rule.name}: {line.strip()}")
+    return failures
+
+
+def callout_bindings(text: str, relative: str) -> list[str]:
+    """A source ratchet, not a substitute for verifying the rendered page."""
+    failures = []
+    imported = re.search(
+        r'import\s+\{([^}]+)\}\s+from\s+["\']/snippets/_sdk-contract\.mdx["\']',
+        text,
+    )
+    has_data = imported is not None and "SDK" in {
+        name.strip() for name in imported.group(1).split(",")
+    }
+    for callout in re.finditer(r"<(?:Source|Local|Remote)Contract\b([^>]*)>", text):
+        if not has_data or not re.search(r"\bsdk\s*=\s*\{\s*SDK\s*\}", callout.group(1)):
+            failures.append(f"{relative}: SDK callout requires the canonical import and sdk={{SDK}}")
+    if relative == "snippets/_sdk-contract.mdx" and re.search(r"\bSDK\.", text):
+        failures.append(f"{relative}: shared components must read sdk props, not ambient SDK")
     return failures
 
 
