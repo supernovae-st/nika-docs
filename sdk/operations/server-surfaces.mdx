@@ -19,18 +19,18 @@ Three surfaces sound like servers but accept different clients.
 <ProjectContract />
 <RemoteContract />
 
-## OpenAPI 0.116.2 route truth
+## Candidate OpenAPI routes
 
 | Method and path | Contract |
 |---|---|
 | `GET /health` | unauthenticated health and supported capabilities |
 | `GET /v1/openapi.json` | authenticated contract document |
-| `POST /v1/check` | workflow check |
+| `POST /v1/check` | compact admission acknowledgement or typed workflow refusal |
 | `POST /v1/jobs` | idempotent admission |
 | `GET /v1/jobs/{id}` | durable job projection |
 | `GET /v1/jobs/{id}/status` | current status |
 | `GET /v1/jobs/{id}/events` | SSE event stream |
-| `POST /v1/jobs/{id}/cancel` | idempotent cancellation |
+| `POST /v1/jobs/{id}/cancel` | cancellation action; 202 remains pending, 200 returns a completed observation |
 | `GET /v1/jobs/{id}/trace/verify` | typed verification diagnostic |
 | `GET /v1/workflows` | contained names |
 | `GET /v1/workflows/{name}` | path-free metadata |
@@ -60,8 +60,9 @@ const run = await nika.run('workflow.nika.yaml')
 const result = await run.done
 ```
 
-This path needs no resident server. These examples require registry client
-`0.116.2`; verify that version before installing.
+This path needs no resident server. These examples target the pending SDK and
+matching engine candidates; their public artifacts remain to be published
+and pinned.
 
 ## Local model path
 

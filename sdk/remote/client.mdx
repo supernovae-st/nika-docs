@@ -16,15 +16,21 @@ import { Nika } from '@supernovae-st/nika-client'
 const nika = new Nika({
   url: process.env.NIKA_URL!,
   token: process.env.NIKA_TOKEN!,
-  cwd: process.cwd(),
   requestTimeout: 30_000,
 })
 ```
 
 Supplying `url` selects HTTP. There is no environment-reading constructor:
-read and validate deployment configuration in your application. A remote
-client still resolves a compatible local engine from `bin`, `NIKA_BIN`, or the
-exact platform package so it can capture immutable workflow bytes.
+read and validate deployment configuration in your application.
+
+Contained names such as `release.nika.yaml` or `flows/release.nika.yaml`
+select a served workflow. `check()` and `run()` send the name directly to the
+resident; no local binary or workflow source is needed. To submit local
+source instead, use an explicit path such as `./flows/release.nika.yaml` or
+an absolute path. The SDK then resolves a compatible local engine from
+`bin`, `NIKA_BIN`, or the exact platform package and captures an immutable
+snapshot relative to `cwd`. It never falls back from an unserved name to a
+local file.
 
 Plain HTTP is refused unless `allowInsecureHttp: true` is explicit. Reserve
 that option for deliberate loopback use. URLs cannot carry credentials,
@@ -35,13 +41,35 @@ const loopback = new Nika({
   url: 'http://127.0.0.1:8787',
   token,
   allowInsecureHttp: true,
-  cwd: process.cwd(),
 })
 ```
 
 `requestTimeout` bounds HTTP admission. `fetch`, `eventBufferSize` and
 `machineBufferBytes` are the other transport seams. The SDK does not expose
 automatic retry or concurrency policy as constructor options.
+
+## Check a served name
+
+```ts
+const report = await nika.check('flows/release.nika.yaml')
+if (!report.clean) {
+  console.error(report.error)
+} else {
+  console.log(report.status, report.snapshot_digest, report.root, report.units)
+}
+```
+
+A successful served-name check returns `clean: true` with the resident's
+compact acknowledgement: `status: "accepted"`, `snapshot_digest`, `root` and `units`.
+A missing served name or a workflow admission refusal returns `clean: false`
+with the typed resident `error` (`code`, optional `message`). This is not a
+local findings report: it has no local process `exitCode` and does not invent
+findings. Authentication, transport and protocol failures still throw.
+
+An explicit local-path check retains the local engine's full check report;
+when capture succeeds, the resident must acknowledge that exact snapshot
+before the SDK returns it. Remote checks reject `model` and `nativeStrict`
+overrides because the HTTP request has no envelope for them.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">

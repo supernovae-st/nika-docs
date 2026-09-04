@@ -19,7 +19,11 @@ const run = await nika.run('release.nika.yaml', {
 await database.runs.insert({ jobId: run.id, lastEventId: 0 })
 ```
 
-HTTP admission captures workflow bytes locally, then submits `POST /v1/jobs`.
+The contained name in this example submits `{"workflow":"release.nika.yaml"}`
+to `POST /v1/jobs`; the resident captures its served workflow itself. No local
+binary or source is needed. An explicit local path such as
+`./release.nika.yaml` instead asks a compatible local engine for a snapshot
+and sends those captured bytes.
 Remote run options currently accept `idempotencyKey`; `vars`, `model` and
 `maxCostUsd` are refused because their request envelopes do not exist.
 
@@ -53,6 +57,11 @@ const result = await recovered.done
 
 Persist the job id and the last durably consumed sequence. Reattachment avoids
 resubmitting a workflow merely because the Node process restarted.
+The engine's settlement remains available on `result.settlement` even when
+the cursor already consumed its terminal event. `paused` settles the current
+observation leg at a human gate and closes its event view and `done` promise.
+The durable job remains resumable by the engine. `attachRun()` resumes
+observation; it does not answer a human gate or start the next execution leg.
 
 ## Read status or cancel
 
@@ -62,9 +71,13 @@ const cancellation = await nika.cancel(run)
 const result = await run.done
 ```
 
-OpenAPI `0.116.2` exposes `POST /v1/jobs/{id}/cancel`; cancellation is not a
-404. The API has no job-list route, so application indexes remain
-application-owned.
+`cancellation.status` may be `cancellation_requested`: the resident accepted
+the action and the runtime is still settling. Await `run.done` for its actual
+status, settlement and evidence. A success or failure racing cancellation is
+preserved; cancellation grace without a runtime result becomes `interrupted`.
+Queued jobs can be cancelled before execution, and an already-settled job
+returns its existing result unchanged. The API has no job-list route, so
+application indexes remain application-owned.
 
 <CardGroup cols={2}>
   <Card title="SSE streaming" icon="wave-pulse" href="/sdk/remote/streaming">

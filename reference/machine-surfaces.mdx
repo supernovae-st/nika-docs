@@ -64,7 +64,7 @@ exit-code contract (locked · additive-only), not an accident:
 | `2` | findings / usage / refusal — check findings, bad flags, the `--max-cost-usd` floor refusal |
 | `3` | environment — missing file, no golden to compare, binary-level trouble |
 | `4` | paused — the run parked on a blocking `nika:prompt` (durable pause · ADR-099) · not a failure but non-zero on purpose · resume with `nika run --resume <trace> --answer <task>=<value>` |
-| `130` | cancelled by the operator (0.118) — Ctrl-C or SIGTERM during `nika run`: in-flight work completed and was counted, the unstarted tasks settled as cancelled, the trace sealed with `workflow_cancelled` · a second Ctrl-C aborts mid-flight and leaves the trace incomplete · 128 + SIGINT, the code every shell already reads as interrupted |
+| `130` | the runtime settled as cancelled after an operator request (0.118) — completed in-flight work is counted and unstarted tasks are cancelled; read the reported evidence state to determine whether a trace was sealed · a second Ctrl-C aborts mid-flight and can leave the trace incomplete · 128 + SIGINT, the code every shell already reads as interrupted |
 
 Stream discipline: product output goes to **stdout**, only
 environmental noise goes to stderr — and in `--json` modes, progress

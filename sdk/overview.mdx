@@ -24,13 +24,14 @@ const local = new Nika({ cwd: process.cwd() })
 const remote = new Nika({
   url: 'https://nika.example.com',
   token: process.env.NIKA_TOKEN!,
-  cwd: process.cwd(),
 })
 ```
 
 Omit `url` for the native-process transport. Supply `url` and `token` for the
-HTTP transport. The remote client still uses a compatible local engine to
-capture immutable workflow bytes before admission.
+HTTP transport. A contained served name such as `flows/release.nika.yaml`
+goes directly to the resident without a local binary or source. An explicit
+local path such as `./flows/release.nika.yaml` uses a compatible local engine
+to capture immutable bytes before HTTP admission.
 
 ## One lifecycle vocabulary
 
@@ -49,8 +50,10 @@ capture immutable workflow bytes before admission.
 
 `run()` returns after stable admission. It does not return a terminal result.
 Events are additive and optional to render; `run.done` is the only terminal
-truth. An admitted workflow failure resolves as result data. Configuration,
-compatibility, transport and protocol failures throw typed SDK errors.
+truth for that observation leg, including a pause. A paused durable job may
+later resume under engine authority. An admitted workflow failure resolves
+as result data. Configuration, compatibility, transport and protocol failures
+throw typed SDK errors.
 
 ## Documentation graph
 
@@ -62,9 +65,9 @@ compatibility, transport and protocol failures throw typed SDK errors.
 - It does not reconstruct traces or receipts in TypeScript.
 - An observer `AbortSignal` does not cancel a run; call `cancel(run)`.
 - It does not infer success from an event kind.
-- It does not expose routes absent from OpenAPI `0.116.2`.
+- It exposes only the candidate engine's supported routes.
 
-<Card title="Read the reviewed source" icon="github" href={`${SDK.source}/tree/${SDK.sourceCommit}`}>
-  The `0.116.2` contract is pinned to an exact public commit. Verify that npm
-  serves the same version before installing.
+<Card title="Review the source candidate" icon="github" href={SDK.sourceCandidate}>
+  Follow the pending SDK changes. The merged source SHA and public package
+  artifacts remain to be pinned.
 </Card>

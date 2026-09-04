@@ -4,19 +4,19 @@
 export const SDK = {
   package: "@supernovae-st/nika-client",
   source: "https://github.com/supernovae-st/nika-client",
-  sourceVersion: "0.116.2",
-  sourceCommit: "5fe9e384b9eb8760edb23a4d33eabd3118f18a4d",
+  sourceVersion: "0.118.1",
+  sourceCandidate: "https://github.com/supernovae-st/nika-client/pull/86",
+  engineCandidate: "https://github.com/supernovae-st/nika/pull/1478",
   site: "https://nika.sh/sdk",
 }
 
 export const SourceContract = () => (
   <Warning>
-    These pages describe the reviewed <code>0.116.2</code> source contract at
-    <a href={`${SDK.source}/commit/${SDK.sourceCommit}`}> commit <code>5fe9e38</code></a>
-    and the released <code>nika 0.116.2</code> engine. Do not assume the One SDK
-    examples are present in the registry package until
-    <code>npm view {SDK.package}@0.116.2 version</code> reports
-    <code>0.116.2</code>.
+    These pages describe the pending <code>{SDK.sourceVersion}</code> SDK source
+    candidate in <a href={SDK.sourceCandidate}>PR #86</a> and its matching engine
+    candidate in <a href={SDK.engineCandidate}>PR #1478</a>. Neither candidate
+    is published. The merged source SHA and public package artifacts must be
+    pinned before these examples become a released installation contract.
   </Warning>
 )
 
@@ -26,20 +26,24 @@ export const LocalContract = () => (
     the package root and omit <code>url</code>. The client resolves the engine
     from <code>bin</code>, then <code>NIKA_BIN</code>, then the exact optional
     platform package. It deliberately refuses an implicit <code>PATH</code>
-    lookup. These examples require registry package <code>0.116.2</code>.
+    lookup. These examples target the pending
+    <a href={SDK.sourceCandidate}> {SDK.sourceVersion} source candidate</a>.
   </Tip>
 )
 
 export const RemoteContract = () => (
   <Info>
     <strong>The same facade selects HTTP when <code>url</code> and
-    <code>token</code> are present.</strong> A compatible local engine is still
-    required to capture immutable workflow bytes before admission. OpenAPI
-    <code>0.116.2</code> includes jobs, SSE, cancellation, trace diagnostics,
+    <code>token</code> are present.</strong> Contained served names go directly
+    to the resident and need no local binary or source. Explicit local paths
+    such as <code>./workflow.nika.yaml</code> require a compatible local engine
+    to capture an immutable snapshot. The candidate OpenAPI includes jobs,
+    SSE, cancellation, trace diagnostics,
     workflows and schedule read/write. It does not include
     <code>POST /v1/run</code>, artifact routes, job listing, or schedule
-    list/delete/trigger/backfill routes. These examples target source
-    <code>0.116.2</code>; verify that exact registry version before installing.
+    list/delete/trigger/backfill routes. These examples target the pending
+    <a href={SDK.sourceCandidate}> {SDK.sourceVersion} source candidate</a>;
+    its npm package and matching engine release are not yet published.
   </Info>
 )
 

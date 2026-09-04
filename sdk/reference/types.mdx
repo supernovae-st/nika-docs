@@ -13,18 +13,20 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 
 ```ts
 interface NikaRun {
-  readonly id: string
+  readonly id: NikaRunId
   readonly done: Promise<NikaRunResult>
 }
 
 interface NikaRunResult {
-  id: string
+  id: NikaRunId
   status: NikaRunStatus
   transport: 'native-process' | 'http'
   exitCode?: number
   outputs?: Record<string, unknown>
   receipt?: NikaReceipt
   error?: NikaMachineError
+  execution_id?: NikaExecutionId
+  settlement?: NikaSettlement
   [key: string]: unknown
 }
 ```
@@ -32,10 +34,30 @@ interface NikaRunResult {
 `NikaRunStatus`, `NikaEvent`, `NikaCheckResult` and engine-owned metadata are
 additive. Known words aid completion without closing the vocabulary.
 
+`NikaSettlement` preserves the engine's `status`, `cause`, `elapsed_ms`,
+`tasks`, `spend` and `error` when present. Remote replay and attachment read
+the stored settlement; a missing runtime settlement remains absent.
+`paused` completes the observation represented by `done` while leaving the
+durable job resumable. Branded `NikaRunId`, `NikaJobId` and `NikaExecutionId`
+keep engine-issued identities distinct and remain assignable to `string`.
+
+## Check and cancellation
+
+`NikaCheckResult` is an open engine projection. A local check carries the
+findings report and process `exitCode`. A served-name HTTP check carries
+`clean: true` plus `status`, `snapshot_digest`, `root` and `units`, or
+`clean: false` with a typed refusal in `error`; it does not invent a local
+findings report or exit code.
+
+`NikaCancelResult` describes action acceptance. Its `status` can be
+`cancellation_requested` while execution continues toward its own settlement.
+Use `run.done` for the actual result, including success racing cancellation.
+
 ## Events and proof
 
 ```ts
-interface NikaEvent {
+// Common fields across the open NikaEvent union.
+interface NikaEventFields {
   kind?: string
   status?: NikaRunStatus
   sequence?: number
@@ -74,8 +96,9 @@ NikaEngineUnavailable
 
 `NikaEngineUnavailable` is exported separately by binary resolution. Schedule
 types are exported for the exact CAS-backed resident schedule contract; inspect
-the pinned source declarations for their additive engine-owned fields.
+the candidate source declarations for their additive engine-owned fields.
 
-<Card title="Pinned source types" icon="github" href={`${SDK.source}/blob/${SDK.sourceCommit}/src/types.ts`}>
-  Read the exact `0.116.2` declarations.
+<Card title="Candidate source types" icon="github" href={SDK.sourceCandidate}>
+  Review the pending source declarations in PR #86; the merged SHA remains
+  to be pinned.
 </Card>
