@@ -34,6 +34,8 @@ jobs:
         run: |
           python3 scripts/sdk_contract_gate.py
           python3 scripts/tests/test_sdk_contract_gate.py
+      - name: Installed MDX parser failures block the push hook
+        run: python3 scripts/tests/test_mintlify_hook.py
       - name: Atomic released snapshot projection (offline doubles)
         run: |
           python3 scripts/tests/test_mintlify_snapshot.py
