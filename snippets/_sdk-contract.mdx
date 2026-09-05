@@ -6,17 +6,17 @@
 export const SDK = {
   package: "@supernovae-st/nika-client",
   source: "https://github.com/supernovae-st/nika-client",
-  sourceVersion: "0.118.1",
+  sourceVersion: "0.118.2",
   sourceCandidate: "https://github.com/supernovae-st/nika-client/pull/86",
-  engineCandidate: "https://github.com/supernovae-st/nika/pull/1478",
+  engineCandidate: "https://github.com/supernovae-st/nika/commit/433e8d4ca48b9363cf5f4af9a53ab83006088fed",
   site: "https://nika.sh/sdk",
 }
 
 export const SourceContract = ({ sdk }) => (
   <Warning>
     These pages describe the pending <code>{sdk.sourceVersion}</code> SDK source
-    candidate in <a href={sdk.sourceCandidate}>PR #86</a> and its matching engine
-    candidate in <a href={sdk.engineCandidate}>PR #1478</a>. Neither candidate
+    candidate in the <a href={sdk.sourceCandidate}>SDK pull request</a> and its
+    matching <a href={sdk.engineCandidate}>exact engine source</a>. Neither candidate
     is published. The merged source SHA and public package artifacts must be
     pinned before these examples become a released installation contract.
   </Warning>

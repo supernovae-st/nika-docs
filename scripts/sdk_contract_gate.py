@@ -69,15 +69,40 @@ def active_documents(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
 
 def findings(root: pathlib.Path = ROOT) -> list[str]:
     failures: list[str] = []
+    version = source_version(root)
     for path in active_documents(root):
         rel = path.relative_to(root).as_posix()
         text = path.read_text(encoding="utf-8")
         failures.extend(callout_bindings(text, rel))
         for line_number, line in enumerate(text.splitlines(), 1):
+            for pin in re.findall(r"@supernovae-st/nika-client@([^\s`'\"]*)", line):
+                if version is None or pin != version:
+                    failures.append(
+                        f"{rel}:{line_number}: SDK package pin {pin!r} does not match "
+                        f"the canonical source version {version!r}"
+                    )
             for rule in RULES:
                 if rule.pattern.search(line):
                     failures.append(f"{rel}:{line_number}: {rule.name}: {line.strip()}")
     return failures
+
+
+def source_version(root: pathlib.Path) -> str | None:
+    """Read the authored version once; explicit package pins must match it.
+
+    This source ratchet judges pinned command text, not npm availability or
+    arbitrary dynamically constructed MDX. Missing/ambiguous data cannot
+    approve an installation pin.
+    """
+    try:
+        text = (root / "snippets" / "_sdk-contract.mdx").read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return None
+    versions = re.findall(r'^\s*sourceVersion:\s*"([^"\n]+)"', text, re.MULTILINE)
+    stable_semver = r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)"
+    if len(versions) != 1 or not re.fullmatch(stable_semver, versions[0]):
+        return None
+    return versions[0]
 
 
 def callout_bindings(text: str, relative: str) -> list[str]:
@@ -101,7 +126,7 @@ def callout_bindings(text: str, relative: str) -> list[str]:
 def main() -> int:
     failures = findings()
     if failures:
-        print("sdk-contract-gate: retired contract found", file=sys.stderr)
+        print("sdk-contract-gate: contract drift found", file=sys.stderr)
         for failure in failures:
             print(f"  {failure}", file=sys.stderr)
         return 1
