@@ -5,9 +5,9 @@ sidebarTitle: "SSE streaming"
 icon: "wave-pulse"
 ---
 
-import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
-<RemoteContract />
+<RemoteContract sdk={SDK} />
 
 ```ts
 for await (const event of nika.events(run, { bufferSize: 64 })) {
@@ -50,6 +50,13 @@ const recovered = await nika.attachRun(jobId, {
 
 The HTTP adapter uses the persisted cursor for SSE continuity. The application
 owns when a sequence is durable.
+
+A `paused` settlement closes the current stream and resolves `run.done` with
+that leg's result and evidence. The durable job can later resume under engine
+authority; a new attachment can observe that later leg. Replaying or attaching
+after the settlement event has already been consumed still reads the full
+stored settlement. Stopping a stream or attaching to a job never answers a
+human gate.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">

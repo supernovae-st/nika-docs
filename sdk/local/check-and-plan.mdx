@@ -5,9 +5,9 @@ sidebarTitle: "Check"
 icon: "list-check"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 ```ts
 const report = await nika.check('workflows/release.nika.yaml', {
@@ -38,13 +38,18 @@ inspect engine-owned fields your pinned engine documents, and preserve unknown
 fields when storing or forwarding the report.
 
 <Warning>
-  One SDK `0.116.2` exposes no separate dry-run-plan method. Do not manufacture
+  The candidate SDK exposes no separate dry-run-plan method. Do not manufacture
   a TypeScript plan contract from engine output. Use `check()` for SDK
   admission and the engine CLI when an operator needs CLI-specific planning.
 </Warning>
 
 Remote checks intentionally reject the local-only `model` and `nativeStrict`
 overrides rather than silently ignoring them.
+For a contained served name, the remote result is the resident's typed
+acknowledgement or workflow refusal, without local findings or an exit code.
+An explicit local path instead captures a local engine report and snapshot;
+successful capture requires the resident to acknowledge that exact snapshot.
+See [remote checks](/sdk/remote/client) for the two forms.
 
 <CardGroup cols={2}>
   <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">

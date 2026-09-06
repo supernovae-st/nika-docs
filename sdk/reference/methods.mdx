@@ -1,13 +1,13 @@
 ---
 title: "SDK method index"
-description: "The complete One SDK 0.116.2 lifecycle vocabulary."
+description: "The pending One SDK candidate's lifecycle vocabulary."
 sidebarTitle: "Method index"
 icon: "list"
 ---
 
-import { SourceContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 
-<SourceContract />
+<SourceContract sdk={SDK} />
 
 | Method | Returns | Local | HTTP |
 |---|---|:---:|:---:|
@@ -23,7 +23,11 @@ import { SourceContract } from "/snippets/_sdk-contract.mdx"
 | `schedule(workflow, options)` | `Promise<NikaScheduleApplyResult>` | no | yes |
 | `scheduleStatus(id)` | `Promise<NikaScheduleStatus>` | no | yes |
 
-`run.done` is the sole terminal result. Methods that require resident
+`run.done` is the result for one observation leg, including a pause.
+`check()` returns the engine's local findings report or the resident's typed
+served-name acknowledgement/refusal, depending on admission form.
+`cancel()` may acknowledge a pending action; it never replaces `run.done`.
+Methods that require resident
 authority return typed compatibility errors in native mode. `events`,
 `cancel`, and `status` accept only a run owned by that client instance.
 

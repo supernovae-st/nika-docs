@@ -1,45 +1,51 @@
 {/* _sdk-contract.mdx: one source for the One SDK release horizon.
-    Keep registry availability separate from the source and engine contract. */}
+    Pass SDK explicitly as sdk: imported components must not rely on sibling
+    variable exports being in scope. Keep availability separate from
+    the source and engine contract. */}
 
 export const SDK = {
   package: "@supernovae-st/nika-client",
   source: "https://github.com/supernovae-st/nika-client",
-  sourceVersion: "0.116.2",
-  sourceCommit: "5fe9e384b9eb8760edb23a4d33eabd3118f18a4d",
+  sourceVersion: "0.118.2",
+  sourceCandidate: "https://github.com/supernovae-st/nika-client/pull/86",
+  engineCandidate: "https://github.com/supernovae-st/nika/commit/433e8d4ca48b9363cf5f4af9a53ab83006088fed",
   site: "https://nika.sh/sdk",
 }
 
-export const SourceContract = () => (
+export const SourceContract = ({ sdk }) => (
   <Warning>
-    These pages describe the reviewed <code>0.116.2</code> source contract at
-    <a href={`${SDK.source}/commit/${SDK.sourceCommit}`}> commit <code>5fe9e38</code></a>
-    and the released <code>nika 0.116.2</code> engine. Do not assume the One SDK
-    examples are present in the registry package until
-    <code>npm view {SDK.package}@0.116.2 version</code> reports
-    <code>0.116.2</code>.
+    These pages describe the pending <code>{sdk.sourceVersion}</code> SDK source
+    candidate in the <a href={sdk.sourceCandidate}>SDK pull request</a> and its
+    matching <a href={sdk.engineCandidate}>exact engine source</a>. Neither candidate
+    is published. The merged source SHA and public package artifacts must be
+    pinned before these examples become a released installation contract.
   </Warning>
 )
 
-export const LocalContract = () => (
+export const LocalContract = ({ sdk }) => (
   <Tip>
     <strong>One facade, local by default.</strong> Import <code>Nika</code> from
     the package root and omit <code>url</code>. The client resolves the engine
     from <code>bin</code>, then <code>NIKA_BIN</code>, then the exact optional
     platform package. It deliberately refuses an implicit <code>PATH</code>
-    lookup. These examples require registry package <code>0.116.2</code>.
+    {" "}lookup. These examples target the pending
+    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} source candidate</a>.
   </Tip>
 )
 
-export const RemoteContract = () => (
+export const RemoteContract = ({ sdk }) => (
   <Info>
     <strong>The same facade selects HTTP when <code>url</code> and
-    <code>token</code> are present.</strong> A compatible local engine is still
-    required to capture immutable workflow bytes before admission. OpenAPI
-    <code>0.116.2</code> includes jobs, SSE, cancellation, trace diagnostics,
+    {" "}<code>token</code> are present.</strong> Contained served names go directly
+    to the resident and need no local binary or source. Explicit local paths
+    such as <code>./workflow.nika.yaml</code> require a compatible local engine
+    to capture an immutable snapshot. The candidate OpenAPI includes jobs,
+    SSE, cancellation, trace diagnostics,
     workflows and schedule read/write. It does not include
-    <code>POST /v1/run</code>, artifact routes, job listing, or schedule
-    list/delete/trigger/backfill routes. These examples target source
-    <code>0.116.2</code>; verify that exact registry version before installing.
+    {" "}<code>POST /v1/run</code>, artifact routes, job listing, or schedule
+    list/delete/trigger/backfill routes. These examples target the pending
+    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} source candidate</a>;
+    its npm package and matching engine release are not yet published.
   </Info>
 )
 

@@ -1,13 +1,13 @@
 ---
 title: "Events"
-description: "Five observability channels. Every run emits typed events, metrics, traces, billing records, and append-only audit entries."
+description: "Typed execution events and the kernel's metrics, trace, billing and audit interfaces."
 sidebarTitle: "Events"
 icon: "signal"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Every Nika run emits a structured stream of **events**. One event is one
+An executing Nika workflow emits a structured stream of **events**. One event is one
 `Event` struct from `nika-kernel::infra::event_sink`, carried as one
 line of NDJSON on stdout (or any other sink you wire in). Events are
 deterministic, typed, and carry source IDs that correlate to the trace
@@ -28,8 +28,10 @@ independently:
 <Info>
   `nika run --json` streams the local event lane today. The kernel traits
   (`EventSink`, `AuditSink`, `BillingSink`, `MetricsExporter`, and
-  `TracerProvider`) keep the interface stable while HTTP/SSE/OTLP exporters
-  remain future interface work.
+  `TracerProvider`) separate the observability interfaces. The resident
+  exposes job lifecycle events over SSE, and `nika trace export` projects a
+  recorded journal to OTLP/JSON lines. Available evidence depends on execution
+  and recording; admitting a job does not guarantee a complete trace.
 </Info>
 
 ## `Event` shape

@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 205
-  file_rows: 32
+  classified_files: 213
+  file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 200
+    authored: 208
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 37
+  unverified-default: 42
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,13 +36,13 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 99421058da04a40a17d7e9494412e5d5e2affd1e056ad099ccd7b566a2cc43cf
+  sha256: 8c65a2b1e4cba4e320b14bff78afd8cbb0f349b4dc127b21fb2fb6cf0e0c3d1b
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
-  sha256: dd283e375852e0a91b233b33e8b7f92bad91c94dd7f3b4e1e63bc9e1e238a8bc
-  evidence: "hand-written bot workflow (it edits snippets/_status-snapshot.mdx — nothing writes it)"
-  note: "release-heal rewrites the version + lastUpdated fields of snippets/_status-snapshot.mdx on a daily cron — bot-maintained fields in ANOTHER file, this one stays hand-written"
+  sha256: c5c56ce5a4fb4e32c5728ae26997ddcc28fa879d8dd003752f14e7d2ed366263
+  evidence: "hand-written release-heal workflow: verified installation, atomic projection and validated PR proposal; main is not written directly"
+  note: "scheduled or manual proposal; installation verifies checksums and attestation, projection verifies release/build coherence, and main protection remains required; GITHUB_TOKEN-created PRs do not themselves trigger further CI"
 - path: ".nvmrc"
   class: authored
   sha256: f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: 69ee658d2a0151addf17712fd868114a304e6710fcd00a13da4644c18756085c
+  sha256: f56978ad3ce543933c9db28ac03f5404a0f71b4f9f5a3f80c15c4d221c7c6801
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -117,18 +117,18 @@ files:
   note: "unverified-default"
 - path: "lefthook.yml"
   class: authored
-  sha256: 96c0cabd0ea8733d85df8fd5be03ce28275767209a5f61f82aa4f2650ae30408
+  sha256: 5c96fa783c0ba1605389e705e2357bfdcc14d688ec81655fa9dac9675f193e91
   evidence: "hand-written pre-push gate config (mint broken-links · link-audit · teach-parity · oracle-sweep)"
 - path: "reference/error-codes.mdx"
   class: authored
   sha256: 28137ea97f6bcec2e19c3f9c1f44b0db7e7c186afe934254e21e759c6b3df776
-  evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
-  note: "its own prose claims 'The tables below are generated from that registry' (the spec's canon.yaml) — but no projector writes this file and no gate re-proves the tables: a hand-baked derivation snapshot, not a projection"
+  evidence: "mixed page: authored frontmatter and prose around errors-*:begin/end tables projected from the spec diagnostic registry by showcase-projector.py"
+  note: "the errors-categories, errors-codes and errors-namespaces blocks are projected from nika-spec canon/diagnostics/registry.yaml; edit the registry and re-project, never hand-edit those blocks; this repo's gate does not independently re-derive them"
 - path: "reference/mcp-catalog.mdx"
   class: authored
   sha256: 53d7b3c60e4a1333aea6f9691a9fcf641d52069f24929f89a731645b23125d68
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
-  note: "frontmatter description hand-types '105 MCP server entries … snapshot 2026-04-17' — outside count-drift-gate's checked classes (providers · builtins · extract modes), so it can rot silently"
+  note: "the body carries authored catalog and category counts with a dated snapshot, not an in-repo projection; the engine's served MCP tool-count check does not prove the separate server-catalog cardinality"
 - path: "scripts/count-drift-gate.py"
   class: authored
   sha256: 4494ccd1b9b55b20fbc24bd2da085a645b924f1bdaae4d46dc1f118b80301d4f
@@ -145,7 +145,7 @@ files:
     - "supernovae-st/nika-estate@<ESTATE_PIN>:scripts/estate.py"
 - path: "scripts/estate_rules.py"
   class: authored
-  sha256: 83dda647a82e3edd44a2b3f63d545e68b3a5ca89ce949b05a5c84439b61c0ad8
+  sha256: 399f3319dd59abfb0a43442d4e572cb8d86cb5666301f8ed2b03a14ea4be58fc
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
@@ -153,16 +153,28 @@ files:
   evidence: "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)"
 - path: "scripts/mintlify-snapshot.sh"
   class: authored
-  sha256: 1f61eacbcba6d411a7f6fbf5c8f0b73447a497acb6f56d1bdb2353e84fe31ba2
-  evidence: "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)"
+  sha256: 8a0b5c1f4cc8be96662edfbeb861acf71b1356be770912dbf74915a8ff4f9c40
+  evidence: "hand-written entry to mintlify_snapshot.py, the atomic owner of version, engineSha, providers, firstCommand and lastUpdated"
 - path: "scripts/oracle-sweep.py"
   class: authored
   sha256: 534d919a547deabf51390b205da32f624e38bccaff21686397080f438f1efbd6
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
+- path: "scripts/sdk_contract_gate.py"
+  class: authored
+  sha256: decb6319f9d095860319cb2310a7bce778e92c1a9dc307ebbc03625dd772b88c
+  evidence: "authored source ratchet for retired SDK contracts, explicit shared-callout bindings and installation pins against the canonical SDK source version"
 - path: "scripts/teach-parity.py"
   class: authored
-  sha256: cab41e3c172cf1a0ab61d2d0d691222bf63330933fabe75d0a83e82602ddfbc7
+  sha256: b3ac94b5030ba0ec09f5c686a8c65f13de78d9ba20175f834fa5fea1dd72764a
   evidence: "hand-written gate · docstring states its law (both directions read the binary's own --help)"
+- path: "scripts/tests/test_mintlify_hook.py"
+  class: authored
+  sha256: efc70414b427cdf1511c5c9472ee89d995736dcc7885306a6ceeeef88f411839
+  evidence: "authored isolated-tool regression that executes the actual push-hook command and preserves parser success, failure and explicitly reported absence; run by gate.yml"
+- path: "scripts/tests/test_sdk_contract_gate.py"
+  class: authored
+  sha256: 469ab8d57ab84bb215082967df07c0fb1864d3c5eb260d97616c1dc442802899
+  evidence: "authored offline positive and planted-negative regressions for the SDK source ratchet, run by gate.yml"
 - path: "snippets/_canon.mdx"
   class: generated
   sha256: 9dd51583cfb003cbef1c1288f4ab802a82905a509d989072db6a68fcc3a79eb9
@@ -188,13 +200,13 @@ files:
 - path: "snippets/_status-snapshot.mdx"
   class: authored
   sha256: 370bec00ae76b321745621b1ce1c40fb51142d25933378ff3b34ee280698a12d
-  evidence: "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields"
-  note: "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands."
+  evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
+  note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 142
-  aggregate_sha256: b9dc04a314557a3aeb4b244cd07bd865ed2052ca94adefe3742f89cfd06e8382
+  aggregate_sha256: 4e61b72083f222c4fcf5ced68b9e618642b76cb21ccaa6d25626271dd8971ec3
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -222,12 +234,13 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 14
-  aggregate_sha256: c634e19e73e6c021c33097c0fb0a9ab746201fdbeb659969d25ae2f3e01e0c7f
+  match_count: 19
+  aggregate_sha256: e5ea72babad5a269ea79a52cc30ccdbf36236c627223ce2ad256e43d1ac2e8d3
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
 - ".gitignore"
+- "api-reference/openapi.json"
 - "images/favicon.svg"
 - "images/logo-dark.svg"
 - "images/logo-light.svg"
@@ -240,17 +253,21 @@ unverified:
 - "images/posters/static-check-fix.png"
 - "images/workflow-gallery.png"
 - "scripts/first_command.py"
+- "scripts/install_release.py"
 - "scripts/mdx-yaml-fix.py"
-- "scripts/sdk_contract_gate.py"
+- "scripts/mintlify_snapshot.py"
 - "scripts/tests/test_count_drift_first_contact.py"
+- "scripts/tests/test_first_command.py"
+- "scripts/tests/test_install_release.py"
 - "scripts/tests/test_mdx_yaml_fix.py"
+- "scripts/tests/test_mintlify_snapshot.py"
 - "scripts/tests/test_oracle_sweep_bare_foreach.py"
 - "scripts/tests/test_oracle_sweep_manifest.py"
 - "scripts/tests/test_oracle_sweep_manifest_without_arm.py"
 - "scripts/tests/test_oracle_sweep_mcp_registry.py"
 - "scripts/tests/test_oracle_sweep_retired_v1_tag.py"
 - "scripts/tests/test_oracle_sweep_sees_nine_key.py"
-- "scripts/tests/test_sdk_contract_gate.py"
+- "scripts/tests/test_teach_parity_binary.py"
 - "scripts/tests/test_teach_parity_retired_new.py"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"

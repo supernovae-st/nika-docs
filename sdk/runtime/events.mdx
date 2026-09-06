@@ -30,6 +30,13 @@ Kinds and fields are engine-owned and additive. Unknown events should remain
 visible to diagnostics without crashing an older interface. Never infer
 completion from the last recognized kind; use `run.done`.
 
+`result.settlement` carries the engine's full settlement, including cause,
+elapsed time, task tally, spend and error when present. Remote replay and
+attachment preserve it even after the event cursor has passed the settlement.
+Unknown evidence stays absent; an interrupted job need not have a runtime
+settlement. A paused result ends this observation leg and event view while
+leaving the durable job available for a later engine-owned resume.
+
 Each event subscriber has a bounded queue. A slow consumer receives
 `NikaEventBufferOverflowError` instead of silent loss. Tune a view with
 `bufferSize`, bounded by the client's `eventBufferSize`.

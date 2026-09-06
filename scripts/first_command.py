@@ -16,12 +16,11 @@ import re
 import subprocess
 import tempfile
 
-# Two label shapes have shipped. A third must be added here DELIBERATELY:
+# Read only the current released label. A new shape must replace it deliberately:
 # falling through silently would leave whatever string is already on the page,
 # which is exactly the failure this file exists to end.
 OFFER_LABELS = (
-    (re.compile(r"^Next:$"), "0.115 · the first-wow cascade"),
-    (re.compile(r"^start here\b"), "<=0.114 · the pre-cascade triple"),
+    (re.compile(r"^Next:$"), "current first-wow cascade"),
 )
 
 
@@ -30,7 +29,8 @@ def read_first_command(nika: str) -> str:
     with tempfile.TemporaryDirectory() as home, tempfile.TemporaryDirectory() as work:
         env = {"HOME": home, "PATH": "/usr/bin:/bin", "TERM": "dumb", "NO_COLOR": "1"}
         screen = subprocess.run(
-            [nika], cwd=work, env=env, text=True, capture_output=True
+            [nika], cwd=work, env=env, text=True, capture_output=True,
+            check=True, timeout=10,
         ).stdout.splitlines()
     for i, line in enumerate(screen):
         if not any(p.match(line.strip()) for p, _ in OFFER_LABELS):

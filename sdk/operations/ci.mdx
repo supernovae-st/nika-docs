@@ -5,9 +5,9 @@ sidebarTitle: "CI gate"
 icon: "shield-check"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 The pull-request job should prove the file is clean, inspect the authority and
 spend shape, then rehearse the graph with the mock provider.
@@ -67,8 +67,10 @@ an implicit global binary.
 
 <Warning>
   Keep this example gated until
-  `npm view @supernovae-st/nika-client@0.116.2 version` reports `0.116.2`;
-  source readiness does not prove a package is pinned in CI.
+  the pending SDK and engine candidates are published and their artifacts
+  pinned. `npm view @supernovae-st/nika-client@0.118.2 version` can check
+  registry availability; source readiness does not prove a package is pinned
+  in CI or that the matching engine artifact is installed.
 </Warning>
 
 ## Continue

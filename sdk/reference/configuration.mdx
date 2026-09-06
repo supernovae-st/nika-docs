@@ -1,13 +1,13 @@
 ---
 title: "SDK configuration"
-description: "Exact local, remote and per-operation options for One SDK 0.116.2."
+description: "Local, remote and per-operation options for the pending One SDK candidate."
 sidebarTitle: "Configuration"
 icon: "sliders"
 ---
 
-import { SourceContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 
-<SourceContract />
+<SourceContract sdk={SDK} />
 
 ## Shared bounds
 
@@ -44,8 +44,9 @@ interface NikaRemoteConfig extends NikaSharedConfig {
 }
 ```
 
-`cwd` and `bin` remain relevant remotely because immutable snapshot capture
-happens through a compatible local engine before HTTP admission.
+For an explicit local path, `cwd` and `bin` select the compatible local
+engine that captures its immutable snapshot. Contained served names go
+directly to the resident and do not require either local source or a binary.
 
 ## Operation options
 
@@ -75,7 +76,8 @@ interface NikaTraceVerifyOptions { signal?: AbortSignal }
 Remote `check` refuses `model` and `nativeStrict`. Remote `run` accepts
 `idempotencyKey` but refuses `vars`, `model` and `maxCostUsd` until the HTTP
 request envelope can carry them. Signals stop a request or observer; only
-`cancel(run)` cancels admitted work.
+`cancel(run)` requests cancellation of admitted work; `run.done` carries the
+actual outcome.
 
 <CardGroup cols={2}>
   <Card title="Method index" icon="list" href="/sdk/reference/methods">

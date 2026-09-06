@@ -239,7 +239,7 @@
             ]
           },
           {
-            "group": "Project · live",
+            "group": "Project",
             "pages": [
               "sdk/project/nika-yaml",
               "sdk/project/cwd-and-monorepos",
@@ -249,7 +249,7 @@
             ]
           },
           {
-            "group": "Local API · live",
+            "group": "Local API",
             "pages": [
               "sdk/local/client",
               "sdk/local/check-and-plan",
@@ -258,7 +258,7 @@
             ]
           },
           {
-            "group": "Runtime · live",
+            "group": "Runtime",
             "pages": [
               "sdk/runtime/events",
               "sdk/runtime/errors",
@@ -266,7 +266,7 @@
             ]
           },
           {
-            "group": "Remote API · preview",
+            "group": "Remote API",
             "pages": [
               "sdk/remote/client",
               "sdk/remote/jobs",

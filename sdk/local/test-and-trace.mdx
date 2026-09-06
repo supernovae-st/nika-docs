@@ -5,9 +5,9 @@ sidebarTitle: "Test and trace"
 icon: "vial-circle-check"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 Golden testing is an engine CLI operation:
 
@@ -16,7 +16,7 @@ nika test workflows/release.nika.yaml
 nika test workflows/release.nika.yaml --update
 ```
 
-One SDK `0.116.2` does not duplicate that command as a client method. Receipt
+The candidate SDK does not duplicate that command as a client method. Receipt
 verification is part of the SDK because it belongs to the run lifecycle.
 
 ```ts
@@ -33,6 +33,8 @@ if (!verdict.verified) {
 
 `traceVerify(receipt)` accepts an engine-issued `NikaReceipt` object only. It does not
 accept a path and does not reconstruct or verify the chain in TypeScript.
+The engine reads the existing journal and its evidence. Verification does
+not seal a trace, and an admitted job does not guarantee a journal exists.
 
 <CardGroup cols={2}>
   <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">

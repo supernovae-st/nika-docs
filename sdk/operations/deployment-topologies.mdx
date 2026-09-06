@@ -5,7 +5,7 @@ sidebarTitle: "Deployment topologies"
 icon: "sitemap"
 ---
 
-import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
 import { ProjectContract } from "/snippets/_project-contract.mdx"
 
 <ProjectContract />
@@ -17,15 +17,15 @@ what protocol crosses the process edge.
 
 | Need | Use | Status | Boundary |
 |---|---|---|---|
-| Product code starts a workflow | local `Nika` | Live in source 0.116 | native process |
+| Product code starts a workflow | local `Nika` | Pending SDK candidate | native process |
 | The project clock starts work | `nika serve` (no `--bind`) | Live | `nika.yaml arm[]` to the resident firer |
-| An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Live in source/engine 0.116 | Bearer + OpenAPI · cancellation live |
+| An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Pending SDK/engine candidate | Bearer + OpenAPI · cancellation requests action |
 | The host scheduler starts work | `nika arm --emit` | Live | launchd or systemd to `nika arm fire` |
 | The engine needs local inference | `nika model serve` | Live | Loopback OpenAI-compatible model API |
 
 ## Request-driven application
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 ```ts
 const run = await nika.run('workflows/support.nika.yaml', {
@@ -61,10 +61,11 @@ accept Nika workflow jobs.
 
 ## Loopback HTTP (opt-in)
 
-<RemoteContract />
+<RemoteContract sdk={SDK} />
 
 `nika serve --bind` is not `nika model serve`, and it is not bare `nika serve`.
-OpenAPI `0.116.2` makes cancellation live. Artifact routes, job listing and
+The candidate OpenAPI exposes cancellation as an action; the runtime's
+settlement determines the result. Artifact routes, job listing and
 `POST /v1/run` remain absent.
 
 ## Architecture view

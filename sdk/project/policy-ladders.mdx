@@ -5,11 +5,11 @@ sidebarTitle: "Policy ladders"
 icon: "stairs"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 import { ProjectContract } from "/snippets/_project-contract.mdx"
 
 <ProjectContract />
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 The SDK does not replace project policy. It supplies the invocation rung and
 the working directory that lets the engine discover the rest.
