@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 205
+  classified_files: 206
   file_rows: 32
   pattern_rows: 6
   by_class:
-    authored: 200
+    authored: 201
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 37
+  unverified-default: 38
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: 69ee658d2a0151addf17712fd868114a304e6710fcd00a13da4644c18756085c
+  sha256: b309203468b990e9fbbc4210ea59cb02c20d003f050ece66c51721da25f4e9af
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -187,14 +187,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 370bec00ae76b321745621b1ce1c40fb51142d25933378ff3b34ee280698a12d
+  sha256: f6c548828104b7af63a1f9589e99d09e3b684504a82acdedc64d0c565106f5dc
   evidence: "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields"
   note: "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 142
-  aggregate_sha256: b9dc04a314557a3aeb4b244cd07bd865ed2052ca94adefe3742f89cfd06e8382
+  aggregate_sha256: 01c9c3093dc988b33a0a6492bdc3ddf06164aae31a73aabc74d58d03269aa6d0
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -222,12 +222,13 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 14
-  aggregate_sha256: c634e19e73e6c021c33097c0fb0a9ab746201fdbeb659969d25ae2f3e01e0c7f
+  match_count: 15
+  aggregate_sha256: ebfc1c399c92ae42a9446fd4a41d1b40e1e3ca4408656253aa581aa8b4d418d5
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
 - ".gitignore"
+- "api-reference/openapi.json"
 - "images/favicon.svg"
 - "images/logo-dark.svg"
 - "images/logo-light.svg"
