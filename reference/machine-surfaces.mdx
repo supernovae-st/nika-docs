@@ -35,19 +35,23 @@ audit keystroke-fresh buffers without touching the disk.
   [SDK runtime guide](/sdk/runtime/events) maps these wires to code.
 </Tip>
 
-## The hosted twins
+## Canonical sources
 
-The same law reaches the web: the machine surfaces an agent can fetch
-without a binary, each probed and versioned like the CLI wires.
+The public documentation explains the contract. Machine consumers read the
+versioned CLI output or the owning repository, rather than a marketing build.
 
-| URL | What it carries |
+| Surface | Owner and access |
 |---|---|
-| [`nika.sh/spec/v1/workflow.schema.json`](https://nika.sh/spec/v1/workflow.schema.json) | the published workflow JSON Schema — the same one `nika spec --schema` embeds |
-| [`nika.sh/errors/catalog.json`](https://nika.sh/errors/catalog.json) | the error catalog, projected from the spec's normative table |
-| [`nika.sh/brand/icons.json`](https://nika.sh/brand/icons.json) | the [design ontology](/reference/design-system): every verb, builtin, feature and run-state with glyph, hue and motion |
-| [`nika.sh/brand/icons.ttl`](https://nika.sh/brand/icons.ttl) | the same graph in Turtle — SPARQL-ready, namespace [`nkd:`](https://nika.sh/ontology/design/) |
-| [`nika.sh/llms.txt`](https://nika.sh/llms.txt) | the agent-readable site summary (llmstxt.org shape) |
-| [registry `index.json`](https://raw.githubusercontent.com/supernovae-st/nika-registry/main/index.json) | every shared artifact with its pin, digest, cert summary and advisory state — resolve names here before installing anything an LLM suggests |
+| Workflow schema | `nika spec --schema` or [spec schema](https://github.com/supernovae-st/nika-spec/blob/main/schemas/workflow.schema.json) |
+| Diagnostics | `nika explain` or [diagnostic registry](https://github.com/supernovae-st/nika-spec/blob/main/canon/diagnostics/registry.yaml) |
+| Tools and models | `nika catalog --tools --json` and `nika catalog --json` |
+| Documentation for agents | [Documentation index](https://docs.nika.sh/llms.txt) |
+| Shared artifacts | [Registry index](https://raw.githubusercontent.com/supernovae-st/nika-registry/main/index.json) |
+
+For a reproducible integration, replace `main` with a reviewed commit and record
+its content digest. The [knowledge system](/reference/knowledge-system) explains
+how Lab references those same owners. Historical schema identifiers are stable
+identities; retiring a website does not rename a language namespace.
 
 ## The exit-code contract
 

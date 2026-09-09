@@ -35,7 +35,7 @@ Public documentation for Nika — the open workflow language for AI
    Run it before every commit; it exits 1 on findings.
 4. MDX components: Mintlify set (Tabs, Accordion, Tip, Warning…).
 5. Cross-property links: the ecosystem mesh lives in ONE place —
-   `snippets/_ecosystem.mdx` (site · spec · engine · SDK · brew ·
+   `snippets/_ecosystem.mdx` (docs · Lab · spec · engine · SDK · brew ·
    studio). Include it rather than hand-writing link lists per page.
 6. Expression canon: `${{ … }}` = CEL (conditions + references) ·
    `extract:`/`nika:jq` = jq (extraction + transform) · NO template
