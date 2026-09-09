@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 205
+  classified_files: 207
   file_rows: 32
   pattern_rows: 6
   by_class:
-    authored: 200
+    authored: 202
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 37
+  unverified-default: 39
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 99421058da04a40a17d7e9494412e5d5e2affd1e056ad099ccd7b566a2cc43cf
+  sha256: 338b5c33077373ff1d69fcdb5c170fc9da3b2a4f3e120778393caa4834f38bab
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: 69ee658d2a0151addf17712fd868114a304e6710fcd00a13da4644c18756085c
+  sha256: b309203468b990e9fbbc4210ea59cb02c20d003f050ece66c51721da25f4e9af
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -153,7 +153,7 @@ files:
   evidence: "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)"
 - path: "scripts/mintlify-snapshot.sh"
   class: authored
-  sha256: 1f61eacbcba6d411a7f6fbf5c8f0b73447a497acb6f56d1bdb2353e84fe31ba2
+  sha256: 3f8cbdd4a910134f061a44df56c84d50214cf7ba4cbdf06579062e9c20ed7bbf
   evidence: "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)"
 - path: "scripts/oracle-sweep.py"
   class: authored
@@ -187,14 +187,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 370bec00ae76b321745621b1ce1c40fb51142d25933378ff3b34ee280698a12d
+  sha256: eb7742b03046736aa50b31e66ff1ace28202fb3e4ce0ee16267e6312448a745f
   evidence: "its own header: 'MIXED PROVENANCE' — scripts/mintlify-snapshot.sh derives version + lastUpdated ONLY; every count field is hand-typed, so the file is authored with two bot-maintained fields"
   note: "the daily release-heal cron rewrites version + lastUpdated here, which advances lastUpdated while the hand-typed counts stay frozen — a fresh date is NOT evidence of fresh counts. No gate watches the counts: engine hygiene vector 23's whitelist (ROADMAP.md · .claude/CLAUDE.md) resolves against the ENGINE repo root and cannot see this one. The file header carries the per-field derivation commands."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 142
-  aggregate_sha256: b9dc04a314557a3aeb4b244cd07bd865ed2052ca94adefe3742f89cfd06e8382
+  aggregate_sha256: f282297b1e50cf01928cffdbeb39135b1aa423dca01eea44745f6436684983c0
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -222,12 +222,13 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 14
-  aggregate_sha256: c634e19e73e6c021c33097c0fb0a9ab746201fdbeb659969d25ae2f3e01e0c7f
+  match_count: 16
+  aggregate_sha256: e0214b1c4fdfd5db173656eb8aa0356f91e0eb44f3ec6ae2b517728f9c0c11d3
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
 - ".gitignore"
+- "api-reference/openapi.json"
 - "images/favicon.svg"
 - "images/logo-dark.svg"
 - "images/logo-light.svg"
@@ -251,6 +252,7 @@ unverified:
 - "scripts/tests/test_oracle_sweep_retired_v1_tag.py"
 - "scripts/tests/test_oracle_sweep_sees_nine_key.py"
 - "scripts/tests/test_sdk_contract_gate.py"
+- "scripts/tests/test_snapshot_binary_identity.py"
 - "scripts/tests/test_teach_parity_retired_new.py"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"

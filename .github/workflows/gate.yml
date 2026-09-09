@@ -68,6 +68,7 @@ jobs:
           # above, so a train that moves the front door reddens HERE instead
           # of on a reader's terminal. The plant proves it both ways.
           python3 scripts/tests/test_count_drift_first_contact.py
+          python3 scripts/tests/test_snapshot_binary_identity.py
       # teach-parity is the inverse of oracle-sweep: it proves every RELEASED
       # subcommand has a reference/cli.mdx row. It soft-skips without a
       # binary — the install above makes a skip here a wiring failure, so a

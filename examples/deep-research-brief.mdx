@@ -122,7 +122,7 @@ tasks:
         - "nika:fetch"                 # the corpus named in permits.net.http
         - "nika:done"                  # the loop-completion sentinel
       max_turns: 25                    # the leash · a loop that cannot end is a bill
-      max_tokens_total: 150000         # and the second leash, in tokens
+      max_tokens_total: 120000         # below the default model’s 128k context window
       schema:
         type: object
         additionalProperties: false
@@ -185,7 +185,7 @@ outputs:
     middle. One file, three cost profiles.
   </Step>
   <Step title="The agent has a leash">
-    `max_turns: 25` + `max_tokens_total: 150000` bound the loop;
+    `max_turns: 25` + `max_tokens_total: 120000` bound the loop;
     `nika:done` lets it exit cleanly when the plan is exhausted. The
     final message must match the schema: findings AND sources.
   </Step>

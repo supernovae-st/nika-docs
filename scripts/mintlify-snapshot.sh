@@ -28,19 +28,27 @@ snap="snippets/_status-snapshot.mdx"
 
 [ -f "$snap" ] || { echo "mintlify-snapshot: $snap not found" >&2; exit 1; }
 
-perl -pi -e "s/(version:\\s*)\"[^\"]*\"/\${1}\"$version\"/" "$snap"
-perl -pi -e "s/(lastUpdated:\\s*)\"[^\"]*\"/\${1}\"$today\"/" "$snap"
-
-echo "mintlify-snapshot: version -> $version · lastUpdated -> $today (latest release $tag)"
-
+# Validate the binary before writing any field: latest-tag + stale local binary
+# previously produced a snapshot claiming two different releases at once.
 nika_bin="${NIKA_BIN:-}"
 if [ -z "$nika_bin" ] && command -v nika >/dev/null 2>&1; then
   nika_bin=$(command -v nika)
 fi
 if [ -z "$nika_bin" ]; then
-  echo "mintlify-snapshot: nika not on PATH — engineSha/providers left untouched"
-  exit 0
+  echo "mintlify-snapshot: no binary available — refusing a mixed release snapshot" >&2
+  exit 1
 fi
+
+binary_version="$("$nika_bin" --version)"
+case "$binary_version" in
+  "nika $version ("*) ;;
+  *) echo "mintlify-snapshot: binary $binary_version does not match release $tag — snapshot unchanged" >&2; exit 1 ;;
+esac
+
+perl -pi -e "s/(version:\\s*)\"[^\"]*\"/\${1}\"$version\"/" "$snap"
+perl -pi -e "s/(lastUpdated:\\s*)\"[^\"]*\"/\${1}\"$today\"/" "$snap"
+
+echo "mintlify-snapshot: version -> $version · lastUpdated -> $today (latest release $tag)"
 
 python3 - "$snap" "$nika_bin" <<'PY'
 import json, os, re, subprocess, sys
