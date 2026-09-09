@@ -65,9 +65,9 @@ throw typed SDK errors.
 - It does not reconstruct traces or receipts in TypeScript.
 - An observer `AbortSignal` does not cancel a run; call `cancel(run)`.
 - It does not infer success from an event kind.
-- It exposes only the candidate engine's supported routes.
+- It exposes only the pinned engine's supported routes.
 
-<Card title="Review the source candidate" icon="github" href={SDK.sourceCandidate}>
-  Follow the pending SDK changes. The merged source SHA and public package
-  artifacts remain to be pinned.
+<Card title="Review the merged source" icon="github" href={SDK.sourceCandidate}>
+  Inspect the pinned merged SDK source. Publication of its matching npm and
+  platform packages remains a separate step.
 </Card>

@@ -15,21 +15,21 @@ import { ProjectContract } from "/snippets/_project-contract.mdx"
 The default client is local. It needs no server or token, but it does need
 Node.js 22 or newer and a compatible Nika engine.
 
-## 1. Check candidate availability
+## 1. Check package availability
 
 ```sh
 nika --version
-npm view @supernovae-st/nika-client@0.118.2 version
+npm view @supernovae-st/nika-client@0.118.7 version
 ```
 
-The SDK and matching engine are pending source candidates, not yet published.
-The remaining examples require that matching candidate engine and SDK. Wait
-for the merged source SHA and public artifacts to be pinned on these pages
-before installing from the registry. After publication, verify the exact
+The SDK source is merged and the matching engine v0.118.7 is public.
+The SDK npm package at this version remains unpublished. The remaining
+examples require that exact SDK and engine. Wait for its package and platform
+artifacts before installing from the registry. After publication, verify the exact
 version rather than the moving npm `latest` tag:
 
 ```sh
-npm install @supernovae-st/nika-client@0.118.2
+npm install @supernovae-st/nika-client@0.118.7
 node -p "require('@supernovae-st/nika-client/package.json').version"
 ```
 

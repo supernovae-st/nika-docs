@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 213
+  classified_files: 214
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 208
+    authored: 209
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 42
+  unverified-default: 43
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 8c65a2b1e4cba4e320b14bff78afd8cbb0f349b4dc127b21fb2fb6cf0e0c3d1b
+  sha256: 6f03bf51d62fd012a05ca0ec6bac6b749d17f97b05c284d8482884ba7400fd0f
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -199,14 +199,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 370bec00ae76b321745621b1ce1c40fb51142d25933378ff3b34ee280698a12d
+  sha256: eb7742b03046736aa50b31e66ff1ace28202fb3e4ce0ee16267e6312448a745f
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 142
-  aggregate_sha256: 4e61b72083f222c4fcf5ced68b9e618642b76cb21ccaa6d25626271dd8971ec3
+  aggregate_sha256: fae1026934f5f473423b6bbf86f4448cec6bb907034503de322a957de7ee7ddf
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -234,8 +234,8 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 19
-  aggregate_sha256: e5ea72babad5a269ea79a52cc30ccdbf36236c627223ce2ad256e43d1ac2e8d3
+  match_count: 20
+  aggregate_sha256: 8447ef76a6341f7a676f093b9d77753576b2e58e4966cb964c88a6e12bf01bfc
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -267,6 +267,7 @@ unverified:
 - "scripts/tests/test_oracle_sweep_mcp_registry.py"
 - "scripts/tests/test_oracle_sweep_retired_v1_tag.py"
 - "scripts/tests/test_oracle_sweep_sees_nine_key.py"
+- "scripts/tests/test_snapshot_binary_identity.py"
 - "scripts/tests/test_teach_parity_binary.py"
 - "scripts/tests/test_teach_parity_retired_new.py"
 - "videos/chat-to-workflow.mp4"
