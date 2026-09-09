@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 214
+  classified_files: 321
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 209
+    authored: 316
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 43
+  unverified-default: 51
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 6f03bf51d62fd012a05ca0ec6bac6b749d17f97b05c284d8482884ba7400fd0f
+  sha256: 427c45fbc567923f65696ce50515ee78350a0937e2f71f23fa2807887edf3268
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: f56978ad3ce543933c9db28ac03f5404a0f71b4f9f5a3f80c15c4d221c7c6801
+  sha256: a1d6c572b560e74945569b429a01cdcf7b738b28b6ac0022b536f836ab8692a9
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -121,12 +121,12 @@ files:
   evidence: "hand-written pre-push gate config (mint broken-links · link-audit · teach-parity · oracle-sweep)"
 - path: "reference/error-codes.mdx"
   class: authored
-  sha256: 28137ea97f6bcec2e19c3f9c1f44b0db7e7c186afe934254e21e759c6b3df776
+  sha256: ac4e7c33176401673c7ba6870df173909f7ee6034f339bc59ae4c05d49b94750
   evidence: "mixed page: authored frontmatter and prose around errors-*:begin/end tables projected from the spec diagnostic registry by showcase-projector.py"
   note: "the errors-categories, errors-codes and errors-namespaces blocks are projected from nika-spec canon/diagnostics/registry.yaml; edit the registry and re-project, never hand-edit those blocks; this repo's gate does not independently re-derive them"
 - path: "reference/mcp-catalog.mdx"
   class: authored
-  sha256: 53d7b3c60e4a1333aea6f9691a9fcf641d52069f24929f89a731645b23125d68
+  sha256: be32a7de0dba5b74658454c056e427da0a07b8e82e3c3d9efa9712a1796bda14
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
   note: "the body carries authored catalog and category counts with a dated snapshot, not an in-repo projection; the engine's served MCP tool-count check does not prove the separate server-catalog cardinality"
 - path: "scripts/count-drift-gate.py"
@@ -149,7 +149,7 @@ files:
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
-  sha256: 12e63163dcf41b3cc7259255899c4f0edf1cfd2561b57b363b04a25556c188d9
+  sha256: 19aaed72d21f4949488bbfd7f7d1dc6550b43102db02040508f5be4fa10eb605
   evidence: "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)"
 - path: "scripts/mintlify-snapshot.sh"
   class: authored
@@ -157,7 +157,7 @@ files:
   evidence: "hand-written entry to mintlify_snapshot.py, the atomic owner of version, engineSha, providers, firstCommand and lastUpdated"
 - path: "scripts/oracle-sweep.py"
   class: authored
-  sha256: 534d919a547deabf51390b205da32f624e38bccaff21686397080f438f1efbd6
+  sha256: bd14f21e04f40317b0586a6a63d6839bc60a1502ab9fdf4807e43941a8f54642
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/sdk_contract_gate.py"
   class: authored
@@ -205,8 +205,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 142
-  aggregate_sha256: fae1026934f5f473423b6bbf86f4448cec6bb907034503de322a957de7ee7ddf
+  match_count: 241
+  aggregate_sha256: 2ca60ece718954604547cfbdd5cd92caa1eb292d77ea14d2af46c0ee2b82b29b
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -234,11 +234,12 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 20
-  aggregate_sha256: 8447ef76a6341f7a676f093b9d77753576b2e58e4966cb964c88a6e12bf01bfc
+  match_count: 28
+  aggregate_sha256: 7fda51d987fe0e4a22e790ae381f32e11e288ef6a9ca8abad91c410846758481
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
+- ".github/workflows/knowledge-freshness.yml"
 - ".gitignore"
 - "api-reference/openapi.json"
 - "images/favicon.svg"
@@ -254,13 +255,16 @@ unverified:
 - "images/workflow-gallery.png"
 - "scripts/first_command.py"
 - "scripts/install_release.py"
+- "scripts/knowledge-mirror.py"
 - "scripts/mdx-yaml-fix.py"
 - "scripts/mintlify_snapshot.py"
 - "scripts/tests/test_count_drift_first_contact.py"
 - "scripts/tests/test_first_command.py"
 - "scripts/tests/test_install_release.py"
+- "scripts/tests/test_knowledge_mirror.py"
 - "scripts/tests/test_mdx_yaml_fix.py"
 - "scripts/tests/test_mintlify_snapshot.py"
+- "scripts/tests/test_oracle_context.py"
 - "scripts/tests/test_oracle_sweep_bare_foreach.py"
 - "scripts/tests/test_oracle_sweep_manifest.py"
 - "scripts/tests/test_oracle_sweep_manifest_without_arm.py"
@@ -270,6 +274,10 @@ unverified:
 - "scripts/tests/test_snapshot_binary_identity.py"
 - "scripts/tests/test_teach_parity_binary.py"
 - "scripts/tests/test_teach_parity_retired_new.py"
+- "scripts/verify-knowledge-source.py"
+- "snippets/data/knowledge-mirror.json"
+- "snippets/data/knowledge-taxonomy.json"
+- "snippets/data/language-reference.json"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"
 - "videos/dag-execution.mp4"

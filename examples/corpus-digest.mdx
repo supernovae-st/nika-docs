@@ -29,7 +29,7 @@ flowchart LR
   slices["slices · nika:jq"]:::invoke
   cards["cards · ∥ for_each · typed"]:::infer
   deck["deck · nika:jq"]:::invoke
-  brief["brief · thinking"]:::infer
+  brief["brief"]:::infer
   files --> plan
   files --> texts
   files --> slices
@@ -229,13 +229,15 @@ tasks:
     when: ${{ size(with.deck) > 0 }}
     timeout: "12m"               # judgment gets patience · still bounded
     infer:
-      max_tokens: 8000           # enough room to reconcile the full deck
+      max_tokens: 8000           # bounded synthesis on the default local seat
       prompt: |
         Question · ${{ with.question }}
         Deck of source cards · ${{ with.deck }}
         Answer the question from the cards alone. Cite the `path` of every
         card you lean on. Where cards disagree, say so — do not resolve a
         conflict the sources did not resolve.
+      # Extended thinking requires a reasoning-capable seat in the catalog.
+      # The default local seat does not declare that capability.
 
 # Both the brief and the deck, so the fold is inspectable: the deck is
 # everything the synthesis was allowed to see. Read with `--output json`.

@@ -7,9 +7,11 @@
 # the spec repo CI; judging a SERVED surface with the spec oracle is the
 # wrong judge (empirical 2026-07-20: 56 fences green vs spec-HEAD, 56
 # broken on every installed binary). Skips fences whose info-string marks
-# them non-runnable (skeleton · illustration · modeline). At the release
+# illustrations/modelines as non-runnable; named skeletons have a separate
+# native lane accepting only explicit slot findings. At the release
 # train nothing changes here — the released binary IS the moving truth.
 # Exit 1 on any invalid block · exit 2 when no binary is on PATH.
+import json
 import os
 import pathlib
 import re
@@ -143,6 +145,7 @@ def has_top_level_key(body: str, key: str) -> bool:
 
 
 bad = 0
+skeletons_total = 0
 total = 0
 manifests_total = 0
 cadence_manifests_total = 0
@@ -193,13 +196,31 @@ for fp in sorted(DOCS.rglob("*.mdx")):
                 print(f"✗ {fp.relative_to(DOCS)}  [project cadence]")
                 for e in _judge_fail_lines(r.stdout + r.stderr)[:3]:
                     print(f"   · {e.strip()[:240]}")
-    if not runnable:
+    skeletons = [(i, b) for i, b in fences if is_workflow_fence(b) and re.search(r"\bskeleton\b", i)]
+    if not runnable and not skeletons:
         continue
     page_dir = tempfile.mkdtemp(prefix="oracle-")
     for name, body in mcp_registries:
         registry = pathlib.Path(page_dir) / name
         registry.parent.mkdir(parents=True, exist_ok=True)
         registry.write_text(body)
+    for info, body in skeletons:
+        skeletons_total += 1
+        name = info.strip().split()[0]
+        path = pathlib.Path(page_dir) / pathlib.Path(name).name
+        path.write_text(body)
+        r = subprocess.run([NIKA, "check", str(path), "--json"], cwd=page_dir, capture_output=True, text=True)
+        try:
+            report = json.loads(r.stdout)
+            errors = [f for f in report.get("findings", []) if f.get("severity") == "error"]
+            valid = r.returncode in (0, 2) and report.get("compiled") is True and all(f.get("kind") == "slot" for f in errors)
+            if r.returncode != 0 and not errors: valid = False
+        except (ValueError, TypeError):
+            valid = False
+        if not valid:
+            bad += 1
+            print(f"✗ {fp.relative_to(DOCS)} [skeleton {name}] · non-slot native failure")
+            print(r.stdout[:1500], r.stderr[:500])
     # every named block on the page is a sibling the others may reference
     for info, body in runnable:
         m = NAMED.match(info)
@@ -236,5 +257,5 @@ for fp in sorted(DOCS.rglob("*.mdx")):
                 print(f"   · {e.strip()[:240]}")
 
 print(f"oracle-sweep: {total} workflow blocks · {manifests_total} project shapes "
-      f"· {cadence_manifests_total} cadence manifests · {bad} invalid (judge: {NIKA})")
+      f"· {cadence_manifests_total} cadence manifests · {skeletons_total} skeletons (only slot findings allowed) · {bad} invalid (judge: {NIKA})")
 sys.exit(1 if bad else 0)

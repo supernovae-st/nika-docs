@@ -1,0 +1,46 @@
+---
+title: "Documentation and source of truth"
+description: "How contracts, user guides and Nika Lab stay connected without duplicating authority."
+---
+
+## Find the right explanation
+
+| You want to… | Start here | What it tells you |
+| --- | --- | --- |
+| Write your first workflow | [Introduction](/introduction) | Installation and a first execution |
+| Understand a YAML field | [Language reference](/reference/language/overview) | Placement, declared type, related fields and source excerpts |
+| Assemble a workflow | [Templates](/guides/templates) | How to turn a source template into your own file |
+| Understand dependencies | [Bindings](/concepts/bindings) | How values connect tasks |
+| Diagnose a refusal | [Error codes](/reference/error-codes) | The finding and its repair path |
+| Check what is released | [Engine status](/reference/status) | Implementation and qualification status |
+
+## One contract, several useful views
+
+The [specification repository](https://github.com/supernovae-st/nika-spec) owns language contracts, schemas and conformance fixtures. This documentation explains those contracts to users. Nika Lab is an internal workspace for exploring their relationships, implementations and evidence. The public website presents the product; its marketing categories do not define the language or the documentation hierarchy.
+
+A field keeps its canonical identity across the reference and the Lab. For example, `language:word:jitter` identifies the field; its occurrences under different schema paths remain separate declarations on the same reference page. Similar titles are not enough to merge two objects.
+
+| Surface | Owns | Links to |
+| --- | --- | --- |
+| Specification | Contract and conformance | Implementations, reference explanations and tests |
+| Documentation | User explanations, examples and navigation | Pinned contracts and related guides |
+| Lab | Exploration, internal work and evidence | The matching reference or an explicitly related guide |
+| Product website | Marketing presentation | Public documentation |
+
+## Read the version with the example
+
+Generated field pages carry the specification revision, schema pointers and source-template line links. These let you inspect the exact source behind a declaration. A template excerpt is a fragment, not a complete executable file. Specification coverage and released-engine support are different: use [engine status](/reference/status) and validate your completed workflow.
+
+A related guide explains an object but is not necessarily its exact reference page. An unpublished reference candidate must not be presented as an already available public page.
+
+## How changes reach users
+
+1. Correct a contract in the specification, including the required conformance coverage for a language change.
+2. Regenerate its field reference and source examples. Generated blocks are checked against their input snapshot; manual changes to them fail the drift check.
+3. Add user-facing explanations in the appropriate authored guide and connect them to the generated reference.
+4. Check navigation, internal links, source provenance and complete runnable examples before publication.
+5. Refresh the Lab's documentation manifest and confirm public availability before promoting a candidate to an exact public link.
+
+Not everything in an internal workspace belongs in public documentation. Private sessions, memories, credentials, unpublished artifacts and internal execution evidence stay internal. Documentation explains how their public features work; it does not mirror their private contents.
+
+To report an unclear explanation, include the page, the field or feature and the relevant version in a [documentation issue](https://github.com/supernovae-st/nika-docs/issues).
