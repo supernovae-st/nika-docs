@@ -1,18 +1,14 @@
 ---
 title: "Remote client"
-description: "Configure the preview HTTP client with bounded retries, concurrency, polling and logging."
+description: "Select authenticated nika serve HTTP with the same Nika facade."
 sidebarTitle: "Remote client"
 icon: "satellite-dish"
 ---
 
-import { RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, SourceContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
-<RemoteContract />
-
-The root `Nika` class describes the intended application-to-service boundary.
-It is useful for adapters, fixtures and interface work today.
-
-## Construct from explicit values
+<SourceContract sdk={SDK} />
+<RemoteContract sdk={SDK} />
 
 ```ts
 import { Nika } from '@supernovae-st/nika-client'
@@ -20,57 +16,66 @@ import { Nika } from '@supernovae-st/nika-client'
 const nika = new Nika({
   url: process.env.NIKA_URL!,
   token: process.env.NIKA_TOKEN!,
-  timeout: 30_000,
-  retries: 2,
-  concurrency: 24,
+  requestTimeout: 30_000,
 })
 ```
 
-The constructor requires an HTTP or HTTPS origin and bearer token. It removes
-one trailing slash and uses native `fetch` by default.
+Supplying `url` selects HTTP. There is no environment-reading constructor:
+read and validate deployment configuration in your application.
 
-## Or read the environment
+Contained names such as `release.nika.yaml` or `flows/release.nika.yaml`
+select a served workflow. `check()` and `run()` send the name directly to the
+resident; no local binary or workflow source is needed. To submit local
+source instead, use an explicit path such as `./flows/release.nika.yaml` or
+an absolute path. The SDK then resolves a compatible local engine from
+`bin`, `NIKA_BIN`, or the exact platform package and captures an immutable
+snapshot relative to `cwd`. It never falls back from an unserved name to a
+local file.
+
+Plain HTTP is refused unless `allowInsecureHttp: true` is explicit. Reserve
+that option for deliberate loopback use. URLs cannot carry credentials,
+queries or fragments; bearer tokens must be 32–512 visible ASCII bytes.
 
 ```ts
-const nika = Nika.fromEnv({
-  timeout: 15_000,
-  concurrency: 8,
+const loopback = new Nika({
+  url: 'http://127.0.0.1:8787',
+  token,
+  allowInsecureHttp: true,
 })
 ```
 
-`fromEnv()` reads `NIKA_URL` and `NIKA_TOKEN`, then applies overrides. Missing
-required values fail at construction.
+`requestTimeout` bounds HTTP admission. `fetch`, `eventBufferSize` and
+`machineBufferBytes` are the other transport seams. The SDK does not expose
+automatic retry or concurrency policy as constructor options.
 
-## Transport policy
+## Check a served name
 
-<div className="sdk-flight sdk-flight-compact">
-  <span>HTTP CLIENT · BOUNDED BY DEFAULT</span>
-  <pre tabIndex={0}>{`request
-├── timeout
-├── concurrency semaphore
-├── retry: 429 + 5xx only
-└── response
-    ├── JSON resource
-    └── typed NikaError`}</pre>
-</div>
+```ts
+const report = await nika.check('flows/release.nika.yaml')
+if (!report.clean) {
+  console.error(report.error)
+} else {
+  console.log(report.status, report.snapshot_digest, report.root, report.units)
+}
+```
 
-Retries use exponential backoff and honor bounded `Retry-After`. Ordinary 4xx
-responses are not retried. Inject `fetch` for middleware or test fixtures,
-and use `logger` for metadata without recording authorization values.
+A successful served-name check returns `clean: true` with the resident's
+compact acknowledgement: `status: "accepted"`, `snapshot_digest`, `root` and `units`.
+A missing served name or a workflow admission refusal returns `clean: false`
+with the typed resident `error` (`code`, optional `message`). This is not a
+local findings report: it has no local process `exitCode` and does not invent
+findings. Authentication, transport and protocol failures still throw.
 
-## Continue
+An explicit local-path check retains the local engine's full check report;
+when capture succeeds, the resident must acknowledge that exact snapshot
+before the SDK returns it. Remote checks reject `model` and `nativeStrict`
+overrides because the HTTP request has no envelope for them.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
-    Submit, poll and cancel remote work.
+    Admit, recover, observe and cancel durable jobs.
   </Card>
   <Card title="Configuration" icon="sliders" href="/sdk/reference/configuration">
-    Every option and default.
-  </Card>
-  <Card title="Use LocalNika today" icon="terminal" href="/sdk/local/client">
-    The production path against the released binary.
-  </Card>
-  <Card title="Server surfaces" icon="server" href="/sdk/operations/server-surfaces">
-    Keep three server-shaped commands separate.
+    Read the exact local and remote unions.
   </Card>
 </CardGroup>

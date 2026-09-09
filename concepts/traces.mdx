@@ -34,12 +34,17 @@ so capturing it live costs nothing. By convention, project traces live
 under `.nika/traces/` next to the workflows they record; the CLI reads a
 trace from any path you give it.
 
-Since 0.94 the redirect is optional: **every run writes its own journal**
+Since 0.94 the redirect is optional: **execution journals are enabled by default**
 to `.nika/traces/<timestamp>-<id>.ndjson` by default, and the verdict
 line prints the path. `--resume`, `nika trace show|replay` and the editor
 read it directly. Opt out per run with `--no-trace-file`, or globally
 with `NIKA_NO_TRACE_FILE` (`nika try` never journals — the mock
 rehearsal is not a workspace run).
+
+A refusal before execution or a queued cancellation can leave no journal.
+Interruption can leave incomplete evidence. A job or receipt identity alone
+does not prove that a trace exists or is sealed; `nika trace verify` reads
+existing evidence and never seals it.
 
 The journal keeps task outputs **verbatim** so a run can be replayed and
 verified. Hash-chained is not confidential: `.nika/traces/` inherits the

@@ -100,7 +100,7 @@ format conversion, generation, time, hashing, adjudication.
 | `nika:uuid` | Generate a UUID: `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
 | `nika:date` | Timestamp arithmetic: op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
 | `nika:hash` | Content hashing: default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
-| `nika:decide` | The deterministic decision kernel ([spec 11](https://github.com/supernovae-st/nika-spec/blob/main/spec/11-decision.md)): evaluates a portable Decision Bundle (`bundle:`) against an EvidenceSnapshot (`evidence:`) and returns the full receipt — outcome, term-by-term contributions, intervals, conflicts with their witnesses, determination provenance. **The model never decides**: an `infer:` task collects the facts, this applies the rubric. Same evidence, same verdict, forever. |
+| `nika:decide` | The deterministic decision kernel ([spec 11](https://github.com/supernovae-st/nika-spec/blob/main/spec/11-decision.md)): evaluates a portable Decision Bundle (`bundle:`) against an EvidenceSnapshot (`evidence:`) and returns the full receipt — outcome, term-by-term contributions, intervals, conflicts with their witnesses, determination provenance. **The model never decides**: an `infer:` task collects the facts, this applies the rubric. Same evidence, same verdict, forever. Full contract: [The decision bundle](#the-decision-bundle). |
 
 ```yaml
 # recursive deep-merge of two task outputs — pure jq, no extra builtin
@@ -114,6 +114,242 @@ merged:
       input: ["${{ with.base }}", "${{ with.overlay }}"]
       expression: ".[0] * .[1]"
 ```
+
+## The decision bundle
+
+One builtin in that table earns its own section. `nika:decide` is the only
+builtin whose **semantics live outside the engine**: the rubric is a portable
+JSON artifact you own and version, and the engine is a reference
+implementation of it, never its prison. Teaching shapes:
+`nika try 14-decide-publish` (offline, zero keys) and
+`nika new classify-and-route <file>`.
+
+### The two args
+
+| Arg | Shape |
+|---|---|
+| `bundle:` | The Decision Bundle. Either the **inline object**, or a **`./path.bundle.json` string**. The path form is an ordinary `fs.read`: the file must sit inside `permits.fs.read`. A literal path outside it is a `NIKA-SEC-004` finding at `nika check`, before anything runs; a computed path is the run's verdict. The inline form touches no filesystem at all, so a bundle in `const:` needs no `permits.fs`. |
+| `evidence:` | The EvidenceSnapshot object: `t` plus an `evidence:` array of items. Required, and it must be an object. |
+
+Both args are required. A wrong arg *shape* is `NIKA-BUILTIN-DECIDE-001`, the
+arg plane every builtin shares. `permits.tools` must list `nika:decide`.
+
+```yaml
+triage:
+  invoke:
+    tool: "nika:decide"
+    args:
+      bundle: "./decisions/refund.bundle.json"    # or the inline object
+      evidence: "${{ tasks.collect.output }}"
+```
+
+### The bundle, as the kernel reads it
+
+A bundle is ONE JSON document with **six mandatory regions**. A missing region
+refuses before anything is scored.
+
+| Region | What the kernel reads |
+|---|---|
+| `manifest` | `id` · `version` · `owner` · `license`, all required non-empty strings. `digest` and `valid_until` are carried, not checked (see below). |
+| `evidence_schema` | A non-empty map, one entry per evidence key. Per key: `type` (a [spec 09](https://github.com/supernovae-st/nika-spec/blob/main/spec/09-types.md) type expression, required) · `required` · `sources` (an allow-list) · `integrity` (the floor) · `identity: true`. |
+| `transforms` | Named, bounded feature transforms: `clamp` · `linear` · `bucket`. Integer basis points only, `min ≤ max`, and the input is clamped into `min..max` before the kind's arithmetic runs. That is what "total on its range" means: no input can fall outside. |
+| `rules` | `dimensions.<name>.terms[]` and `thresholds[]`. This is the whole scoring program. |
+| `governance` | `never_automatic: [outcome…]`, plus fields the kernel carries but does not read. |
+| `fixtures` | The bundle's own golden cases: `name` · `class` · `evidence`. |
+
+The three transform kinds, exactly:
+
+| Kind | Arithmetic |
+|---|---|
+| `clamp` | The clamped value itself. |
+| `linear` | `clamped * scale_bp / 10000 + offset`, floor division. `scale_bp` defaults to `10000` (identity), `offset` to `0`. |
+| `bucket` | `edges[n]` plus `values[n+1]`, edges sorted ascending. The first edge strictly above the value selects its value; past every edge, the last one. A log-shaped curve is an explicit table, honest and byte-equal across evaluators. |
+
+A rule term and a threshold:
+
+```json
+{
+  "rules": {
+    "dimensions": {
+      "refund_eligibility": {
+        "terms": [
+          { "evidence": "days_since_purchase", "transform": "within_window",
+            "weight_bp": 6000, "monotonicity": "decreases" },
+          { "evidence": "item_returned", "transform": "returned_step",
+            "weight_bp": 4000, "monotonicity": "increases" }
+        ]
+      }
+    },
+    "thresholds": [
+      { "dimension": "refund_eligibility", "recommend_gte_bp": 8000 }
+    ]
+  }
+}
+```
+
+- `evidence` must name a declared `evidence_schema` key, and that key must not
+  be an `identity: true` key.
+- `transform` must name a declared transform.
+- `weight_bp` is an **integer basis point**: `8735` is 87.35%. One term
+  contributes `transform(value) * weight_bp / 10000`, floor division.
+- `monotonicity` is `increases` · `decreases` · `none` (the default).
+- `recommend_gte_bp` is an integer basis point too, and its `dimension` must
+  be a declared dimension.
+
+The threshold ladder is read in order, and it reads **intervals**, never a
+point estimate: `inf ≥ gate` recommends (robust dominance) · `sup < gate`
+falls through to the next threshold · a straddle defers as *incomparable with
+the available evidence* · no threshold admitted defers.
+
+`governance.never_automatic` lists outcomes that may never ride out
+automatically. Every entry must be in the closed outcome enum
+(`recommend` · `defer` · `human_required` · `opted_out` · `overridden`), and
+it is applied **last**, over whatever outcome emerged: a bundle that lists
+`recommend` turns its own recommendations into `human_required`.
+
+Fixtures carry a `class` from a closed set: `positive` · `negative` ·
+`ambiguous` · `contradictory` · `adversarial`. At least one `contradictory`
+fixture is **mandatory**: a bundle that cannot prove its Conflict handling is
+unpublishable.
+
+### What the kernel enforces
+
+The bundle is validated **in full before it scores anything**, and both
+refusals are deterministic: same inputs, same refusal, never a partial
+receipt.
+
+`NIKA-DECIDE-001` · the bundle breaks its own laws:
+
+- **Fixed-point integrity.** Every weight, threshold and transform bound is a
+  real JSON integer. A float refuses, and so does `3.0`, which is a float in
+  both evaluators.
+- **Closed rules.** A term may only read a declared `evidence_schema` key, and
+  only through a declared transform.
+- **Identity counterfactual invariance.** An `identity: true` key feeding a
+  technical dimension refuses. The same case under a different author, tenure
+  or tier yields the same technical decision, structurally.
+- **A contradictory fixture is mandatory.**
+- **Declared monotonicity is property-checked**, on the bundle's own
+  `positive` / `negative` / `ambiguous` fixtures: for every fixture pair that
+  differs on exactly one monotone key, all else equal, that dimension's score
+  must move the declared way. It does not, and the bundle is refused at
+  publication. The law is tested, not prose.
+- Shape laws: the six regions, the manifest strings, transform kinds in the
+  closed set, `min ≤ max`, `edges[n]` with `values[n+1]` and edges sorted,
+  fixture classes in the closed set.
+
+`NIKA-DECIDE-002` · the snapshot does not satisfy the schema:
+
+- an **undeclared** evidence key (the schema is the closed surface);
+- a **value that does not fit** the key's declared type;
+- a `source` outside the key's declared `sources`;
+- an `integrity` **below the declared floor**, on the lattice
+  `untrusted ⊑ observed ⊑ verified ⊑ authoritative`.
+
+Every item is judged, including a duplicate key, which is two claims. A
+**missing required key is not an error**: it lands in `snapshot.missing` and
+drives `defer`, because abstention is a safety property.
+
+<Warning>
+  **`nika check` does not evaluate the bundle.** The bundle laws above are the
+  kernel's, and they fire when the task runs. A workflow carrying a bundle
+  with no contradictory fixture, a float weight or a violated monotonicity
+  audits clean and refuses at run time with `NIKA-DECIDE-001`. Prove a bundle
+  by running it against its cases: see
+  [Testing · Proving a rule against cases](/guides/testing#proving-a-rule-against-cases).
+</Warning>
+
+### What it does not enforce today
+
+Stated plainly, so you do not buy a guarantee that is not there:
+
+- **A fixture's `class` is a label, not an asserted outcome.** Nothing
+  evaluates a `positive` fixture and checks that it recommends. Relabel a
+  passing fixture `negative` and the bundle still publishes. The classes carry
+  exactly two mechanical duties: at least one `contradictory` must exist, and
+  the `positive` / `negative` / `ambiguous` set is the corpus the monotonicity
+  check runs over. Everything else a class implies is yours to prove, one case
+  file at a time.
+- **`manifest.digest` is copied into the receipt verbatim**, never recomputed
+  and never verified against the bundle's bytes.
+- **`manifest.valid_until` is not read.** Expiry is not enforced by the kernel.
+- **`governance.human_required_triggers`, `override` and `appeal` are carried,
+  not read.** Only `never_automatic` changes an outcome today.
+- **The snapshot's `observed_at`, `confidentiality` and `quality`
+  (`freshness` · `completeness` · `independence_group`) are carried, not
+  scored.** The `ttl` and the independence-group contribution cap are not
+  applied by the kernel today.
+
+### The receipt
+
+The success value is the whole receipt, and the explanation IS the formula:
+
+```json
+{
+  "decision_receipt_format": 1,
+  "bundle": { "id": "refund-eligibility", "version": "1.0.0", "digest": null },
+  "snapshot": { "t": "2026-09-02T09:00:00Z", "digests": ["d1", "d2"], "missing": [] },
+  "dimensions": {
+    "refund_eligibility": {
+      "interval": { "lo": 10000, "hi": 10000 },
+      "contributions": [
+        { "evidence": "days_since_purchase", "known": true,
+          "contribution": { "lo": 6000, "hi": 6000 },
+          "weight_bp": 6000, "transform": "within_window" },
+        { "evidence": "item_returned", "known": true,
+          "contribution": { "lo": 4000, "hi": 4000 },
+          "weight_bp": 4000, "transform": "returned_step" }
+      ]
+    }
+  },
+  "conflicts": [],
+  "outcome": "recommend",
+  "determination_provenance": [
+    "dimension refund_eligibility dominates the threshold (inf 10000 >= 8000 bp) — robust, not point-estimated"
+  ]
+}
+```
+
+| Field | What it carries |
+|---|---|
+| `outcome` | The closed enum: `recommend` · `defer` · `human_required` · `opted_out` · `overridden`. `defer` and `human_required` are **successful** evaluations, never errors. |
+| `determination_provenance` | The ordered lines naming the commitments that decided between admissible outcomes: which threshold, which dominance test, which governance trigger. Data provenance says where the facts came from; this says what settled the verdict. |
+| `dimensions.<name>.interval` | The dimension's `lo` / `hi` in basis points. `lo == hi` means every term was known. |
+| `dimensions.<name>.contributions[]` | Per term: `evidence` · `known` · `contribution` (`lo` / `hi`) · `weight_bp` · `transform`. A term whose value is missing or non-integer has `known: false` and contributes the transform's whole **interval**, never an invented zero. Unknown is not False and not 0. |
+| `conflicts[]` | One entry per key where two sources at `authoritative` integrity disagree: `key` · `class` · `required` · a `witness[]` of `source` · `value` · `digest`, both sides preserved. A conflict on a required key forces `human_required`. |
+| `snapshot.digests` | The evidence digests, sorted: the receipt's link back to the exact facts, so a decision can be published without publishing the evidence. |
+| `snapshot.missing` | The required keys absent from the snapshot. Non-empty means `defer`. |
+| `bundle` | `id` · `version` · `digest`, straight from the manifest. |
+
+A dimension is a **vector component**, never a universal scalar score. Declare
+`change_risk` and `evidence_quality` separately and route on each, rather than
+averaging them into one number nobody can appeal.
+
+### Where the lane goes
+
+There is no `lane` field in the receipt: the routing decision is the
+`outcome`, and mapping an outcome to a queue is one `nika:jq` away.
+
+```yaml
+route:
+  with:
+    receipt: ${{ tasks.decide.output }}
+  invoke:
+    tool: "nika:jq"
+    args:
+      input: ${{ with.receipt }}
+      expression: 'if .outcome == "human_required" then "manual-review"
+                   elif .outcome == "recommend" then "priority"
+                   else "standard" end'
+```
+
+<Info>
+  **The semantics belong to the bundle.** A stdlib-Python reference
+  interpreter (`conformance/decision_core.py` in the spec) is the conformance
+  oracle: for every bundle fixture, the engine's receipt must be **byte-equal**
+  canonical JSON against it. That proof, not a claim on this page, is what
+  makes a bundle portable.
+</Info>
 
 ## Network (2)
 
