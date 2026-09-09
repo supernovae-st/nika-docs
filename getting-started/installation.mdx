@@ -8,7 +8,7 @@ icon: "download"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 <Warning>
-  **Latest release: v{STATUS.version}**, what `brew install` and the install
+  **Latest release: v{STATUS.version}**, what npm, `brew install`, and the install
   script give you. Main may be ahead with unreleased features. Run `nika --version`
   and `nika --help` after install; those commands are the executable source of
   truth for your local binary. A grammar change ships with its `nika check --fix` migration.
@@ -18,6 +18,8 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 <Tabs>
   <Tab title="npm">
+    Requires Node.js 22 or newer.
+
     ```bash
     npm install -g @supernovae-st/nika-client
     nika --version
