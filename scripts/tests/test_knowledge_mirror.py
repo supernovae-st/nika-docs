@@ -18,6 +18,17 @@ class KnowledgeMirrorTests(unittest.TestCase):
     def test_duplicate_identity_refused(self):
         self.data['words'].append(copy.deepcopy(self.data['words'][0]))
         with self.assertRaises(ValueError):mirror.render(self.data)
+    def test_current_owner_changes_and_new_templates_are_not_hidden_by_valid_old_pin(self):
+        import tempfile,hashlib
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'schemas').mkdir();(root/'templates').mkdir()
+            path=root/'schemas/workflow.schema.json';path.write_bytes(b'{}')
+            snapshot={'inputs':{'schemas/workflow.schema.json':hashlib.sha256(b'{}').hexdigest()}}
+            verifier.verify_current_source(snapshot,root)
+            path.write_bytes(b'{"properties":{}}')
+            with self.assertRaisesRegex(ValueError,'Owner advanced'):verifier.verify_current_source(snapshot,root)
+            path.write_bytes(b'{}');(root/'templates/new.nika.yaml').write_text('nika: new')
+            with self.assertRaisesRegex(ValueError,'Owner advanced'):verifier.verify_current_source(snapshot,root)
     def test_path_traversal_refused(self):
         self.data['words'][0]['docsPath']='../introduction'
         with self.assertRaises(ValueError):mirror.render(self.data)

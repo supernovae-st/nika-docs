@@ -20,9 +20,15 @@ def verify(snapshot, read_source):
             props = value.get('properties', {})
             for name, decl in props.items():
                 expected[pointer+'/properties/'+name] = (name, pointer or '/', name in value.get('required', []), decl, sorted(set(props)-{name}))
-            for key, child in value.items(): walk(child, pointer+'/'+key.replace('~','~0').replace('/','~1'))
-        elif isinstance(value,list):
-            for i, child in enumerate(value): walk(child,pointer+'/'+str(i))
+            maps=('properties','patternProperties','$defs','definitions','dependentSchemas')
+            arrays=('allOf','anyOf','oneOf','prefixItems')
+            singles=('items','contains','additionalProperties','unevaluatedProperties','unevaluatedItems','propertyNames','not','if','then','else')
+            for key in maps:
+                for name,child in value.get(key,{}).items():walk(child,pointer+'/'+key+'/'+name.replace('~','~0').replace('/','~1'))
+            for key in arrays:
+                for i,child in enumerate(value.get(key,[])):walk(child,pointer+'/'+key+'/'+str(i))
+            for key in singles:
+                if isinstance(value.get(key),dict):walk(value[key],pointer+'/'+key)
     walk(schema); seen = set(); ids = set()
     for word in snapshot['words']:
         name = word['name']
@@ -45,7 +51,7 @@ def verify(snapshot, read_source):
     if seen != set(expected): raise ValueError('Missing schema declarations')
     return len(ids)
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--spec-root',required=True,type=Path);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--spec-root',required=True,type=Path);p.add_argument('--current-source',action='store_true',help='Also require exact parity with the supplied owner checkout, including new/deleted templates');a=p.parse_args()
     snapshot=json.loads((ROOT/'snippets/data/language-reference.json').read_text())
     def read(rev,path): return subprocess.check_output(['git','show',f'{rev}:{path}'],cwd=a.spec_root)
     # The set of input files itself must be exhaustive, not only the listed hashes.
@@ -53,5 +59,12 @@ def main():
     wanted={p for p in tracked if p=='schemas/workflow.schema.json' or re.fullmatch(r'templates/[^/]+\.nika\.yaml',p)}
     if wanted != set(snapshot['inputs']): raise SystemExit('Missing or unexpected source input')
     count=verify(snapshot,read)
+    if a.current_source: verify_current_source(snapshot,a.spec_root)
     print(f'Verified {count} fields against pinned Git objects, including every declaration and source excerpt')
+def verify_current_source(snapshot, root):
+    files=[root/'schemas/workflow.schema.json',*sorted((root/'templates').glob('*.nika.yaml'))]
+    observed={path.relative_to(root).as_posix():hashlib.sha256(path.read_bytes()).hexdigest() for path in files}
+    if observed != snapshot['inputs']:
+        changed=sorted(path for path in set(observed)|set(snapshot['inputs']) if observed.get(path)!=snapshot['inputs'].get(path))
+        raise ValueError('Owner advanced beyond documentation snapshot: '+', '.join(changed))
 if __name__=='__main__': main()

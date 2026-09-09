@@ -156,7 +156,7 @@
       "sourcePointers": [
         "/properties/const"
       ],
-      "sha256": "7782f0c225640b2f9b74288db0b82a5eab2308935c45f8d072caf59be81e2827"
+      "sha256": "e6279634b1fd55656cd965dd24e2dcb5502c0ad666e6977fb39ea45c0bf8a7fa"
     },
     {
       "id": "language:word:cwd",
@@ -391,7 +391,7 @@
       "sourcePointers": [
         "/properties/inputs"
       ],
-      "sha256": "5d779339d35af343a137bfc9980c55a20b95ddbf1b7afb5d644c77a3b740dfd8"
+      "sha256": "f18e3f6392baed2156e3103ab87e7ff8589f2224bea1100903de8a8d582d72c8"
     },
     {
       "id": "language:word:integer",
@@ -594,7 +594,7 @@
         "/$defs/infer/properties/model",
         "/$defs/agent/properties/model"
       ],
-      "sha256": "05e378106a6479a51676b248761dc96504590acf26c34ebb1ba1a42bae0e98c0"
+      "sha256": "ca3ca5fd7692e96fc15ae1dc32df90fa2c24220509129e1845e7e91cfdf38fe9"
     },
     {
       "id": "language:word:net",
@@ -616,7 +616,7 @@
       "sourcePointers": [
         "/properties/nika"
       ],
-      "sha256": "7b94e03bfb7a8958552b7d813e551f7f64c6038fbe95ae91a629db6dfb22af7f"
+      "sha256": "e8b7844cb3bd432061cd8c9e129f6229d3933daf6e9b8fbd45e771ea55ef3018"
     },
     {
       "id": "language:word:number",
@@ -683,7 +683,7 @@
       "sourcePointers": [
         "/properties/outputs"
       ],
-      "sha256": "7a77b360f33859c169d1144b94c4b43136b809463dbd8f9b2a6086ac1d252b3b"
+      "sha256": "9219501acd074d4905501b823fc637b1f53a53552c44060dd6385404d2ad5ac3"
     },
     {
       "id": "language:word:path",
@@ -717,7 +717,7 @@
       "sourcePointers": [
         "/properties/permits"
       ],
-      "sha256": "6315473d744aba3e5e64e2a5b2c3e4f28fd3d4f807cf1a1ba7a738987038f081"
+      "sha256": "6f1170327e1f58c67ed5ee99a94360cb53b81ab956fa96946fd37d50ef88eb9e"
     },
     {
       "id": "language:word:prompt",
@@ -795,7 +795,7 @@
       "sourcePointers": [
         "/properties/run"
       ],
-      "sha256": "a30534c2b67fc6720a9af9a952c4a4966df04ab05cf863ff7a73de7237bdcb53"
+      "sha256": "e12dbb40f549c2c996e44940ef7027e892456b911a9d1e57d0e41fbb67b38ac0"
     },
     {
       "id": "language:word:schema",
@@ -818,7 +818,7 @@
       "sourcePointers": [
         "/properties/secrets"
       ],
-      "sha256": "d197dee104bdfcbe4f0553f5101b368aaebee306bd28b671839627cfef89f41d"
+      "sha256": "20b21a1923546f1e709f4b54ab1aaeaf3b7f34031ee9e92cd18b7d1e20017d54"
     },
     {
       "id": "language:word:seeded",
@@ -920,7 +920,7 @@
       "sourcePointers": [
         "/properties/tasks"
       ],
-      "sha256": "dba9939432ffd9583c7117e807698b94d9b00c639236fcb4c9c9190479fb55c8"
+      "sha256": "4e3004336c3c877f67124a25393bc4bb19be8e8ed26f5d745c2cda6da59ffd86"
     },
     {
       "id": "language:word:temperature",
