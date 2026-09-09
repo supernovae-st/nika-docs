@@ -271,6 +271,24 @@
       "guide": "reference/constellation",
       "relation": "guide",
       "visibility": "internal-evidence"
+    },
+    "diagnostic": {
+      "category": "language",
+      "guide": "reference/error-codes",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "law": {
+      "category": "language",
+      "guide": "reference/knowledge-system",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "registry": {
+      "category": "language",
+      "guide": "reference/knowledge-system",
+      "relation": "guide",
+      "visibility": "public-concept"
     }
   },
   "destinations": {

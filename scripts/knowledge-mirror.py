@@ -6,7 +6,6 @@ import html
 import json
 from pathlib import Path
 import re
-import shutil
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'snippets/data/language-reference.json'
 TAXONOMY=ROOT/'snippets/data/knowledge-taxonomy.json'
@@ -63,8 +62,8 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('--write',action='store_true');p.add_argument('--source',type=Path);a=p.parse_args()
     if a.source:
         if not a.write:raise SystemExit('--source requires --write')
-        shutil.copyfile(a.source,SOURCE)
-    snapshot=json.loads(SOURCE.read_text());outputs=render(snapshot)
+    source_text=(a.source if a.source else SOURCE).read_text()
+    snapshot=json.loads(source_text);outputs=render(snapshot)
     nav=json.loads((ROOT/'docs.json').read_text())
     ref=next(t for t in nav['navigation']['tabs'] if t['tab']=='Reference')
     ref['groups']=[g for g in ref['groups'] if g['group'] not in ['Language fields','Documentation system']]
@@ -74,6 +73,8 @@ def main():
     actual=set(p.relative_to(ROOT).as_posix() for p in (ROOT/'reference/language').rglob('*.mdx')) if (ROOT/'reference/language').exists() else set()
     extra=actual-set(outputs)
     if extra:raise SystemExit(f'Unexpected generated pages require explicit removal review: {sorted(extra)}')
+    # A rejected candidate must leave the admitted source intact.
+    if a.write and a.source:SOURCE.write_text(source_text)
     for name,text in outputs.items():
         file=ROOT/name
         if a.write:file.parent.mkdir(parents=True,exist_ok=True);file.write_text(text)
