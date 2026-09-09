@@ -15,6 +15,10 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+  attestations: read
+
 jobs:
   link-audit:
     runs-on: ubuntu-latest
@@ -26,10 +30,17 @@ jobs:
           python-version: '3.12'
       - name: link + canon audit
         run: python3 scripts/link-audit.py
-      - name: One SDK 0.116 contract ratchet
+      - name: One SDK current contract ratchet
         run: |
           python3 scripts/sdk_contract_gate.py
           python3 scripts/tests/test_sdk_contract_gate.py
+      - name: Installed MDX parser failures block the push hook
+        run: python3 scripts/tests/test_mintlify_hook.py
+      - name: Atomic released snapshot projection (offline doubles)
+        run: |
+          python3 scripts/tests/test_mintlify_snapshot.py
+          python3 scripts/tests/test_first_command.py
+          python3 scripts/tests/test_install_release.py
       # the estate manifest re-emits and byte-compares — a red here means a
       # PR changed tracked files without `python3 scripts/estate.py --write`.
       - name: Estate manifest observes (non-blocking · E0)
@@ -38,27 +49,19 @@ jobs:
       # count-drift check (c) asserts hand-typed MCP tool counts against the
       # live wire — without a binary it self-skips, so CI was only running
       # checks (a)+(b) while the wire assertion lived local-only. Install the
-      # latest release the same checksum-verified way the marketplace gate
-      # does: no bare curl|tar.
-      - name: install nika (latest release · checksum-verified)
-        run: |
-          set -euo pipefail
-          tag=$(curl -fsSL -o /dev/null -w '%{url_effective}'             https://github.com/supernovae-st/nika/releases/latest | sed 's|.*/tag/||')
-          ver=${tag#v}
-          dl="https://github.com/supernovae-st/nika/releases/download/${tag}"
-          asset="nika-linux-x64-${ver}.tar.gz"
-          curl -fsSL "${dl}/${asset}" -o "${asset}"
-          curl -fsSL "${dl}/SHA256SUMS" -o SHA256SUMS
-          grep " ${asset}\$" SHA256SUMS | sha256sum -c -
-          tar xzf "${asset}"
-          sudo mv nika /usr/local/bin/nika
-          nika --version
+      # same verified release installer used by oracle-sweep and release-heal.
+      - name: Install the verified published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/install_release.py --dest "$RUNNER_TEMP/nika-release" >> "$GITHUB_ENV"
       # shell: bash turns on pipefail — without it the default `bash -e {0}`
       # lets `tee` swallow the gate's red exit code (the verdict must never
       # ride a pipe unprotected).
       - name: count-drift gate (wire-asserted)
         shell: bash
         run: |
+          PATH="$(dirname "$NIKA_BIN"):$PATH"
+          export PATH
           python3 scripts/count-drift-gate.py | tee /tmp/cdg.out
           if grep -q "skipped" /tmp/cdg.out; then
             echo "::error::tool-count check skipped despite the install — wire assertion did not run"
@@ -68,6 +71,7 @@ jobs:
           # above, so a train that moves the front door reddens HERE instead
           # of on a reader's terminal. The plant proves it both ways.
           python3 scripts/tests/test_count_drift_first_contact.py
+          python3 scripts/tests/test_snapshot_binary_identity.py
       # teach-parity is the inverse of oracle-sweep: it proves every RELEASED
       # subcommand has a reference/cli.mdx row. It soft-skips without a
       # binary — the install above makes a skip here a wiring failure, so a
@@ -81,6 +85,7 @@ jobs:
             exit 1
           fi
           python3 scripts/tests/test_teach_parity_retired_new.py
+          python3 scripts/tests/test_teach_parity_binary.py
 
   oracle-sweep:
     runs-on: ubuntu-latest
@@ -95,27 +100,22 @@ jobs:
       # (The spec oracle judges the PACK in the spec repo's own CI; judging
       # a served surface against spec HEAD is the wrong judge — that is how
       # 56 fences stayed green while broken on every installed binary.)
-      - name: install nika (latest release · checksum-verified)
-        run: |
-          set -euo pipefail
-          tag=$(curl -fsSL -o /dev/null -w '%{url_effective}' \
-            https://github.com/supernovae-st/nika/releases/latest | sed 's|.*/tag/||')
-          ver=${tag#v}
-          dl="https://github.com/supernovae-st/nika/releases/download/${tag}"
-          asset="nika-linux-x64-${ver}.tar.gz"
-          curl -fsSL "${dl}/${asset}" -o "${asset}"
-          curl -fsSL "${dl}/SHA256SUMS" -o SHA256SUMS
-          grep " ${asset}\$" SHA256SUMS | sha256sum -c -
-          tar xzf "${asset}"
-          sudo mv nika /usr/local/bin/nika
-          nika --version
+      - name: Install the verified published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/install_release.py --dest "$RUNNER_TEMP/nika-release" >> "$GITHUB_ENV"
       - name: every docs yaml block runs on the released binary
-        run: python3 scripts/oracle-sweep.py
+        run: |
+          python3 scripts/oracle-sweep.py
+          python3 scripts/tests/test_oracle_context.py
       # Cliquet: a planted `nika: v1` project fence must stay red on the
       # held binary. Without this, the seventh page re-teaches the retired
       # schema tag and oracle-sweep only notices after a reader copies it.
       - name: "retired nika: v1 project tag stays red"
-        run: python3 scripts/tests/test_oracle_sweep_retired_v1_tag.py
+        run: |
+          PATH="$(dirname "$NIKA_BIN"):$PATH"
+          export PATH
+          python3 scripts/tests/test_oracle_sweep_retired_v1_tag.py
       # The spec clone below serves ONLY the design-token parity check.
       # clock: ratified-HEAD · because the docs THEME follows the spec design
       # pack as ratified — an accepted, advisory drift signal (a spec-side
@@ -153,3 +153,34 @@ jobs:
             exit 1
           fi
           echo "✓ scripts/estate.py is byte-identical to nika-estate@${pin} and executable"
+
+  knowledge-reference:
+    name: Spec to documentation reference
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Generated pages and navigation match their input
+        run: |
+          python3 scripts/knowledge-mirror.py
+          python3 scripts/tests/test_knowledge_mirror.py
+      - name: Read the validated source revision
+        id: spec
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          revision=json.load(open('snippets/data/language-reference.json'))['revision']
+          assert re.fullmatch('[a-f0-9]{40}',revision)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as output:
+              output.write('revision='+revision+'\n')
+          PY
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: supernovae-st/nika-spec
+          ref: ${{ steps.spec.outputs.revision }}
+          path: .knowledge-spec
+      - name: All declarations and excerpts come from the pinned source
+        run: python3 scripts/verify-knowledge-source.py --spec-root .knowledge-spec

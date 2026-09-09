@@ -164,7 +164,8 @@ spent, and the card hands over:
   the workflow can *act* on unhealthy containers, still inside the
   declared boundary. See [patterns](/guides/patterns).
 - **Schedule it** — the file is the artifact: cron or CI runs
-  `nika run` and every execution leaves a verifiable trace.
+  `nika run`; when journaling is enabled, inspect and verify the evidence
+  the execution leaves behind.
 - **Structured instead of prose** — give `diagnose` a `schema:` and the
   report becomes typed data downstream tasks can branch on. See
   [testing](/guides/testing) for pinning it with a golden.

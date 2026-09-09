@@ -5,8 +5,10 @@ sidebarTitle: "Receipts"
 icon: "link"
 ---
 
-A live event view is presentation. The engine-issued receipt on the terminal
-result is the typed proof seam.
+A live event view is presentation. An engine-issued receipt identifies the
+run and its available evidence; its presence alone does not prove a sealed
+journal exists. Refusal before execution, queued cancellation and interrupted
+ownership can leave no complete runtime trace.
 
 ```ts
 const run = await nika.run('workflow.nika.yaml')
@@ -25,6 +27,10 @@ if (!verdict.verified) {
 `NikaReceipt` is an opaque readonly record. The SDK never constructs it,
 extracts a path from it, enriches it by reading a workflow, or implements
 cryptography. It asks the authoritative engine to verify the object unchanged.
+The runtime writes and seals trace evidence. Verification reads what already
+exists; it never creates a journal or seals an incomplete one. Paused results
+can carry evidence for the completed observation leg while the durable job
+remains resumable.
 
 Local verification can return `verified` or `invalid`. The remote endpoint
 currently returns a typed `unavailable` verdict with reason

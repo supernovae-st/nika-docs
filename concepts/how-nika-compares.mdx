@@ -9,7 +9,7 @@ Most orchestrators plan. Nika sits under them: a plain-text file your agent, cro
 
 ## The one thing that is different
 
-Nika is the only one where you can **audit a workflow before you run it**. `nika check` reads the file statically and tells you the plan, an honest cost floor, which secrets flow into which step, and the permits boundary, before anything executes. Every run then leaves a hash-chained trace that `nika trace verify` confirms or breaks. The receipt comes from the runtime, never from a model's prose.
+Nika is the only one where you can **audit a workflow before you run it**. `nika check` reads the file statically and tells you the plan, an honest cost floor, which secrets flow into which step, and the permits boundary, before anything executes. Recorded executions leave a hash-chained trace that `nika trace verify` confirms or breaks; refusal before execution need not leave a journal. The receipt comes from the runtime, never from a model's prose.
 
 That is a property of the whole design (one static Rust binary, a frozen language, local-first), not a feature bolted on. It is what the rest of this page is measured against.
 

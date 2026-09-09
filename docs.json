@@ -144,22 +144,37 @@
               "getting-started/installation",
               "getting-started/your-machine",
               "getting-started/first-workflow",
-              "getting-started/editors",
+              "getting-started/editors"
+            ]
+          },
+          {
+            "group": "Author workflows",
+            "pages": [
+              "guides/patterns",
+              "guides/templates",
+              "guides/agent-authoring",
+              "guides/testing"
+            ]
+          },
+          {
+            "group": "Models and media",
+            "pages": [
               "guides/local-models",
               "guides/docker-ai-workflow",
               "guides/image-generation",
               "guides/image-effects",
               "guides/charts",
-              "guides/speech-generation",
-              "guides/patterns",
-              "guides/testing",
+              "guides/speech-generation"
+            ]
+          },
+          {
+            "group": "Operate and troubleshoot",
+            "pages": [
               "guides/resume",
               "guides/observability",
               "guides/cost-honesty",
               "guides/energy-honesty",
               "guides/harness-access",
-              "guides/agent-authoring",
-              "guides/templates",
               "guides/sharing",
               "guides/troubleshooting"
             ]
@@ -239,7 +254,7 @@
             ]
           },
           {
-            "group": "Project · live",
+            "group": "Project",
             "pages": [
               "sdk/project/nika-yaml",
               "sdk/project/cwd-and-monorepos",
@@ -249,7 +264,7 @@
             ]
           },
           {
-            "group": "Local API · live",
+            "group": "Local API",
             "pages": [
               "sdk/local/client",
               "sdk/local/check-and-plan",
@@ -258,7 +273,7 @@
             ]
           },
           {
-            "group": "Runtime · live",
+            "group": "Runtime",
             "pages": [
               "sdk/runtime/events",
               "sdk/runtime/errors",
@@ -266,7 +281,7 @@
             ]
           },
           {
-            "group": "Remote API · preview",
+            "group": "Remote API",
             "pages": [
               "sdk/remote/client",
               "sdk/remote/jobs",
@@ -274,7 +289,8 @@
               "sdk/remote/artifacts",
               "sdk/remote/workflows",
               "sdk/remote/webhooks"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Operations",
@@ -390,6 +406,144 @@
             ]
           },
           {
+            "group": "Language fields",
+            "pages": [
+              "reference/language/overview",
+              {
+                "group": "Workflow envelope",
+                "pages": [
+                  "reference/language/words/const",
+                  "reference/language/words/inputs",
+                  "reference/language/words/model",
+                  "reference/language/words/nika",
+                  "reference/language/words/outputs",
+                  "reference/language/words/permits",
+                  "reference/language/words/run",
+                  "reference/language/words/secrets",
+                  "reference/language/words/tasks"
+                ]
+              },
+              {
+                "group": "Tasks and dependencies",
+                "pages": [
+                  "reference/language/words/after",
+                  "reference/language/words/agent",
+                  "reference/language/words/because",
+                  "reference/language/words/exec",
+                  "reference/language/words/extract",
+                  "reference/language/words/fail_fast",
+                  "reference/language/words/for_each",
+                  "reference/language/words/from",
+                  "reference/language/words/group",
+                  "reference/language/words/infer",
+                  "reference/language/words/invoke",
+                  "reference/language/words/items",
+                  "reference/language/words/law",
+                  "reference/language/words/lift",
+                  "reference/language/words/max_parallel",
+                  "reference/language/words/on_error",
+                  "reference/language/words/retry",
+                  "reference/language/words/returns",
+                  "reference/language/words/timeout",
+                  "reference/language/words/when",
+                  "reference/language/words/with"
+                ]
+              },
+              {
+                "group": "Verbs and models",
+                "pages": [
+                  "reference/language/words/args",
+                  "reference/language/words/budget_tokens",
+                  "reference/language/words/capture",
+                  "reference/language/words/command",
+                  "reference/language/words/cwd",
+                  "reference/language/words/decode",
+                  "reference/language/words/enabled",
+                  "reference/language/words/env",
+                  "reference/language/words/max_tokens",
+                  "reference/language/words/max_tokens_total",
+                  "reference/language/words/max_turns",
+                  "reference/language/words/path",
+                  "reference/language/words/prompt",
+                  "reference/language/words/schema",
+                  "reference/language/words/shell",
+                  "reference/language/words/skills",
+                  "reference/language/words/source",
+                  "reference/language/words/stdin",
+                  "reference/language/words/system",
+                  "reference/language/words/temperature",
+                  "reference/language/words/thinking",
+                  "reference/language/words/tool",
+                  "reference/language/words/tools",
+                  "reference/language/words/url",
+                  "reference/language/words/vision",
+                  "reference/language/words/workflow"
+                ]
+              },
+              {
+                "group": "Retries and recovery",
+                "pages": [
+                  "reference/language/words/backoff_max_ms",
+                  "reference/language/words/backoff_ms",
+                  "reference/language/words/backoff_strategy",
+                  "reference/language/words/jitter",
+                  "reference/language/words/max_attempts",
+                  "reference/language/words/on_codes",
+                  "reference/language/words/recover",
+                  "reference/language/words/skip"
+                ]
+              },
+              {
+                "group": "Permissions and secrets",
+                "pages": [
+                  "reference/language/words/egress",
+                  "reference/language/words/fs",
+                  "reference/language/words/host",
+                  "reference/language/words/host_from_self",
+                  "reference/language/words/http",
+                  "reference/language/words/key",
+                  "reference/language/words/net",
+                  "reference/language/words/read",
+                  "reference/language/words/to",
+                  "reference/language/words/write"
+                ]
+              },
+              {
+                "group": "Execution settings",
+                "pages": [
+                  "reference/language/words/clock",
+                  "reference/language/words/entropy",
+                  "reference/language/words/seeded"
+                ]
+              },
+              {
+                "group": "Values and types",
+                "pages": [
+                  "reference/language/words/additional",
+                  "reference/language/words/array",
+                  "reference/language/words/default",
+                  "reference/language/words/description",
+                  "reference/language/words/enum",
+                  "reference/language/words/integer",
+                  "reference/language/words/map",
+                  "reference/language/words/max",
+                  "reference/language/words/max_len",
+                  "reference/language/words/min",
+                  "reference/language/words/min_len",
+                  "reference/language/words/number",
+                  "reference/language/words/object",
+                  "reference/language/words/optional",
+                  "reference/language/words/pattern",
+                  "reference/language/words/required",
+                  "reference/language/words/string",
+                  "reference/language/words/type",
+                  "reference/language/words/union",
+                  "reference/language/words/value"
+                ]
+              }
+            ]
+          },
+          {
             "group": "CLI & errors",
             "pages": [
               "reference/cli",
@@ -414,6 +568,12 @@
               "reference/status",
               "reference/constellation",
               "reference/design-system"
+            ]
+          },
+          {
+            "group": "Documentation system",
+            "pages": [
+              "reference/knowledge-system"
             ]
           }
         ],

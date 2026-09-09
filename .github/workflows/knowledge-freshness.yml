@@ -1,0 +1,40 @@
+name: Knowledge owner freshness
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 */6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  owner-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: supernovae-st/nika-spec
+          ref: main
+          fetch-depth: 0
+          path: .knowledge-owner
+          persist-credentials: false
+      - name: Compare public reference to the current owner, not only its old pin
+        run: |
+          python3 - <<'PY'
+          import json,re,subprocess
+          revision=json.load(open('snippets/data/language-reference.json'))['revision']
+          assert re.fullmatch('[a-f0-9]{40}',revision)
+          subprocess.run(['git','fetch','--no-tags','origin',revision],cwd='.knowledge-owner',check=True)
+          PY
+          python3 scripts/verify-knowledge-source.py --spec-root .knowledge-owner --current-source
+          python3 scripts/knowledge-mirror.py
+      # Failure is a synchronization incident, never authorization to rewrite
+      # the baseline, edit language meaning, commit, or publish documentation.
