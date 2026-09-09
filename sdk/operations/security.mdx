@@ -5,13 +5,13 @@ sidebarTitle: "Security boundary"
 icon: "shield"
 ---
 
-import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
 The SDK carries types and transport. The engine remains the policy enforcer.
 
 ## Local seam
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 <div className="sdk-flight sdk-flight-compact">
   <span>PROCESS BOUNDARY · ONE ARGV VALUE</span>
@@ -51,7 +51,7 @@ Check these facts explicitly:
 
 ## Remote seam
 
-<RemoteContract />
+<RemoteContract sdk={SDK} />
 
 Bearer tokens belong in governed environment or workload identity plumbing,
 not source. The SDK exposes no logger or webhook verifier; keep application

@@ -5,9 +5,9 @@ sidebarTitle: "Run and cancel"
 icon: "circle-play"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 ## Admit, observe and settle
 
@@ -32,7 +32,10 @@ if (result.status !== 'succeeded') {
 
 `run()` is asynchronous admission and returns a `NikaRun` containing `id` and
 `done`. The run itself is not an async iterator. Subscribe through
-`nika.events(run)`; terminal truth lives only in `run.done`.
+`nika.events(run)`; the result for this observation leg lives in `run.done`.
+The result's `settlement` carries the engine's cause, task tally, spend,
+elapsed time and error when available. A `paused` result closes observation
+at a human gate without claiming the workflow can never resume.
 
 ## Stop observation without cancelling
 
@@ -60,6 +63,10 @@ console.log(cancellation.accepted, result.status)
 
 Cancellation is idempotent for a run owned by this client. Passing a run from
 another client instance throws `NikaRunOwnershipError`.
+`cancellation_requested` acknowledges the action, not its outcome. Keep
+awaiting `run.done`: the actual runtime result may be cancelled, succeeded,
+failed or paused. A missing runtime settlement after the resident's grace
+period is reported as interrupted rather than fabricated cancellation.
 
 <CardGroup cols={2}>
   <Card title="Events" icon="wave-pulse" href="/sdk/runtime/events">

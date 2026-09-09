@@ -5,7 +5,7 @@ sidebarTitle: "nika.yaml"
 icon: "file-code"
 ---
 
-import { LocalContract } from "/snippets/_sdk-contract.mdx"
+import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 import { PROJECT, ProjectContract, ProjectDoors } from "/snippets/_project-contract.mdx"
 
 <ProjectContract />
@@ -77,7 +77,7 @@ uses the first `nika.yaml`, like Git finds `.git`.
 direct traces stay at cwd · arm state stays at project root`}</pre>
 </div>
 
-<LocalContract />
+<LocalContract sdk={SDK} />
 
 ```ts
 import { Nika } from '@supernovae-st/nika-client'
