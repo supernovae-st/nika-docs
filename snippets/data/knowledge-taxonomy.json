@@ -1,0 +1,483 @@
+{
+  "schemaVersion": 1,
+  "kind": "documentation-taxonomy",
+  "owner": "supernovae-st/nika-docs",
+  "policy": {
+    "exactIdentity": "Explicit ID mapping only; guide links never imply equivalent identity.",
+    "privateData": "Internal evidence and mixed sources require publication review; a guide link is not publication permission.",
+    "marketing": "nika.sh is a presentation source, never the owner of a language contract."
+  },
+  "families": {
+    "words": {
+      "category": "language",
+      "guide": "reference/yaml-syntax",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "types": {
+      "category": "language",
+      "guide": "reference/yaml-syntax",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "namespaces": {
+      "category": "language",
+      "guide": "reference/yaml-syntax",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "verbs": {
+      "category": "language",
+      "guide": "concepts/verbs",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "edge-kinds": {
+      "category": "language",
+      "guide": "concepts/bindings",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "gate-predicates": {
+      "category": "language",
+      "guide": "concepts/bindings",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "templates": {
+      "category": "workflows",
+      "guide": "guides/templates",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "skeleton": {
+      "category": "workflows",
+      "guide": "guides/templates",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "showcases": {
+      "category": "workflows",
+      "guide": "examples/overview",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "tool": {
+      "category": "tools",
+      "guide": "reference/builtins",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "builtins": {
+      "category": "tools",
+      "guide": "reference/builtins",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "tool-families": {
+      "category": "tools",
+      "guide": "reference/builtins",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "extract-modes": {
+      "category": "tools",
+      "guide": "reference/builtins",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "model": {
+      "category": "models",
+      "guide": "reference/providers-catalog",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "embedding": {
+      "category": "models",
+      "guide": "reference/providers-catalog",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "providers": {
+      "category": "models",
+      "guide": "reference/providers-catalog",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "provider-canonical": {
+      "category": "models",
+      "guide": "reference/providers-catalog",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "provider-market": {
+      "category": "models",
+      "guide": "reference/providers-catalog",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "mcp-tools": {
+      "category": "integrations",
+      "guide": "reference/mcp-server",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "mcp-server": {
+      "category": "integrations",
+      "guide": "reference/mcp-server",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "capability-rule": {
+      "category": "tools",
+      "guide": "reference/capabilities",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "pricing-rule": {
+      "category": "operations",
+      "guide": "guides/cost-honesty",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "energy-row": {
+      "category": "operations",
+      "guide": "guides/energy-honesty",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "permit-families": {
+      "category": "security",
+      "guide": "concepts/security",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "secret-sources": {
+      "category": "security",
+      "guide": "concepts/security",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "error": {
+      "category": "diagnostics",
+      "guide": "reference/error-codes",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "error-codes": {
+      "category": "diagnostics",
+      "guide": "reference/error-codes",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "error-namespaces": {
+      "category": "diagnostics",
+      "guide": "reference/error-codes",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "error-categories": {
+      "category": "diagnostics",
+      "guide": "reference/error-codes",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "conformance-levels": {
+      "category": "validation",
+      "guide": "guides/testing",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "truth-words": {
+      "category": "validation",
+      "guide": "guides/testing",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "crate": {
+      "category": "architecture",
+      "guide": "concepts/architecture",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "building": {
+      "category": "architecture",
+      "guide": "concepts/architecture",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "layer": {
+      "category": "architecture",
+      "guide": "concepts/architecture",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "chapter": {
+      "category": "architecture",
+      "guide": "architecture/layers",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "release": {
+      "category": "delivery",
+      "guide": "reference/status",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "document": {
+      "category": "knowledge",
+      "guide": "introduction",
+      "relation": "guide",
+      "visibility": "mixed-review-required"
+    },
+    "set": {
+      "category": "knowledge",
+      "guide": "introduction",
+      "relation": "guide",
+      "visibility": "mixed-review-required"
+    },
+    "surface": {
+      "category": "knowledge",
+      "guide": "introduction",
+      "relation": "guide",
+      "visibility": "mixed-review-required"
+    },
+    "file": {
+      "category": "implementation",
+      "guide": "concepts/architecture",
+      "relation": "guide",
+      "visibility": "mixed-review-required"
+    },
+    "artifact": {
+      "category": "evidence",
+      "guide": "concepts/traces",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "campaign": {
+      "category": "evidence",
+      "guide": "concepts/traces",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "estate": {
+      "category": "operations",
+      "guide": "reference/constellation",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "estate-manifest": {
+      "category": "operations",
+      "guide": "reference/constellation",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    }
+  },
+  "destinations": {
+    "lab": {
+      "guide": "introduction",
+      "relation": "guide",
+      "scope": "orientation"
+    },
+    "browse": {
+      "guide": "introduction",
+      "relation": "guide",
+      "scope": "orientation"
+    },
+    "docs": {
+      "guide": "introduction",
+      "relation": "guide",
+      "scope": "orientation"
+    },
+    "documents": {
+      "guide": "introduction",
+      "relation": "guide",
+      "scope": "orientation"
+    },
+    "ecosystem": {
+      "guide": "introduction",
+      "relation": "guide",
+      "scope": "orientation"
+    },
+    "benchmark-dx": {
+      "guide": "reference/status",
+      "relation": "guide",
+      "scope": "internal-workspace"
+    },
+    "inbox": {
+      "guide": "reference/status",
+      "relation": "guide",
+      "scope": "internal-workspace"
+    },
+    "memory": {
+      "guide": "reference/status",
+      "relation": "guide",
+      "scope": "internal-workspace"
+    },
+    "admin": {
+      "guide": "reference/status",
+      "relation": "guide",
+      "scope": "internal-workspace"
+    },
+    "tools": {
+      "guide": "reference/builtins",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "builtins": {
+      "guide": "reference/builtins",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "words": {
+      "guide": "reference/yaml-syntax",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "models": {
+      "guide": "reference/providers-catalog",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "crates": {
+      "guide": "concepts/architecture",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "architecture": {
+      "guide": "concepts/architecture",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "surfaces": {
+      "guide": "reference/constellation",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "capabilities": {
+      "guide": "reference/capabilities",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "workspace": {
+      "guide": "guides/templates",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "workflows": {
+      "guide": "guides/templates",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "editor": {
+      "guide": "guides/templates",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "sessions": {
+      "guide": "concepts/traces",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "replay": {
+      "guide": "concepts/traces",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "media": {
+      "guide": "sdk/runtime/receipts",
+      "relation": "guide",
+      "scope": "guide"
+    },
+    "leaderboard": {
+      "guide": "guides/testing",
+      "relation": "guide",
+      "scope": "internal-evidence"
+    },
+    "benchmarks": {
+      "guide": "guides/testing",
+      "relation": "guide",
+      "scope": "internal-evidence"
+    },
+    "benchmark-catalog": {
+      "guide": "guides/testing",
+      "relation": "guide",
+      "scope": "internal-evidence"
+    },
+    "worlds": {
+      "guide": "guides/testing",
+      "relation": "guide",
+      "scope": "internal-evidence"
+    },
+    "personas": {
+      "guide": "guides/testing",
+      "relation": "guide",
+      "scope": "internal-evidence"
+    },
+    "design": {
+      "guide": "reference/design-system",
+      "relation": "guide",
+      "scope": "guide"
+    }
+  },
+  "languageSections": [
+    {
+      "title": "Workflow envelope",
+      "exactContexts": [
+        "/"
+      ],
+      "prefixes": []
+    },
+    {
+      "title": "Tasks and dependencies",
+      "exactContexts": [],
+      "prefixes": [
+        "/$defs/task"
+      ]
+    },
+    {
+      "title": "Verbs and models",
+      "exactContexts": [],
+      "prefixes": [
+        "/$defs/agent",
+        "/$defs/infer",
+        "/$defs/exec",
+        "/$defs/invoke"
+      ]
+    },
+    {
+      "title": "Retries and recovery",
+      "exactContexts": [],
+      "prefixes": [
+        "/$defs/retry",
+        "/$defs/onError"
+      ]
+    },
+    {
+      "title": "Permissions and secrets",
+      "exactContexts": [],
+      "prefixes": [
+        "/properties/permits",
+        "/properties/secrets"
+      ]
+    },
+    {
+      "title": "Execution settings",
+      "exactContexts": [],
+      "prefixes": [
+        "/properties/run"
+      ]
+    },
+    {
+      "title": "Values and types",
+      "exactContexts": [],
+      "prefixes": [
+        "/$defs/typeExpr",
+        "/$defs/fieldTypeExpr",
+        "/properties/inputs",
+        "/properties/outputs",
+        "/properties/const"
+      ]
+    }
+  ]
+}

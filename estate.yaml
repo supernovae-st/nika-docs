@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 202
+  classified_files: 309
   file_rows: 32
   pattern_rows: 6
   by_class:
-    authored: 197
+    authored: 304
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 34
+  unverified-default: 42
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 59122539f35793590a3cb69f2a711285b7ecb2ae8eca3eca480f575bf2f07787
+  sha256: a3da71a47684c7795c6987b0a6bfbf4cf5f3e2f1d87126d349f817188aa97285
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: 69ee658d2a0151addf17712fd868114a304e6710fcd00a13da4644c18756085c
+  sha256: 87e1de1211185d1288641deb1340823f2407a6a3d9685709f057a252c64c7297
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -121,12 +121,12 @@ files:
   evidence: "hand-written pre-push gate config (mint broken-links · link-audit · teach-parity · oracle-sweep)"
 - path: "reference/error-codes.mdx"
   class: authored
-  sha256: 28137ea97f6bcec2e19c3f9c1f44b0db7e7c186afe934254e21e759c6b3df776
+  sha256: ac4e7c33176401673c7ba6870df173909f7ee6034f339bc59ae4c05d49b94750
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
   note: "its own prose claims 'The tables below are generated from that registry' (the spec's canon.yaml) — but no projector writes this file and no gate re-proves the tables: a hand-baked derivation snapshot, not a projection"
 - path: "reference/mcp-catalog.mdx"
   class: authored
-  sha256: cd06144502270dedc0309a08dbb59fdad785b9dcd2ac64e032f00b62c51209e6
+  sha256: be32a7de0dba5b74658454c056e427da0a07b8e82e3c3d9efa9712a1796bda14
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
   note: "frontmatter description hand-types '105 MCP server entries … snapshot 2026-04-17' — outside count-drift-gate's checked classes (providers · builtins · extract modes), so it can rot silently"
 - path: "scripts/count-drift-gate.py"
@@ -149,7 +149,7 @@ files:
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
-  sha256: 12e63163dcf41b3cc7259255899c4f0edf1cfd2561b57b363b04a25556c188d9
+  sha256: 19aaed72d21f4949488bbfd7f7d1dc6550b43102db02040508f5be4fa10eb605
   evidence: "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)"
 - path: "scripts/mintlify-snapshot.sh"
   class: authored
@@ -157,7 +157,7 @@ files:
   evidence: "hand-written healer script (the tool that derives _status-snapshot.mdx's two release fields)"
 - path: "scripts/oracle-sweep.py"
   class: authored
-  sha256: abe5113b36a722eab9a5b595ca9df5387cf8144b25ae7272966f29faa4903d30
+  sha256: e59beea75f9c3c8824f76530079336a47d37a4f1b1133a5052c7c82b46bfd324
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/teach-parity.py"
   class: authored
@@ -193,8 +193,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 142
-  aggregate_sha256: 9e938b87ad99d07e7f05a549e6553239e9572bc4f2b5d03aef041f5438e7d08c
+  match_count: 241
+  aggregate_sha256: 19dedec7c39aea71ba506ac5e120b03b710bd70cdd17449716c0c7794ac058ae
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -222,11 +222,12 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 11
-  aggregate_sha256: 34c5194c491349ca784297d2a8dc34407c286ef245c6c4739e4df036ca43e22c
+  match_count: 19
+  aggregate_sha256: 84b1a964d903c168cfe614d9c677a77f8d1cae5e94e18ce951d749169a4e3537
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
+- ".github/workflows/knowledge-freshness.yml"
 - ".gitignore"
 - "images/favicon.svg"
 - "images/logo-dark.svg"
@@ -240,15 +241,22 @@ unverified:
 - "images/posters/static-check-fix.png"
 - "images/workflow-gallery.png"
 - "scripts/first_command.py"
+- "scripts/knowledge-mirror.py"
 - "scripts/mdx-yaml-fix.py"
 - "scripts/tests/test_count_drift_first_contact.py"
+- "scripts/tests/test_knowledge_mirror.py"
 - "scripts/tests/test_mdx_yaml_fix.py"
+- "scripts/tests/test_oracle_context.py"
 - "scripts/tests/test_oracle_sweep_bare_foreach.py"
 - "scripts/tests/test_oracle_sweep_manifest.py"
 - "scripts/tests/test_oracle_sweep_manifest_without_arm.py"
 - "scripts/tests/test_oracle_sweep_retired_v1_tag.py"
 - "scripts/tests/test_oracle_sweep_sees_nine_key.py"
 - "scripts/tests/test_teach_parity_retired_new.py"
+- "scripts/verify-knowledge-source.py"
+- "snippets/data/knowledge-mirror.json"
+- "snippets/data/knowledge-taxonomy.json"
+- "snippets/data/language-reference.json"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"
 - "videos/dag-execution.mp4"
