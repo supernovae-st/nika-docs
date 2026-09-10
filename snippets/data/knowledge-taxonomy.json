@@ -289,6 +289,30 @@
       "guide": "reference/knowledge-system",
       "relation": "guide",
       "visibility": "public-concept"
+    },
+    "repository": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "distribution-package": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "publication-channel": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "deployment-surface": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
     }
   },
   "destinations": {
@@ -436,6 +460,11 @@
       "guide": "reference/design-system",
       "relation": "guide",
       "scope": "guide"
+    },
+    "publications": {
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "scope": "orientation"
     }
   },
   "languageSections": [

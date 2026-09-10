@@ -567,6 +567,7 @@
             "pages": [
               "reference/status",
               "reference/constellation",
+              "reference/distribution",
               "reference/design-system"
             ]
           },
