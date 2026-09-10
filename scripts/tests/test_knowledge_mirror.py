@@ -100,10 +100,20 @@ class KnowledgeMirrorTests(unittest.TestCase):
             names=['page_'+str(i) for i in range(20)]
             for name in names:(root/(name+'.mdx')).write_text('Reference')
             (root/'docs.json').write_text(json.dumps({'navigation':{'pages':names}}))
+            (root/'snippets/data').mkdir(parents=True)
+            routes=root/'snippets/data/documentation-navigation.json'
+            routes.write_text(json.dumps({'legacyGuides':{'/docs':'page_1'}}))
             page=root/'page_0.mdx';page.write_text('[Other](/page_1)')
             command=['python3',str(ROOT/'scripts/link-audit.py')]
             self.assertEqual(subprocess.run(command,cwd=root,capture_output=True).returncode,0)
             page.write_text('[Missing](/page_missing)')
+            self.assertNotEqual(subprocess.run(command,cwd=root,capture_output=True).returncode,0)
+            for link in ['https://nika.sh/docs', 'https://www.nika.sh/language/words/test', 'https://docs.nika.sh/page_missing']:
+                page.write_text('[Documentation]('+link+')')
+                self.assertNotEqual(subprocess.run(command,cwd=root,capture_output=True).returncode,0,link)
+            page.write_text('[Documentation](https://docs.nika.sh/page_1)')
+            self.assertEqual(subprocess.run(command,cwd=root,capture_output=True).returncode,0)
+            routes.write_text(json.dumps({'legacyGuides':{'/docs':'page_missing'}}))
             self.assertNotEqual(subprocess.run(command,cwd=root,capture_output=True).returncode,0)
     def test_new_unclassified_context_is_reported(self):
         self.data['words'][0]['contracts'][0]['context']='/$defs/brandNewDomain'

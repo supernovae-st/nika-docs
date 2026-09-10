@@ -6,7 +6,7 @@
   "logo": {
     "dark": "/images/logo-dark.svg",
     "light": "/images/logo-light.svg",
-    "href": "https://nika.sh"
+    "href": "/introduction"
   },
   "favicon": "/images/favicon.svg",
   "colors": {
@@ -135,7 +135,9 @@
           {
             "group": "Overview",
             "pages": [
-              "introduction"
+              "introduction",
+              "reference/documentation",
+              "guides/explore-lab"
             ]
           },
           {
@@ -655,7 +657,8 @@
             "group": "Cadence",
             "pages": [
               "changelog/releases",
-              "changelog/roadmap"
+              "changelog/roadmap",
+              "reference/timeline"
             ]
           }
         ],
