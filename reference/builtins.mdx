@@ -56,12 +56,12 @@ The workflow-control family: speak, signal, guard, ask, finish, pause.
 
 | Builtin | What it does |
 |---|---|
-| `nika:log` | Emit a log entry (`debug`/`info`/`warn`/`error`) to the event stream: the human-readable diagnostic. |
-| `nika:emit` | Emit a custom machine event (consumed by subscribers and the journal). `log` is for humans, `emit` is for machines. |
-| `nika:assert` | Fail the task if a CEL `${{ }}` condition is false: the fail-fast guard (`when:` is the skip-guard). |
-| `nika:prompt` | Interactive human confirm: blocks until answered; engines may use `default` in CI. |
-| `nika:done` | Mark the current `agent:` loop complete and exit. Valid only inside an agent tool whitelist. |
-| `nika:wait` | Temporal pause: relative `duration:` XOR absolute `until:` (ISO 8601), validated at parse time. |
+| [`nika:log`](/reference/tools/log) | Emit a log entry (`debug`/`info`/`warn`/`error`) to the event stream: the human-readable diagnostic. |
+| [`nika:emit`](/reference/tools/emit) | Emit a custom machine event (consumed by subscribers and the journal). `log` is for humans, `emit` is for machines. |
+| [`nika:assert`](/reference/tools/assert) | Fail the task if a CEL `${{ }}` condition is false: the fail-fast guard (`when:` is the skip-guard). |
+| [`nika:prompt`](/reference/tools/prompt) | Interactive human confirm: blocks until answered; engines may use `default` in CI. |
+| [`nika:done`](/reference/tools/done) | Mark the current `agent:` loop complete and exit. Valid only inside an agent tool whitelist. |
+| [`nika:wait`](/reference/tools/wait) | Temporal pause: relative `duration:` XOR absolute `until:` (ISO 8601), validated at parse time. |
 
 ```yaml
 gate:
@@ -78,11 +78,11 @@ gate:
 
 | Builtin | What it does |
 |---|---|
-| `nika:read` | Read a file. Returns string content. |
-| `nika:write` | Write a file. Returns the path; binary upstream values are written as-is. |
-| `nika:edit` | In-place find/replace. Returns the modified path. |
-| `nika:glob` | Glob match. Returns an array of paths. |
-| `nika:grep` | Recursive grep. Returns an array of `{ path, line, match }`. |
+| [`nika:read`](/reference/tools/read) | Read a file. Returns string content. |
+| [`nika:write`](/reference/tools/write) | Write a file. Returns the path; binary upstream values are written as-is. |
+| [`nika:edit`](/reference/tools/edit) | In-place find/replace. Returns the modified path. |
+| [`nika:glob`](/reference/tools/glob) | Glob match. Returns an array of paths. |
+| [`nika:grep`](/reference/tools/grep) | Recursive grep. Returns an array of `{ path, line, match }`. |
 
 ## Data (9)
 
@@ -92,15 +92,15 @@ format conversion, generation, time, hashing, adjudication.
 
 | Builtin | What it does |
 |---|---|
-| `nika:jq` | Run a jq expression: the single transform-and-extraction language, same jq as `extract:` bindings. |
-| `nika:json_diff` | JSON diff. Returns RFC 6902 JSON Patch (jq can't diff). |
-| `nika:validate` | Validate data against a JSON Schema: `format: json \| yaml`, returns `{ valid, errors }`. |
-| `nika:json_merge_patch` | RFC 7396 merge patch: `null` deletes a key, the semantics jq's `*` merge does not provide. |
-| `nika:convert` | Universal format converter: `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. CSV emit takes `formula_guard: true` (opt-in) to neutralize spreadsheet formula-injection in untrusted data. |
-| `nika:uuid` | Generate a UUID: `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
-| `nika:date` | Timestamp arithmetic: op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
-| `nika:hash` | Content hashing: default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
-| `nika:decide` | The deterministic decision kernel ([spec 11](https://github.com/supernovae-st/nika-spec/blob/main/spec/11-decision.md)): evaluates a portable Decision Bundle (`bundle:`) against an EvidenceSnapshot (`evidence:`) and returns the full receipt — outcome, term-by-term contributions, intervals, conflicts with their witnesses, determination provenance. **The model never decides**: an `infer:` task collects the facts, this applies the rubric. Same evidence, same verdict, forever. |
+| [`nika:jq`](/reference/tools/jq) | Run a jq expression: the single transform-and-extraction language, same jq as `extract:` bindings. |
+| [`nika:json_diff`](/reference/tools/json_diff) | JSON diff. Returns RFC 6902 JSON Patch (jq can't diff). |
+| [`nika:validate`](/reference/tools/validate) | Validate data against a JSON Schema: `format: json \| yaml`, returns `{ valid, errors }`. |
+| [`nika:json_merge_patch`](/reference/tools/json_merge_patch) | RFC 7396 merge patch: `null` deletes a key, the semantics jq's `*` merge does not provide. |
+| [`nika:convert`](/reference/tools/convert) | Universal format converter: `json` · `yaml` · `toml` · `csv`, `from:`/`to:` mode args. CSV emit takes `formula_guard: true` (opt-in) to neutralize spreadsheet formula-injection in untrusted data. |
+| [`nika:uuid`](/reference/tools/uuid) | Generate a UUID: `v7` default (timestamped/sortable, RFC 9562) or `v4`. |
+| [`nika:date`](/reference/tools/date) | Timestamp arithmetic: op-discriminated (`now`/`add`/`subtract`/`format`/`parse`/`diff`), timezone-aware, ISO 8601 out. |
+| [`nika:hash`](/reference/tools/hash) | Content hashing: default blake3, or `sha256`/`sha512`; md5/sha1 are not supported. |
+| [`nika:decide`](/reference/tools/decide) | The deterministic decision kernel ([spec 11](https://github.com/supernovae-st/nika-spec/blob/main/spec/11-decision.md)): evaluates a portable Decision Bundle (`bundle:`) against an EvidenceSnapshot (`evidence:`) and returns the full receipt — outcome, term-by-term contributions, intervals, conflicts with their witnesses, determination provenance. **The model never decides**: an `infer:` task collects the facts, this applies the rubric. Same evidence, same verdict, forever. |
 
 ```yaml
 # recursive deep-merge of two task outputs — pure jq, no extra builtin
@@ -119,8 +119,8 @@ merged:
 
 | Builtin | What it does |
 |---|---|
-| `nika:fetch` | HTTP request + content extraction: {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`) + `raw` passthrough — plus `form:` (urlencoded), `multipart:` (file parts ride the `permits.fs` READ boundary · ≤32 MiB) and `traverse:` (bounded same-origin crawl · `max_pages` ≤ 25 · robots honored · the effect certificate counts every page). Fetching a URL is *calling a tool*, not a verb — and so is crawling: no `nika:crawl`. |
-| `nika:notify` | Send notifications: `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms`), one builtin not five. |
+| [`nika:fetch`](/reference/tools/fetch) | HTTP request + content extraction: {CANON.extractModes} extract modes (`article`, `markdown`, `links`, `feed`, `sitemap`, `selector`, `text`, `metadata`, `jq`) + `raw` passthrough — plus `form:` (urlencoded), `multipart:` (file parts ride the `permits.fs` READ boundary · ≤32 MiB) and `traverse:` (bounded same-origin crawl · `max_pages` ≤ 25 · robots honored · the effect certificate counts every page). Fetching a URL is *calling a tool*, not a verb — and so is crawling: no `nika:crawl`. |
+| [`nika:notify`](/reference/tools/notify) | Send notifications: `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms`), one builtin not five. |
 
 <Warning>
   Engines MUST ship SSRF defense on `nika:fetch`: private-network and
@@ -132,8 +132,8 @@ merged:
 
 | Builtin | What it does |
 |---|---|
-| `nika:inspect` | Workflow introspection. Four `view:` modes: `cost` · `records` · `dag_info` · `threads`. Live cell seeded at run start (`available: true`). Teaching shape: `16-inspect-self`. |
-| `nika:compose` | The agent loop's self-check: pass a drafted workflow YAML, get the full `nika check` verdict back as JSON — never executed. Loop-only, like `nika:done` (valid only inside an `agent:` tools whitelist · grant after `nika:done`). Teaching shape: `15-compose-self-check`. Standalone `invoke:` is `NIKA-BUILTIN-COMPOSE-001`. |
+| [`nika:inspect`](/reference/tools/inspect) | Workflow introspection. Four `view:` modes: `cost` · `records` · `dag_info` · `threads`. Live cell seeded at run start (`available: true`). Teaching shape: `16-inspect-self`. |
+| [`nika:compose`](/reference/tools/compose) | The agent loop's self-check: pass a drafted workflow YAML, get the full `nika check` verdict back as JSON — never executed. Loop-only, like `nika:done` (valid only inside an `agent:` tools whitelist · grant after `nika:done`). Teaching shape: `15-compose-self-check`. Standalone `invoke:` is `NIKA-BUILTIN-COMPOSE-001`. |
 
 ```yaml
 budget_check:
@@ -146,10 +146,10 @@ budget_check:
 
 | Builtin | What it does |
 |---|---|
-| `nika:chart` | **Deterministic chart rendering** from rows + a semantic spec (`bar` · `line` · `area_band` · `scatter` · `heatmap`): a byte-identical SVG lands at `out:` (permit-gated write) and its sha256 rides the outputs as a trace-chain receipt. Pure compute + one write — no network, no clock, re-runs idempotent; optional Vega-Lite sibling via `compile_to:`. Full guide: [Charts](/guides/charts). |
-| `nika:image_generate` | Provider-backed image **generation and editing** as an *asset pipeline*: renders land under a declared `output_dir:` (rides `permits.fs.write`), and `mode: edit` sources are read permit-gated (`permits.fs.read` — the mirror boundary); outputs and a provenance manifest carry paths + dimensions + sha256, and an edit records its `source_images` — **image bytes never ride workflow outputs**. Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). Full guide: [Image generation](/guides/image-generation) — sovereign quickstart · editing · cookbook · honesty rules. |
-| `nika:tts_generate` | Speech synthesis on the same asset-pipeline contract (full guide: [Speech generation](/guides/speech-generation)): ONE audio file lands under `output_dir:` (permit-gated), output + manifest carry path + sha256 + `duration_ms` (wav-exact, mp3 honestly null) — **audio bytes never ride outputs**. Providers (sovereign-first): `local` (any OpenAI-speech-compatible server — LocalAI · Kokoro-FastAPI · Speaches — via `NIKA_TTS_LOCAL_URL`) · `openai` (`gpt-4o-mini-tts`) · `elevenlabs` (`ELEVENLABS_API_KEY`) · `mock` (real deterministic WAV, offline). Teaching shape: `17-tts-self`. |
-| `nika:image_fx` | **Deterministic artistic effects** on a PNG — dither (bayer · blue-noise · ign · floyd_steinberg · atkinson · jjn) · palette mapping (Oklab) · duotone · pixelate · halftone · grain · vignette · chromatic aberration · scanlines · glitch · ascii (png/text/ansi). Zero providers, zero network: **byte-identical output forever** for identical `(input, args)` — the artifact's sha256 joins the trace chain, re-render IS the tamper check, and the full recipe (contract tag `image_fx/v1` · input sha256 · seed · ops) rides the PNG itself as a `nika` tEXt chunk. `input:` read + `out:` write both ride `permits.fs`. Full guide: [Image effects](/guides/image-effects) — the receipts story · op table · cookbook. |
+| [`nika:chart`](/reference/tools/chart) | **Deterministic chart rendering** from rows + a semantic spec (`bar` · `line` · `area_band` · `scatter` · `heatmap`): a byte-identical SVG lands at `out:` (permit-gated write) and its sha256 rides the outputs as a trace-chain receipt. Pure compute + one write — no network, no clock, re-runs idempotent; optional Vega-Lite sibling via `compile_to:`. Full guide: [Charts](/guides/charts). |
+| [`nika:image_generate`](/reference/tools/image_generate) | Provider-backed image **generation and editing** as an *asset pipeline*: renders land under a declared `output_dir:` (rides `permits.fs.write`), and `mode: edit` sources are read permit-gated (`permits.fs.read` — the mirror boundary); outputs and a provenance manifest carry paths + dimensions + sha256, and an edit records its `source_images` — **image bytes never ride workflow outputs**. Providers (v1.1 · local-first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). Full guide: [Image generation](/guides/image-generation) — sovereign quickstart · editing · cookbook · honesty rules. |
+| [`nika:tts_generate`](/reference/tools/tts_generate) | Speech synthesis on the same asset-pipeline contract (full guide: [Speech generation](/guides/speech-generation)): ONE audio file lands under `output_dir:` (permit-gated), output + manifest carry path + sha256 + `duration_ms` (wav-exact, mp3 honestly null) — **audio bytes never ride outputs**. Providers (sovereign-first): `local` (any OpenAI-speech-compatible server — LocalAI · Kokoro-FastAPI · Speaches — via `NIKA_TTS_LOCAL_URL`) · `openai` (`gpt-4o-mini-tts`) · `elevenlabs` (`ELEVENLABS_API_KEY`) · `mock` (real deterministic WAV, offline). Teaching shape: `17-tts-self`. |
+| [`nika:image_fx`](/reference/tools/image_fx) | **Deterministic artistic effects** on a PNG — dither (bayer · blue-noise · ign · floyd_steinberg · atkinson · jjn) · palette mapping (Oklab) · duotone · pixelate · halftone · grain · vignette · chromatic aberration · scanlines · glitch · ascii (png/text/ansi). Zero providers, zero network: **byte-identical output forever** for identical `(input, args)` — the artifact's sha256 joins the trace chain, re-render IS the tamper check, and the full recipe (contract tag `image_fx/v1` · input sha256 · seed · ops) rides the PNG itself as a `nika` tEXt chunk. `input:` read + `out:` write both ride `permits.fs`. Full guide: [Image effects](/guides/image-effects) — the receipts story · op table · cookbook. |
 
 ```yaml
 hero:

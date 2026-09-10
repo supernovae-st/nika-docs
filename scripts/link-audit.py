@@ -30,7 +30,7 @@ if len(corpus) < 20:
 
 for f in corpus:
     s = open(f).read()
-    for m in re.finditer(r'(?:href=["\']|\]\()(/[a-z0-9\-/#]+)', s):
+    for m in re.finditer(r'(?:href=["\']|\]\()(/[a-z0-9_\-/#]+)', s):
         base = m.group(1).split('#')[0].lstrip('/')
         if base and base not in pages and not base.startswith('images'):
             findings.append(f'{f}: broken internal link {m.group(1)}')

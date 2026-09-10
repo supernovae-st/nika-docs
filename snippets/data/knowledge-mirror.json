@@ -1,0 +1,1096 @@
+{
+  "schemaVersion": 1,
+  "kind": "public-documentation-mirror",
+  "specRevision": "c5ebbb7b862b68bc6cf7235efba61173b844afc6",
+  "sourceSha256": "ae78c033c8714a6fc01aa9871b24fc80a98ed761c2283dd7ccd2c6e3bda9b113",
+  "entries": [
+    {
+      "id": "language:word:additional",
+      "path": "reference/language/words/additional",
+      "url": "https://docs.nika.sh/reference/language/words/additional",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/additional"
+      ],
+      "sha256": "97909b7f99b9117c89a6a91481c8246e2569e00a58c5b4a707eb326fe9d907d3"
+    },
+    {
+      "id": "language:word:after",
+      "path": "reference/language/words/after",
+      "url": "https://docs.nika.sh/reference/language/words/after",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/after"
+      ],
+      "sha256": "449bca195dc675f3a0f09bd9c4afcd0fcd1ee5b5ab75e5a4d5d2c7ef3d8c7e77"
+    },
+    {
+      "id": "language:word:agent",
+      "path": "reference/language/words/agent",
+      "url": "https://docs.nika.sh/reference/language/words/agent",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/agent"
+      ],
+      "sha256": "bb19e58580a741056dcb7529a719354d56865c5b913f1fecc664e379d210a9bc"
+    },
+    {
+      "id": "language:word:args",
+      "path": "reference/language/words/args",
+      "url": "https://docs.nika.sh/reference/language/words/args",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/invoke/properties/args"
+      ],
+      "sha256": "711f8abc115b1d8a85b2578bd797ca1ceca9a0848ee7a0addbb5b846ba7f0eb4"
+    },
+    {
+      "id": "language:word:array",
+      "path": "reference/language/words/array",
+      "url": "https://docs.nika.sh/reference/language/words/array",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/array"
+      ],
+      "sha256": "647bdeb00cb2ee5a27303477c97b7b7132d1089a43f574b51be3905827881d85"
+    },
+    {
+      "id": "language:word:backoff_max_ms",
+      "path": "reference/language/words/backoff_max_ms",
+      "url": "https://docs.nika.sh/reference/language/words/backoff_max_ms",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/retry/properties/backoff_max_ms"
+      ],
+      "sha256": "5860f98f280831c71374cd83255585365bb16b7f5efdaa0696274f1dca865854"
+    },
+    {
+      "id": "language:word:backoff_ms",
+      "path": "reference/language/words/backoff_ms",
+      "url": "https://docs.nika.sh/reference/language/words/backoff_ms",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/retry/properties/backoff_ms"
+      ],
+      "sha256": "1bda93cb83ff968ed19bec6dd18b66efd91e02ff4de17d67cbe6d8bb98d13d3f"
+    },
+    {
+      "id": "language:word:backoff_strategy",
+      "path": "reference/language/words/backoff_strategy",
+      "url": "https://docs.nika.sh/reference/language/words/backoff_strategy",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/retry/properties/backoff_strategy"
+      ],
+      "sha256": "f9f27bc57fb712797c20ea5a60bfd68250f71c9f03337533fefd18716d67374c"
+    },
+    {
+      "id": "language:word:because",
+      "path": "reference/language/words/because",
+      "url": "https://docs.nika.sh/reference/language/words/because",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/lift/items/properties/because"
+      ],
+      "sha256": "d99bd7cf0f795966a5a2f999c461d76da6c501cf2e5159d5faffb58df47a372e"
+    },
+    {
+      "id": "language:word:budget_tokens",
+      "path": "reference/language/words/budget_tokens",
+      "url": "https://docs.nika.sh/reference/language/words/budget_tokens",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/thinking/properties/budget_tokens"
+      ],
+      "sha256": "42f3f33db8ab8718cc455018b066d0af9505ab4da7c459bd56c8625645e5f386"
+    },
+    {
+      "id": "language:word:capture",
+      "path": "reference/language/words/capture",
+      "url": "https://docs.nika.sh/reference/language/words/capture",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/exec/properties/capture"
+      ],
+      "sha256": "9a5998a1961139be513f2eb17980bd214ec78986a15d5f095cc5c2896309d2e3"
+    },
+    {
+      "id": "language:word:clock",
+      "path": "reference/language/words/clock",
+      "url": "https://docs.nika.sh/reference/language/words/clock",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/run/properties/clock"
+      ],
+      "sha256": "e5199e2594a781fe5ab176cb35098a5fefa069b9b44b0e6e3819d3716855b43b"
+    },
+    {
+      "id": "language:word:command",
+      "path": "reference/language/words/command",
+      "url": "https://docs.nika.sh/reference/language/words/command",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/exec/properties/command"
+      ],
+      "sha256": "da63490df0f9b80901f73601f7d4f97cca2a8ffa3a2aa432c343373476c69b90"
+    },
+    {
+      "id": "language:word:const",
+      "path": "reference/language/words/const",
+      "url": "https://docs.nika.sh/reference/language/words/const",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/const"
+      ],
+      "sha256": "7782f0c225640b2f9b74288db0b82a5eab2308935c45f8d072caf59be81e2827"
+    },
+    {
+      "id": "language:word:cwd",
+      "path": "reference/language/words/cwd",
+      "url": "https://docs.nika.sh/reference/language/words/cwd",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/exec/properties/cwd"
+      ],
+      "sha256": "e0bb214a7b4c229de4c8555b995034929992dc5aa79cd4437a2be8313277e5b5"
+    },
+    {
+      "id": "language:word:decode",
+      "path": "reference/language/words/decode",
+      "url": "https://docs.nika.sh/reference/language/words/decode",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/exec/properties/decode"
+      ],
+      "sha256": "c805975d9f9f919282cc831a840203099eb2ad9f707f43c6e04b9258c90b6049"
+    },
+    {
+      "id": "language:word:default",
+      "path": "reference/language/words/default",
+      "url": "https://docs.nika.sh/reference/language/words/default",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/inputs/additionalProperties/properties/default"
+      ],
+      "sha256": "da0983354bde160cf0655ec967056b095a329e540b993d10305b87ce78a72955"
+    },
+    {
+      "id": "language:word:description",
+      "path": "reference/language/words/description",
+      "url": "https://docs.nika.sh/reference/language/words/description",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/inputs/additionalProperties/properties/description",
+        "/properties/const/additionalProperties/then/properties/description",
+        "/properties/outputs/additionalProperties/anyOf/1/properties/description"
+      ],
+      "sha256": "84e8720a0c628ce79ef078f76be4b125438200be5b36e0dfdfcbc1b934c5774f"
+    },
+    {
+      "id": "language:word:egress",
+      "path": "reference/language/words/egress",
+      "url": "https://docs.nika.sh/reference/language/words/egress",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/secrets/additionalProperties/properties/egress"
+      ],
+      "sha256": "e88a74c64453e82ea30a412c641c83eb88d5712209e2978f50dcee6f659b1235"
+    },
+    {
+      "id": "language:word:enabled",
+      "path": "reference/language/words/enabled",
+      "url": "https://docs.nika.sh/reference/language/words/enabled",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/thinking/properties/enabled"
+      ],
+      "sha256": "6c41aeffc870a48bb83ac7ebd1702cc3b37e7f5fc4b071fe2c23d4061feee557"
+    },
+    {
+      "id": "language:word:entropy",
+      "path": "reference/language/words/entropy",
+      "url": "https://docs.nika.sh/reference/language/words/entropy",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/run/properties/entropy"
+      ],
+      "sha256": "5e6ee34ced82e5c7d91cb7526ac4b9a64d82c454bf08be55afdd6ebf4b025034"
+    },
+    {
+      "id": "language:word:enum",
+      "path": "reference/language/words/enum",
+      "url": "https://docs.nika.sh/reference/language/words/enum",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/enum"
+      ],
+      "sha256": "81356ec2ce1e55224dad3e9e75b4f4b0724312ee69f25fb14d08e92f52a2302d"
+    },
+    {
+      "id": "language:word:env",
+      "path": "reference/language/words/env",
+      "url": "https://docs.nika.sh/reference/language/words/env",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits/properties/env",
+        "/$defs/exec/properties/env"
+      ],
+      "sha256": "24406edeeaf8547a170108f6d8c925844ed14223c811afb2d153439dbb241a27"
+    },
+    {
+      "id": "language:word:exec",
+      "path": "reference/language/words/exec",
+      "url": "https://docs.nika.sh/reference/language/words/exec",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits/properties/exec",
+        "/$defs/task/properties/exec"
+      ],
+      "sha256": "9131930589672a44e67e88d248ed6ce4fad4fad05e14928e1303ca9b251ad385"
+    },
+    {
+      "id": "language:word:extract",
+      "path": "reference/language/words/extract",
+      "url": "https://docs.nika.sh/reference/language/words/extract",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/extract"
+      ],
+      "sha256": "92e2f2e249e22383e8d1567aaaa6334c3c7ec5b1115e82442fd12be07ba681d7"
+    },
+    {
+      "id": "language:word:fail_fast",
+      "path": "reference/language/words/fail_fast",
+      "url": "https://docs.nika.sh/reference/language/words/fail_fast",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/for_each/properties/fail_fast"
+      ],
+      "sha256": "829ba84686fd27194e2c5bdb9532c41e10ee65e392dbe019e01cfe106d738cab"
+    },
+    {
+      "id": "language:word:for_each",
+      "path": "reference/language/words/for_each",
+      "url": "https://docs.nika.sh/reference/language/words/for_each",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/for_each"
+      ],
+      "sha256": "384ebe7ea55875a98c286496b857a97920096c5d6f5fd555c98c13bc1dc7b701"
+    },
+    {
+      "id": "language:word:from",
+      "path": "reference/language/words/from",
+      "url": "https://docs.nika.sh/reference/language/words/from",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/lift/items/properties/from"
+      ],
+      "sha256": "ed767864fb2b4f328db338fd67c9a910dac86ddb11542ed9242a6bb7bd4e9d62"
+    },
+    {
+      "id": "language:word:fs",
+      "path": "reference/language/words/fs",
+      "url": "https://docs.nika.sh/reference/language/words/fs",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits/properties/fs"
+      ],
+      "sha256": "a6179d1f7ce157abb36df8be9a07a588195737796d43192e201b84c5b2940607"
+    },
+    {
+      "id": "language:word:group",
+      "path": "reference/language/words/group",
+      "url": "https://docs.nika.sh/reference/language/words/group",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/group"
+      ],
+      "sha256": "530cf72e01a6839ecbbec929662c8bdc0f385801a37cbc5f2247c0042d21cf7d"
+    },
+    {
+      "id": "language:word:host",
+      "path": "reference/language/words/host",
+      "url": "https://docs.nika.sh/reference/language/words/host",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/secrets/additionalProperties/properties/egress/items/properties/host"
+      ],
+      "sha256": "27393b04e7f4f2da4f358a70374df3d1c4617997e6506ad0463bee3dd5dcdb97"
+    },
+    {
+      "id": "language:word:host_from_self",
+      "path": "reference/language/words/host_from_self",
+      "url": "https://docs.nika.sh/reference/language/words/host_from_self",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/secrets/additionalProperties/properties/egress/items/properties/host_from_self"
+      ],
+      "sha256": "2b91954e0c41f8337c831bfb76b9eca3b1d3afe3f51f89fec6402b27403ba4b9"
+    },
+    {
+      "id": "language:word:http",
+      "path": "reference/language/words/http",
+      "url": "https://docs.nika.sh/reference/language/words/http",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits/properties/net/properties/http"
+      ],
+      "sha256": "d7b8a7fa4fd73b39eeb347c648e82148f4820092b7df2a33e399526245ac897d"
+    },
+    {
+      "id": "language:word:infer",
+      "path": "reference/language/words/infer",
+      "url": "https://docs.nika.sh/reference/language/words/infer",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/infer"
+      ],
+      "sha256": "dcc27a143c594507c06d6583a7c6f32288255f3384fd3fdae3a86086962473df"
+    },
+    {
+      "id": "language:word:inputs",
+      "path": "reference/language/words/inputs",
+      "url": "https://docs.nika.sh/reference/language/words/inputs",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/inputs"
+      ],
+      "sha256": "5d779339d35af343a137bfc9980c55a20b95ddbf1b7afb5d644c77a3b740dfd8"
+    },
+    {
+      "id": "language:word:integer",
+      "path": "reference/language/words/integer",
+      "url": "https://docs.nika.sh/reference/language/words/integer",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/integer"
+      ],
+      "sha256": "6bf93f200f9e04408609e5b07ed74396756caf5ebbea604caaca938cfcebab37"
+    },
+    {
+      "id": "language:word:invoke",
+      "path": "reference/language/words/invoke",
+      "url": "https://docs.nika.sh/reference/language/words/invoke",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/invoke"
+      ],
+      "sha256": "4e9b5ebd8658e95c4f9f4a02f6b57e25dba5682853534b963656811e5d722a28"
+    },
+    {
+      "id": "language:word:items",
+      "path": "reference/language/words/items",
+      "url": "https://docs.nika.sh/reference/language/words/items",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/for_each/properties/items"
+      ],
+      "sha256": "df794e23cd2be5b53bdd6bc24f83a0116de3c3e223e8a44948d9bda8a9f41f43"
+    },
+    {
+      "id": "language:word:jitter",
+      "path": "reference/language/words/jitter",
+      "url": "https://docs.nika.sh/reference/language/words/jitter",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/retry/properties/jitter"
+      ],
+      "sha256": "f6ec047e6c9db0a37cb897fbfc96bc8fe397fdcec7bc90e8984bfcf5a08c0c89"
+    },
+    {
+      "id": "language:word:key",
+      "path": "reference/language/words/key",
+      "url": "https://docs.nika.sh/reference/language/words/key",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/secrets/additionalProperties/properties/key"
+      ],
+      "sha256": "18192a00354ebfe9d790d898742eb7a55ae574f60db6000dd8aac35d91beada0"
+    },
+    {
+      "id": "language:word:law",
+      "path": "reference/language/words/law",
+      "url": "https://docs.nika.sh/reference/language/words/law",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/lift/items/properties/law",
+        "/$defs/task/properties/lift/items/allOf/0/if/properties/law"
+      ],
+      "sha256": "ff5f806227eaa24738055105559e8e74b3da8ee3c7adfb847ccb77f03b205dfb"
+    },
+    {
+      "id": "language:word:lift",
+      "path": "reference/language/words/lift",
+      "url": "https://docs.nika.sh/reference/language/words/lift",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/lift"
+      ],
+      "sha256": "ef0d893e876c221ab81dee0530d91f677dc958c3d34bfd01704a238f3731531c"
+    },
+    {
+      "id": "language:word:map",
+      "path": "reference/language/words/map",
+      "url": "https://docs.nika.sh/reference/language/words/map",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/map"
+      ],
+      "sha256": "7b6affe126a234eaf0b23841d832e2229d882066bdffd39738366c1164e53405"
+    },
+    {
+      "id": "language:word:max",
+      "path": "reference/language/words/max",
+      "url": "https://docs.nika.sh/reference/language/words/max",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/integer/properties/max",
+        "/$defs/typeExpr/oneOf/2/properties/number/properties/max"
+      ],
+      "sha256": "189b793803c198c2aabaa546986534fe9fc7a0ba48ec1260e03fddd47c21bb65"
+    },
+    {
+      "id": "language:word:max_attempts",
+      "path": "reference/language/words/max_attempts",
+      "url": "https://docs.nika.sh/reference/language/words/max_attempts",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/retry/properties/max_attempts"
+      ],
+      "sha256": "a8a40addd113d87f24290963748204bd0b1518144ac388a84ca8afd24a53c308"
+    },
+    {
+      "id": "language:word:max_len",
+      "path": "reference/language/words/max_len",
+      "url": "https://docs.nika.sh/reference/language/words/max_len",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/string/properties/max_len"
+      ],
+      "sha256": "6dec198f6220fc0c67e858da483d18737b7d0b5465da9bf4faec764ca8540219"
+    },
+    {
+      "id": "language:word:max_parallel",
+      "path": "reference/language/words/max_parallel",
+      "url": "https://docs.nika.sh/reference/language/words/max_parallel",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/for_each/properties/max_parallel"
+      ],
+      "sha256": "51079d92e00cf10bc7bd5e937e997ca5412abebd09adc147e23b2ce8d39fa4d6"
+    },
+    {
+      "id": "language:word:max_tokens",
+      "path": "reference/language/words/max_tokens",
+      "url": "https://docs.nika.sh/reference/language/words/max_tokens",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/max_tokens"
+      ],
+      "sha256": "6b693dbf113edeb63a0b91b9c3196c55b42f6af07751facdd4e3f217a14a19e5"
+    },
+    {
+      "id": "language:word:max_tokens_total",
+      "path": "reference/language/words/max_tokens_total",
+      "url": "https://docs.nika.sh/reference/language/words/max_tokens_total",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/agent/properties/max_tokens_total"
+      ],
+      "sha256": "33df24b3eedaf9312f6c846ccbbf0b3e7c2da57a52db21c9fd62ef0826e2ed6c"
+    },
+    {
+      "id": "language:word:max_turns",
+      "path": "reference/language/words/max_turns",
+      "url": "https://docs.nika.sh/reference/language/words/max_turns",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/agent/properties/max_turns"
+      ],
+      "sha256": "8cb6a4052c3de89b818c2a6a8b02a869dd8d475677e031a9d26d465e6ab7c9d3"
+    },
+    {
+      "id": "language:word:min",
+      "path": "reference/language/words/min",
+      "url": "https://docs.nika.sh/reference/language/words/min",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/integer/properties/min",
+        "/$defs/typeExpr/oneOf/2/properties/number/properties/min"
+      ],
+      "sha256": "7132618d1f0fff828bb9c049ba26e900606a743ed00d81712fd1ddd15a850a37"
+    },
+    {
+      "id": "language:word:min_len",
+      "path": "reference/language/words/min_len",
+      "url": "https://docs.nika.sh/reference/language/words/min_len",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/string/properties/min_len"
+      ],
+      "sha256": "133659b20377a284d4961260d3ad7310a160ef352b18be2929f48045a398adca"
+    },
+    {
+      "id": "language:word:model",
+      "path": "reference/language/words/model",
+      "url": "https://docs.nika.sh/reference/language/words/model",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/model",
+        "/$defs/infer/properties/model",
+        "/$defs/agent/properties/model"
+      ],
+      "sha256": "05e378106a6479a51676b248761dc96504590acf26c34ebb1ba1a42bae0e98c0"
+    },
+    {
+      "id": "language:word:net",
+      "path": "reference/language/words/net",
+      "url": "https://docs.nika.sh/reference/language/words/net",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits/properties/net"
+      ],
+      "sha256": "647c2a15891648dbf5b8e73b7dd69333ade3ea1cc921a8bb4394af2bbe0e3380"
+    },
+    {
+      "id": "language:word:nika",
+      "path": "reference/language/words/nika",
+      "url": "https://docs.nika.sh/reference/language/words/nika",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/nika"
+      ],
+      "sha256": "7b94e03bfb7a8958552b7d813e551f7f64c6038fbe95ae91a629db6dfb22af7f"
+    },
+    {
+      "id": "language:word:number",
+      "path": "reference/language/words/number",
+      "url": "https://docs.nika.sh/reference/language/words/number",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/number"
+      ],
+      "sha256": "5f25af320a617ecc795239c254cc52087dd88eacca00dafc0e526977b620de69"
+    },
+    {
+      "id": "language:word:object",
+      "path": "reference/language/words/object",
+      "url": "https://docs.nika.sh/reference/language/words/object",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/object"
+      ],
+      "sha256": "aaf73b07e160ae9b2bc772fd1783b670d2ebe158ada0b3d18a6762d6d9ffc21f"
+    },
+    {
+      "id": "language:word:on_codes",
+      "path": "reference/language/words/on_codes",
+      "url": "https://docs.nika.sh/reference/language/words/on_codes",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/retry/properties/on_codes",
+        "/$defs/onError/properties/on_codes"
+      ],
+      "sha256": "bcdb8099c44939630e4b985aedc22448004f8267af1e5e90dadfc4eb2cd73b39"
+    },
+    {
+      "id": "language:word:on_error",
+      "path": "reference/language/words/on_error",
+      "url": "https://docs.nika.sh/reference/language/words/on_error",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/on_error"
+      ],
+      "sha256": "ddb41608bb626b4cd26e95f4a084971ec6d5993569eee0d0f41e3c3d4c3d7331"
+    },
+    {
+      "id": "language:word:optional",
+      "path": "reference/language/words/optional",
+      "url": "https://docs.nika.sh/reference/language/words/optional",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/fieldTypeExpr/oneOf/1/properties/optional"
+      ],
+      "sha256": "fc545b94137dea12745946afaee1ab5fa812638537b3dabff81e3478a74f6293"
+    },
+    {
+      "id": "language:word:outputs",
+      "path": "reference/language/words/outputs",
+      "url": "https://docs.nika.sh/reference/language/words/outputs",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/outputs"
+      ],
+      "sha256": "7a77b360f33859c169d1144b94c4b43136b809463dbd8f9b2a6086ac1d252b3b"
+    },
+    {
+      "id": "language:word:path",
+      "path": "reference/language/words/path",
+      "url": "https://docs.nika.sh/reference/language/words/path",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/secrets/additionalProperties/properties/path",
+        "/$defs/infer/properties/vision/items/properties/path"
+      ],
+      "sha256": "0d42741013447dff7179712ef269851ea2d4fd57ddf6ae5307a999e6ed110061"
+    },
+    {
+      "id": "language:word:pattern",
+      "path": "reference/language/words/pattern",
+      "url": "https://docs.nika.sh/reference/language/words/pattern",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/string/properties/pattern"
+      ],
+      "sha256": "d454e0de4eb858a6b83bed3530c8251779836ef4d0afe86b0ebe43470d22e59c"
+    },
+    {
+      "id": "language:word:permits",
+      "path": "reference/language/words/permits",
+      "url": "https://docs.nika.sh/reference/language/words/permits",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits"
+      ],
+      "sha256": "6315473d744aba3e5e64e2a5b2c3e4f28fd3d4f807cf1a1ba7a738987038f081"
+    },
+    {
+      "id": "language:word:prompt",
+      "path": "reference/language/words/prompt",
+      "url": "https://docs.nika.sh/reference/language/words/prompt",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/prompt",
+        "/$defs/agent/properties/prompt"
+      ],
+      "sha256": "9c7d6b671a94928b3e803ae373455146d86dc27f30db65cc12352314c65f0b7c"
+    },
+    {
+      "id": "language:word:read",
+      "path": "reference/language/words/read",
+      "url": "https://docs.nika.sh/reference/language/words/read",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits/properties/fs/properties/read"
+      ],
+      "sha256": "a5fb7384c16b43edfd28c17ac2f9a2833c5a1560fd97152be2cae9c5da0a9e7b"
+    },
+    {
+      "id": "language:word:recover",
+      "path": "reference/language/words/recover",
+      "url": "https://docs.nika.sh/reference/language/words/recover",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/onError/properties/recover"
+      ],
+      "sha256": "5b3014282925574aebd09280106fcf474496ff4c758fbdfe20e9563ae7dacef5"
+    },
+    {
+      "id": "language:word:required",
+      "path": "reference/language/words/required",
+      "url": "https://docs.nika.sh/reference/language/words/required",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/inputs/additionalProperties/properties/required"
+      ],
+      "sha256": "62b4d094c99d4276c25570d1f90c78050e6aa58029d2d3358a67b09c4be0953a"
+    },
+    {
+      "id": "language:word:retry",
+      "path": "reference/language/words/retry",
+      "url": "https://docs.nika.sh/reference/language/words/retry",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/retry"
+      ],
+      "sha256": "d6ca4e147e082297f6e751511e65b8559d36523d3ad637b1840a57c1550c5dfa"
+    },
+    {
+      "id": "language:word:returns",
+      "path": "reference/language/words/returns",
+      "url": "https://docs.nika.sh/reference/language/words/returns",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/returns"
+      ],
+      "sha256": "70a42af87453a2ff5e70a113ce4d95d45bcb46479bdb1d511ee36d888e1fdc9d"
+    },
+    {
+      "id": "language:word:run",
+      "path": "reference/language/words/run",
+      "url": "https://docs.nika.sh/reference/language/words/run",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/run"
+      ],
+      "sha256": "a30534c2b67fc6720a9af9a952c4a4966df04ab05cf863ff7a73de7237bdcb53"
+    },
+    {
+      "id": "language:word:schema",
+      "path": "reference/language/words/schema",
+      "url": "https://docs.nika.sh/reference/language/words/schema",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/schema",
+        "/$defs/agent/properties/schema"
+      ],
+      "sha256": "6d74818627e770a19fe70fa7a4b43229eb50a601d7b20bf16c25390261f0f760"
+    },
+    {
+      "id": "language:word:secrets",
+      "path": "reference/language/words/secrets",
+      "url": "https://docs.nika.sh/reference/language/words/secrets",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/secrets"
+      ],
+      "sha256": "d197dee104bdfcbe4f0553f5101b368aaebee306bd28b671839627cfef89f41d"
+    },
+    {
+      "id": "language:word:seeded",
+      "path": "reference/language/words/seeded",
+      "url": "https://docs.nika.sh/reference/language/words/seeded",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/run/properties/entropy/anyOf/1/properties/seeded"
+      ],
+      "sha256": "92729ed10fcff641c66c639e4d937546605218c696797e0f113e06899ef63f6d"
+    },
+    {
+      "id": "language:word:shell",
+      "path": "reference/language/words/shell",
+      "url": "https://docs.nika.sh/reference/language/words/shell",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/exec/properties/shell"
+      ],
+      "sha256": "301b83a78b19bb7261690cbe80e25f3d4b8c9a5f319b69e18d267308e80bf274"
+    },
+    {
+      "id": "language:word:skills",
+      "path": "reference/language/words/skills",
+      "url": "https://docs.nika.sh/reference/language/words/skills",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/agent/properties/skills"
+      ],
+      "sha256": "b8f6df87707ad29ea77a4728ed9bbd8f3cc056bc53f6388d7eb15d5fd381892b"
+    },
+    {
+      "id": "language:word:skip",
+      "path": "reference/language/words/skip",
+      "url": "https://docs.nika.sh/reference/language/words/skip",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/onError/properties/skip"
+      ],
+      "sha256": "c5f6cb4803b5a5c0d70444755d6f3605434443dc894647ce7fa14df7568e9655"
+    },
+    {
+      "id": "language:word:source",
+      "path": "reference/language/words/source",
+      "url": "https://docs.nika.sh/reference/language/words/source",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/secrets/additionalProperties/properties/source",
+        "/properties/secrets/additionalProperties/allOf/0/if/properties/source",
+        "/$defs/infer/properties/vision/items/properties/source"
+      ],
+      "sha256": "94c5cd998b804704911a64235701898812d8827cf84c0987e72e0ba680d076ef"
+    },
+    {
+      "id": "language:word:stdin",
+      "path": "reference/language/words/stdin",
+      "url": "https://docs.nika.sh/reference/language/words/stdin",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/exec/properties/stdin"
+      ],
+      "sha256": "390f57501c55c34b68a49135d082a193f43ce831df7663571d8df9d1f731403e"
+    },
+    {
+      "id": "language:word:string",
+      "path": "reference/language/words/string",
+      "url": "https://docs.nika.sh/reference/language/words/string",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/string"
+      ],
+      "sha256": "70cdbf5d70c4fd066eb55cd590c2f3c99d6505bd5bf6db477c4b119ba24c7f35"
+    },
+    {
+      "id": "language:word:system",
+      "path": "reference/language/words/system",
+      "url": "https://docs.nika.sh/reference/language/words/system",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/system",
+        "/$defs/agent/properties/system"
+      ],
+      "sha256": "9436dd47eef680bfcc04b4c9e26e60771a06357bdcb4abc188150e361ddfa2dc"
+    },
+    {
+      "id": "language:word:tasks",
+      "path": "reference/language/words/tasks",
+      "url": "https://docs.nika.sh/reference/language/words/tasks",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/tasks"
+      ],
+      "sha256": "dba9939432ffd9583c7117e807698b94d9b00c639236fcb4c9c9190479fb55c8"
+    },
+    {
+      "id": "language:word:temperature",
+      "path": "reference/language/words/temperature",
+      "url": "https://docs.nika.sh/reference/language/words/temperature",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/temperature",
+        "/$defs/agent/properties/temperature"
+      ],
+      "sha256": "4c033159144fc10fbabed865143cb792bc70dac7158651166b1d61a8bfaa6926"
+    },
+    {
+      "id": "language:word:thinking",
+      "path": "reference/language/words/thinking",
+      "url": "https://docs.nika.sh/reference/language/words/thinking",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/thinking"
+      ],
+      "sha256": "262d2bbfb2a03d780910599a0c236f10749e80a9d67d982a67b4e32d2ccab475"
+    },
+    {
+      "id": "language:word:timeout",
+      "path": "reference/language/words/timeout",
+      "url": "https://docs.nika.sh/reference/language/words/timeout",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/timeout"
+      ],
+      "sha256": "ff141e877f54c955aea22fb80be114ad736969ad63c5f991688cf78c7c8ada74"
+    },
+    {
+      "id": "language:word:to",
+      "path": "reference/language/words/to",
+      "url": "https://docs.nika.sh/reference/language/words/to",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/secrets/additionalProperties/properties/egress/items/properties/to"
+      ],
+      "sha256": "3b98c07027399557097599aa005fd832839204f086ec2dbb8e481affb5d641b0"
+    },
+    {
+      "id": "language:word:tool",
+      "path": "reference/language/words/tool",
+      "url": "https://docs.nika.sh/reference/language/words/tool",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/invoke/properties/tool"
+      ],
+      "sha256": "70179e12b773a48f1a0b53a3b9e5dff7dd2b09a0086870efa071e754818b0e72"
+    },
+    {
+      "id": "language:word:tools",
+      "path": "reference/language/words/tools",
+      "url": "https://docs.nika.sh/reference/language/words/tools",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits/properties/tools",
+        "/$defs/agent/properties/tools"
+      ],
+      "sha256": "7e5d65b72c7b2340959177ff088e85dbbc2550d8cb2008eea0d30e2f3e345ea8"
+    },
+    {
+      "id": "language:word:type",
+      "path": "reference/language/words/type",
+      "url": "https://docs.nika.sh/reference/language/words/type",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/inputs/additionalProperties/properties/type",
+        "/properties/const/additionalProperties/then/properties/type",
+        "/properties/outputs/additionalProperties/anyOf/1/properties/type"
+      ],
+      "sha256": "4d5d27d198245a5eddac55550450fcc74d16874deece80894aa856018fff34a6"
+    },
+    {
+      "id": "language:word:union",
+      "path": "reference/language/words/union",
+      "url": "https://docs.nika.sh/reference/language/words/union",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/typeExpr/oneOf/2/properties/union"
+      ],
+      "sha256": "4ea23cf16d520a69d41fca0deb4696c158a17c05287ed61e873102e4cd937f93"
+    },
+    {
+      "id": "language:word:url",
+      "path": "reference/language/words/url",
+      "url": "https://docs.nika.sh/reference/language/words/url",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/vision/items/properties/url"
+      ],
+      "sha256": "c33199c9d29ffd5f4cbf6c14c6dde8ffd5c92fe3ddc29e1a908cf6bf8176ceb4"
+    },
+    {
+      "id": "language:word:value",
+      "path": "reference/language/words/value",
+      "url": "https://docs.nika.sh/reference/language/words/value",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/const/additionalProperties/then/properties/value",
+        "/properties/outputs/additionalProperties/anyOf/1/properties/value"
+      ],
+      "sha256": "ba2ea156cff82f74b1dccc4bea9158f2d59e458b2362287c12a2c5230bc96ef4"
+    },
+    {
+      "id": "language:word:vision",
+      "path": "reference/language/words/vision",
+      "url": "https://docs.nika.sh/reference/language/words/vision",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/infer/properties/vision"
+      ],
+      "sha256": "17e7458b118687ffc7c31e7e16f2684ebe378619f140783f415ada3869922f69"
+    },
+    {
+      "id": "language:word:when",
+      "path": "reference/language/words/when",
+      "url": "https://docs.nika.sh/reference/language/words/when",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/when"
+      ],
+      "sha256": "f34c3429ea6072b9c14c521ef474cd2399682d873063b0de76dd4758a7fcfe78"
+    },
+    {
+      "id": "language:word:with",
+      "path": "reference/language/words/with",
+      "url": "https://docs.nika.sh/reference/language/words/with",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/task/properties/with"
+      ],
+      "sha256": "42081a8e6385387451cbb6b9a60b10a414beffd28ac591ca77e5986a11fcb0ff"
+    },
+    {
+      "id": "language:word:workflow",
+      "path": "reference/language/words/workflow",
+      "url": "https://docs.nika.sh/reference/language/words/workflow",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/$defs/invoke/properties/workflow"
+      ],
+      "sha256": "eeb74928611fd90b6d86e38dc89fa958eb3a4f18009227dd78f15a54e5bf59ae"
+    },
+    {
+      "id": "language:word:write",
+      "path": "reference/language/words/write",
+      "url": "https://docs.nika.sh/reference/language/words/write",
+      "relation": "exact",
+      "publication": "not-verified",
+      "sourcePointers": [
+        "/properties/permits/properties/fs/properties/write"
+      ],
+      "sha256": "9ca8d105279bc03fc400e8e5e122aa2ebf0f1a4cda582ba4dd5a6a49eb222d96"
+    }
+  ]
+}

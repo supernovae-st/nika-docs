@@ -32,49 +32,70 @@ references servers by id: Nika handles the rest.
     **17**: from `anthropic` to `vectordb`
   </Card>
   <Card title="Invocation" icon="bolt">
-    `invoke:` verb with `server: <id>`
+    `invoke.tool: mcp:<server>/<tool>`
   </Card>
 </CardGroup>
 
-## How to invoke one
+## Invoke a configured local server
 
-<CodeGroup>
+A catalog entry is a discovery record, not an installed server. Save these
+files in one project. This example uses a local filesystem server, needs no
+MCP API key, and gives it access only to `./data`.
+
+```json .nika/mcp_servers.json
+{
+  "mcp_servers_format": 1,
+  "servers": {
+    "filesystem": {
+      "command": "node",
+      "args": ["./node_modules/@modelcontextprotocol/server-filesystem/dist/index.js", "./data"],
+      "network": "deny"
+    }
+  }
+}
+```
+
 ```yaml workflow.nika.yaml
-nika: scrape-and-summarise
-
-permits:                              # an MCP tool is granted like any other
-  exec: false
-  tools: ["mcp:firecrawl/scrape"]     # the server's own reach is its side of the boundary
-
+nika: read-and-summarise
+model: mock/echo
+permits:
+  tools: ["mcp:filesystem/read_file"]
 tasks:
-  crawl:
+  read:
     invoke:
-      tool: "mcp:firecrawl/scrape"   # mcp:<server>/<tool> · server id from the catalog below
+      tool: "mcp:filesystem/read_file"
       args:
-        url: https://example.com
-
+        path: ./data/article.txt
   summarise:
     with:
-      page: ${{ tasks.crawl.output.content }}
+      page: ${{ tasks.read.output }}
     infer:
-      model: anthropic/claude-sonnet-4-6   # <provider>/<name>
       prompt: "Summarise: ${{ with.page }}"
+      max_tokens: 1200
+outputs:
+  summary: ${{ tasks.summarise.output }}
 ```
 
-```bash Required env
-# Each server declares its env_var in mcp-servers.toml.
-# Firecrawl needs FIRECRAWL_API_KEY — read mcp-servers.toml for the full
-# list. Run `nika doctor` to inspect provider readiness.
-export FIRECRAWL_API_KEY=fc-...
+Install the server package in this project, create `data/article.txt`, then
+check the workflow. The checker validates the declared server; a successful
+check does not attest a server installation or handshake. Inspect the installed server before running it. Nika records its tool
+definitions at the first handshake; subsequent drift requires review. `mock/echo`
+keeps model calls offline and echoes the prompt; choose a configured language
+model for an actual summary.
+
+```bash
+npm install @modelcontextprotocol/server-filesystem
+mkdir -p data
+printf 'A short article to read.\n' > data/article.txt
+nika check workflow.nika.yaml
 nika run workflow.nika.yaml
 ```
-</CodeGroup>
 
 <Note>
-  Verb `invoke:` is live in v{STATUS.version}. The Nika MCP catalog here is
-  about workflows calling external MCP tools; Nika's own agent-facing MCP
-  server remains read-only (9 tools — `nika_check` · `nika_explain` ·
-  the authoring surface).
+  The MCP child environment is scrubbed. A catalog's credential names do not
+  automatically reach a server process, and arbitrary `env` entries in this
+  registry are not a supported credential transport. Configure a server's
+  supported authentication before selecting a remote service.
 </Note>
 
 ## By category

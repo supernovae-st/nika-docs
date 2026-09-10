@@ -574,6 +574,74 @@
             "pages": [
               "reference/knowledge-system"
             ]
+          },
+          {
+            "group": "Tool contracts",
+            "pages": [
+              {
+                "group": "Core",
+                "pages": [
+                  "reference/tools/assert",
+                  "reference/tools/done",
+                  "reference/tools/emit",
+                  "reference/tools/log",
+                  "reference/tools/prompt",
+                  "reference/tools/wait"
+                ]
+              },
+              {
+                "group": "Data",
+                "pages": [
+                  "reference/tools/convert",
+                  "reference/tools/date",
+                  "reference/tools/hash",
+                  "reference/tools/jq",
+                  "reference/tools/json_diff",
+                  "reference/tools/json_merge_patch",
+                  "reference/tools/uuid",
+                  "reference/tools/validate"
+                ]
+              },
+              {
+                "group": "Decision",
+                "pages": [
+                  "reference/tools/decide"
+                ]
+              },
+              {
+                "group": "File",
+                "pages": [
+                  "reference/tools/edit",
+                  "reference/tools/glob",
+                  "reference/tools/grep",
+                  "reference/tools/read",
+                  "reference/tools/write"
+                ]
+              },
+              {
+                "group": "Introspection",
+                "pages": [
+                  "reference/tools/compose",
+                  "reference/tools/inspect"
+                ]
+              },
+              {
+                "group": "Media",
+                "pages": [
+                  "reference/tools/chart",
+                  "reference/tools/image_fx",
+                  "reference/tools/image_generate",
+                  "reference/tools/tts_generate"
+                ]
+              },
+              {
+                "group": "Network",
+                "pages": [
+                  "reference/tools/fetch",
+                  "reference/tools/notify"
+                ]
+              }
+            ]
           }
         ],
         "icon": "code"

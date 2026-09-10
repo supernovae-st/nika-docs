@@ -44,10 +44,10 @@ flowchart LR
 ```yaml support-triage.nika.yaml
 nika: support-triage
 
-# A NON-thinking local model, deliberately: a thinking model can spend the
-# whole `max_tokens` budget in its think block and return before the JSON
-# (engine#428). Schema showcases pick a model that answers directly.
-model: ollama/llama3.2:3b   # local · zero key · swap for groq/llama-3.3-70b (triage wants speed)
+# The house seat — a THINKING model: the think block and the JSON both count
+# against `max_tokens` (engine#428), so the triage ceiling below covers the
+# reasoning AND the board, not the board alone.
+model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (triage wants speed)
 
 const:
   queue_path: "examples/fixtures/support-queue.json"
@@ -89,7 +89,7 @@ tasks:
     with:
       queue: ${{ tasks.queue.output }}
     infer:
-      max_tokens: 1500                 # the whole queue in one call · a ceiling, not UNBOUNDED
+      max_tokens: 4000                 # think block + the whole queue in one call · a ceiling, not UNBOUNDED
       prompt: |
         Triage every ticket in this queue ·
         ${{ with.queue }}
