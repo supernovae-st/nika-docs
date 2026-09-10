@@ -1,0 +1,66 @@
+---
+title: "Timeline and evidence"
+description: "Read Nika history, dated releases and forward gates with their source and evidence class."
+icon: "timeline"
+---
+
+Nika's timeline is owned by the specification's
+[`timeline/timeline.yaml`](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/timeline/timeline.yaml).
+This guide explains that record at the linked revision. Read
+[releases](/changelog/releases) for the dated changelog,
+[current status](/reference/status) for the released engine, and
+[the roadmap](/changelog/roadmap) for forward plans.
+
+## Eras
+
+| Era | Period recorded in the source | How to read it |
+| --- | --- | --- |
+| Exploration | Summer through the end of 2025 | Private prototypes before the public Git history; labeled testimony |
+| Brouillon | January 1 through April 13, 2026 | The draft engine; private archive records are distinct from its public crates.io releases |
+| Diamond | Beginning April 13, 2026 | The engine rewrite, anchored by a public commit; the language's version lineage continues |
+
+These are historical periods, not support branches or instructions to use an old
+grammar. Use the current reference when authoring a workflow.
+
+## Evidence classes
+
+| Class | What the record points to |
+| --- | --- |
+| `git-tag` | A tag in the specification repository |
+| `github-release`, `github-commit`, `github-pr` | A release, commit or merged pull request in a public repository |
+| `crates-io` | A recorded package version, including versions later yanked |
+| `scorecard` | A dated OpenSSF Scorecard reading; the score may change |
+| `private-archive` | A recorded archive reference that requires access |
+| `testimony` | A dated account without mechanical proof |
+
+The source's [`timeline/verify.py`](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/timeline/verify.py)
+checks mechanically verifiable references. Testimony and private archives keep
+their labels; they do not become public proof. This page describes the checking
+contract and does not claim that a fresh verification run has just passed.
+
+## Gates
+
+Forward entries describe conditions to satisfy, not promised release dates.
+A gate being listed is not evidence that it has closed. Follow its source and
+the dated evidence before interpreting it as a delivered capability.
+
+Two examples referenced by the roadmap are the
+[Connectome gate](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/timeline/timeline.yaml#L401)
+(whole sovereign memory, governed tools and replayable receipts) and the
+[hundred-year gate](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/timeline/timeline.yaml#L410)
+(conformance, archival, compatibility, deterministic checking and succession).
+These are conditions in the cited revision, not a release announcement.
+
+The record is append-only: a correction adds a note rather than silently
+rewriting an earlier claim. The [roadmap](/changelog/roadmap) gives the wider
+context; [crate admission](/architecture/admission) explains the engineering
+admission process.
+
+<CardGroup cols={2}>
+  <Card title="Released implementation" icon="gauge" href="/reference/status">
+    Find the engine snapshot used by the current documentation.
+  </Card>
+  <Card title="Sources and synchronization" icon="diagram-project" href="/reference/knowledge-system">
+    Understand revision pins and the limits of each kind of evidence.
+  </Card>
+</CardGroup>

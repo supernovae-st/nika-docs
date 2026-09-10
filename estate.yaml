@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 321
+  classified_files: 358
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 316
+    authored: 353
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 51
+  unverified-default: 56
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 427c45fbc567923f65696ce50515ee78350a0937e2f71f23fa2807887edf3268
+  sha256: a5cf67f5b097bed97c0f861a0f22b2486c39c6ee6609bc5dfb68a5dcb1edd59f
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -49,7 +49,7 @@ files:
   evidence: "hand-pinned Node major for the local mint preview"
 - path: "AGENTS.md"
   class: authored
-  sha256: 31511629a94b49f1641673d7bac18725ecbdadc79f8ca84392110a8078f6d658
+  sha256: 7d241712ee870f72c0ea001b33aed8e965d486b790d36bf6423120c0e45885e0
   evidence: "hand-written agent entry per the AGENTS.md convention · it STATES the projection rules the snippets follow"
 - path: "DEPLOY.md"
   class: authored
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: a1d6c572b560e74945569b429a01cdcf7b738b28b6ac0022b536f836ab8692a9
+  sha256: 6e3b0552f0a1d7d8f50ab3362b806576c1fe870bc080758834cc6adae4d26f72
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -149,7 +149,7 @@ files:
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
-  sha256: 19aaed72d21f4949488bbfd7f7d1dc6550b43102db02040508f5be4fa10eb605
+  sha256: 1af95c0e8b98d609e9f3ac539c2eecc8c25907749c24d7cea32ee0ff11f77771
   evidence: "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)"
 - path: "scripts/mintlify-snapshot.sh"
   class: authored
@@ -186,7 +186,7 @@ files:
     - "supernovae-st/nika-spec canon.yaml (the Nika language single source of truth)"
 - path: "snippets/_ecosystem.mdx"
   class: authored
-  sha256: a9f1b775fb4f9321a3fce6cbf4a13dea37246298649a52989761058e41760353
+  sha256: 516b458aeeeac15c7d9b9dfbf01a76774750c34e6b8a4146253cadeedb733a88
   evidence: "its own header: 'Edit HERE, never per-page' — the one hand-edited snippet (a single-source link mesh, not a projection)"
 - path: "snippets/_showcase.mdx"
   class: generated
@@ -199,14 +199,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: eb7742b03046736aa50b31e66ff1ace28202fb3e4ce0ee16267e6312448a745f
+  sha256: eecf27685ed5f52a3ff9dac1fe96ed25f604e3d11dbb845f48fdd8219ea31a1b
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 241
-  aggregate_sha256: 2ca60ece718954604547cfbdd5cd92caa1eb292d77ea14d2af46c0ee2b82b29b
+  match_count: 273
+  aggregate_sha256: d5255a66c224ed2a2d15d5002dc583e1a6f2600e84aea31f23c858f04f00ddd2
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -234,8 +234,8 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 28
-  aggregate_sha256: 7fda51d987fe0e4a22e790ae381f32e11e288ef6a9ca8abad91c410846758481
+  match_count: 33
+  aggregate_sha256: ecd51bbadb1f587d26624309134e7cea932fa572654989fd100344aea74d7aea
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -274,10 +274,15 @@ unverified:
 - "scripts/tests/test_snapshot_binary_identity.py"
 - "scripts/tests/test_teach_parity_binary.py"
 - "scripts/tests/test_teach_parity_retired_new.py"
+- "scripts/tests/test_tool_reference.py"
+- "scripts/tool-reference.py"
 - "scripts/verify-knowledge-source.py"
+- "snippets/data/documentation-navigation.json"
 - "snippets/data/knowledge-mirror.json"
 - "snippets/data/knowledge-taxonomy.json"
 - "snippets/data/language-reference.json"
+- "snippets/data/tool-mirror.json"
+- "snippets/data/tool-reference.json"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"
 - "videos/dag-execution.mp4"

@@ -7,6 +7,7 @@ Exits 1 on findings. Checks:
   4. no legacy binding syntax ({{ ... }} without $ — spec canon is ${{ ... }} CEL)
 """
 import re, glob, json, os, sys
+from urllib.parse import urlsplit
 
 findings = []
 pages = {os.path.splitext(f)[0] for f in glob.glob('**/*.mdx', recursive=True)}
@@ -19,6 +20,14 @@ def walk(o):
             nav_pages.add(v) if isinstance(v, str) else walk(v)
 walk(json.load(open('docs.json'))['navigation'])
 
+# Documentation destinations are owned here; the Lab imports this reviewed map.
+routes = json.load(open('snippets/data/documentation-navigation.json'))['legacyGuides']
+for source, target in routes.items():
+    if not re.fullmatch(r'/[a-z0-9_/-]+', source) or '..' in source:
+        findings.append(f'invalid former documentation path: {source}')
+    if target not in nav_pages or target not in pages:
+        findings.append(f'documentation destination missing from pages/navigation: {target}')
+
 corpus = glob.glob('**/*.mdx', recursive=True)
 # A gate that walks nothing reports clean. This site has ~110 pages; a
 # harvest near zero means the cwd or the glob moved, and the audit went
@@ -30,6 +39,14 @@ if len(corpus) < 20:
 
 for f in corpus:
     s = open(f).read()
+    for match in re.finditer(r'(?:href=["\']|\]\()(https?://(?:www\.)?nika\.sh[^\s)"\']*)', s):
+        path = urlsplit(match.group(1)).path.rstrip('/')
+        if path in routes or path.startswith(('/docs/', '/language/', '/sdk/')):
+            findings.append(f'{f}: documentation link still targets marketing: {match.group(1)}')
+    for match in re.finditer(r'(?:href=["\']|\]\()(https://docs\.nika\.sh[^\s)"\']*)', s):
+        path = urlsplit(match.group(1)).path.strip('/')
+        if path and path not in {'llms.txt', 'llms-full.txt', 'changelog/releases/rss.xml'} and path not in nav_pages:
+            findings.append(f'{f}: public documentation page missing from navigation: {path}')
     for m in re.finditer(r'(?:href=["\']|\]\()(/[a-z0-9_\-/#]+)', s):
         base = m.group(1).split('#')[0].lstrip('/')
         if base and base not in pages and not base.startswith('images'):

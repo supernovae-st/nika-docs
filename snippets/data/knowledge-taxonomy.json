@@ -226,19 +226,19 @@
     },
     "document": {
       "category": "knowledge",
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "visibility": "mixed-review-required"
     },
     "set": {
       "category": "knowledge",
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "visibility": "mixed-review-required"
     },
     "surface": {
       "category": "knowledge",
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "visibility": "mixed-review-required"
     },
@@ -317,27 +317,27 @@
   },
   "destinations": {
     "lab": {
-      "guide": "introduction",
+      "guide": "guides/explore-lab",
       "relation": "guide",
       "scope": "orientation"
     },
     "browse": {
-      "guide": "introduction",
+      "guide": "guides/explore-lab",
       "relation": "guide",
       "scope": "orientation"
     },
     "docs": {
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "scope": "orientation"
     },
     "documents": {
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "scope": "orientation"
     },
     "ecosystem": {
-      "guide": "introduction",
+      "guide": "guides/explore-lab",
       "relation": "guide",
       "scope": "orientation"
     },
