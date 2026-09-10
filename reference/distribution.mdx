@@ -1,0 +1,34 @@
+---
+title: "Repositories and distribution"
+description: "Follow a package from its source manifest to its release and distribution channel."
+---
+
+## Follow the source
+
+A repository owns code and manifests. A manifest declares a package name, version and publication policy. A release records a published tag and its assets. A registry records the versions it actually serves. These observations can differ during development.
+
+| Object | What it tells you | What it does not prove |
+| --- | --- | --- |
+| Repository | Source owner, branch and commit | That the commit was released |
+| Package | Manifest identity, version and publication policy | That the version exists in a registry |
+| Publication channel | Where a package is distributed | That every source package belongs there |
+| Release | Published tag and assets | That every other channel updated successfully |
+| Website destination | A declared URL and, when checked, HTTP reachability | The deployed commit or the version served |
+
+## Choose an installation channel
+
+Use the [installation guide](/getting-started/installation) for supported commands. The npm package, binary releases, Homebrew tap and editor extension have separate publication receipts. Open VSX and the VS Code Marketplace are separate channels, even when they use the same extension identity.
+
+Crates with `publish = false` are internal source packages. A reserved crate name is not an engine release or an installation recommendation. Do not infer a Cargo installation path from a workspace version or a name reservation.
+
+## Understand a version difference
+
+Compare the manifest at a specific commit with the registry observation at a specific time. Keep the source commit, channel, package identity and observation time beside the result. Missing data means unknown; a failed request does not mean that a package was deleted.
+
+A matching version is a consistency observation, not a conformance score. A different version requires investigation before a release. An open pull request remains proposed work until merged; a draft release remains unpublished.
+
+## Trace the relationships
+
+Repository → package comes from the package manifest. Package → channel comes from its distribution policy and registry observation. Repository → release comes from the release record. Repository → website is a declared destination until deployment evidence is available.
+
+The same source package can appear in code, documentation and a distribution inventory without those views becoming separate owners. Private repository inventories, local paths and operational receipts remain private; this guide documents the concepts.
