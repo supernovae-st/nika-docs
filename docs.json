@@ -6,7 +6,7 @@
   "logo": {
     "dark": "/images/logo-dark.svg",
     "light": "/images/logo-light.svg",
-    "href": "https://docs.nika.sh/introduction"
+    "href": "https://nika.sh"
   },
   "favicon": "/images/favicon.svg",
   "colors": {
@@ -58,8 +58,8 @@
   "navbar": {
     "links": [
       {
-        "label": "Documentation",
-        "href": "https://docs.nika.sh/introduction"
+        "label": "nika.sh",
+        "href": "https://nika.sh"
       },
       {
         "type": "github",
@@ -83,7 +83,7 @@
         "items": [
           {
             "label": "Site",
-            "href": "https://docs.nika.sh/introduction"
+            "href": "https://nika.sh"
           },
           {
             "label": "Live state",
@@ -254,7 +254,7 @@
             ]
           },
           {
-            "group": "Project · live",
+            "group": "Project",
             "pages": [
               "sdk/project/nika-yaml",
               "sdk/project/cwd-and-monorepos",
@@ -264,7 +264,7 @@
             ]
           },
           {
-            "group": "Local API · live",
+            "group": "Local API",
             "pages": [
               "sdk/local/client",
               "sdk/local/check-and-plan",
@@ -273,7 +273,7 @@
             ]
           },
           {
-            "group": "Runtime · live",
+            "group": "Runtime",
             "pages": [
               "sdk/runtime/events",
               "sdk/runtime/errors",
@@ -281,7 +281,7 @@
             ]
           },
           {
-            "group": "Remote API · preview",
+            "group": "Remote API",
             "pages": [
               "sdk/remote/client",
               "sdk/remote/jobs",
@@ -289,7 +289,8 @@
               "sdk/remote/artifacts",
               "sdk/remote/workflows",
               "sdk/remote/webhooks"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Operations",
@@ -566,6 +567,7 @@
             "pages": [
               "reference/status",
               "reference/constellation",
+              "reference/distribution",
               "reference/design-system"
             ]
           },

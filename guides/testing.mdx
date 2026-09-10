@@ -70,8 +70,9 @@ guessing (exit 3):
 $ nika test triage.nika.yaml
 nika test · no golden yet for triage.nika.yaml
 
-  the golden pins this workflow's typed `outputs:` under the mock
-  provider (offline · deterministic) — future runs must match it.
+  the golden pins this workflow's typed `outputs:` under the simulated
+  plane (mock model · effects refused · offline · deterministic) —
+  future runs must match it.
 
   create it:   nika test triage.nika.yaml --update
   then commit: triage.nika.yaml.golden.json
@@ -105,12 +106,120 @@ $ nika test triage.nika.yaml
 ✖ outputs drifted from the golden · triage.nika.yaml.golden.json
   + outputs.verdict.queue · not in the golden ("mock")
 
-  intended? re-pin with: nika test triage.nika.yaml --update
+  intended? re-baseline: nika test triage.nika.yaml --update
 ```
 
 If the drift was intended (you changed the schema, added an output), re-pin
 with `--update` and commit the new golden — the diff shows up in code
 review, exactly like a snapshot test.
+
+## Proving a rule against cases
+
+A [`nika:decide`](/reference/builtins#the-decision-bundle) bundle is a rubric
+with consequences, so it wants a corpus, not one happy path. The kernel
+enforces the bundle's own laws, but a fixture's `class` is only a label:
+nothing asserts that a `positive` fixture actually recommends. `nika test` is
+how you assert it today.
+
+The pattern that works: **the rule lives once, the cases live one per file.**
+
+```text
+decisions/
+  refund.bundle.json                            ← the rule · one owned artifact
+  refund-fresh-returned.nika.yaml               ← one case
+  refund-fresh-returned.nika.yaml.golden.json   ← its pinned outcome
+  refund-stale-returned.nika.yaml
+  refund-fresh-unreturned.nika.yaml
+  ...
+```
+
+Each case is a small workflow: an evidence snapshot in `const:`, the kernel in
+the middle, the outcome out. No model, no network, no clock, so the only thing
+under test is the rule.
+
+```yaml refund-fresh-returned.nika.yaml
+nika: refund-fresh-returned
+
+permits:
+  fs: { read: ["./refund.bundle.json"] }
+  tools: ["nika:decide"]
+
+const:
+  snapshot:
+    t: "2026-09-02T09:00:00Z"
+    evidence:
+      - { key: days_since_purchase, value: 5, source: orders-db,
+          observed_at: "2026-09-02T09:00:00Z", digest: d1,
+          confidentiality: internal, integrity: verified,
+          quality: { freshness: fresh, completeness: complete, independence_group: orders } }
+      - { key: item_returned, value: true, source: warehouse,
+          observed_at: "2026-09-02T09:00:00Z", digest: d2,
+          confidentiality: internal, integrity: verified,
+          quality: { freshness: fresh, completeness: complete, independence_group: warehouse } }
+
+tasks:
+  decide:
+    invoke:
+      tool: "nika:decide"
+      args:
+        bundle: "./refund.bundle.json"
+        evidence: ${{ const.snapshot }}
+
+outputs:
+  outcome: ${{ tasks.decide.output.outcome }}
+```
+
+Pin it once, read the outcome, commit both files:
+
+```text
+$ nika test refund-fresh-returned.nika.yaml --update
+✔ golden written · refund-fresh-returned.nika.yaml.golden.json
+  review it once, commit it — `nika test` now guards this workflow
+```
+
+```json refund-fresh-returned.nika.yaml.golden.json
+{
+  "outcome": "recommend"
+}
+```
+
+The rule is now guarded. Change **one character** in the shared bundle, a
+weight of `6000` that becomes `600`, and every case that leaned on it goes red
+at once, naming the flip:
+
+```text
+$ nika test refund-fresh-returned.nika.yaml
+✖ outputs drifted from the golden · refund-fresh-returned.nika.yaml.golden.json
+  ~ outputs.outcome · golden "recommend" → run "defer"
+
+  intended? re-baseline: nika test refund-fresh-returned.nika.yaml --update
+```
+
+That line is the point. Not "a test failed" but *this rule used to recommend
+this case and now defers*. If the flip was intended, re-baseline and let the
+golden diff carry it into review, which is where a rubric change belongs.
+
+<Tip>
+  Keep the golden narrow. Pinning `outcome` (or the outcome plus one
+  dimension `interval`) makes each red line legible. Pinning the whole receipt
+  works, but the receipt carries every `weight_bp` and every contribution, so
+  a single weight edit churns every golden in the corpus and buries the one
+  flip that matters.
+</Tip>
+
+### Two limits, stated plainly
+
+- **`nika test` takes no `--var`.** Its flags are `--update` · `--answer` ·
+  `--color` · `--hyperlink` · `--plain` · `--ascii`. One file is one input, so
+  a ten-case corpus is ten small files sharing one bundle. That is more files
+  than a parameterised table would be, and it is also ten reviewable goldens.
+- **Under the mock, the model leg is a constant.** `nika test` swaps every
+  `infer:` to the mock provider, which synthesizes a schema-conformant value.
+  A case that runs `infer:` then `nika:decide` therefore proves the *law*, and
+  proves nothing about the *extraction*: the facts were handed to it. Keep the
+  model out of the case files, pin the evidence in `const:`, and prove the
+  rubric. Extraction quality is a separate exercise against real seats, where
+  it costs money and is worth what it costs.
 
 ## Exit codes · the CI contract
 
@@ -145,5 +254,8 @@ shows the re-pinned golden in the diff — both are reviewable.
 - [Concepts · Workflows](/concepts/workflows): typed `inputs:` in,
   typed `outputs:` out — the callable contract the golden pins.
 - [Reference · CLI](/reference/cli): every `nika test` flag.
+- [Reference · Builtins](/reference/builtins#the-decision-bundle): the
+  `nika:decide` bundle grammar, what the kernel enforces, and the receipt
+  the cases above pin.
 - [Guides · Troubleshooting](/guides/troubleshooting): when `nika check`
   findings block a test (exit 2).

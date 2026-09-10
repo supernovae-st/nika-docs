@@ -32,7 +32,7 @@ def render(snapshot):
         if path!='reference/language/words/'+name or not re.fullmatch('[a-z][a-z0-9_]*',name):raise ValueError('Invalid generated destination')
         lines=[front(name,'Contract, placement, related fields and source examples for this Nika YAML field.'),f'[Language reference](/reference/language/overview) / `{name}`\n',f'## Meaning and placement\n']
         for c in w['contracts']:
-            d=c['declaration'];scope=c['context'];label=scope.removeprefix('/$defs/').replace('/properties/',' → ').replace('/',' · ') or 'document'
+            d=c['declaration'];scope=c['context'];label='document' if scope == '/' else scope.removeprefix('/$defs/').replace('/properties/',' → ').replace('/',' · ')
             lines += [f'### {prose(label)}\n',prose(d.get('description','The schema declares this field at the location below.'))+'\n', '| Property | Declaration |','| --- | --- |',f'| Requirement | {"Required in this object" if c["required"] else "Optional in this object"} |',f'| Schema location | `{c["pointer"]}` |']
             for key in ['type','$ref','default','const','enum','minimum','maximum','minLength','maxLength','pattern','additionalProperties']:
                 if key in d:lines.append(f'| {prose(key)} | {prose(json.dumps(d[key],ensure_ascii=False))} |')
@@ -75,8 +75,7 @@ def main():
     actual=set(p.relative_to(ROOT).as_posix() for p in (ROOT/'reference/language').rglob('*.mdx')) if (ROOT/'reference/language').exists() else set()
     extra=actual-set(outputs)
     if extra:raise SystemExit(f'Unexpected generated pages require explicit removal review: {sorted(extra)}')
-    # Validate identities, destinations, taxonomy and retirement before replacing
-    # the admitted source. A rejected candidate must leave the old source intact.
+    # A rejected candidate must leave the admitted source intact.
     if a.write and a.source:SOURCE.write_text(source_text)
     for name,text in outputs.items():
         file=ROOT/name

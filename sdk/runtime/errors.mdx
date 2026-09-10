@@ -1,79 +1,59 @@
 ---
-title: "Errors and exits"
-description: "Separate file findings, workflow failure, environment failure, cancellation and remote transport errors."
-sidebarTitle: "Errors and exits"
+title: "Errors and results"
+description: "Separate dirty reports, admitted workflow results and typed boundary failures."
+sidebarTitle: "Errors and results"
 icon: "triangle-exclamation"
 ---
 
-import { LocalContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+## Three channels
 
-## Local failure model
-
-<LocalContract />
-
-Local calls use three channels:
-
-| Channel | Example | Handle it as |
+| Channel | Example | Handling |
 |---|---|---|
-| Resolved report | dirty `check()` | show every finding |
-| Resolved outcome | non-zero local run | branch on `exitCode` |
-| Rejected promise | binary cannot spawn | environment exception |
+| Resolved report | `check()` returns `clean: false` | show engine findings |
+| Resolved terminal result | `run.done` returns `status: "failed"` | branch on result data |
+| Rejected promise | invalid config, incompatible option, transport/protocol failure | catch typed SDK error |
 
 ```ts
-const report = await local.check(file)
-if (!report.clean) {
-  return { accepted: false, findings: report.findings }
-}
+const report = await nika.check(file)
+if (!report.clean) return { admitted: false, report }
 
-const outcome = await local.runToEnd(file)
-if (!outcome.ok) {
-  return { accepted: true, exitCode: outcome.exitCode }
+const run = await nika.run(file)
+const result = await run.done
+
+if (result.status !== 'succeeded') {
+  return { admitted: true, status: result.status, error: result.error }
 }
 ```
 
-Do not catch a dirty file as if the engine disappeared.
+## Typed boundary failures
 
-## Remote hierarchy
-
-<RemoteContract />
-
-<div className="sdk-flight sdk-flight-compact">
-  <span>REMOTE ERROR TREE · PREVIEW</span>
-  <pre tabIndex={0}>{`NikaError
-├── NikaAPIError
-├── NikaConnectionError
-├── NikaTimeoutError
-└── NikaJobError
-    └── NikaJobCancelledError`}</pre>
-</div>
-
-Catch from specific to general:
-
-```ts
-try {
-  return await nika.jobs.run('release.nika.yaml')
-} catch (error) {
-  if (error instanceof NikaJobCancelledError) return { state: 'cancelled' }
-  if (error instanceof NikaJobError) return { state: 'failed', exit: error.exitCode }
-  if (error instanceof NikaTimeoutError) return { state: 'timed-out' }
-  throw error
-}
+```text
+NikaError
+├── NikaConfigurationError
+├── NikaTransportError
+│   └── NikaProtocolError
+├── NikaCompatibilityError
+├── NikaOperationError
+├── NikaEventBufferOverflowError
+└── NikaRunOwnershipError
 ```
 
-## Diagnostics belong to the owning layer
+`NikaOperationError` carries schedule operation findings.
+`NikaEventBufferOverflowError` refuses silent observer loss.
+`NikaRunOwnershipError` prevents one facade from acting on another facade's
+run object. `NikaEngineUnavailable` reports local engine resolution failure.
 
-- Language findings link to the [error register](/reference/error-codes).
-- Engine exits keep the [machine surface contract](/reference/machine-surfaces).
-- Remote API errors carry status, response body and optional request id.
-- Product errors should wrap these facts, not replace them.
-
-## Continue
+<Warning>
+  An HTTP trace verification can resolve with
+  `verified: false, verdict: "unavailable"`; that typed engine verdict is not a
+  transport 404 and must not be converted into one.
+</Warning>
 
 <CardGroup cols={2}>
   <Card title="Type index" icon="brackets-curly" href="/sdk/reference/types">
-    Scan every exported result and error type.
+    Scan every public result and error type.
   </Card>
-  <Card title="Security boundary" icon="shield" href="/sdk/operations/security">
-    Refuse before execution where possible.
+  <Card title="Run lifecycle" icon="circle-play" href="/sdk/local/run-and-cancel">
+    Keep observation and settlement separate.
   </Card>
 </CardGroup>
