@@ -119,6 +119,10 @@ class KnowledgeMirrorTests(unittest.TestCase):
         self.data['words'][0]['contracts'][0]['context']='/$defs/brandNewDomain'
         self.data['words'][0]['contracts']=self.data['words'][0]['contracts'][:1]
         with self.assertRaisesRegex(ValueError,'Unclassified schema context'):mirror.sections(self.data)
+    def test_external_mcp_catalog_is_distinct_from_nika_oracle(self):
+        taxonomy=json.loads((ROOT/'snippets/data/knowledge-taxonomy.json').read_text())
+        self.assertEqual(taxonomy['families']['mcp-server']['guide'],'reference/mcp-catalog')
+        self.assertNotEqual(taxonomy['families']['mcp-server']['guide'],'reference/mcp-server')
     def test_taxonomy_guides_exist_and_are_in_navigation(self):
         taxonomy=json.loads((ROOT/'snippets/data/knowledge-taxonomy.json').read_text())
         nav=json.loads((ROOT/'docs.json').read_text());serialized=json.dumps(nav['navigation'])
