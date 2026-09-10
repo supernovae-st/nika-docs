@@ -124,7 +124,7 @@
     },
     "mcp-server": {
       "category": "integrations",
-      "guide": "reference/mcp-server",
+      "guide": "reference/mcp-catalog",
       "relation": "guide",
       "visibility": "public-concept"
     },
