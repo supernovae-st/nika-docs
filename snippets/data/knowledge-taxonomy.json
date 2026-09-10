@@ -465,6 +465,11 @@
       "guide": "reference/distribution",
       "relation": "guide",
       "scope": "orientation"
+    },
+    "system": {
+      "guide": "reference/knowledge-system",
+      "relation": "guide",
+      "scope": "orientation"
     }
   },
   "languageSections": [

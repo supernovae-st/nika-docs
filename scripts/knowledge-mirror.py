@@ -66,9 +66,11 @@ def main():
     snapshot=json.loads(source_text);outputs=render(snapshot)
     nav=json.loads((ROOT/'docs.json').read_text())
     ref=next(t for t in nav['navigation']['tabs'] if t['tab']=='Reference')
-    ref['groups']=[g for g in ref['groups'] if g['group'] not in ['Language fields','Documentation system']]
-    ref['groups'].insert(1,{'group':'Language fields','pages':['reference/language/overview',*[{'group':title,'pages':[w['docsPath'] for w in group]} for title,group in sections(snapshot).items() if group]]})
-    ref['groups'].append({'group':'Documentation system','pages':['reference/knowledge-system']})
+    groups={'Language fields':{'group':'Language fields','pages':['reference/language/overview',*[{'group':title,'pages':[w['docsPath'] for w in group]} for title,group in sections(snapshot).items() if group]]},'Documentation system':{'group':'Documentation system','pages':['reference/knowledge-system']}}
+    ref['groups']=[groups.pop(g['group'],g) for g in ref['groups']]
+    for name,group in groups.items():
+        if name=='Language fields':ref['groups'].insert(1,group)
+        else:ref['groups'].append(group)
     outputs['docs.json']=json.dumps(nav,ensure_ascii=False,indent=2)+'\n'
     actual=set(p.relative_to(ROOT).as_posix() for p in (ROOT/'reference/language').rglob('*.mdx')) if (ROOT/'reference/language').exists() else set()
     extra=actual-set(outputs)
