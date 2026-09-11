@@ -313,6 +313,18 @@
       "guide": "reference/distribution",
       "relation": "guide",
       "visibility": "internal-evidence"
+    },
+    "github-organization": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "pull-request": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
     }
   },
   "destinations": {
