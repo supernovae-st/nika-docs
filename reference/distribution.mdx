@@ -9,6 +9,8 @@ A repository owns code and manifests. A manifest declares a package name, versio
 
 | Object | What it tells you | What it does not prove |
 | --- | --- | --- |
+| GitHub organization | The namespace named by a captured repository URL | Dependencies between its repositories |
+| Pull request | An observed proposal, its repository and number | Merge, passing checks or release readiness |
 | Repository | Source owner, branch and commit | That the commit was released |
 | Package | Manifest identity, version and publication policy | That the version exists in a registry |
 | Publication channel | Where a package is distributed | That every source package belongs there |
@@ -28,6 +30,8 @@ Compare the manifest at a specific commit with the registry observation at a spe
 A matching version is a consistency observation, not a conformance score. A different version requires investigation before a release. An open pull request remains proposed work until merged; a draft release remains unpublished.
 
 ## Trace the relationships
+
+Repository → organization is an identity relation derived from the captured GitHub URL, including archived repositories. Repository → pull request uses the proposal’s exact repository and number; equally numbered proposals in different repositories remain different objects.
 
 Repository → package comes from the package manifest. Package → channel comes from its distribution policy and registry observation. Repository → release comes from the release record. Repository → website is a declared destination until deployment evidence is available.
 
