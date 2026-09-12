@@ -349,6 +349,11 @@
       "guide": "concepts/traces",
       "relation": "guide",
       "visibility": "internal-evidence"
+    },
+    "knowledge-subject": {
+      "guide": "guides/explore-lab",
+      "relation": "guide",
+      "scope": "lab-subject-assembly"
     }
   },
   "destinations": {
