@@ -325,6 +325,30 @@
       "guide": "reference/distribution",
       "relation": "guide",
       "visibility": "internal-evidence"
+    },
+    "benchmark": {
+      "category": "evidence",
+      "guide": "guides/testing",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "evaluation-feature": {
+      "category": "evidence",
+      "guide": "guides/testing",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "evaluation-domain": {
+      "category": "evidence",
+      "guide": "guides/testing",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "evaluation-receipt": {
+      "category": "evidence",
+      "guide": "concepts/traces",
+      "relation": "guide",
+      "visibility": "internal-evidence"
     }
   },
   "destinations": {
