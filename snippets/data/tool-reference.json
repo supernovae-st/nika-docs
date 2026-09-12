@@ -1,0 +1,494 @@
+{
+  "revision": "f8c5df2127c7867b2e51a2cd5712fa9d8461e73e",
+  "inputs": {
+    "canon/builtins.yaml": "c69102989cdb7ea175d205bf81b818acd25aca9aa010204386b76bb07a37e5fb",
+    "stdlib/builtins-v0.1.md": "666d9f87fb163a12fdadcc2b84f604e10f2972a868fc45eaadde214088477e7f"
+  },
+  "registry": [
+    {
+      "id": "nika:assert",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "core",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/assert-args",
+      "error_plane": "NIKA-BUILTIN-ASSERT",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:chart",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "media",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs"
+        ]
+      },
+      "args_schema": "to-mint-c1/chart-args",
+      "error_plane": "NIKA-BUILTIN-CHART",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:compose",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "introspection",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/compose-args",
+      "error_plane": "NIKA-BUILTIN-COMPOSE",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:convert",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "data",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/convert-args",
+      "error_plane": "NIKA-BUILTIN-CONVERT",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:date",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "data",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/date-args",
+      "error_plane": "NIKA-BUILTIN-DATE",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:decide",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "decision",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/decide-args",
+      "error_plane": "NIKA-DECIDE",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT). Doc verbatim: « PURE compute — zero required effects (a bundle: path reads like any declared fs.read; an inline object needs no filesystem) ». FINDING CF-04: the stdlib category table sums 27 across its rows while the total row says 28 · decide carries no category row in the prose table · the sealed enum has `decision` · assigned per enum, divergence declared."
+    },
+    {
+      "id": "nika:done",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "core",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/done-args",
+      "error_plane": "NIKA-BUILTIN-DONE",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:edit",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "file",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs"
+        ]
+      },
+      "args_schema": "to-mint-c1/edit-args",
+      "error_plane": "NIKA-BUILTIN-EDIT",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:emit",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "core",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/emit-args",
+      "error_plane": "NIKA-BUILTIN-EMIT",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:fetch",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "network",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "net"
+        ]
+      },
+      "args_schema": "to-mint-c1/fetch-args",
+      "error_plane": "NIKA-BUILTIN-FETCH",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT). Doc verbatim: multipart file parts « every path rides the permits.fs READ boundary (NIKA-SEC-004 on escape) » · arg-conditional fs, the unconditional class is net."
+    },
+    {
+      "id": "nika:glob",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "file",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs"
+        ]
+      },
+      "args_schema": "to-mint-c1/glob-args",
+      "error_plane": "NIKA-BUILTIN-GLOB",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:grep",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "file",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs"
+        ]
+      },
+      "args_schema": "to-mint-c1/grep-args",
+      "error_plane": "NIKA-BUILTIN-GREP",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:hash",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "data",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/hash-args",
+      "error_plane": "NIKA-BUILTIN-HASH",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:image_fx",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "media",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs"
+        ]
+      },
+      "args_schema": "to-mint-c1/image_fx-args",
+      "error_plane": "NIKA-BUILTIN-IMAGE_FX",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:image_generate",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "media",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs",
+          "tools"
+        ]
+      },
+      "args_schema": "to-mint-c1/image_generate-args",
+      "error_plane": "NIKA-BUILTIN-IMAGE_GENERATE",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT). Doc verbatim: « the provider egress is engine transport, exactly like infer:; permits.net.http does not govern it, permits.tools + permits.fs DO »."
+    },
+    {
+      "id": "nika:inspect",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "introspection",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/inspect-args",
+      "error_plane": "NIKA-BUILTIN-INSPECT",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:jq",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "data",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/jq-args",
+      "error_plane": "NIKA-BUILTIN-JQ",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT). R12 point 20 verbatim préservé (merge of the two pre-import rows · FINDING CF-02): « nika:jq ne bénéficie d'aucun bypass magique. Il exige zéro permit uniquement parce qu'il est officiellement classé pure/internal. » Pre-import row A carried args_schema to-mint-c1/builtins/jq-args.schema.json + error_plane to-mint-c1/builtins/jq-error-plane.yaml · row B carried to-mint-c1/nika-jq-args + error_plane NIKA-JQ and cited LAW-TEMPORAL-0411 (a wait-scoped law whose builtins ref is nika:wait · erroneous on jq · dropped, declared). Normalized to the import convention."
+    },
+    {
+      "id": "nika:json_diff",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "data",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/json_diff-args",
+      "error_plane": "NIKA-BUILTIN-JSON_DIFF",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:json_merge_patch",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "data",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/json_merge_patch-args",
+      "error_plane": "NIKA-BUILTIN-JSON_MERGE_PATCH",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:log",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "core",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/log-args",
+      "error_plane": "NIKA-BUILTIN",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT). Doc: best-effort · no failure codes · error_plane = the static arg-contract floor (NIKA-BUILTIN-001)."
+    },
+    {
+      "id": "nika:notify",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "network",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "net"
+        ]
+      },
+      "args_schema": "to-mint-c1/notify-args",
+      "error_plane": "NIKA-BUILTIN-NOTIFY",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:prompt",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "core",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/prompt-args",
+      "error_plane": "NIKA-BUILTIN-PROMPT",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:read",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "file",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs"
+        ]
+      },
+      "args_schema": "to-mint-c1/read-args",
+      "error_plane": "NIKA-BUILTIN-READ",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:tts_generate",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "media",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs",
+          "tools"
+        ]
+      },
+      "args_schema": "to-mint-c1/tts_generate-args",
+      "error_plane": "NIKA-BUILTIN-TTS_GENERATE",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT). Capability mirrors image_generate per doc: « endpoints are engine-fixed constants … the same sanction as image_generate and infer: » + output_dir rides permits.fs."
+    },
+    {
+      "id": "nika:uuid",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "data",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/uuid-args",
+      "error_plane": "NIKA-BUILTIN",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT). Doc: « No failure codes. » · error_plane = the static arg-contract floor (NIKA-BUILTIN-001)."
+    },
+    {
+      "id": "nika:validate",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "data",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/validate-args",
+      "error_plane": "NIKA-BUILTIN-VALIDATE",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    },
+    {
+      "id": "nika:wait",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311",
+        "LAW-TEMPORAL-0411"
+      ],
+      "introduced_in": "C0",
+      "category": "core",
+      "capability_classification": {
+        "class": "pure_internal"
+      },
+      "args_schema": "to-mint-c1/wait-args",
+      "error_plane": "NIKA-BUILTIN-WAIT",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT). B-17 point 14 verbatim préservé: nika:wait ne garde pas un processus actif (durable suspension · LAW-TEMPORAL-0411). FINDING CF-03: pre-import error_plane NIKA-NIKAWAIT contradicted stdlib/builtins-v0.1.md (NIKA-BUILTIN-WAIT-001..003) · corrected to the doc value, declared."
+    },
+    {
+      "id": "nika:write",
+      "status": "reserved",
+      "owner": "spec",
+      "law_ids": [
+        "LAW-AUTH-0311"
+      ],
+      "introduced_in": "C0",
+      "category": "file",
+      "capability_classification": {
+        "class": "external",
+        "requires": [
+          "fs"
+        ]
+      },
+      "args_schema": "to-mint-c1/write-args",
+      "error_plane": "NIKA-BUILTIN-WRITE",
+      "notes": "Import-c0 (canon-flip) · canon.yaml builtins → row · category + capability + error plane per stdlib/builtins-v0.1.md · classification law LAW-AUTH-0311 (chaque builtin est classé explicitement dans la SSOT)."
+    }
+  ],
+  "contract": "# Stdlib v0.1 · Builtins\n\n> **<!-- canon:builtins -->28<!-- /canon --> canonical builtins** shipped with Stdlib v0.1-compliant engines.\n> Invoked via `invoke: tool: \"nika:<name>\"`. Plus the remaining media\n> builtins deferred to stdlib v0.x (opt-in feature flag).\n>\n> **Consolidation (« less but better »)** · was 42 → 26 (D-N6) →\n> **22**. Step 1 (42 → 26 · D-N6) · `nika:jq` is THE data language · 13 thin\n> wrappers that jq subsumes were cut (incl. `json_merge` = jq's recursive `*` ·\n> jaq source-verified 2026-05-27 · `obj_merge` impl + test corpus + corelang\n> docs) · the validators merged · `task_status`/`orchestrate`/`locale_lookup`\n> cut. Step 3 (22 → 23 · 2026-06-13) · `nika:compose` · the agent loop's\n> self-verification intrinsic (ADR-093 · loop-only like `done`). Step 2\n> (26 → 22 · ADR-086/087/088 Rams sweep 2026-05-27) · `convert`\n> replaces `csv_to_json` (multi-format · from:/to:) · `wait` unifies\n> `sleep`+`wait_until` (−1) · `inspect` unifies `cost`+`records`+`dag_info`+\n> `threads` (−3). ZERO capability loss (jq ⊇ the cuts · jaq-verified · the\n> collapses preserve every behavior via mode args). See §\"What jq subsumes\".\n> Step 4 (23 → 24 · 2026-07-05) · `nika:image_generate` · the FIRST §Media\n> graduate. Providers v1.1 (local-first per the sovereignty review\n> 2026-07-05) · `local` (any OpenAI-images-compatible self-hosted server —\n> LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni) · openai `gpt-image-2` ·\n> gemini `gemini-3.1-flash-image` · xai `grok-imagine-image` · `mock` for\n> offline runs · assets land on disk, never inline base64.\n> Step 5 (24 → 25 · 2026-07-05) · `nika:tts_generate` · the SECOND\n> Media-class graduate (stdlib §Audio) · sovereign-first — `local` (any\n> OpenAI-speech-compatible server: LocalAI · Kokoro-FastAPI · Speaches ·\n> openedai-speech) · openai `gpt-4o-mini-tts` · elevenlabs · `mock` (a\n> real deterministic WAV · offline CI) · ONE audio file on disk, never\n> inline bytes.\n\n---\n\n## Builtin categories\n\n| Category | Count | Status |\n|---|---|---|\n| Core | 6 | Required for execution (log · emit · assert · prompt · done · wait) |\n| File | 5 | I/O primitives (read · write · edit · glob · grep) |\n| Data | 8 | `jq` (THE data language) + 7 capabilities jq can't express (json_diff · validate · json_merge_patch · convert · uuid · date · hash) |\n| Introspection | 2 | Self-awareness · `inspect` (runtime state · 4 views) · `compose` (static check of a drafted workflow · agent loops only) |\n| Network | 2 | fetch (HTTP+extraction) · notify (alerts out) |\n| Media | 4 | `chart` (§Media #4 · deterministic/attested · 2026-07-09) · `image_generate` (§Media · 2026-07-05) · `image_fx` (§Media #3 · deterministic ops chain · 2026-07-09) · `tts_generate` (§Audio · 2026-07-05) — the REST of the media class stays deferred to stdlib v0.x |\n| **Total v0.1** | **<!-- canon:builtins -->28<!-- /canon -->** | |\n\nA Stdlib v0.1-compliant engine MUST ship these <!-- canon:builtins -->28<!-- /canon -->.\n\n---\n\n## Core builtins (6)\n\n### `nika:log`\n```yaml\ninvoke: { tool: \"nika:log\", args: { level: info, message: \"Processing ${{ inputs.user_id }}\", data: { foo: \"bar\" } } }\n```\nEmit a log entry (`debug`/`info`/`warn`/`error`) to the workflow event stream (human-readable diagnostic).\n\nReturns `null` · best-effort (no failure codes · a log that cannot land never fails the task).\n\n### `nika:emit`\n```yaml\ninvoke: { tool: \"nika:emit\", args: { event_type: custom.event, payload: { ... } } }\n```\nEmit a custom machine event (consumed by subscribers · journal).\n\n> **Why this is not `log` with a different word (normative rationale · 2026-08-11).**\n> The separation was stated as *\"`log` = human diagnostic · `emit` = machine\n> event\"* — a claim about the intended READER, and a reader is a property of the\n> consumer, not of the write. That reasoning would not have survived the\n> collapse sweep that merged `sleep`+`wait_until` and four introspection\n> builtins. **The load-bearing difference is the FAILURE MODE**, and it is\n> structural: `nika:log` has **no failure codes at all** — a log that cannot\n> land never fails its task — while `emit` **validates the event shape** and\n> refuses `NIKA-BUILTIN-EMIT-001`. Collapsing them forces one of two\n> regressions: either every diagnostic becomes failable (73 files in the\n> measured corpus rely on it not being), or machine events lose their shape\n> gate. Two builtins, two contracts, one event stream — **kept for what they\n> promise on failure, not for who reads them.**\n\n`event_type:` matches `^[a-z][a-z0-9_.-]*$` · `payload:` any JSON value. Returns `null`. Delivery is engine-side (journal · subscribers) · best-effort once shape-valid. Throws · `NIKA-BUILTIN-EMIT-001` (invalid event shape · `validation_error`).\n\n### `nika:assert`\n```yaml\ninvoke: { tool: \"nika:assert\", args: { condition: \"${{ tasks.X.output.count > 0 }}\", message: \"Expected non-empty result\" } }\n```\nFail the task if `condition` (a **CEL `${{ }}` boolean**) is false · else no-op. The **fail-fast guard** (distinct from `when:` which is the **skip-guard**). `condition:` uses the canonical `${{ }}` CEL surface, never a legacy `$task` syntax.\n\nReturns `true` on pass. Throws · `NIKA-BUILTIN-ASSERT-001` (assertion failed · `tool_error` · `transient: false` · `message:` lands in the error message · retryable via `retry.on_codes`, the polling pattern's lever). A red last assert **quarantines** writes from that run (`out/` moves to `.nika/quarantine/<trace>/` in the reference engine — hint `assert-quarantine`). Keep the assert off the last wave if you need the artifacts from a red run.\n\n### `nika:prompt`\n```yaml\n# confirm (default) — a yes/no gate\ninvoke: { tool: \"nika:prompt\", args: { message: \"Approve deploy to production?\", default: false } }\n# input — collect a free-text value\ninvoke: { tool: \"nika:prompt\", args: { mode: input, message: \"Paste the OTP:\", default: \"\" } }\n# choice — pick one of N\ninvoke: { tool: \"nika:prompt\", args: { mode: choice, message: \"Which title?\", choices: [\"${{ tasks.a.output }}\", \"${{ tasks.b.output }}\"] } }\n```\nInteractive human-in-the-loop · blocks until answered. **`mode:` selects what\nis collected** (default `confirm`) ·\n\n| `mode` | Returns | Notes |\n|---|---|---|\n| `confirm` (default) | **boolean** | `true` = confirmed · `false` = refused. A refusal is a VALUE, never an error: gate downstream with `when:`. |\n| `input` | **string** | the free text the human typed (may be empty). |\n| `choice` | **string** | the chosen element of `choices:` (required · non-empty array). Returns the chosen value (not its index) so it binds directly. |\n\nNon-interactive contract (normative · all modes) · when no human can answer\n(CI · daemon) the engine MUST use `default:` when present · and MUST fail\n`NIKA-BUILTIN-PROMPT-001` (`validation_error` · non-interactive without a\n`default:`) when absent: never hang forever · never silently pick an answer.\nA `choice` whose `default:` is not an element of `choices:` is a parse error\n(`NIKA-BUILTIN-PROMPT-002` · `validation_error`).\n\n### `nika:done`\n```yaml\ninvoke: { tool: \"nika:done\", args: { result: { status: \"complete\" } } }\n```\nMark the current `agent:` loop complete and exit · the loop-completion sentinel (**valid only inside an `agent:` tool whitelist** · error elsewhere).\n\n### `nika:wait` · temporal wait (relative OR absolute)\n```yaml\ninvoke:\n  tool: \"nika:wait\"\n  args:\n    duration: \"5s\"                  # RELATIVE · Go-duration string (\"500ms\"/\"30s\"/\"5m\"/\"1h30m\")\n    # OR (mutually exclusive · exactly-one-of) ·\n    until: \"2026-05-23T09:00:00Z\"   # ABSOLUTE · ISO 8601 timestamp · MAY be CEL expression\n    timeout: \"1h\"                   # OPTIONAL · cap for absolute wait (until: only)\n```\nTemporal pause · ONE builtin · 2 modes (relative `duration:` XOR absolute `until:` · exactly-one-of validated at parse time).\n\nReplaces · legacy `nika:sleep` (relative-only) + `nika:wait_until` (absolute-only · cut per ADR-087 Rams sweep · 2026-05-27). Same family · same trust class (PURE) · same temporal-control semantics · the unified surface preserves both behaviors via mode arg.\n\nThrows · `NIKA-BUILTIN-WAIT-001` on absolute timeout · `-002` if the timestamp is in the past · `-003` if neither `duration:` nor `until:` set (or both set).\n\n---\n\n## File builtins (5)\n\n### `nika:read`\n```yaml\ninvoke: { tool: \"nika:read\", args: { path: \"./config.yaml\" } }\n```\nRead a file · returns **string** content (text mode · the default).\n`binary: true` (explicit · no content sniffing) returns **opaque bytes**\n([04 §value rendering](../spec/04-variables.md) · they flow tool→tool ·\nnever into a string position). Throws · `NIKA-BUILTIN-READ-001` (file not\nfound, the code the state-file first-run pattern scopes its recovery to) ·\n`-002` (IO failure · permission) · `-003` (text mode on non-UTF-8 content ·\nuse `binary: true`). All `tool_error` · `transient: false`.\n\n### `nika:write`\n```yaml\ninvoke: { tool: \"nika:write\", args: { path: \"./out.md\", content: \"...\", create_dirs: true, overwrite: true } }\n```\nWrite a file · `path:` names a FILE, never a directory · returns the path. A binary `content` value (an opaque bytes output from an upstream tool · e.g. MCP image content) is written as-is · no `output_format` declaration needed (the value carries its own type). A directory is never the target: it is made by writing its first file inside it with `create_dirs: true`, never by an empty write at the directory's path.\n\n`overwrite:` defaults **true** · `create_dirs:` defaults **false** — and a false `create_dirs:` is ENFORCED, not ignored: a missing parent directory is refused loudly (a typo'd path surfaces rather than silently materializing a directory tree), so pass `create_dirs: true` to create the parent. **One carve-out, by decision (engine #433 option C): a declared `permits.fs.write` entry covering the target path IS the intent** — the boundary creates the parent tree before the builtin's gate, and the write lands without `create_dirs:` (measured on the reference engine: a literal grant `deep/dir/new.txt` and a glob grant `out/**` both materialize their tree · run green). The refusal keeps its teeth where no declared grant covers the path — and there the boundary itself speaks first: an uncovered write is `NIKA-SEC-004` before the parent gate can. A typo'd path under a *narrow* grant still surfaces (it falls outside the grant → SEC-004); the tree-scatter the enforcement exists to catch cannot hide inside a boundary the author drew. Throws · `NIKA-BUILTIN-WRITE-001` (IO failure, or a missing parent while `create_dirs: false` outside a covering grant · a directory-shaped `path:` — a trailing `/` is `write failed: path not found`, an existing directory is `filesystem I/O error: Is a directory` · a file in the way of `create_dirs:` — `create_dirs failed: path already exists`, the mark an earlier empty write at the directory's path leaves behind, and nothing deletes it; all three measured on the reference engine 0.118.7) · `-002` (`overwrite: false` and the path exists). Both `tool_error` · `transient: false`.\n\n### `nika:edit`\n```yaml\ninvoke: { tool: \"nika:edit\", args: { path: \"./file.md\", find: \"old\", replace: \"new\" } }\n```\nIn-place find/replace · returns the modified path. `find:` is a **literal\nstring** (not a regex: use `nika:grep` to locate · jq to transform) ·\nreplaces **all occurrences** · `count:` (when set) caps replacements to the\nfirst N. `count:` MUST be a non-negative integer — a present non-integer\n(e.g. the string `\"2\"`) is a loud `-001` arg error, NEVER silently the\nreplace-all default (that silent fall-through would over-edit the file · the\nintent-inversion footgun class). Throws ·\n`NIKA-BUILTIN-EDIT-001` (`find:` matched nothing: an edit that edits\nnothing is an authoring bug · `tool_error` · also a non-integer `count:`) ·\n`-002` (IO failure).\n\n### `nika:glob`\n```yaml\ninvoke: { tool: \"nika:glob\", args: { pattern: \"./src/**/*.rs\", exclude: [\"**/target/**\"] } }\n```\nGlob match · returns array of paths · **sorted lexicographically**\n(deterministic across engines · filesystems). A markdown glob\n(`held/*.md`) also matches `README.md` in the same directory — pin\nit (`exclude: \"**/README.md\"`) before a paid infer classifies the\ntable of contents (hint `glob-readme`). Throws ·\n`NIKA-BUILTIN-GLOB-001` (invalid pattern · `validation_error`).\n\n### `nika:grep`\n```yaml\ninvoke: { tool: \"nika:grep\", args: { pattern: \"TODO:\", path: \"./src\", case_insensitive: false } }\n```\nRecursive grep · returns array of `{ path, line, match }` · `line` is the\n1-based line **number** (integer) · `match` the matched line text · results\nsorted by `(path, line)`. `pattern:` is a **Rust-regex-class** expression\n(RE2-compatible · no backreferences · the portable subset). Throws ·\n`NIKA-BUILTIN-GREP-001` (invalid pattern · `validation_error`).\n\n---\n\n## Data builtins (8) · `jq` is THE data language\n\n### `nika:jq` · the transform + extraction primitive\n```yaml\ninvoke: { tool: \"nika:jq\", args: { expression: \".items | map(.price) | add\", input: \"${{ tasks.X.output }}\" } }\n```\nRun a jq expression. **The single data-transform-and-extraction language**: map · filter · select · group_by · reshape · string-interpolation `\"\\(.x)\"` · `@base64`/`@base64d` encoders (the embedded jaq has NO `@csv`/`@tsv` — use `nika:convert to: csv`) · array `flatten` · `leaf_paths`/`getpath`/`setpath`. The same jq used in `extract:` bindings (see `04-variables.md`). **jq is also the law after an extract**: the model emits facts (`infer.schema:` as `type: integer` for numeric enums); this builtin (or `nika:decide`) names the level. Do not pay a second `infer:` to score. Teaching shape · `examples/13-extract-then-law.nika.yaml`. After `. as $c`, write `($c | map(...))` — a bare `map(` maps the current value (hint `jq-as-map`).\n\n**`input` is any JSON value**: a single ref (`input: \"${{ tasks.X.output }}\"`) OR a **constructed array for multi-input ops**. Recursive merge of two objects (this is exactly why `json_merge` is NOT a builtin · jaq's `*` does it) ·\n```yaml\ninvoke:\n  tool: nika:jq\n  args:\n    input: [\"${{ tasks.base.output }}\", \"${{ tasks.overlay.output }}\"]\n    expression: \".[0] * .[1]\"      # recursive deep-merge · overlay wins\n```\nSame shape combines / zips N inputs · build the array, index inside jq.\n\n**The arg is `expression:`**, exactly that name (not `query:` · not `expr:` ·\none name everywhere · the conformance oracle gates it). Throws ·\n`NIKA-BUILTIN-JQ-001` (program error at runtime · `tool_error`). Compile\nerrors are caught statically (`NIKA-VAR-005`).\n\n**Implementation** · reference engine uses `jaq` (Rust jq).\n\n### `nika:json_diff`\n```yaml\ninvoke: { tool: \"nika:json_diff\", args: { before: { ... }, after: { ... } } }\n```\nJSON diff · returns **RFC 6902** JSON Patch. (jq can't diff.) Throws · `NIKA-BUILTIN-JSON_DIFF-001` (non-JSON input · `validation_error`).\n\n### `nika:validate` · schema validation (json OR yaml)\n```yaml\ninvoke: { tool: \"nika:validate\", args: { data: { ... }, schema: { type: object, ... }, format: json } }\n# format: json (default · validate a value) | yaml (parse a YAML string first, then validate)\n```\nValidate data against a **JSON Schema** · returns `{ valid: bool, errors: [...] }`. Invalid DATA is a **report, never a task failure** (gate on `.valid` downstream · or `nika:assert` it). Merges the former `json_verify` + `yaml_validate` (`format:` arg · one validator). `schema:` may be an object **or** a JSON/YAML string (a `nika:read` of a `.json` file is a string — the builtin parses it). Throws · `NIKA-BUILTIN-VALIDATE-001` (the `schema:` itself is not a valid JSON Schema · `validation_error`) · `-002` (`format: yaml` and the string does not parse as YAML).\n\n### `nika:json_merge_patch`\n```yaml\ninvoke: { tool: \"nika:json_merge_patch\", args: { target: { ... }, patch: { ... } } }\n```\n**RFC 7396** merge patch (`null` deletes a key) · the delete-on-null semantics jq's `*` recursive-merge does NOT provide (so this stays a genuine builtin). Plain recursive merge (no delete) is just `jq '.[0] * .[1]'` on a `[base, overlay]` input · no builtin needed. Throws · `NIKA-BUILTIN-JSON_MERGE_PATCH-001` (non-object target/patch · `validation_error`).\n\n### `nika:convert` · universal multi-format conversion\n```yaml\ninvoke:\n  tool: \"nika:convert\"\n  args:\n    input: \"${{ tasks.A.output }}\"     # the data to convert · string for text formats · structured for json/yaml/toml\n    from: csv                          # REQUIRED · enum · json | yaml | toml | csv\n    to: json                           # REQUIRED · enum · json | yaml | toml | csv\n    has_header: true                   # OPTIONAL · CSV only · default true\n    formula_guard: false               # OPTIONAL · CSV emit only · default false (see below)\n```\nUniversal format converter · 4 formats v0.1 (`json` · `yaml` · `toml` · `csv`) · 12 directions in scope (4×3 minus identity) · `from == to` is rejected (`NIKA-BUILTIN-CONVERT-001` · `validation_error` · an identity conversion is an authoring bug). Throws · `-002` (the input does not parse as `from:` · `tool_error`).\n\n**`formula_guard`** (CSV emit only · default `false`) · opt-in **CSV formula-injection guard** (CWE-1236). A spreadsheet (Excel · Sheets · LibreOffice) interprets a cell whose FIRST non-whitespace character is `=` `+` `-` `@` (or a leading `\\t`/`\\r` control char) as a **formula** — so `=HYPERLINK(…)` or `=cmd|…` in untrusted data executes when the file is opened. With `formula_guard: true`, such a cell (data OR header key) is prefixed with a single quote `'` — the OWASP mitigation those apps render as literal text. **Opt-in because it ALTERS data**: a legitimate negative number `-5` becomes the text `'-5`. Enable it when the CSV carries untrusted data AND is destined for a spreadsheet; leave it off (the default) for clean machine round-trips — matching the Rust/Python `csv` ecosystem, where the spreadsheet is the consumer's trust boundary. A non-boolean value is a loud `-001` arg error (never silently read as `false`).\n\nPattern · `fetch+extract` symmetry · single super-powerful builtin · `from`/`to` mode parameters · all bidirectional pairs canonical · no per-direction builtin slot.\n\nReplaces · legacy `nika:csv_to_json` (cut per ADR-086 · D-2026-05-27 Rams sweep · the « less but better » builtin-by-builtin review that cut the canonical set to 22). The reverse direction (JSON→CSV) is ALSO covered here · `nika:convert` is the canonical multi-format builtin for BOTH directions (the embedded jaq has no `@csv`/`@tsv` filter, so there is no in-jq alternative — `nika:convert to: csv` is the one path).\n\nReference implementation · `serde_transcode` 1.1+ orchestrator (zero-allocation walk · serde-ecosystem canonical · 15M+ downloads · sfackler) + format-specific crates · `serde_json` (JSON · already nika dep) · `serde_yaml_bw` 2.5+ (YAML · modern + maintained 2026) · `toml` 1.1+ (TOML · spec 1.1.0 compliant) · `csv` 1.4+ (CSV · quoting-aware).\n\n### `nika:uuid`\n```yaml\ninvoke: { tool: \"nika:uuid\", args: { version: v7 } }   # v7 default (timestamped/sortable · RFC 9562) | v4 (random)\n```\nGenerate a UUID. (Generators are not jq · jq is pure transform.) Returns the canonical lowercase-hyphenated string. No failure codes.\n\n### `nika:decide`\n```yaml\ninvoke:\n  tool: \"nika:decide\"\n  args:\n    bundle: \"./decisions/pr-triage.bundle.json\"   # path OR inline bundle object\n    evidence: \"${{ tasks.collect.output }}\"       # the EvidenceSnapshot { t, evidence: [...] }\n```\nThe deterministic decision kernel (spec [11-decision.md](../spec/11-decision.md)) · evaluates a portable **Decision Bundle** against an **EvidenceSnapshot** and returns the full Decision Receipt (outcome ∈ {recommend · defer · human_required · opted_out · overridden} · per-dimension term-by-term contributions · intervals · conflicts+witnesses · determination provenance). PURE compute — zero required effects (a `bundle:` path reads like any declared `fs.read`; an inline object needs no filesystem) · zero floats (fixed-point basis-points) · same inputs, same bytes, both evaluators (the stdlib-Python reference interpreter is the conformance oracle — byte-equal canonical JSON). **The LLM never decides**: `infer:` produces closed cited facts; this kernel applies the rubric. The lighter teaching shape (no bundle) is `nika:jq` after the extract — `examples/13-extract-then-law.nika.yaml`. Throws · `NIKA-DECIDE-001` (the bundle violates its own laws) · `NIKA-DECIDE-002` (the snapshot does not satisfy the evidence schema) · both `validation_error`, deterministic.\n\n### `nika:date`\n```yaml\ninvoke: { tool: \"nika:date\", args: { op: now } }\n# op: now { tz } | add { base, duration } | subtract | format { input, format } | parse | diff { start, end, unit }\n```\nTimestamp arithmetic · op-discriminated single builtin · timezone-aware (IANA · default UTC) · ISO 8601 out. `format:`/`parse` use the **strftime** field grammar (`%Y-%m-%d` · the one cross-language constant). Every op returns a string EXCEPT `diff` (integer · in `unit:`). Throws · `NIKA-BUILTIN-DATE-001` (unparseable input / unknown op / bad tz · `validation_error`).\n\n### `nika:hash`\n\n> **Reference-engine availability at `6ac427c5e62dc450d1d2393e3eec169e9566f6a3`:**\n> digest calls accept `content`, `algo` and `encoding`. The `op` argument,\n> including explicit `op: hash`, and the `sign`/`verify` forms below are\n> **spec-ahead of this engine pin**. Their normative contract is retained;\n> these examples do not announce implementation availability.\n\n```yaml\ninvoke: { tool: \"nika:hash\", args: { algo: blake3, content: \"${{ tasks.X.output }}\", encoding: hex } }\n\n# Normative op forms · spec-ahead at the engine pin named above\ninvoke: { tool: \"nika:hash\", args: { op: sign,   content: \"${{ with.manifest }}\", key: \"${{ secrets.release_key }}\" } }\ninvoke: { tool: \"nika:hash\", args: { op: verify, content: \"${{ with.manifest }}\", public_key: \"${{ const.release_pub }}\", signature: \"${{ with.sig }}\" } }\n```\nContent hashing · default **blake3** (fastest modern cryptographic hash · parallel · secure) · or `sha256`/`sha512`. md5/sha1 NOT supported (cryptographically broken · `NIKA-BUILTIN-HASH-001` `validation_error` on an unsupported algo). `encoding:` `hex` (default) | `base64`. Use cases · cache keys · content addressing · provenance. `content:` accepts a string **or** a structured value (an object/array is hashed as compact JSON — do not pre-pipe `| tojson`).\n\n**Digest arguments (`op` omitted or `op: hash`).** `content` MUST be present and non-null. Strings are hashed verbatim; every other non-null JSON value (object, array, number or boolean) is hashed as compact JSON. An empty string, `0`, `false`, an empty object or array, and null members inside an object or array are valid content. `algo` and `encoding` use their defaults only when absent. When present, each MUST be a string in its listed closed set; null, another JSON type, an empty string or an unsupported value is a validation error (`NIKA-BUILTIN-HASH-001`). Statically known invalid literals MUST be refused before execution. A valid substitution expression whose result is not yet known is checked after resolution; it does not exempt other, independently decidable arguments from validation.\n\n**`op:` · `hash` (default) · `sign` · `verify` (normative · v0.1 surface).**\nThe engine already signs and verifies Ed25519 — the run seal is one Ed25519\nsignature over the journal, minted by `nika key init` and checked by the\nevidence verifier. **The language could not reach any of it.** A capability\nthat ships and stays unreachable from the file is not a shipped capability,\nso `op:` exposes it through the builtin that already owns the digest.\n\n| Arg | Ops | Notes |\n|---|---|---|\n| `content` | all | required · the bytes under the operation |\n| `algo` | `hash` | `blake3` (default) · `sha256` · `sha512` |\n| `encoding` | `hash` · `sign` | `hex` (default) · `base64` — the output encoding |\n| `key` | `sign` | required · the Ed25519 private key · **MUST be a `${{ secrets.X }}` reference** |\n| `public_key` | `verify` | required · the Ed25519 public key (a `const:`/`inputs:` value — a public key is not a secret) |\n| `signature` | `verify` | required · the signature to check, in `encoding:` |\n\n`sign` returns the signature string; `verify` returns a boolean and never\nthrows on a bad signature (a *false* verdict is data, not an error — a\nworkflow branches on it with `when:`). A malformed key, an unknown `op:`, or\na missing per-op required arg is `NIKA-BUILTIN-HASH-001` (`validation_error`).\n\n**The key rides `secrets:` — that is a hard rule, not a convention.** A\nprivate key reached from the ambient environment or an implicit on-disk\nkeyring would make `nika:hash` read state its declaration does not name,\nwhich is exactly the pure-compute-that-is-not-pure defect the permits\nboundary exists to refuse. Declaring the key under `secrets:` keeps it inside\nthe three-authority family, keeps it masked in logs, and keeps its reach\ngoverned by `egress:` like any other secret.\n\n**What this closes, and what it does NOT (bounded honestly).** It closes\n**Ed25519** signing and verification — detached signatures over content the\nworkflow already holds: release manifests, provenance attestations,\ninter-workflow handoffs, checkpoint verification. It does **not** close\nRS256/JWT: that is RSA with a different key format, a different padding\nscheme and a token envelope, none of which this surface has. A GitHub App\ncredential exchange is RS256 and stays out of reach — do not read this\nsection as authenticating anything that mints a JWT. `capability_classification`\nfor the builtin moves from `pure_internal` to secret-reading under `op: sign`;\nthe classification row in `canon/builtins.yaml` follows when the engine wires\nthe op (today the engine's `ARGS` gate declares `content · algo · encoding`\nonly, so `op:` is spec-ahead-of-engine and this file says so rather than\nimplying a green that does not exist).\n\n---\n\n## Network builtins (2)\n\n### `nika:fetch`\nHTTP request + content extraction (reached via `invoke:` because fetching a URL is *calling a tool*, not a verb · see `02-verbs.md`).\n```yaml\ninvoke: { tool: \"nika:fetch\", args: { url: \"https://example.com/article\", mode: article } }\n```\n| Arg | Notes |\n|---|---|\n| `url` | required · may use `${{ ... }}` |\n| `method` | `GET` (default) · `POST` · `PUT` · `DELETE` · `PATCH` · `HEAD` |\n| `headers` · `body` | extra headers · body (objects auto-JSON) · auth rides `headers` (`x-api-key: \"${{ secrets.KEY }}\"` · masked) |\n| `form` | `application/x-www-form-urlencoded` object of scalar fields (string · number · boolean — nesting refused · reshape with `nika:jq`) · body-bearing method required |\n| `multipart` | `multipart/form-data` parts array · `{name, value}` text XOR `{name, path, filename?, content_type?}` file · every `path` rides the `permits.fs` READ boundary (`NIKA-SEC-004` on escape) · ≤64 parts · ≤32 MiB total · body-bearing method required |\n| `mode` | extraction mode · see `extract-modes-v0.1.md` · default `markdown` |\n| `jq` | a jq expression · only with `mode: jq` (structured JSON extraction · replaces the former JSONPath mode) |\n| `traverse` | bounded same-origin crawl · `{ max_pages: 1..=25 (required), respect_robots?: bool (default true) }` · GET only · excludes `mode`/`selector`/`jq`/`body`/`form`/`multipart` |\n\n**Payload exclusivity (normative)** · at most ONE of `body` · `form` ·\n`multipart`; `form`/`multipart` require a body-bearing method (`POST` ·\n`PUT` · `PATCH`) and OWN their `content-type` (a user-supplied\n`content-type` header alongside them is a refused conflict).\n\n**The data-as-code sink (normative pointer · NEP-0006)** · a fetch whose\nresolved URL path names a code-bearing class (serialized-executable ·\nscript/interpreter · executable binary/module · the closed list in\n`10-authority.md` §the data-as-code sink) is refused at check\n(`NIKA-SEC-008`) and at run (`NIKA-SEC-004`) unless the task declares the\nread inert (`lift: [{law: data-as-code, because: \"…\"}]` · the honest\ndoor · it never lifts the host boundary or the SSRF floor).\n\n**`traverse` semantics (normative)** · same-origin BFS from `url` ·\nfragment-stripped dedup · per-page output is the fixed page digest\n`{url, status, title, description, headings ≤16, links ≤30, images ≤24,\ncolors ≤20, text ≤4000}` · crawl output is `{url, page_count, pages[],\nassets: {images ≤40, colors ≤30}}` · `robots.txt` honored by default\n(RFC 9309 group semantics · `User-agent: *` `Disallow` prefixes · the\nprobe's outcome follows RFC 9309 §2.3.1: a 4xx is *unavailable* and\nallow-all · a 5xx or a transport failure is *unreachable* and a COMPLETE\nDISALLOW, refused loudly and transiently before a page is spent · rules\nare per origin, so a root that lands on another origin re-reads that\norigin's robots before any descendant is enqueued · a disallowed ROOT is\na loud failure · disallowed descendants are silently skipped) · the page\ndigest passes the same depth admission every HTML mode passes (a\ndepth-bomb root is a loud failure · a depth-bomb descendant is an honest\n`{url, status, error}` entry) · discovery reads every link a page\ncarries (the `links ≤30` facet is a preview, never the frontier's bound)\n· every hop rides\nthe engine's SSRF defense · a failing descendant page becomes an honest\n`{url, status|error}` entry and the crawl continues · the effect\ncertificate bounds logical GET calls per invocation: `max_pages` with\nliteral `respect_robots: false`, otherwise `max_pages + 2` (the seed's\nrobots, then at most one probe of the landed root's different origin).\nAn unchanged origin needs only one robots probe, but a literal initial\nURL and the same-origin link filter do not exclude a root redirect;\nan unknown final origin therefore requires the two-probe bound. Dynamic\npage bounds use the valid runtime maximum 25, hence at most 27 logical\nGETs (25 with literal robots false); dynamic robots options reserve both\nprobes. Invalid resolved options still refuse before any GET. These are\nlogical calls, not a bound on physical transmissions, redirect hops or\ntransport retries; aggregate saturation is not a proven global bound.\n`crawl`/`http`/`website` are intentions, not\ntools — they all route HERE (no `nika:crawl`).\n\n**Non-2xx is failure (normative)** · a non-2xx response throws\n`NIKA-BUILTIN-FETCH-001` (`category: network_error` · `transient: true` for\n5xx/408/429 · `false` for other 4xx · `details.status_code` carries the\nstatus) — **with the effect-safe carve-out (normative · issue #1371)**: a\nkeyless effect-capable method (`POST` · `PUT` · `DELETE` · `PATCH` without\nan `idempotency-key` header) is `transient: false` on EVERY failure,\nstatus-table and transport alike — the failure may be ambiguous (the\nserver may have committed before the socket dropped or the error was\nemitted) and a blind retry replays the effect; a declared `retry:` on such\na call is the static `NIKA-SEC-016` refusal ([05 §the effect-safe retry\nlaw](../spec/05-errors.md#the-effect-safe-retry-law-normative--issue-1371)).\n`GET`/`HEAD` and keyed calls keep the status table.\nTo poll a pending resource · the jq-error pattern\n([08 H19](../spec/08-out-of-scope.md)), not status-code inspection.\nRedirects follow up to an engine cap · the FINAL status decides.\n\n**Security (engine MUST)** · SSRF defense (reject private-net + cloud-metadata `169.254.169.254` unless configured) · honor task-level `timeout` · reject self-signed TLS by default.\n\n### `nika:notify`\n```yaml\ninvoke: { tool: \"nika:notify\", args: { channel: webhook, target: \"https://hooks.slack.com/...\", message: \"Done · ${{ tasks.X.status }}\", severity: info, data: { run: \"${{ tasks.X.output }}\" } } }\n```\nSend notifications · `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms` · one builtin not 5). The 1.0 engine MUST support `webhook` · others MAY be feature-gated. `data:` (OPTIONAL · any JSON value) carries structured context alongside the human `message`: the webhook payload is `{ message, severity, data? }` (the key is absent when not given · receivers branch on machine fields, never parse the message). Returns `null` on accepted delivery. Throws · `NIKA-BUILTIN-NOTIFY-001` (channel unconfigured · `validation_error`) · `-002` (delivery failed · `network_error` · transient engine-assessed).\n\n**Injection defense (normative)** · the `webhook` payload is JSON-encoded, so the `message` cannot break its transport (serde escaping neutralizes `\"`/newlines). A channel that renders the `message` into a DIFFERENT medium MUST neutralize that medium's injection surface when implemented · **email** MUST reject/strip CR/LF in any header-bound field (`target:`/subject) against RFC 5322 header injection · **slack**/**discord** MUST treat the `message` as text, never a trusted mrkdwn/mention control string · **sms** MUST bound length to the carrier segment limit. The `webhook target:` rides the same SSRF boundary as `nika:fetch` (private-network / cloud-metadata rejected). Same discipline as the `nika:fetch` SSRF requirement · an output channel that reaches an interpreter neutralizes that interpreter's control surface.\n\n---\n\n## Introspection builtins (2)\n\n### `nika:compose` · self-check a drafted workflow (agent loops only)\n```yaml\nagent:\n  prompt: \"Draft a workflow, then check it before you finish.\"\n  tools: [\"nika:done\", \"nika:compose\"]   # done first · mock/echo closes at turn one\n```\nThe teaching shape is\n[`examples/15-compose-self-check.nika.yaml`](../examples/15-compose-self-check.nika.yaml).\nThe agent loop's self-verification intrinsic · the model passes a workflow\nYAML draft it wrote, and gets the FULL `nika check` verdict back as JSON:\nconformance violations (with codes + repair hints), secret-flow findings,\npermits escapes, and the termination/cost certificate. It **never executes**\nthe draft (« generation is not permission » · the draft is an artifact + its\ncertificate · running it stays a separate, gated decision). Iterate until\n`valid` is true, then deliver the draft.\n\nLoop-served like `nika:done`: **valid only inside an `agent:` tool whitelist**\n(a standalone `invoke: nika:compose` is rejected · `NIKA-BUILTIN-COMPOSE-001`).\nThe model never sees it unless it is whitelisted (default-deny).\n\nArgs · `workflow_yaml` (string · required · the complete draft).\n\n### `nika:inspect` · workflow introspection (4 views · view-discriminated)\n```yaml\ninvoke:\n  tool: \"nika:inspect\"\n  args:\n    view: cost                     # REQUIRED · enum · cost | records | dag_info | threads\n```\nWorkflow introspection · 1 builtin · 4 `view:` enum modes (Rams collapse per ADR-088 · 2026-05-27) ·\n\n- `view: cost` → `{ total_usd, by_task, by_provider }`. Running workflow cost.\n- `view: records` → `{ tasks: [{ id, status, duration_ms, ... }] }`. Full execution record. (Per-task status is also read directly via the `${{ tasks.X.status }}` namespace, same shape.)\n- `view: dag_info` → `{ nodes, edges, waves }`. DAG topology.\n- `view: threads` → `{ active, queued, completed }`. Engine task-pool state · **advisory** · counts reflect the engine's concurrency model (impl-dependent · use for coarse adaptive-throttling · not a portable contract-precise number).\n\nReplaces · 4 legacy introspection builtins (`nika:cost` · `nika:records` · `nika:dag_info` · `nika:threads`) collapsed per « less but better » Rams sweep · same trust class (PURE) · same query-own-workflow-state semantic family · the split into 4 separate builtins was historical (one-per-shape) not structural · the unified `view:` discriminator + per-shape `args:` is the canonical « one super-powerful builtin · multi-mode args » pattern (matches fetch+extract · jq · convert · wait).\n\nThrows · `NIKA-BUILTIN-INSPECT-001` if `view:` value not in the canonical enum.\n\nThe reference engine injects a live cell at composition and writes it\nas tasks settle. `available: true` once the DAG is seeded at run start.\nThe teaching shape is\n[`examples/16-inspect-self.nika.yaml`](../examples/16-inspect-self.nika.yaml).\nProbe any new builtin with `mock/echo` *before* wiring it after a paid\ninfer.\n\n---\n\n## Media builtins (4)\n\n\n### `nika:chart` · deterministic chart artifacts (§Media graduate #4)\n\n```yaml\ninvoke:\n  tool: \"nika:chart\"\n  args:\n    data: \"${{ steps.metrics.output }}\"   # rows · array of flat objects (strings + numbers) · or { path: <json file> }\n    semantics: { period: timestamp, cost: usd, provider: category }\n    chart:\n      type: line                          # bar | line | area_band | scatter | heatmap (closed)\n      x: period                           # field names · y_lo/y_hi = area_band bounds · y2 = actual overlay\n      y: cost                             # color = series split (heatmap: the value field)\n      title: \"Cost over time\"\n    out: report/cost-over-time.svg        # .svg REQUIRED — SVG is the attestation surface\n    compile_to: vega_lite                 # optional · also writes the .vl.json sibling\n```\n\nPure compute + ONE permit-gated write (`out:` rides `permits.fs.write` ·\na `data.path` source rides `permits.fs.read`). No network, no clock, no\nkeys — identical `(spec, data)` produce **byte-identical SVG** on every\nplatform, re-runs are idempotent (hash-equal artifacts are never\nrewritten), and `outputs:` carries the receipts: `path · sha256 ·\ndata_sha256 · width · height · bytes · wrote · warnings`.\n\nThe semantic map drives presentation (`usd` money grain · `duration_ms`\nhumanized · `tokens` k/M · `delta` ⇒ diverging palette anchored at 0 ·\n`percent` · `timestamp` · `count` · `category` — closed set). Encoding\nhonesty is built in: bars always anchor zero · **predictions are dashed,\nobservations solid** (area_band) · decimation (LTTB) keeps extremes and\nwarns — the DATA hash still covers every row.\n\nErrors are `NIKA-BUILTIN-CHART-001..008` (001 empty data · 002 unknown\nfield · 003 non-finite · 004 invalid spec/closed-enum · 005 domain\ncollapsed · 006 type mismatch · 007 too many points · 008 I/O).\n\n### `nika:image_generate` · provider-backed image asset generation\n\n```yaml\ninvoke:\n  tool: \"nika:image_generate\"\n  args:\n    provider: mock                # mock (offline) | local (sovereign) | gemini | openai | xai — inferable from model: (local excepted)\n    prompt: \"OG hero — a monarch butterfly over a nebula, editorial photo\"\n    aspect_ratio: \"16:9\"\n    output_dir: \"./assets/og\"\n    filename_prefix: \"launch-hero\"\n    metadata: { campaign: \"spring\", page_slug: \"qr-menu\" }\n```\n\nText-to-image generation as an *asset pipeline*, not a blob pipe: images are\n**saved to `output_dir:`** and the output carries `paths + dimensions +\nsha256 (+ a provenance manifest)` — **image bytes NEVER ride workflow\noutputs** (no base64 in `tasks.X.output`, logs, or traces · normative).\n\n| Arg | Notes |\n|---|---|\n| `provider` | `local` · `openai` · `gemini` · `xai` · `mock` — optional when inferable from `model:` (`gpt-image*`→openai · `gemini-*`→gemini · `grok*`→xai · `mock*`→mock · `local` is NEVER inferred: its model names are server-specific) |\n| `model` | per-provider default (reference engine 2026-07: `stablediffusion` for local — the LocalAI convention · SD-family servers also honor the `positive \\| negative` split INSIDE `prompt:` (LocalAI pipe syntax) — no separate arg needed · `gpt-image-2` · `gemini-3.1-flash-image` · `grok-imagine-image` — the `-quality` tier is the model knob · `mock-image-1`) |\n| `prompt` | **required** · the creative brief · may use `${{ … }}` |\n| `mode` | `generate` (default · text→image) · `edit` (source image(s) + instruction → image · M2.2 · 2026-07-06) |\n| `image` / `images` | mode:edit source · one path (`image:`) XOR many (`images:` · capped per provider: openai 16 · gemini 14 · xai 3) · **read + permit-gated** (`permits.fs.read` must cover them — the mirror of the save boundary) |\n| `mask` | mode:edit optional pixel-mask path · openai/local only — a mask on an instruction-only provider (gemini/xai) is REFUSED loudly, never silently dropped (the output would be wrong outside the region) |\n| `n` | 1..=10 variants (engines MAY satisfy n via sequential provider calls · documented per adapter) |\n| `aspect_ratio` | closed set `1:1 · 16:9 · 9:16 · 4:3 · 3:4 · 3:2 · 2:3 · 21:9` |\n| `size` | exact `WIDTHxHEIGHT` or `auto` · an exact size WINS over `aspect_ratio:` (with a warning) · providers that render size CLASSES fold it (loudly) |\n| `quality` | `auto · low · medium · high · ultra` — folded per provider capability, never silently |\n| `format` | `png` (default) · `jpeg` · `webp` — **magic bytes are the authority**: what actually landed decides mime/extension, a mismatch is a warning |\n| `compression` | 0..=100 · jpeg/webp only |\n| `background` | `auto · transparent · opaque` · transparent REQUIRES an alpha-capable format (png/webp) and a supporting provider/model |\n| `seed` | best-effort (providers without seed support warn + drop) |\n| `reference_images` | RESERVED (rejected loudly in v0.1 · media roadmap) |\n| `provider_options` | vetted pass-through (unknown keys warn, never crash) · openai `{moderation, user}` · gemini `{thinking_level, image_size}` · xai `{user, resolution: 1k\\|2k}` |\n| `output_dir` | **required** · rides the declared `permits.fs` boundary (`NIKA-SEC-004` · gated per final path BEFORE any I/O) |\n| `filename_prefix` | filename stem (else `metadata.page_slug`, else `image`) — sanitized `[a-z0-9._-]`, traversal-free by construction |\n| `save` | `true` (v0.1 contract · `save: false` is RESERVED — rejected loudly) |\n| `manifest` | write the provenance manifest JSON beside the assets (default `true`) |\n| `metadata` | free provenance object (campaign · page_slug · locale · …) echoed into output + manifest |\n| `timeout_ms` | per-request deadline · default 180000 (local: 300000 — CPU renders run minutes) · 1000..=600000 |\n| `debug` | echo the sanitized raw provider response (base64 payloads STRIPPED · headers never included) |\n\n**Filenames (normative grammar)** ·\n`{stem}-{provider}-{modelslug}-{index}-{sha8}.{ext}` · every component\nsanitized to `[a-z0-9._-]` with no separators; name collisions probe\n`-2..-99`; an IDENTICAL payload already on disk is an idempotent re-run\n(no duplicate). The manifest lands beside the assets as\n`{stem}-{provider}-{modelslug}-{batchsha8}.manifest.json`\n(`manifest_version: 1` · resolved request echo · per-image\npaths/dimensions/sha256 · usage · warnings · caller `metadata:` — and\nNEVER a credential: keys live a composition layer away by construction).\n\n**Output (normalized · every provider + mock)** · `{ provider, model, mode,\nprompt, revised_prompt, provider_text, created_at, count, images: [{ index,\npath, filename, mime_type, format, width, height, size_bytes, sha256,\nprovider, model, seed, variant_id, warnings, metadata }], usage:\n{ input_tokens, output_tokens, total_tokens, thoughts_tokens }, cost_usd,\nwarnings, manifest_path, output_dir }` — absent usage axes are `null`,\nnever zero-that-looks-real. `cost_usd` is the render's REAL spend when\nthe provider reports it exactly (xai bills `cost_in_usd_ticks` in the\nresponse · 1 cent = 10⁸ ticks) and `null` otherwise — never an estimate\ndressed as truth. **Invoke-cost metering (normative)** · a tool whose\nstructured output carries a top-level numeric `cost_usd` reports real\nspend; engines SHOULD meter it into the run's cost ledger through the\nsame honest-spend channel `infer:` rides.\n\n**Security (engine MUST)** · provider endpoints are ENGINE-FIXED constants\n(never workflow data — the provider egress is engine transport, exactly like\n`infer:`; `permits.net.http` does not govern it, `permits.tools` +\n`permits.fs` DO; the `local` base URL is ENGINE CONFIG resolved at the\ncomposition root — `NIKA_IMAGE_LOCAL_URL`, default LocalAI's\n`http://localhost:8080` — still never workflow data) · decode validation is HEADER-ONLY (magic bytes + PNG\nIHDR / JPEG SOF / WebP VP8-VP8L-VP8X dimensions · no pixel decode → no\ndecompression-bomb surface · declared-vs-actual mismatch is a warning, a\nnon-image payload is a hard error) · atomic writes (temp+rename) · API keys\nare engine-configured (env/config at the composition root), never workflow\nargs, never logged, never echoed.\n\n**Warnings (normative shape)** · every tolerated-but-lossy mapping lands a\nstable `code: message` warning string (`size_conflict:` ·\n`compression_ignored:` · `seed_unsupported:` · `quality_folded:` ·\n`format_mismatch:` · `gemini_size_class:` · `xai_size_class:` ·\n`aspect_remapped:` · `count_shortfall:` · `revised_prompt_clamped:` ·\n`provider_option_unknown:` · `provider_text_clamped:` · …) in `warnings` — silent degradation is\nnon-conformant.\n\n**`provider_text`/`revised_prompt` are captions, not payload channels\n(normative)** · a provider's accompanying text MUST be bounded by the\nengine (the reference engine clamps at 2 000 chars with a\n`provider_text_clamped:` warning) — a multimodal response interleaving\nmegabytes of text (or base64-shaped junk) must never ride workflow\noutputs, the manifest, or the `debug:` echo unbounded.\n\n**Result URLs are never fetched (normative)** · engines request\n`response_format: b64_json` on url-capable wires (openai-compat · xai) and\nMUST refuse a url-only response with an actionable error — fetching a\nprovider-supplied result URL would reopen the SSRF/net-boundary surface\nthe const-endpoint design closed. The provenance manifest and output\ncarry `endpoint_host` (which server actually rendered the asset — load-\nbearing for `local`, where the endpoint is configurable).\n\n**Content credentials: detect-and-PRESERVE (normative)** · upstream\ngenerators sign their returned bytes (OpenAI images and Google's media\nmodels emit C2PA manifests as of mid-2026 · carriage: PNG `caBX` chunk ·\nJPEG APP11 JUMBF · `WebP`/WAV RIFF `C2PA` · MP3 `ID3v2` GEOB\n`application/c2pa`), and C2PA hard bindings hash the asset's byte\nranges — **any engine-side insert into a signed payload converts valid\ncredentials into « present but tampered », which is worse than\nstripping them**. Engines MUST detect these signals before any in-file\nwrite, MUST stand their own embed down when credentials are present,\nand SHOULD surface presence as `content_credentials` in output +\nmanifest (values are DETECTION labels — an engine that has not\ncryptographically validated the manifest must never say « verified »).\nProvider-declared watermarking (e.g. `SynthID` — detectable only by the\nvendor) MAY be surfaced as a `watermark_declared` manifest fact, marked\nas declared, never as verified. Preserving machine-readable marks is\nalso the EU AI Act Article 50 robustness expectation (in force\n2026-08-02).\n\n**Provenance travels IN the file (PNG)** · engines SHOULD embed the\ndeterministic provenance core (tool · engine version · provider · model ·\nclamped prompt · seed — no timestamp, so byte-determinism holds) as a\n`nika` tEXt chunk in saved PNG renders — the ComfyUI/InvokeAI\ninterchange practice: a sidecar manifest answers « where does this come\nfrom? » only until the file is copied without it. JPEG/WebP have no\nequally-universal text container and are documented as manifest-only,\nnever silently faked.\n\nThrows · `NIKA-BUILTIN-IMAGE_GENERATE-001` invalid arguments (incl. the v0.1\nRESERVED options · `validation_error`) · `-002` provider unavailable\n(missing credentials / image plane unwired · `validation_error`) · `-003`\nprovider request failed (`network_error` · `transient: true` for\n5xx/408/429 + timeout/connection · `details.status_code`) · `-004` no\nimage / malformed response (`tool_error`) · `-005` content policy block\n(moderation / safety finish reasons · `security_error` · never transient ·\n`details {finish_reason? · moderation_details?}`) · `-006` save/manifest\nwrite failed (`tool_error`) · `-007` image validation failed (magic\nmismatch · dimension/byte bounds · `tool_error`). Plus the boundary\n`NIKA-SEC-004` (an `output_dir:` outside `permits.fs.write`).\n\n---\n\n### `nika:image_fx` · deterministic artistic image effects\n\n```yaml\ninvoke:\n  tool: \"nika:image_fx\"\n  args:\n    input: out/hero-openai-gptimage2-0-a1b2c3d4.png   # source PNG (read-gated)\n    out: out/hero-styled.png                          # artifact path (write-gated)\n    seed: 42                                          # optional · default 0\n    ops:                                              # ordered · single-key op maps\n      - resize: { width: 320 }                        # linear-light · auto|nearest|bilinear\n      - dither: { mode: floyd_steinberg, palette: gameboy }\n      - grain: { intensity: 32 }\n      - scanlines: { strength: 110, period: 4 }\n      - vignette: { strength: 140 }\n```\n\nThe §Media graduate #3 (the `image editing` deferred row) — the\nDETERMINISTIC sibling of `image_generate`: pure pixel transform, NO\nprovider, NO network, NO clock. **Byte-identical output forever** for\nidentical `(input bytes, args)` — the artifact's sha256 joins the\nhash-chained trace, re-render IS the tamper check, and the full recipe\n(contract tag `image_fx/v1` · input sha256 · seed · ops) rides the artifact itself\nas a PNG `nika` tEXt chunk (no timestamp — determinism holds).\nIdentical bytes already at `out:` = idempotent skip (`skipped_existing`).\n\n| Arg | Contract |\n|---|---|\n| `input` | REQUIRED · source path · **PNG v1** (depth 8 · gray/RGB/RGBA · no Adam7) — non-PNG fails `-003` with the honest hint (produce PNG upstream via `image_generate format: png`) · read rides `permits.fs.read` · decoded-pixel budget gated from the header BEFORE any decompression (`-005`) |\n| `out` | REQUIRED · artifact path · extension must match the pipeline (`.png` · `.txt`/`.ans` for ascii text/ansi emits) · write rides `permits.fs.write` |\n| `ops` | REQUIRED · 1..=32 ordered single-key maps over the closed v1 vocabulary: `resize {width,height,filter}` · `crop {x,y,width,height}` · `levels {brightness,contrast}` · `grayscale` · `palette_map {palette}` · `dither {mode: bayer2\\|bayer4\\|bayer8\\|blue_noise\\|ign\\|floyd_steinberg\\|atkinson\\|jjn, palette}` · `duotone {dark,light}` · `pixelate {block}` · `halftone {cell, angle: 0\\|15\\|45\\|75}` · `grain {intensity}` · `vignette {strength}` · `chromatic_aberration {shift}` · `scanlines {strength,period}` · `glitch {line_shift,channel_shift,blocks}` · `ascii {cols, emit: png\\|text\\|ansi}` (ascii MUST be last — it changes the artifact type). Branching/fan-out is the WORKFLOW's job (`with:`/`after:` edges · `for_each`) — `ops` is a linear pipeline by design · unknown op parameters are rejected (`-001` — no silent style lies) |\n| `palette` (in ops) | preset (`bw` · `gray4` · `gameboy` · `cga` · `okabe_ito`) or inline list of `#rrggbb` / `[r,g,b]` (2..=256 colors) · nearest-color mapping is perceptual (Oklab distance) |\n| `seed` | stochastic-op seed (`grain` · `glitch`) · default 0 · **the seed IS the style** — same seed, same bytes |\n\nPer-op defaults + acceptance ranges (NORMATIVE — for a byte-deterministic\nbuiltin the defaults ARE the wire contract; a second engine choosing other\ndefaults emits different bytes for the same YAML) ·\n\n| Op | Defaults | Ranges |\n|---|---|---|\n| `resize` | `filter: auto` | width/height 1..=16384 (≥1 required) |\n| `crop` | `x: 0` · `y: 0` | width/height ≥1 · rect inside image |\n| `levels` | `brightness: 0` · `contrast: 0` | brightness −255..=255 · contrast −128..=128 |\n| `dither` | `mode: floyd_steinberg` · `palette: bw` | palette 2..=256 colors |\n| `palette_map` | `palette: bw` | palette 2..=256 colors |\n| `pixelate` | — | block 2..=256 |\n| `halftone` | `cell: 8` · `angle: 45` | cell 3..=64 |\n| `grain` | `intensity: 48` | 0..=128 |\n| `vignette` | `strength: 160` | 0..=255 |\n| `chromatic_aberration` | `shift: 4` | 1..=16 |\n| `scanlines` | `strength: 96` · `period: 4` | strength 0..=255 · period 2..=64 |\n| `glitch` | all 0 | line_shift ≤64 · channel_shift ≤16 · blocks ≤64 · ≥1 non-zero |\n| `ascii` | `cols: 96` · `emit: png` | cols 2..=1024 |\n\nInput caps (normative) · per-dimension ≤16384 · decoded pixels ≤2^26\n(gated from the header BEFORE any decompression · `-005`).\n\nOutput · `{ input, input_sha256, path, sha256, size_bytes, width, height,\nformat, ops_applied, seed, skipped_existing }` — artifact bytes NEVER\nride outputs (the disk law, inherited verbatim). Text artifacts (ascii\n`text`/`ansi` emits) report `width`/`height` `0` and `format` `txt`/`ans`.\n\nDeterminism contract (normative) · no wall-clock · no randomness beyond\nthe seeded stream · no float transcendentals · integer/fixed-point pixel\nmath · identical `(input, args)` MUST produce byte-identical artifacts\nacross platforms and releases within a stdlib major (the recipe carries\nthe stable contract tag `image_fx/v1`, never the engine build). An\nengine that cannot honor this is not conformant (07-conformance §3).\n\nThrows · `NIKA-BUILTIN-IMAGE_FX-001` invalid arguments (unknown op ·\nout-of-range param · extension mismatch · `validation_error`) · `-002`\ninput read failed (`tool_error`) · `-003` unsupported input format\n(non-PNG · exotic depth/interlace · `validation_error`) · `-004` decode\nfailed (structural corruption · CRC/Adler mismatch · `tool_error`) ·\n`-005` decoded-pixel budget exceeded (`security_error` · never\ntransient) · `-006` artifact save failed (`tool_error`). Plus the\nboundary `NIKA-SEC-004` (paths outside `permits.fs`).\n\n---\n\n### `nika:tts_generate` · provider-backed speech synthesis (§Audio)\n\n```yaml\nnarrate:\n    invoke:\n      tool: \"nika:tts_generate\"\n      args:\n        provider: local              # sovereign first — or openai · elevenlabs · mock\n        text: \"Bienvenue — the launch is live.\"\n        voice: \"alloy\"\n        output_dir: \"./assets/audio\"\n```\n\nTeaching shape · [`17-tts-self`](../examples/17-tts-self.nika.yaml)\n(`provider: mock` · a real WAV · offline).\n\nThe image family's contract, applied to audio: ONE audio file lands under\n`output_dir:` (permit-gated per final path BEFORE I/O · atomic write ·\ncontent-hash-named `{stem}-{provider}-{model}-{sha8}.{ext}` so identical\nre-runs are idempotent), the output carries `{ provider, model, voice,\ncreated_at, endpoint_host, audio: { path, filename, format, mime_type,\nsize_bytes, sha256, duration_ms }, cost_usd, warnings, manifest_path,\noutput_dir }` — **audio bytes NEVER ride outputs**, and a sidecar\nprovenance manifest (`manifest: true` default) echoes the resolved\nrequest.\n\n| Arg | Contract |\n|---|---|\n| `provider` | REQUIRED-or-inferred · closed: `local` (any OpenAI-speech-compatible self-hosted server — LocalAI · Kokoro-FastAPI · Speaches · openedai-speech · ONE wire: `POST {base}/v1/audio/speech` → raw bytes · base URL is ENGINE CONFIG `NIKA_TTS_LOCAL_URL`, default `http://localhost:8080`, never workflow data · never inferred) · `openai` · `elevenlabs` · `mock` (a REAL deterministic WAV · zero network/keys). Inference: `eleven*` → elevenlabs · `gpt-*`/`tts-*` → openai · `mock*` → mock. |\n| `model` | per-provider default (reference engine 2026-07: `tts-1` local convention · `gpt-4o-mini-tts` · `eleven_multilingual_v2` · `mock-tts-1`) |\n| `text` | REQUIRED · non-empty · ≤4096 chars (the strictest documented wire cap, held portably — fan longer scripts out with `for_each`) |\n| `voice` | provider voice id · defaults: `alloy` (openai/local) · Rachel's public id (elevenlabs — ids are path components, so engines MUST restrict them to the id alphabet) · `sine` (mock) |\n| `format` | `mp3 \\| wav \\| auto` (default auto = provider-native) — the saved EXTENSION follows the sniffed bytes (magic authority), never the ask; a lossy fold is a `format_mismatch:` warning |\n| `speed` | 0.25–4.0 (openai/local native) — warned-dropped (`speed_unsupported:`) where the wire has no knob |\n| `output_dir` · `filename_prefix` · `metadata` · `manifest` | as `image_generate` (stem falls back to `metadata.page_slug`, then `speech`) |\n| `timeout_ms` | default 120000 · local 300000 (CPU synthesis) · max 600000 |\n\n**Validation (engine MUST)** · the payload is sniffed (WAV `RIFF…WAVE` ·\nMP3 `ID3`/frame-sync) — a non-audio payload is a hard `-007`; WAV\n`duration_ms` is exact header math, MP3 duration is honestly `null`\n(never a guess). Empty payloads are `-004`.\n\n**Security (engine MUST)** · endpoints are engine-fixed constants (the\n`local` base URL is engine config at the composition root — the same\nsanction as `image_generate` and `infer:`) · keys are engine-configured\n(`OPENAI_API_KEY` · `ELEVENLABS_API_KEY` · `NIKA_TTS_LOCAL_API_KEY` or\nthe `NIKA_`-prefixed forms), never workflow args, never logged · a\nverbose local server reflecting the Bearer into an error body MUST be\nscrubbed (the image family's rule).\n\nThrows · `NIKA-BUILTIN-TTS_GENERATE-001` invalid arguments\n(`validation_error`) · `-002` provider unavailable (`validation_error`) ·\n`-003` request failed (`network_error` · `transient: true` for\n5xx/408/429 + timeout/connection) · `-004` empty audio (`tool_error`) ·\n`-005` content policy (`security_error` · never transient) · `-006` save\nfailed (`tool_error`) · `-007` payload validation (`tool_error`) — the\nimage twin's category ladder, code for code.\n\n## What jq subsumes (cut from v0.1)\n\nThese 13 former builtins are **expressible in `nika:jq`** (jaq-verified) · cut to\nkeep ONE data language (« no two ways to transform data »). Canonical recipes ·\n\n| Former builtin | jq recipe |\n|---|---|\n| `nika:map` | `map(EXPR)` |\n| `nika:filter` | `map(select(EXPR))` |\n| `nika:group_by` | `group_by(.key)` |\n| `nika:aggregate` | `map(.val) \\| add` |\n| `nika:enrich` | `. + { fetched_at: $now }` |\n| `nika:chunk` | `[range(0; length; N) as $i \\| .[$i:$i+N]]` |\n| `nika:flatten` (object dot-path) | `[leaf_paths as $p \\| {($p\\|join(\".\")): getpath($p)}] \\| add` |\n| `nika:unflatten` | `reduce to_entries[] as $e (.; setpath($e.key/\".\"; $e.value))` |\n| `nika:inject` (template) | `\"Hello \\(.name), age \\(.age)\"` (string interpolation) |\n| `nika:base64_encode` / `_decode` | `@base64` / `@base64d` |\n| `nika:json_to_csv` | `nika:convert to: csv` (NOT jq — the embedded jaq has no `@csv` filter) |\n| `nika:json_merge` (recursive `*`) | `.[0] * .[1]` on a `[base, overlay]` input (jaq `obj_merge` · source-verified 2026-05-27) |\n\nAlso cut · `nika:task_status` (use `${{ tasks.X.status }}`) · `nika:orchestrate`\n(use `for_each` for bounded fan-out · a sub-workflow call is the `invoke:\nworkflow:` tagged union per `14-composition.md` · never a builtin) ·\n`nika:locale_lookup` (niche i18n → stdlib-extended).\n\n---\n\n## Media builtins · the REST stays DEFERRED (stdlib v0.x)\n\n`image_generate` graduated 2026-07-05 · `tts_generate` same arc ·\n`image_fx` graduated 2026-07-09 (the image *editing* row · §Media #3) ·\n`chart` graduated 2026-07-09 (above · §Media #4). The remaining media class\n(pdf_extract · svg_render · phash · provenance ·\n…) is NOT enumerated in v0.1 (feature-flag in the reference engine · MAY\ngraduate builtin-by-builtin per the 3-razor admission test). Deliberate\n« less but better » (Rams 10).\n\n---\n\n## Cross-builtin invariants\n\nA v0.1-compliant builtin · takes a single `args` object · returns a\nJSON-serializable value · reports errors as typed `NIKA-BUILTIN-<NAME>-NNN` codes (4-segment · per-builtin sub-namespace · [05](../spec/05-errors.md)) ·\nhonors task-level `timeout` · respects engine security policies.\n\n---\n\n## Forward-compat\n\nNew builtins MAY enter stdlib v0.x. Builtin removal is never allowed within a\nstdlib v0.x lifetime (removal requires a new stdlib major). The v0.1 → 22\nconsolidation (42 → 26 → 22 · then +`compose` → 23 · then +`image_generate`\n→ 24 · the additive §Media graduation path) happened **pre-public** (0\nexternal users · before the forever-clock).\n\n---\n\n🦋 *<!-- canon:builtins -->28<!-- /canon --> builtins canonical · jq = the data language · 5-layer Rams symmetry (fetch+extract · jq · convert · wait · inspect) · assets land on disk, never inline · clear forever.*\n"
+}

@@ -124,7 +124,7 @@
     },
     "mcp-server": {
       "category": "integrations",
-      "guide": "reference/mcp-server",
+      "guide": "reference/mcp-catalog",
       "relation": "guide",
       "visibility": "public-concept"
     },
@@ -226,19 +226,19 @@
     },
     "document": {
       "category": "knowledge",
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "visibility": "mixed-review-required"
     },
     "set": {
       "category": "knowledge",
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "visibility": "mixed-review-required"
     },
     "surface": {
       "category": "knowledge",
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "visibility": "mixed-review-required"
     },
@@ -271,31 +271,109 @@
       "guide": "reference/constellation",
       "relation": "guide",
       "visibility": "internal-evidence"
+    },
+    "diagnostic": {
+      "category": "language",
+      "guide": "reference/error-codes",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "law": {
+      "category": "language",
+      "guide": "reference/knowledge-system",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "registry": {
+      "category": "language",
+      "guide": "reference/knowledge-system",
+      "relation": "guide",
+      "visibility": "public-concept"
+    },
+    "repository": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "distribution-package": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "publication-channel": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "deployment-surface": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "github-organization": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "pull-request": {
+      "category": "delivery",
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "benchmark": {
+      "category": "evidence",
+      "guide": "guides/testing",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "evaluation-feature": {
+      "category": "evidence",
+      "guide": "guides/testing",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "evaluation-domain": {
+      "category": "evidence",
+      "guide": "guides/testing",
+      "relation": "guide",
+      "visibility": "internal-evidence"
+    },
+    "evaluation-receipt": {
+      "category": "evidence",
+      "guide": "concepts/traces",
+      "relation": "guide",
+      "visibility": "internal-evidence"
     }
   },
   "destinations": {
     "lab": {
-      "guide": "introduction",
+      "guide": "guides/explore-lab",
       "relation": "guide",
       "scope": "orientation"
     },
     "browse": {
-      "guide": "introduction",
+      "guide": "guides/explore-lab",
       "relation": "guide",
       "scope": "orientation"
     },
     "docs": {
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "scope": "orientation"
     },
     "documents": {
-      "guide": "introduction",
+      "guide": "reference/documentation",
       "relation": "guide",
       "scope": "orientation"
     },
     "ecosystem": {
-      "guide": "introduction",
+      "guide": "guides/explore-lab",
       "relation": "guide",
       "scope": "orientation"
     },
@@ -418,6 +496,16 @@
       "guide": "reference/design-system",
       "relation": "guide",
       "scope": "guide"
+    },
+    "publications": {
+      "guide": "reference/distribution",
+      "relation": "guide",
+      "scope": "orientation"
+    },
+    "system": {
+      "guide": "reference/knowledge-system",
+      "relation": "guide",
+      "scope": "orientation"
     }
   },
   "languageSections": [

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "owner": "supernovae-st/nika-docs",
+  "legacyGuides": {
+    "/docs": "reference/documentation",
+    "/documentation": "reference/documentation",
+    "/spec": "reference/schema",
+    "/language": "reference/language/overview",
+    "/language/words": "reference/language/overview",
+    "/language/verbs": "concepts/verbs",
+    "/language/stdlib": "reference/builtins",
+    "/language/errors": "reference/error-codes",
+    "/tools": "reference/builtins",
+    "/errors": "reference/error-codes",
+    "/templates": "guides/templates",
+    "/workflows": "concepts/workflows",
+    "/workflows/skeletons": "guides/templates",
+    "/workflows/path/01-hello": "getting-started/first-workflow",
+    "/install": "getting-started/installation",
+    "/timeline": "reference/timeline",
+    "/map": "reference/constellation",
+    "/sdk": "sdk/overview",
+    "/integrations": "integrations/everywhere",
+    "/providers": "reference/providers-catalog",
+    "/architecture": "concepts/architecture",
+    "/city": "architecture/layers",
+    "/lab": "guides/explore-lab"
+  }
+}
