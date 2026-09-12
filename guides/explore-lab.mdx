@@ -37,7 +37,7 @@ documentation page.
     smaller local map instead.
   </Step>
   <Step title="Open a node without losing the map">
-    Click a node to read its page over the graph. This is the actual page:
+    In **Explorer** mode, click a node to read its page over the graph. This is the actual page:
     an editor still edits your local workflow, and an object page still points
     to its reference and recorded sources. Internal reading links continue
     through the graph context.
@@ -62,6 +62,63 @@ flowchart LR
   Read -->|Page seule| Start
   Read -->|Documentation| Docs[Public reference on docs.nika.sh]
 ```
+
+### Choose how to arrange the map
+
+The graph fills the central workspace. Its controls float over the canvas;
+**Plein écran** also hides the sidebar. The composition menu changes where
+nodes are placed while keeping their identities and recorded relationships.
+
+| Composition | Use it to… | Read the positions as… |
+| --- | --- | --- |
+| Constellation | Explore around a selected subject | Neighbors arranged in rings, with different families represented |
+| Familles | Separate documents, tools, files and other types | A column for each type present in the current view |
+| Flux | Follow the direction of recorded relationships | A directed layout, including cycles when present |
+
+Rings do not indicate importance or evidence strength. A rank in **Flux** does
+not indicate time or workflow execution order. Read the link and its source
+to understand what it actually means.
+
+### Explore, then organize
+
+<Steps>
+  <Step title="Move through the canvas">
+    In **Explorer**, drag the background to pan, pinch to zoom, or use the
+    zoom buttons and mini-map. Click a node, or focus it and press Enter,
+    to open its page. Dragging a node moves it without opening the page.
+  </Step>
+  <Step title="Arrange a group">
+    Choose **Organiser** in the bottom dock. Draw a selection rectangle or
+    Shift-click nodes, then drag the selection together. Arrow keys move a
+    focused selection; hold Space to pan. Open a selected node with Enter,
+    a double-click or **Ouvrir ce nœud**.
+  </Step>
+  <Step title="Change density or start again">
+    **Compact** reduces the cards; **Cartes** restores their fuller view.
+    **Réaligner** restores the current automatic composition. Manual positions
+    and the camera are session preferences, kept separately for each scope,
+    composition and density. Opening a page above the map preserves that context.
+  </Step>
+</Steps>
+
+These gestures arrange your view; they do not edit the imported source graph.
+Motion follows the system's reduced-motion preference, including changes made
+while the Lab is open.
+
+### Narrow a busy neighborhood
+
+Open **Liste et liens**, then choose a **Type de voisin** or a **Relation à
+explorer**. For example, the `agent` dossier can show just its documents while
+keeping the same subject. The list reports the relations
+currently displayed and the total available for that relation scope.
+
+Large neighborhoods admit more nodes as you scroll the list and alternate
+families in the first view. This presentation does not remove identities from
+the underlying graph. **Tous les nœuds** remains available for its dense view.
+
+Hover a node to reveal its link labels. Click a relation to open its provenance
+in the side panel; the corresponding source relation is highlighted. Close
+**Liste et liens** to give the canvas its full visual space again.
 
 ### Distinguish navigation from evidence
 
