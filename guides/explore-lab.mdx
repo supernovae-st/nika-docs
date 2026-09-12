@@ -120,6 +120,10 @@ Hover a node to reveal its link labels. Click a relation to open its provenance
 in the side panel; the corresponding source relation is highlighted. Close
 **Liste et liens** to give the canvas its full visual space again.
 
+The map also draws recorded relationships **between the neighbors already
+shown**. These appear as **Entre les voisins affichés** in the provenance list.
+They do not add hidden nodes, and the relation filter applies to them too.
+
 ### Distinguish navigation from evidence
 
 A field such as `after` retains its canonical object identity. Its normal page,
@@ -182,6 +186,61 @@ files alone do not create dossier-to-dossier links.
 </Note>
 
 ## Follow an object
+
+### Follow references across repositories
+
+Object pages and dossiers include **Continuer l’exploration**, with a
+**Références et citations** section. It proposes a direct connection or a path
+through an intermediate document. Each step opens the existing object page;
+the arrows retain the direction of the recorded relation.
+
+| Reading control | What it shows |
+| --- | --- |
+| Type de destination | Documentation, contracts, code, evaluations or language objects |
+| Entre dépôts | Paths whose objects have sources in different repositories |
+| Liens entrants | Objects with a direct recorded relation pointing to this object |
+| Liens sortants | Objects reached by this object's direct outgoing relations |
+| Sources de ce chemin | The evidence and source address for each step |
+
+For example, the [Codex integration](/integrations/clients/codex) references
+installation, agent setup and the Nika MCP server. Captured hyperlinks connect
+those document pages in the Lab. A language field can lead to its dedicated
+reference and then to another page explicitly linked by that reference.
+
+```mermaid
+flowchart LR
+  Field[Language object] -->|Documented in| Guide[Dedicated reference]
+  Guide -->|Explicit hyperlink| Related[Another document]
+  Guide -->|Exact commit link| Version[Cited source version]
+  Related -->|Recorded source| Code[Source file]
+```
+
+Open a proposed destination to see the path, then use **Voir dans le graphe** to inspect its neighborhood. The list proposes one path per
+destination; it does not claim to list every possible path. Sharing a repository
+or a schema file alone does not generate suggested paths or dossier membership.
+
+### Read the version behind a link
+
+An explicit hyperlink is evidence that one captured document references another
+resource. Its meaning depends on the destination:
+
+| Link target | What the Lab preserves |
+| --- | --- |
+| Public Docs route | The route and its captured document; live publication is checked separately |
+| GitHub URL at a full commit | That exact repository, path and file version |
+| GitHub `main` or `master` URL | The cited moving URL and a separate captured observation of the path, without claiming identical versions |
+
+When a document cites a file version older than the repository inventory, the
+Lab can retain that explicitly cited version as a separate source node. Its
+commit and content fingerprint remain visible. It does not replace the current
+inventory's identity or imply that the code has been executed.
+
+**Références hors de cette capture** keeps unresolved destinations accessible at
+their original URLs. The Lab does not substitute a similarly named file or a
+different commit. A relationship path is a reading aid, not proof of runtime
+support, synchronized versions or benchmark qualification.
+
+### Move from a question to its source
 
 <Steps>
   <Step title="Choose a category or search for an object">
