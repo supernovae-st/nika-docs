@@ -353,7 +353,9 @@
     "knowledge-subject": {
       "guide": "guides/explore-lab",
       "relation": "guide",
-      "scope": "lab-subject-assembly"
+      "scope": "lab-subject-assembly",
+      "category": "knowledge",
+      "visibility": "mixed-review-required"
     }
   },
   "destinations": {
