@@ -137,7 +137,8 @@
             "pages": [
               "introduction",
               "reference/documentation",
-              "guides/explore-lab"
+              "guides/explore-lab",
+              "guides/lab-agents"
             ]
           },
           {

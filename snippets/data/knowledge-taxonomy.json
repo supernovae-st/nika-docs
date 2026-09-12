@@ -513,6 +513,11 @@
       "guide": "reference/knowledge-system",
       "relation": "guide",
       "scope": "orientation"
+    },
+    "agents": {
+      "guide": "guides/lab-agents",
+      "relation": "guide",
+      "scope": "guide"
     }
   },
   "languageSections": [
