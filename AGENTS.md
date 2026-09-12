@@ -19,13 +19,7 @@ Public documentation for Nika — the open workflow language for AI
    `snippets/_status-snapshot.mdx` the same way (`STATUS.version`…).
    Frontmatter `description:` cannot import — keep counts OUT of
    descriptions entirely. **No exemption, no "forever-locked" carve-out.**
-   This rule used to exempt "the 42-crate target"; ADR-037 then revised it
-   to a 50-90 horizon (cap 100, "projected, never a gate"), and the
-   blessed literal went on rendering `54 / 42` on live pages. A count that
-   feels permanent is the one nobody re-checks. If a description needs a
-   number, rewrite the sentence so it doesn't. Dated changelog/ADR entries
-   are FROZEN history: never retro-edit their numbers — fix the drift in
-   the live pages instead.
+   Dated changelog/ADR entries are frozen history; repair active pages instead.
 2. **4 verbs only**: `infer` · `exec` · `invoke` · `agent`. Fetch is the
    `nika:fetch` builtin under `invoke:` — never document it as a verb.
 3. New pages must be registered in `docs.json` nav — `python3
@@ -42,9 +36,8 @@ Public documentation for Nika — the open workflow language for AI
    filters. Model id in examples: `ollama/qwen3.5:4b` (local-first ·
    sovereignty default · the SAME model the engine's own scaffold and
    the brew caveat teach — one first experience across the funnel) ·
-   cloud variant when needed: `mistral/mistral-large` · anthropic/openai
-   NEVER the default example (presentation order per
-   supernovae-alignment Rule 3 · local → mistral → anthropic → openai).
+   cloud variant when needed: `mistral/mistral-large`. Respect an explicitly
+   requested provider/model; examples do not change runtime defaults.
 7. Commit trailer: `Co-Authored-By: Nika 🦋 <nika@supernovae.studio>`.
 8. **These docs teach the current stable binary and only that binary.** The
    exact version is the projection at `snippets/_status-snapshot.mdx`; never
@@ -85,3 +78,9 @@ Public documentation for Nika — the open workflow language for AI
    nika-spec `2b3d6ac3e`): a served example IS the spec file. Changing
    one for real means changing the spec file and re-projecting, not
    editing the mirror.
+
+## Task scope and completion
+
+Read the source needed for the change: `docs.json` for navigation, the owning spec for language behavior, and the released-binary projection for current engine claims. A typo correction does not need a whole-repository architecture survey. For authored YAML, run the relevant oracle checks as required above; preserve effect boundaries and do not execute paid workflows implicitly.
+
+Complete authorized edits through the required checks and requested publication, fixing failures introduced by the change. Report unrelated baseline failures separately. Preserve model choice and use available client tools; these instructions do not require a particular model or a private studio checkout.
