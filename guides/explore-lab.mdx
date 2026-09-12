@@ -8,6 +8,79 @@ The Lab brings source documents and a graph of Nika objects into one workspace.
 Use it to follow a question across language fields, tools, crates and the
 documents that describe them. Public guides remain on `docs.nika.sh`.
 
+## Choose a space, then a view
+
+The sidebar answers **what you want to work with**. The Page / Graphe switch
+answers **how you want to navigate it**. Changing the view does not create a
+second copy of an object.
+
+| Lab space | Start here to… |
+| --- | --- |
+| Accueil | Understand the workspace and choose a starting point |
+| Explorer | Find language elements, tools, models, contracts and documents |
+| Atelier | Choose a workflow example, edit YAML and return to local drafts |
+| Évaluations | Connect test protocols, captured campaigns, receipts and results |
+| Projet & code | Follow architecture, development work, repositories and publications |
+| Réglages et outils | Configure local preferences and inspect workspace tools |
+
+**Plan du Lab** lists the available pages and explains their roles. The same
+page definitions appear in the graph. A page can be a local tool, a collection,
+a guide or a view of imported observations; it does not have to be a public
+documentation page.
+
+### Read on top of the graph
+
+<Steps>
+  <Step title="Locate the page you are reading">
+    Choose **Graphe** in the sidebar, or click the mini-map at the bottom of the
+    page. The graph opens around the current subject. **Voisins** opens the
+    smaller local map instead.
+  </Step>
+  <Step title="Open a node without losing the map">
+    Click a node to read its page over the graph. This is the actual page:
+    an editor still edits your local workflow, and an object page still points
+    to its reference and recorded sources. Internal reading links continue
+    through the graph context.
+  </Step>
+  <Step title="Continue exploring or return to the page">
+    **Revenir au graphe**, or Escape, closes the reading panel while keeping
+    the map context. **Page seule** opens the page normally. The browser's
+    back button follows your navigation history. **Plein écran** expands the
+    graph across the workspace; Escape leaves that expanded view.
+  </Step>
+</Steps>
+
+The graph's **Plan du Lab** scope starts from local pages and spaces.
+**Tout Nika** also includes the imported objects and sources. **Tous les nœuds**
+opens the exhaustive map, while grouped views keep the overview readable.
+
+```mermaid
+flowchart LR
+  Start[Page in the Lab] -->|Graphe| Map[Graph around the same subject]
+  Map -->|Click a node| Read[Actual page over the map]
+  Read -->|Revenir au graphe| Map
+  Read -->|Page seule| Start
+  Read -->|Documentation| Docs[Public reference on docs.nika.sh]
+```
+
+### Distinguish navigation from evidence
+
+A field such as `after` retains its canonical object identity. Its normal page,
+its graph node and its search result resolve to that identity. Local pages and
+spaces have their own Lab-owned identities, such as `lab:page:editor` and
+`lab:space:build`. Search filters describe views of those pages; they are not
+new knowledge objects.
+
+A dotted navigation link such as **affiche cet élément** says that a Lab page
+presents an object. **contient la page** places a page within a space.
+**a pour guide** connects a page to its associated documentation. These links
+are authored by the Lab and stay distinct from imported source relations.
+They do not prove implementation, execution or benchmark coverage. The
+**Pages du Lab** relation filter isolates these navigation links on object pages.
+
+Private drafts remain local to the browser. Representing the editor as a graph
+node does not publish the contents of those drafts.
+
 ## Follow an object
 
 <Steps>
