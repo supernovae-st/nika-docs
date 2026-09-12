@@ -81,6 +81,49 @@ They do not prove implementation, execution or benchmark coverage. The
 Private drafts remain local to the browser. Representing the editor as a graph
 node does not publish the contents of those drafts.
 
+## Read a subject as a whole
+
+Start with **Explorer → Dossiers** when you want to understand a feature rather
+than inspect one isolated source. A dossier brings related objects into a
+single reading page: its defining identities, contracts, documentation, source
+references, examples, evaluations and distribution records when linked.
+
+The diagram is interactive. Choose a role to inspect its members, then open
+**Pourquoi ce rattachement ?** to see the source relation that admitted each
+member. **Lire sur Docs** opens an explicitly mapped public reference;
+**Source Git** opens the recorded source revision. A missing branch means no
+link was found in the imported sources, not that no implementation exists.
+
+```mermaid
+flowchart LR
+  Subject[Subject dossier] --> Identity[Defining identities]
+  Subject --> Contract[Contracts and cited rules]
+  Subject --> Docs[Explicit documentation]
+  Subject --> Code[Source definitions and citations]
+  Subject --> Examples[Imported examples]
+  Subject --> Evaluation[Associated evaluations]
+  Subject --> Distribution[Declared distribution]
+```
+
+For example, the **agent** dossier brings its verb definition and task-field
+contract together. They remain separate identities with their own revisions.
+Other fields declared in the same task block appear as neighboring subjects;
+sharing a schema does not make them part of the same feature.
+
+An object can support several dossiers. Its page links back to those dossiers,
+so a shared document or source file remains one object rather than being
+copied. The dossier itself has a Lab-owned graph identity prefixed with
+`lab:subject:`. The **Dossiers de connaissance** graph scope shows dossiers and
+the direct relationships between their defining subjects. Shared supporting
+files alone do not create dossier-to-dossier links.
+
+<Note>
+  Dossiers are reading assemblies maintained by the Lab. A code citation does
+  not prove implementation; an associated benchmark does not prove measured
+  coverage. Different source revisions stay visible and are not certified as
+  synchronized by the grouping.
+</Note>
+
 ## Follow an object
 
 <Steps>
