@@ -200,7 +200,7 @@ two that carry a contract of their own:
 
 | Modifier | What it declares |
 |---|---|
-| `returns:` | The task's output type, as an inline [type expression](#types--inline-where-the-shape-is-used) — exclusive with a verb-level `schema:` (`NIKA-TYPE-003`). Under composition it is how the parent states the child's shape. |
+| `returns:` | The task's output type, as an inline [type expression](#types-·-inline-where-the-shape-is-used) — exclusive with a verb-level `schema:` (`NIKA-TYPE-003`). Under composition it is how the parent states the child's shape. |
 | `lift:` | The **single** construct through which an author opens a named law. `law: taint` raises exactly one binding (`from:` a dotted path · a non-empty `because:`) through the permit-parameterization taint — the value is still matched against the declared boundary, so it is never a permit bypass. `law: data-as-code` (no `from:` · a non-empty `because:`) is the door through the data-as-code sink: a `nika:fetch` whose resolved URL names a code-bearing class (`.pkl` · `.py` · `.so` · the closed NEP-0006 list) is refused with `NIKA-SEC-008` unless the entry declares the artifact will never be loaded or run. It lifts that law only — never the `net.http` boundary, never the SSRF floor. |
 
 ```yaml inert-fetch.nika.yaml
@@ -302,10 +302,10 @@ Normative home: [stdlib · providers §Transport deadline](https://github.com/su
 ## Verbs
 
 See individual pages:
-- [`infer`](/concepts/verbs#infer): LLM call
-- [`exec`](/concepts/verbs#exec): shell commands
-- [`invoke`](/concepts/verbs#invoke): built-in or MCP tool (HTTP fetch is `invoke: nika:fetch`)
-- [`agent`](/concepts/verbs#agent): tool-calling loop
+- [`infer`](/concepts/verbs#infer-llm-inference): LLM call
+- [`exec`](/concepts/verbs#exec-run-a-local-command): shell commands
+- [`invoke`](/concepts/verbs#invoke-call-a-builtin-or-mcp-tool): built-in or MCP tool (HTTP fetch is `invoke: nika:fetch`)
+- [`agent`](/concepts/verbs#agent-multi-turn-loop-with-tools): tool-calling loop
 
 ## Full schema
 
