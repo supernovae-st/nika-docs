@@ -20,7 +20,7 @@ def walk(o):
             nav_pages.add(v) if isinstance(v, str) else walk(v)
 walk(json.load(open('docs.json'))['navigation'])
 
-# Documentation destinations are owned here; the Lab imports this reviewed map.
+# Documentation destinations are owned by this public reference.
 routes = json.load(open('snippets/data/documentation-navigation.json'))['legacyGuides']
 for source, target in routes.items():
     if not re.fullmatch(r'/[a-z0-9_/-]+', source) or '..' in source:

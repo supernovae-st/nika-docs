@@ -29,7 +29,7 @@ Public documentation for Nika — the open workflow language for AI
    Run it before every commit; it exits 1 on findings.
 4. MDX components: Mintlify set (Tabs, Accordion, Tip, Warning…).
 5. Cross-property links: the ecosystem mesh lives in ONE place —
-   `snippets/_ecosystem.mdx` (docs · Lab · spec · engine · SDK · brew ·
+   `snippets/_ecosystem.mdx` (docs · spec · engine · SDK · brew ·
    studio). Include it rather than hand-writing link lists per page.
 6. Expression canon: `${{ … }}` = CEL (conditions + references) ·
    `extract:`/`nika:jq` = jq (extraction + transform) · NO template
@@ -84,3 +84,12 @@ Public documentation for Nika — the open workflow language for AI
 Read the source needed for the change: `docs.json` for navigation, the owning spec for language behavior, and the released-binary projection for current engine claims. A typo correction does not need a whole-repository architecture survey. For authored YAML, run the relevant oracle checks as required above; preserve effect boundaries and do not execute paid workflows implicitly.
 
 Complete authorized edits through the required checks and requested publication, fixing failures introduced by the change. Report unrelated baseline failures separately. Preserve model choice and use available client tools; these instructions do not require a particular model or a private studio checkout.
+
+## Publication boundary
+
+This entire repository is public, including source files, assets and Git history.
+Publish product usage, public contracts and released integrations only. Internal
+workspaces, development services, project plans and operational evidence belong
+in their private owners. Never move private material into a hidden page, snippet,
+JSON export, screenshot or source comment here. Review the audience before
+writing; run `python3 scripts/publication-audit.py` before committing.
