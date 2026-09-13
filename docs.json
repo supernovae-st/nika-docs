@@ -136,9 +136,7 @@
             "group": "Overview",
             "pages": [
               "introduction",
-              "reference/documentation",
-              "guides/explore-lab",
-              "guides/lab-agents"
+              "reference/documentation"
             ]
           },
           {

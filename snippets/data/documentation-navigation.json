@@ -23,7 +23,6 @@
     "/integrations": "integrations/everywhere",
     "/providers": "reference/providers-catalog",
     "/architecture": "concepts/architecture",
-    "/city": "architecture/layers",
-    "/lab": "guides/explore-lab"
+    "/city": "architecture/layers"
   }
 }
