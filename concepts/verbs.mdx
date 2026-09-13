@@ -85,11 +85,12 @@ shell) | `shell` (string · the explicit shell door: pipes · redirects ·
 globs). A string `command:` is rejected at parse.
 **Optional**: `cwd` (path), `env` (map · OS env for this subprocess), `stdin` (string), `capture` (`stdout` default · `stderr` · `combined` · `structured`). Task-level `timeout:` applies (not a verb field).
 
-The native argv starter prints a literal message with the system `printf`.
-It needs no Cargo project or Rust toolchain:
+The portable argv example prints a literal message with the system `printf`.
+Save the [canonical file](https://github.com/supernovae-st/nika-spec/blob/main/examples/snippets/run.nika.yaml)
+as `run.nika.yaml`, then execute it. It needs no Cargo project or Rust toolchain:
 
 ```bash
-nika try snippets/run
+nika run run.nika.yaml
 ```
 
 Its command uses `command: ["printf", "%s\n", "Hello from a confined program"]`
@@ -99,11 +100,12 @@ To adapt it to a build, declare the workspace and toolchain access that build
 actually requires, then check and run the resulting workflow.
 
 For the shell door, structured exit status, conditional branches and cleanup,
-run `nika try 03-exec-pipeline`. That lesson uses explicit sample commands:
+save the [complete pipeline](https://github.com/supernovae-st/nika-spec/blob/main/examples/03-exec-pipeline.nika.yaml)
+as `exec-pipeline.nika.yaml` and run `nika run exec-pipeline.nika.yaml`.
+That lesson uses explicit sample commands:
 its test exits `1`, the simulated deploy skips, and cleanup runs. Change the
 sample's `exit 1` to `exit 0` to exercise the other branch. It performs no real
-build or deployment. Read the
-[complete pipeline](https://github.com/supernovae-st/nika-spec/blob/main/examples/03-exec-pipeline.nika.yaml).
+build or deployment.
 
 **Invariants** (from `nika-kernel::process::ShellExecutor`):
 
