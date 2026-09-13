@@ -1,6 +1,6 @@
 ---
 title: "Templates"
-description: "The instantiable skeletons covering the recurring workflow shapes. Copy, fill the SLOT lines, check, ship: agents don't invent structure, they instantiate it."
+description: "The instantiable skeletons covering the recurring workflow shapes. Copy a skeleton, fill its values, check the boundary and rehearse its behavior."
 sidebarTitle: "Templates"
 icon: "copy"
 ---
@@ -9,30 +9,49 @@ import { SHOWCASE } from "/snippets/_showcase.mdx";
 
 Every recurring workflow shape has a **structural skeleton** in the
 spec, gated by the conformance suite on every push, with comments at decision points and `<SLOT: …>` values where input is required. The path from intent to a correct file
-is mechanical: **route → copy → fill slots → `nika check` → repair →
+starts with: **route → copy → fill slots → `nika check` → repair →
 re-check.**
 
-## Route by intent
+## Choose a starting point
 
-| Your intent sounds like… | Template | What it locks in |
-|---|---|---|
-| « take data, produce words, save them » | [`chain`](#chain) | deterministic gather · one model job · explicit persist |
-| « watch X, act when Y » | [`gate-and-act`](#gate-and-act) | jq extraction · CEL skip-gate · often zero model calls |
-| « do this for EVERY item » | [`fanout`](#fanout) | runtime collection · the full leash (max_parallel · fail_fast · retry) |
-| « only what changed since last run » | [`etl-state`](#etl-state) | state read→diff→write · `on_error: recover:` quarantine |
-| « research / review / open-ended » | [`agent-loop`](#agent-loop) | plan-then-execute · default-deny tools · budgets · typed final message |
-| « anything irreversible (deploy · send · publish) » | [`human-gated-ship`](#human-gated-ship) | parallel gates · assert · `nika:prompt` GO · `after: { act: terminal }` record |
-| « understand a site (domain · theme · assets) from a URL » | [`website-brief`](#website-brief) | fetch `traverse:` crawl · one typed infer · explicit persist · zero exec |
-| « generate image/audio assets from a brief » | [`media-asset-pack`](#media-asset-pack) | `nika:image_generate` · `nika:jq` manifest · local/mock provider first |
-| « call a product API: upload a file, then create from it » | [`api-upload-and-create`](#api-upload-and-create) | fetch `multipart:` upload · masked secrets header · mode/jq extraction |
-| « read a system's state (docker · kubectl · gh), explain it, keep the report » | [`docker-report`](#docker-report) | argv-array exec (provable allowlist) · parallel reads · exec ledger · one artifact |
+`nika new '?'` lists the skeletons embedded in your installed binary.
+The copyable sources below also run through the released checker.
+See [bounded authoring examples](/examples/bounded-authoring) for filled
+workflows, expected outputs and rejection cases.
+
+{/* template-index:begin */}
+| Source template | Copyable skeleton |
+|---|---|
+| `agent-loop` | [agent-loop](#agent-loop) |
+| `aggregate-by-key` | [aggregate-by-key](#aggregate-by-key) |
+| `api-upload-and-create` | [api-upload-and-create](#api-upload-and-create) |
+| `bounded-batch` | [bounded-batch](#bounded-batch) |
+| `chain` | [chain](#chain) |
+| `classify-and-route` | [classify-and-route](#classify-and-route) |
+| `corpus-qa` | [corpus-qa](#corpus-qa) |
+| `deduplicate-records` | [deduplicate-records](#deduplicate-records) |
+| `docker-report` | [docker-report](#docker-report) |
+| `document-to-fields` | [document-to-fields](#document-to-fields) |
+| `etl-state` | [etl-state](#etl-state) |
+| `evaluate-and-optimize` | [evaluate-and-optimize](#evaluate-and-optimize) |
+| `fanout` | [fanout](#fanout) |
+| `gate-and-act` | [gate-and-act](#gate-and-act) |
+| `human-gated-ship` | [human-gated-ship](#human-gated-ship) |
+| `media-asset-pack` | [media-asset-pack](#media-asset-pack) |
+| `parallel-review` | [parallel-review](#parallel-review) |
+| `project-public-fields` | [project-public-fields](#project-public-fields) |
+| `recover-optional-file` | [recover-optional-file](#recover-optional-file) |
+| `snapshot-diff` | [snapshot-diff](#snapshot-diff) |
+| `validate-records` | [validate-records](#validate-records) |
+| `website-brief` | [website-brief](#website-brief) |
+{/* template-index:end */}
 
 Composite jobs compose templates: a fanout whose merge feeds a
 human-gated-ship, an etl-state whose delta fans out. Start from the
 template matching the **outer** shape.
 
 <Info>
-  The YAML below is normally **projected** from
+  The YAML below is **projected** from
   [`nika-spec/templates/`](https://github.com/supernovae-st/nika-spec/tree/main/templates)
   — the source of truth, validated by the conformance runner — by
   `nika-spec/scripts/showcase-projector.py`.
@@ -506,19 +525,13 @@ tasks:
       goal: ${{ inputs.goal }}
       steps: ${{ tasks.plan.output.steps }}
     agent:
-      # Say what the JOB is. Do NOT describe the output shape.
-      #
-      # The engine binds `schema:` to the FINAL answer. A free-text answer
-      # that misses it is RE-ASKED with the schema wired, bounded by a retry
-      # budget (measured on ollama/qwen3.5:4b — this task, with zero shape
-      # instruction, returns a clean typed object). A `nika:done` result that
-      # misses it is judged AS IT IS on 0.118.7 — NIKA-INFER-002, attempts 1,
-      # the budget already spent (measured: two of five real seats died on one
-      # extra key beside `findings`); an engine that carries the schema on the
-      # `nika:done` definition repairs it through the same retry budget. On
-      # either engine, hand-instructing "reply with the object, then call
-      # nika:done" only makes that miss more likely (measured twice on that
-      # exact instruction). Let the engine own the shape.
+      # Describe the job in the prompt; declare its result shape in schema:.
+      # The granted nika:done sentinel is required to finish this loop.
+      # Text-only plans receive feedback within the turn/token budgets.
+      # The engine validates the final result and can request a schema
+      # repair within its configured retry allowance and task budgets.
+      # A valid result shape does not prove the promised work was performed;
+      # retain an independent check of the facts or artifacts you require.
       system: "You are a careful analyst. Work the plan step by step and report what you actually found."   # SLOT
       prompt: |
         Goal · ${{ with.goal }}
@@ -533,17 +546,13 @@ tasks:
         # `NIKA-SEC-004 · agent tool "nika:read" refused by the security
         # boundary` — measured, mid-loop, after the turns are paid for.
         - "nika:jq"
-        - "nika:done"               # the early-exit sentinel · loop-owned
+        - "nika:done"               # explicit completion · loop-owned
       max_turns: 15                 # SLOT: the loop bound
-      max_tokens_total: 80000       # SLOT: the spend bound
+      max_tokens_total: 80000       # SLOT: cumulative input + output tokens
       schema:                       # SLOT: the typed final-message contract
-        # Closed on purpose (`check` hints `strictness` on an open object):
-        # on 0.118.7 an extra key through `nika:done` is a verdict (above),
-        # so every field the answer may carry is named HERE, not in the prompt.
-        # Measured on a real seat with the goal bound in: it computed the
-        # answer and died on one key it added beside `findings`. On 0.118.7
-        # the trade is yours — open the object (one `strictness` hint) or
-        # name the key here; the fix is the engine's repair, not the prompt.
+        # Closed on purpose: declare every allowed result field here.
+        # Keep extra fields out of the result; schema repair is bounded,
+        # and exhausting that allowance is a failure.
         type: object
         additionalProperties: false
         required: [findings]
@@ -558,8 +567,8 @@ tasks:
       # The schema above already refuses an empty list and an empty string;
       # this assert is the trust boundary downstream code can SEE, and the
       # place for YOUR law once the goal fixes one (a count · a required id ·
-      # a value you computed by hand). `size` is the one callable in this
-      # expression language on 0.118.7 — a per-item rule belongs in the schema
+      # a value you computed by hand). `size` counts the collection in this
+      # expression here — a per-item rule belongs in the schema
       # (as above) or in a `nika:jq` law. No static law catches an INVENTED
       # answer: that gap closes upstream, by binding the goal into the agent.
       has_findings: ${{ size(tasks.execute.output.findings) > 0 }}   # the check crosses as ONE boundary expression · SLOT: your law
@@ -1109,3 +1118,1161 @@ outputs:
     The skeletons in the spec repo, conformance-gated.
   </Card>
 </CardGroup>
+
+## aggregate-by-key
+
+Group validated integer amounts with exact totals.
+
+{/* template:begin aggregate-by-key.nika.yaml */}
+```yaml aggregate-by-key.nika.yaml skeleton
+nika: aggregate-by-key
+const:
+  currency: '<SLOT: the currency code>'
+  records:
+  - region: north
+    amount: 10
+  - region: south
+    amount: 20
+  - region: north
+    amount: 5
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.records }}
+        format: json
+        schema:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - region
+            - amount
+            properties:
+              region:
+                type: string
+                enum:
+                - north
+                - south
+              amount:
+                type: integer
+                minimum: 0
+                maximum: 1000000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  aggregate:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          currency: ${{ const.currency }}
+          records: ${{ const.records }}
+        expression: '{currency, groups: (.records | group_by(.region) | map({region: .[0].region, count:
+          length, total: (map(.amount) | add)})), total: ([.records[].amount] | add // 0)}'
+outputs:
+  report: ${{ tasks.aggregate.output }}
+```
+{/* template:end */}
+
+## bounded-batch
+
+Admit a finite batch before starting model calls.
+
+{/* template:begin bounded-batch.nika.yaml */}
+```yaml bounded-batch.nika.yaml skeleton
+nika: bounded-batch
+model: ollama/qwen3.5:4b
+run:
+  clock: system
+const:
+  brief: '<SLOT: the per-item instruction>'
+  items:
+  - first note
+  - second note
+permits:
+  tools:
+  - nika:assert
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.items }}
+        format: json
+        schema:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            minLength: 1
+            maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  process:
+    after:
+      admit: success
+    for_each:
+      items: ${{ const.items }}
+      max_parallel: 2
+      fail_fast: true
+    timeout: 30s
+    infer:
+      prompt: '${{ const.brief }}
+
+        Item: ${{ item }}'
+      max_tokens: 2048
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+        - summary
+        properties:
+          summary:
+            type: string
+            minLength: 1
+            maxLength: 4000
+outputs:
+  results: '${{ tasks.process.output == null ? [] : tasks.process.output }}'
+```
+{/* template:end */}
+
+## classify-and-route
+
+Typed facts → evidence → decision → queue..
+
+{/* template:begin classify-and-route.nika.yaml */}
+```yaml classify-and-route.nika.yaml skeleton
+nika: classify-and-route       # SLOT: kebab-case workflow id
+
+# SLOT: the seat this file runs on — a local one first (`ollama/…`), a hosted
+# one when the job needs it. `nika new` STAMPS this line: it rewrites `model:`
+# with a seat this binary can resolve, and whatever rides on the line is
+# dropped — a marker THERE never reaches the reader, so it lives here.
+# Measured on 0.118.7: with no resolvable seat the stamp leaves `mock/echo`.
+model: mock/echo
+
+const:
+  request: "<SLOT: the request to classify and route>"
+  bundle:
+    decision_bundle_format: 1
+    manifest:
+      id: incident-route
+      version: "1.0.0"
+      owner: example-org
+      license: Apache-2.0
+      valid_until: "2028-01-01T00:00:00Z"
+    evidence_schema:
+      urgency:
+        type: integer
+        required: true
+        sources: [classifier]
+        integrity: observed
+    transforms:
+      urgency_step:
+        kind: bucket
+        min: 0
+        max: 1
+        edges: [1]
+        values: [0, 10000]
+    rules:
+      dimensions:
+        incident_priority:
+          terms:
+            - { evidence: urgency, transform: urgency_step, weight_bp: 10000, monotonicity: increases }
+      thresholds:
+        - { dimension: incident_priority, recommend_gte_bp: 5000 }
+    governance:
+      never_automatic: [recommend]
+      override: { append_only: true, reason_required: true }
+      appeal: "ask the incident commander"
+      human_required_triggers: [conflict_on_required]
+    fixtures:
+      - { name: urgent, class: positive, evidence: { urgency: 1 } }
+      - { name: routine, class: negative, evidence: { urgency: 0 } }
+      - { name: edge, class: ambiguous, evidence: { urgency: 0 } }
+      - { name: conflict, class: contradictory, evidence: { urgency: 1 } }
+      - { name: probe, class: adversarial, evidence: { urgency: 1 } }
+  urgent_snapshot:
+    t: "2027-01-01T00:00:00Z"
+    evidence:
+      - key: urgency
+        value: 1
+        source: classifier
+        observed_at: "2027-01-01T00:00:00Z"
+        digest: fixture-urgency
+        confidentiality: internal
+        integrity: observed
+        quality: { freshness: fresh, completeness: complete, independence_group: classifier }
+
+permits:
+  tools: ["nika:jq", "nika:decide", "nika:assert"]
+
+tasks:
+  extract_facts:
+    infer:
+      max_tokens: 300                # SLOT: classification spend ceiling
+      prompt: |
+        Extract the urgency fact from this request. Use 1 only for an active
+        widespread outage, otherwise use 0.
+
+        ${{ const.request }}
+      schema:
+        type: object
+        additionalProperties: false
+        required: [urgency]
+        properties:
+          urgency: { type: integer, enum: [0, 1] }
+
+  snapshot:
+    with:
+      facts: ${{ tasks.extract_facts.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ with.facts }}
+        expression: '{t: "2027-01-01T00:00:00Z", evidence: [{key: "urgency", value: .urgency, source: "classifier", observed_at: "2027-01-01T00:00:00Z", digest: "runtime-urgency", confidentiality: "internal", integrity: "observed", quality: {freshness: "fresh", completeness: "complete", independence_group: "classifier"}}]}'
+
+  decide:
+    with:
+      evidence: ${{ tasks.snapshot.output }}
+    invoke:
+      tool: nika:decide
+      args:
+        bundle: ${{ const.bundle }}
+        evidence: ${{ with.evidence }}
+
+  queue:
+    with:
+      receipt: ${{ tasks.decide.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ with.receipt }}
+        expression: 'if .outcome == "human_required" then "manual-review" elif .outcome == "recommend" then "priority" else "standard" end'
+
+  fixture_decide:
+    invoke:
+      tool: nika:decide
+      args:
+        bundle: ${{ const.bundle }}
+        evidence: ${{ const.urgent_snapshot }}
+
+  compiled:
+    with:
+      receipt: ${{ tasks.fixture_decide.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.receipt.outcome == "human_required" }}
+        message: "Urgent fixture must abstain to manual review"
+
+outputs:
+  queue: ${{ tasks.queue.output }}
+  receipt: ${{ tasks.decide.output }}
+```
+{/* template:end */}
+
+## corpus-qa
+
+Canonicalize corpus → retrieve → answer or abstain..
+
+{/* template:begin corpus-qa.nika.yaml */}
+```yaml corpus-qa.nika.yaml skeleton
+nika: corpus-qa       # SLOT: kebab-case workflow id
+
+# SLOT: the seat this file runs on — a local one first (`ollama/…`), a hosted
+# one when the job needs it. `nika new` STAMPS this line: it rewrites `model:`
+# with a seat this binary can resolve, and whatever rides on the line is
+# dropped — a marker THERE never reaches the reader, so it lives here.
+# Measured on 0.118.7: with no resolvable seat the stamp leaves `mock/echo`.
+model: mock/echo
+
+const:
+  query: "<SLOT: the question to answer from the corpus>"
+  documents:                         # SLOT: replace with retrieved source chunks
+    - { id: handbook, text: "Support hours are 09:00 to 17:00 UTC." }
+    - { id: security, text: "Security incidents are reported within one hour." }
+    - { id: handbook, text: "Support hours are 09:00 to 17:00 UTC." }
+
+permits:
+  tools: ["nika:jq", "nika:assert"]
+
+tasks:
+  conflicting_ids:
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ const.documents }}
+        expression: 'sort_by(.id) | group_by(.id) | map(select((map(.text) | unique | length) > 1) | .[0].id)'
+
+  duplicates_consistent:
+    with:
+      conflicting_ids: ${{ tasks.conflicting_ids.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ size(with.conflicting_ids) == 0 }}
+        message: "One corpus id names conflicting source text"
+
+  index_once:
+    after:
+      duplicates_consistent: success
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ const.documents }}
+        expression: "sort_by(.id) | unique_by(.id)"
+
+  index_twice:
+    with:
+      index: ${{ tasks.index_once.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ with.index }}
+        expression: "sort_by(.id) | unique_by(.id)"
+
+  index_is_idempotent:
+    with:
+      first: ${{ tasks.index_once.output }}
+      second: ${{ tasks.index_twice.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: { first: "${{ with.first }}", second: "${{ with.second }}" }
+        expression: ".first == .second"
+
+  compiled:
+    with:
+      idempotent: ${{ tasks.index_is_idempotent.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.idempotent }}
+        message: "Corpus index changed when canonicalized twice"
+
+  retrieve:
+    with:
+      index: ${{ tasks.index_once.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: { documents: "${{ with.index }}", query: "${{ const.query }}" }
+        expression: '.documents as $docs | .query as $query | ($docs | map(select((.text | ascii_downcase) | contains($query | ascii_downcase))))'
+
+  answer:
+    with:
+      hits: ${{ tasks.retrieve.output }}
+    when: ${{ size(with.hits) > 0 }}
+    infer:
+      max_tokens: 500                # SLOT: answer spend ceiling
+      prompt: |
+        Answer from these passages only and cite their ids.
+        Question: ${{ const.query }}
+        Passages: ${{ with.hits }}
+      schema:
+        type: object
+        additionalProperties: false
+        required: [answer, citations]
+        properties:
+          answer: { type: string, minLength: 1 }
+          citations: { type: array, minItems: 1, items: { type: string } }
+
+  finalize:
+    with:
+      hits: ${{ tasks.retrieve.output }}
+      answer: ${{ tasks.answer.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: { hits: "${{ with.hits }}", answer: "${{ with.answer }}" }
+        expression: 'if (.hits | length) == 0 then {known: false, answer: "I do not know from this corpus.", citations: []} else {known: true, answer: .answer.answer, citations: .answer.citations} end'
+
+outputs:
+  result: ${{ tasks.finalize.output }}
+```
+{/* template:end */}
+
+## deduplicate-records
+
+Collapse identical duplicates and refuse conflicts.
+
+{/* template:begin deduplicate-records.nika.yaml */}
+```yaml deduplicate-records.nika.yaml skeleton
+nika: deduplicate-records
+const:
+  dataset: '<SLOT: the dataset label>'
+  records:
+  - id: a
+    amount: 10
+  - id: a
+    amount: 10
+  - id: b
+    amount: 20
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.records }}
+        format: json
+        schema:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - id
+            - amount
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 64
+              amount:
+                type: integer
+                minimum: 0
+                maximum: 1000000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  consistent:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ const.records }}
+        expression: group_by(.id) | all(.[]; (map(.amount) | unique | length) == 1)
+  agree:
+    with:
+      consistent: ${{ tasks.consistent.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.consistent }}
+        message: Conflicting records share an id; do not silently keep the first
+  deduplicate:
+    after:
+      agree: success
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          dataset: ${{ const.dataset }}
+          records: ${{ const.records }}
+        expression: '{dataset, records: (.records | unique_by(.id))}'
+outputs:
+  result: ${{ tasks.deduplicate.output }}
+```
+{/* template:end */}
+
+## document-to-fields
+
+Source text → anchored facts → nonempty proof..
+
+{/* template:begin document-to-fields.nika.yaml */}
+```yaml document-to-fields.nika.yaml skeleton
+nika: document-to-fields       # SLOT: kebab-case workflow id
+
+# SLOT: the seat this file runs on — a local one first (`ollama/…`), a hosted
+# one when the job needs it. `nika new` STAMPS this line: it rewrites `model:`
+# with a seat this binary can resolve, and whatever rides on the line is
+# dropped — a marker THERE never reaches the reader, so it lives here.
+# Measured on 0.118.7: with no resolvable seat the stamp leaves `mock/echo`.
+model: mock/echo
+
+const:
+  # NOT a slot, deliberately. This literal is the REHEARSAL FIXTURE the
+  # skeleton's own `nika:assert` step reads — hole it and the template
+  # stops rehearsing green, without closing anything: this workflow
+  # persists nothing, so it leaves behind no file that reads like a
+  # result (#1066's actual failure mode). Replace it with your document,
+  # or bind this const to a `nika:read` / `nika:fetch` task's output.
+  document: |
+    Invoice INV-204
+    Supplier: Northwind Tools
+    Total: EUR 84.50
+    Rehearsal marker: mock
+
+permits:
+  tools: ["nika:jq", "nika:assert"]
+
+tasks:
+  normalize_document:
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ const.document }}
+        expression: 'gsub("^\\s+|\\s+$"; "")'
+
+  document_nonempty:
+    with:
+      document: ${{ tasks.normalize_document.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ size(with.document) > 0 }}
+        message: "Document is empty after whitespace is trimmed"
+
+  extract:
+    with:
+      document: ${{ tasks.normalize_document.output }}
+    after:
+      document_nonempty: success
+    infer:
+      max_tokens: 600                # SLOT: extraction spend ceiling
+      prompt: |
+        Extract only facts explicitly present in this document. For every
+        value, copy the shortest exact source fragment that anchors it.
+
+        ${{ with.document }}
+      schema:
+        type: object
+        additionalProperties: false
+        required: [fields]
+        properties:
+          fields:
+            type: array
+            minItems: 1
+            items:
+              type: object
+              additionalProperties: false
+              required: [name, value, anchor]
+              properties:
+                name: { type: string, minLength: 1 }
+                value: { type: string, minLength: 1 }
+                anchor: { type: string, minLength: 1 }
+
+  anchors_present:
+    with:
+      fields: ${{ tasks.extract.output.fields }}
+      document: ${{ tasks.normalize_document.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: { fields: "${{ with.fields }}", document: "${{ with.document }}" }
+        expression: '. as $root | ($root.fields | length) > 0 and all($root.fields[]; . as $field | (.name | length) > 0 and (.value | length) > 0 and (.anchor | length) > 0 and ($root.document | contains($field.anchor)))'
+
+  compiled:
+    with:
+      anchors_present: ${{ tasks.anchors_present.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.anchors_present }}
+        message: "Document extraction returned no anchored fields"
+
+outputs:
+  fields: ${{ tasks.extract.output.fields }}
+```
+{/* template:end */}
+
+## evaluate-and-optimize
+
+Draft → two fixed critique/revision rounds..
+
+{/* template:begin evaluate-and-optimize.nika.yaml */}
+```yaml evaluate-and-optimize.nika.yaml skeleton
+nika: evaluate-and-optimize       # SLOT: kebab-case workflow id
+
+# SLOT: the seat this file runs on — a local one first (`ollama/…`), a hosted
+# one when the job needs it. `nika new` STAMPS this line: it rewrites `model:`
+# with a seat this binary can resolve, and whatever rides on the line is
+# dropped — a marker THERE never reaches the reader, so it lives here.
+# Measured on 0.118.7: with no resolvable seat the stamp leaves `mock/echo`.
+model: mock/echo
+
+const:
+  brief: "<SLOT: the deliverable to draft, critique and revise>"
+
+permits: {}
+
+tasks:
+  draft:
+    infer:
+      max_tokens: 300               # SLOT: the draft ceiling · sized for the SEAT (see CEILINGS)
+      prompt: "Draft this deliverable: ${{ const.brief }}"
+      schema:
+        type: object
+        additionalProperties: false
+        required: [text]
+        properties:
+          text: { type: string, minLength: 1 }
+
+  evaluate_1:
+    with:
+      candidate: ${{ tasks.draft.output.text }}
+    infer:
+      max_tokens: 400               # SLOT: the critique ceiling · a reasoning seat's floor is 256 here (measured)
+      prompt: |
+        Critique this candidate against the brief. Name one concrete repair.
+        Brief: ${{ const.brief }}
+        Candidate: ${{ with.candidate }}
+      schema:
+        type: object
+        additionalProperties: false
+        required: [score, repair]
+        properties:
+          score: { type: integer, minimum: 0, maximum: 100 }
+          repair: { type: string, minLength: 1 }
+
+  optimize_1:
+    with:
+      candidate: ${{ tasks.draft.output.text }}
+      repair: ${{ tasks.evaluate_1.output.repair }}
+    infer:
+      max_tokens: 300               # SLOT: the revision ceiling · sized for the SEAT
+      prompt: |
+        Revise the candidate using the repair, without changing the brief.
+        Candidate: ${{ with.candidate }}
+        Repair: ${{ with.repair }}
+      schema:
+        type: object
+        additionalProperties: false
+        required: [text]
+        properties:
+          text: { type: string, minLength: 1 }
+
+  evaluate_2:
+    with:
+      candidate: ${{ tasks.optimize_1.output.text }}
+    infer:
+      max_tokens: 400               # SLOT: idem · the same floor applies
+      prompt: |
+        Critique this revision against the same brief. Name one final repair.
+        Brief: ${{ const.brief }}
+        Candidate: ${{ with.candidate }}
+      schema:
+        type: object
+        additionalProperties: false
+        required: [score, repair]
+        properties:
+          score: { type: integer, minimum: 0, maximum: 100 }
+          repair: { type: string, minLength: 1 }
+
+  optimize_2:
+    with:
+      candidate: ${{ tasks.optimize_1.output.text }}
+      repair: ${{ tasks.evaluate_2.output.repair }}
+    infer:
+      max_tokens: 300               # SLOT: the final revision ceiling · sized for the SEAT
+      prompt: |
+        Produce the final revision using the last repair.
+        Candidate: ${{ with.candidate }}
+        Repair: ${{ with.repair }}
+      schema:
+        type: object
+        additionalProperties: false
+        required: [text]
+        properties:
+          text: { type: string, minLength: 1 }
+
+  final_evaluate:
+    with:
+      candidate: ${{ tasks.optimize_2.output.text }}
+    infer:
+      max_tokens: 400               # SLOT: the score-only ceiling · the same floor applies
+      prompt: |
+        Score the final candidate against the brief. Evaluate the candidate
+        exactly as written without proposing another revision.
+        Brief: ${{ const.brief }}
+        Candidate: ${{ with.candidate }}
+      schema:
+        type: object
+        additionalProperties: false
+        required: [score, reason]
+        properties:
+          score: { type: integer, minimum: 0, maximum: 100 }
+          reason: { type: string, minLength: 1 }
+
+outputs:
+  result: ${{ tasks.optimize_2.output.text }}
+  final_score: ${{ tasks.final_evaluate.output.score }}
+```
+{/* template:end */}
+
+## parallel-review
+
+Collect independent reviews with a deterministic conjunction.
+
+{/* template:begin parallel-review.nika.yaml */}
+```yaml parallel-review.nika.yaml skeleton
+nika: parallel-review
+model: ollama/qwen3.5:4b
+run:
+  clock: system
+const:
+  document: '<SLOT: the document to review>'
+  law: '{ready: (.clarity.ready and .accuracy.ready), reviews: [.clarity, .accuracy]}'
+  cases:
+  - clarity:
+      ready: false
+      reason: fixture
+    accuracy:
+      ready: false
+      reason: fixture
+    expected: false
+  - clarity:
+      ready: false
+      reason: fixture
+    accuracy:
+      ready: true
+      reason: fixture
+    expected: false
+  - clarity:
+      ready: true
+      reason: fixture
+    accuracy:
+      ready: false
+      reason: fixture
+    expected: false
+  - clarity:
+      ready: true
+      reason: fixture
+    accuracy:
+      ready: true
+      reason: fixture
+    expected: true
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.document }}
+        format: json
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  clarity:
+    after:
+      admit: success
+      law_holds: success
+    timeout: 30s
+    infer:
+      prompt: 'Review clarity and missing explanations. Document: ${{ const.document }}'
+      max_tokens: 2048
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+        - ready
+        - reason
+        properties:
+          ready:
+            type: boolean
+          reason:
+            type: string
+            minLength: 1
+            maxLength: 4000
+  accuracy:
+    after:
+      admit: success
+      law_holds: success
+    timeout: 30s
+    infer:
+      prompt: 'Review unsupported claims and internal contradictions. Document: ${{ const.document }}'
+      max_tokens: 2048
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+        - ready
+        - reason
+        properties:
+          ready:
+            type: boolean
+          reason:
+            type: string
+            minLength: 1
+            maxLength: 4000
+  verdict:
+    with:
+      clarity: ${{ tasks.clarity.output }}
+      accuracy: ${{ tasks.accuracy.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          clarity: ${{ with.clarity }}
+          accuracy: ${{ with.accuracy }}
+        expression: ${{ const.law }}
+    after:
+      law_holds: success
+  prove:
+    for_each:
+      items: ${{ const.cases }}
+      max_parallel: 1
+      fail_fast: true
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ item }}
+        expression: . as $case | (${{ const.law }}) | .ready == $case.expected
+  law_holds:
+    with:
+      cases: ${{ tasks.prove.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.cases == [true, true, true, true] }}
+        message: All four conjunction truth-table cases must pass
+outputs:
+  verdict: ${{ tasks.verdict.output }}
+```
+{/* template:end */}
+
+## project-public-fields
+
+Select allowed fields before sending data to a model.
+
+{/* template:begin project-public-fields.nika.yaml */}
+```yaml project-public-fields.nika.yaml skeleton
+nika: project-public-fields
+model: ollama/qwen3.5:4b
+run:
+  clock: system
+const:
+  instruction: '<SLOT: the public summary instruction>'
+  record:
+    topic: queue latency
+    severity: 2
+    email: private@example.invalid
+    internal_note: internal-only-fixture
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.record }}
+        format: json
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+          - topic
+          - severity
+          - email
+          - internal_note
+          properties:
+            topic:
+              type: string
+              minLength: 1
+              maxLength: 4000
+            severity:
+              type: integer
+              minimum: 0
+              maximum: 5
+            email:
+              type: string
+              minLength: 1
+              maxLength: 4000
+            internal_note:
+              type: string
+              minLength: 1
+              maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  public:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ const.record }}
+        expression: '{topic, severity}'
+  summarize:
+    with:
+      public: ${{ tasks.public.output }}
+    timeout: 30s
+    infer:
+      prompt: '${{ const.instruction }}
+
+        Allowed fields only: ${{ with.public }}'
+      max_tokens: 2048
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+        - summary
+        properties:
+          summary:
+            type: string
+            minLength: 1
+            maxLength: 4000
+outputs:
+  public: ${{ tasks.public.output }}
+  summary: ${{ tasks.summarize.output.summary }}
+```
+{/* template:end */}
+
+## recover-optional-file
+
+Recover a missing optional file without hiding other failures.
+
+{/* template:begin recover-optional-file.nika.yaml */}
+```yaml recover-optional-file.nika.yaml skeleton
+nika: recover-optional-file
+run:
+  clock: system
+const:
+  fallback: '<SLOT: the explicit fallback content>'
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:read
+  - nika:validate
+  fs:
+    read:
+    - ./optional.txt
+tasks:
+  read:
+    invoke:
+      tool: nika:read
+      args:
+        path: ./optional.txt
+    timeout: 5s
+    retry:
+      max_attempts: 2
+      backoff_strategy: exponential
+      jitter: false
+    on_error:
+      on_codes:
+      - NIKA-BUILTIN-READ-001
+      recover: ${{ const.fallback }}
+  validate:
+    with:
+      content: ${{ tasks.read.output }}
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ with.content }}
+        format: json
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Content must be nonempty and at most 4000 characters
+  result:
+    after:
+      admit: success
+    with:
+      content: ${{ tasks.read.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ with.content }}
+        expression: .
+outputs:
+  content: ${{ tasks.result.output }}
+```
+{/* template:end */}
+
+## snapshot-diff
+
+Compare two snapshots without model judgment.
+
+{/* template:begin snapshot-diff.nika.yaml */}
+```yaml snapshot-diff.nika.yaml skeleton
+nika: snapshot-diff
+const:
+  resource: '<SLOT: the resource being compared>'
+  before:
+  - alpha
+  - beta
+  after:
+  - beta
+  - gamma
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data:
+          before: ${{ const.before }}
+          after: ${{ const.after }}
+        format: json
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+          - before
+          - after
+          properties:
+            before:
+              type: array
+              maxItems: 8
+              items:
+                type: string
+                minLength: 1
+                maxLength: 4000
+            after:
+              type: array
+              maxItems: 8
+              items:
+                type: string
+                minLength: 1
+                maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  diff:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          resource: ${{ const.resource }}
+          before: ${{ const.before }}
+          after: ${{ const.after }}
+        expression: '{resource, added: ((.after - .before) | unique), removed: ((.before - .after) | unique),
+          kept: ([.after[] as $id | select(.before | index($id)) | $id] | unique)}'
+outputs:
+  diff: ${{ tasks.diff.output }}
+```
+{/* template:end */}
+
+## validate-records
+
+Reject malformed records before producing totals.
+
+{/* template:begin validate-records.nika.yaml */}
+```yaml validate-records.nika.yaml skeleton
+nika: validate-records
+const:
+  batch: '<SLOT: the batch label>'
+  records:
+  - id: a
+    amount: 10
+  - id: b
+    amount: 20
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.records }}
+        format: json
+        schema:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - id
+            - amount
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 64
+              amount:
+                type: integer
+                minimum: 0
+                maximum: 1000000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  report:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          batch: ${{ const.batch }}
+          records: ${{ const.records }}
+        expression: '{batch, count: (.records | length), total: ([.records[].amount] | add // 0)}'
+outputs:
+  report: ${{ tasks.report.output }}
+```
+{/* template:end */}
