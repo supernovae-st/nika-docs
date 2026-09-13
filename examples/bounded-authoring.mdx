@@ -1,0 +1,730 @@
+---
+title: "Bounded authoring examples"
+sidebarTitle: "Bounded workflows"
+description: "Copyable workflows with input bounds, deterministic checks, narrow recovery and explicit mock rehearsals."
+icon: "shield-check"
+---
+
+These filled workflows are generated from the [template sources](/guides/templates).
+The YAML below is the same source embedded in the engine pack. Copy a block to
+`workflow.nika.yaml`, then validate and rehearse it:
+
+```bash
+nika check workflow.nika.yaml --native-strict --model mock/echo
+nika run workflow.nika.yaml --model mock/echo --output json
+```
+
+Mock rehearsals need no keys or model service. They prove graph execution,
+validation and output shape; they do not evaluate model quality. When changing
+the model, check with that exact `provider/model` and evaluate real outputs.
+
+## Choose the bound that matches the resource
+
+| Resource | Bound | What it does not guarantee |
+|---|---|---|
+| Collection | JSON Schema `maxItems` followed by `nika:assert` before the fan | `max_parallel` alone cannot cap the number of items |
+| Active fan iterations | `for_each.max_parallel` | A total run duration or cost ceiling |
+| Model call | `infer.max_tokens` | Input token count or semantic correctness |
+| Attempt duration | Task `timeout` with `run.clock` | A single deadline for all retry attempts |
+| Retry count | `retry.max_attempts` | Safe repetition of a mutating effect |
+| Agent loop | Explicit turn, token and cost budgets | Proof that a model achieved the objective |
+| Metered run cost | `--max-cost-usd` | Zero overshoot from calls already admitted in parallel |
+
+A validation result is data. The `admit` assertion makes rejection stop the
+workflow, and the downstream task explicitly depends on its success. The
+negative tests must inspect the trace and confirm that task never started.
+The collection check bounds downstream work after the data is loaded; it is
+not a streaming ingress limit. A dynamic fan may still have an unknown static
+cost estimate even when this runtime guard bounds its input.
+
+## Batch admission
+
+An empty batch returns `[]`. Eight items pass; a ninth item or an overlong item fails at `admit`, before `process`. Parallelism limits active calls; the validator separately limits total work.
+
+Source skeleton: [`bounded-batch`](/guides/templates#bounded-batch).
+
+{/* showcase:begin 18-bounded-batch.nika.yaml */}
+```yaml 18-bounded-batch.nika.yaml
+nika: bounded-batch
+model: ollama/qwen3.5:4b
+run:
+  clock: system
+const:
+  brief: Summarize the item in one sentence.
+  items:
+  - first note
+  - second note
+permits:
+  tools:
+  - nika:assert
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.items }}
+        format: json
+        schema:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            minLength: 1
+            maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  process:
+    after:
+      admit: success
+    for_each:
+      items: ${{ const.items }}
+      max_parallel: 2
+      fail_fast: true
+    timeout: 30s
+    infer:
+      prompt: '${{ const.brief }}
+
+        Item: ${{ item }}'
+      max_tokens: 2048
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+        - summary
+        properties:
+          summary:
+            type: string
+            minLength: 1
+            maxLength: 4000
+outputs:
+  results: '${{ tasks.process.output == null ? [] : tasks.process.output }}'
+```
+{/* showcase:end */}
+
+## Record validation
+
+The fixture returns count `2` and total `30`. Unknown fields, negative amounts and string amounts refuse before `report`. An empty batch returns total zero.
+
+Source skeleton: [`validate-records`](/guides/templates#validate-records).
+
+{/* showcase:begin 19-validate-records.nika.yaml */}
+```yaml 19-validate-records.nika.yaml
+nika: validate-records
+const:
+  batch: daily-orders
+  records:
+  - id: a
+    amount: 10
+  - id: b
+    amount: 20
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.records }}
+        format: json
+        schema:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - id
+            - amount
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 64
+              amount:
+                type: integer
+                minimum: 0
+                maximum: 1000000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  report:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          batch: ${{ const.batch }}
+          records: ${{ const.records }}
+        expression: '{batch, count: (.records | length), total: ([.records[].amount] | add // 0)}'
+outputs:
+  report: ${{ tasks.report.output }}
+```
+{/* showcase:end */}
+
+## Snapshot comparison
+
+The fixture adds `gamma`, removes `alpha` and keeps `beta`. Duplicates use set semantics; empty snapshots are valid. Both snapshots are bounded before comparison.
+
+Source skeleton: [`snapshot-diff`](/guides/templates#snapshot-diff).
+
+{/* showcase:begin 20-snapshot-diff.nika.yaml */}
+```yaml 20-snapshot-diff.nika.yaml
+nika: snapshot-diff
+const:
+  resource: enabled-features
+  before:
+  - alpha
+  - beta
+  after:
+  - beta
+  - gamma
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data:
+          before: ${{ const.before }}
+          after: ${{ const.after }}
+        format: json
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+          - before
+          - after
+          properties:
+            before:
+              type: array
+              maxItems: 8
+              items:
+                type: string
+                minLength: 1
+                maxLength: 4000
+            after:
+              type: array
+              maxItems: 8
+              items:
+                type: string
+                minLength: 1
+                maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  diff:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          resource: ${{ const.resource }}
+          before: ${{ const.before }}
+          after: ${{ const.after }}
+        expression: '{resource, added: ((.after - .before) | unique), removed: ((.before - .after) | unique),
+          kept: ([.after[] as $id | select(.before | index($id)) | $id] | unique)}'
+outputs:
+  diff: ${{ tasks.diff.output }}
+```
+{/* showcase:end */}
+
+## Duplicate handling
+
+Identical rows collapse to one row per id. Conflicting amounts for the same id fail at `agree`; there is no arbitrary first-row winner.
+
+Source skeleton: [`deduplicate-records`](/guides/templates#deduplicate-records).
+
+{/* showcase:begin 21-deduplicate-records.nika.yaml */}
+```yaml 21-deduplicate-records.nika.yaml
+nika: deduplicate-records
+const:
+  dataset: orders
+  records:
+  - id: a
+    amount: 10
+  - id: a
+    amount: 10
+  - id: b
+    amount: 20
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.records }}
+        format: json
+        schema:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - id
+            - amount
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 64
+              amount:
+                type: integer
+                minimum: 0
+                maximum: 1000000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  consistent:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ const.records }}
+        expression: group_by(.id) | all(.[]; (map(.amount) | unique | length) == 1)
+  agree:
+    with:
+      consistent: ${{ tasks.consistent.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.consistent }}
+        message: Conflicting records share an id; do not silently keep the first
+  deduplicate:
+    after:
+      agree: success
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          dataset: ${{ const.dataset }}
+          records: ${{ const.records }}
+        expression: '{dataset, records: (.records | unique_by(.id))}'
+outputs:
+  result: ${{ tasks.deduplicate.output }}
+```
+{/* showcase:end */}
+
+## Field projection
+
+Only `topic` and `severity` reach the model task. Email and internal notes remain outside the prompt. This does not detect sensitive prose inside allowed fields, and source data can remain in the local trace.
+
+Source skeleton: [`project-public-fields`](/guides/templates#project-public-fields).
+
+{/* showcase:begin 22-project-public-fields.nika.yaml */}
+```yaml 22-project-public-fields.nika.yaml
+nika: project-public-fields
+model: ollama/qwen3.5:4b
+run:
+  clock: system
+const:
+  instruction: Summarize the incident using only the allowed fields.
+  record:
+    topic: queue latency
+    severity: 2
+    email: private@example.invalid
+    internal_note: internal-only-fixture
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.record }}
+        format: json
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+          - topic
+          - severity
+          - email
+          - internal_note
+          properties:
+            topic:
+              type: string
+              minLength: 1
+              maxLength: 4000
+            severity:
+              type: integer
+              minimum: 0
+              maximum: 5
+            email:
+              type: string
+              minLength: 1
+              maxLength: 4000
+            internal_note:
+              type: string
+              minLength: 1
+              maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  public:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ const.record }}
+        expression: '{topic, severity}'
+  summarize:
+    with:
+      public: ${{ tasks.public.output }}
+    timeout: 30s
+    infer:
+      prompt: '${{ const.instruction }}
+
+        Allowed fields only: ${{ with.public }}'
+      max_tokens: 2048
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+        - summary
+        properties:
+          summary:
+            type: string
+            minLength: 1
+            maxLength: 4000
+outputs:
+  public: ${{ tasks.public.output }}
+  summary: ${{ tasks.summarize.output.summary }}
+```
+{/* showcase:end */}
+
+## Parallel review
+
+Each review has its own timeout and token ceiling. A shared conjunction is checked against all boolean input pairs. Mock returns `ready: false`; this checks wiring and the decision rule, not the quality of a real review.
+
+Source skeleton: [`parallel-review`](/guides/templates#parallel-review).
+
+{/* showcase:begin 23-parallel-review.nika.yaml */}
+```yaml 23-parallel-review.nika.yaml
+nika: parallel-review
+model: ollama/qwen3.5:4b
+run:
+  clock: system
+const:
+  document: The service processes jobs in order.
+  law: '{ready: (.clarity.ready and .accuracy.ready), reviews: [.clarity, .accuracy]}'
+  cases:
+  - clarity:
+      ready: false
+      reason: fixture
+    accuracy:
+      ready: false
+      reason: fixture
+    expected: false
+  - clarity:
+      ready: false
+      reason: fixture
+    accuracy:
+      ready: true
+      reason: fixture
+    expected: false
+  - clarity:
+      ready: true
+      reason: fixture
+    accuracy:
+      ready: false
+      reason: fixture
+    expected: false
+  - clarity:
+      ready: true
+      reason: fixture
+    accuracy:
+      ready: true
+      reason: fixture
+    expected: true
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.document }}
+        format: json
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  clarity:
+    after:
+      admit: success
+      law_holds: success
+    timeout: 30s
+    infer:
+      prompt: 'Review clarity and missing explanations. Document: ${{ const.document }}'
+      max_tokens: 2048
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+        - ready
+        - reason
+        properties:
+          ready:
+            type: boolean
+          reason:
+            type: string
+            minLength: 1
+            maxLength: 4000
+  accuracy:
+    after:
+      admit: success
+      law_holds: success
+    timeout: 30s
+    infer:
+      prompt: 'Review unsupported claims and internal contradictions. Document: ${{ const.document }}'
+      max_tokens: 2048
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+        - ready
+        - reason
+        properties:
+          ready:
+            type: boolean
+          reason:
+            type: string
+            minLength: 1
+            maxLength: 4000
+  verdict:
+    with:
+      clarity: ${{ tasks.clarity.output }}
+      accuracy: ${{ tasks.accuracy.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          clarity: ${{ with.clarity }}
+          accuracy: ${{ with.accuracy }}
+        expression: ${{ const.law }}
+    after:
+      law_holds: success
+  prove:
+    for_each:
+      items: ${{ const.cases }}
+      max_parallel: 1
+      fail_fast: true
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ item }}
+        expression: . as $case | (${{ const.law }}) | .ready == $case.expected
+  law_holds:
+    with:
+      cases: ${{ tasks.prove.output }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.cases == [true, true, true, true] }}
+        message: All four conjunction truth-table cases must pass
+outputs:
+  verdict: ${{ tasks.verdict.output }}
+```
+{/* showcase:end */}
+
+## Narrow recovery
+
+With no `optional.txt`, the fixture returns its explicit fallback. A present file wins. Oversized content refuses after reading; the validator does not bound file allocation. Retry applies only to the read; only not-found is recovered.
+
+Source skeleton: [`recover-optional-file`](/guides/templates#recover-optional-file).
+
+{/* showcase:begin 24-recover-optional-file.nika.yaml */}
+```yaml 24-recover-optional-file.nika.yaml
+nika: recover-optional-file
+run:
+  clock: system
+const:
+  fallback: No optional configuration supplied.
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:read
+  - nika:validate
+  fs:
+    read:
+    - ./optional.txt
+tasks:
+  read:
+    invoke:
+      tool: nika:read
+      args:
+        path: ./optional.txt
+    timeout: 5s
+    retry:
+      max_attempts: 2
+      backoff_strategy: exponential
+      jitter: false
+    on_error:
+      on_codes:
+      - NIKA-BUILTIN-READ-001
+      recover: ${{ const.fallback }}
+  validate:
+    with:
+      content: ${{ tasks.read.output }}
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ with.content }}
+        format: json
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Content must be nonempty and at most 4000 characters
+  result:
+    after:
+      admit: success
+    with:
+      content: ${{ tasks.read.output }}
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ with.content }}
+        expression: .
+outputs:
+  content: ${{ tasks.result.output }}
+```
+{/* showcase:end */}
+
+## Exact aggregation
+
+The fixture returns north `15`, south `20`, total `35`. Values are integer minor units in one currency. Negative amounts, unknown regions and oversized batches refuse; empty input returns zero.
+
+Source skeleton: [`aggregate-by-key`](/guides/templates#aggregate-by-key).
+
+{/* showcase:begin 25-aggregate-by-key.nika.yaml */}
+```yaml 25-aggregate-by-key.nika.yaml
+nika: aggregate-by-key
+const:
+  currency: EUR
+  records:
+  - region: north
+    amount: 10
+  - region: south
+    amount: 20
+  - region: north
+    amount: 5
+permits:
+  tools:
+  - nika:assert
+  - nika:jq
+  - nika:validate
+tasks:
+  validate:
+    invoke:
+      tool: nika:validate
+      args:
+        data: ${{ const.records }}
+        format: json
+        schema:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - region
+            - amount
+            properties:
+              region:
+                type: string
+                enum:
+                - north
+                - south
+              amount:
+                type: integer
+                minimum: 0
+                maximum: 1000000
+  admit:
+    with:
+      valid: ${{ tasks.validate.output.valid }}
+    invoke:
+      tool: nika:assert
+      args:
+        condition: ${{ with.valid }}
+        message: Input violates the declared shape or size bound
+  aggregate:
+    after:
+      admit: success
+    invoke:
+      tool: nika:jq
+      args:
+        input:
+          currency: ${{ const.currency }}
+          records: ${{ const.records }}
+        expression: '{currency, groups: (.records | group_by(.region) | map({region: .[0].region, count:
+          length, total: (map(.amount) | add)})), total: ([.records[].amount] | add // 0)}'
+outputs:
+  report: ${{ tasks.aggregate.output }}
+```
+{/* showcase:end */}

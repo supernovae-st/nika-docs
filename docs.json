@@ -322,7 +322,8 @@
           {
             "group": "Start here",
             "pages": [
-              "examples/overview"
+              "examples/overview",
+              "examples/bounded-authoring"
             ]
           },
           {
