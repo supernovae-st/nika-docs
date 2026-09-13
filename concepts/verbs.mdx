@@ -92,7 +92,7 @@ It needs no Cargo project or Rust toolchain:
 nika try snippets/run
 ```
 
-Its command uses `command: ["printf", "%s\\n", "Hello from a confined program"]`
+Its command uses `command: ["printf", "%s\n", "Hello from a confined program"]`
 and declares `permits.exec: ["printf"]`. The complete file lives in the
 [canonical argv example](https://github.com/supernovae-st/nika-spec/blob/main/examples/snippets/run.nika.yaml).
 To adapt it to a build, declare the workspace and toolchain access that build
