@@ -84,12 +84,11 @@ This reference preserves the specification at the revision linked below. Source 
 [Read the pinned specification]({url}) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/{rev}/canon/builtins.yaml).
 
 Tool identity: `nika:{name}`. Specification revision: `{rev[:12]}`.
-The Lab language identity is `language:tool:{name}`; the registry view is `ecosystem:tool/nika:{name}`. They refer to this contract without merging their graph identities.
 
 <Ecosystem />
 '''
         outputs[path+'.mdx']=text
-        entries.append(dict(path=path,ids=['language:tool:'+name,'ecosystem:tool/nika:'+name,'document:owner:language:tool:'+name],legacyPaths=['/language/stdlib/'+name],sha256=digest(text),source=url,revision=rev))
+        entries.append(dict(path=path,ids=['nika:'+name],legacyPaths=['/language/stdlib/'+name],sha256=digest(text),source=url,revision=rev))
     outputs['snippets/data/tool-mirror.json']=json.dumps(dict(schemaVersion=1,revision=rev,inputs=source['inputs'],entries=entries),indent=2)+'\n'
     return outputs
 

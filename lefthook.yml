@@ -18,6 +18,8 @@ pre-push:
         then mint broken-links;
         else echo "⚠ mint CLI absent — MDX-parse gate SKIPPED (install: npm i -g mint)";
         fi'
+    publication-audit:
+      run: python3 scripts/publication-audit.py
     link-audit:
       run: python3 scripts/link-audit.py
     sdk-contract:
