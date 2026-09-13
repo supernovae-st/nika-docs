@@ -18,11 +18,11 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 358
+  classified_files: 360
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 353
+    authored: 355
     authored-pin: 1
     generated: 2
     pinned-copy: 2
@@ -49,7 +49,7 @@ files:
   evidence: "hand-pinned Node major for the local mint preview"
 - path: "AGENTS.md"
   class: authored
-  sha256: 7d241712ee870f72c0ea001b33aed8e965d486b790d36bf6423120c0e45885e0
+  sha256: 97881c2792990b59917b172da2f0b4ece18141045fb2dbc0da7c09cd8836cd6f
   evidence: "hand-written agent entry per the AGENTS.md convention · it STATES the projection rules the snippets follow"
 - path: "DEPLOY.md"
   class: authored
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: 6e3b0552f0a1d7d8f50ab3362b806576c1fe870bc080758834cc6adae4d26f72
+  sha256: f2d35866e1fb5f8fc59d3cd75a4c9eeb8307adb8d82b31359366e1974bef069d
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -205,8 +205,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 273
-  aggregate_sha256: d5255a66c224ed2a2d15d5002dc583e1a6f2600e84aea31f23c858f04f00ddd2
+  match_count: 275
+  aggregate_sha256: a4895db62f5d922d5aa1ec7d6d8606bf647c38a90a86cc3405b35c3c3d837c2d
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -235,7 +235,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 33
-  aggregate_sha256: ecd51bbadb1f587d26624309134e7cea932fa572654989fd100344aea74d7aea
+  aggregate_sha256: b5420138316bb050f1dda68e3c2efd0fa21209548d8b2c09a6f5ebe151709c0f
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
