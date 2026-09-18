@@ -116,9 +116,8 @@ outputs it produced:
 ```
 
 The same frames are recoverable from any recorded trace, hours or
-machines later. After the run above, the journal is already on disk
-(the `trace:` line). With no path, these commands read that latest
-journal:
+machines later. After a run, the journal is already on disk. With no
+path, these commands read the workspace's latest journal:
 
 ```bash
 nika trace show     # storyboard + waterfall + verdict card — a reading
@@ -137,16 +136,14 @@ happened. Neither `show` nor `replay` proves the chain;
 A recorded trace projects to OTLP/JSON lines, so any OpenTelemetry
 viewer becomes a Nika run viewer — no collector, no daemon, no vendor.
 Unlike `show` / `replay` / `verify`, **`nika trace export` requires the
-journal path** — there is no workspace-latest default. The path is the
-`trace:` line the run card already printed (During, above), or a row
-from `nika trace ls`. A later run prints a new timestamped name; do not
-invent one.
+journal path** — there is no workspace-latest default. Fill `<path>`
+with a row from `nika trace ls`.
 
 ```text
 nika trace ls
-nika trace export <path-from-the-run-card-or-ls>
+nika trace export <path>
 # default sidecar: same stem, `.otlp.jsonl` beside the journal
-nika trace export <path-from-the-run-card-or-ls> -o run.otlp.jsonl
+nika trace export <path> -o run.otlp.jsonl
 ```
 
 Each verb becomes a span (duration, tokens, the ADR-099 identity
