@@ -15,7 +15,7 @@ spend shape, then rehearse the graph with the mock provider.
 ## Admission script
 
 ```ts
-import { Nika } from '@supernovae-st/nika-client'
+import { Nika } from '@supernovae-st/nika'
 
 const nika = new Nika()
 const file = process.argv[2]
@@ -52,26 +52,27 @@ if (result.status !== 'succeeded') process.exit(result.exitCode ?? 1)
 protected job ───── provider secrets + deployment authority`}</pre>
 </div>
 
-The review job needs no provider key. Protected execution receives only the
-authority its environment and workflow declare.
+The shown mock workflow needs no provider key. Rehearsal fixtures must also
+have safe tool boundaries: a mock model does not disable external effects.
+Protected execution receives only the authority its environment and workflow
+declare.
 
 ## Pin and print both versions
 
 ```sh
-nika --version
-npm ls @supernovae-st/nika-client
+npm exec -- nika --version
+npm ls @supernovae-st/nika
 ```
 
 Keep the engine and SDK release train visible in logs. Do not debug skew from
 an implicit global binary.
 
-<Warning>
-  Keep this example gated until
-  the SDK npm and platform packages are published and their artifacts
-  pinned. The matching engine v0.118.7 is already public. `npm view @supernovae-st/nika-client@0.118.7 version` can check
-  registry availability; source readiness does not prove a package is pinned
-  in CI or that the matching engine artifact is installed.
-</Warning>
+<Info>
+  Commit the package lockfile and keep optional platform dependencies enabled.
+  The local npm executable above resolves the project's installed package;
+  it does not require a global CLI. Pin the SDK and native payload together.
+  A newer standalone engine release does not update an existing npm install.
+</Info>
 
 ## Continue
 

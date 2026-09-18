@@ -18,7 +18,7 @@ request, interface and business state. Nika owns parsing, admission,
 execution, policy, events, receipts and traces.
 
 ```ts
-import { Nika } from '@supernovae-st/nika-client'
+import { Nika } from '@supernovae-st/nika'
 
 const local = new Nika({ cwd: process.cwd() })
 const remote = new Nika({
@@ -48,7 +48,9 @@ to capture immutable bytes before HTTP admission.
 | Discover workflows | `listWorkflows()` · `workflow(name)` | HTTP only |
 | Manage one schedule | `schedule()` · `scheduleStatus()` | HTTP only |
 
-`run()` returns after stable admission. It does not return a terminal result.
+`run()` returns a handle, not a terminal result. In the published native
+transport, that handle can exist before admission completes; wait for
+`run.done` and handle typed SDK errors as well as failed results.
 Events are additive and optional to render; `run.done` is the only terminal
 truth for that observation leg, including a pause. A paused durable job may
 later resume under engine authority. An admitted workflow failure resolves
@@ -67,7 +69,6 @@ throw typed SDK errors.
 - It does not infer success from an event kind.
 - It exposes only the pinned engine's supported routes.
 
-<Card title="Review the merged source" icon="github" href={SDK.sourceCandidate}>
-  Inspect the pinned merged SDK source. Publication of its matching npm and
-  platform packages remains a separate step.
+<Card title="Review the published source" icon="github" href={SDK.sourceCandidate}>
+  Inspect the source corresponding to the published SDK and native payloads.
 </Card>

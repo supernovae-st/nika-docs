@@ -5,9 +5,11 @@ from __future__ import annotations
 
 import importlib.util
 import pathlib
+import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SCRIPT = pathlib.Path(__file__).resolve().parents[1] / "sdk_contract_gate.py"
 SPEC = importlib.util.spec_from_file_location("sdk_contract_gate", SCRIPT)
@@ -23,7 +25,7 @@ class SdkContractGateTest(unittest.TestCase):
             root = pathlib.Path(directory)
             (root / "sdk").mkdir()
             (root / "sdk" / "install.mdx").write_text(
-                f"npm install @supernovae-st/nika-client@{pin}\n", encoding="utf-8"
+                f"npm install @supernovae-st/nika@{pin}\n", encoding="utf-8"
             )
             if source is not None:
                 (root / "snippets").mkdir()
@@ -80,6 +82,22 @@ class SdkContractGateTest(unittest.TestCase):
             "snippets/_sdk-contract.mdx",
         ))
 
+    def test_retired_package_name_is_rejected_in_commands_and_imports(self) -> None:
+        for text in (
+            "npm install @supernovae-st/nika-client@9.8.7",
+            "import { Nika } from '@supernovae-st/nika-client'",
+            'package: "@supernovae-st/nika-client",',
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(any("retired package name" in item
+                                    for item in self.check_document(text)))
+        self.assertEqual([], self.check_document(
+            "import { Nika } from '@supernovae-st/nika'"
+        ))
+        self.assertEqual([], self.check_document(
+            "https://github.com/supernovae-st/nika-client"
+        ))
+
     def test_clean_one_sdk_document_passes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
@@ -89,6 +107,30 @@ class SdkContractGateTest(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertEqual([], GATE.findings(root))
+
+    def test_npm_availability_requires_exact_registry_version(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            (root / "snippets").mkdir()
+            (root / "snippets" / "_sdk-contract.mdx").write_text(
+                'package: "@supernovae-st/nika",\nsourceVersion: "9.8.7",\n',
+                encoding="utf-8",
+            )
+            for output in ('"9.8.6"', '["9.8.7"]', 'not json', '"9.8.7"'):
+                with self.subTest(output=output), patch.object(GATE.subprocess, "run") as run:
+                    run.return_value.stdout = output
+                    self.assertEqual(not bool(GATE.verify_npm(root)), output == '"9.8.7"')
+                    self.assertIn("@supernovae-st/nika@9.8.7", run.call_args.args[0])
+            for error in (FileNotFoundError(), subprocess.TimeoutExpired("npm", 30),
+                          subprocess.CalledProcessError(1, "npm", stderr="E404")):
+                with self.subTest(error=error), patch.object(GATE.subprocess, "run", side_effect=error):
+                    self.assertTrue(GATE.verify_npm(root))
+
+    def test_historical_package_name_is_not_rewritten(self) -> None:
+        self.assertEqual([], self.check_document(
+            "LEGACY: npm install @supernovae-st/nika-client@0.115.0",
+            "sdk/history/migration.mdx",
+        ))
 
     def test_retired_contract_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
