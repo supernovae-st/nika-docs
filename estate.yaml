@@ -199,7 +199,7 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: eecf27685ed5f52a3ff9dac1fe96ed25f604e3d11dbb845f48fdd8219ea31a1b
+  sha256: 6b71d9a5e10bef29679596ddc1df20146b70ac142420e8c457781f28eed09661
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 patterns:
