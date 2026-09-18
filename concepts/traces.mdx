@@ -13,25 +13,26 @@ it. The run is evidence, not a memory.
 
 ## Record a run
 
-`nika run` renders a live storyboard for humans. Add `--json` and the
-same run streams machine events instead, one NDJSON line per event:
+`nika run` renders a live storyboard for humans and writes an execution
+journal by default to `.nika/traces/<timestamp>-<id>.ndjson`. The
+verdict line prints that path — the same file
+`nika compile hello hello.nika` then `nika run hello.nika` writes.
+
+Add `--json` and the same run also streams machine events on stdout, one
+NDJSON line per event — the CI and agent surface (stdout stays pure
+NDJSON; nothing else is printed there):
 
 ```bash
-nika run review.nika --json > .nika/traces/review.ndjson
+nika run hello.nika --json
 ```
 
-That single redirect is the whole recorder. The stream is designed for
-CI and agents (stdout stays pure NDJSON; nothing else is printed there),
-so capturing it live costs nothing. By convention, project traces live
-under `.nika/traces/` next to the workflows they record; the CLI reads a
-trace from any path you give it.
-
-Since 0.94 the redirect is optional: **execution journals are enabled by default**
-to `.nika/traces/<timestamp>-<id>.ndjson` by default, and the verdict
-line prints the path. `--resume`, `nika trace show|replay` and the editor
-read it directly. Opt out per run with `--no-trace-file`, or globally
-with `NIKA_NO_TRACE_FILE` (`nika try` never journals — the mock
-rehearsal is not a workspace run).
+`--resume`, `nika trace show|replay|verify` and the editor read the
+journal directly. With no path, `show`, `replay`, and `verify` read the
+workspace's latest journal and name it on stderr
+(`nika trace: reading <path> (the workspace latest)`). Pass a path to
+select another; `nika trace ls` lists the store. Opt out per run with
+`--no-trace-file`, or globally with `NIKA_NO_TRACE_FILE` (`nika try`
+never journals — the mock rehearsal is not a workspace run).
 
 A refusal before execution or a queued cancellation can leave no journal.
 Interruption can leave incomplete evidence. A job or receipt identity alone
@@ -83,16 +84,18 @@ report the loop's accumulated tool spend as `tools_cost_usd`.
 
 ## Replay, never re-execute
 
-Two commands read a trace back:
+Two commands inspect a recorded run. With no path they read the
+workspace's latest journal:
 
 ```bash
-nika trace replay .nika/traces/review.ndjson   # re-render the run, live
-nika trace show   .nika/traces/review.ndjson   # print the final card only
+nika trace replay   # re-render the run, live
+nika trace show     # print the final card only
 ```
 
 `replay` plays the recorded events through the same renderer that drew
 the original run: same storyboard, same timing, same verdict card.
-`show` skips the animation and prints the summary.
+`show` skips the animation and prints the summary. Both are a
+**reading** of the file — they do not walk the hash chain.
 
 <Warning>
   **Replay = re-render, never re-execute.** Replaying a trace calls no
@@ -110,11 +113,13 @@ at the end. Nothing the engine did is off the chain, and nothing can be
 edited, reordered, or dropped from the middle without breaking it.
 
 ```bash
-nika trace verify .nika/traces/review.ndjson
+nika trace verify
 ```
 
 `verify` walks the chain and then climbs a proof ladder, reporting the
-highest tier honestly attained:
+highest tier honestly attained. That is the **proof**, distinct from
+`show` / `replay`: those inspect the recorded events; this command
+attests the sequence is intact. The tiers:
 
 - **CHAINED** — the links hold; the sequence is intact.
 - **SEALED** — a signature over the whole chain verifies against a
