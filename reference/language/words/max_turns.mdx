@@ -23,30 +23,30 @@ The schema declares this field at the location below.
 **In the same object:** [max_tokens_total](/reference/language/words/max_tokens_total) · [model](/reference/language/words/model) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [skills](/reference/language/words/skills) · [system](/reference/language/words/system) · [temperature](/reference/language/words/temperature) · [tools](/reference/language/words/tools)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
 ## In a source template
 
-Excerpt from `templates/agent-loop.nika.yaml`, source lines 107–116. This is a fragment, not a runnable workflow.
+Excerpt from `templates/agent-loop.nika`, source lines 95–104. This is a fragment, not a runnable workflow.
 
 ```yaml illustration
         # boundary` — measured, mid-loop, after the turns are paid for.
         - "nika:jq"
-        - "nika:done"               # the early-exit sentinel · loop-owned
+        - "nika:done"               # explicit completion · loop-owned
       max_turns: 15                 # SLOT: the loop bound
-      max_tokens_total: 80000       # SLOT: the spend bound
+      max_tokens_total: 80000       # SLOT: cumulative input + output tokens
       schema:                       # SLOT: the typed final-message contract
-        # Closed on purpose (`check` hints `strictness` on an open object):
-        # on 0.118.7 an extra key through `nika:done` is a verdict (above),
-        # so every field the answer may carry is named HERE, not in the prompt.
-        # Measured on a real seat with the goal bound in: it computed the
+        # Closed on purpose: declare every allowed result field here.
+        # Keep extra fields out of the result; schema repair is bounded,
+        # and exhausting that allowance is a failure.
+        type: object
 ```
 
 ### Templates containing this field
 
 | Template | Source |
 | --- | --- |
-| `templates/agent-loop.nika.yaml` | [Line 110](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/agent-loop.nika.yaml#L110) |
+| `templates/agent-loop.nika` | [Line 98](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/agent-loop.nika#L98) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -54,6 +54,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:max_turns`. Spec revision: [`c5ebbb7b862b`](https://github.com/supernovae-st/nika-spec/tree/c5ebbb7b862b68bc6cf7235efba61173b844afc6).
+Canonical identity: `language:word:max_turns`. Spec revision: [`60696338ef08`](https://github.com/supernovae-st/nika-spec/tree/60696338ef08adb25df6cca23cb47f0a39eb785a).
 
 [How documentation stays connected](/reference/knowledge-system).

@@ -21,19 +21,19 @@ intelligence.
 
 ## Tier 1: JSON schema validation (today)
 
-Any editor with `yaml-language-server` can validate `.nika.yaml` against
+Any editor with `yaml-language-server` can validate `.nika` against
 the workflow schema.
 
 <Tabs>
   <Tab title="VS Code">
     Install the [YAML extension (Red Hat)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml).
     It picks up the schema via the `# yaml-language-server` directive at
-    the top of `.nika.yaml`, or via `settings.json`:
+    the top of `.nika`, or via `settings.json`:
 
     ```json settings.json
     {
       "yaml.schemas": {
-        "https://nika.sh/spec/v1/workflow.schema.json": "*.nika.yaml"
+        "https://nika.sh/spec/v1/workflow.schema.json": "*.nika"
       }
     }
     ```
@@ -49,7 +49,7 @@ the workflow schema.
       settings = {
         yaml = {
           schemas = {
-            ["https://nika.sh/spec/v1/workflow.schema.json"] = "*.nika.yaml",
+            ["https://nika.sh/spec/v1/workflow.schema.json"] = "*.nika",
           },
         },
       },
@@ -63,14 +63,14 @@ the workflow schema.
     ```toml
     [[language]]
     name = "yaml"
-    file-types = [{ glob = "*.nika.yaml" }]
+    file-types = [{ glob = "*.nika" }]
     language-servers = ["yaml-language-server"]
     ```
   </Tab>
 
   <Tab title="Zed / Cursor / JetBrains">
     Any editor supporting `yaml-language-server` will validate
-    `.nika.yaml` against `https://nika.sh/spec/v1/workflow.schema.json`
+    `.nika` against `https://nika.sh/spec/v1/workflow.schema.json`
     once it publishes. Zed has native LSP; JetBrains supports via the
     YAML plugin.
   </Tab>
@@ -78,7 +78,7 @@ the workflow schema.
 
 ## In-file schema hint
 
-Add one comment at the top of any `.nika.yaml` so the schema works with
+Add one comment at the top of any `.nika` so the schema works with
 zero editor configuration:
 
 ```yaml
@@ -278,9 +278,17 @@ did-you-mean as a one-click repair in any LSP editor. Wire it as a
 generic LSP command (`nika lsp`) in Zed, Neovim or Helix alongside the
 Tier-1 schema.
 
+## GitHub display
+
+GitHub Linguist does not register Nika or `.nika`. A repository
+`.gitattributes` line `*.nika linguist-language=YAML` is the supported
+highlighting mitigation. It affects display and classification only,
+not Nika semantics, and is not a claim of native GitHub language
+registration.
+
 ## File and folder icons
 
-`*.nika.yaml` files carry the butterfly mark out of the box wherever the
+`*.nika` files carry the butterfly mark out of the box wherever the
 icon theme honors language icons (Seti — VS Code's default — does; the
 extension contributes it). Folder icons are the icon theme's territory,
 not an extension's, so `.nika/` — the flight-recorder home — needs one
@@ -324,7 +332,7 @@ line in your settings until the upstream icons land:
 
 <CardGroup cols={2}>
   <Card title="Schema reference" icon="file-code" href="/reference/schema">
-    `.nika.yaml` top-level keys + workflow envelope.
+    `.nika` top-level keys + workflow envelope.
   </Card>
   <Card title="YAML syntax" icon="align-left" href="/reference/yaml-syntax">
     Full grammar for every verb step.

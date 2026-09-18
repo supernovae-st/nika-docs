@@ -27,7 +27,7 @@ binary resolution and compatibility errors.
 
 ## 2. Save a workflow
 
-Create `hello.nika.yaml` in the application directory:
+Create `hello.nika` in the application directory:
 
 ```yaml
 nika: hello-sdk
@@ -45,7 +45,7 @@ outputs:
 This fixture has no external tools or effects. Choosing a mock model for an
 arbitrary workflow does not disable that workflow's tools or permissions.
 A project `nika.yaml` is optional for this example; the executable source is
-`hello.nika.yaml`.
+`hello.nika`.
 
 ## 3. Run and observe
 
@@ -55,7 +55,7 @@ Save `demo.mjs` next to the workflow:
 import { Nika } from '@supernovae-st/nika'
 
 const nika = new Nika({ cwd: process.cwd() })
-const run = await nika.run('./hello.nika.yaml', {
+const run = await nika.run('./hello.nika', {
   maxCostUsd: 0,
 })
 

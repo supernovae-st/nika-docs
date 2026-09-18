@@ -48,16 +48,17 @@ Ask OpenCode:
 > Turn my weekly changelog digest into a Nika workflow from the chain
 > template, check it, and run it with the mock model.
 
-Expected tool trail: `nika new chain` → edit → `nika check` (static
-audit, nothing spent) → `nika run … --model mock/echo` (offline) →
-receipts in `.nika/traces/`.
+Expected tool trail: `nika compile chain --json` (incomplete questions,
+preview only) → `--answer` until Ready → write an explicit destination →
+edit → `nika check` (static audit, nothing spent) →
+`nika run … --model mock/echo` (offline) → receipts in `.nika/traces/`.
 
 ## When to reach for which
 
 | task | who |
 |---|---|
 | implement/refactor/review code | OpenCode |
-| a repeated AI pipeline (digest, triage, ETL, report, multi-model bench) | a `.nika.yaml` OpenCode authors once |
+| a repeated AI pipeline (digest, triage, ETL, report, multi-model bench) | a `.nika` OpenCode authors once |
 | a one-off question | neither — just answer |
 
 ## Troubleshooting

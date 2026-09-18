@@ -18,7 +18,7 @@ file proposes. A machine edge disposes. Reading the file never schedules work.
 nika: my-project
 
 arm:
-  - workflow: workflows/daily-brief.nika.yaml
+  - workflow: workflows/daily-brief.nika
     cadence: "TZ=Europe/Paris 30 7 * * 1-5"
     où: local
     plafond: 0.20
@@ -30,7 +30,7 @@ arm:
 
 | Key | Requirement | Contract |
 |---|---|---|
-| `workflow` | Required | Repo-relative `*.nika.yaml` path |
+| `workflow` | Required | Repo-relative `*.nika` path |
 | `cadence` | Required | Readable schedule, TZ-prefixed cron, or `on-webhook` |
 | `plafond` | Required | Positive per-tick USD ceiling |
 | `manqué` | Required | `rattraper` · `rattraper-une-fois` · `sauter` |
@@ -81,7 +81,7 @@ the firing law.
 nika: my-project
 
 arm:
-  - workflow: workflows/daily-brief.nika.yaml
+  - workflow: workflows/daily-brief.nika
     cadence: "TZ=Europe/Paris 30 7 * * 1-5"
     plafond: 0.20
     manqué: sauter

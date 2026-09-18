@@ -40,8 +40,11 @@ flowchart LR
     the [bounded examples](/examples/bounded-authoring) pair each skeleton with
     a filled workflow and observable success and refusal behavior.
 
-    `nika new '?'` lists your installed templates. A native scaffold command
-    includes the destination: `nika new chain workflow.nika.yaml`.
+    `nika compile --list` names your installed templates. Preview with
+    `nika compile <skeleton> --json`. A destination writes only a Ready
+    candidate; `chain` stays incomplete until its questions are answered
+    with `--answer KEY=JSON_LITERAL`. Unknown words do not select a
+    substitute workflow.
   </Step>
   <Step title="Adapt the example to the job">
     Copy the template and replace every `<SLOT: …>` value. Review the
@@ -53,7 +56,7 @@ flowchart LR
     guess.
   </Step>
   <Step title="Check: never ship unchecked">
-    `nika check workflow.nika.yaml --native-strict` (engine) or
+    `nika check workflow.nika --native-strict` (engine) or
     `python conformance/runner.py validate <file>` (spec oracle).
     Editors get the same truth live via the
     [JSON Schema](https://github.com/supernovae-st/nika-spec/blob/main/schemas/workflow.schema.json).

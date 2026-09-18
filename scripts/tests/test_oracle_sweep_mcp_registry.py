@@ -24,7 +24,7 @@ REGISTRY = """```json .nika/mcp_servers.json
 ```
 
 """
-WORKFLOW = """```yaml probe.nika.yaml
+WORKFLOW = """```yaml probe.nika
 nika: mcp-registry-probe
 permits:
   tools: ["mcp:probe/read"]

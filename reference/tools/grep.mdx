@@ -30,6 +30,21 @@ sorted by `(path, line)`. `pattern:` is a **Rust-regex-class** expression
 (RE2-compatible · no backreferences · the portable subset). Throws ·
 `NIKA-BUILTIN-GREP-001` (invalid pattern · `validation_error`).
 
+The read grants cover both the directory being walked and the files read
+inside it. A literal directory grant does not grant its children. For the
+recursive example above, declare the root and the descendant glob:
+
+```yaml illustration
+permits:
+  tools: ["nika:grep"]
+  fs: { read: ["./src", "./src/**"] }
+```
+
+For one level of files, `./src/*` covers those files while `./src` still
+covers the walk root. The root grant alone does not authorize their
+contents; a file read outside the declared boundary is a permission
+refusal, not evidence that the pattern has no matches.
+
 ---
 
 ## Related concepts
@@ -43,8 +58,8 @@ sorted by `(path, line)`. `pattern:` is a **Rust-regex-class** expression
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/stdlib/builtins-v0.1.md#L187) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/stdlib/builtins-v0.1.md#L187) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/canon/builtins.yaml).
 
-Tool identity: `nika:grep`. Specification revision: `f8c5df2127c7`.
+Tool identity: `nika:grep`. Specification revision: `e255dbf72336`.
 
 <Ecosystem />

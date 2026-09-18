@@ -14,11 +14,14 @@ ships inside the binary:
 
 ```bash
 nika try 01-hello                    # the mock rehearsal · zero keys · nothing written
-nika new meeting-actions             # take an example, fixtures included, then run it
+nika compile hello hello.nika        # write the offline lesson at an explicit destination
 ```
 
-`nika try` previews an example offline with zero setup; `nika new`
-lands the file with its fixture ingredients so the real run works.
+`nika try` previews an example offline with zero setup. `nika compile`
+writes only a Ready candidate to an explicit destination; showcase jobs
+on these pages are copied from the YAML, not instantiated by a showcase
+slug. `nika compile --list` names exact skeletons. Unknown intent stays
+incomplete and does not pick a substitute.
 
 The YAML you read here is projected verbatim from
 [`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),
@@ -187,7 +190,7 @@ files, so it cannot go stale.
 | [typed workflow inputs](/reference/yaml-syntax) | [ceo-monday-brief](/examples/ceo-monday-brief) · [competitor-radar](/examples/competitor-radar) · [config-drift-sentinel](/examples/config-drift-sentinel) · [contract-guard](/examples/contract-guard) · [corpus-digest](/examples/corpus-digest) · [deep-research-brief](/examples/deep-research-brief) · [incident-war-room](/examples/incident-war-room) · [meeting-actions](/examples/meeting-actions) · [release-notes](/examples/release-notes) · [release-train](/examples/release-train) · [seo-content-brief](/examples/seo-content-brief) |
 | [typed workflow outputs (callable)](/reference/yaml-syntax) | [bookmark-triage](/examples/bookmark-triage) · [ceo-monday-brief](/examples/ceo-monday-brief) · [competitor-radar](/examples/competitor-radar) · [config-drift-sentinel](/examples/config-drift-sentinel) · [contract-guard](/examples/contract-guard) · [corpus-digest](/examples/corpus-digest) · [csv-chart-report](/examples/csv-chart-report) · [deep-research-brief](/examples/deep-research-brief) · [etl-quarantine](/examples/etl-quarantine) · [image-fx-batch](/examples/image-fx-batch) · [incident-war-room](/examples/incident-war-room) · [invoice-chaser](/examples/invoice-chaser) · [localization-factory](/examples/localization-factory) · [meeting-actions](/examples/meeting-actions) · [model-bench](/examples/model-bench) · [og-images](/examples/og-images) · [pr-review-fanout](/examples/pr-review-fanout) · [price-watch](/examples/price-watch) · [release-notes](/examples/release-notes) · [release-radar](/examples/release-radar) · [release-train](/examples/release-train) · [resume-screener](/examples/resume-screener) · [seo-content-brief](/examples/seo-content-brief) · [social-repurpose](/examples/social-repurpose) · [standup-digest](/examples/standup-digest) · [support-triage](/examples/support-triage) · [transcript-shownotes](/examples/transcript-shownotes) |
 | [default-deny tool grants](/concepts/verbs) | [deep-research-brief](/examples/deep-research-brief) · [pr-review-fanout](/examples/pr-review-fanout) |
-| [sovereign local model](/concepts/providers) | [ceo-monday-brief](/examples/ceo-monday-brief) · [competitor-radar](/examples/competitor-radar) · [config-drift-sentinel](/examples/config-drift-sentinel) · [contract-guard](/examples/contract-guard) · [corpus-digest](/examples/corpus-digest) · [deep-research-brief](/examples/deep-research-brief) · [incident-war-room](/examples/incident-war-room) · [invoice-chaser](/examples/invoice-chaser) · [localization-factory](/examples/localization-factory) · [meeting-actions](/examples/meeting-actions) · [model-bench](/examples/model-bench) · [pr-review-fanout](/examples/pr-review-fanout) · [release-notes](/examples/release-notes) · [release-radar](/examples/release-radar) · [resume-screener](/examples/resume-screener) · [seo-content-brief](/examples/seo-content-brief) · [social-repurpose](/examples/social-repurpose) · [standup-digest](/examples/standup-digest) · [support-triage](/examples/support-triage) · [transcript-shownotes](/examples/transcript-shownotes) |
+| [sovereign local model](/concepts/providers) | [ceo-monday-brief](/examples/ceo-monday-brief) · [competitor-radar](/examples/competitor-radar) · [config-drift-sentinel](/examples/config-drift-sentinel) · [contract-guard](/examples/contract-guard) · [corpus-digest](/examples/corpus-digest) · [deep-research-brief](/examples/deep-research-brief) · [incident-war-room](/examples/incident-war-room) · [invoice-chaser](/examples/invoice-chaser) · [localization-factory](/examples/localization-factory) · [meeting-actions](/examples/meeting-actions) · [pr-review-fanout](/examples/pr-review-fanout) · [release-notes](/examples/release-notes) · [release-radar](/examples/release-radar) · [resume-screener](/examples/resume-screener) · [seo-content-brief](/examples/seo-content-brief) · [social-repurpose](/examples/social-repurpose) · [standup-digest](/examples/standup-digest) · [support-triage](/examples/support-triage) · [transcript-shownotes](/examples/transcript-shownotes) |
 {/* showcase:coverage-end */}
 
 ## The rules every example obeys

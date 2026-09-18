@@ -23,7 +23,7 @@ Allowed nika:/mcp: tool ids · globs ok.
 **In the same object:** [env](/reference/language/words/env) · [exec](/reference/language/words/exec) · [fs](/reference/language/words/fs) · [net](/reference/language/words/net)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
 ### agent
 
@@ -38,11 +38,11 @@ Whitelist · DEFAULT-DENY (no tools if absent) · gitignore-style globs · `!` n
 **In the same object:** [max_tokens_total](/reference/language/words/max_tokens_total) · [max_turns](/reference/language/words/max_turns) · [model](/reference/language/words/model) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [skills](/reference/language/words/skills) · [system](/reference/language/words/system) · [temperature](/reference/language/words/temperature)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
 ## In a source template
 
-Excerpt from `templates/agent-loop.nika.yaml`, source lines 50–59. This is a fragment, not a runnable workflow.
+Excerpt from `templates/agent-loop.nika`, source lines 44–53. This is a fragment, not a runnable workflow.
 
 ```yaml illustration
 permits:                            # the blast radius · default-deny once present
@@ -61,19 +61,27 @@ tasks:
 
 | Template | Source |
 | --- | --- |
-| `templates/agent-loop.nika.yaml` | [Line 53](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/agent-loop.nika.yaml#L53) |
-| `templates/api-upload-and-create.nika.yaml` | [Line 52](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/api-upload-and-create.nika.yaml#L52) |
-| `templates/chain.nika.yaml` | [Line 37](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/chain.nika.yaml#L37) |
-| `templates/classify-and-route.nika.yaml` | [Line 74](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/classify-and-route.nika.yaml#L74) |
-| `templates/corpus-qa.nika.yaml` | [Line 29](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/corpus-qa.nika.yaml#L29) |
-| `templates/docker-report.nika.yaml` | [Line 41](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/docker-report.nika.yaml#L41) |
-| `templates/document-to-fields.nika.yaml` | [Line 35](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/document-to-fields.nika.yaml#L35) |
-| `templates/etl-state.nika.yaml` | [Line 55](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/etl-state.nika.yaml#L55) |
-| `templates/fanout.nika.yaml` | [Line 71](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/fanout.nika.yaml#L71) |
-| `templates/gate-and-act.nika.yaml` | [Line 33](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/gate-and-act.nika.yaml#L33) |
-| `templates/human-gated-ship.nika.yaml` | [Line 62](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/human-gated-ship.nika.yaml#L62) |
-| `templates/media-asset-pack.nika.yaml` | [Line 40](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/media-asset-pack.nika.yaml#L40) |
-| `templates/website-brief.nika.yaml` | [Line 42](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/website-brief.nika.yaml#L42) |
+| `templates/agent-loop.nika` | [Line 47](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/agent-loop.nika#L47) |
+| `templates/aggregate-by-key.nika` | [Line 21](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/aggregate-by-key.nika#L21) |
+| `templates/api-upload-and-create.nika` | [Line 52](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/api-upload-and-create.nika#L52) |
+| `templates/bounded-batch.nika` | [Line 20](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/bounded-batch.nika#L20) |
+| `templates/chain.nika` | [Line 36](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/chain.nika#L36) |
+| `templates/classify-and-route.nika` | [Line 72](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/classify-and-route.nika#L72) |
+| `templates/corpus-qa.nika` | [Line 27](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/corpus-qa.nika#L27) |
+| `templates/deduplicate-records.nika` | [Line 21](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/deduplicate-records.nika#L21) |
+| `templates/docker-report.nika` | [Line 37](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/docker-report.nika#L37) |
+| `templates/document-to-fields.nika` | [Line 33](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/document-to-fields.nika#L33) |
+| `templates/etl-state.nika` | [Line 55](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/etl-state.nika#L55) |
+| `templates/fanout.nika` | [Line 66](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/fanout.nika#L66) |
+| `templates/gate-and-act.nika` | [Line 33](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/gate-and-act.nika#L33) |
+| `templates/human-gated-ship.nika` | [Line 62](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/human-gated-ship.nika#L62) |
+| `templates/media-asset-pack.nika` | [Line 37](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/media-asset-pack.nika#L37) |
+| `templates/parallel-review.nika` | [Line 47](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/parallel-review.nika#L47) |
+| `templates/project-public-fields.nika` | [Line 22](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/project-public-fields.nika#L22) |
+| `templates/recover-optional-file.nika` | [Line 16](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/recover-optional-file.nika#L16) |
+| `templates/snapshot-diff.nika` | [Line 20](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/snapshot-diff.nika#L20) |
+| `templates/validate-records.nika` | [Line 19](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/validate-records.nika#L19) |
+| `templates/website-brief.nika` | [Line 38](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/website-brief.nika#L38) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -81,6 +89,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:tools`. Spec revision: [`c5ebbb7b862b`](https://github.com/supernovae-st/nika-spec/tree/c5ebbb7b862b68bc6cf7235efba61173b844afc6).
+Canonical identity: `language:word:tools`. Spec revision: [`60696338ef08`](https://github.com/supernovae-st/nika-spec/tree/60696338ef08adb25df6cca23cb47f0a39eb785a).
 
 [How documentation stays connected](/reference/knowledge-system).

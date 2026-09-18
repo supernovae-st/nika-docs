@@ -1,0 +1,6 @@
+# Migrated-engine qualification pin for pre-release docs CI.
+# The released-engine jobs (install_release.py) remain the visitor-surface
+# judge and are not this file. Qualification builds nika from this exact
+# commit and runs oracle-sweep / arm plants against that binary.
+# Bump deliberately when the engine worker publishes a new SHA.
+f6155d1be080973500a4793e01dbec93faa451b4

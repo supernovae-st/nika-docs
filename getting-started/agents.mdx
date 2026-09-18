@@ -10,7 +10,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 Your agent already does the work: a PR review in Claude Code, a research
 brief in Codex, a triage pass in Cursor. Then the chat scrolls away and the
 procedure is gone. Nika's job is to keep it: the agent writes the workflow
-**as a `.nika.yaml` file**, you review it, the runtime enforces it, and it
+**as a `.nika` file**, you review it, the runtime enforces it, and it
 runs again next week without re-prompting.
 
 Two commands wire any agent:
@@ -26,13 +26,14 @@ nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
 `--force` overwrites):
 
 - **`AGENTS.md`**, the agent operating guide: the four verbs, the authoring
-  loop (`nika new <template>` → fill → `nika check` → repair from the
+  loop (`nika compile <skeleton> --json` → answer remaining questions →
+  write a Ready dest → `nika check` → repair from the
   error), and the rules that keep generated workflows valid. Read natively by
   **Codex**, **Claude Code**, **Cursor**, **Jules** and every AGENTS.md-aware
   tool.
-- **`.vscode/settings.json`**: maps `*.nika.yaml` to the canonical JSON
+- **`.vscode/settings.json`**: maps `*.nika` to the canonical JSON
   schema, so completions and validation work in any YAML-aware editor.
-- **`.cursor/rules/nika.mdc`**, the Cursor rules file (globs `*.nika.yaml`):
+- **`.cursor/rules/nika.mdc`**, the Cursor rules file (globs `*.nika`):
   the syntax floor + the check loop, auto-attached whenever the agent touches
   a workflow file.
 - **Cursor, fully equipped** (next release): the three kit subagents
@@ -65,7 +66,7 @@ claude plugin install nika@nika
 ```
 
 One install: the `nika-authoring` skill lands (invoke it explicitly, or
-let it auto-trigger on `.nika.yaml` work), and the read-only oracle is
+let it auto-trigger on `.nika` work), and the read-only oracle is
 wired (9 tools: `nika_check` + `nika_explain` + the authoring surface).
 The plugin expects the `nika` binary on your PATH (`brew install supernovae-st/tap/nika`).
 
@@ -121,11 +122,11 @@ The server exposes two tool families — **validate** and **learn**:
 ## The loop
 
 ```text
-agent writes review.nika.yaml        (from AGENTS.md + a template)
+agent writes review.nika        (from AGENTS.md + a template)
   → nika check --native-strict       (agent self-repairs from the findings)
   → nika run --model mock/echo       (shape proof · zero keys)
   → you read the file                (it's YAML, review it like code)
-  → nika run review.nika.yaml        (you, or your CI, not the agent)
+  → nika run review.nika        (you, or your CI, not the agent)
 ```
 
 The model extracts facts. `nika:jq` or `nika:decide` is the law — do
@@ -148,6 +149,6 @@ on top. See [Editors](/getting-started/editors).
     The deterministic path: template → fill → check → repair.
   </Card>
   <Card title="Templates" icon="clone" href="/guides/templates">
-    The valid skeletons `nika new <skeleton>` instantiates.
+    The valid skeletons `nika compile --list` names.
   </Card>
 </CardGroup>

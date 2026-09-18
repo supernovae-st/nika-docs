@@ -10,7 +10,7 @@ import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 <LocalContract sdk={SDK} />
 
 ```ts
-const report = await nika.check('workflows/release.nika.yaml', {
+const report = await nika.check('workflows/release.nika', {
   model: 'mock/echo',
   nativeStrict: true,
 })

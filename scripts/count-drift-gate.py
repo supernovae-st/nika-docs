@@ -30,9 +30,10 @@
 #       string "undefined" on a public page, and nothing else notices.
 #   (g) the first-contact command. A fenced command cannot interpolate,
 #       so the string IS duplicated across pages — and it moved twice in
-#       three releases (`nika try 01-hello` -> `nika new hello`) with
-#       three pages still teaching the old one. Every bare `nika try
-#       <slug>` / `nika new <slug>` must equal STATUS.firstCommand, which
+#       three releases (`nika try 01-hello` -> `nika new hello` ->
+#       `nika compile hello hello.nika`) with three pages still teaching
+#       the old one. Every bare `nika try|new|compile` first-contact line
+#       (no flags) must equal STATUS.firstCommand, which
 #       mintlify-snapshot.sh reads off the downloadable binary. A flagged
 #       variant is a deliberate lane and is left alone.
 # Exit 0 clean · 1 findings. Stdlib only (check c skips if nika absent).
@@ -359,9 +360,10 @@ def main() -> int:
     # (g) the FIRST-CONTACT command. A fenced command cannot interpolate, so
     # the string is unavoidably duplicated — which is exactly how it went
     # stale in three pages at once. It stops being a hand-owned string here:
-    # every bare `nika try <slug>` / `nika new <slug>` (no flags — a flagged
-    # variant is a deliberate lane, not the front door) must be the command
-    # the snapshot projects off the downloadable binary.
+    # every bare `nika try|new|compile` first-contact line (no flags — a
+    # flagged variant is a deliberate lane, not the front door) must be the
+    # command the snapshot projects off the downloadable binary. Compile
+    # takes an optional destination, so one or two positional args match.
     snap = (ROOT / "snippets" / "_status-snapshot.mdx").read_text(encoding="utf-8")
     fc = re.search(r'firstCommand:\s*"([^"]+)"', snap)
     if not fc:
@@ -385,8 +387,10 @@ def main() -> int:
                     f"snippets/_status-snapshot.mdx: firstCommand {first!r} but the "
                     f"installed release prints {live!r} — re-run "
                     "scripts/mintlify-snapshot.sh")
-                first = live
-        bare = re.compile(r"^nika (?:try|new) [a-z0-9][a-z0-9/._-]*\s*(?:#.*)?$")
+        bare = re.compile(
+            r"^nika (?:try|new|compile) [a-z0-9][a-z0-9/._-]*"
+            r"(?: [a-z0-9][a-z0-9/._-]*)?\s*(?:#.*)?$"
+        )
         for page in sorted(ROOT.rglob("*.mdx")):
             rel = page.relative_to(ROOT)
             if not first_contact(rel):
@@ -411,5 +415,59 @@ def main() -> int:
     return 0
 
 
+def canon_wire_against_bin(nika: str) -> int:
+    """Compare CANON snippet counts to `nika spec --canon` only.
+
+    Does not assert STATUS.version against the binary: the released visitor
+    snapshot and a migrated-engine qualification pin are different trains.
+    """
+    findings = []
+    values = snippet_values()
+    try:
+        canon_yaml = subprocess.run(
+            [nika, "spec", "--canon"], capture_output=True, text=True,
+            timeout=30, check=True).stdout
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as e:
+        print(f"count-drift-gate · FAIL\n  ✗ nika spec --canon failed: {e}")
+        return 1
+
+    def canon_count(name: str) -> int | None:
+        m = re.search(rf"^{name}:\s*\n\s*count:\s*(\d+)", canon_yaml, re.M)
+        return int(m.group(1)) if m else None
+
+    for name, key in (("templates", "CANON.templates"),
+                      ("providers", "CANON.providers"),
+                      ("builtins", "CANON.builtins"),
+                      ("verbs", "CANON.verbs")):
+        got = canon_count(name)
+        have = values.get(key)
+        if got is None:
+            findings.append(f"`nika spec --canon` has no {name}.count")
+        elif have is None:
+            findings.append(f"{key} missing from snippets/_canon.mdx")
+        elif got != have:
+            findings.append(
+                f"{key} is {have} but `nika spec --canon` {name}.count is {got}")
+    if findings:
+        print("count-drift-gate · FAIL (canon-wire)")
+        for f in findings:
+            print(f"  ✗ {f}")
+        return 1
+    print("count-drift-gate · OK (CANON matches `nika spec --canon` on this binary)")
+    return 0
+
+
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--canon-wire", action="store_true",
+        help="only compare CANON counts to `nika spec --canon` (migrated-engine lane)")
+    args = parser.parse_args()
+    if args.canon_wire:
+        nika = shutil.which("nika")
+        if not nika:
+            print("count-drift-gate · FAIL\n  ✗ nika not on PATH")
+            sys.exit(1)
+        sys.exit(canon_wire_against_bin(nika))
     sys.exit(main())

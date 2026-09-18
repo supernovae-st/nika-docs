@@ -34,7 +34,7 @@ project root as `cwd`.
 ## Verify a run trace through the SDK
 
 ```ts
-const run = await nika.run('workflows/release.nika.yaml')
+const run = await nika.run('workflows/release.nika')
 const result = await run.done
 
 if (!result.receipt) throw new Error('run did not issue a receipt')

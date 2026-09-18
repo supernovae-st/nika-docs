@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""The docs gate must reject the retired `nika new --from` form."""
+"""The docs gate must reject the retired `nika new` authoring door."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def test_retired_new_form_is_visible_and_red() -> None:
         )
         output = result.stdout + result.stderr
         assert result.returncode == 1, output[-800:]
-        assert "retired `nika new --from`" in output, output[-800:]
+        assert "retired `nika new`" in output, output[-800:]
         assert "_mutation-retired-new.mdx:1" in output, output[-800:]
     finally:
         if PLANT.exists():
@@ -33,4 +33,4 @@ def test_retired_new_form_is_visible_and_red() -> None:
 
 if __name__ == "__main__":
     test_retired_new_form_is_visible_and_red()
-    print("ok · retired nika new --from is visible and red")
+    print("ok · retired nika new is visible and red")

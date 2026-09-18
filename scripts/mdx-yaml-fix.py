@@ -6,7 +6,7 @@
 #
 # What it does, per fence:
 #   · finds every ```yaml fence (the info-string is FREE TEXT: bare, a
-#     `<slug>.nika.yaml` name, a prose title · and the trap where the
+#     `<slug>.nika` name, a prose title · and the trap where the
 #     envelope line itself sits in the title, ` ```yaml nika: v1 `: that
 #     line is moved INTO the body first, the title becomes bare);
 #   · fences may be INDENTED (a block inside an <Accordion> sits four
@@ -46,7 +46,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 FENCE_OPEN = re.compile(r"^([ \t]*)```yaml([^\n]*)$")
 FENCE_CLOSE = re.compile(r"^[ \t]*```[ \t]*$")
 SKIP_INFO = re.compile(r"skeleton|illustration|modeline", re.I)
-NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika\.yaml)\s*$")
+NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika)\s*$")
 # the trap: the whole info-string IS an envelope line (` ```yaml nika: v1 `)
 TITLE_ENVELOPE = re.compile(r"^\s*(nika:\s*\S+)\s*$")
 ENVELOPE = re.compile(r"^\s*nika:\s", re.M)
@@ -183,7 +183,7 @@ def process_file(fp: pathlib.Path, nika: str, dry: bool, report: list[str],
             report.append(f"{loc}  skipped  · no envelope line (a fragment · the oracle needs a whole file)")
             counts["skipped"] += 1
             continue
-        name = b.name or f"block-{b.line}.nika.yaml"
+        name = b.name or f"block-{b.line}.nika"
         tmp = page_dir / name
         tmp.write_text(body, encoding="utf-8")
         subprocess.run([nika, "check", "--fix", str(tmp)], capture_output=True, text=True)

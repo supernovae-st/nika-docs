@@ -1,6 +1,6 @@
 ---
 title: "YAML syntax reference"
-description: "Full .nika.yaml schema. Every field, type, and validation rule."
+description: "Full .nika schema. Every field, type, and validation rule."
 sidebarTitle: "YAML syntax"
 icon: "file-code"
 ---
@@ -90,7 +90,7 @@ pure-compute workflow passes with an informational hint; `permits: {}` is the
 authored spelling of "I touch nothing".
 
 ```bash
-nika check flow.nika.yaml --infer-permits   # prints the tightest block, ready to paste
+nika check flow.nika --infer-permits   # prints the tightest block, ready to paste
 ```
 
 Once the block is present every category is **default-deny unless listed** —
@@ -120,7 +120,7 @@ A shape rides the verb's own `schema:` (structured output) or a task's
 There is no named-type block any more (`types:` left the envelope with the
 nine-key one · `NIKA-TYPE-002` retired with it).
 
-```yaml typed-triage.nika.yaml
+```yaml typed-triage.nika
 nika: typed-triage
 
 permits:
@@ -203,7 +203,7 @@ two that carry a contract of their own:
 | `returns:` | The task's output type, as an inline [type expression](#types-·-inline-where-the-shape-is-used) — exclusive with a verb-level `schema:` (`NIKA-TYPE-003`). Under composition it is how the parent states the child's shape. |
 | `lift:` | The **single** construct through which an author opens a named law. `law: taint` raises exactly one binding (`from:` a dotted path · a non-empty `because:`) through the permit-parameterization taint — the value is still matched against the declared boundary, so it is never a permit bypass. `law: data-as-code` (no `from:` · a non-empty `because:`) is the door through the data-as-code sink: a `nika:fetch` whose resolved URL names a code-bearing class (`.pkl` · `.py` · `.so` · the closed NEP-0006 list) is refused with `NIKA-SEC-008` unless the entry declares the artifact will never be loaded or run. It lifts that law only — never the `net.http` boundary, never the SSRF floor. |
 
-```yaml inert-fetch.nika.yaml
+```yaml inert-fetch.nika
 nika: inert-fetch
 
 permits:

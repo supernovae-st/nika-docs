@@ -36,7 +36,7 @@ They orchestrate infra, services and code. Nika is the file for the AI-native sl
 
 We publish this because a comparison that only lists wins is marketing, not a map.
 
-- **No IDE chrome.** Cursor and Continue.dev win for in-editor UX. Nika ships a VS Code extension for `.nika.yaml` (syntax, a DAG view, diagnostics), but it is not an agentic editor.
+- **No IDE chrome.** Cursor and Continue.dev win for in-editor UX. Nika ships a VS Code extension for `.nika` (syntax, a DAG view, diagnostics), but it is not an agentic editor.
 - **No visual workflow builder.** LangGraph has a graph UI. Nika draws the DAG (`nika graph`) but you author in YAML and CLI.
 - **No enterprise durable-execution track record.** Temporal has a decade of battle-testing for long-lived distributed state. Nika is a finite single-run DAG, one file in, one run out. Different problem.
 - **Younger, smaller community.** LangGraph and Cursor have far larger ecosystems today.
@@ -64,6 +64,6 @@ Start the difference in two commands, offline, no keys:
 
 ```bash
 brew install supernovae-st/tap/nika
-nika new hello
+nika compile hello hello.nika
 ```
 </Note>

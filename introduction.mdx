@@ -12,15 +12,16 @@ download a model either. Install Nika, run one command, see it finish.
 
 ```bash
 brew install supernovae-st/tap/nika   # or: curl -LsSf https://nika.sh/install.sh | sh
-nika new hello
+nika compile hello hello.nika
 ```
 
-That second line is what an empty directory makes `nika` offer on
-v{STATUS.version}: `{STATUS.firstCommand}`. It creates a local starter without
-spending. Then use `nika check` and `nika run` when you are ready to execute.
+That second line is `{STATUS.firstCommand}`: the offline hello lesson at an
+explicit destination. No destination means preview only; the command does
+not run the workflow or pick a model for you. Then use `nika check` and
+`nika run` when you are ready to execute.
 
 Useful AI work shouldn't disappear into chats. **Nika turns repeatable AI
-work into files you can run, review, diff and share**: one `.nika.yaml`
+work into files you can run, review, diff and share**: one `.nika`
 file, four verbs, one Rust binary. If you do the same AI task twice, make
 it a workflow.
 
@@ -50,7 +51,7 @@ deterministically, audited **before a single token is spent**. Four verbs
 (`infer`, `exec`, `invoke`, `agent`) and nothing else; fetching a URL,
 writing a file, calling GitHub are all **tools** under `invoke`.
 
-```yaml workflow.nika.yaml
+```yaml workflow.nika
 nika: summarize
 
 permits:                                 # the file IS the blast radius
@@ -121,7 +122,7 @@ for you.
 | Run my first workflow | [First workflow](/getting-started/first-workflow) |
 | Start from a real example | [Examples gallery](/examples/overview) |
 | Write a workflow well (or have an agent write it) | [Patterns](/guides/patterns) · [Agent authoring](/guides/agent-authoring) |
-| See every `.nika.yaml` field | [YAML syntax reference](/reference/yaml-syntax) |
+| See every `.nika` field | [YAML syntax reference](/reference/yaml-syntax) |
 | Understand how verbs execute | [Concepts · Verbs](/concepts/verbs) |
 | Pick an LLM provider | [Concepts · Providers](/concepts/providers) |
 | Know what a run can cost BEFORE running it | [Cost honesty](/guides/cost-honesty) |
@@ -155,7 +156,7 @@ enforced by CI on every commit.
 ```mermaid
 %%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
 flowchart LR
-    F["workflow.nika.yaml<br/><i>portable · readable · verifiable</i>"] --> E["<b>nika</b><br/>single Rust binary"]
+    F["workflow.nika<br/><i>portable · readable · verifiable</i>"] --> E["<b>nika</b><br/>single Rust binary"]
     E -->|infer| L["LLMs<br/>Ollama · LM Studio · any API"]
     E -->|exec| S["shell"]
     E -->|invoke| T["tools · MCP"]
@@ -185,7 +186,7 @@ click away at [Reference · Status](/reference/status), the design at
     subscribable by RSS. And [what ships next](/changelog/roadmap).
   </Card>
   <Card title="Workflows" icon="diagram-project" href="/concepts/workflows" horizontal>
-    How a `.nika.yaml` file becomes an executed graph.
+    How a `.nika` file becomes an executed graph.
   </Card>
   <Card title="Providers" icon="server" href="/concepts/providers" horizontal>
     Local-first: Ollama · llama.cpp · vLLM · LM Studio, or any cloud API.

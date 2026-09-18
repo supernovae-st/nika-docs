@@ -22,7 +22,7 @@ you can sort, grep, and prune from.
 
 ## The shape
 
-{/* showcase:dag-begin bookmark-triage.nika.yaml */}
+{/* showcase:dag-begin bookmark-triage.nika */}
 ```mermaid
 flowchart LR
   pages["pages · ∥ for_each · nika:fetch"]:::invoke
@@ -36,8 +36,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin bookmark-triage.nika.yaml */}
-```yaml bookmark-triage.nika.yaml
+{/* showcase:begin bookmark-triage.nika */}
+```yaml bookmark-triage.nika
 nika: bookmark-triage
 
 const:
@@ -148,12 +148,22 @@ when all you need is identity, don't ask for the body.
 
 ## Run it
 
+Rehearsal writes nothing:
+
 ```bash
-nika try bookmark-triage      # see it work · offline · nothing written
-nika new bookmark-triage      # take it · the sample export lands beside it
-nika run bookmark-triage.nika.yaml
+nika try bookmark-triage
+```
+
+To run a file you own, copy the YAML on this page to
+`bookmark-triage.nika`, then:
+
+```bash
+nika check bookmark-triage.nika
+nika run bookmark-triage.nika
 open out/bookmarks.md
 ```
+
+`nika compile` does not instantiate showcase jobs.
 
 Replace `inputs.bookmarks` with your own export (most browsers dump
 bookmarks to HTML — one jq pass turns that into the URL list this file

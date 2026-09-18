@@ -14,6 +14,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -34,6 +35,11 @@ jobs:
           python3 scripts/tests/test_publication_audit.py
       - name: link + canon audit
         run: python3 scripts/link-audit.py
+      - name: Retired program-suffix ratchet
+        run: |
+          python3 scripts/suffix_ratchet.py
+          python3 scripts/suffix_ratchet.py --selftest
+          python3 -m unittest scripts/tests/test_suffix_ratchet.py -v
       - name: One SDK current contract ratchet
         run: |
           python3 scripts/sdk_contract_gate.py --verify-npm
@@ -135,6 +141,84 @@ jobs:
         env:
           NIKA_DOCS_ROOT: ${{ github.workspace }}
         run: python3 ../spec/scripts/design-projector.py --check
+
+  # Pre-merge qualification against the migrated engine at ENGINE_QUAL_PIN.
+  # The released-engine jobs above stay the visitor-surface judge (what a
+  # reader copies onto brew). This lane is not a substitute for that job
+  # and does not restore retired suffixes to make v0.119.0 green.
+  oracle-sweep-migrated:
+    name: oracle-sweep (migrated engine pin)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Read the exact engine commit
+        id: pin
+        run: |
+          pin="$(grep -v '^#' ENGINE_QUAL_PIN | head -1 | tr -d '[:space:]')"
+          case "$pin" in
+            *[!a-f0-9]*|"" ) echo "::error::ENGINE_QUAL_PIN is not a 40-hex commit"; exit 1 ;;
+          esac
+          if [ "${#pin}" -ne 40 ]; then
+            echo "::error::ENGINE_QUAL_PIN is not a 40-hex commit"
+            exit 1
+          fi
+          echo "sha=$pin" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: supernovae-st/nika
+          ref: ${{ steps.pin.outputs.sha }}
+          path: .engine-qual
+      - name: Verify the checkout is the pinned commit
+        run: |
+          got="$(git -C .engine-qual rev-parse HEAD)"
+          want="${{ steps.pin.outputs.sha }}"
+          if [ "$got" != "$want" ]; then
+            echo "::error::engine checkout $got != ENGINE_QUAL_PIN $want"
+            exit 1
+          fi
+          echo "engine HEAD $got"
+      - name: Install a stable Rust toolchain
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+      - name: Build nika from the pinned commit
+        working-directory: .engine-qual
+        run: cargo build -p nika-cli --bin nika
+      - name: every docs yaml block runs on the migrated engine
+        env:
+          NIKA_BIN: ${{ github.workspace }}/.engine-qual/target/debug/nika
+        run: |
+          "$NIKA_BIN" --version
+          python3 scripts/oracle-sweep.py
+          python3 scripts/tests/test_oracle_sweep_manifest.py
+      - name: CANON counts match the migrated engine spec --canon
+        env:
+          NIKA_BIN: ${{ github.workspace }}/.engine-qual/target/debug/nika
+        run: |
+          PATH="$(dirname "$NIKA_BIN"):$PATH"
+          export PATH
+          python3 scripts/count-drift-gate.py --canon-wire
+      - name: teach-parity against the migrated engine
+        env:
+          NIKA_BIN: ${{ github.workspace }}/.engine-qual/target/debug/nika
+        run: |
+          python3 scripts/teach-parity.py
+          python3 scripts/tests/test_teach_parity_retired_new.py
+          python3 - <<'PY'
+          import os, pathlib, re, sys
+          sys.path.insert(0, "scripts")
+          from first_command import read_first_command
+          live = read_first_command(os.environ["NIKA_BIN"])
+          snap = pathlib.Path("snippets/_status-snapshot.mdx").read_text()
+          first = re.search(r'firstCommand:\s*"([^"]+)"', snap).group(1)
+          if live != first:
+              raise SystemExit(f"firstCommand {first!r} != candidate welcome {live!r}")
+          print(f"first-contact OK: {live}")
+          PY
 
   mirror:
     name: The estate tool is the shared one

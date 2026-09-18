@@ -56,7 +56,7 @@ flowchart LR
     classDef tool fill:#1f2937,color:#94a3b8,stroke:#475569
     classDef out fill:#0b1530,color:#7FE9FF,stroke:#3F7DFF
 
-    Y["📄 .nika.yaml<br/>intent"]:::out --> D{verb?}
+    Y["📄 .nika<br/>intent"]:::out --> D{verb?}
     D -->|"think"| I["infer<br/>LLM call"]:::verb
     D -->|"run"| E["exec<br/>subprocess"]:::verb
     D -->|"use"| V["invoke<br/>tool dispatch"]:::verb
@@ -86,22 +86,22 @@ globs). A string `command:` is rejected at parse.
 **Optional**: `cwd` (path), `env` (map · OS env for this subprocess), `stdin` (string), `capture` (`stdout` default · `stderr` · `combined` · `structured`). Task-level `timeout:` applies (not a verb field).
 
 The portable argv example prints a literal message with the system `printf`.
-Save the [canonical file](https://github.com/supernovae-st/nika-spec/blob/main/examples/snippets/run.nika.yaml)
-as `run.nika.yaml`, then execute it. It needs no Cargo project or Rust toolchain:
+Save the [canonical file](https://github.com/supernovae-st/nika-spec/blob/main/examples/snippets/run.nika)
+as `run.nika`, then execute it. It needs no Cargo project or Rust toolchain:
 
 ```bash
-nika run run.nika.yaml
+nika run run.nika
 ```
 
 Its command uses `command: ["printf", "%s\n", "Hello from a confined program"]`
 and declares `permits.exec: ["printf"]`. The complete file lives in the
-[canonical argv example](https://github.com/supernovae-st/nika-spec/blob/main/examples/snippets/run.nika.yaml).
+[canonical argv example](https://github.com/supernovae-st/nika-spec/blob/main/examples/snippets/run.nika).
 To adapt it to a build, declare the workspace and toolchain access that build
 actually requires, then check and run the resulting workflow.
 
 For the shell door, structured exit status, conditional branches and cleanup,
-save the [complete pipeline](https://github.com/supernovae-st/nika-spec/blob/main/examples/03-exec-pipeline.nika.yaml)
-as `exec-pipeline.nika.yaml` and run `nika run exec-pipeline.nika.yaml`.
+save the [complete pipeline](https://github.com/supernovae-st/nika-spec/blob/main/examples/03-exec-pipeline.nika)
+as `exec-pipeline.nika` and run `nika run exec-pipeline.nika`.
 That lesson uses explicit sample commands:
 its test exits `1`, the simulated deploy skips, and cleanup runs. Change the
 sample's `exit 1` to `exit 0` to exercise the other branch. It performs no real

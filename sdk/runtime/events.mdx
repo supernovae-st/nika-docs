@@ -21,7 +21,7 @@ function reduce(state: ViewState, event: NikaEvent) {
   }
 }
 
-const run = await nika.run('workflow.nika.yaml')
+const run = await nika.run('workflow.nika')
 for await (const event of nika.events(run)) reduce(view, event)
 const result = await run.done
 ```

@@ -18,7 +18,7 @@ provenance manifest out, ready for the site build to pick up.
 
 ## The shape
 
-{/* showcase:dag-begin og-images.nika.yaml */}
+{/* showcase:dag-begin og-images.nika */}
 ```mermaid
 flowchart LR
   hero["hero · nika:image_generate"]:::invoke
@@ -28,8 +28,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin og-images.nika.yaml */}
-```yaml og-images.nika.yaml
+{/* showcase:begin og-images.nika */}
+```yaml og-images.nika
 nika: og-images
 
 permits:
@@ -85,11 +85,22 @@ outputs:
 
 ## Run it
 
+Rehearsal writes nothing:
+
 ```sh
-nika try og-images                             # offline · mock renders real PNGs
-nika new og-images                             # take it · ingredients land beside it
-ls assets/og/                                  # variants + the provenance manifest
+nika try og-images
 ```
+
+To run a file you own, copy the YAML on this page to `og-images.nika`,
+then:
+
+```sh
+nika check og-images.nika
+nika run og-images.nika
+ls assets/og/
+```
+
+`nika compile` does not instantiate showcase jobs.
 
 Flip the provider line and re-run when you want real renders — the rest
 of the file does not change.

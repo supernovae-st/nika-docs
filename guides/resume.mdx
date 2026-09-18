@@ -28,7 +28,7 @@ determinism is ever demanded of your workflow.
 
 ## Record, then resume
 
-```yaml release-notes.nika.yaml
+```yaml release-notes.nika
 # Collect commits, draft notes, stamp a file.
 nika: release-notes
 
@@ -62,13 +62,13 @@ outputs:
 Any `--json` run is a recording ([Traces & replay](/concepts/traces)):
 
 ```bash
-nika run release-notes.nika.yaml --json > .nika/traces/release-notes.ndjson
+nika run release-notes.nika --json > .nika/traces/release-notes.ndjson
 ```
 
 Resume from it:
 
 ```text
-$ nika run release-notes.nika.yaml --resume .nika/traces/release-notes.ndjson
+$ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson
   🦋 nika · release-notes · 3 tasks
      permits ✓ declared boundary · default-deny
 
@@ -105,10 +105,10 @@ that consume it re-run, and the mismatch cascades exactly as far as the
 data flows — untouched sibling branches still skip:
 
 ```text
-$ nika run brief.nika.yaml --var topic="local-first AI" --resume .nika/traces/brief.ndjson
+$ nika run brief.nika --var topic="local-first AI" --resume .nika/traces/brief.ndjson
   resumed · 1 skipped (cache hit) · 0 ran live
 
-$ nika run brief.nika.yaml --var topic="sovereign memory" --resume .nika/traces/brief.ndjson
+$ nika run brief.nika --var topic="sovereign memory" --resume .nika/traces/brief.ndjson
   resumed · 0 skipped (cache hit) · 1 ran live
 ```
 
@@ -135,7 +135,7 @@ task **and its transitive downstream** to re-run even on a match —
 upstream tasks still cache-hit:
 
 ```text
-$ nika run release-notes.nika.yaml --resume .nika/traces/release-notes.ndjson --from draft
+$ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson --from draft
   ✔  collect  cache hit
   ✔  draft    infer · mock/echo  0ms
   ✔  stamp    exec · printf      4ms
@@ -166,7 +166,7 @@ code **4**, and the frame prints the exact resume line (your
 `--var`/`--model` included). Pre-answer in one pass with
 `--answer <task>=<value>` at launch.
 
-```yaml gated-ship.nika.yaml
+```yaml gated-ship.nika
 # Build, ask a human, ship only on yes.
 nika: gated-ship
 
@@ -196,7 +196,7 @@ tasks:
 ```
 
 ```bash
-nika run gated-ship.nika.yaml --json > .nika/traces/gated-ship.ndjson
+nika run gated-ship.nika --json > .nika/traces/gated-ship.ndjson
 echo $?   # 4 · paused — not a failure, but non-zero so `&& next` stops here
 ```
 
@@ -215,7 +215,7 @@ hours later, on the same machine, by a different process:
 Resume with the answer bound to the task id via `--answer` (repeatable):
 
 ```text
-$ nika run gated-ship.nika.yaml --resume .nika/traces/gated-ship.ndjson --answer approve=true
+$ nika run gated-ship.nika --resume .nika/traces/gated-ship.ndjson --answer approve=true
   ✔  build    cache hit
   ✔  approve  invoke · nika:prompt  0ms
   ✔  ship     exec · printf         5ms

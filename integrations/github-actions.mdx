@@ -6,7 +6,7 @@ icon: "github"
 ---
 
 [`supernovae-st/nika-action`](https://github.com/supernovae-st/nika-action)
-turns every PR that touches a `.nika.yaml` into a reviewed plan: a sticky
+turns every PR that touches a `.nika` into a reviewed plan: a sticky
 comment with the `nika check` verdict, the cost floor (never a fake zero),
 the models and secrets the change needs, its egress statics, and the DAG —
 rendered natively by GitHub as mermaid.
@@ -15,7 +15,7 @@ rendered natively by GitHub as mermaid.
 name: nika
 on:
   pull_request:
-    paths: ['**.nika.yaml']  # fire only when a workflow file changes
+    paths: ['**.nika']  # fire only when a workflow file changes
 permissions:
   contents: read
   pull-requests: write     # drop it and the body lands in the step summary
@@ -28,12 +28,14 @@ jobs:
       # the form Dependabot/Renovate bump: @<sha> # v1.0.2
       - uses: supernovae-st/nika-action@v1
         with:
-          workflow: flows/report.nika.yaml
+          workflow: flows/report.nika
           mode: check        # or: test → adds the offline mock golden lane
 ```
 
-No workflow yet? `nika new chain flows/report.nika.yaml` scaffolds
-one — [authoring in 10 minutes](/integrations/quickstart).
+No workflow yet? `nika compile hello hello.nika` writes the offline
+lesson. For `chain`, preview with `nika compile chain --json` and answer
+its questions before naming a destination —
+[authoring in 10 minutes](/integrations/quickstart).
 
 ## Already have CI? One line
 
@@ -49,7 +51,7 @@ jobs:
       pull-requests: write
     uses: supernovae-st/nika-actions-starter/.github/workflows/nika-check.yml@main
     with:
-      workflow: path/to/your.nika.yaml
+      workflow: path/to/your.nika
 ```
 
 Starting fresh instead? [`nika-actions-starter`](https://github.com/supernovae-st/nika-actions-starter)
@@ -59,7 +61,7 @@ live, so you can read a real sticky comment before adopting anything.
 
 ## What lands on the PR
 
-> ✅ **nika check** — clean · `flows/report.nika.yaml` · 3 task(s) · 3 wave(s)
+> ✅ **nika check** — clean · `flows/report.nika` · 3 task(s) · 3 wave(s)
 > 💰 **cost floor ≥ $0.12** · ⚠ 1 unpriced task — never rendered as $0
 > 🔐 **requires** — models: `ollama/qwen3.5:4b` · `mistral/mistral-small-latest` · secrets: `MISTRAL_API_KEY`
 > 🌊 **schedule** — 3 wave(s), max width 1
@@ -74,7 +76,7 @@ thread spam.
 |---|---|---|
 | `check` (default) | static analysis only, nothing executes | none |
 | `test` | + `nika test` vs `<file>.golden.json` — mock provider, offline | none |
-| ~~run~~ | **refused by design.** A `.nika.yaml` can declare `exec:` shell steps — executing PR content under a CI token is your decision to make explicitly, in your own workflow, never on fork-origin events | — |
+| ~~run~~ | **refused by design.** A `.nika` can declare `exec:` shell steps — executing PR content under a CI token is your decision to make explicitly, in your own workflow, never on fork-origin events | — |
 
 ## Security posture
 

@@ -1,6 +1,6 @@
 ---
 title: "Workflows"
-description: "A .nika.yaml file: schema · metadata · tasks. Parsed into a DAG, executed with structured concurrency."
+description: "A .nika file: schema · metadata · tasks. Parsed into a DAG, executed with structured concurrency."
 sidebarTitle: "Workflows"
 icon: "diagram-project"
 ---
@@ -254,7 +254,7 @@ input with `required: false` and a `default:`. A value the file owns and
 nobody overrides is a `const:` entry; a credential is a `secrets:` reference.
 Three authorities, one role each — pick by the role the value plays.
 
-```yaml research-brief.nika.yaml
+```yaml research-brief.nika
 # Bullet-point brief on a topic supplied at launch.
 nika: research-brief
 
@@ -298,7 +298,7 @@ launches a workflow.
 
 The child is an ordinary workflow. Nothing marks it as "a child":
 
-```yaml word-count.nika.yaml
+```yaml word-count.nika
 # Count the words in a piece of text · the reusable child.
 nika: word-count
 
@@ -326,7 +326,7 @@ outputs:
 The parent calls it by **static path**, passes `args:` that fit the child's
 `inputs:`, and reads the child's `outputs:` back as that task's output:
 
-```yaml brief-with-stats.nika.yaml
+```yaml brief-with-stats.nika
 # Write a brief, then measure it by calling a child workflow.
 nika: brief-with-stats
 
@@ -347,7 +347,7 @@ tasks:
     with:
       body: "${{ tasks.brief.output }}"
     invoke:
-      workflow: "./word-count.nika.yaml"
+      workflow: "./word-count.nika"
       args:
         text: "${{ with.body }}"
     returns:
@@ -360,7 +360,7 @@ outputs:
 ```
 
 ```bash
-nika run brief-with-stats.nika.yaml --var topic="local-first AI"
+nika run brief-with-stats.nika --var topic="local-first AI"
 ```
 
 ### The rules the checker enforces
@@ -396,7 +396,7 @@ stream. Full contract: [spec 14 · Composition](https://github.com/supernovae-st
 `nika run` takes one `--var key=value` per input (repeatable):
 
 ```bash
-nika run research-brief.nika.yaml --var topic="local-first AI" --var bullets=5
+nika run research-brief.nika --var topic="local-first AI" --var bullets=5
 ```
 
 Four rules govern the flag, and the file stays the contract — every input a
@@ -417,7 +417,7 @@ caller can pass is declared in `inputs:`:
   listed — a typo that silently did nothing would be the worst outcome:
 
 ```text
-$ nika run research-brief.nika.yaml --var topic=x --var oops=1
+$ nika run research-brief.nika --var topic=x --var oops=1
 nika run: --var oops: unknown input — the workflow declares: topic · bullets
 ```
 

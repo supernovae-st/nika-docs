@@ -16,7 +16,7 @@ VALID_FENCE = """```yaml
 nika: my-project
 ceiling: 0.50
 arm:
-  - workflow: workflows/nightly.nika.yaml
+  - workflow: workflows/nightly.nika
     cadence: "TZ=UTC 0 3 * * *"
     plafond: 0.25
     manqué: sauter
