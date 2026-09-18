@@ -116,19 +116,21 @@ outputs it produced:
 ```
 
 The same frames are recoverable from any recorded trace, hours or
-machines later:
+machines later. After the run above, the journal is already on disk
+(the `trace:` line). With no path, these commands read that latest
+journal:
 
 ```bash
-nika run standup-digest.nika --json > .nika/traces/standup.ndjson
-
-nika trace show   .nika/traces/standup.ndjson   # storyboard + waterfall + verdict card
-nika trace replay .nika/traces/standup.ndjson   # re-render the run live · never re-execute
+nika trace show     # storyboard + waterfall + verdict card — a reading
+nika trace replay   # re-render the run live · never re-execute — a reading
+nika trace verify   # walk the hash chain — the proof, not a reading
 ```
 
 `trace show` prints the final frames; `trace replay` plays the recorded
 events through the same renderer that drew the original run. Replay
 calls no model and runs no command — it is a projection of what already
-happened ([Traces & replay](/concepts/traces)).
+happened. Neither `show` nor `replay` proves the chain;
+`nika trace verify` does ([Traces & replay](/concepts/traces)).
 
 ## Export to your tracing stack · OTLP
 
@@ -136,10 +138,11 @@ A recorded trace projects to OTLP/JSON lines, so any OpenTelemetry
 viewer becomes a Nika run viewer — no collector, no daemon, no vendor:
 
 ```bash
-nika trace export .nika/traces/standup.ndjson
-# → .nika/traces/standup.otlp.jsonl  (one OTLP span per line)
+# export needs the journal path (the run card's `trace:` line, or `nika trace ls`)
+nika trace export .nika/traces/2026-07-28T06-58-44Z-bb6e.ndjson
+# → .nika/traces/2026-07-28T06-58-44Z-bb6e.otlp.jsonl  (one OTLP span per line)
 
-nika trace export .nika/traces/standup.ndjson -o run.otlp.jsonl   # choose the path
+nika trace export .nika/traces/2026-07-28T06-58-44Z-bb6e.ndjson -o run.otlp.jsonl
 ```
 
 Each verb becomes a span (duration, tokens, the ADR-099 identity
