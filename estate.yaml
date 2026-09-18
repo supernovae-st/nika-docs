@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 365
+  classified_files: 366
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 360
+    authored: 361
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 63
+  unverified-default: 64
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: c353dc9945916b50678afcf73068659966dcfd6183ef00f376d0063857a20bff
+  sha256: da2c8afe77c1497470aeca797481b11e47894d26884918b9fc3a05a4fdc6fb8e
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -206,7 +206,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 273
-  aggregate_sha256: e77ac3e7775484189ad1f3ef938943f9851fa77b36eb8e701924647a181c2ade
+  aggregate_sha256: 3e167d91cfb3f0a3b01fb164c447230e0148c27b772e8b015663e28f0bedc5c7
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -234,14 +234,15 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 40
-  aggregate_sha256: 555a7eacd05eb232159f7899a3675381879989f124dbe871615d8431a05bf164
+  match_count: 41
+  aggregate_sha256: 36ea8d271b6d4139e0dcb386b5ad5fbd940c87e4c552a447dea2ffa55d87f75c
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
 - ".gitattributes"
 - ".github/workflows/knowledge-freshness.yml"
 - ".gitignore"
+- "ENGINE_QUAL_PIN"
 - "api-reference/openapi.json"
 - "images/favicon.svg"
 - "images/logo-dark.svg"
