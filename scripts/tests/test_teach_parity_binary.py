@@ -49,7 +49,7 @@ class TeachParityBinaryTest(unittest.TestCase):
         self.cli = self.docs / "cli.mdx"
         self.cli.write_text("| `nika run` | Execute |\n", encoding="utf-8")
         (self.docs / "guide.mdx").write_text(
-            "```sh\nnika run flow.nika.yaml\nnika catalog\n```\n", encoding="utf-8"
+            "```sh\nnika run flow.nika\nnika catalog\n```\n", encoding="utf-8"
         )
 
     def run_gate(self, env: dict[str, str]) -> tuple[int, str]:

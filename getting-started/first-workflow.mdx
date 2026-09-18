@@ -16,7 +16,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 ## Goal
 
-Write a `.nika.yaml` file, run it, get structured output. No setup beyond
+Write a `.nika` file, run it, get structured output. No setup beyond
 `nika` installed. **Your first run needs no API key and no model server.**
 
 ## 1. Pick how the AI step runs
@@ -55,9 +55,9 @@ All provider env vars listed in [Providers catalog](/reference/providers-catalog
 
 ## 2. Write the workflow
 
-Create `hello.nika.yaml`:
+Create `hello.nika`:
 
-```yaml hello.nika.yaml
+```yaml hello.nika
 nika: hello
 
 tasks:
@@ -75,8 +75,8 @@ Three things to notice:
 ## 3. Check it, then run it
 
 ```bash
-nika check hello.nika.yaml   # the static audit: plan · cost · secrets · types · before a single token is spent
-nika run hello.nika.yaml
+nika check hello.nika   # the static audit: plan · cost · secrets · types · before a single token is spent
+nika run hello.nika
 ```
 
 `nika check` catches broken references, missing dependencies and schema
@@ -140,7 +140,7 @@ ceiling.
 
 ## 4. Add a second task that depends on the first
 
-```yaml hello.nika.yaml
+```yaml hello.nika
 nika: hello
 
 tasks:
@@ -182,7 +182,7 @@ consume nothing — use `after: { tests: success }`, the control door.)
 
 ## 5. Get structured output
 
-```yaml hello.nika.yaml
+```yaml hello.nika
 nika: hello-structured
 
 tasks:
@@ -211,13 +211,13 @@ JSON-mode emulation), and validates the result against your schema before
 passing it on.
 
 ```bash
-nika run hello.nika.yaml
+nika run hello.nika
 # Output is guaranteed to be { "names": ["...", "...", "..."] }
 ```
 
 ## What you just built
 
-- Workflows are YAML files: `.nika.yaml`.
+- Workflows are YAML files: `.nika`.
 - Tasks are units of work; the map key is the identity.
 - Four verbs (`infer`, `exec`, `invoke`, `agent`) define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
 - `with:` (data) and `after:` (control) build the DAG — the binding IS the edge.
@@ -228,10 +228,10 @@ nika run hello.nika.yaml
 
 <Steps>
   <Step title="Check before running">
-    `nika check hello.nika.yaml`: static audit before any token or effect.
+    `nika check hello.nika`: static audit before any token or effect.
   </Step>
   <Step title="Inspect the DAG">
-    `nika inspect hello.nika.yaml` (add `--format mermaid|dot|json` for the machine projections).
+    `nika inspect hello.nika` (add `--format mermaid|dot|json` for the machine projections).
   </Step>
   <Step title="Wire your agent">
     Run `nika wire cursor` or `nika wire all` for explicit MCP setup, or use

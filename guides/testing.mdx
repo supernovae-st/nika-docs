@@ -13,7 +13,7 @@ pin what the workflow produces, and any future edit that changes the
 contract fails loud in CI.
 
 ```bash
-nika test triage.nika.yaml
+nika test triage.nika
 ```
 
 ## Why the mock makes this possible
@@ -28,7 +28,7 @@ validates against it — required fields present, types respected. Every
 schema workflow runs offline, end to end, through the same runtime,
 bindings, and typed-outputs validation as a live run.
 
-```yaml triage.nika.yaml
+```yaml triage.nika
 # Classify a support ticket into a typed verdict.
 nika: ticket-triage
 
@@ -67,29 +67,29 @@ First run — no golden exists yet, so `nika test` teaches instead of
 guessing (exit 3):
 
 ```text
-$ nika test triage.nika.yaml
-nika test · no golden yet for triage.nika.yaml
+$ nika test triage.nika
+nika test · no golden yet for triage.nika
 
   the golden pins this workflow's typed `outputs:` under the simulated
   plane (mock model · effects refused · offline · deterministic) —
   future runs must match it.
 
-  create it:   nika test triage.nika.yaml --update
-  then commit: triage.nika.yaml.golden.json
+  create it:   nika test triage.nika --update
+  then commit: triage.nika.golden.json
 ```
 
 Create it with `--update`, review it once, commit it:
 
 ```text
-$ nika test triage.nika.yaml --update
-✔ golden written · triage.nika.yaml.golden.json
+$ nika test triage.nika --update
+✔ golden written · triage.nika.golden.json
   review it once, commit it — `nika test` now guards this workflow
 ```
 
 The golden is small, readable JSON — the mock-synthesized, schema-conformant
 outputs:
 
-```json triage.nika.yaml.golden.json
+```json triage.nika.golden.json
 {
   "verdict": {
     "category": "mock",
@@ -102,11 +102,11 @@ From now on `nika test` compares. A match is exit 0; drift renders a
 per-path diff and exits 1:
 
 ```text
-$ nika test triage.nika.yaml
-✖ outputs drifted from the golden · triage.nika.yaml.golden.json
+$ nika test triage.nika
+✖ outputs drifted from the golden · triage.nika.golden.json
   + outputs.verdict.queue · not in the golden ("mock")
 
-  intended? re-baseline: nika test triage.nika.yaml --update
+  intended? re-baseline: nika test triage.nika --update
 ```
 
 If the drift was intended (you changed the schema, added an output), re-pin
@@ -126,10 +126,10 @@ The pattern that works: **the rule lives once, the cases live one per file.**
 ```text
 decisions/
   refund.bundle.json                            ← the rule · one owned artifact
-  refund-fresh-returned.nika.yaml               ← one case
-  refund-fresh-returned.nika.yaml.golden.json   ← its pinned outcome
-  refund-stale-returned.nika.yaml
-  refund-fresh-unreturned.nika.yaml
+  refund-fresh-returned.nika               ← one case
+  refund-fresh-returned.nika.golden.json   ← its pinned outcome
+  refund-stale-returned.nika
+  refund-fresh-unreturned.nika
   ...
 ```
 
@@ -137,7 +137,7 @@ Each case is a small workflow: an evidence snapshot in `const:`, the kernel in
 the middle, the outcome out. No model, no network, no clock, so the only thing
 under test is the rule.
 
-```yaml refund-fresh-returned.nika.yaml
+```yaml refund-fresh-returned.nika
 nika: refund-fresh-returned
 
 permits:
@@ -172,12 +172,12 @@ outputs:
 Pin it once, read the outcome, commit both files:
 
 ```text
-$ nika test refund-fresh-returned.nika.yaml --update
-✔ golden written · refund-fresh-returned.nika.yaml.golden.json
+$ nika test refund-fresh-returned.nika --update
+✔ golden written · refund-fresh-returned.nika.golden.json
   review it once, commit it — `nika test` now guards this workflow
 ```
 
-```json refund-fresh-returned.nika.yaml.golden.json
+```json refund-fresh-returned.nika.golden.json
 {
   "outcome": "recommend"
 }
@@ -188,11 +188,11 @@ weight of `6000` that becomes `600`, and every case that leaned on it goes red
 at once, naming the flip:
 
 ```text
-$ nika test refund-fresh-returned.nika.yaml
-✖ outputs drifted from the golden · refund-fresh-returned.nika.yaml.golden.json
+$ nika test refund-fresh-returned.nika
+✖ outputs drifted from the golden · refund-fresh-returned.nika.golden.json
   ~ outputs.outcome · golden "recommend" → run "defer"
 
-  intended? re-baseline: nika test refund-fresh-returned.nika.yaml --update
+  intended? re-baseline: nika test refund-fresh-returned.nika --update
 ```
 
 That line is the point. Not "a test failed" but *this rule used to recommend
@@ -240,7 +240,7 @@ Offline and deterministic means no keys in CI, no flakes, no spend:
 ```yaml .github/workflows/nika-test.yml (fragment)
 - name: Golden-test the workflows
   run: |
-    for wf in workflows/*.nika.yaml; do
+    for wf in workflows/*.nika; do
       nika test "$wf"
     done
 ```

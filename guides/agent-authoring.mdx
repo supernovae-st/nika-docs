@@ -41,7 +41,7 @@ flowchart LR
     a filled workflow and observable success and refusal behavior.
 
     `nika new '?'` lists your installed templates. A native scaffold command
-    includes the destination: `nika new chain workflow.nika.yaml`.
+    includes the destination: `nika new chain workflow.nika`.
   </Step>
   <Step title="Adapt the example to the job">
     Copy the template and replace every `<SLOT: …>` value. Review the
@@ -53,7 +53,7 @@ flowchart LR
     guess.
   </Step>
   <Step title="Check: never ship unchecked">
-    `nika check workflow.nika.yaml --native-strict` (engine) or
+    `nika check workflow.nika --native-strict` (engine) or
     `python conformance/runner.py validate <file>` (spec oracle).
     Editors get the same truth live via the
     [JSON Schema](https://github.com/supernovae-st/nika-spec/blob/main/schemas/workflow.schema.json).

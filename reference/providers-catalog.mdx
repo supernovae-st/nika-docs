@@ -134,7 +134,7 @@ catalog's own presentation-order note in `canon.yaml`.
 ## Example: invoke a provider
 
 <CodeGroup>
-```yaml workflow.nika.yaml
+```yaml workflow.nika
 nika: multi-provider
 
 tasks:
@@ -156,7 +156,7 @@ tasks:
 ```bash Required env
 ollama pull llama3.2:3b         # local primary · no key
 export MISTRAL_API_KEY=...      # cloud fallback only
-nika run workflow.nika.yaml
+nika run workflow.nika
 ```
 </CodeGroup>
 
@@ -178,6 +178,6 @@ nika run workflow.nika.yaml
     `NIKA-1xx` provider errors.
   </Card>
   <Card title="Schema" icon="file-code" href="/reference/schema">
-    Workflow envelope, `.nika.yaml` top-level keys.
+    Workflow envelope, `.nika` top-level keys.
   </Card>
 </CardGroup>

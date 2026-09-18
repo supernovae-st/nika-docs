@@ -75,7 +75,7 @@ class KnowledgeMirrorTests(unittest.TestCase):
             verifier.verify_current_source(snapshot,root)
             path.write_bytes(b'{"properties":{}}')
             with self.assertRaisesRegex(ValueError,'Owner advanced'):verifier.verify_current_source(snapshot,root)
-            path.write_bytes(b'{}');(root/'templates/new.nika.yaml').write_text('nika: new')
+            path.write_bytes(b'{}');(root/'templates/new.nika').write_text('nika: new')
             with self.assertRaisesRegex(ValueError,'Owner advanced'):verifier.verify_current_source(snapshot,root)
     def test_path_traversal_refused(self):
         self.data['words'][0]['docsPath']='../introduction'

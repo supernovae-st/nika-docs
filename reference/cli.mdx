@@ -20,7 +20,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika welcome` | The mirror: what this machine has (editors · local models · key presence), what this binary carries, where to start — offline, always exit 0 |
 | `nika welcome --deep [--json]` | The whole workspace truth in one call: every workflow audited (verdict · tasks · waves · cost honesty · permits), recent runs folded from the flight recorder, the machine facts — capped and says so |
 | `nika try [slug]` | See a canonical workflow WORK — offline by default (the mock rehearsal · zero keys · zero flags), nothing written, nothing owned. Bare `nika try` lists what there is to see · `--model <provider>/<name>` runs the same example on a real seat |
-| `nika list` | List every `.nika.yaml` workflow below the current directory, one relative path per line — stable plain output for people and scripts |
+| `nika list` | List every `.nika` workflow below the current directory, one relative path per line — stable plain output for people and scripts |
 | `nika check <file>` | Static pre-flight audit before any run — `-` reads the workflow from stdin (0.94+) · `registry:owner/name` pulls a certified artifact first · `--sdk-snapshot` prints the report with the execution snapshot the resident admits, the body `POST /v1/jobs` and `POST /v1/check` take (0.118) |
 | `nika guard` | Internal hook judge used by the wired guard shim: audits a requested run and returns the host hook's decision without executing the workflow |
 | `nika run <file>` | Execute a checked workflow — `registry:owner/name` refs resolve through the verified cache, then the normal audit-before-run |

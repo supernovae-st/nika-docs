@@ -55,7 +55,7 @@ MCP API key, and gives it access only to `./data`.
 }
 ```
 
-```yaml workflow.nika.yaml
+```yaml workflow.nika
 nika: read-and-summarise
 model: mock/echo
 permits:
@@ -87,8 +87,8 @@ model for an actual summary.
 npm install @modelcontextprotocol/server-filesystem
 mkdir -p data
 printf 'A short article to read.\n' > data/article.txt
-nika check workflow.nika.yaml
-nika run workflow.nika.yaml
+nika check workflow.nika
+nika run workflow.nika
 ```
 
 <Note>

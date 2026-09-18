@@ -32,7 +32,7 @@ The One SDK has no separate version method. Make a real, read-only check at
 startup when the application cannot operate without Nika:
 
 ```ts
-const report = await nika.check('workflows/health.nika.yaml', {
+const report = await nika.check('workflows/health.nika', {
   nativeStrict: true,
 })
 

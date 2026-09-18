@@ -267,7 +267,7 @@ def nine_key_binary() -> str | None:
     nika = os.environ.get("NIKA_BIN") or shutil.which("nika")
     if not nika or not pathlib.Path(nika).exists():
         return None
-    with tempfile.NamedTemporaryFile("w", suffix=".nika.yaml", delete=False) as f:
+    with tempfile.NamedTemporaryFile("w", suffix=".nika", delete=False) as f:
         f.write('nika: v1\nworkflow:\n  id: probe\ntasks:\n  t:\n    infer:\n      prompt: "x"\n      model: mock/echo\n')
         probe = f.name
     try:

@@ -48,14 +48,14 @@ MCP_REGISTRY_FENCE = re.compile(
 # witness lives where witnesses belong — the spec's conformance fixture
 # pair (trifecta-realized-flow-ungated / -human-gate-dominates). The
 # inverted-assertion MECHANISM stays: register any future witness here
-# as {"file.nika.yaml": "NIKA-CODE"} and a green means the lane broke.
+# as {"file.nika": "NIKA-CODE"} and a green means the lane broke.
 DELIBERATE_RED: dict[str, str] = {}
 CODE = re.compile(r"NIKA-[A-Z]+-\d+")
-# A fence may name its file (```yaml child.nika.yaml). Named fences are
+# A fence may name its file (```yaml child.nika). Named fences are
 # materialized as SIBLINGS before judging, so a composition parent can
-# resolve `invoke: workflow: ./child.nika.yaml` — the multi-file examples
+# resolve `invoke: workflow: ./child.nika` — the multi-file examples
 # get judged like every other block instead of being exempted.
-NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika\.yaml)\s*$")
+NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika(?:\.ya?ml)?)\s*$")
 # The type discriminant is the FIRST content line matching `^\s*nika:\s`
 # (spec 01). Leading indent is allowed: a fence inside an <Accordion>
 # keeps its indent in the captured body, and a column-4 `nika: hello`
@@ -169,7 +169,7 @@ for fp in sorted(DOCS.rglob("*.mdx")):
         manifests_total += 1
         mdir = tempfile.mkdtemp(prefix="oracle-manifest-")
         (pathlib.Path(mdir) / "nika.yaml").write_text(body)
-        (pathlib.Path(mdir) / "oracle.nika.yaml").write_text(
+        (pathlib.Path(mdir) / "oracle.nika").write_text(
             "nika: docs-project-oracle\n"
             "model: mock/echo\n"
             "tasks:\n"
@@ -177,7 +177,7 @@ for fp in sorted(DOCS.rglob("*.mdx")):
             "    infer: { prompt: project oracle, max_tokens: 1 }\n"
         )
         r = subprocess.run(
-            [NIKA, "run", "oracle.nika.yaml", "--dry-run", "--plain"],
+            [NIKA, "run", "oracle.nika", "--dry-run", "--plain"],
             cwd=mdir,
             capture_output=True,
             text=True,
@@ -231,7 +231,7 @@ for fp in sorted(DOCS.rglob("*.mdx")):
         m = NAMED.match(info)
         # re-assert THIS fence's bytes (pages reuse one filename across
         # progressive versions — each version is judged as itself)
-        name = m.group(1) if m else f"block-{total}.nika.yaml"
+        name = m.group(1) if m else f"block-{total}.nika"
         path = pathlib.Path(page_dir) / name
         path.write_text(body)
         r = subprocess.run(

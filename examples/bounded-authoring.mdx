@@ -7,11 +7,11 @@ icon: "shield-check"
 
 These filled workflows are generated from the [template sources](/guides/templates).
 The YAML below is the same source embedded in the engine pack. Copy a block to
-`workflow.nika.yaml`, then validate and rehearse it:
+`workflow.nika`, then validate and rehearse it:
 
 ```bash
-nika check workflow.nika.yaml --native-strict --model mock/echo
-nika run workflow.nika.yaml --model mock/echo --output json
+nika check workflow.nika --native-strict --model mock/echo
+nika run workflow.nika --model mock/echo --output json
 ```
 
 Mock rehearsals need no keys or model service. They prove graph execution,

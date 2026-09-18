@@ -10,7 +10,7 @@ happen?* (before), *what is happening?* (during), *what happened?*
 (after). One command each, all offline-friendly — every frame below is
 real output from this workflow:
 
-```yaml standup-digest.nika.yaml
+```yaml standup-digest.nika
 # Pull commits and tickets in parallel, then digest.
 nika: standup-digest
 
@@ -47,7 +47,7 @@ three planning lines — the parallelism width, the pinch points, and each
 task's blast radius. Zero execution, zero tokens:
 
 ```text
-$ nika inspect standup-digest.nika.yaml
+$ nika inspect standup-digest.nika
 standup-digest · 3 tasks · 2 waves · ≥ $0.0000 (floor — unbounded tasks)
   ╭ wave 1 ── 2 in parallel ─╮
   │ ◆ commits  exec          │
@@ -73,7 +73,7 @@ predicted. Piped (CI logs, `tee`), the same run prints one plain,
 deterministic frame instead — `∥` marks tasks that ran in parallel:
 
 ```text
-$ nika run standup-digest.nika.yaml
+$ nika run standup-digest.nika
   🦋 nika · standup-digest · 3 tasks
      permits ✓ declared boundary · default-deny
 
@@ -119,7 +119,7 @@ The same frames are recoverable from any recorded trace, hours or
 machines later:
 
 ```bash
-nika run standup-digest.nika.yaml --json > .nika/traces/standup.ndjson
+nika run standup-digest.nika --json > .nika/traces/standup.ndjson
 
 nika trace show   .nika/traces/standup.ndjson   # storyboard + waterfall + verdict card
 nika trace replay .nika/traces/standup.ndjson   # re-render the run live · never re-execute

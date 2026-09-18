@@ -11,7 +11,7 @@ journal exists. Refusal before execution, queued cancellation and interrupted
 ownership can leave no complete runtime trace.
 
 ```ts
-const run = await nika.run('workflow.nika.yaml')
+const run = await nika.run('workflow.nika')
 const result = await run.done
 
 if (!result.receipt) throw new Error('run did not issue a receipt')

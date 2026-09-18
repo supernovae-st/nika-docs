@@ -45,7 +45,7 @@ arm:
 
 | Key | Required | What it means |
 |---|---|---|
-| `workflow` | yes | The workflow to fire — a repo-relative `*.nika.yaml` path |
+| `workflow` | yes | The workflow to fire — a repo-relative `*.nika.yaml` path (released engine; `.nika` moves with the engine file-identity train) |
 | `cadence` | yes | `on-webhook`, a 5-field cron (`"TZ=Europe/Paris 30 7 * * *"`), or a readable schedule such as `"TZ=Europe/Paris lundi 9h07"` — the IANA zone resolves against the embedded tzdb, never the host's |
 | `plafond` | yes | Per-tick cost ceiling in USD — no default exists (the pay law: a beat always names its own) |
 | `manqué` | yes | The missed-run policy — no default either (the run-missed law) |
@@ -77,13 +77,13 @@ fired, and what fires next — it schedules nothing:
 $ nika arm
 2 beats in /home/alice/project/nika.yaml
 
-  [armed] workflows/nightly-report.nika.yaml · TZ=Europe/Paris 30 7 * * *
+  [armed] workflows/nightly-report.nika · TZ=Europe/Paris 30 7 * * *
          ✓ PROUVÉ · fired · 2026-08-19T05:30:01Z · slot 2026-08-19T05:30:00Z · 0 sauts / 12 tirs
          → 2026-08-20 07:30 CEST
          → 2026-08-21 07:30 CEST
          → 2026-08-22 07:30 CEST
 
-  [armed] workflows/on-event.nika.yaml · on-webhook
+  [armed] workflows/on-event.nika · on-webhook
          · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
          → no upcoming slot (a webhook beat fires on its event)
 
@@ -114,7 +114,7 @@ fired nightly-report · slot 2026-08-19T05:30:00Z · exit 0
 ONE function applies the on-time window, the miss policy, the overlap
 lock, the per-tick ceiling and the firing record — the emitted OS units
 and `nika serve` both end here, so the law lives exactly once. The label
-is the workflow file's radical (`workflows/doctor.nika.yaml` → `doctor`;
+is the workflow file's radical (`workflows/doctor.nika` → `doctor`;
 a radical collision takes `-2`, `-3` in file order).
 
 The stdout contract: a decision prints **exactly one line** —

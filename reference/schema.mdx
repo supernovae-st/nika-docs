@@ -1,6 +1,6 @@
 ---
 title: "JSON Schema"
-description: "The machine-authoritative schema for .nika.yaml."
+description: "The machine-authoritative schema for .nika."
 sidebarTitle: "JSON Schema"
 icon: "schema"
 ---
@@ -25,7 +25,7 @@ project file `nika.yaml` (no `tasks:`) names the project
 
 ## Point your editor
 
-Add the LSP modeline at the top of any `.nika.yaml` so your editor's YAML
+Add the LSP modeline at the top of any `.nika` so your editor's YAML
 language server consumes the JSON Schema directly:
 
 ```yaml the modeline · paste at the top of any workflow
@@ -38,8 +38,8 @@ See [editor setup](/getting-started/editors) for per-IDE instructions.
 ## Local validation
 
 ```bash
-nika check workflow.nika.yaml   # validates against the v1 contract
-nika check workflow.nika.yaml --strict   # + extra lints
+nika check workflow.nika   # validates against the v1 contract
+nika check workflow.nika --strict   # + extra lints
 ```
 
 ## Versioning policy

@@ -59,11 +59,11 @@ where the budget flags and traces live
 In a Hermes session:
 
 > Use the nika skill: smoke-test my nika install offline, then create
-> hello.nika.yaml from the chain template, check it, and run it with the
+> hello.nika from the chain template, check it, and run it with the
 > mock model. Report the trace verify verdict.
 
 Expected: `nika --version` → `nika new hello`
-(offline, zero keys) → `nika new chain hello.nika.yaml` → `nika check --json` →
+(offline, zero keys) → `nika new chain hello.nika` → `nika check --json` →
 mock run → `nika trace verify <trace>` exit 0 (path from the run card's
 `trace:` line — the bare form is a usage error).
 

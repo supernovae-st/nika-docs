@@ -34,6 +34,10 @@ jobs:
           python3 scripts/tests/test_publication_audit.py
       - name: link + canon audit
         run: python3 scripts/link-audit.py
+      - name: Retired program-suffix ratchet
+        run: |
+          python3 scripts/suffix_ratchet.py
+          python3 -m unittest scripts/tests/test_suffix_ratchet.py -v
       - name: One SDK current contract ratchet
         run: |
           python3 scripts/sdk_contract_gate.py --verify-npm

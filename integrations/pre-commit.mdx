@@ -1,12 +1,12 @@
 ---
 title: "Nika × pre-commit"
-description: "Audit every .nika.yaml before it lands: the check verdict — DAG, types, permits, secret flows, cost floor — at commit time, before a single token is spent."
+description: "Audit every .nika before it lands: the check verdict — DAG, types, permits, secret flows, cost floor — at commit time, before a single token is spent."
 sidebarTitle: "pre-commit"
 icon: "code-commit"
 ---
 
 The engine ships a [pre-commit](https://pre-commit.com) manifest, so `nika
-check` runs as a hook on every staged `.nika.yaml`. A workflow that names a
+check` runs as a hook on every staged `.nika`. A workflow that names a
 missing secret, wires a type mismatch, or quietly widens its permits is
 stopped at the commit, with the same named finding and fix the CLI gives you
 — not twenty minutes later in CI.
@@ -22,7 +22,7 @@ repos:
 
 ```bash
 pre-commit install     # once per clone
-git commit             # every staged .nika.yaml is audited from now on
+git commit             # every staged .nika is audited from now on
 ```
 
 ## What the hook checks
