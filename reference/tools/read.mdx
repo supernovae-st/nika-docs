@@ -26,7 +26,7 @@ invoke: { tool: "nika:read", args: { path: "./config.yaml" } }
 ```
 Read a file · returns **string** content (text mode · the default).
 `binary: true` (explicit · no content sniffing) returns **opaque bytes**
-([04 §value rendering](https://github.com/supernovae-st/nika-spec/blob/c119bb42fbacde440f66fcdc745f7bc5b966b627/spec/04-variables.md) · they flow tool→tool ·
+([04 §value rendering](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/spec/04-variables.md) · they flow tool→tool ·
 never into a string position). Throws · `NIKA-BUILTIN-READ-001` (file not
 found, the code the state-file first-run pattern scopes its recovery to) ·
 `-002` (IO failure · permission) · `-003` (text mode on non-UTF-8 content ·
@@ -43,8 +43,8 @@ use `binary: true`). All `tool_error` · `transient: false`.
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/c119bb42fbacde440f66fcdc745f7bc5b966b627/stdlib/builtins-v0.1.md#L141) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/c119bb42fbacde440f66fcdc745f7bc5b966b627/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/stdlib/builtins-v0.1.md#L141) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/canon/builtins.yaml).
 
-Tool identity: `nika:read`. Specification revision: `c119bb42fbac`.
+Tool identity: `nika:read`. Specification revision: `e255dbf72336`.
 
 <Ecosystem />

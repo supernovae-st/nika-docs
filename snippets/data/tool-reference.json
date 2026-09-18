@@ -1,5 +1,5 @@
 {
-  "revision": "c119bb42fbacde440f66fcdc745f7bc5b966b627",
+  "revision": "e255dbf72336bcb98c8163cd8c087e023051a5ab",
   "inputs": {
     "canon/builtins.yaml": "c69102989cdb7ea175d205bf81b818acd25aca9aa010204386b76bb07a37e5fb",
     "stdlib/builtins-v0.1.md": "e36a2be9bba9d0d13c5a9daf1f3cb8d6f8b6c82bec59e57d256fc4587fec6237"

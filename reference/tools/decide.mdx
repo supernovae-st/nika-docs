@@ -28,7 +28,7 @@ invoke:
     bundle: "./decisions/pr-triage.bundle.json"   # path OR inline bundle object
     evidence: "${{ tasks.collect.output }}"       # the EvidenceSnapshot { t, evidence: [...] }
 ```
-The deterministic decision kernel (spec [11-decision.md](https://github.com/supernovae-st/nika-spec/blob/c119bb42fbacde440f66fcdc745f7bc5b966b627/spec/11-decision.md)) · evaluates a portable **Decision Bundle** against an **EvidenceSnapshot** and returns the full Decision Receipt (outcome ∈ &#123;recommend · defer · human_required · opted_out · overridden&#125; · per-dimension term-by-term contributions · intervals · conflicts+witnesses · determination provenance). PURE compute — zero required effects (a `bundle:` path reads like any declared `fs.read`; an inline object needs no filesystem) · zero floats (fixed-point basis-points) · same inputs, same bytes, both evaluators (the stdlib-Python reference interpreter is the conformance oracle — byte-equal canonical JSON). **The LLM never decides**: `infer:` produces closed cited facts; this kernel applies the rubric. The lighter teaching shape (no bundle) is `nika:jq` after the extract — `examples/13-extract-then-law.nika`. Throws · `NIKA-DECIDE-001` (the bundle violates its own laws) · `NIKA-DECIDE-002` (the snapshot does not satisfy the evidence schema) · both `validation_error`, deterministic.
+The deterministic decision kernel (spec [11-decision.md](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/spec/11-decision.md)) · evaluates a portable **Decision Bundle** against an **EvidenceSnapshot** and returns the full Decision Receipt (outcome ∈ &#123;recommend · defer · human_required · opted_out · overridden&#125; · per-dimension term-by-term contributions · intervals · conflicts+witnesses · determination provenance). PURE compute — zero required effects (a `bundle:` path reads like any declared `fs.read`; an inline object needs no filesystem) · zero floats (fixed-point basis-points) · same inputs, same bytes, both evaluators (the stdlib-Python reference interpreter is the conformance oracle — byte-equal canonical JSON). **The LLM never decides**: `infer:` produces closed cited facts; this kernel applies the rubric. The lighter teaching shape (no bundle) is `nika:jq` after the extract — `examples/13-extract-then-law.nika`. Throws · `NIKA-DECIDE-001` (the bundle violates its own laws) · `NIKA-DECIDE-002` (the snapshot does not satisfy the evidence schema) · both `validation_error`, deterministic.
 
 ## Related concepts
 
@@ -41,8 +41,8 @@ The deterministic decision kernel (spec [11-decision.md](https://github.com/supe
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/c119bb42fbacde440f66fcdc745f7bc5b966b627/stdlib/builtins-v0.1.md#L285) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/c119bb42fbacde440f66fcdc745f7bc5b966b627/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/stdlib/builtins-v0.1.md#L285) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/canon/builtins.yaml).
 
-Tool identity: `nika:decide`. Specification revision: `c119bb42fbac`.
+Tool identity: `nika:decide`. Specification revision: `e255dbf72336`.
 
 <Ecosystem />
