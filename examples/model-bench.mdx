@@ -149,13 +149,23 @@ bench is FOR:
 
 ## Run it
 
+Rehearsal writes nothing:
+
 ```bash
-nika try model-bench                               # see it work · offline · mock seats
-ollama pull qwen2.5:14b llama3.2:3b qwen2.5:0.5b   # or swap the seats
-nika new model-bench                               # take it · ingredients land beside it
+nika try model-bench
+```
+
+To run a file you own, copy the YAML on this page to `model-bench.nika`,
+pull the seats you want to compare, then:
+
+```bash
+ollama pull qwen2.5:14b llama3.2:3b qwen2.5:0.5b
+nika check model-bench.nika
 nika run model-bench.nika
 cat bench/model-bench.md
 ```
+
+`nika compile` does not instantiate showcase jobs.
 
 The first call to each model pays its load time — run the bench twice
 and read the warm numbers. Swap any seat for `mistral/…`,

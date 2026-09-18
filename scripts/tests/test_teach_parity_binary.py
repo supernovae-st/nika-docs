@@ -109,7 +109,7 @@ class TeachParityBinaryTest(unittest.TestCase):
         (self.docs / "guide.mdx").write_text("Run `nika new --from chain`.\n", encoding="utf-8")
         status, output = self.run_gate({"NIKA_BIN": str(self.selected), "PATH": ""})
         self.assertEqual(status, 1, output)
-        self.assertIn("retired `nika new --from`", output)
+        self.assertIn("retired `nika new`", output)
 
     def test_timed_out_inventory_is_red_not_a_skip(self) -> None:
         with patch.object(GATE.subprocess, "run", side_effect=GATE.subprocess.TimeoutExpired("nika", 10)) as run:

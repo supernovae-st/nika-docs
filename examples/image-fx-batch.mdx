@@ -123,20 +123,21 @@ outputs:
 
 ## Run it
 
+Rehearsal writes nothing:
+
 ```bash
-nika new image-fx-batch fx.nika   # the file + its two sample photos land beside you
-nika run fx.nika                  # offline · $0.00 · deterministic renders
+nika try image-fx-batch
+```
+
+To run a file you own: copy the YAML on this page to `fx.nika`, point
+`const.photos` at an **existing** directory of PNG files, then:
+
+```bash
+nika check fx.nika
+nika run fx.nika
 ls out/darkroom/
 ```
 
-<Note>
-  The 0.107 pack embeds this workflow: `nika new image-fx-batch <dest>`
-  lands the file verbatim **with its ingredients** (the two sample
-  photos, at the exact relative path the yaml names). Proven against the
-  released `0.107.0`: the taken copy runs offline end-to-end — `3/3 done
-  · $0.00`, two renders in `out/darkroom/`.
-</Note>
-
-Point `const.photos` at any directory of PNG files. Because every op is
-deterministic, the diff of `out/darkroom/` across two runs is empty —
-which makes the output safe to commit, and the workflow safe to put in CI.
+`nika compile` does not instantiate this showcase slug and does not plant
+sample photos. `nika compile --list` names exact skeletons; only a Ready
+candidate plus an explicit destination writes.

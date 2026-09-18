@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """first_command.py — read the front door off a binary, in one place.
 
-The line a stranger is told to type moved twice in three releases
-(`nika try 01-hello` -> `nika new hello`) while these pages kept teaching the
-old one. It is projected now, and this is the ONE reader: the snapshot writes
-what it returns (scripts/mintlify-snapshot.sh) and the gate re-asserts it
-against the installed release (count-drift-gate check g). Two readers would
-be a mirror to keep in sync, which is the defect one layer up.
+The line a stranger is told to type moved three times
+(`nika try 01-hello` -> `nika new hello` -> `nika compile hello hello.nika`)
+while these pages kept teaching the old one. It is projected now, and this
+is the ONE reader: the snapshot writes what it returns
+(scripts/mintlify-snapshot.sh) and the gate re-asserts it against the
+installed release (count-drift-gate check g). Two readers would be a
+mirror to keep in sync, which is the defect one layer up.
 
 The read is deliberately the STRANGER's: an empty working directory and a
 scratch HOME, so no wired editor and no exported key can change the answer.

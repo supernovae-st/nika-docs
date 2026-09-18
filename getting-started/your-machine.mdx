@@ -16,26 +16,26 @@ diagnosis with a fix line per gap.
 nika welcome
 ```
 
-Captured verbatim against the released `nika 0.109.2` on a machine with no
-keys, no configs, no editors wired — the stranger's first screen (only the
+Captured against candidate `nika 0.120.0` on a machine with no keys, no
+configs, no editors wired — the stranger's first screen (only the
 workspace path is shortened to `~/demo`):
 
 ```text
-🦋 nika 0.109.2 — Intent as Code. The workflow language for AI.
+🦋 nika 0.120.0 — Intent as Code. The workflow language for AI.
    one file · 4 verbs · one binary · audited BEFORE it runs
    every run records a tamper-evident, hash-chained trace
 
 this machine
   editors    cursor ✗ · windsurf ✗ · claude ✗ · zed ✗ · hermes ✗ · vscode ✗
              6 unwired · one command each → nika wire cursor
-  local      ollama · lmstudio · llamacpp · localai · vllm · no key needed
-  state      installed · no inference path — start → nika new hello
+  local      5 keyless engines supported · none probed → nika doctor --ping
+  state      installed · no inference path — proof → nika try 01-hello
   workspace  ~/demo
              git ✗ · no workflows yet · agents not briefed → nika init
 
-
 this binary
-  4 verbs · 28 builtins · 15 providers · 48 examples · 10 templates
+  4 verbs · 28 builtins · 16 providers · 61 examples · 22 templates
+  16 wired in this build (5 local · 11 cloud · plus mock)
 
 a whole workflow is one file
   nika: hello
@@ -44,10 +44,8 @@ a whole workflow is one file
     greet:
       infer: { prompt: "say hello to the operator", max_tokens: 50 }
 
-start here (offline · zero keys)
-  nika new hello      # local starter · zero keys
-  nika init           # found this repo (wizard)
-  nika new            # guided first workflow
+Next:
+  nika compile hello hello.nika
 
 learn: nika.sh · docs: docs.nika.sh · ⭐ github.com/supernovae-st/nika
 ```
@@ -59,8 +57,8 @@ line is derived live from the embedded pack (never hand-typed — the
 `15 providers` are the runnable cloud + local set; the
 [catalog](/reference/providers-catalog) counts 17 with the deterministic
 `mock`), and the `state` row names the gap, never a vendor: no inference
-path yet, and the starter door is one command (`nika new hello` —
-offline, zero keys, no provider call).
+path yet, and the starter door is one command (`nika compile hello hello.nika` —
+explicit destination, offline, zero keys, no provider call).
 `--json` emits the machine mirror (`welcome_version: 1`); `--ascii`
 swaps every glyph for CI logs.
 

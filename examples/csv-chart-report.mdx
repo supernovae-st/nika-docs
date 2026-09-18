@@ -156,12 +156,22 @@ outputs:
 
 ## Run it
 
+Rehearsal writes nothing:
+
 ```bash
-nika try csv-chart-report      # see it work · offline · nothing written
-nika new csv-chart-report      # take it · the sample CSV lands beside it
+nika try csv-chart-report
+```
+
+To run a file you own, copy the YAML on this page to
+`csv-chart-report.nika`, then:
+
+```bash
+nika check csv-chart-report.nika
 nika run csv-chart-report.nika
 open out/revenue-report.md
 ```
+
+`nika compile` does not instantiate showcase jobs.
 
 Swap the bundled sample for your own export by pointing
 `const.sales_csv` at it — the aggregation key and the chart spec are

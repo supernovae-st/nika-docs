@@ -202,6 +202,23 @@ jobs:
           PATH="$(dirname "$NIKA_BIN"):$PATH"
           export PATH
           python3 scripts/count-drift-gate.py --canon-wire
+      - name: teach-parity against the migrated engine
+        env:
+          NIKA_BIN: ${{ github.workspace }}/.engine-qual/target/debug/nika
+        run: |
+          python3 scripts/teach-parity.py
+          python3 scripts/tests/test_teach_parity_retired_new.py
+          python3 - <<'PY'
+          import os, pathlib, re, sys
+          sys.path.insert(0, "scripts")
+          from first_command import read_first_command
+          live = read_first_command(os.environ["NIKA_BIN"])
+          snap = pathlib.Path("snippets/_status-snapshot.mdx").read_text()
+          first = re.search(r'firstCommand:\s*"([^"]+)"', snap).group(1)
+          if live != first:
+              raise SystemExit(f"firstCommand {first!r} != candidate welcome {live!r}")
+          print(f"first-contact OK: {live}")
+          PY
 
   mirror:
     name: The estate tool is the shared one

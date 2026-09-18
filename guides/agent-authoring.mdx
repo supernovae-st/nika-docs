@@ -40,8 +40,11 @@ flowchart LR
     the [bounded examples](/examples/bounded-authoring) pair each skeleton with
     a filled workflow and observable success and refusal behavior.
 
-    `nika new '?'` lists your installed templates. A native scaffold command
-    includes the destination: `nika new chain workflow.nika`.
+    `nika compile --list` names your installed templates. Preview with
+    `nika compile <skeleton> --json`. A destination writes only a Ready
+    candidate; `chain` stays incomplete until its questions are answered
+    with `--answer KEY=JSON_LITERAL`. Unknown words do not select a
+    substitute workflow.
   </Step>
   <Step title="Adapt the example to the job">
     Copy the template and replace every `<SLOT: …>` value. Review the

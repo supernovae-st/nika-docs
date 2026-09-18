@@ -49,11 +49,13 @@ Ask your agent:
 > Create a workflow from the `chain` template that summarizes ./notes.md
 > into ./out/brief.md, **check it**, then run it with the mock model.
 
-The agent scaffolds (`nika new chain`), audits (`nika check` — plan,
-cost floor, permits, **before** any token is spent), runs offline
-(`--model mock/echo`), and the receipts land in `.nika/traces/`
-(`nika trace verify .nika/traces/<run>.ndjson` → exit 0 — the run card
-prints the path on its `trace:` line).
+The agent previews (`nika compile chain --json` — incomplete questions
+stay questions; no file is written), answers them with repeatable
+`--answer KEY=JSON_LITERAL`, writes a Ready destination, audits
+(`nika check` — plan, cost floor, permits, **before** any token is
+spent), runs offline (`--model mock/echo`), and the receipts land in
+`.nika/traces/` (`nika trace verify .nika/traces/<run>.ndjson` → exit 0
+— the run card prints the path on its `trace:` line).
 
 ## Then: CI receipts
 

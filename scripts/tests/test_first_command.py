@@ -14,7 +14,11 @@ from first_command import read_first_command
 
 class FirstCommandTest(unittest.TestCase):
     def test_supported_screen_shapes_still_use_the_same_reader(self) -> None:
-        for screen in ("Next:\n\n nika new hello # comment\n", "Next:\n nika new hello\n"):
+        for screen in (
+            "Next:\n\n nika compile hello hello.nika # comment\n",
+            "Next:\n nika compile hello hello.nika\n",
+            "Next:\n nika new hello\n",
+        ):
             with patch("first_command.subprocess.run", return_value=subprocess.CompletedProcess([], 0, screen)) as run:
                 self.assertTrue(read_first_command("/selected/nika").startswith("nika "))
                 self.assertTrue(run.call_args.kwargs["check"])

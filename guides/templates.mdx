@@ -14,8 +14,12 @@ re-check.**
 
 ## Choose a starting point
 
-`nika new '?'` lists the skeletons embedded in your installed binary.
-The copyable sources below also run through the released checker.
+`nika compile --list` names the exact skeletons embedded in your installed
+binary. Preview one with `nika compile <slug> --json`. Unknown intent stays
+incomplete and does not pick a substitute. Only a Ready candidate plus an
+explicit destination writes; remaining questions use repeatable
+`--answer KEY=JSON_LITERAL`. The copyable sources below also run through
+the released checker.
 See [bounded authoring examples](/examples/bounded-authoring) for filled
 workflows, expected outputs and rejection cases.
 
@@ -971,10 +975,11 @@ outputs:
 The audited-ops shape: read a system's real state via a pinned CLI (argv-array exec — the only form a `permits.exec` allowlist can prove), explain it with one bounded model call, keep the report as a file. Swap `docker` for any product CLI. The live-proven walkthrough: [A Docker AI workflow](/guides/docker-ai-workflow).
 
 <Tip>
-  Shipped in the engine pack since 0.99.0: `nika new docker-report
-  <dest>.nika` scaffolds this exact skeleton (verified on the
-  released binary). The block below is the same conformance-validated
-  source, if you prefer to copy it.
+  Shipped in the engine pack since 0.99.0. On the 0.120 compile door,
+  `nika compile docker-report <dest>.nika` is Ready (zero questions) and
+  writes that destination. Preview with `nika compile docker-report --json`.
+  The block below is the same conformance-validated source, if you prefer
+  to copy it.
 </Tip>
 
 {/* template:begin docker-report.nika */}

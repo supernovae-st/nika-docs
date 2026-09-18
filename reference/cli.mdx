@@ -36,7 +36,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `nika spec --schema` | Print the embedded JSON Schema |
 | `nika catalog [--json]` | The embedded provider/model catalog (models · capabilities · env vars) — `--json` emits the versioned machine projection (`catalog_version: 1`) |
 | `nika catalog --tools [--json]` | The embedded builtin tool catalog (`nika:*` · model-facing schemas) — `--json` emits the versioned machine projection (`tools_version: 1`) |
-| `nika new [intent] [dest]` | The ONE creation door: plain words route across the whole catalog · an example slug lands verbatim with its ingredients · a skeleton name instantiates (`nika new '?'` lists the set) |
+| `nika compile [intent] [dest]` | Compile an exact skeleton or conservative edit into a reviewable workflow. No destination: preview only. Unknown intent stays incomplete (no substitute). `--list` names exact skeletons. `--json` prints the versioned result, including questions. `--answer KEY=JSON_LITERAL` fills a stable question. `--base` + `--change 'Set const.NAME to JSON_LITERAL'` is a conservative edit. Only Ready plus an explicit destination writes; `--force` replaces |
 | `nika arm [fire\|disarm]` | Read the local beat registry and show what is armed plus the next firing time — scheduling nothing by default. `fire` evaluates and records one due beat; `disarm` teaches the explicit registry gesture |
 | `nika serve` | Resident ARM firer by default (the same `fire`, wall clock in place of the OS). `--bind` with `--workflows` and `--token-file` opens authenticated HTTP: jobs, SSE, cancellation, trace diagnostics, workflows, schedules and OpenAPI. Artifact routes and `POST /v1/run` are absent |
 | `nika completions <shell>` | Generate shell completions ([setup](/getting-started/installation#shell-completions)) |
@@ -69,7 +69,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `--no-progress` | `run` | Deterministic non-animated render |
 | `--quiet` | `run` | Compact final verdict card |
 | `--format json|mermaid|dot` | `graph` | Choose graph projection |
-| `--force` | `init`, `new` | Overwrite existing generated files |
+| `--force` | `init`, `compile` | Overwrite existing generated files |
 
 ## Environment variables
 

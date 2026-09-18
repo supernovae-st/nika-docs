@@ -62,10 +62,12 @@ In a Hermes session:
 > hello.nika from the chain template, check it, and run it with the
 > mock model. Report the trace verify verdict.
 
-Expected: `nika --version` → `nika new hello`
-(offline, zero keys) → `nika new chain hello.nika` → `nika check --json` →
+Expected: `nika --version` → `nika compile hello hello.nika`
+(offline, zero keys, explicit destination) → `nika check --json` →
 mock run → `nika trace verify <trace>` exit 0 (path from the run card's
-`trace:` line — the bare form is a usage error).
+`trace:` line — the bare form is a usage error). `nika compile chain`
+stays incomplete until its questions are answered; it does not write a
+substitute file.
 
 ## The two clocks
 

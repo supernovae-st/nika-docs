@@ -158,13 +158,24 @@ this time".
 
 ## Run it
 
+Rehearsal writes nothing:
+
 ```bash
-nika try transcript-shownotes      # see it work · offline · nothing written
+nika try transcript-shownotes
+```
+
+To run a file you own, copy the YAML on this page to
+`transcript-shownotes.nika`, pull a local model if you want a real
+answer, then:
+
+```bash
 ollama pull llama3.2:3b
-nika new transcript-shownotes      # take it · the sample transcript lands beside it
+nika check transcript-shownotes.nika
 nika run transcript-shownotes.nika
 open out/show-notes.md
 ```
+
+`nika compile` does not instantiate showcase jobs.
 
 Feed it any meeting transcript instead: the schema does not care
 whether the speakers were recording a podcast or arguing about a

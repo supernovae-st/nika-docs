@@ -14,11 +14,14 @@ ships inside the binary:
 
 ```bash
 nika try 01-hello                    # the mock rehearsal · zero keys · nothing written
-nika new meeting-actions             # take an example, fixtures included, then run it
+nika compile hello hello.nika        # write the offline lesson at an explicit destination
 ```
 
-`nika try` previews an example offline with zero setup; `nika new`
-lands the file with its fixture ingredients so the real run works.
+`nika try` previews an example offline with zero setup. `nika compile`
+writes only a Ready candidate to an explicit destination; showcase jobs
+on these pages are copied from the YAML, not instantiated by a showcase
+slug. `nika compile --list` names exact skeletons. Unknown intent stays
+incomplete and does not pick a substitute.
 
 The YAML you read here is projected verbatim from
 [`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),

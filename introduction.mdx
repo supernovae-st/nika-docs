@@ -12,12 +12,13 @@ download a model either. Install Nika, run one command, see it finish.
 
 ```bash
 brew install supernovae-st/tap/nika   # or: curl -LsSf https://nika.sh/install.sh | sh
-nika new hello
+nika compile hello hello.nika
 ```
 
-That second line is what an empty directory makes `nika` offer on
-v{STATUS.version}: `{STATUS.firstCommand}`. It creates a local starter without
-spending. Then use `nika check` and `nika run` when you are ready to execute.
+That second line is `{STATUS.firstCommand}`: the offline hello lesson at an
+explicit destination. No destination means preview only; the command does
+not run the workflow or pick a model for you. Then use `nika check` and
+`nika run` when you are ready to execute.
 
 Useful AI work shouldn't disappear into chats. **Nika turns repeatable AI
 work into files you can run, review, diff and share**: one `.nika`

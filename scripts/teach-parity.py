@@ -10,9 +10,9 @@ a taught command that no longer exists, the second cannot see a shipped
 command nobody wrote down. A reader copying a "## Run it" block must
 never meet a dead end the surface swore was live.
 
-The positional `nika new <intent> [dest]` door also gets one explicit
-tombstone: live pages may not teach its retired `--from` flag. Release
-history is exempt because it records the migration.
+Live pages may not teach the retired `nika new` authoring door (including
+its `--from` flag). The creation door is `nika compile`. Release history
+is exempt because it records the migration.
 
 Both directions read the SAME derivation — the released binary's own
 `--help --all` command inventory. NIKA_BIN selects an explicit absolute
@@ -83,7 +83,7 @@ SHELL_FENCE = re.compile(r"```(?:sh|bash|console|shell)[^\n]*\n(.*?)```", re.DOT
 # `nika <sub>` at the head of a copyable line. A `$`/`>` prompt is
 # tolerated; a continuation (`--flag`) or a comment is not a command.
 TAUGHT_CALL = re.compile(r"^\s*(?:[$>]\s*)?nika\s+([a-z][a-z0-9-]*)", re.M)
-RETIRED_NEW_FORM = re.compile(r"nika new[^\n`]*--from")
+RETIRED_NEW_CMD = re.compile(r"\bnika[ \t]+new\b")
 
 
 def taught_subcommands() -> dict[str, list[str]]:
@@ -101,14 +101,14 @@ def taught_subcommands() -> dict[str, list[str]]:
 
 
 def retired_new_forms() -> list[str]:
-    """Live pages that still hand readers the pre-positional creation flag."""
+    """Live pages that still hand readers the retired `nika new` door."""
     findings = []
     for path in sorted(DOCS_ROOT.rglob("*.mdx")):
         if "node_modules" in path.parts or "changelog" in path.parts:
             continue
         lines = path.read_text(encoding="utf-8").splitlines()
         for line_number, line in enumerate(lines, 1):
-            if RETIRED_NEW_FORM.search(line):
+            if RETIRED_NEW_CMD.search(line):
                 findings.append(f"{path.relative_to(DOCS_ROOT)}:{line_number}")
     return findings
 
@@ -178,7 +178,7 @@ def judge(binary: str) -> int:
             )
     if retired_new:
         print(
-            "teach-parity: RED — live docs still teach retired `nika new --from`: "
+            "teach-parity: RED — live docs still teach retired `nika new`: "
             + " · ".join(retired_new)
         )
     if missing or dead or retired_new:
