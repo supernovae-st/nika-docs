@@ -36,7 +36,7 @@ jobs:
         run: python3 scripts/link-audit.py
       - name: One SDK current contract ratchet
         run: |
-          python3 scripts/sdk_contract_gate.py
+          python3 scripts/sdk_contract_gate.py --verify-npm
           python3 scripts/tests/test_sdk_contract_gate.py
       - name: Installed MDX parser failures block the push hook
         run: python3 scripts/tests/test_mintlify_hook.py

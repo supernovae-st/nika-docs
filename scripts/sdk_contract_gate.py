@@ -3,8 +3,11 @@
 
 from __future__ import annotations
 
+import argparse
+import json
 import pathlib
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 
@@ -25,7 +28,8 @@ class Rule:
 
 RULES = (
     Rule("split local class", re.compile(r"\bLocalNika\b")),
-    Rule("split local import", re.compile(r"@supernovae-st/nika-client/local")),
+    Rule("retired package name", re.compile(r"@supernovae-st/nika-client\b")),
+    Rule("split local import", re.compile(r"@supernovae-st/nika(?:-client)?/local")),
     Rule("buffered terminal shortcut", re.compile(r"\brunToEnd\b")),
     Rule("invented plan method", re.compile(r"\bdryRunPlan\b")),
     Rule("retired jobs namespace", re.compile(r"\bnika\.jobs\b")),
@@ -75,7 +79,7 @@ def findings(root: pathlib.Path = ROOT) -> list[str]:
         text = path.read_text(encoding="utf-8")
         failures.extend(callout_bindings(text, rel))
         for line_number, line in enumerate(text.splitlines(), 1):
-            for pin in re.findall(r"@supernovae-st/nika-client@([^\s`'\"]*)", line):
+            for pin in re.findall(r"@supernovae-st/nika@([^\s`'\"]*)", line):
                 if version is None or pin != version:
                     failures.append(
                         f"{rel}:{line_number}: SDK package pin {pin!r} does not match "
@@ -123,8 +127,34 @@ def callout_bindings(text: str, relative: str) -> list[str]:
     return failures
 
 
+def verify_npm(root: pathlib.Path = ROOT) -> list[str]:
+    """Verify availability separately from static contract consistency."""
+    version = source_version(root)
+    source = (root / "snippets" / "_sdk-contract.mdx").read_text(encoding="utf-8")
+    packages = re.findall(r'^\s*package:\s*"([^"\n]+)"', source, re.MULTILINE)
+    if version is None or packages != ["@supernovae-st/nika"]:
+        return ["npm verification requires one canonical package and exact version"]
+    try:
+        result = subprocess.run(
+            ["npm", "view", f"{packages[0]}@{version}", "version", "--json",
+             "--registry=https://registry.npmjs.org"],
+            check=True, capture_output=True, text=True, timeout=30,
+        )
+        if json.loads(result.stdout) != version:
+            return ["npm registry did not return the exact canonical version"]
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return ["npm availability could not be verified (missing package, network or invalid response)"]
+    return []
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--verify-npm", action="store_true",
+                        help="also require the exact package version in the public registry")
+    args = parser.parse_args()
     failures = findings()
+    if args.verify_npm and not failures:
+        failures.extend(verify_npm())
     if failures:
         print("sdk-contract-gate: contract drift found", file=sys.stderr)
         for failure in failures:

@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 360
+  classified_files: 361
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 355
+    authored: 356
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 56
+  unverified-default: 59
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: a5cf67f5b097bed97c0f861a0f22b2486c39c6ee6609bc5dfb68a5dcb1edd59f
+  sha256: ad26b92259f6c569c0266598baaadf94995630910ad648fe5be5583993bd5a21
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -49,11 +49,11 @@ files:
   evidence: "hand-pinned Node major for the local mint preview"
 - path: "AGENTS.md"
   class: authored
-  sha256: 97881c2792990b59917b172da2f0b4ece18141045fb2dbc0da7c09cd8836cd6f
+  sha256: 92d4d36a55860d30e06aed33e25ea4548375dfd22d1f771fdeafa8c7ace9fd0c
   evidence: "hand-written agent entry per the AGENTS.md convention · it STATES the projection rules the snippets follow"
 - path: "DEPLOY.md"
   class: authored
-  sha256: 5f76c7e3996f36402436108a007868a87c10620f6d13a7922edd043e822dfe25
+  sha256: c738cf68151183f55c40dde0dab141f65b474e3863d46a49c7b471dbaec5534b
   evidence: "hand-written deploy runbook (Mintlify dashboard + DNS steps · two owners)"
 - path: "ESTATE_PIN"
   class: authored-pin
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: f2d35866e1fb5f8fc59d3cd75a4c9eeb8307adb8d82b31359366e1974bef069d
+  sha256: 36bf6c597caa758c13237676a0b778d23f8f0245fa285c7fbce61220c181e93a
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -117,7 +117,7 @@ files:
   note: "unverified-default"
 - path: "lefthook.yml"
   class: authored
-  sha256: 5c96fa783c0ba1605389e705e2357bfdcc14d688ec81655fa9dac9675f193e91
+  sha256: a706607076ed0b513f8370bbccf764c52c3d8927eb7482cba88f759556cf94cd
   evidence: "hand-written pre-push gate config (mint broken-links · link-audit · teach-parity · oracle-sweep)"
 - path: "reference/error-codes.mdx"
   class: authored
@@ -149,7 +149,7 @@ files:
   evidence: "hand-written per-repo estate rules (this file) · the tool is shared, these declarations are ours"
 - path: "scripts/link-audit.py"
   class: authored
-  sha256: 1af95c0e8b98d609e9f3ac539c2eecc8c25907749c24d7cea32ee0ff11f77771
+  sha256: 50eb8a6885c9d6b19b22f4ef0dfa5fb9ec1692133458143b0fde7f613aa9bd4f
   evidence: "hand-written gate · docstring lists its four checks (links · nav · dead branches · legacy bindings)"
 - path: "scripts/mintlify-snapshot.sh"
   class: authored
@@ -161,7 +161,7 @@ files:
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/sdk_contract_gate.py"
   class: authored
-  sha256: decb6319f9d095860319cb2310a7bce778e92c1a9dc307ebbc03625dd772b88c
+  sha256: af8577c6cfd390ce5842b352c65310313c3a21f8d8d923a3ac79e1d83f8dcbd0
   evidence: "authored source ratchet for retired SDK contracts, explicit shared-callout bindings and installation pins against the canonical SDK source version"
 - path: "scripts/teach-parity.py"
   class: authored
@@ -173,7 +173,7 @@ files:
   evidence: "authored isolated-tool regression that executes the actual push-hook command and preserves parser success, failure and explicitly reported absence; run by gate.yml"
 - path: "scripts/tests/test_sdk_contract_gate.py"
   class: authored
-  sha256: 469ab8d57ab84bb215082967df07c0fb1864d3c5eb260d97616c1dc442802899
+  sha256: 64a4d8804a30dd681371c54e5565feea5a29b58b0b8c0a61f2e473a7e6b02bfe
   evidence: "authored offline positive and planted-negative regressions for the SDK source ratchet, run by gate.yml"
 - path: "snippets/_canon.mdx"
   class: generated
@@ -186,7 +186,7 @@ files:
     - "supernovae-st/nika-spec canon.yaml (the Nika language single source of truth)"
 - path: "snippets/_ecosystem.mdx"
   class: authored
-  sha256: 516b458aeeeac15c7d9b9dfbf01a76774750c34e6b8a4146253cadeedb733a88
+  sha256: 6a91f758c17eb7cc74d278e1be9e1d00b2d4c3d1f24bd620efe5657f76d82cd6
   evidence: "its own header: 'Edit HERE, never per-page' — the one hand-edited snippet (a single-source link mesh, not a projection)"
 - path: "snippets/_showcase.mdx"
   class: generated
@@ -199,14 +199,14 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: eecf27685ed5f52a3ff9dac1fe96ed25f604e3d11dbb845f48fdd8219ea31a1b
+  sha256: 6b71d9a5e10bef29679596ddc1df20146b70ac142420e8c457781f28eed09661
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 275
-  aggregate_sha256: 0062c76d54cfd9cea6361bf51c9c402ebefa4ed985159f269d0a19439e3d7980
+  match_count: 273
+  aggregate_sha256: 51b3fbe5335d0021f730b06627c7c87660b4154647699950e4cad366fa5092d6
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -234,8 +234,8 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 33
-  aggregate_sha256: b5420138316bb050f1dda68e3c2efd0fa21209548d8b2c09a6f5ebe151709c0f
+  match_count: 36
+  aggregate_sha256: cb5b7c6acf6bc1487beccef640aeb3d8449ca019b78edee643594cbdf6d82502
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -258,6 +258,8 @@ unverified:
 - "scripts/knowledge-mirror.py"
 - "scripts/mdx-yaml-fix.py"
 - "scripts/mintlify_snapshot.py"
+- "scripts/public-assets.json"
+- "scripts/publication-audit.py"
 - "scripts/tests/test_count_drift_first_contact.py"
 - "scripts/tests/test_first_command.py"
 - "scripts/tests/test_install_release.py"
@@ -271,6 +273,7 @@ unverified:
 - "scripts/tests/test_oracle_sweep_mcp_registry.py"
 - "scripts/tests/test_oracle_sweep_retired_v1_tag.py"
 - "scripts/tests/test_oracle_sweep_sees_nine_key.py"
+- "scripts/tests/test_publication_audit.py"
 - "scripts/tests/test_snapshot_binary_identity.py"
 - "scripts/tests/test_teach_parity_binary.py"
 - "scripts/tests/test_teach_parity_retired_new.py"

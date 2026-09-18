@@ -1,25 +1,25 @@
-{/* _sdk-contract.mdx: one source for the One SDK release horizon.
+{/* _sdk-contract.mdx: one source for the published One SDK contract.
     Pass SDK explicitly as sdk: imported components must not rely on sibling
     variable exports being in scope. Keep availability separate from
     the source and engine contract. */}
 
 export const SDK = {
-  package: "@supernovae-st/nika-client",
+  package: "@supernovae-st/nika",
   source: "https://github.com/supernovae-st/nika-client",
   sourceVersion: "0.118.7",
-  sourceCandidate: "https://github.com/supernovae-st/nika-client/commit/e40e4e20ce15e9be62225ffae87298d336988582",
+  sourceCandidate: "https://github.com/supernovae-st/nika-client/tree/v0.118.7",
   engineCandidate: "https://github.com/supernovae-st/nika/releases/tag/v0.118.7",
   site: "https://nika.sh/sdk",
 }
 
 export const SourceContract = ({ sdk }) => (
-  <Warning>
-    These pages describe the merged <code>{sdk.sourceVersion}</code>
-    <a href={sdk.sourceCandidate}>SDK source</a> and its matching
-    <a href={sdk.engineCandidate}>public engine release</a>. The SDK npm package
-    has not yet been published at this version. Verify the exact package and
-    platform artifacts before using these examples as an installation contract.
-  </Warning>
+  <Info>
+    These pages describe the published <code>{sdk.package}@{sdk.sourceVersion}</code>
+    {" "}<a href={sdk.sourceCandidate}>SDK release</a> and its matching
+    {" "}<a href={sdk.engineCandidate}>bundled native engine</a>. A newer engine
+    release or SDK main commit does not change an installed package. Use Node.js
+    22 or newer; no global Nika installation is required for local mode.
+  </Info>
 )
 
 export const LocalContract = ({ sdk }) => (
@@ -28,8 +28,8 @@ export const LocalContract = ({ sdk }) => (
     the package root and omit <code>url</code>. The client resolves the engine
     from <code>bin</code>, then <code>NIKA_BIN</code>, then the exact optional
     platform package. It deliberately refuses an implicit <code>PATH</code>
-    {" "}lookup. These examples target the merged
-    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} SDK source</a>.
+    {" "}lookup. These examples target the published
+    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} SDK release</a>.
   </Tip>
 )
 
@@ -43,16 +43,16 @@ export const RemoteContract = ({ sdk }) => (
     SSE, cancellation, trace diagnostics,
     workflows and schedule read/write. It does not include
     {" "}<code>POST /v1/run</code>, artifact routes, job listing, or schedule
-    list/delete/trigger/backfill routes. These examples target the merged
-    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} SDK source</a>;
-    its npm package remains unpublished; the matching engine release is public.
+    list/delete/trigger/backfill routes. These examples target the published
+    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} SDK release</a>. The remote server owns its engine version; check its
+    compatibility separately from the bundled local payload.
   </Info>
 )
 
 export const SdkDoors = () => (
   <CardGroup cols={3}>
     <Card title="Start" icon="play" href="/sdk/start/quickstart">
-      Check registry availability and complete one typed run.
+      Install the published package and complete one typed run.
     </Card>
     <Card title="Project" icon="folder-tree" href="/sdk/project/nika-yaml">
       nika.yaml, arm policy, precedence and runtime state.

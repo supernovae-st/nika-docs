@@ -1,116 +1,120 @@
 ---
 title: "TypeScript quickstart"
-description: "Audit a real workflow and complete one typed run through the One SDK lifecycle."
+description: "Install the SDK, run a workflow with the bundled engine and inspect its result."
 sidebarTitle: "Quickstart"
 icon: "play"
 ---
 
 import { SDK, SourceContract, LocalContract } from "/snippets/_sdk-contract.mdx"
-import { ProjectContract } from "/snippets/_project-contract.mdx"
 
 <SourceContract sdk={SDK} />
 <LocalContract sdk={SDK} />
-<ProjectContract />
 
-The default client is local. It needs no server or token, but it does need
-Node.js 22 or newer and a compatible Nika engine.
+Use Node.js 22 or newer. This example runs locally with the package's native
+engine and the mock provider. It needs no server, global CLI or provider key.
 
-## 1. Check package availability
-
-```sh
-nika --version
-npm view @supernovae-st/nika-client@0.118.7 version
-```
-
-The SDK source is merged and the matching engine v0.118.7 is public.
-The SDK npm package at this version remains unpublished. The remaining
-examples require that exact SDK and engine. Wait for its package and platform
-artifacts before installing from the registry. After publication, verify the exact
-version rather than the moving npm `latest` tag:
+## 1. Install in your application
 
 ```sh
-npm install @supernovae-st/nika-client@0.118.7
-node -p "require('@supernovae-st/nika-client/package.json').version"
+npm install @supernovae-st/nika@0.118.7
+npm ls @supernovae-st/nika
 ```
 
-The second command proves the dependency installed in this project. A version
-query alone does not prove that the engine or optional platform package is
-the matching released artifact.
+Keep optional dependencies enabled: they provide the native payload for your
+supported platform. An explicit `bin` or `NIKA_BIN` overrides that payload;
+omit both for this first run. The [local client](/sdk/local/client) explains
+binary resolution and compatibility errors.
 
-## 2. Create a project and workflow
+## 2. Save a workflow
 
-```sh
-nika init --project-file
-mkdir -p workflows
-nika new 01-hello workflows/hello.nika.yaml
+Create `hello.nika.yaml` in the application directory:
+
+```yaml
+nika: hello-sdk
+model: mock/echo
+permits: {}
+tasks:
+  greet:
+    infer:
+      prompt: "Hello, Nika"
+      max_tokens: 32
+outputs:
+  greeting: ${{ tasks.greet.output }}
 ```
 
-Keep the generated `.nika.yaml` workflow in your application, for example as
-`workflows/hello.nika.yaml`.
+This fixture has no external tools or effects. Choosing a mock model for an
+arbitrary workflow does not disable that workflow's tools or permissions.
+A project `nika.yaml` is optional for this example; the executable source is
+`hello.nika.yaml`.
 
-`nika.yaml` is the project control plane; `workflows/hello.nika.yaml` is the
-executable workflow. Pass only the latter to `check()` and `run()`.
+## 3. Run and observe
 
-## 3. Check, admit, observe, settle
+Save `demo.mjs` next to the workflow:
 
-```ts
-import { Nika } from '@supernovae-st/nika-client'
+```js
+import { Nika } from '@supernovae-st/nika'
 
 const nika = new Nika({ cwd: process.cwd() })
-const file = 'workflows/hello.nika.yaml'
-const report = await nika.check(file, { nativeStrict: true })
-
-if (!report.clean) {
-  console.error(report)
-  process.exit(2)
-}
-
-const run = await nika.run(file, {
-  model: 'mock/echo',
+const run = await nika.run('./hello.nika.yaml', {
   maxCostUsd: 0,
 })
 
 const watching = (async () => {
   for await (const event of nika.events(run)) {
-    console.log(event.kind, event.status)
+    console.log(event.kind)
   }
 })()
 
 const result = await run.done
 await watching
 
-if (result.status !== 'succeeded') process.exit(result.exitCode ?? 1)
-console.log(result.settlement, result.outputs, result.receipt)
-```
+if (result.status !== 'succeeded') {
+  console.error(result)
+  process.exitCode = result.exitCode ?? 1
+} else {
+  console.log(result.outputs)
+}
 
-`run()` resolves after stable admission. `nika.events(run)` is the live,
-additive journal view. `run.done` is the only terminal result; an admitted
-workflow failure resolves as `status: "failed"` instead of throwing.
-
-## 4. Verify engine-issued proof
-
-```ts
-if (!result.receipt) throw new Error('run did not issue a receipt')
-
-const proof = await nika.traceVerify(result.receipt)
-if (!proof.verified) {
-  throw new Error(proof.output ?? proof.reason ?? 'trace verification failed')
+if (result.receipt) {
+  const proof = await nika.traceVerify(result.receipt)
+  console.log(proof)
 }
 ```
 
-Pass the receipt object back unchanged. The SDK transports proof; the engine
-owns verification. Verification reads existing evidence; it does not create
-or seal a journal. A receipt or job identity alone does not guarantee that a
-trace is available.
+Run the application:
+
+```sh
+node demo.mjs
+```
+
+The engine admits the workflow as part of execution. `check()` is available
+for authoring and CI; it is not an extra required step before every `run()`.
+The published native transport can return a handle before admission finishes.
+A handle alone is not evidence that execution started. `run.done` reports the
+terminal result; configuration, compatibility, transport or protocol errors
+can reject and should be handled by your application's error boundary.
+
+## 4. Read the proof's scope
+
+Pass an engine-issued receipt to `traceVerify(receipt)` unchanged. Verification reads
+existing evidence; it does not seal an unsigned journal. A mock run may have
+an intact but unsealed trace, so `verified: false` alone does not mean the run
+failed or that the journal is corrupt. Read the returned reason and details.
+With this unsigned fixture, the published SDK can report `receipt_mismatch`
+even while the engine reports an intact chain: the evidence has no verified
+signed SDK receipt binding. This is not a verified receipt; the successful
+workflow result and receipt verification are separate outcomes.
+A trace does not prove that an external recipient read a message or that a
+business goal was achieved.
 
 ## Next
 
 <CardGroup cols={2}>
   <Card title="Project setup" icon="folder-tree" href="/sdk/start/project-setup">
-    Place nika.yaml, workflows, application code and runtime state deliberately.
+    Add project policy and organize workflows when your application needs them.
   </Card>
   <Card title="Local client" icon="terminal" href="/sdk/local/client">
-    Understand binary resolution and the local transport.
+    Understand payload selection and the local transport.
   </Card>
   <Card title="Run lifecycle" icon="circle-play" href="/sdk/local/run-and-cancel">
     Separate observation, terminal settlement and cancellation.
