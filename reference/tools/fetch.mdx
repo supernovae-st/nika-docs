@@ -92,10 +92,10 @@ status-table and transport alike — the failure may be ambiguous (the
 server may have committed before the socket dropped or the error was
 emitted) and a blind retry replays the effect; a declared `retry:` on such
 a call is the static `NIKA-SEC-016` refusal ([05 §the effect-safe retry
-law](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/spec/05-errors.md#the-effect-safe-retry-law-normative--issue-1371)).
+law](https://github.com/supernovae-st/nika-spec/blob/c0e0da96999f9d12fe08705377cbec63a9793a4e/spec/05-errors.md#the-effect-safe-retry-law-normative--issue-1371)).
 `GET`/`HEAD` and keyed calls keep the status table.
 To poll a pending resource · the jq-error pattern
-([08 H19](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/spec/08-out-of-scope.md)), not status-code inspection.
+([08 H19](https://github.com/supernovae-st/nika-spec/blob/c0e0da96999f9d12fe08705377cbec63a9793a4e/spec/08-out-of-scope.md)), not status-code inspection.
 Redirects follow up to an engine cap · the FINAL status decides.
 
 **Security (engine MUST)** · SSRF defense (reject private-net + cloud-metadata `169.254.169.254` unless configured) · honor task-level `timeout` · reject self-signed TLS by default.
@@ -111,8 +111,8 @@ Redirects follow up to an engine cap · the FINAL status decides.
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/stdlib/builtins-v0.1.md#L353) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/c0e0da96999f9d12fe08705377cbec63a9793a4e/stdlib/builtins-v0.1.md#L368) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/c0e0da96999f9d12fe08705377cbec63a9793a4e/canon/builtins.yaml).
 
-Tool identity: `nika:fetch`. Specification revision: `f8c5df2127c7`.
+Tool identity: `nika:fetch`. Specification revision: `c0e0da96999f`.
 
 <Ecosystem />

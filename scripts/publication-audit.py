@@ -25,6 +25,7 @@ DATA_FILES = {
     'snippets/data/knowledge-taxonomy.json', 'snippets/data/language-reference.json',
     'snippets/data/tool-mirror.json', 'snippets/data/tool-reference.json',
     'scripts/public-assets.json',
+    'scripts/old-suffix-exceptions.json',
 }
 
 def files(root):

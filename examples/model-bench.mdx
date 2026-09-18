@@ -20,7 +20,7 @@ seats, one report on disk that you can diff run over run.
 
 ## The shape
 
-{/* showcase:dag-begin model-bench.nika.yaml */}
+{/* showcase:dag-begin model-bench.nika */}
 ```mermaid
 flowchart LR
   ask_incumbent["ask_incumbent"]:::infer
@@ -39,11 +39,16 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin model-bench.nika.yaml */}
-```yaml model-bench.nika.yaml
+{/* showcase:begin model-bench.nika */}
+```yaml model-bench.nika
 nika: model-bench
 
-model: ollama/qwen3.5:4b # the house default · contenders below pick their own seats
+# NO envelope `model:` on purpose — a default seat would be the one model
+# this file never calls: every contender pins its own `infer.model:` below,
+# and the bench IS the seats. The absence is load-bearing honesty: with no
+# default to override, nothing can claim the mock rehearsal previews this
+# file (measured · the offline rescue tip fires only for a file that HAS
+# an envelope model to swap).
 
 const:
   question:

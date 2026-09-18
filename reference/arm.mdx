@@ -31,13 +31,13 @@ nika: my-project
 ceiling: 0.50            # the run default when a beat says nothing — a beat always says its own
 
 arm:
-  - workflow: workflows/nightly-report.nika.yaml
+  - workflow: workflows/nightly-report.nika
     cadence: "TZ=Europe/Paris 30 7 * * *"
     plafond: 0.20
     manqué: rattraper-une-fois
     chevauchement: sauter
     après_saut: prochain-créneau
-  - workflow: workflows/on-event.nika.yaml
+  - workflow: workflows/on-event.nika
     cadence: on-webhook
     plafond: 0.05
     manqué: sauter
@@ -45,7 +45,7 @@ arm:
 
 | Key | Required | What it means |
 |---|---|---|
-| `workflow` | yes | The workflow to fire — a repo-relative `*.nika.yaml` path (released engine; `.nika` moves with the engine file-identity train) |
+| `workflow` | yes | The workflow to fire — a repo-relative `*.nika` path |
 | `cadence` | yes | `on-webhook`, a 5-field cron (`"TZ=Europe/Paris 30 7 * * *"`), or a readable schedule such as `"TZ=Europe/Paris lundi 9h07"` — the IANA zone resolves against the embedded tzdb, never the host's |
 | `plafond` | yes | Per-tick cost ceiling in USD — no default exists (the pay law: a beat always names its own) |
 | `manqué` | yes | The missed-run policy — no default either (the run-missed law) |

@@ -40,6 +40,27 @@
       }
     },
     "schemas": {
+      "CheckByName": {
+        "additionalProperties": false,
+        "description": "Source-only Check by served name. Required launch inputs may remain unsupplied; caller inputs are accepted only on POST /v1/jobs and are refused here. Check does not execute an access plan.",
+        "properties": {
+          "access": {
+            "description": "Access pin, same vocabulary as `--access` (class or harness id). A pin never silently substitutes a metered seat.",
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "workflow": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow"
+        ],
+        "type": "object"
+      },
       "Error": {
         "additionalProperties": false,
         "properties": {
@@ -67,9 +88,10 @@
       },
       "ExecutionSnapshot": {
         "additionalProperties": false,
-        "description": "Immutable byte-owned execution world. Unit bytes are canonical lowercase hexadecimal and digests are canonical lowercase SHA-256. The decoded unit aggregate is limited to 16 MiB and the complete encoded request to 33 MiB. This object is the request body itself, not a path-bearing wrapper.",
+        "description": "Immutable byte-owned execution world — the body `nika check <file> --json --sdk-snapshot` prints (the engine is the one producer; a client never hashes). Unit bytes are canonical lowercase hexadecimal. `digest` and every unit `digest` are OPTIONAL caller-supplied integrity digests (canonical lowercase SHA-256 · a content assertion, never a signature): absent, the resident computes them and the receipt carries the result; present, they must match the bytes or the request is refused as `snapshot_tampered`. The decoded unit aggregate is limited to 16 MiB and the complete encoded request to 33 MiB. This object is the request body itself, not a path-bearing wrapper.",
         "properties": {
           "digest": {
+            "description": "Optional caller-supplied integrity digest of the world (never a signature)",
             "pattern": "^[0-9a-f]{64}$",
             "type": "string"
           },
@@ -91,10 +113,12 @@
                   "type": "string"
                 },
                 "digest": {
+                  "description": "Optional caller-supplied integrity digest of the unit (never a signature)",
                   "pattern": "^[0-9a-f]{64}$",
                   "type": "string"
                 },
                 "kind": {
+                  "description": "0 root (the admitted workflow) · 1 child (a transitively invoked workflow) · 2 skill (an Agent Skill document) · 3 import (an opaque import the caller supplied)",
                   "maximum": 3,
                   "minimum": 0,
                   "type": "integer"
@@ -108,7 +132,6 @@
               "required": [
                 "path",
                 "kind",
-                "digest",
                 "bytes_hex"
               ],
               "type": "object"
@@ -120,7 +143,6 @@
         "required": [
           "format_version",
           "root",
-          "digest",
           "units"
         ],
         "type": "object"
@@ -180,6 +202,31 @@
             "const": "ok",
             "type": "string"
           },
+          "storeFormatVersion": {
+            "additionalProperties": false,
+            "description": "Durable store formats this resident reads and writes; independent of the HTTP and event protocol versions.",
+            "properties": {
+              "jobs": {
+                "examples": [
+                  3
+                ],
+                "minimum": 1,
+                "type": "integer"
+              },
+              "schedules": {
+                "examples": [
+                  1
+                ],
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "jobs",
+              "schedules"
+            ],
+            "type": "object"
+          },
           "supportedCapabilities": {
             "items": {
               "type": "string"
@@ -207,6 +254,7 @@
           "checkReportVersion",
           "eventFormatVersion",
           "traceFormatVersion",
+          "storeFormatVersion",
           "supportedCapabilities"
         ],
         "type": "object"
@@ -230,6 +278,9 @@
             ],
             "type": "object"
           },
+          "evidence": {
+            "$ref": "#/components/schemas/JournalEvidence"
+          },
           "execution_id": {
             "type": "string"
           },
@@ -245,6 +296,9 @@
           "receipt": {
             "$ref": "#/components/schemas/JobReceipt"
           },
+          "settlement": {
+            "$ref": "#/components/schemas/RunSettlement"
+          },
           "status": {
             "$ref": "#/components/schemas/JobStatus"
           },
@@ -258,17 +312,68 @@
         ],
         "type": "object"
       },
+      "JobByName": {
+        "additionalProperties": false,
+        "description": "The by-name form (ADR-131): a workflow the served registry lists (GET /v1/workflows · project-root-relative, `.nika`). The resident captures its world exactly as a schedule does — the one owner of the snapshot and its digest domain. Idempotency binds to these request bytes. Optional `access` is the same pin as CLI `--access` (a pin is a pin). Absent: the resident's unpinned plan. Snapshot bodies reject both access and inputs overlays, including null or empty maps. Optional inputs are literal JSON values checked against declared keys, types and required values before a job exists; strings are never CLI @env instructions or expressions.",
+        "properties": {
+          "access": {
+            "description": "Access pin, same vocabulary as `--access` (class or harness id). A pin never silently substitutes a metered seat.",
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "inputs": {
+            "additionalProperties": true,
+            "description": "Literal JSON overrides for declared workflow inputs. Unknown keys, wrong types and missing required values refuse with 422; defaults remain authored. A present null is refused. Inputs bind exact request identity and survive durable queue recovery; workflow bytes are unchanged.",
+            "type": "object"
+          },
+          "workflow": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow"
+        ],
+        "type": "object"
+      },
       "JobEvent": {
         "additionalProperties": false,
         "properties": {
+          "at": {
+            "description": "When the resident admitted the event (RFC 3339 · UTC). Outside the event's hash chain; absent on an event written before the journal was dated.",
+            "format": "date-time",
+            "type": "string"
+          },
           "code": {
             "type": "string"
           },
+          "evidence": {
+            "$ref": "#/components/schemas/JournalEvidence"
+          },
           "kind": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "anyOf": [
+              {
+                "enum": [
+                  "execution.queued",
+                  "execution.started",
+                  "execution.prepared",
+                  "execution.requeued",
+                  "execution.settled",
+                  "execution.cancelled",
+                  "execution.interrupted",
+                  "execution.refused",
+                  "execution.aborted_before_claim",
+                  "approval_decided"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The resident's event vocabulary: execution.<word> (queued · started · prepared · requeued · settled · cancelled · interrupted · refused · aborted_before_claim), plus the approval_decided frame the journal admits. Null on a payload that carries no kind."
           },
           "message": {
             "type": "string"
@@ -283,6 +388,9 @@
           "sequence": {
             "minimum": 1,
             "type": "integer"
+          },
+          "settlement": {
+            "$ref": "#/components/schemas/RunSettlement"
           },
           "status": {
             "anyOf": [
@@ -417,6 +525,7 @@
         "type": "object"
       },
       "JobStatus": {
+        "description": "queued and running: the resident owns the execution. interrupted: execution ownership was lost and effect settlement is unknown — an EVIDENCE state (the journal is INCOMPLETE), never a run state (ADR-129). paused, succeeded, failed and cancelled: the run's own settlement, the words its terminal frame carries (ADR-128).",
         "enum": [
           "queued",
           "running",
@@ -438,6 +547,172 @@
         },
         "required": [
           "status"
+        ],
+        "type": "object"
+      },
+      "JournalEvidence": {
+        "additionalProperties": false,
+        "description": "Reported journal delivery loss, independent of execution status. The reason classifies the mirror's first error without exposing OS text or paths. Absence is not a claim that a journal exists.",
+        "properties": {
+          "reason": {
+            "enum": [
+              "write_failed",
+              "record_refused"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "const": "mirror_lost",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "RunSettlement": {
+        "additionalProperties": false,
+        "description": "The run's settlement (ADR-128), built once by the runtime and projected whole: the state word every door speaks, why, the elapsed time on the kernel clock, the task tally, the spend with its qualifier, the failure named. Unknown cost is never zero: `total_cost_usd` is absent when nothing was metered. Present on the terminal event and durable job response of a job whose runtime settled; absent when the resident lost the execution (interrupted) or refused it before any task. Reattachment and idempotent admission replay project the same hash-bound terminal event, never a new settlement.",
+        "properties": {
+          "cause": {
+            "enum": [
+              "normal",
+              "human_gate",
+              "task_failed",
+              "output_contract",
+              "budget",
+              "operator",
+              "refused"
+            ],
+            "type": "string"
+          },
+          "elapsed_ms": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "error": {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "task": {
+                "description": "The task that failed · absent for a run-level cause",
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "type": "object"
+          },
+          "spend": {
+            "additionalProperties": false,
+            "properties": {
+              "by_source": {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              "priced_calls": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "pricing_as_of": {
+                "type": "string"
+              },
+              "qualifier": {
+                "enum": [
+                  "priced",
+                  "partially_priced",
+                  "unpriced",
+                  "unmetered"
+                ],
+                "type": "string"
+              },
+              "total_cost_usd": {
+                "description": "Present only when at least one leaf metered real spend",
+                "minimum": 0,
+                "type": "number"
+              },
+              "unpriced_calls": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "priced_calls",
+              "unpriced_calls",
+              "qualifier"
+            ],
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "succeeded",
+              "failed",
+              "paused",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "tasks": {
+            "additionalProperties": false,
+            "properties": {
+              "cancelled": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "failed": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "never_started": {
+                "description": "Cancelled at the boundary without ever starting (counted in `cancelled` too)",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "ok": {
+                "description": "A recovered task IS a success (counted here too)",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "recovered": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "skipped": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "total": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "total",
+              "ok",
+              "failed",
+              "recovered",
+              "skipped",
+              "cancelled",
+              "never_started"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "status",
+          "cause",
+          "spend"
         ],
         "type": "object"
       },
@@ -556,7 +831,7 @@
           },
           "workflow": {
             "maxLength": 1024,
-            "pattern": "^[^/].*\\.nika\\.yaml$",
+            "pattern": "^[^/].*\\.nika$",
             "type": "string"
           }
         },
@@ -604,14 +879,65 @@
       },
       "TraceVerification": {
         "additionalProperties": false,
-        "description": "Run-scoped typed verdict. Unavailable is an honest refusal: this server has no remote trace-journal authority and never scans or returns filesystem paths.",
+        "description": "Run-scoped verdict on the journal the resident wrote for the job, through the ONE verifier `nika trace verify --json` runs. `verdict` is the CLI's headline word: the attained tier (ok · sealed · anchored · replayed), incomplete for a journal with no terminal frame (the writer's liveness rides `reason`), tampered for a buried seal, broken for an edited chain, and the CLI's refusal classes; `unavailable` only when no journal exists for the job (refused before its first event · queued · a backend keeping none). `reason` is the machine class beside it (the seal tier under a ladder verdict). The CLI's own document rides verbatim (exit · chain · seal · anchor · replay · lines); a filesystem path is never returned.",
         "properties": {
+          "anchor": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "chain": {
+            "additionalProperties": true,
+            "description": "events · head · headline (intact · torn · incomplete) · liveness (alive · dead · unknown · null)",
+            "type": "object"
+          },
+          "exit": {
+            "description": "The CLI's exit class: 0 the reported tier holds · 2 a forged or edited journal · 3 the environment (unchained · unreadable · a missing input) · 5 incomplete lifecycle evidence",
+            "enum": [
+              0,
+              2,
+              3,
+              5
+            ],
+            "type": "integer"
+          },
+          "lines": {
+            "description": "The CLI's ladder lines, the journal path replaced by <journal>",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "reason": {
             "enum": [
               "run_not_terminal",
-              "trace_journal_unavailable"
+              "trace_journal_unavailable",
+              "sealed",
+              "unsealed",
+              "forged",
+              "buried",
+              "unattributable",
+              "writer_alive",
+              "writer_dead",
+              "writer_unknown",
+              "buried_seal",
+              "broken",
+              "unchained",
+              "empty",
+              "unreadable",
+              "refused",
+              "line_over_long",
+              "unknown"
             ],
             "type": "string"
+          },
+          "replay": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "seal": {
+            "additionalProperties": true,
+            "description": "tier (unsealed · sealed · forged · buried · unattributable) and the tier's facts",
+            "type": "object"
           },
           "trace_id": {
             "minLength": 1,
@@ -619,9 +945,26 @@
           },
           "verdict": {
             "enum": [
-              "unavailable"
+              "unavailable",
+              "ok",
+              "sealed",
+              "anchored",
+              "replayed",
+              "incomplete",
+              "tampered",
+              "broken",
+              "unchained",
+              "empty",
+              "unreadable",
+              "refused",
+              "line-over-long",
+              "unknown"
             ],
             "type": "string"
+          },
+          "verify_version": {
+            "minimum": 1,
+            "type": "integer"
           }
         },
         "required": [
@@ -671,7 +1014,7 @@
   "info": {
     "description": "Authenticated loopback remote execution and declarative schedules. Artifacts, schedule list/delete/trigger/backfill, /v1/arm, and POST /v1/run are absent.",
     "title": "nika serve",
-    "version": "0.116.2"
+    "version": "0.120.0-dev"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -695,12 +1038,19 @@
     },
     "/v1/check": {
       "post": {
-        "description": "Runs the same decode and ExecutionService readmission as POST /v1/jobs over the exact request body.",
+        "description": "Runs the same admission as POST /v1/jobs (ADR-131 · both forms) over the exact request body, and creates nothing.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExecutionSnapshot"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CheckByName"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ExecutionSnapshot"
+                  }
+                ]
               }
             }
           },
@@ -768,12 +1118,12 @@
             "description": "Malformed, unsupported, tampered, or semantically refused snapshot"
           }
         },
-        "summary": "Judge immutable snapshot bytes without creating a job"
+        "summary": "Judge a workflow without creating a job — by served name, or as immutable snapshot bytes"
       }
     },
     "/v1/jobs": {
       "post": {
-        "description": "The server decodes and readmits this exact body through ExecutionService and never interprets a caller filesystem path. Idempotency binds to the exact snapshot payload bytes.",
+        "description": "Two forms, one admission (ADR-131). `{\"workflow\": \"<name>\"}` names a workflow the served registry lists: the resident captures its world through ExecutionService, exactly as a schedule does. Optional `access` on that form is CLI `--access` for this job only. A snapshot body is the world `nika check <file> --json --sdk-snapshot` prints, decoded and readmitted through the same ExecutionService; its digests are optional caller-supplied integrity digests (a content assertion, never a signature). Snapshot jobs inherit the resident's unpinned plan. The server never interprets a caller filesystem path. Idempotency binds to the exact request bytes.",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -783,7 +1133,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExecutionSnapshot"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/JobByName"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ExecutionSnapshot"
+                  }
+                ]
               }
             }
           },
@@ -901,7 +1258,7 @@
             "description": "Durable job capacity exhausted"
           }
         },
-        "summary": "Admit immutable snapshot bytes as a durable job"
+        "summary": "Admit a workflow as a durable job — by served name, or as immutable snapshot bytes"
       }
     },
     "/v1/jobs/{id}": {
@@ -954,7 +1311,7 @@
     },
     "/v1/jobs/{id}/cancel": {
       "post": {
-        "description": "Cancellation signals the run-scoped engine token before durable terminal settlement. A terminal replay returns the existing result unchanged.",
+        "description": "A queued job cancels atomically before execution claims it. An active job receives the run-scoped cancellation signal and returns 202 until its execution owner settles: the result may be success, failure or cancellation; expired grace means interrupted, never an invented cancellation. A paused or final observation returns its existing result unchanged.",
         "parameters": [
           {
             "in": "path",
@@ -975,7 +1332,17 @@
                 }
               }
             },
-            "description": "Cancelled or already terminal job"
+            "description": "Cancelled before execution, or already ended observation"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            },
+            "description": "Cancellation requested; execution has not yet settled"
           },
           "401": {
             "content": {
@@ -1008,7 +1375,7 @@
             "description": "Error envelope"
           }
         },
-        "summary": "Idempotently cancel a queued, running, or paused job"
+        "summary": "Request cancellation or replay an ended observation"
       }
     },
     "/v1/jobs/{id}/events": {
@@ -1125,7 +1492,7 @@
     },
     "/v1/jobs/{id}/trace/verify": {
       "get": {
-        "description": "Returns a typed honest refusal while no remote trace-journal authority exists. It never scans a trace directory or exposes a filesystem path.",
+        "description": "Locates the journal the resident wrote for this job under the project it serves (by the job's execution and trace identity) and verifies it through the same verifier `nika trace verify` runs; the vocabulary is the CLI's. `unavailable` is the honest refusal when no journal exists. The response never exposes a filesystem path.",
         "parameters": [
           {
             "in": "path",
@@ -1169,7 +1536,7 @@
             "description": "Error envelope"
           }
         },
-        "summary": "Return the run-scoped trace verification verdict"
+        "summary": "Verify the job's trace journal"
       }
     },
     "/v1/openapi.json": {
@@ -1353,7 +1720,7 @@
                 }
               }
             },
-            "description": "Relative .nika.yaml names"
+            "description": "Project-relative .nika names under the served registry (--workflows)"
           },
           "401": {
             "content": {

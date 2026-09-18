@@ -23,7 +23,7 @@ infer, so the cost of an episode is the cost of one call, visible in
 
 ## The shape
 
-{/* showcase:dag-begin transcript-shownotes.nika.yaml */}
+{/* showcase:dag-begin transcript-shownotes.nika */}
 ```mermaid
 flowchart LR
   raw["raw · nika:read"]:::invoke
@@ -41,8 +41,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin transcript-shownotes.nika.yaml */}
-```yaml transcript-shownotes.nika.yaml
+{/* showcase:begin transcript-shownotes.nika */}
+```yaml transcript-shownotes.nika
 nika: transcript-shownotes
 
 model: ollama/qwen3.5:4b # local · zero key · the house seat — a THINKING model: the think block and the JSON both count against `max_tokens` (engine#428), so the ceiling below is sized for think + show-notes, not the notes alone

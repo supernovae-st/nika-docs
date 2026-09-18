@@ -46,7 +46,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 FENCE_OPEN = re.compile(r"^([ \t]*)```yaml([^\n]*)$")
 FENCE_CLOSE = re.compile(r"^[ \t]*```[ \t]*$")
 SKIP_INFO = re.compile(r"skeleton|illustration|modeline", re.I)
-NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika(?:\.ya?ml)?)\s*$")
+NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika)\s*$")
 # the trap: the whole info-string IS an envelope line (` ```yaml nika: v1 `)
 TITLE_ENVELOPE = re.compile(r"^\s*(nika:\s*\S+)\s*$")
 ENVELOPE = re.compile(r"^\s*nika:\s", re.M)

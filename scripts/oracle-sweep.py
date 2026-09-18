@@ -55,7 +55,7 @@ CODE = re.compile(r"NIKA-[A-Z]+-\d+")
 # materialized as SIBLINGS before judging, so a composition parent can
 # resolve `invoke: workflow: ./child.nika` — the multi-file examples
 # get judged like every other block instead of being exempted.
-NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika(?:\.ya?ml)?)\s*$")
+NAMED = re.compile(r"^\s*([A-Za-z0-9._-]+\.nika)\s*$")
 # The type discriminant is the FIRST content line matching `^\s*nika:\s`
 # (spec 01). Leading indent is allowed: a fence inside an <Accordion>
 # keeps its indent in the captured body, and a column-4 `nika: hello`

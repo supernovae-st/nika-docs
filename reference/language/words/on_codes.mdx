@@ -23,7 +23,7 @@ Retry ONLY on these canonical `NIKA-&lt;NS&gt;-&lt;NNN&gt;` codes · absent, the
 **In the same object:** [backoff_max_ms](/reference/language/words/backoff_max_ms) · [backoff_ms](/reference/language/words/backoff_ms) · [backoff_strategy](/reference/language/words/backoff_strategy) · [jitter](/reference/language/words/jitter) · [max_attempts](/reference/language/words/max_attempts)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
 ### onError
 
@@ -38,11 +38,11 @@ Optional catch-side filter (mirror of retry.on_codes · same regex) · the actio
 **In the same object:** [recover](/reference/language/words/recover) · [skip](/reference/language/words/skip)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
 ## In a source template
 
-Excerpt from `templates/api-upload-and-create.nika.yaml`, source lines 92–99. This is a fragment, not a runnable workflow.
+Excerpt from `templates/api-upload-and-create.nika`, source lines 92–99. This is a fragment, not a runnable workflow.
 
 ```yaml illustration
       # answering 401). The literal is shaped EXACTLY like what the jq above
@@ -59,10 +59,11 @@ outputs:
 
 | Template | Source |
 | --- | --- |
-| `templates/api-upload-and-create.nika.yaml` | [Line 95](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/api-upload-and-create.nika.yaml#L95) |
-| `templates/chain.nika.yaml` | [Line 59](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/chain.nika.yaml#L59) |
-| `templates/etl-state.nika.yaml` | [Line 81](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/etl-state.nika.yaml#L81) |
-| `templates/human-gated-ship.nika.yaml` | [Line 105](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/human-gated-ship.nika.yaml#L105) |
+| `templates/api-upload-and-create.nika` | [Line 95](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/api-upload-and-create.nika#L95) |
+| `templates/chain.nika` | [Line 58](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/chain.nika#L58) |
+| `templates/etl-state.nika` | [Line 81](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/etl-state.nika#L81) |
+| `templates/human-gated-ship.nika` | [Line 105](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/human-gated-ship.nika#L105) |
+| `templates/recover-optional-file.nika` | [Line 36](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/recover-optional-file.nika#L36) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -70,6 +71,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:on_codes`. Spec revision: [`c5ebbb7b862b`](https://github.com/supernovae-st/nika-spec/tree/c5ebbb7b862b68bc6cf7235efba61173b844afc6).
+Canonical identity: `language:word:on_codes`. Spec revision: [`60696338ef08`](https://github.com/supernovae-st/nika-spec/tree/60696338ef08adb25df6cca23cb47f0a39eb785a).
 
 [How documentation stays connected](/reference/knowledge-system).

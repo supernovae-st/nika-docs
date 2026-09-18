@@ -1,0 +1,33 @@
+{
+  "selftest": {
+    "inject_path": "changelog/releases.mdx",
+    "new_file": "scripts/_ratchet-injection.md",
+    "new_prefix_file": "api-reference/_ratchet-injection.md"
+  },
+  "exceptions": [
+    {
+      "path": "changelog/releases.mdx",
+      "category": "historical",
+      "reason": "Dated record of the retired spelling as it actually shipped.",
+      "owner": "nika-docs",
+      "count": 1,
+      "lines_sha256": "sha256:50a892b3d98ac5afd4c10e283dc9208999e976437aa6364b9af6591422e05b42"
+    },
+    {
+      "path": "scripts/suffix_ratchet.py",
+      "category": "ratchet",
+      "reason": "The scanner's own forbidden-pattern data.",
+      "owner": "nika-docs",
+      "count": 29,
+      "lines_sha256": "sha256:6fe8dda3a510e04f5e09b58149c02d794d85f2bbfefbd80de5206a067957a24e"
+    },
+    {
+      "path": "scripts/tests/test_suffix_ratchet.py",
+      "category": "negative",
+      "reason": "Mutation fixture that must keep the retired spelling to prove detection.",
+      "owner": "nika-docs",
+      "count": 14,
+      "lines_sha256": "sha256:acc4c6d559a6c177d3a18eaf6c5202b141ec679381063c5a59e1757af76b68a3"
+    }
+  ]
+}

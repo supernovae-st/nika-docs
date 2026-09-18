@@ -20,7 +20,7 @@ final REVIEW.md ends with a verdict.
 
 ## The shape
 
-{/* showcase:dag-begin pr-review-fanout.nika.yaml */}
+{/* showcase:dag-begin pr-review-fanout.nika */}
 ```mermaid
 flowchart TD
   approve["approve · nika:prompt"]:::invoke
@@ -38,6 +38,7 @@ flowchart TD
   approve -.->|success| todo_sweep
   files --> reviews
   reviews --> merged
+  changed --> summary
   merged --> summary
   todo_sweep --> summary
   summary --> save
@@ -59,8 +60,8 @@ for both branches before `summary`:
 
 ## The file
 
-{/* showcase:begin pr-review-fanout.nika.yaml */}
-```yaml pr-review-fanout.nika.yaml
+{/* showcase:begin pr-review-fanout.nika */}
+```yaml pr-review-fanout.nika
 nika: pr-review-fanout
 
 model: ollama/qwen3.5:4b   # local tool-calling model · swap for anthropic/claude-sonnet-4-6 for depth
@@ -123,6 +124,11 @@ tasks:
     when: ${{ with.go == true }}     # « no » at the gate → no diff, no swarm
     exec:
       command: ["git", "diff", "--name-only", "--diff-filter=d", "${{ const.base_ref }}...HEAD"]
+    on_error:
+      # Not an empty diff: the notice carries no `src/` line, so the swarm
+      # has nothing to review, and `summary` repeats it instead of a verdict
+      # earned on files nobody read.
+      recover: "diff unavailable: git failed or was refused. No changed files were collected."
 
   files:
     with:
@@ -216,17 +222,21 @@ tasks:
 
   summary:
     with:
+      changed: ${{ tasks.changed.output }}
       merged: ${{ tasks.merged.output }}
       todo_sweep: ${{ tasks.todo_sweep.output }}
     when: ${{ with.todo_sweep != null && size(with.todo_sweep) > 0 }}  # skipped (null) or an empty sweep · no page to write
     infer:
       max_tokens: 2500                 # a review page · not the whole diff back
       prompt: |
+        Changed files, or the notice that the diff was unavailable ·
+        ${{ with.changed }}
         Merge these review findings into REVIEW.md · blockers first ·
         ${{ with.merged }}
         Open TODO debt found by grep ·
         ${{ with.todo_sweep }}
-        End with a verdict · ship / fix-first / redesign.
+        End with a verdict · ship / fix-first / redesign. If the diff was
+        unavailable, say so and invent no findings.
 
   save:
     with:
@@ -239,6 +249,9 @@ tasks:
         content: "${{ with.summary }}"
 
 outputs:
+  diff:
+    value: ${{ tasks.changed.output }}
+    description: "The changed-file list, or the explicit notice that Git was refused"
   findings:
     value: ${{ tasks.merged.output }}
     description: "Every finding, blockers first, each attributed to its file"

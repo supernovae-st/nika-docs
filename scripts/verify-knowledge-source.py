@@ -41,7 +41,7 @@ def verify(snapshot, read_source):
             seen.add(pointer)
         examples = []
         for path, data in sorted(raw.items()):
-            if not path.startswith('templates/') or not re.search(r'\.nika(?:\.ya?ml)?$', path): continue
+            if not path.startswith('templates/') or Path(path).suffix != '.nika': continue
             lines = data.decode().splitlines()
             hits = [i for i,line in enumerate(lines) if re.match(r'^\s*'+re.escape(name)+r'\s*:',line)]
             if not hits: continue
@@ -56,13 +56,13 @@ def main():
     def read(rev,path): return subprocess.check_output(['git','show',f'{rev}:{path}'],cwd=a.spec_root)
     # The set of input files itself must be exhaustive, not only the listed hashes.
     tracked=subprocess.check_output(['git','ls-tree','-r','--name-only',snapshot['revision'],'--','templates','schemas/workflow.schema.json'],cwd=a.spec_root,text=True).splitlines()
-    wanted={p for p in tracked if p=='schemas/workflow.schema.json' or re.fullmatch(r'templates/[^/]+\.nika(?:\.ya?ml)?',p)}
+    wanted={p for p in tracked if p=='schemas/workflow.schema.json' or re.fullmatch(r'templates/[^/]+\.nika',p)}
     if wanted != set(snapshot['inputs']): raise SystemExit('Missing or unexpected source input')
     count=verify(snapshot,read)
     if a.current_source: verify_current_source(snapshot,a.spec_root)
     print(f'Verified {count} fields against pinned Git objects, including every declaration and source excerpt')
 def verify_current_source(snapshot, root):
-    files=[root/'schemas/workflow.schema.json',*sorted((root/'templates').glob('*.nika.yaml')),*sorted((root/'templates').glob('*.nika'))]
+    files=[root/'schemas/workflow.schema.json',*sorted((root/'templates').glob('*.nika'))]
     observed={path.relative_to(root).as_posix():hashlib.sha256(path.read_bytes()).hexdigest() for path in files}
     if observed != snapshot['inputs']:
         changed=sorted(path for path in set(observed)|set(snapshot['inputs']) if observed.get(path)!=snapshot['inputs'].get(path))

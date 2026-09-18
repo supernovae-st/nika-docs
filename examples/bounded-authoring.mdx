@@ -43,8 +43,8 @@ An empty batch returns `[]`. Eight items pass; a ninth item or an overlong item 
 
 Source skeleton: [`bounded-batch`](/guides/templates#bounded-batch).
 
-{/* showcase:begin 18-bounded-batch.nika.yaml */}
-```yaml 18-bounded-batch.nika.yaml
+{/* showcase:begin 18-bounded-batch.nika */}
+```yaml 18-bounded-batch.nika
 nika: bounded-batch
 model: ollama/qwen3.5:4b
 run:
@@ -114,8 +114,8 @@ The fixture returns count `2` and total `30`. Unknown fields, negative amounts a
 
 Source skeleton: [`validate-records`](/guides/templates#validate-records).
 
-{/* showcase:begin 19-validate-records.nika.yaml */}
-```yaml 19-validate-records.nika.yaml
+{/* showcase:begin 19-validate-records.nika */}
+```yaml 19-validate-records.nika
 nika: validate-records
 const:
   batch: daily-orders
@@ -183,8 +183,8 @@ The fixture adds `gamma`, removes `alpha` and keeps `beta`. Duplicates use set s
 
 Source skeleton: [`snapshot-diff`](/guides/templates#snapshot-diff).
 
-{/* showcase:begin 20-snapshot-diff.nika.yaml */}
-```yaml 20-snapshot-diff.nika.yaml
+{/* showcase:begin 20-snapshot-diff.nika */}
+```yaml 20-snapshot-diff.nika
 nika: snapshot-diff
 const:
   resource: enabled-features
@@ -260,8 +260,8 @@ Identical rows collapse to one row per id. Conflicting amounts for the same id f
 
 Source skeleton: [`deduplicate-records`](/guides/templates#deduplicate-records).
 
-{/* showcase:begin 21-deduplicate-records.nika.yaml */}
-```yaml 21-deduplicate-records.nika.yaml
+{/* showcase:begin 21-deduplicate-records.nika */}
+```yaml 21-deduplicate-records.nika
 nika: deduplicate-records
 const:
   dataset: orders
@@ -347,8 +347,8 @@ Only `topic` and `severity` reach the model task. Email and internal notes remai
 
 Source skeleton: [`project-public-fields`](/guides/templates#project-public-fields).
 
-{/* showcase:begin 22-project-public-fields.nika.yaml */}
-```yaml 22-project-public-fields.nika.yaml
+{/* showcase:begin 22-project-public-fields.nika */}
+```yaml 22-project-public-fields.nika
 nika: project-public-fields
 model: ollama/qwen3.5:4b
 run:
@@ -444,8 +444,8 @@ Each review has its own timeout and token ceiling. A shared conjunction is check
 
 Source skeleton: [`parallel-review`](/guides/templates#parallel-review).
 
-{/* showcase:begin 23-parallel-review.nika.yaml */}
-```yaml 23-parallel-review.nika.yaml
+{/* showcase:begin 23-parallel-review.nika */}
+```yaml 23-parallel-review.nika
 nika: parallel-review
 model: ollama/qwen3.5:4b
 run:
@@ -590,8 +590,8 @@ With no `optional.txt`, the fixture returns its explicit fallback. A present fil
 
 Source skeleton: [`recover-optional-file`](/guides/templates#recover-optional-file).
 
-{/* showcase:begin 24-recover-optional-file.nika.yaml */}
-```yaml 24-recover-optional-file.nika.yaml
+{/* showcase:begin 24-recover-optional-file.nika */}
+```yaml 24-recover-optional-file.nika
 nika: recover-optional-file
 run:
   clock: system
@@ -662,8 +662,8 @@ The fixture returns north `15`, south `20`, total `35`. Values are integer minor
 
 Source skeleton: [`aggregate-by-key`](/guides/templates#aggregate-by-key).
 
-{/* showcase:begin 25-aggregate-by-key.nika.yaml */}
-```yaml 25-aggregate-by-key.nika.yaml
+{/* showcase:begin 25-aggregate-by-key.nika */}
+```yaml 25-aggregate-by-key.nika
 nika: aggregate-by-key
 const:
   currency: EUR

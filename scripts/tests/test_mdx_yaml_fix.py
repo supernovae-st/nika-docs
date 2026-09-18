@@ -102,8 +102,8 @@ tasks:
       model: ollama/qwen3.5:4b
 ```
 
-{/* showcase:begin projected.nika.yaml */}
-```yaml projected.nika.yaml
+{/* showcase:begin projected.nika */}
+```yaml projected.nika
 nika: v1
 workflow:
   id: projected-flow

@@ -18,7 +18,7 @@ file proposes. A machine edge disposes. Reading the file never schedules work.
 nika: my-project
 
 arm:
-  - workflow: workflows/daily-brief.nika.yaml
+  - workflow: workflows/daily-brief.nika
     cadence: "TZ=Europe/Paris 30 7 * * 1-5"
     où: local
     plafond: 0.20
@@ -81,7 +81,7 @@ the firing law.
 nika: my-project
 
 arm:
-  - workflow: workflows/daily-brief.nika.yaml
+  - workflow: workflows/daily-brief.nika
     cadence: "TZ=Europe/Paris 30 7 * * 1-5"
     plafond: 0.20
     manqué: sauter

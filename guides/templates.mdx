@@ -66,14 +66,13 @@ template matching the **outer** shape.
 
 The default shape for « take real data, produce words, save them ».
 
-{/* template:begin chain.nika.yaml */}
-```yaml chain.nika.yaml skeleton
+{/* template:begin chain.nika */}
+```yaml chain.nika skeleton
 nika: chain-template       # SLOT: kebab-case workflow id
 
-# `nika new` STAMPS this line with a seat this binary can resolve; with no
-# resolvable seat it leaves `mock/echo` (measured on 0.118.7). Whatever rides
-# on the `model:` line is dropped by that stamp — teaching goes above it.
-# `--model mock/echo` keeps the offline rehearsal available either way.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 const:
@@ -145,8 +144,8 @@ outputs:
 
 Watch something, act only when a condition holds (often zero model calls).
 
-{/* template:begin gate-and-act.nika.yaml */}
-```yaml gate-and-act.nika.yaml skeleton
+{/* template:begin gate-and-act.nika */}
+```yaml gate-and-act.nika skeleton
 nika: gate-and-act-template       # SLOT: kebab-case workflow id
 
 const:
@@ -208,18 +207,13 @@ outputs:
 
 The same work for every item of a runtime collection, fully leashed.
 
-{/* template:begin fanout.nika.yaml */}
-```yaml fanout.nika.yaml skeleton
+{/* template:begin fanout.nika */}
+```yaml fanout.nika skeleton
 nika: fanout-template       # SLOT: kebab-case workflow id
 
-# SLOT: provider/model · local · zero key. House seat — `ollama/qwen3.5:4b`,
-# a THINKING model: the ceilings below leave room for the think block, which
-# counts against `max_tokens` too.
-# `--model mock/echo` needs no seat and is the path this file guarantees.
-# `nika new` STAMPS this line: it rewrites `model:` with a seat this binary
-# can resolve, and whatever rides on the line is dropped — so the teaching
-# lives here, above it. Measured on 0.118.7: with no resolvable seat the
-# stamp leaves `mock/echo`, the offline path this file guarantees.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 run:
@@ -356,8 +350,8 @@ outputs:
 
 Incremental runs: only what changed since last time, survive bad input.
 
-{/* template:begin etl-state.nika.yaml */}
-```yaml etl-state.nika.yaml skeleton
+{/* template:begin etl-state.nika */}
+```yaml etl-state.nika skeleton
 nika: etl-state-template       # SLOT: kebab-case workflow id
 
 const:
@@ -468,19 +462,13 @@ outputs:
 Open-ended work: plan with a fast model, execute with a budgeted agent,
 validate the typed result. Never ship an unleashed agent.
 
-{/* template:begin agent-loop.nika.yaml */}
-```yaml agent-loop.nika.yaml skeleton
+{/* template:begin agent-loop.nika */}
+```yaml agent-loop.nika skeleton
 nika: agent-loop-template       # SLOT: kebab-case workflow id
 
-# SLOT: a TOOL-CALLING model · local by default. This seat is measured, not
-# assumed: `ollama/qwen2.5:14b` completes the planning call in ~65s under the
-# ceiling below. A reasoning seat (`ollama/qwen3.5:4b`) spends its whole
-# budget thinking and never emits JSON here — the guaranteed offline path is
-# `--model mock/echo`, which needs no seat at all.
-# `nika new` STAMPS this line: it rewrites `model:` with a seat this binary
-# can resolve, and whatever rides on the line is dropped — so the teaching
-# lives here, above it. Measured on 0.118.7: with no resolvable seat the
-# stamp leaves `mock/echo`, the offline path this file guarantees.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 inputs:
@@ -590,8 +578,8 @@ outputs:
 Anything irreversible: parallel gates, a hard assert, a human GO, and an
 `after: { act: terminal }` record whatever happens.
 
-{/* template:begin human-gated-ship.nika.yaml */}
-```yaml human-gated-ship.nika.yaml skeleton
+{/* template:begin human-gated-ship.nika */}
+```yaml human-gated-ship.nika skeleton
 nika: human-gated-ship-template       # SLOT: kebab-case workflow id
 
 const:
@@ -721,17 +709,13 @@ outputs:
 
 Understand a site from a URL: bounded `traverse:` crawl → one typed brief → persist. Zero exec.
 
-{/* template:begin website-brief.nika.yaml */}
-```yaml website-brief.nika.yaml skeleton
+{/* template:begin website-brief.nika */}
+```yaml website-brief.nika skeleton
 nika: website-brief-template       # SLOT: kebab-case workflow id
 
-# SLOT: provider/model · local · zero key. The schema below has five required
-# fields, so give it a seat that holds structure — `ollama/qwen2.5:14b` is
-# measured on this shape. `--model mock/echo` needs no seat at all.
-# `nika new` STAMPS this line: it rewrites `model:` with a seat this binary
-# can resolve, and whatever rides on the line is dropped — so the teaching
-# lives here, above it. Measured on 0.118.7: with no resolvable seat the
-# stamp leaves `mock/echo`, the offline path this file guarantees.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 const:
@@ -810,16 +794,13 @@ outputs:
 
 Generate assets from a brief: typed creative direction → `nika:image_generate` → jq manifest.
 
-{/* template:begin media-asset-pack.nika.yaml */}
-```yaml media-asset-pack.nika.yaml skeleton
+{/* template:begin media-asset-pack.nika */}
+```yaml media-asset-pack.nika skeleton
 nika: media-asset-pack-template       # SLOT: kebab-case workflow id
 
-# SLOT: provider/model · local · zero key. Measured seat — `ollama/qwen2.5:14b`
-# holds the small schema below. `--model mock/echo` needs no seat at all.
-# `nika new` STAMPS this line: it rewrites `model:` with a seat this binary
-# can resolve, and whatever rides on the line is dropped — so the teaching
-# lives here, above it. Measured on 0.118.7: with no resolvable seat the
-# stamp leaves `mock/echo`, the offline path this file guarantees.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 const:
@@ -917,8 +898,8 @@ outputs:
 
 Call a product API natively: `multipart:` upload (masked secrets header) → JSON create → typed result.
 
-{/* template:begin api-upload-and-create.nika.yaml */}
-```yaml api-upload-and-create.nika.yaml skeleton
+{/* template:begin api-upload-and-create.nika */}
+```yaml api-upload-and-create.nika skeleton
 nika: api-upload-and-create-template       # SLOT: kebab-case workflow id
 
 const:
@@ -996,17 +977,13 @@ The audited-ops shape: read a system's real state via a pinned CLI (argv-array e
   source, if you prefer to copy it.
 </Tip>
 
-{/* template:begin docker-report.nika.yaml */}
-```yaml docker-report.nika.yaml skeleton
+{/* template:begin docker-report.nika */}
+```yaml docker-report.nika skeleton
 nika: docker-report-template       # SLOT: kebab-case workflow id
 
-# SLOT: local-first · `--model mock/echo` for the offline rehearsal. House
-# seat — `ollama/qwen3.5:4b`, a THINKING model: the think block counts against
-# `max_tokens` too, so the ceiling below leaves room for it.
-# `nika new` STAMPS this line: it rewrites `model:` with a seat this binary
-# can resolve, and whatever rides on the line is dropped — so the teaching
-# lives here, above it. Measured on 0.118.7: with no resolvable seat the
-# stamp leaves `mock/echo`, the offline path this file guarantees.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 permits:                            # the blast radius · default-deny once present
@@ -1123,8 +1100,8 @@ outputs:
 
 Group validated integer amounts with exact totals.
 
-{/* template:begin aggregate-by-key.nika.yaml */}
-```yaml aggregate-by-key.nika.yaml skeleton
+{/* template:begin aggregate-by-key.nika */}
+```yaml aggregate-by-key.nika skeleton
 nika: aggregate-by-key
 const:
   currency: '<SLOT: the currency code>'
@@ -1194,8 +1171,8 @@ outputs:
 
 Admit a finite batch before starting model calls.
 
-{/* template:begin bounded-batch.nika.yaml */}
-```yaml bounded-batch.nika.yaml skeleton
+{/* template:begin bounded-batch.nika */}
+```yaml bounded-batch.nika skeleton
 nika: bounded-batch
 model: ollama/qwen3.5:4b
 run:
@@ -1263,15 +1240,13 @@ outputs:
 
 Typed facts → evidence → decision → queue..
 
-{/* template:begin classify-and-route.nika.yaml */}
-```yaml classify-and-route.nika.yaml skeleton
+{/* template:begin classify-and-route.nika */}
+```yaml classify-and-route.nika skeleton
 nika: classify-and-route       # SLOT: kebab-case workflow id
 
-# SLOT: the seat this file runs on — a local one first (`ollama/…`), a hosted
-# one when the job needs it. `nika new` STAMPS this line: it rewrites `model:`
-# with a seat this binary can resolve, and whatever rides on the line is
-# dropped — a marker THERE never reaches the reader, so it lives here.
-# Measured on 0.118.7: with no resolvable seat the stamp leaves `mock/echo`.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 const:
@@ -1399,15 +1374,13 @@ outputs:
 
 Canonicalize corpus → retrieve → answer or abstain..
 
-{/* template:begin corpus-qa.nika.yaml */}
-```yaml corpus-qa.nika.yaml skeleton
+{/* template:begin corpus-qa.nika */}
+```yaml corpus-qa.nika skeleton
 nika: corpus-qa       # SLOT: kebab-case workflow id
 
-# SLOT: the seat this file runs on — a local one first (`ollama/…`), a hosted
-# one when the job needs it. `nika new` STAMPS this line: it rewrites `model:`
-# with a seat this binary can resolve, and whatever rides on the line is
-# dropped — a marker THERE never reaches the reader, so it lives here.
-# Measured on 0.118.7: with no resolvable seat the stamp leaves `mock/echo`.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 const:
@@ -1520,8 +1493,8 @@ outputs:
 
 Collapse identical duplicates and refuse conflicts.
 
-{/* template:begin deduplicate-records.nika.yaml */}
-```yaml deduplicate-records.nika.yaml skeleton
+{/* template:begin deduplicate-records.nika */}
+```yaml deduplicate-records.nika skeleton
 nika: deduplicate-records
 const:
   dataset: '<SLOT: the dataset label>'
@@ -1605,15 +1578,13 @@ outputs:
 
 Source text → anchored facts → nonempty proof..
 
-{/* template:begin document-to-fields.nika.yaml */}
-```yaml document-to-fields.nika.yaml skeleton
+{/* template:begin document-to-fields.nika */}
+```yaml document-to-fields.nika skeleton
 nika: document-to-fields       # SLOT: kebab-case workflow id
 
-# SLOT: the seat this file runs on — a local one first (`ollama/…`), a hosted
-# one when the job needs it. `nika new` STAMPS this line: it rewrites `model:`
-# with a seat this binary can resolve, and whatever rides on the line is
-# dropped — a marker THERE never reaches the reader, so it lives here.
-# Measured on 0.118.7: with no resolvable seat the stamp leaves `mock/echo`.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 const:
@@ -1706,15 +1677,13 @@ outputs:
 
 Draft → two fixed critique/revision rounds..
 
-{/* template:begin evaluate-and-optimize.nika.yaml */}
-```yaml evaluate-and-optimize.nika.yaml skeleton
+{/* template:begin evaluate-and-optimize.nika */}
+```yaml evaluate-and-optimize.nika skeleton
 nika: evaluate-and-optimize       # SLOT: kebab-case workflow id
 
-# SLOT: the seat this file runs on — a local one first (`ollama/…`), a hosted
-# one when the job needs it. `nika new` STAMPS this line: it rewrites `model:`
-# with a seat this binary can resolve, and whatever rides on the line is
-# dropped — a marker THERE never reaches the reader, so it lives here.
-# Measured on 0.118.7: with no resolvable seat the stamp leaves `mock/echo`.
+# This skeleton keeps its authored offline model. Creating a workflow does
+# not select a paid provider from ambient credentials. Choose a different
+# model explicitly for a real run; `--model mock/echo` remains offline.
 model: mock/echo
 
 const:
@@ -1830,8 +1799,8 @@ outputs:
 
 Collect independent reviews with a deterministic conjunction.
 
-{/* template:begin parallel-review.nika.yaml */}
-```yaml parallel-review.nika.yaml skeleton
+{/* template:begin parallel-review.nika */}
+```yaml parallel-review.nika skeleton
 nika: parallel-review
 model: ollama/qwen3.5:4b
 run:
@@ -1974,8 +1943,8 @@ outputs:
 
 Select allowed fields before sending data to a model.
 
-{/* template:begin project-public-fields.nika.yaml */}
-```yaml project-public-fields.nika.yaml skeleton
+{/* template:begin project-public-fields.nika */}
+```yaml project-public-fields.nika skeleton
 nika: project-public-fields
 model: ollama/qwen3.5:4b
 run:
@@ -2069,8 +2038,8 @@ outputs:
 
 Recover a missing optional file without hiding other failures.
 
-{/* template:begin recover-optional-file.nika.yaml */}
-```yaml recover-optional-file.nika.yaml skeleton
+{/* template:begin recover-optional-file.nika */}
+```yaml recover-optional-file.nika skeleton
 nika: recover-optional-file
 run:
   clock: system
@@ -2139,8 +2108,8 @@ outputs:
 
 Compare two snapshots without model judgment.
 
-{/* template:begin snapshot-diff.nika.yaml */}
-```yaml snapshot-diff.nika.yaml skeleton
+{/* template:begin snapshot-diff.nika */}
+```yaml snapshot-diff.nika skeleton
 nika: snapshot-diff
 const:
   resource: '<SLOT: the resource being compared>'
@@ -2214,8 +2183,8 @@ outputs:
 
 Reject malformed records before producing totals.
 
-{/* template:begin validate-records.nika.yaml */}
-```yaml validate-records.nika.yaml skeleton
+{/* template:begin validate-records.nika */}
+```yaml validate-records.nika skeleton
 nika: validate-records
 const:
   batch: '<SLOT: the batch label>'
