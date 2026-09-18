@@ -135,14 +135,18 @@ happened. Neither `show` nor `replay` proves the chain;
 ## Export to your tracing stack · OTLP
 
 A recorded trace projects to OTLP/JSON lines, so any OpenTelemetry
-viewer becomes a Nika run viewer — no collector, no daemon, no vendor:
+viewer becomes a Nika run viewer — no collector, no daemon, no vendor.
+Unlike `show` / `replay` / `verify`, **`nika trace export` requires the
+journal path** — there is no workspace-latest default. The path is the
+`trace:` line the run card already printed (During, above), or a row
+from `nika trace ls`. A later run prints a new timestamped name; do not
+invent one.
 
-```bash
-# export needs the journal path (the run card's `trace:` line, or `nika trace ls`)
-nika trace export .nika/traces/2026-07-28T06-58-44Z-bb6e.ndjson
-# → .nika/traces/2026-07-28T06-58-44Z-bb6e.otlp.jsonl  (one OTLP span per line)
-
-nika trace export .nika/traces/2026-07-28T06-58-44Z-bb6e.ndjson -o run.otlp.jsonl
+```text
+nika trace ls
+nika trace export <path-from-the-run-card-or-ls>
+# default sidecar: same stem, `.otlp.jsonl` beside the journal
+nika trace export <path-from-the-run-card-or-ls> -o run.otlp.jsonl
 ```
 
 Each verb becomes a span (duration, tokens, the ADR-099 identity
