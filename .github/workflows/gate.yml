@@ -195,6 +195,13 @@ jobs:
           "$NIKA_BIN" --version
           python3 scripts/oracle-sweep.py
           python3 scripts/tests/test_oracle_sweep_manifest.py
+      - name: CANON counts match the migrated engine spec --canon
+        env:
+          NIKA_BIN: ${{ github.workspace }}/.engine-qual/target/debug/nika
+        run: |
+          PATH="$(dirname "$NIKA_BIN"):$PATH"
+          export PATH
+          python3 scripts/count-drift-gate.py --canon-wire
 
   mirror:
     name: The estate tool is the shared one
