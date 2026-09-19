@@ -65,13 +65,16 @@ Public documentation for Nika — the open workflow language for AI
    is judged by `scripts/oracle-sweep.py` on the released binary;
    `scripts/mdx-yaml-fix.py` runs the binary's own `--fix` through the
    fences in place.
-9. **Two regions of this repo are PROJECTED, not authored** — never
+9. **These regions of this repo are PROJECTED, not authored** — never
    hand-edit them, the next projection reverts you:
    - `{/* showcase:begin … */}` and `{/* template:begin … */}` blocks in
      `examples/*.mdx` and `guides/*.mdx` ← `nika-spec` `examples/showcase/`
      + `templates/`, via `nika-spec/scripts/showcase-projector.py`.
    - `{/* errors-*:begin */}` tables in `reference/error-codes.mdx` ←
      `nika-spec` `canon/diagnostics/registry.yaml`, same projector.
+   - `changelog/releases.mdx` and `snippets/data/releases.json` ← published
+     stable GitHub releases, via `python3 scripts/release_catalog.py --refresh`.
+     Dated authored accounts live separately in `changelog/history.mdx`.
 
    The projector serves the spec's source as identity (the grammar door
    that once downcast the pack to the released binary is gone since

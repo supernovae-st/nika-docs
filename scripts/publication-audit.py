@@ -21,6 +21,8 @@ RULES = {
 DETECTORS = {'scripts/publication-audit.py', 'scripts/tests/test_publication_audit.py'}
 DATA_FILES = {
     'docs.json', 'api-reference/openapi.json',
+    # Public stable GitHub releases only; release_catalog.py validates this schema.
+    'snippets/data/releases.json',
     'snippets/data/documentation-navigation.json', 'snippets/data/knowledge-mirror.json',
     'snippets/data/knowledge-taxonomy.json', 'snippets/data/language-reference.json',
     'snippets/data/tool-mirror.json', 'snippets/data/tool-reference.json',

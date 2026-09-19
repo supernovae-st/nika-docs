@@ -44,6 +44,12 @@ jobs:
         run: |
           python3 scripts/sdk_contract_gate.py --verify-npm
           python3 scripts/tests/test_sdk_contract_gate.py
+      - name: Published release inventory and automation regressions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/tests/test_release_catalog.py
+          python3 scripts/release_catalog.py --refresh --check
       - name: Installed MDX parser failures block the push hook
         run: python3 scripts/tests/test_mintlify_hook.py
       - name: Atomic released snapshot projection (offline doubles)

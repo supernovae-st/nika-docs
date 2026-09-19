@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "repository": "supernovae-st/nika",
+  "releases": [
+    {
+      "tag": "v0.120.1",
+      "name": "v0.120.1",
+      "publishedAt": "2026-09-18T22:35:56Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.120.1",
+      "assetCount": 8,
+      "highlights": [
+        "Compile derives private pattern facets from the AST.",
+        "Project schemas follow canonical program names.",
+        "A value read of a stage that CERTAINLY skips on « no » is a NIKA-SEC-014 refusal."
+      ],
+      "notesSha256": "ae1f81b48987f5c7cdd402c4810e35c4bae47e4b3b6e1f978632212a4c0b3be6"
+    },
+    {
+      "tag": "v0.120.0",
+      "name": "v0.120.0",
+      "publishedAt": "2026-09-18T18:59:17Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.120.0",
+      "assetCount": 8,
+      "highlights": [
+        "Scheduled beats carry per-beat inputs.",
+        "A resumed leg names the trace it continues.",
+        "Serve named-job inputs."
+      ],
+      "notesSha256": "13d1d52ba287a746177bbdaca06564e05f9f1034817b8de2c06b3de7b094c477"
+    },
+    {
+      "tag": "v0.119.0",
+      "name": "v0.119.0",
+      "publishedAt": "2026-09-13T17:03:41Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.119.0",
+      "assetCount": 8,
+      "highlights": [
+        "The card names the prompt side of the bill.",
+        "Executable file-read hints.",
+        "The OTLP projection carries the GenAI usage counters."
+      ],
+      "notesSha256": "44b3825f50f8fe62a51f7a26b745f6f14feb8f14649841dae7cd04e8ca2b771d"
+    },
+    {
+      "tag": "v0.118.7",
+      "name": "v0.118.7",
+      "publishedAt": "2026-09-05T17:58:35Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.118.7",
+      "assetCount": 8,
+      "highlights": [
+        "File journals refuse bytes beyond the verifier's existing bounds.",
+        "Hash arguments agree across check and execution.",
+        "Incomplete trace diagnostics describe evidence, not runtime failure."
+      ],
+      "notesSha256": "ad29a1f253455c4dd8ffd6a3dced1b5c75d87bf89dc49bcdc804f3e40cbef62a"
+    },
+    {
+      "tag": "v0.118.6",
+      "name": "v0.118.6",
+      "publishedAt": "2026-09-05T14:28:46Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.118.6",
+      "assetCount": 8,
+      "highlights": [
+        "Authoring guidance follows composition and cleanup contracts.",
+        "Cancellation publication has a discriminating model test.",
+        "Preserve the release coordinate in metadata writes."
+      ],
+      "notesSha256": "bb1367aecd5bdcd5f5d78a246645b403e1122a8b8efa045b1f7ad1119b913b9d"
+    },
+    {
+      "tag": "v0.116.2",
+      "name": "v0.116.2",
+      "publishedAt": "2026-08-31T21:51:24Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.116.2",
+      "assetCount": 8,
+      "highlights": [
+        "0.116.2 supersedes the unpublished 0.116.1 tag.",
+        "Relative permit paths keep stable identity during concurrent ancestry changes.",
+        "Resident schedules settle before their durable store shuts down."
+      ],
+      "notesSha256": "604182b6b755a63d87a93ffce639d1acb9727d42c715411820884b59e356cdb6"
+    },
+    {
+      "tag": "v0.116.0",
+      "name": "v0.116.0",
+      "publishedAt": "2026-08-31T07:30:56Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.116.0",
+      "assetCount": 8,
+      "highlights": [
+        "One SDK gains a durable resident HTTP authority.",
+        "The One SDK contract is machine-complete at its live boundaries.",
+        "The MCP oracle closes the repair loop."
+      ],
+      "notesSha256": "bb10ab4dbbd6e58ec82c970b8b8b712da4cd3f902be644519f56ed6b035dad2d"
+    },
+    {
+      "tag": "v0.115.0",
+      "name": "v0.115.0",
+      "publishedAt": "2026-08-26T18:28:03Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.115.0",
+      "assetCount": 8,
+      "highlights": [
+        "nika check --json carries one-obvious-way lints.",
+        "The next tagged binary includes the harness access class.",
+        "One-shot infer: tasks can use a proved Codex subscription seat."
+      ],
+      "notesSha256": "5d3f2a5a6f716267340d0e5cf42e2406cce44b95e796be303f8d6f26eb80eebd"
+    },
+    {
+      "tag": "v0.114.0",
+      "name": "v0.114.0",
+      "publishedAt": "2026-08-23T13:54:46Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.114.0",
+      "assetCount": 8,
+      "highlights": [
+        "nika serve --bind is authenticated loopback HTTP.",
+        "Job events project over SSE",
+        "nika doctor names the HTTP door when a token file is present."
+      ],
+      "notesSha256": "b57bbd1684745f52de76229724c38b1bdf033bb5b6a96e31bed9f3d283f63a84"
+    },
+    {
+      "tag": "v0.113.0",
+      "name": "v0.113.0",
+      "publishedAt": "2026-08-21T19:06:47Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.113.0",
+      "assetCount": 8,
+      "highlights": [
+        "nika check now judges every native shell segment, not only the head.",
+        "Four form-first skeletons join nika new.",
+        "The MCP oracle now carries instructions and a structured example index."
+      ],
+      "notesSha256": "9dba13547cc550f4a91058097e4755e874cde2b7bc4a2f17647f3517ae336b38"
+    },
+    {
+      "tag": "v0.112.0",
+      "name": "v0.112.0",
+      "publishedAt": "2026-08-20T23:37:01Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.112.0",
+      "assetCount": 8,
+      "highlights": [
+        "nika list names every workflow below the current directory.",
+        "Bare nika on a terminal opens one continuous thread.",
+        "BREAKING — VirtualClock loses its dead time-mover (nika-clock)."
+      ],
+      "notesSha256": "0fc28c0e7dc03c9d13cdaf67101ecff9341d33fb2aa6e327bd6e4e06c771eb6b"
+    },
+    {
+      "tag": "v0.111.0",
+      "name": "v0.111.0",
+      "publishedAt": "2026-08-19T19:02:18Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.111.0",
+      "assetCount": 8,
+      "highlights": [
+        "paid_ready · compiled · next on nika check --json (#1013).",
+        "nika:inspect is live (#1018).",
+        "Lesson 15 nika:compose on an agent whitelist (#1016)."
+      ],
+      "notesSha256": "41ccab550072e189c5127fd70d3ee6e4a70d7995f32e1066d93d7f736ac717d6"
+    },
+    {
+      "tag": "v0.110.0",
+      "name": "v0.110.0",
+      "publishedAt": "2026-08-19T12:59:38Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.110.0",
+      "assetCount": 8,
+      "highlights": [
+        "The project file carries the thirteen beat keys (arm: · W1 · #993).",
+        "nika arm fire <label> — the one firer (W2 · #1001).",
+        "nika arm --emit launchd|systemd — the OS bridge (W3 · #1005)."
+      ],
+      "notesSha256": "fe587507a0146f2ee2f4c51d806ac818c946eda7d286b8d5150ed811eb91fd12"
+    },
+    {
+      "tag": "v0.109.2",
+      "name": "v0.109.2 — the nine-key release (installable)",
+      "publishedAt": "2026-08-18T23:23:10Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.109.2",
+      "assetCount": 8,
+      "highlights": [
+        "An expression sees only its input (#959).",
+        "A third-party receipt wrote the operator's clipboard (#958).",
+        "The Linux release builders install bubblewrap before the gates run (release.yml)."
+      ],
+      "notesSha256": "16b575c97016487052e6a4913c1e3a9bc52eeda6bd4859e92943fcd63a9289bd"
+    },
+    {
+      "tag": "v0.109.1",
+      "name": "v0.109.1 — the release the release gate refused (tag · no assets)",
+      "publishedAt": "2026-08-19T00:09:08Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.109.1",
+      "assetCount": 0,
+      "highlights": [
+        "The release gates speak the live envelope (funnel e2e · trust battery).",
+        "Hygiene vector 50 · check-release-gate-envelope."
+      ],
+      "notesSha256": "f955facc1b6f265e588c689237382512c0d59771e399936b34ec528240587c50"
+    },
+    {
+      "tag": "v0.109.0",
+      "name": "v0.109.0 — the nine-key release (tag · no assets)",
+      "publishedAt": "2026-08-19T00:09:07Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.109.0",
+      "assetCount": 0,
+      "highlights": [
+        "An expression sees only its input (#959).",
+        "A third-party receipt wrote the operator's clipboard (#958).",
+        "The project file nika.yaml (D-2026-08-11-N5)."
+      ],
+      "notesSha256": "c870d146177c42ff2b062a6c87dff3f47b36cf2125207f17ecc8dc6318569881"
+    },
+    {
+      "tag": "v0.108.0",
+      "name": "v0.108.0",
+      "publishedAt": "2026-08-05T17:39:16Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.108.0",
+      "assetCount": 8,
+      "highlights": [
+        "Execution access · step 3 — the ACP harness class",
+        "Execution access · step 2 — the deterministic resolver, the pin, the narration",
+        "Every catalog-miss advisory printed twice."
+      ],
+      "notesSha256": "eb48962b6b6fd8c1a553ea3f4f2feed55000f22e4abef88d570e09c7558b9d3b"
+    },
+    {
+      "tag": "v0.107.2",
+      "name": "v0.107.2",
+      "publishedAt": "2026-08-02T17:27:52Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.107.2",
+      "assetCount": 8,
+      "highlights": [
+        "A permit could name a system root by shouting it.",
+        "A secret was redacted in the trace and printed on stdout.",
+        "The dangerous-environment floor is proven entry by entry."
+      ],
+      "notesSha256": "5e5db21247f953e6a8ccec2e5b1f9b3d480a1678f62ec77c03adbbed807d7c40"
+    },
+    {
+      "tag": "v0.107.1",
+      "name": "v0.107.1",
+      "publishedAt": "2026-08-02T12:49:13Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.107.1",
+      "assetCount": 8,
+      "highlights": [
+        "One door catalog, one ratchet.",
+        "nika try opens on three jobs, not thirty-nine.",
+        "guard-declared is not guarded."
+      ],
+      "notesSha256": "011bd2d79cc4b242f60d021ffe5ae97c4881b8f9c23ea96929897f5eaae4cccf"
+    },
+    {
+      "tag": "v0.107.0",
+      "name": "v0.107.0",
+      "publishedAt": "2026-08-01T16:21:44Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.107.0",
+      "assetCount": 8,
+      "highlights": [
+        "nika try [slug] — see it work, own nothing",
+        "nika new routes the WHOLE catalog",
+        "The MCP oracle walks the same door"
+      ],
+      "notesSha256": "d5a85455196ca03f4f9a02bd4f797c5a80dbd4d2c9e75934754eec9974a11305"
+    },
+    {
+      "tag": "v0.106.1",
+      "name": "v0.106.1",
+      "publishedAt": "2026-07-28T21:18:17Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.106.1",
+      "assetCount": 8,
+      "highlights": [
+        "catalog",
+        "check",
+        "check"
+      ],
+      "notesSha256": "3c9c49f44ac1200490559e4704183fc3f6bba0f532c52a0b15e7ad8482d9993c"
+    },
+    {
+      "tag": "v0.106.0",
+      "name": "v0.106.0",
+      "publishedAt": "2026-07-27T23:24:02Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.106.0",
+      "assetCount": 6,
+      "highlights": [
+        "nika-check",
+        "run: — the run declares its entropy and its clock",
+        "The run's lifecycle is attested"
+      ],
+      "notesSha256": "d9a0566f95d443ff56d5596f2f61a0b4ad33d0b992b45a7afdfc80f56608abfa"
+    },
+    {
+      "tag": "v0.105.0",
+      "name": "v0.105.0",
+      "publishedAt": "2026-07-20T07:57:19Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.105.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "97c1e0cf7435cea12039647cbff5490493d358e1498cdbafcf764b8cae5cfb9c"
+    },
+    {
+      "tag": "v0.104.0",
+      "name": "v0.104.0",
+      "publishedAt": "2026-07-17T15:02:30Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.104.0",
+      "assetCount": 5,
+      "highlights": [
+        "moonshot joins the canonical catalog (17 providers · 11 cloud + 5 local + 1 test)",
+        "kimi pricing",
+        "nika-lsp semantic_document fixtures spoke the pre-argv grammar"
+      ],
+      "notesSha256": "ecc448e538dab501ef1622987b0c7ed8ed2b3d48da9e591a90916bd82b678181"
+    },
+    {
+      "tag": "v0.103.0",
+      "name": "v0.103.0",
+      "publishedAt": "2026-07-13T12:00:28Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.103.0",
+      "assetCount": 5,
+      "highlights": [
+        "exec semantics never fork on a YAML type again",
+        "bare ${{ tasks.X }} is a validation error",
+        "the gate algebra becomes normative"
+      ],
+      "notesSha256": "bb85407a5253bea0459fd7b22dd041f5bd232741b0acb8c56244d7703b35a2e1"
+    },
+    {
+      "tag": "v0.102.0",
+      "name": "v0.102.0",
+      "publishedAt": "2026-07-13T08:20:04Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.102.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "f11ecf23e4fe224ce199b4fa2d8122ef084fdee814960653aa3bb3f56f1bac1d"
+    },
+    {
+      "tag": "v0.101.0",
+      "name": "v0.101.0",
+      "publishedAt": "2026-07-12T23:04:59Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.101.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "8d7067127f12ec3c2fa1295890b2efd93bd0093b69fc2ad756e06b211ed47aad"
+    },
+    {
+      "tag": "v0.100.0",
+      "name": "v0.100.0",
+      "publishedAt": "2026-07-12T21:18:02Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.100.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "20d9a801b1e0b3be1e2c27417e779a50d7c70205fa409ebdc554f0e45a654e6c"
+    },
+    {
+      "tag": "v0.99.0",
+      "name": "v0.99.0",
+      "publishedAt": "2026-07-10T07:56:18Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.99.0",
+      "assetCount": 8,
+      "highlights": [
+        "nika:image_fx — deterministic artistic effects, the 26th builtin (stdlib §Media graduate #3).",
+        "nika:chart — deterministic chart artifacts, the 27th builtin (stdlib §Media graduate #4).",
+        "nika check --model <provider/model>"
+      ],
+      "notesSha256": "4e0a513517e308580471fc30605c69780cd185351fc19ed7e6e01217e811c2f6"
+    },
+    {
+      "tag": "v0.98.0",
+      "name": "v0.98.0",
+      "publishedAt": "2026-07-08T16:41:42Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.98.0",
+      "assetCount": 8,
+      "highlights": [],
+      "notesSha256": "ac3a9547eac3be5f95bdb7daf0d7097a9e795b6df8ca89bebaae69b49277abe8"
+    },
+    {
+      "tag": "v0.97.0",
+      "name": "v0.97.0 — the run becomes evidence",
+      "publishedAt": "2026-07-07T14:01:08Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.97.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "46633727f41f400986f0df725df6a220e85e021762ba4a50e8b4e4ba2aec2ca2"
+    },
+    {
+      "tag": "v0.96.0",
+      "name": "v0.96.0 — the run becomes a place",
+      "publishedAt": "2026-07-06T18:54:09Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.96.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "980fa459dcb8b0560112766dfff1770d50f484ece8d1e2a0d6df54bb51264a98"
+    },
+    {
+      "tag": "v0.95.0",
+      "name": "v0.95.0 — the catalog practices local-first",
+      "publishedAt": "2026-07-06T14:11:34Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.95.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "6ca1463497b2803893de3099927559c1e1da5b3a00cca03a40b21761b06da5a0"
+    },
+    {
+      "tag": "v0.94.0",
+      "name": "v0.94.0 — the media suite",
+      "publishedAt": "2026-07-06T09:09:11Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.94.0",
+      "assetCount": 5,
+      "highlights": [
+        "The media suite",
+        "Every run leaves a journal",
+        "The catalog rides the wire"
+      ],
+      "notesSha256": "ed47b2438c937aa489008c1d1a10e5d88d81c700bad47169c7776ae019dd1b19"
+    },
+    {
+      "tag": "v0.93.1",
+      "name": "v0.93.1 — the embedded pack teaches 2026 models",
+      "publishedAt": "2026-07-05T02:46:34Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.93.1",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "9fe90eb4aca837463568ecfe13ce3e97010b13a60ddaca8528a58b1ab7f83107"
+    },
+    {
+      "tag": "v0.93.0",
+      "name": "v0.93.0 — resume · test harness · local thinking models unbricked",
+      "publishedAt": "2026-07-05T02:16:15Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.93.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "c9587ba3a999bfef50255c22a4787c1fab23d5aa98fdd9e18f072064026d6706"
+    },
+    {
+      "tag": "v0.92.0",
+      "name": "v0.92.0 — agent-native",
+      "publishedAt": "2026-07-03T03:23:32Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.92.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "ec87dd2804973176e43911a3c7ef78b87922c3a368cb2f312b0b211136ae15f3"
+    },
+    {
+      "tag": "v0.91.0",
+      "name": "v0.91.0 — onboarding wiring · headless builds",
+      "publishedAt": "2026-06-25T15:26:43Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.91.0",
+      "assetCount": 5,
+      "highlights": [
+        "Smoother first 15 minutes",
+        "Headless & Linux builds fixed",
+        "Honest release plumbing"
+      ],
+      "notesSha256": "b6ec26b10a78ff844f7d57a8676b52925dbf6fb11aa2b417e7cd2f2adfd02a90"
+    },
+    {
+      "tag": "v0.90.0",
+      "name": "v0.90.0 — the first public release 🦋",
+      "publishedAt": "2026-06-21T14:49:22Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.90.0",
+      "assetCount": 5,
+      "highlights": [],
+      "notesSha256": "bd4c3238c25aaca156f155df254d390c8d148c61a6c1670b83f5dc0b001e3a35"
+    }
+  ]
+}

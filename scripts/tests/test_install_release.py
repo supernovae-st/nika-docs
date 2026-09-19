@@ -301,13 +301,17 @@ class WiringTest(unittest.TestCase):
         self.assertNotIn('ssh-key:', heal)
         self.assertIn('pull-requests: write', heal)
         self.assertNotIn('One SDK 0.116', (SCRIPTS.parent / '.github/workflows/gate.yml').read_text())
-        self.assertIn('gh pr create', heal)
-        self.assertIn('HEAD:refs/heads/', heal)
-        self.assertIn('NIKA_TAG', heal)
+        proposal = (SCRIPTS / 'release_proposal.py').read_text()
+        self.assertIn('run("gh", "pr", "create"', proposal)
+        self.assertIn('HEAD:refs/heads/', proposal)
+        self.assertIn('scripts/release_proposal.py', heal)
         self.assertLess(heal.index('scripts/install_release.py'), heal.index('bash scripts/mintlify-snapshot.sh'))
         for check in ('scripts/link-audit.py','scripts/count-drift-gate.py','scripts/teach-parity.py','scripts/oracle-sweep.py'):
-            self.assertLess(heal.index(check), heal.index('git push'))
+            self.assertLess(heal.index(check), heal.index('scripts/release_proposal.py'))
         self.assertNotIn('--force', heal)
+        self.assertNotIn('--force', proposal)
+        self.assertNotIn('--admin', proposal)
+        self.assertIn('f"sha={head}"', proposal)
 
 
 if __name__ == '__main__':

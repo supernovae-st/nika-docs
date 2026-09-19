@@ -73,14 +73,15 @@ There is no `package.json`; Mintlify's CLI runs standalone via `npx`.
 
 ## Generated content: never hand-edit
 
-Three classes of content are PROJECTED from external sources of truth.
-Hand edits are overwritten on the next regeneration (and the projector
-`--check` gates catch drift in the monorepo audit):
+Generated content has explicit owners and validation. Hand edits to projected
+fields are overwritten on regeneration; historical development fields are
+separate from the released-binary snapshot:
 
 | Surface | Source of truth | Regenerate |
 |---|---|---|
-| `snippets/_status-snapshot.mdx` · `version` + `lastUpdated` | published GitHub release | `bash scripts/mintlify-snapshot.sh` (here) |
-| `snippets/_status-snapshot.mdx` · **every count** | engine `main` refresh-status.sh block | **hand-copied.** No gate watches it — see the file header for the per-field derivation commands |
+| `snippets/_status-snapshot.mdx` · `version`, `engineSha`, `providers`, `firstCommand`, `lastUpdated` | One verified published binary and its release metadata | `NIKA_BIN=… bash scripts/mintlify-snapshot.sh` |
+| Remaining historical fields in `_status-snapshot.mdx` | Dated engine-main records | Hand-maintained; not evidence about the released binary |
+| `snippets/data/releases.json` and `changelog/releases.mdx` | Paginated GitHub published stable release API | `python3 scripts/release_catalog.py --refresh`; live parity checked in `gate.yml` |
 | `snippets/_canon.mdx` (language facts: verbs/builtins/providers counts) | `nika-spec/canon.yaml` | `python3 scripts/canon-projectors.py --write` (in the spec) |
 | `examples/*.mdx` YAML+mermaid blocks · `guides/templates.mdx` template blocks · `reference/error-codes.mdx` tables | `nika-spec` showcase/ · templates/ · error registry | `python3 scripts/showcase-projector.py --write` (in the spec) |
 
@@ -93,7 +94,16 @@ keep volatile numbers out of descriptions entirely.
 
 The Mintlify GitHub App is installed on this repo. Each push to `main`
 triggers an automatic rebuild (typically ~30 seconds) and updates
-`docs.nika.sh`. No CI configuration lives in this repo.
+`docs.nika.sh`. Documentation checks live in `.github/workflows/gate.yml`.
+
+`release-heal.yml` runs hourly and can be dispatched manually. It verifies the
+release binary, refreshes the complete release inventory and engine snapshot,
+and opens a PR containing only generated surfaces. Since `GITHUB_TOKEN` PRs do
+not run pull-request CI unattended, it explicitly dispatches `gate.yml`, waits
+for all five jobs, and merges the exact successful commit through normal branch
+protection. API failures, missing gates, changed PR identity, or a rejected merge
+fail the sync and leave the proposal open. Re-running the same generated tree
+reuses its branch and PR without force-pushing. No npm publication is implied.
 
 ## Content conventions
 
