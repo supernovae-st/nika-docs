@@ -26,7 +26,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      actions: write # explicitly dispatch CI for GITHUB_TOKEN-created proposals
+      actions: write # dispatch CI and approve the exact held pull_request gate for GITHUB_TOKEN-created proposals
       attestations: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -71,8 +71,11 @@ jobs:
           python3 scripts/estate.py --write
           python3 scripts/estate.py --check
       - name: Propose, qualify and merge generated release changes
-        # Explicit workflow_dispatch runs all gates on the proposed commit.
-        # REST merge pins that commit and honors main branch protection.
+        # Explicit workflow_dispatch runs all gates on the proposed commit; the
+        # pull_request gate is created held, so the script approves that exact
+        # run only after re-validating the same-repo generated-only identity.
+        # Both gates and every required job must succeed before the REST merge,
+        # which pins that commit and honors main branch protection.
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/release_proposal.py

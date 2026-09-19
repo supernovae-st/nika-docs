@@ -2,8 +2,12 @@
 """Publish only generated release files, qualify their exact commit, then merge.
 
 GITHUB_TOKEN-created pull requests do not run CI unattended. Explicit
-workflow_dispatch starts the qualification run; never infer checks from PR
-creation or bypass branch protection.
+workflow_dispatch starts one qualification run; the pull_request gate for the
+same commit is created held (`action_required`) with an EMPTY pull_requests
+payload. This script approves that exact run — only after re-validating the
+proposal identity — then waits for BOTH gates and every required job before
+the normal exact-SHA merge. Never infer checks from PR creation or bypass
+branch protection.
 No remote branch code is executed by this script.
 """
 from __future__ import annotations
@@ -11,19 +15,26 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import time
 
 REPO = "supernovae-st/nika-docs"
+GATE = ".github/workflows/gate.yml"
 ALLOWED = {"snippets/_status-snapshot.mdx", "snippets/data/releases.json",
            "changelog/releases.mdx", "estate.yaml"}
 REQUIRED = {"link-audit", "oracle-sweep", "oracle-sweep (migrated engine pin)",
             "The estate tool is the shared one", "Spec to documentation reference"}
+SECRET = re.compile(r"x-access-token:[^@\s]+@|gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}")
 
 
 def run(*args):
-    return subprocess.run(args, check=True, capture_output=True, text=True, timeout=120).stdout.strip()
+    try:
+        return subprocess.run(args, check=True, capture_output=True, text=True, timeout=120).stdout.strip()
+    except subprocess.CalledProcessError as error:
+        detail = SECRET.sub("REDACTED", (error.stderr or error.stdout or "").strip())
+        raise ValueError(f"{args[0]} {args[1]} exited {error.returncode}: {detail[:400] or 'no output'}") from None
 
 
 def api(endpoint, *args):
@@ -46,6 +57,71 @@ def check_jobs(jobs):
     names = {job["name"] for job in jobs}
     if not REQUIRED <= names or any(job.get("conclusion") != "success" for job in jobs):
         raise ValueError("all documentation gates must succeed on the selected commit")
+
+
+def select_run(runs, *, head, branch, event, since=None):
+    """The latest run carrying the exact proposal identity, or None.
+
+    repository and head_repository must both be this repository — a fork's
+    gate run is never awaited or approved. The run's pull_requests payload is
+    ignored on purpose: GITHUB_TOKEN-created proposals report it empty, so the
+    PR identity comes from check_pr and the run identity from these fields.
+    """
+    selected = [r for r in runs
+                if r.get("head_sha") == head and r.get("head_branch") == branch
+                and r.get("event") == event and r.get("path") == GATE
+                and (r.get("repository") or {}).get("full_name") == REPO
+                and (r.get("head_repository") or {}).get("full_name") == REPO
+                and (since is None or r.get("created_at", "") >= since)]
+    return max(selected, key=lambda r: r["id"]) if selected else None
+
+
+def gate_run(event, head, branch, since=None):
+    runs = api(f"actions/workflows/gate.yml/runs?event={event}&head_sha={head}&per_page=100")["workflow_runs"]
+    return select_run(runs, head=head, branch=branch, event=event, since=since)
+
+
+def approve_gate(number, head, selected):
+    """Approve the held pull_request gate after exact identity validation."""
+    if selected.get("event") != "pull_request" or selected.get("path") != GATE:
+        raise ValueError("only the held pull_request gate may be approved")
+    pr = json.loads(run("gh", "pr", "view", number, "--repo", REPO, "--json",
+                        "state,isCrossRepository,baseRefName,headRefOid,files"))
+    check_pr(pr, head)
+    # actions/runs/{id}/approve answers 201 with an empty body; no JSON to parse.
+    run("gh", "api", "--method", "POST", f"repos/{REPO}/actions/runs/{selected['id']}/approve")
+    print(f"release-heal: approved held pull_request gate {selected['id']} on {head[:12]}", flush=True)
+
+
+def await_gates(number, head, branch, started):
+    """Both gates must complete with every required job green on the exact head."""
+    deadline = time.monotonic() + 1200
+    approved = set()
+    while True:
+        states = {}
+        for event, since in (("pull_request", None), ("workflow_dispatch", started)):
+            selected = gate_run(event, head, branch, since)
+            if selected is None:
+                states[event] = "missing"
+            elif selected["status"] == "action_required":
+                if event != "pull_request":
+                    raise ValueError(f"unexpected held {event} gate: {selected['html_url']}")
+                if selected["id"] not in approved:
+                    approve_gate(number, head, selected)
+                    approved.add(selected["id"])
+                states[event] = "awaiting approval"
+            elif selected["status"] != "completed":
+                states[event] = selected["status"]
+            elif selected["conclusion"] != "success":
+                raise ValueError(f"documentation checks failed: {selected['html_url']}")
+            else:
+                check_jobs(api(f"actions/runs/{selected['id']}/jobs?per_page=100")["jobs"])
+                states[event] = "success"
+        if all(state == "success" for state in states.values()):
+            return
+        if time.monotonic() >= deadline:
+            raise ValueError(f"documentation checks timed out: {states}; proposal remains open")
+        time.sleep(20)
 
 
 def main():
@@ -91,20 +167,7 @@ def main():
     started = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     run("gh", "workflow", "run", "gate.yml", "--repo", REPO, "--ref", branch)
     print(f"release-heal: PR #{number}, validating {head}", flush=True)
-    deadline = time.monotonic() + 900
-    while time.monotonic() < deadline:
-        runs = api(f"actions/workflows/gate.yml/runs?event=workflow_dispatch&head_sha={head}&per_page=100")["workflow_runs"]
-        selected = [r for r in runs if r["head_sha"] == head and r["head_branch"] == branch and r["created_at"] >= started]
-        if selected:
-            selected_run = max(selected, key=lambda r: r["id"])
-            if selected_run["status"] == "completed":
-                if selected_run["conclusion"] != "success":
-                    raise ValueError(f"documentation checks failed: {selected_run['html_url']}")
-                check_jobs(api(f"actions/runs/{selected_run['id']}/jobs?per_page=100")["jobs"])
-                break
-        time.sleep(20)
-    else:
-        raise ValueError("documentation checks timed out; proposal remains open")
+    await_gates(number, head, branch, started)
     pr = json.loads(run("gh", "pr", "view", number, "--repo", REPO, "--json",
                         "state,isCrossRepository,baseRefName,headRefOid,files"))
     check_pr(pr, head)
