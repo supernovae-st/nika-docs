@@ -62,7 +62,7 @@ Switching provider is **one line** in YAML:
 tasks:
   first:
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · swap to mistral/… · anthropic/… · gemini/…
+      model: ollama/qwen3.5:4b             # <provider>/<name> · swap to openai/… · xai/… · moonshot/…
       prompt: "Hello."
 ```
 
@@ -144,11 +144,11 @@ When a provider fails, Nika can route to a fallback:
 tasks:
   primary:
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local first
+      model: ollama/qwen3.5:4b             # <provider>/<name> · local first
       prompt: "..."
     fallback:
-      - { model: mistral/mistral-large }
-      - { model: anthropic/claude-sonnet-4-6 }
+      - { model: openai/gpt-5.2 }
+      - { model: xai/grok-3 }
 ```
 
 <Warning>

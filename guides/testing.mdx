@@ -19,8 +19,8 @@ nika test triage.nika
 ## Why the mock makes this possible
 
 `nika test` swaps every `infer:` / `agent:` call to the mock provider,
-whatever `model:` the file declares — your `ollama/llama3.2:3b` (or
-`mistral/…`, or any cloud model) workflow tests offline, unchanged.
+whatever `model:` the file declares — your `ollama/qwen3.5:4b` (or
+`openai/…`, or any cloud model) workflow tests offline, unchanged.
 
 The mock is not a stub that returns `"ok"`. It is **schema-conformant**:
 when a task declares a `schema:`, the mock synthesizes an instance that
