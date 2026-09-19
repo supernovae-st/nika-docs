@@ -54,6 +54,9 @@ class PublicationBoundary(unittest.TestCase):
     def test_symlink_cannot_bypass_audit(self):
         (self.root/'copied.mdx').symlink_to(self.root/'introduction.mdx')
         self.assertTrue(audit.audit(self.root))
+    def test_mdx_runtime_manifest_is_an_admitted_tool_contract(self):
+        self.assertIn('scripts/tests/mdx-runtime/package.json', audit.DATA_FILES)
+        self.assertIn('scripts/tests/mdx-runtime/package-lock.json', audit.DATA_FILES)
     def test_real_public_repository(self):
         self.assertEqual(audit.audit(ROOT),[])
 

@@ -5,12 +5,19 @@ sidebarTitle: "Testing"
 icon: "vial"
 ---
 
-A workflow is code, so it gets tests. `nika test <file>` runs the workflow
-under the **mock provider** — offline, deterministic, zero keys, zero
-tokens — and compares the typed `outputs:` against a **golden file**
-(`<file>.golden.json`) committed next to it. Same idea as snapshot testing:
-pin what the workflow produces, and any future edit that changes the
-contract fails loud in CI.
+How do you pin what a workflow returns without spending tokens?
+
+`nika test <file>` runs it under the **mock provider** — offline,
+deterministic, zero keys — then **diffs the output values** against
+`<file>.golden.json` (deep JSON equality, path-by-path). Schema
+acceptance is a **separate** gate: when `infer.schema` is present the
+mock must synthesize a valid instance *before* that JSON is compared.
+
+Predict: if you change only the prompt text, does the golden still
+match? Not if the recorded values change. `mock/echo` echoes the
+prompt, so the golden fails. A schema mock that still synthesizes the
+same instance can match even when the prompt changed — the golden
+never means “shape only”.
 
 ```bash
 nika test triage.nika

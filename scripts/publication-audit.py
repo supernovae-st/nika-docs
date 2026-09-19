@@ -26,6 +26,8 @@ DATA_FILES = {
     'snippets/data/tool-mirror.json', 'snippets/data/tool-reference.json',
     'scripts/public-assets.json',
     'scripts/old-suffix-exceptions.json',
+    'scripts/tests/mdx-runtime/package.json',
+    'scripts/tests/mdx-runtime/package-lock.json',
 }
 
 def files(root):

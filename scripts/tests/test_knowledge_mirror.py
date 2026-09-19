@@ -93,6 +93,71 @@ class KnowledgeMirrorTests(unittest.TestCase):
     def test_jitter_excerpt_and_context(self):
         page=mirror.render(self.data)['reference/language/words/jitter.mdx']
         self.assertIn('boolean',page);self.assertIn('```yaml illustration',page);self.assertIn('/reference/language/words/backoff_ms',page)
+    def test_inline_code_keeps_braces_and_prose_escapes_stray_braces(self):
+        self.assertEqual(mirror.code_span('${{ inputs.X }}'),'`${{ inputs.X }}`')
+        self.assertIn('`${{ inputs.X }}`',mirror.md_prose('Typed workflow inputs · ${{ inputs.X }} · caller.'))
+        self.assertNotIn('&#123;',mirror.md_prose('Typed workflow inputs · ${{ inputs.X }} · caller.'))
+        self.assertIn('&#123;not-cel&#125;',mirror.md_prose('ordinary {not-cel} prose'))
+        self.assertNotIn('{not-cel}',mirror.md_prose('ordinary {not-cel} prose'))
+    def test_inputs_page_does_not_leak_entities_in_cel_or_dump_json_in_a_cell(self):
+        page=mirror.render(self.data)['reference/language/words/inputs.mdx']
+        self.assertIn('`${{ inputs.X }}`',page)
+        self.assertNotIn('$&#123;',page)
+        self.assertIn('```json',page)
+        self.assertIn('<details>',page)
+        self.assertIn('source-versus-implementation',page)
+        self.assertNotRegex(page,r'\| additionalProperties \| &#123;')
+        self.assertIn('\n  "type":',page)
+    def test_code_span_keeps_backticks_and_pipes_leave_the_table(self):
+        self.assertIn('`',mirror.code_span('a`b'))
+        self.assertIn('a`b',mirror.code_span('a`b'))
+        word=copy.deepcopy(self.data['words'][0])
+        word['name']='pipe_field';word['id']='language:word:pipe_field';word['docsPath']='reference/language/words/pipe_field'
+        word['contracts']=[{'pointer':'/properties/pipe_field','context':'/','required':False,'siblings':[],
+            'declaration':{'type':'string','pattern':'a|b','enum':['x|y']}}]
+        data=copy.deepcopy(self.data);data['words'].append(word)
+        page=mirror.render(data)['reference/language/words/pipe_field.mdx']
+        self.assertNotRegex(page,r'\| pattern \| `')
+        self.assertIn('declaration below',page)
+        self.assertIn('a|b',page)
+    def test_md_prose_nested_ticks_pipes_cel_and_jsx_like(self):
+        src='see `` `nested` `` and ${{ inputs.X }} and {Not.JSX} and `a|b`'
+        out=mirror.md_prose(src)
+        self.assertIn('nested',out)
+        self.assertIn('`${{ inputs.X }}`',out)
+        self.assertIn('&#123;Not.JSX&#125;',out)
+        self.assertNotIn('{Not.JSX}',out)
+        self.assertIn('a|b',out)
+        self.assertNotIn('$&#123;',out)
+        # Inner backtick of a double-delimited span survives.
+        self.assertIn('`` `nested` ``',out)
+    def test_representative_pages_compile_as_mdx(self):
+        import subprocess, tempfile
+        runtime=ROOT/'scripts'/'tests'/'mdx-runtime'
+        compiler=runtime/'compile-mdx.mjs'
+        modules=runtime/'node_modules'/'@mdx-js'/'mdx'
+        if not modules.exists():
+            inst=subprocess.run(['npm','ci'],cwd=runtime,capture_output=True,text=True,timeout=120)
+            self.assertEqual(inst.returncode,0,inst.stderr)
+        missing=subprocess.run(['node',str(compiler)],cwd=runtime,capture_output=True,text=True)
+        self.assertNotEqual(missing.returncode,0)
+        self.assertIn('usage:',missing.stderr)
+        pages={
+            'inputs.mdx':mirror.render(self.data)['reference/language/words/inputs.mdx'],
+            'hostile.mdx':'# H\n\n'+mirror.md_prose('CEL ${{ inputs.X }} ticks `` `x` `` jsx {Nope} pipe `a|b`')+'\n',
+        }
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            for name,body in pages.items():
+                path=root/name;path.write_text(body)
+                result=subprocess.run(['node',str(compiler),str(path)],
+                    cwd=runtime,capture_output=True,text=True,timeout=60)
+                self.assertEqual(result.returncode,0,name+'\n'+result.stderr+result.stdout)
+            bad=root/'bad.mdx';bad.write_text('# H\n\n{this is not {valid mdx\n')
+            broken=subprocess.run(['node',str(compiler),str(bad)],
+                cwd=runtime,capture_output=True,text=True,timeout=60)
+            self.assertNotEqual(broken.returncode,0)
+            self.assertTrue(broken.stderr or broken.stdout)
     def test_link_audit_handles_underscores_and_rejects_missing_targets(self):
         import tempfile, subprocess
         with tempfile.TemporaryDirectory() as directory:

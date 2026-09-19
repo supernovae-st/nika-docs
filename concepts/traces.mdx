@@ -59,7 +59,9 @@ unique id, a nanosecond timestamp, a `kind`, and typed fields:
 - `workflow_completed`, or `workflow_failed`, or `workflow_paused`
   (a human gate is waiting — the trace carries the prompt payload)
 
-Here is a real capture, verbatim, from a two-task exec workflow:
+Here is a **historical** capture (2026-07, two-task `exec` workflow). The
+kinds are still the spine; do not treat the timestamps or ids as current
+engine output:
 
 ```json
 {"id":{"uuid":"019f23fb-af22-76b0-a124-4fc91d3166e9"},"timestamp":1783015124770000000,"kind":"workflow_started","run":null,"correlation":null,"fields":[{"key":"workflow","value":"version-stamp"},{"key":"permits","value":"engine floor (no boundary declared)"}]}
@@ -127,14 +129,18 @@ attests the sequence is intact. The tiers:
 - **ANCHORED** — a detached sidecar verifies **fully offline** against a
   public transparency log entry + an RFC 3161 timestamp (`nika trace
   anchor` is the opt-in network act that mints it).
-- **REPLAYED** — a fresh run reproduces the recorded one.
+- **REPLAYED** — you passed a separately supplied fresh journal; verify
+  compares it. The command **never starts** that second run.
+
+`traceVerify` / `nika trace verify` **verifies** an existing seal. It
+does not create one. A succeeded run can still be UNSEALED on a keyless
+machine. An intact chain is not proof that a human read the output, that
+an external API committed, or that the business goal was met.
 
 Three refusals name themselves rather than hide in a tier: a broken
 chain is `TAMPERED`, lines appended after the seal are `SEAL BURIED`
 (forgery, never a crash), a sidecar that vouches for nothing is `ANCHOR
-FORGED`. This is the property no scrollback and no vendor dashboard
-gives you: the evidence proves *itself*, on your machine, without
-trusting the tool that wrote it.
+FORGED`.
 
 ## Why this matters
 

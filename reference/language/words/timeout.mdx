@@ -18,8 +18,19 @@ Go-duration string · quoted · e.g. "30s" "5m" "1h30m" "2.5s". Max 24h.
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/task/properties/timeout` |
-| type | "string" |
-| pattern | "^[0-9]+(\\.[0-9]+)?(ns&#124;us&#124;µs&#124;ms&#124;s&#124;m&#124;h)([0-9]+(\\.[0-9]+)?(ns&#124;us&#124;µs&#124;ms&#124;s&#124;m&#124;h))*$" |
+| type | `"string"` |
+| pattern | declaration below |
+
+<details>
+<summary><code>pattern</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+"^[0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h)([0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h))*$"
+```
+
+</details>
+
 
 **In the same object:** [after](/reference/language/words/after) · [agent](/reference/language/words/agent) · [exec](/reference/language/words/exec) · [extract](/reference/language/words/extract) · [for_each](/reference/language/words/for_each) · [group](/reference/language/words/group) · [infer](/reference/language/words/infer) · [invoke](/reference/language/words/invoke) · [lift](/reference/language/words/lift) · [on_error](/reference/language/words/on_error) · [retry](/reference/language/words/retry) · [returns](/reference/language/words/returns) · [when](/reference/language/words/when) · [with](/reference/language/words/with)
 

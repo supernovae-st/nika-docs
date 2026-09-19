@@ -12,13 +12,13 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### retry
 
-Retry ONLY on these canonical `NIKA-&lt;NS&gt;-&lt;NNN&gt;` codes · absent, the engine retries anything transient. Codes, never HTTP status numbers · the retry-side mirror of `on_error.on_codes`.
+Retry ONLY on these canonical `NIKA-<NS>-<NNN>` codes · absent, the engine retries anything transient. Codes, never HTTP status numbers · the retry-side mirror of `on_error.on_codes`.
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/retry/properties/on_codes` |
-| type | "array" |
+| type | `"array"` |
 
 **In the same object:** [backoff_max_ms](/reference/language/words/backoff_max_ms) · [backoff_ms](/reference/language/words/backoff_ms) · [backoff_strategy](/reference/language/words/backoff_strategy) · [jitter](/reference/language/words/jitter) · [max_attempts](/reference/language/words/max_attempts)
 
@@ -33,7 +33,7 @@ Optional catch-side filter (mirror of retry.on_codes · same regex) · the actio
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/onError/properties/on_codes` |
-| type | "array" |
+| type | `"array"` |
 
 **In the same object:** [recover](/reference/language/words/recover) · [skip](/reference/language/words/skip)
 
