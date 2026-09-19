@@ -57,11 +57,12 @@ import { Nika } from '@supernovae-st/nika'
 
 const nika = new Nika({ cwd: process.cwd() })
 const run = await nika.run('workflow.nika')
-const result = await run.done
+const result = await run.result()
 ```
 
-This path needs no resident server. These examples target the merged SDK source and public engine v0.118.7.
-The matching SDK npm and platform packages remain to be published and pinned.
+This path needs no resident server. These examples target the published
+`@supernovae-st/nika@0.120.0` npm package (bundled engine 0.120.0). The
+standalone engine CLI releases on its own channel, currently 0.120.1.
 
 ## Local model path
 

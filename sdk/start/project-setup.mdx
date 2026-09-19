@@ -12,8 +12,9 @@ import { ProjectContract } from "/snippets/_project-contract.mdx"
 <ProjectContract />
 
 The SDK should make the project boundary visible, not dissolve it into
-application objects. The root `nika.yaml` is the control plane. Each
-`*.nika` file is executable workflow intent.
+application objects. The root `nika.yaml` is the control plane — optional
+for a first workflow, required once the project arms beats or sets policy.
+Each `*.nika` file is executable workflow intent.
 
 ## Recommended layout
 
@@ -73,13 +74,17 @@ for each lane.
 
 ```ts
 // src/nika.ts
+import { fileURLToPath } from 'node:url'
 import { Nika } from '@supernovae-st/nika'
 
 export const nika = new Nika({
   bin: process.env.APP_NIKA_BIN,
-  cwd: new URL('..', import.meta.url).pathname,
+  cwd: fileURLToPath(new URL('..', import.meta.url)),
 })
 ```
+
+`fileURLToPath` decodes percent-escapes and survives spaces in the path —
+`new URL(...).pathname` does neither.
 
 Binary resolution follows one ladder:
 
@@ -98,15 +103,21 @@ try {
   const report = await nika.check('workflows/daily-brief.nika', {
     nativeStrict: true,
   })
-  console.info('nika engine ready', report.clean)
+  if (!report.clean) {
+    console.error('workflow refused at admission', report.findings)
+    process.exit(2)
+  }
+  console.info('nika engine ready')
 } catch (error) {
   console.error('cannot start workflow runtime', error)
   process.exit(3)
 }
 ```
 
-A missing binary is an environment failure. A dirty workflow is different:
-`check()` resolves to a report so the caller can show every finding.
+A missing binary is an environment failure (the promise rejects). A dirty
+workflow is different: `check()` resolves to a report so the caller can show
+every finding — branch on `report.clean`, never log readiness while it is
+false.
 
 ## Keep receipts governed
 

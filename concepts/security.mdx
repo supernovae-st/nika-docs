@@ -1,6 +1,6 @@
 ---
 title: "Security model"
-description: "What protects a Nika workflow: SSRF defense on by default, a shell blocklist, taint-tracked trust levels, typed security errors, and a hardened Rust supply chain."
+description: "Absent permits is zero authority. SSRF, the shell blocklist, taint, and typed NIKA-SEC errors on the declared boundary."
 sidebarTitle: "Security"
 icon: "shield-halved"
 ---
@@ -40,13 +40,23 @@ permits:
 
 Two laws govern it:
 
-1. **No `permits:` block → the engine floor only.** The hardened
-   defaults below (SSRF defense, shell blocklist, secret masking)
-   apply — nothing else is restricted.
+1. **No `permits:` block → zero authority**, not an unrestricted floor.
+   Hardened defaults (SSRF, shell blocklist, secret masking) still apply,
+   and they do **not** grant exec, net, fs, or tools. Measured on
+   published 0.120.0 and GitHub 0.120.1: `exec: ["printf", "hello"]`
+   with no `permits:` is `NIKA-AUTH-006` at check, exit 2. Spec
+   01-envelope · LAW-AUTH-0324.
 2. **Any `permits:` block → default-deny for the whole file.** Anything
    not listed is refused. A task reaching beyond the boundary is caught
-   by `nika check`, statically — `NIKA-SEC-004`, with the exact fix —
-   and the same boundary is enforced again at run time.
+   by `nika check` (`NIKA-SEC-004` or `NIKA-AUTH-006`, with the exact
+   fix) and again at run time.
+
+<Tip>
+  Predict: a file with one `exec:` and no `permits:` — does it run?
+  It does not. `nika check --infer-permits` prints the tightest block
+  to paste. Infer-only `mock/echo` with `permits: {}` is the declared
+  zero, and that is enough for a first run.
+</Tip>
 
 You never have to write it by hand: `nika check --infer-permits`
 computes the tightest boundary the file actually needs and prints it,
@@ -60,10 +70,17 @@ verbatim from the engine (`nika-http`):
 
 <Steps>
   <Step title="Static checks (pure)">
-    Scheme allow-list (`http`/`https` only), blocked hostnames
-    (`localhost`, cloud metadata), literal-IP range checks: loopback,
-    RFC 1918, link-local/metadata (`169.254.169.254`), CGN, IPv6 local
-    ranges, v4-mapped v6.
+    Scheme allow-list (`http`/`https` only), blocked hostnames, and
+    range checks for implicit loopback, RFC 1918, link-local/metadata
+    (`169.254.169.254`), CGN, IPv6 local, v4-mapped v6. Spec
+    [01-envelope Exact-loopback declassification](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/spec/01-envelope.md):
+    the **only** SSRF carve-out is an exact `permits.net.http` literal —
+    the closed set `localhost`, a `127.x.y.z` v4 literal, or `::1` /
+    `[::1]`. Clearing is exact-host: a permitted `localhost` does **not**
+    clear `127.0.0.1` (measured on 0.120.1: that grant + fetch to
+    `127.0.0.1` is `NIKA-SEC-005`; an exact `127.0.0.1` grant fetches);
+    a public name that resolves to loopback stays refused; RFC1918 /
+    metadata named in the list stay floor-blocked (`NIKA-SEC-005`).
   </Step>
   <Step title="DNS resolution check">
     Non-literal hosts are resolved and **every address** is
@@ -157,10 +174,11 @@ tools:
 | untrusted data reached a prompt without spotlight wrapping | `NIKA-SEC` family |
 | workflow recursion depth / self-launch blocked | `NIKA-SEC-003` (registered) |
 
-The three codes the spec REGISTERS today: `NIKA-SEC-001` (exec blocklist
-hit), `NIKA-SEC-002` (agent tool outside the whitelist), `NIKA-SEC-003`
-(run-recursion bound). The runtime trust layers above are engine-side
-(the Shield): they emit within the `NIKA-SEC` namespace as they land.
+Do not freeze the `NIKA-SEC` family at three codes. The catalog on
+[Error codes](/reference/error-codes) is the live set (`NIKA-SEC-001`
+blocklist, `NIKA-SEC-002` agent whitelist, `NIKA-SEC-003` recursion,
+`NIKA-SEC-004` permit miss, and later SEC laws). Runtime trust layers
+emit in that namespace as they land.
 
 Every failure is a [typed error](/reference/error-codes) with a stable
 code and a `transient` flag. Your `on_error:` can act on it.

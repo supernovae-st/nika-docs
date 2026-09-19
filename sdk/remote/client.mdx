@@ -7,9 +7,6 @@ icon: "satellite-dish"
 
 import { SDK, SourceContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
-<SourceContract sdk={SDK} />
-<RemoteContract sdk={SDK} />
-
 ```ts
 import { Nika } from '@supernovae-st/nika'
 
@@ -70,6 +67,11 @@ An explicit local-path check retains the local engine's full check report;
 when capture succeeds, the resident must acknowledge that exact snapshot
 before the SDK returns it. Remote checks reject `model` and `nativeStrict`
 overrides because the HTTP request has no envelope for them.
+
+<Accordion title="Which published source this page describes">
+  <SourceContract sdk={SDK} />
+  <RemoteContract sdk={SDK} />
+</Accordion>
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">

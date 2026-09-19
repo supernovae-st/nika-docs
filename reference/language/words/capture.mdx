@@ -12,14 +12,30 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### exec
 
-Which stream becomes the task's output · `stdout` (default) · `stderr` · `combined` · `structured` = `&#123; stdout, stderr, exit_code &#125;`. This is the SOURCE; `decode:` is how that string becomes a value.
+Which stream becomes the task's output · `stdout` (default) · `stderr` · `combined` · `structured` = `{ stdout, stderr, exit_code }`. This is the SOURCE; `decode:` is how that string becomes a value.
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/exec/properties/capture` |
-| type | "string" |
-| enum | ["stdout", "stderr", "combined", "structured"] |
+| type | `"string"` |
+| enum | declaration below |
+
+<details>
+<summary><code>enum</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+[
+  "stdout",
+  "stderr",
+  "combined",
+  "structured"
+]
+```
+
+</details>
+
 
 **In the same object:** [command](/reference/language/words/command) · [cwd](/reference/language/words/cwd) · [decode](/reference/language/words/decode) · [env](/reference/language/words/env) · [shell](/reference/language/words/shell) · [stdin](/reference/language/words/stdin)
 

@@ -221,7 +221,7 @@ summarize:
   with:
     readme: ${{ tasks.pull_readme.output }}
   infer:
-    model: mistral/<model>          # <provider>/<name> · see /reference/providers-catalog
+    model: openai/<model>           # <provider>/<name> · see /reference/providers-catalog
     system: "You are a technical writer."
     prompt: |
       Summarize this in one sentence:
@@ -263,7 +263,7 @@ until a completion signal fires or a budget exhausts.
 ```yaml
 investigate:
   agent:
-    model: mistral/<model>          # <provider>/<name>
+    model: openai/<model>           # <provider>/<name>
     system: |
       You are investigating a GitHub issue. Use tools to gather
       context before answering.

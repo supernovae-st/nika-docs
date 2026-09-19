@@ -7,10 +7,8 @@ icon: "wave-pulse"
 
 import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
-<RemoteContract sdk={SDK} />
-
 ```ts
-for await (const event of nika.events(run, { bufferSize: 64 })) {
+for await (const event of run.events({ bufferSize: 64 })) {
   render(event)
   if (event.sequence !== undefined) {
     await persistSequence(run.id, event.sequence)
@@ -18,9 +16,10 @@ for await (const event of nika.events(run, { bufferSize: 64 })) {
 }
 ```
 
-`NikaEvent` is open to additive fields and event kinds. Render only what the
-application understands, preserve sequence when it is present, and use
-`run.done` for terminal truth.
+`NikaRunEvent` is open to additive fields and event kinds. Render only what
+the application understands, preserve sequence when it is present, and use
+`run.result()` for terminal truth. The untouched protocol frame is on
+`event.raw`.
 
 Each subscriber has a bounded queue. If a consumer falls behind, the SDK
 throws `NikaEventBufferOverflowError` rather than silently losing evidence.
@@ -30,14 +29,14 @@ throws `NikaEventBufferOverflowError` rather than silently losing evidence.
 ```ts
 const controller = new AbortController()
 
-for await (const event of nika.events(run, {
+for await (const event of run.events({
   signal: controller.signal,
 })) {
   render(event)
 }
 ```
 
-The signal stops only this subscriber. Call `nika.cancel(run)` to ask the
+The signal stops only this subscriber. Call `run.cancel()` to ask the
 server to cancel engine work.
 
 ## Resume from application state
@@ -51,12 +50,16 @@ const recovered = await nika.attachRun(jobId, {
 The HTTP adapter uses the persisted cursor for SSE continuity. The application
 owns when a sequence is durable.
 
-A `paused` settlement closes the current stream and resolves `run.done` with
-that leg's result and evidence. The durable job can later resume under engine
-authority; a new attachment can observe that later leg. Replaying or attaching
-after the settlement event has already been consumed still reads the full
-stored settlement. Stopping a stream or attaching to a job never answers a
-human gate.
+A `paused` settlement closes the current stream and resolves `run.result()`
+with that leg's result and evidence. The durable job can later resume under
+engine authority; a new attachment can observe that later leg. Replaying or
+attaching after the settlement event has already been consumed still reads
+the full stored settlement. Stopping a stream or attaching to a job never
+answers a human gate.
+
+<Accordion title="Which published source this page describes">
+  <RemoteContract sdk={SDK} />
+</Accordion>
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">

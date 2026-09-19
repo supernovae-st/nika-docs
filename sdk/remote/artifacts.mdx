@@ -16,11 +16,11 @@ that the server does not advertise.
 Engine-owned outputs arrive on events and the terminal result:
 
 ```ts
-for await (const event of nika.events(run)) {
+for await (const event of run.events()) {
   if (event.outputs) preview(event.outputs)
 }
 
-const result = await run.done
+const result = await run.result()
 await persistOutputs(run.id, result.outputs)
 ```
 

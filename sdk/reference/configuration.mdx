@@ -58,10 +58,11 @@ interface NikaCheckOptions {
 }
 
 interface NikaRunOptions {
-  vars?: Record<string, string | number | boolean>
+  inputs?: Record<string, unknown>             // literal typed values — the app channel
+  vars?: Record<string, string | number | boolean>  // deprecated: native --var operator channel
   model?: string
   maxCostUsd?: number
-  idempotencyKey?: string
+  idempotencyKey?: string                      // required for HTTP admission
 }
 
 interface NikaEventsOptions {
@@ -73,11 +74,28 @@ interface NikaAttachRunOptions { lastEventId?: number }
 interface NikaTraceVerifyOptions { signal?: AbortSignal }
 ```
 
-Remote `check` refuses `model` and `nativeStrict`. Remote `run` accepts
-`idempotencyKey` but refuses `vars`, `model` and `maxCostUsd` until the HTTP
-request envelope can carry them. Signals stop a request or observer; only
-`cancel(run)` requests cancellation of admitted work; `run.done` carries the
-actual outcome.
+**`inputs` is the application channel.** Values are strict JSON and stay
+literal — a string is never read as `@env:NAME`, an expression or a number,
+and nothing is coerced to the declared type. The engine validates the map
+(unknown key, type mismatch, missing required input) and refuses before any
+run exists; a value JSON cannot carry rejects `run()` with
+`NikaConfigurationError` instead of being dropped. The channel needs an
+engine that advertises it — `inputsLiteral` natively (values ride stdin,
+never argv), `jobInputs` over HTTP by served name — and an engine without
+it rejects with `NikaCompatibilityError`; the SDK never falls back to
+`--var`. An execution snapshot freezes its inputs, so an HTTP run of an
+explicit local path refuses `inputs`. Never put a secret here.
+
+**`vars` is deprecated**: the native `--var KEY=VALUE` operator channel —
+the engine reads `@env:NAME` from its own environment and coerces text to
+the declared type, so it cannot carry literal API values and has no HTTP
+form. Combining `vars` with `inputs` rejects `run()`.
+
+Remote `check` refuses `model` and `nativeStrict`. Remote `run` requires
+`idempotencyKey` (reuse the same key and request after an uncertain
+response) and refuses `vars`, `model` and `maxCostUsd`. Signals stop a
+request or observer; only `run.cancel()` requests cancellation of admitted
+work; `run.result()` carries the actual outcome.
 
 <CardGroup cols={2}>
   <Card title="Method index" icon="list" href="/sdk/reference/methods">

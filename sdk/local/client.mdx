@@ -7,9 +7,6 @@ icon: "terminal"
 
 import { SDK, SourceContract, LocalContract } from "/snippets/_sdk-contract.mdx"
 
-<SourceContract sdk={SDK} />
-<LocalContract sdk={SDK} />
-
 ## Construct the client
 
 ```ts
@@ -44,15 +41,21 @@ future engine fields pass through unchanged.
 
 ## Native method boundary
 
-Local mode supports `check`, `run`, `events`, `cancel` and `traceVerify`.
-`attachRun`, `status`, workflow discovery and schedules require resident HTTP
-authority and return typed compatibility errors in native mode.
+Local mode supports `check`, `run`, `run.events()`, `run.result()`,
+`run.cancel()` and `traceVerify`. `attachRun`, `run.status()`, workflow
+discovery and schedules require resident HTTP authority and return typed
+compatibility errors in native mode.
 
 <Info>
   The driver spawns a binary with an argv array. This protects the application
   seam from shell interpolation; the engine still enforces permits, secrets,
   spend and its hardened runtime floor.
 </Info>
+
+<Accordion title="Which published source this page describes">
+  <SourceContract sdk={SDK} />
+  <LocalContract sdk={SDK} />
+</Accordion>
 
 <CardGroup cols={2}>
   <Card title="Check" icon="list-check" href="/sdk/local/check-and-plan">

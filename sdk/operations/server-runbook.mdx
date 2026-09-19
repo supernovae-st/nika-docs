@@ -61,8 +61,10 @@ the workflows and evidence policy require.
 
 ## Probe the surfaces that exist
 
-`nika serve` does not listen on an HTTP port, so an HTTP health probe would be
-a fictional contract.
+Bare `nika serve` does not listen on an HTTP port — the firer loop has no
+socket, so an HTTP health probe there would be a fictional contract. With
+`--bind` the same verb *does* listen: probe `GET /health` on the bound
+address instead.
 
 <div className="sdk-flight sdk-flight-compact">
   <span>SERVER PROBES · EACH ANSWERS ONE QUESTION</span>
