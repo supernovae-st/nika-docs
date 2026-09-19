@@ -38,6 +38,13 @@ def utc(value):
     return value
 
 
+def highlights(body):
+    """Use complete upstream change headings, not guessed or truncated summaries."""
+    headings = re.findall(r"(?ms)^[-*] \*\*(.+?)\*\*", body)
+    return [re.sub(r"\s+", " ", heading.replace('`', '')).strip()
+            for heading in headings[:3]]
+
+
 def fetch(fetcher=api):
     rows = []
     # Explicit pagination also catches a malformed/error response on later pages.
@@ -66,6 +73,7 @@ def fetch(fetcher=api):
             rows.append({"tag": tag, "name": name,
                          "publishedAt": utc(release.get("published_at")),
                          "url": url, "assetCount": len(assets),
+                         "highlights": highlights(body),
                          "notesSha256": hashlib.sha256(body.encode()).hexdigest()})
         if len(batch) < 100:
             break
@@ -104,6 +112,10 @@ def validate(data):
             raise ValueError("invalid release asset count")
         if not re.fullmatch(r"[a-f0-9]{64}", row.get("notesSha256", "")):
             raise ValueError("invalid release notes digest")
+        summaries = row.get('highlights')
+        if not isinstance(summaries, list) or len(summaries) > 3 or any(
+                not isinstance(s, str) or not s or any(ord(c) < 32 for c in s) for s in summaries):
+            raise ValueError('invalid release highlights')
 
 
 def text(value):
@@ -140,6 +152,7 @@ def render(data):
         out += [f'<Update label="{row["tag"]}" description="{date} UTC" tags={{["{label}"]}}>',
                 f'  **{text(row["name"])}**', '',
                 f'  Published {date}. ' + (f'{row["assetCount"]} attached assets.' if row['assetCount'] else '**No attached assets.**'), '',
+                *[f'  - {text(summary)}' for summary in row['highlights']], '',
                 f'  [Read release notes and downloads]({row["url"]})', '</Update>', '']
     out += ['## All published releases', '', '| Release | Published (UTC) | Attached assets |',
             '| --- | --- | --- |']

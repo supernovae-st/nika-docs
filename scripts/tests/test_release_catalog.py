@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import release_catalog as catalog
@@ -20,6 +21,16 @@ def release(tag="v0.120.1", **changes):
 
 
 class CatalogTests(unittest.TestCase):
+    def test_complete_multiline_highlights_are_inert_and_bounded(self):
+        body = '- **A complete\nchange heading.** Details.\n- **A second <Tag>{value}.** More.\n- **Third.**\n- **Fourth.**'
+        data = catalog.fetch(lambda _: [release(body=body)])
+        self.assertEqual(data['releases'][0]['highlights'][0], 'A complete change heading.')
+        page = catalog.render(data)
+        self.assertIn('A complete change heading.', page)
+        self.assertNotIn('<Tag>', page)
+        self.assertNotIn('{value}', page)
+        self.assertNotIn('Fourth.', page)
+
     def test_pagination_filters_and_semver(self):
         first = [release(f"v0.{i}.0") for i in range(100)]
         pages = [first, [release(), release("v0.121.0", draft=True), release("v0.122.0", prerelease=True)]]
@@ -89,6 +100,51 @@ class CatalogTests(unittest.TestCase):
 
 
 class MergeTests(unittest.TestCase):
+    def test_real_proposal_flow_waits_for_ci_before_exact_head_merge(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            previous = Path.cwd()
+            import os
+            os.chdir(tmp)
+            try:
+                path = Path('snippets/data/releases.json')
+                path.parent.mkdir(parents=True)
+                path.write_text(json.dumps({'releases': [{'tag':'v0.120.1'}]}))
+                for verdict in ['success', 'failure']:
+                    calls = []
+                    def command(*args):
+                        calls.append(args)
+                        if args[:4] == ('git','diff','--cached','--name-only'): return 'changelog/releases.mdx'
+                        if args[:2] == ('git','write-tree'): return 'b' * 40
+                        if args[:2] == ('git','ls-remote'): return ''
+                        if args[:2] == ('git','rev-parse'): return 'a' * 40
+                        if args[:3] == ('gh','pr','list'): return '[{"number":7}]'
+                        if args[:3] == ('gh','pr','view'):
+                            return json.dumps({'state':'OPEN','isCrossRepository':False,'baseRefName':'main',
+                                               'headRefOid':'a'*40,'files':[{'path':'changelog/releases.mdx'}]})
+                        return ''
+                    def remote(endpoint, *args):
+                        calls.append((endpoint, *args))
+                        if endpoint.startswith('actions/workflows/'):
+                            return {'workflow_runs':[{'id':1,'head_sha':'a'*40,
+                                    'head_branch':'nika-release-heal/v0.120.1-'+'b'*12,
+                                    'created_at':'9999-12-31T00:00:00Z','status':'completed',
+                                    'conclusion':verdict,'html_url':'https://github.com/check'}]}
+                        if endpoint.startswith('actions/runs/'):
+                            return {'jobs':[{'name':n,'conclusion':'success'} for n in proposal.REQUIRED]}
+                        return {'merged':True,'sha':'c'*40}
+                    with patch.object(proposal, 'run', side_effect=command), patch.object(proposal, 'api', side_effect=remote):
+                        if verdict == 'success': proposal.main()
+                        else:
+                            with self.assertRaisesRegex(ValueError, 'checks failed'): proposal.main()
+                    merges = [c for c in calls if c[0] == 'pulls/7/merge']
+                    self.assertEqual(len(merges), int(verdict == 'success'))
+                    if merges:
+                        self.assertIn('sha='+'a'*40, merges[0])
+                        self.assertLess(next(i for i,c in enumerate(calls) if c[0].startswith('actions/runs/')),
+                                        calls.index(merges[0]))
+            finally:
+                os.chdir(previous)
+
     def test_only_generated_files_can_be_published(self):
         proposal.check_files(['changelog/releases.mdx'])
         for paths in ([], ['.github/workflows/gate.yml'], ['changelog/releases.mdx', 'README.md']):

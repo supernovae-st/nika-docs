@@ -90,7 +90,7 @@
             "href": "https://nika.sh"
           },
           {
-            "label": "Live state",
+            "label": "Current status",
             "href": "/reference/status"
           },
           {
@@ -658,7 +658,7 @@
         "tab": "Changelog",
         "groups": [
           {
-            "group": "Cadence",
+            "group": "Product updates",
             "pages": [
               "changelog/releases",
               "changelog/roadmap",
