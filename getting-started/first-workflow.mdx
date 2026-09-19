@@ -41,8 +41,8 @@ outputs:
 - **`permits: {}`** declares zero authority up front. A workflow that later
   touches a file, a host or a shell must say so here, or admission refuses
   it.
-- **`max_tokens`** bounds the model step so the cost report is a ceiling,
-  not a guess.
+- **`max_tokens`** caps the answer's length — for a priced model the audit
+  reads it as the spend ceiling for that step.
 - **`outputs:`** names what the run hands back.
 
 ## 2. Check it, then run it
@@ -62,13 +62,17 @@ Captured on v{STATUS.version}, offline — the audit is fully green
     wrote .nika/traces
     said "mock(echo) · Say hello to a new user, brief…"
     rehearsal · a mock model echoed the prompt — not a real answer
-    trace: .nika/traces/2026-09-19T12-59-30Z-c4ae.ndjson · 6 events · chain 659f4371… · sealed
+    trace: .nika/traces/2026-09-19T13-20-21Z-06c2.ndjson · 6 events · chain 08cf2534… · sealed
 ```
 
 `nika check` catches broken references, missing dependencies and schema
 problems before any model is called, and points at the exact fix. The run
-wrote a hash-chained journal under `.nika/traces/` — `nika trace verify`
-proves it was not tampered with.
+wrote a hash-chained journal under `.nika/traces/`. Verifying that exact
+journal — `nika trace verify .nika/traces/2026-09-19T13-20-21Z-06c2.ndjson`
+— answered `OK · chain intact` and `SEALED` on this machine (exit 0):
+tamper-evidence about the record, re-executing nothing. A machine without
+a run-signing key still runs fine; its journal is intact but unsealed, and
+verification says so instead of pretending.
 
 ## 3. Ask the file three questions
 
@@ -125,6 +129,9 @@ consuming nothing — use `after: { tests: success }`.)
 ## 5. Get structured output
 
 ```yaml hello.nika
+nika: hello-structured
+model: mock/echo
+permits: {}
 tasks:
   names:
     infer:
@@ -142,23 +149,33 @@ tasks:
             minItems: 3
             maxItems: 3
         required: [names]
+outputs:
+  names: ${{ tasks.names.output }}
 ```
 
 The engine asks the provider for output that conforms (using each
 provider's native structured-output mode where the [capability
 rules](/reference/capabilities) allow it) and validates the reply against
-your schema before passing it on. On a **successful** run, `outputs:`
-then carries `{ "names": ["...", "...", "..."] }` — the shape is checked
-when the model answers. A failed or refused run produces no output; the
+your schema before passing it on. The mock validates too — it synthesizes
+a conformant instance, so this exact file runs offline. Captured on
+v{STATUS.version} (`nika run hello.nika --output json`):
+
+```json
+{"names":{"names":["mock","mock","mock"]}}
+```
+
+On a **successful** run, `outputs:` carries the declared shape — checked
+when the model answers. A failed or refused run produces no output: the
 guarantee covers shape, not outcome.
 
 ## 6. See a real job
 
 [Meeting actions](/examples/meeting-actions) turns a transcript into
 typed, tracker-ready action items. It defaults to a local model
-(`ollama/qwen3.5:4b`, no key); point it at a cloud provider and the same
-file costs a few cents, priced by `check` before the run. Same file shape
-as your hello; the model and tools change, the lifecycle does not.
+(`ollama/qwen3.5:4b`, no provider key — your own compute); point it at a
+cloud provider and `check` prices the run before anything executes.
+Same file shape as your hello; the model and tools change, the lifecycle
+does not.
 
 ## What you just built
 

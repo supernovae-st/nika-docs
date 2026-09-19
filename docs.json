@@ -52,7 +52,7 @@
     "twitter:card": "summary_large_image"
   },
   "banner": {
-    "content": "New here? Five minutes to your first workflow — offline, no key. [Start →](/getting-started/first-workflow)",
+    "content": "New here? Five minutes to your first typed result from an app — no key, no server. [SDK quickstart →](/sdk/start/quickstart)",
     "dismissible": true
   },
   "navbar": {

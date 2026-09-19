@@ -15,8 +15,10 @@ no server.
 
 ## Your first result
 
+Requires Node.js 22+ on macOS or Linux (arm64/x64).
+
 ```bash
-npm install @supernovae-st/nika
+npm install @supernovae-st/nika@0.120.0
 ```
 
 Save `hello.nika`:
@@ -29,7 +31,7 @@ tasks:
   greet:
     infer:
       prompt: "Hello, Nika"
-      max_tokens: 32    # bounded: the ceiling is known before the run
+      max_tokens: 32    # caps the answer's length
 outputs:
   greeting: ${{ tasks.greet.output }}
 ```
@@ -71,25 +73,26 @@ Prefer the terminal? The CLI runs the same file: `nika run hello.nika`.
 
 [Meeting actions](/examples/meeting-actions) turns a transcript into
 typed, tracker-ready action items. It defaults to a local model
-(`ollama/qwen3.5:4b`, no key); point it at a cloud provider and the same
-file costs a few cents — `nika check` prices the run before it happens.
+(`ollama/qwen3.5:4b`, no provider key — your own compute); point it at a
+cloud provider and `nika check` prices the run before anything executes.
 Same file shape as above; the model and tools change, the lifecycle does
 not.
 
 ## What just happened, one concept at a time
 
-1. **The file is the contract.** Four verbs (`infer`, `exec`, `invoke`,
-   `agent`) and nothing else — fetching a URL or writing a file is a
-   *tool* under `invoke`, declared and auditable.
+1. **The file is the contract.** The verbs `infer`, `exec`, `invoke` and
+   `agent` — nothing else: fetching a URL or writing a file is a *tool*
+   under `invoke`, declared and auditable.
 2. **Admission before execution.** `run()` audits the file before anything
    executes; a broken file throws before a run exists. `nika check` is the
    same audit on its own, for CI.
 3. **Permits are the blast radius.** `permits: {}` declares zero
    authority. A workflow that touches a file, a host or a shell must say
    so, or admission refuses it (`NIKA-AUTH-006`).
-4. **Every run leaves a receipt.** Runs write a hash-chained trace under
-   `.nika/traces/`; the SDK's `traceVerify` reads it back. Verification
-   proves the record was not tampered with — not that a model was right.
+4. **Runs leave evidence.** Each run writes a hash-chained trace under
+   `.nika/traces/`; when a receipt is present, `traceVerify` reads it back.
+   Verification proves the record was not tampered with — not that a model
+   was right.
 
 ## Ask the file three questions
 
@@ -127,7 +130,8 @@ not.
     Starter chains to multi-step reports, every file runnable.
   </Card>
   <Card title="Providers" icon="server" href="/concepts/providers">
-    Local-first model choice: Ollama at zero cost, cloud when you need it.
+    Local-first model choice: Ollama needs no provider API key, cloud
+    providers when you need them.
   </Card>
 </CardGroup>
 
