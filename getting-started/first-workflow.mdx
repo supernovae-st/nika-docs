@@ -85,9 +85,11 @@ mismatched receipt changes the verdict, not the run's result.
   <Accordion title="What if a permission is absent?" icon="circle-question">
     Admission refuses at check; the finding names the missing
     permission. An absent `permits:` block is zero authority
-    (`NIKA-AUTH-006`). A declared `permits: {}` that omits a tool the
-    file reaches is `NIKA-SEC-004` — the plate below. `nika check
-    --infer-permits` drafts the tightest block for you.
+    (`NIKA-AUTH-006`). A declared `permits: {}` that omits a reached
+    tool or path is `NIKA-SEC-004` — the plate below. The file needs
+    both the named tool (`nika:read`) and the specific path
+    (`./hello.nika`). `nika check --infer-permits` drafts the
+    tightest block for you.
   </Accordion>
   <Accordion title="What if I switch the model?" icon="circle-question">
     One line. `ollama/qwen3.5:4b` runs locally after
@@ -115,10 +117,12 @@ play — nothing autoplays.
 <details>
   <summary>What this plate shows</summary>
   `nika check denied.nika` on CLI 0.120.1. Task `peek` would invoke
-  `nika:read` on `./hello.nika`. `permits: {}` grants no tools.
-  Admission refuses with `NIKA-SEC-004`: `nika:read` is outside
-  `permits.tools`. Nothing ran. Fix: add `"nika:read"` to
-  `permits.tools`. Condensed measured plate, not the TypeScript SDK.
+  `nika:read` on `./hello.nika`. `permits: {}` grants nothing.
+  Admission refuses with `NIKA-SEC-004`. Adding only
+  `permits.tools: ["nika:read"]` still refuses: the path
+  `./hello.nika` is outside `permits.fs.read`. Authorize both the
+  named tool and that specific file path. Nothing ran. Condensed
+  measured plate, not the TypeScript SDK.
 </details>
 
 [Download GIF](/images/gifs/check-denied.gif)
