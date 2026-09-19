@@ -12,13 +12,13 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### document
 
-Default model · `&lt;provider&gt;/&lt;name&gt;` (e.g. ollama/qwen3.5:9b · anthropic/claude-sonnet-4-6 · mock/echo).
+Default model · `<provider>/<name>` (e.g. ollama/qwen3.5:9b · anthropic/claude-sonnet-4-6 · mock/echo).
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/properties/model` |
-| type | "string" |
+| type | `"string"` |
 
 **In the same object:** [const](/reference/language/words/const) · [inputs](/reference/language/words/inputs) · [nika](/reference/language/words/nika) · [outputs](/reference/language/words/outputs) · [permits](/reference/language/words/permits) · [run](/reference/language/words/run) · [secrets](/reference/language/words/secrets) · [tasks](/reference/language/words/tasks)
 
@@ -33,7 +33,7 @@ The schema declares this field at the location below.
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/infer/properties/model` |
-| type | "string" |
+| type | `"string"` |
 
 **In the same object:** [max_tokens](/reference/language/words/max_tokens) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [system](/reference/language/words/system) · [temperature](/reference/language/words/temperature) · [thinking](/reference/language/words/thinking) · [vision](/reference/language/words/vision)
 
@@ -48,7 +48,7 @@ The schema declares this field at the location below.
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/agent/properties/model` |
-| type | "string" |
+| type | `"string"` |
 
 **In the same object:** [max_tokens_total](/reference/language/words/max_tokens_total) · [max_turns](/reference/language/words/max_turns) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [skills](/reference/language/words/skills) · [system](/reference/language/words/system) · [temperature](/reference/language/words/temperature) · [tools](/reference/language/words/tools)
 
@@ -71,6 +71,9 @@ inputs:
     required: true
     # A `required:` input still carries a `default:` here so the skeleton
 ```
+
+A skeleton may show `required: true` next to `default:` so the compiled file can run immediately. That pair is not the usual app contract: a required input with no default is a HINT at `nika check` and `NIKA-1708` at `nika run` until you pass `--var` or SDK `inputs`.
+
 
 ### Templates containing this field
 

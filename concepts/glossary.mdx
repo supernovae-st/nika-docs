@@ -47,9 +47,10 @@ into three rounds. → [Workflows](/concepts/workflows)
 task reads another's output); `after:` is a **control** edge (a task waits,
 without reading). → [Bindings](/concepts/bindings)
 
-**`unwind`** — a cleanup edge. A task on an `unwind` edge runs whatever
-happened upstream, success or failure, so teardown is an ordinary task the
-graph can see rather than a special block hidden from it.
+**`unwind`** — a cleanup edge on a producer that **started**. Spec 03-dag:
+the unwind task runs after that producer, success or failure. A producer
+that never started has no cleanup. A terminal report task (`after: {x:
+terminal}`) is a different edge — it is not unwind.
 → [Workflows](/concepts/workflows)
 
 ## The expressions

@@ -12,14 +12,14 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### document
 
-The run's entropy and clock declaration · every source of randomness and of time is declared, never ambient. The two dimensions couple: only `ambient × system` (the status quo) and `none &#124; seeded × virtual` (the deterministic states) are legal, and a declared contradiction refuses at parse (NEP-0010).
+The run's entropy and clock declaration · every source of randomness and of time is declared, never ambient. The two dimensions couple: only `ambient × system` (the status quo) and `none | seeded × virtual` (the deterministic states) are legal, and a declared contradiction refuses at parse (NEP-0010).
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/properties/run` |
-| type | "object" |
-| additionalProperties | false |
+| type | `"object"` |
+| additionalProperties | `false` |
 
 **In the same object:** [const](/reference/language/words/const) · [inputs](/reference/language/words/inputs) · [model](/reference/language/words/model) · [nika](/reference/language/words/nika) · [outputs](/reference/language/words/outputs) · [permits](/reference/language/words/permits) · [secrets](/reference/language/words/secrets) · [tasks](/reference/language/words/tasks)
 

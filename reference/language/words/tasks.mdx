@@ -18,8 +18,19 @@ The task map · the KEY is the task's identity (snake_case · CEL-safe). Source 
 | --- | --- |
 | Requirement | Required in this object |
 | Schema location | `/properties/tasks` |
-| type | "object" |
-| additionalProperties | &#123;"$ref": "#/$defs/task"&#125; |
+| type | `"object"` |
+| additionalProperties | declaration below |
+
+<details>
+<summary><code>additionalProperties</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+{"$ref": "#/$defs/task"}
+```
+
+</details>
+
 
 **In the same object:** [const](/reference/language/words/const) · [inputs](/reference/language/words/inputs) · [model](/reference/language/words/model) · [nika](/reference/language/words/nika) · [outputs](/reference/language/words/outputs) · [permits](/reference/language/words/permits) · [run](/reference/language/words/run) · [secrets](/reference/language/words/secrets)
 

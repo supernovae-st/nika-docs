@@ -18,8 +18,19 @@ How the captured string becomes a value · `text` (default) · `json` · `jsonl`
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/exec/properties/decode` |
-| type | "string" |
-| enum | ["text", "json", "jsonl", "bytes"] |
+| type | `"string"` |
+| enum | declaration below |
+
+<details>
+<summary><code>enum</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+["text", "json", "jsonl", "bytes"]
+```
+
+</details>
+
 
 **In the same object:** [capture](/reference/language/words/capture) · [command](/reference/language/words/command) · [cwd](/reference/language/words/cwd) · [env](/reference/language/words/env) · [shell](/reference/language/words/shell) · [stdin](/reference/language/words/stdin)
 

@@ -93,6 +93,20 @@ class KnowledgeMirrorTests(unittest.TestCase):
     def test_jitter_excerpt_and_context(self):
         page=mirror.render(self.data)['reference/language/words/jitter.mdx']
         self.assertIn('boolean',page);self.assertIn('```yaml illustration',page);self.assertIn('/reference/language/words/backoff_ms',page)
+    def test_inline_code_keeps_braces_and_prose_escapes_stray_braces(self):
+        self.assertEqual(mirror.code_span('${{ inputs.X }}'),'`${{ inputs.X }}`')
+        self.assertIn('`${{ inputs.X }}`',mirror.md_prose('Typed workflow inputs · ${{ inputs.X }} · caller.'))
+        self.assertNotIn('&#123;',mirror.md_prose('Typed workflow inputs · ${{ inputs.X }} · caller.'))
+        self.assertIn('&#123;not-cel&#125;',mirror.md_prose('ordinary {not-cel} prose'))
+        self.assertNotIn('{not-cel}',mirror.md_prose('ordinary {not-cel} prose'))
+    def test_inputs_page_does_not_leak_entities_in_cel_or_dump_json_in_a_cell(self):
+        page=mirror.render(self.data)['reference/language/words/inputs.mdx']
+        self.assertIn('`${{ inputs.X }}`',page)
+        self.assertNotIn('$&#123;',page)
+        self.assertIn('```json',page)
+        self.assertIn('<details>',page)
+        self.assertIn('NIKA-1708',page)
+        self.assertNotRegex(page,r'\| additionalProperties \| &#123;')
     def test_link_audit_handles_underscores_and_rejects_missing_targets(self):
         import tempfile, subprocess
         with tempfile.TemporaryDirectory() as directory:

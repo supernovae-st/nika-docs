@@ -18,8 +18,19 @@ Which curve the delay follows between attempts · `fixed` · `linear` · `expone
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/retry/properties/backoff_strategy` |
-| type | "string" |
-| enum | ["fixed", "linear", "exponential"] |
+| type | `"string"` |
+| enum | declaration below |
+
+<details>
+<summary><code>enum</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+["fixed", "linear", "exponential"]
+```
+
+</details>
+
 
 **In the same object:** [backoff_max_ms](/reference/language/words/backoff_max_ms) · [backoff_ms](/reference/language/words/backoff_ms) · [jitter](/reference/language/words/jitter) · [max_attempts](/reference/language/words/max_attempts) · [on_codes](/reference/language/words/on_codes)
 

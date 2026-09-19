@@ -18,8 +18,19 @@ The schema declares this field at the location below.
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/typeExpr/oneOf/2/properties/object` |
-| type | "object" |
-| additionalProperties | &#123;"$ref": "#/$defs/fieldTypeExpr"&#125; |
+| type | `"object"` |
+| additionalProperties | declaration below |
+
+<details>
+<summary><code>additionalProperties</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+{"$ref": "#/$defs/fieldTypeExpr"}
+```
+
+</details>
+
 
 **In the same object:** [additional](/reference/language/words/additional) · [array](/reference/language/words/array) · [enum](/reference/language/words/enum) · [integer](/reference/language/words/integer) · [map](/reference/language/words/map) · [number](/reference/language/words/number) · [string](/reference/language/words/string) · [union](/reference/language/words/union)
 

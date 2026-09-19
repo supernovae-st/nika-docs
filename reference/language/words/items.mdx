@@ -12,13 +12,24 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### task → for_each
 
-The collection · a `$&#123;&#123; ... &#125;&#125;` reference OR a literal array. Evaluated EXACTLY ONCE, before the fan-out; no iteration feeds back into it (spec 03 §where this sits).
+The collection · a `${{ ... }}` reference OR a literal array. Evaluated EXACTLY ONCE, before the fan-out; no iteration feeds back into it (spec 03 §where this sits).
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Required in this object |
 | Schema location | `/$defs/task/properties/for_each/properties/items` |
-| type | ["string", "array"] |
+| type | declaration below |
+
+<details>
+<summary><code>type</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+["string", "array"]
+```
+
+</details>
+
 
 **In the same object:** [fail_fast](/reference/language/words/fail_fast) · [max_parallel](/reference/language/words/max_parallel)
 

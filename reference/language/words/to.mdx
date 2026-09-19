@@ -12,13 +12,13 @@ description: "Contract, placement, related fields and source examples for this N
 
 ###  → secrets · additionalProperties → egress · items
 
-The sanctioned sink · a tool id (`nika:fetch` · `nika:notify` · `mcp:&lt;server&gt;/&lt;tool&gt;`), `exec`, a provider-egress sink `infer` / `agent` (a secret in an infer/agent prompt), or `outputs` (the workflow boundary — a return value derived from the secret's response) · SPECIFIC (no cross-tool laundering).
+The sanctioned sink · a tool id (`nika:fetch` · `nika:notify` · `mcp:<server>/<tool>`), `exec`, a provider-egress sink `infer` / `agent` (a secret in an infer/agent prompt), or `outputs` (the workflow boundary — a return value derived from the secret's response) · SPECIFIC (no cross-tool laundering).
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Required in this object |
 | Schema location | `/properties/secrets/additionalProperties/properties/egress/items/properties/to` |
-| type | "string" |
+| type | `"string"` |
 
 **In the same object:** [host](/reference/language/words/host) · [host_from_self](/reference/language/words/host_from_self)
 

@@ -18,8 +18,19 @@ WHICH law this entry lifts · 'taint' raises ONE binding from untrusted to trust
 | --- | --- |
 | Requirement | Required in this object |
 | Schema location | `/$defs/task/properties/lift/items/properties/law` |
-| type | "string" |
-| enum | ["taint", "data-as-code"] |
+| type | `"string"` |
+| enum | declaration below |
+
+<details>
+<summary><code>enum</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+["taint", "data-as-code"]
+```
+
+</details>
+
 
 **In the same object:** [because](/reference/language/words/because) · [from](/reference/language/words/from)
 
@@ -34,7 +45,7 @@ The schema declares this field at the location below.
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/task/properties/lift/items/allOf/0/if/properties/law` |
-| const | "taint" |
+| const | `"taint"` |
 
 [Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 

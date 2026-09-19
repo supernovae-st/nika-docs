@@ -59,10 +59,16 @@ outputs:
   notes: "${{ tasks.draft.output }}"
 ```
 
-Any `--json` run is a recording ([Traces & replay](/concepts/traces)):
+`nika run` already writes `.nika/traces/<timestamp>-<id>.ndjson` when
+the directory exists (the engine creates `.nika/traces/` as it runs).
+Redirecting stdout yourself fails **before Nika starts** if the folder
+is missing (`zsh: no such file or directory`). Prefer the automatic
+journal, or `mkdir -p .nika/traces` first:
 
 ```bash
-nika run release-notes.nika --json > .nika/traces/release-notes.ndjson
+nika run release-notes.nika
+# then: nika trace verify    # latest journal
+# optional: nika run release-notes.nika --json > .nika/traces/release-notes.ndjson
 ```
 
 Resume from it:
@@ -119,12 +125,13 @@ durability is the engine's problem, never yours. A task that does not
 match simply re-runs live, side effects included.
 
 <Warning>
-  **The honest limit — at-least-once, not exactly-once.** Completed work
-  never re-fires, but a crash *in the middle* of a side effect can
-  double-fire it on re-run — the same caveat every database-backed
-  durable-execution system documents for its own steps. Idempotency keys
-  are a deliberate deferral: make external effects idempotent via their
-  own arguments, or fence the node with `--from` discipline.
+  **The honest limit — at-least-once, not exactly-once.** A task whose
+  **definition and resolved inputs still hash the same** is skipped. Edit
+  the verb, change `--var` / `inputs`, or pass `--from` and that work
+  runs again — "completed" is not a forever lock. A crash *in the middle*
+  of a side effect can also double-fire it on re-run. Make external
+  effects idempotent via their own arguments, or fence the node with
+  `--from` discipline.
 </Warning>
 
 ## `--from` · force a re-run the hashes cannot see

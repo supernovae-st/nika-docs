@@ -12,14 +12,25 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### document
 
-Named constants · `$&#123;&#123; const.X &#125;&#125;` · a fixed value baked into the workflow. Either a bare literal, or a `&#123; type, value &#125;` typed constant whose `value:` MUST conform to `type:`. The literal half of the dead `vars:` block (R3a · LAW-SURFACE-0201) · everything that is not `required: true` lands here per the E-split total rule.
+Named constants · `${{ const.X }}` · a fixed value baked into the workflow. Either a bare literal, or a `{ type, value }` typed constant whose `value:` MUST conform to `type:`. The literal half of the dead `vars:` block (R3a · LAW-SURFACE-0201) · everything that is not `required: true` lands here per the E-split total rule.
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/properties/const` |
-| type | "object" |
-| additionalProperties | &#123;"type": ["string", "number", "boolean", "array", "object", "null"], "if": &#123;"type": "object", "required": ["type", "value"]&#125;, "then": &#123;"additionalProperties": false, "properties": &#123;"type": &#123;"$ref": "#/$defs/typeExpr"&#125;, "value": &#123;"description": "The constant value · MUST conform to `type:` (NIKA-DEFAULT-001)."&#125;, "description": &#123;"description": "Free-form prose about this constant · why the value is what it is. Documentation only — the contract is `type` and `value`.", "type": "string"&#125;&#125;, "$comment": "An object carrying BOTH `type` and `value` is a typed constant · the type speaks the full TypeExpr (R3b) and values_core checks the value against it (NIKA-DEFAULT-001) · an object missing either key is a bare literal object constant."&#125;&#125; |
+| type | `"object"` |
+| additionalProperties | declaration below |
+
+<details>
+<summary><code>additionalProperties</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+{"type": ["string", "number", "boolean", "array", "object", "null"], "if": {"type": "object", "required": ["type", "value"]}, "then": {"additionalProperties": false, "properties": {"type": {"$ref": "#/$defs/typeExpr"}, "value": {"description": "The constant value · MUST conform to `type:` (NIKA-DEFAULT-001)."}, "description": {"description": "Free-form prose about this constant · why the value is what it is. Documentation only — the contract is `type` and `value`.", "type": "string"}}, "$comment": "An object carrying BOTH `type` and `value` is a typed constant · the type speaks the full TypeExpr (R3b) and values_core checks the value against it (NIKA-DEFAULT-001) · an object missing either key is a bare literal object constant."}}
+```
+
+</details>
+
 
 **In the same object:** [inputs](/reference/language/words/inputs) · [model](/reference/language/words/model) · [nika](/reference/language/words/nika) · [outputs](/reference/language/words/outputs) · [permits](/reference/language/words/permits) · [run](/reference/language/words/run) · [secrets](/reference/language/words/secrets) · [tasks](/reference/language/words/tasks)
 

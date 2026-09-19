@@ -20,7 +20,8 @@ import { CANON } from "/snippets/_canon.mdx";
     Two independent axes. The **language** is versioned by the spec and
     changes only with a migration the binary applies (`nika check --fix`);
     after 1.0 it is additive only. The **engine** follows real
-    semver toward 1.0 (`0.90` release-candidate today, then `1.0.0`, `1.1`, …).
+    semver toward 1.0 (public tags are the 0.12x line today, then `1.0.0`
+    when the [gates](/changelog/roadmap) are green).
     Same model as SQL or GraphQL: the contract is stable, implementations
     iterate.
   </Accordion>
@@ -33,8 +34,10 @@ import { CANON } from "/snippets/_canon.mdx";
   <Accordion title="Which providers work offline?" icon="server">
     {CANON.providersLocal} local runtimes (Ollama · LM Studio · llama.cpp
     · LocalAI · vLLM). Point `model: ollama/llama3.2:3b` at your machine and
-    the whole workflow runs with zero cloud. `mock/echo` runs with
-    nothing at all: that's what the templates default to.
+    the **infer** step stays on the machine. "Zero cloud" is about model
+    inference: `nika:fetch`, MCP, and other declared tools can still
+    call the network if `permits` allow them. `mock/echo` infers with
+    nothing at all.
   </Accordion>
   <Accordion title="Do I write {{ }} or ${{ }}?" icon="dollar-sign">
     Always `${{ … }}`: what's inside is CEL. The bare `{{ … }}` form is
@@ -63,7 +66,7 @@ flag ([error model](/reference/error-codes)). The frequent ones:
 | « parse error » on a file that looks fine | `NIKA-PARSE` | Usually the envelope: `nika: <name>` (a kebab-case identifier — `nika: v1` + `workflow:` is the previous envelope, `nika check --fix` migrates it), `tasks:` present. |
 | `tasks.X` read refused at check time | `NIKA-VAR-021` · `NIKA-PARSE-024` | A `tasks.*` reference outside the boundary (verb body · `when:` · `for_each:`): hoist it into `with:` — the binding IS the edge (`nika check --fix` applies it). A lingering `depends_on:` is `NIKA-PARSE-024`: data → `with:`, control → `after:`. |
 | `jq`/`fromjson` fails on fetch output (« expecting value, byte 0 ») | `NIKA-BUILTIN-JQ` | The fetch used the default `mode: markdown` (built for pages — it escapes JSON bodies). APIs take `mode: raw`, or `mode: jq` + `jq:` so the shaping rides the fetch. |
-| « unknown binding » | `NIKA-VAR` · `NIKA-VALUES` | Five namespaces only — the three value authorities (`inputs` · `const` · `secrets`) plus `with` and `tasks`. Typos like `tsaks.` are caught at validation; a read of the dead `vars`/`env` namespaces is `NIKA-VALUES-001`/`-002`, and any other value namespace is `NIKA-VALUES-003`. |
+| « unknown binding » | `NIKA-VAR` · `NIKA-VALUES` | Inside a task body the five value namespaces are `inputs` · `const` · `secrets` · `with` · `tasks` (plus loop locals). That is not every CEL scope: `when:` cannot read `tasks.*` until you hoist, `item`/`index` exist only in `for_each`, outputs may read `tasks` directly. Dead `vars`/`env` is `NIKA-VALUES-001`/`-002`. |
 | « no boundary declared » on a workflow that touches something | `NIKA-AUTH-006` | An absent `permits:` block declares ZERO authority, not a free pass. Run `nika check --infer-permits` — it prints the tightest block the body needs, ready to paste. |
 | provider call fails once then works | `NIKA-PROVIDER` (`transient: true`) | The engine retries with backoff per your `retry:`. Declare it instead of wrapping logic. |
 | fetch refuses a URL | `NIKA-SEC` | SSRF defense: private networks and cloud metadata are blocked by default ([security model](/concepts/security)). |

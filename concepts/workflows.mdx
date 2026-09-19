@@ -7,35 +7,44 @@ icon: "diagram-project"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-A **workflow** is a YAML document that names a goal, lists one or more
-tasks, and declares how values flow between them. Nika parses the file
-with source spans, validates it against the catalog, compiles it to a
-DAG, and executes tasks in topological order, parallelizing whatever
-the dependency graph allows.
+What is a `.nika` file, and what happens when you run it?
 
-<Info>
-  **Implementation status.** The envelope below is the canonical spec
-  contract (`nika-spec` · [01-envelope](https://github.com/supernovae-st/nika-spec/blob/main/spec/01-envelope.md)).
-  The engine implements it end-to-end today: `nika check` parses and
-  audits it, `nika run` executes it. [Live state →](/reference/status)
-</Info>
+A workflow is a YAML contract: identity, model, permits, tasks, outputs.
+The engine admits it (`nika check` / the check inside `nika run`), then
+executes the task graph. Four verbs only: `infer` · `exec` · `invoke` ·
+`agent`. Fetching a URL is `invoke: { tool: "nika:fetch" }`, not a fifth
+verb.
 
-## Minimal workflow
+Qualified on `nika 0.120.1 (9d554c84c)` with `mock/echo` (a local
+simulation — output is prefixed `mock(echo) ·`):
 
 ```yaml
-# A minimal workflow.
+# hello.nika
 nika: hello
-
+model: mock/echo
+permits: {}
 tasks:
   greet:
     infer:
       prompt: "Say hi in one line."
-      model: ollama/<model>      # <provider>/<name>
+      max_tokens: 16
+outputs:
+  greeting: ${{ tasks.greet.output }}
 ```
 
-One required line (`nika: <name>`) and a non-empty `tasks:`, the whole
-minimum to be a valid workflow. Fields carry source spans through
-`Spanned<T>` so diagnostics point at the exact byte range.
+```bash
+nika check hello.nika   # clean
+nika run hello.nika --max-cost-usd 0
+# said "mock(echo) · Say hi in one line."
+```
+
+Swap `model:` later for a local or cloud seat. The file is the contract;
+`--var` / SDK `inputs` supply caller values.
+
+<Info>
+  Envelope law: [nika-spec 01-envelope](https://github.com/supernovae-st/nika-spec/blob/main/spec/01-envelope.md).
+  [Live binary](/reference/status) is the implementation you download.
+</Info>
 
 ## Why the mark is the name (not a K8s envelope, not a version)
 
@@ -88,8 +97,11 @@ went (see the [reference](/reference/yaml-syntax#what-left-the-envelope-0-109)).
 (The `env:` field *inside* an `exec:` block is a different thing and is
 alive: it is the child process's environment map.)
 
+## Parser internals (after the useful envelope)
+
 Every field is span-carrying (`Spanned<T>`): source spans survive
-all the way into the diagnostic layer (ADR-010 miette bridge).
+all the way into the diagnostic layer (ADR-010 miette bridge). The
+`RawWorkflow` AST matches the nine envelope keys — nothing hidden.
 
 ## Execution pipeline
 
@@ -111,10 +123,9 @@ all the way into the diagnostic layer (ADR-010 miette bridge).
                                  │  (L3 · live)   │
                                  │                │
                                  │ topo-sort ──►  │   ┌─ exec   L2
-                                 │ dispatch  ──►  │   ├─ fetch  L2
-                                 │ events    ──►  │   ├─ invoke L2
-                                 │ checkpoint ──► │   ├─ infer  L2
-                                 │                │   └─ agent  L2
+                                 │ dispatch  ──►  │   ├─ invoke L2
+                                 │ events    ──►  │   ├─ infer  L2
+                                 │ checkpoint ──► │   └─ agent L2
                                  └────────────────┘
                                           │
                                           ▼
@@ -404,11 +415,13 @@ caller can pass is declared in `inputs:`:
 
 - **A supplied value overrides a declared `default:`.** `--var bullets=5`
   wins over `default: 3` for this run.
-- **It satisfies `required: true`.** A required input with no default must be
-  supplied at launch; without it the task that reads it fails loud
-  (`NIKA-VAR-001`, naming the exact flag to pass). `nika check` flags it
-  earlier, statically: `HINT [inputs] required input(s) with no default ·
-  pass at run time: --var topic=…`.
+- **It satisfies `required: true`.** A required input with no default must
+  be supplied at launch. Measured on 0.120.1: `nika check` stays clean and
+  prints `HINT [inputs] required input(s) with no default · pass at run
+  time: --var name=…`. `nika run` refuses before any task:
+  `NIKA-1708 · missing required inputs` (exit 3). The SDK throws
+  `NikaOperationError` with that code. This is admission, not a
+  task-level `NIKA-VAR-001`.
 - **The value parses as JSON when it parses.** `--var bullets=5` arrives as
   a number, `--var deep=true` as a boolean, `--var tags='["a","b"]'` as an
   array. Anything that does not parse as JSON rides as a string — no

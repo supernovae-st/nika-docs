@@ -18,7 +18,7 @@ The caller MUST supply a value (no default is consulted).
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/properties/inputs/additionalProperties/properties/required` |
-| type | "boolean" |
+| type | `"boolean"` |
 
 **In the same object:** [default](/reference/language/words/default) · [description](/reference/language/words/description) · [type](/reference/language/words/type)
 
@@ -41,6 +41,9 @@ inputs:
     description: "What the agent must accomplish"   # SLOT
 
 ```
+
+A skeleton may show `required: true` next to `default:` so the compiled file can run immediately. That pair is not the usual app contract: a required input with no default is a HINT at `nika check` and `NIKA-1708` at `nika run` until you pass `--var` or SDK `inputs`.
+
 
 ### Templates containing this field
 

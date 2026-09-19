@@ -12,13 +12,13 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### invoke
 
-Arguments passed to the tool · an object whose shape is the TOOL's own schema, not the language's. Each builtin and each MCP tool declares its own (spec/02-verbs.md §invoke) · `$&#123;&#123; &#125;&#125;` may appear in any leaf value.
+Arguments passed to the tool · an object whose shape is the TOOL's own schema, not the language's. Each builtin and each MCP tool declares its own (spec/02-verbs.md §invoke) · `${{ }}` may appear in any leaf value.
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/invoke/properties/args` |
-| type | "object" |
+| type | `"object"` |
 
 **In the same object:** [tool](/reference/language/words/tool) · [workflow](/reference/language/words/workflow)
 

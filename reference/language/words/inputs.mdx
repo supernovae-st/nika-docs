@@ -12,14 +12,25 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### document
 
-Typed workflow inputs · `$&#123;&#123; inputs.X &#125;&#125;` · the parameters an author declares and a caller supplies. Each entry is a typed declaration whose `type:` speaks the full TypeExpr of 09-types (R3b · LAW-GRAMMAR-0211 · the flat 6-enum is dead · LAW-SURFACE-0211). The typed half of the dead `vars:` block (R3a · LAW-SURFACE-0201) · a `required: true` value lands here per the E-split total rule.
+Typed workflow inputs · `${{ inputs.X }}` · the parameters an author declares and a caller supplies. Each entry is a typed declaration whose `type:` speaks the full TypeExpr of 09-types (R3b · LAW-GRAMMAR-0211 · the flat 6-enum is dead · LAW-SURFACE-0211). The typed half of the dead `vars:` block (R3a · LAW-SURFACE-0201) · a `required: true` value lands here per the E-split total rule.
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/properties/inputs` |
-| type | "object" |
-| additionalProperties | &#123;"type": "object", "additionalProperties": false, "required": ["type"], "properties": &#123;"type": &#123;"$ref": "#/$defs/typeExpr"&#125;, "required": &#123;"type": "boolean", "description": "The caller MUST supply a value (no default is consulted)."&#125;, "default": &#123;"description": "The value used when the caller supplies none · MUST conform to `type:` (R3b · LAW-TYPE-0211 · NIKA-DEFAULT-001 · the P0 soundness hole is closed at check)."&#125;, "description": &#123;"description": "Free-form prose about this input · what a caller is being asked for. Documentation only — the contract is `type` and `required`.", "type": "string"&#125;&#125;&#125; |
+| type | `"object"` |
+| additionalProperties | declaration below |
+
+<details>
+<summary><code>additionalProperties</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+{"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"$ref": "#/$defs/typeExpr"}, "required": {"type": "boolean", "description": "The caller MUST supply a value (no default is consulted)."}, "default": {"description": "The value used when the caller supplies none · MUST conform to `type:` (R3b · LAW-TYPE-0211 · NIKA-DEFAULT-001 · the P0 soundness hole is closed at check)."}, "description": {"description": "Free-form prose about this input · what a caller is being asked for. Documentation only — the contract is `type` and `required`.", "type": "string"}}}
+```
+
+</details>
+
 
 **In the same object:** [const](/reference/language/words/const) · [model](/reference/language/words/model) · [nika](/reference/language/words/nika) · [outputs](/reference/language/words/outputs) · [permits](/reference/language/words/permits) · [run](/reference/language/words/run) · [secrets](/reference/language/words/secrets) · [tasks](/reference/language/words/tasks)
 
@@ -42,6 +53,9 @@ inputs:
     # RUNS the moment it is scaffolded. Replace the default with your job;
     # `--var goal=…` overrides it at any time.
 ```
+
+A skeleton may show `required: true` next to `default:` so the compiled file can run immediately. That pair is not the usual app contract: a required input with no default is a HINT at `nika check` and `NIKA-1708` at `nika run` until you pass `--var` or SDK `inputs`.
+
 
 ### Templates containing this field
 
