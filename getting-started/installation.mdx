@@ -9,12 +9,12 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 <Warning>
   **Latest engine release: v{STATUS.version}** — what `brew install` and the
-  install script give you. The npm package runs on its own channel (currently
-  one patch behind the engine; it bundles its own engine build, so an npm
-  install never depends on your CLI version). Run `nika --version` and
-  `nika --help` after install; those commands are the executable source of
-  truth for your local binary. A grammar change ships with its `nika check
-  --fix` migration.
+  install script give you. The npm package runs on its own channel; it
+  bundles its own engine build, so an npm install never depends on your CLI
+  version. The published SDK currently matches engine v{STATUS.version}.
+  Run `nika --version` and `nika --help` after install; those commands are
+  the executable source of truth for your local binary. A grammar change
+  ships with its `nika check --fix` migration.
 </Warning>
 
 ## Install today

@@ -17,7 +17,7 @@ what protocol crosses the process edge.
 
 | Need | Use | Status | Boundary |
 |---|---|---|---|
-| Product code starts a workflow | local `Nika` | Published npm 0.120.0 (bundled engine) | native process |
+| Product code starts a workflow | local `Nika` | Published npm 0.120.2 (bundled engine) | native process |
 | The project clock starts work | `nika serve` (no `--bind`) | Live | `nika.yaml arm[]` to the resident firer |
 | An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Published SDK · public engine | Bearer + OpenAPI · cancellation requests action |
 | The host scheduler starts work | `nika arm --emit` | Live | launchd or systemd to `nika arm fire` |
