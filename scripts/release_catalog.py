@@ -119,8 +119,12 @@ def validate(data):
 
 
 def text(value):
-    # Numeric entities make even braces, Markdown and JSX inert text in MDX.
-    return "".join(c if c.isalnum() or c in " .,:/—–·" else f"&#{ord(c)};" for c in value)
+    # A JSON string literal is inert MDX and bypasses smart punctuation. Numeric
+    # HTML entities still let the renderer turn CLI --flags into an em dash.
+    literal = json.dumps(value, ensure_ascii=True)
+    for character in "<>&{}[]":
+        literal = literal.replace(character, f"\\u{ord(character):04x}")
+    return "{" + literal + "}"
 
 
 def render(data):

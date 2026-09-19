@@ -31,6 +31,18 @@ class CatalogTests(unittest.TestCase):
         self.assertNotIn('{value}', page)
         self.assertNotIn('Fourth.', page)
 
+    def test_rendered_text_preserves_flags_and_inert_prose(self):
+        for value in ['nika check --json', '<Tag>{value}</Tag> [x](javascript:x)',
+                      'quotes " and backslashes \\ with `code`', 'Unicode — « »']:
+            with self.subTest(value=value):
+                rendered = catalog.text(value)
+                self.assertTrue(rendered.startswith('{"') and rendered.endswith('"}'))
+                self.assertEqual(json.loads(rendered[1:-1]), value)
+                self.assertNotIn('<Tag>', rendered)
+                self.assertNotIn('{value}', rendered)
+        self.assertIn('  - {"nika check --json"}', catalog.render(
+            catalog.fetch(lambda _: [release(body='- **nika check --json**')])) )
+
     def test_pagination_filters_and_semver(self):
         first = [release(f"v0.{i}.0") for i in range(100)]
         pages = [first, [release(), release("v0.121.0", draft=True), release("v0.122.0", prerelease=True)]]
