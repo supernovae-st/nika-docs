@@ -12,13 +12,13 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### task
 
-Retry policy for this task · `&#123; max_attempts, backoff_ms, backoff_strategy, backoff_max_ms, jitter, on_codes &#125;`. Retries run BEFORE `on_error` sees anything — the catch handles the last error only (spec/05-errors.md §Retry policy).
+Retry policy for this task · `{ max_attempts, backoff_ms, backoff_strategy, backoff_max_ms, jitter, on_codes }`. Retries run BEFORE `on_error` sees anything — the catch handles the last error only (spec/05-errors.md §Retry policy).
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/task/properties/retry` |
-| $ref | "#/$defs/retry" |
+| $ref | `"#/$defs/retry"` |
 
 **In the same object:** [after](/reference/language/words/after) · [agent](/reference/language/words/agent) · [exec](/reference/language/words/exec) · [extract](/reference/language/words/extract) · [for_each](/reference/language/words/for_each) · [group](/reference/language/words/group) · [infer](/reference/language/words/infer) · [invoke](/reference/language/words/invoke) · [lift](/reference/language/words/lift) · [on_error](/reference/language/words/on_error) · [returns](/reference/language/words/returns) · [timeout](/reference/language/words/timeout) · [when](/reference/language/words/when) · [with](/reference/language/words/with)
 

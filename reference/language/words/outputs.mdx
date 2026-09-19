@@ -12,14 +12,51 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### document
 
-The workflow's return value · symmetric to inputs. Each entry is a `$&#123;&#123; tasks.X.output &#125;&#125;` reference (untyped form · string) OR a typed declaration &#123; value · type · description &#125;. Powers `nika run` result + the output half of the callable-workflow schema.
+The workflow's return value · symmetric to inputs. Each entry is a `${{ tasks.X.output }}` reference (untyped form · string) OR a typed declaration &#123; value · type · description &#125;. Powers `nika run` result + the output half of the callable-workflow schema.
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/properties/outputs` |
-| type | "object" |
-| additionalProperties | &#123;"anyOf": [&#123;"type": "string"&#125;, &#123;"type": "object", "required": ["value"], "additionalProperties": false, "properties": &#123;"value": &#123;"type": "string"&#125;, "type": &#123;"$ref": "#/$defs/typeExpr", "description": "The output's type · the full TypeExpr of 09-types (R3b · LAW-GRAMMAR-0211 · the flat 6-enum is dead alongside the inputs half · LAW-SURFACE-0211)."&#125;, "description": &#123;"description": "Free-form prose about this output · what a caller receives. Documentation only — the contract is `value` and `type`.", "type": "string"&#125;&#125;&#125;]&#125; |
+| type | `"object"` |
+| additionalProperties | declaration below |
+
+<details>
+<summary><code>additionalProperties</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+{
+  "anyOf": [
+    {
+      "type": "string"
+    },
+    {
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/typeExpr",
+          "description": "The output's type · the full TypeExpr of 09-types (R3b · LAW-GRAMMAR-0211 · the flat 6-enum is dead alongside the inputs half · LAW-SURFACE-0211)."
+        },
+        "description": {
+          "description": "Free-form prose about this output · what a caller receives. Documentation only — the contract is `value` and `type`.",
+          "type": "string"
+        }
+      }
+    }
+  ]
+}
+```
+
+</details>
+
 
 **In the same object:** [const](/reference/language/words/const) · [inputs](/reference/language/words/inputs) · [model](/reference/language/words/model) · [nika](/reference/language/words/nika) · [permits](/reference/language/words/permits) · [run](/reference/language/words/run) · [secrets](/reference/language/words/secrets) · [tasks](/reference/language/words/tasks)
 

@@ -12,13 +12,27 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### infer
 
-Sampling temperature · 0 is the steadiest the provider offers, 2 the loosest. A number in 0-2, or a `$&#123;&#123; &#125;&#125;` reference.
+Sampling temperature · 0 is the steadiest the provider offers, 2 the loosest. A number in 0-2, or a `${{ }}` reference.
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/infer/properties/temperature` |
-| type | ["number", "string"] |
+| type | declaration below |
+
+<details>
+<summary><code>type</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+[
+  "number",
+  "string"
+]
+```
+
+</details>
+
 
 **In the same object:** [max_tokens](/reference/language/words/max_tokens) · [model](/reference/language/words/model) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [system](/reference/language/words/system) · [thinking](/reference/language/words/thinking) · [vision](/reference/language/words/vision)
 
@@ -27,13 +41,27 @@ Sampling temperature · 0 is the steadiest the provider offers, 2 the loosest. A
 
 ### agent
 
-Sampling temperature for every turn of the loop · 0 is the steadiest the provider offers, 2 the loosest. A number in 0-2, or a `$&#123;&#123; &#125;&#125;` reference.
+Sampling temperature for every turn of the loop · 0 is the steadiest the provider offers, 2 the loosest. A number in 0-2, or a `${{ }}` reference.
 
 | Property | Declaration |
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/agent/properties/temperature` |
-| type | ["number", "string"] |
+| type | declaration below |
+
+<details>
+<summary><code>type</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+[
+  "number",
+  "string"
+]
+```
+
+</details>
+
 
 **In the same object:** [max_tokens_total](/reference/language/words/max_tokens_total) · [max_turns](/reference/language/words/max_turns) · [model](/reference/language/words/model) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [skills](/reference/language/words/skills) · [system](/reference/language/words/system) · [tools](/reference/language/words/tools)
 

@@ -10,7 +10,7 @@ import { CANON } from "/snippets/_canon.mdx";
 
 <Info>
   This page is judged by the **downloadable release** — `nika --version`
-  must print <code>{STATUS.version}</code> (<code>{STATUS.engineSha}</code>). Catalog counts
+  must print {STATUS.version} ({STATUS.engineSha}). Catalog counts
   come from `nika catalog --json` on that binary. Language counts come
   from `nika spec --canon` (projected into `CANON`). Crate, test, ADR and
   hygiene totals do not project from the binary and are not on this page.
@@ -20,7 +20,7 @@ import { CANON } from "/snippets/_canon.mdx";
 
 <CardGroup cols={3}>
   <Card title="Release" icon="tag">
-    **v{STATUS.version}** · <code>{STATUS.engineSha}</code>
+    **v{STATUS.version}** · {STATUS.engineSha}
   </Card>
   <Card title="Catalog" icon="server">
     **{STATUS.providers}** providers in `nika catalog`

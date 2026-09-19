@@ -18,7 +18,22 @@ Where the secret lives · never an inline value (spec/01-envelope.md §secrets).
 | --- | --- |
 | Requirement | Required in this object |
 | Schema location | `/properties/secrets/additionalProperties/properties/source` |
-| enum | ["vault", "env", "file"] |
+| enum | declaration below |
+
+<details>
+<summary><code>enum</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+[
+  "vault",
+  "env",
+  "file"
+]
+```
+
+</details>
+
 
 **In the same object:** [egress](/reference/language/words/egress) · [key](/reference/language/words/key) · [path](/reference/language/words/path)
 
@@ -33,7 +48,7 @@ The schema declares this field at the location below.
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/properties/secrets/additionalProperties/allOf/0/if/properties/source` |
-| const | "file" |
+| const | `"file"` |
 
 [Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
@@ -45,8 +60,22 @@ The schema declares this field at the location below.
 | --- | --- |
 | Requirement | Optional in this object |
 | Schema location | `/$defs/infer/properties/vision/items/properties/source` |
-| type | "string" |
-| enum | ["file", "url"] |
+| type | `"string"` |
+| enum | declaration below |
+
+<details>
+<summary><code>enum</code> schema declaration (spec source, not a lesson)</summary>
+
+
+```json
+[
+  "file",
+  "url"
+]
+```
+
+</details>
+
 
 **In the same object:** [path](/reference/language/words/path) · [url](/reference/language/words/url)
 
