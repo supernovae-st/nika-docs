@@ -49,7 +49,7 @@ const projectRoot = fileURLToPath(new URL('../../', import.meta.url))
 export const nika = new Nika({ cwd: projectRoot })
 
 const run = await nika.run('workflows/release.nika')
-const result = await run.done
+const result = await run.result()
 ```
 
 That one choice aligns:

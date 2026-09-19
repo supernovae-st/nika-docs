@@ -13,23 +13,31 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 |---|---|:---:|:---:|
 | `check(workflow, options?)` | `Promise<NikaCheckResult>` | yes | yes |
 | `run(workflow, options?)` | `Promise<NikaRun>` | yes | yes |
-| `events(run, options?)` | `AsyncIterable<NikaEvent>` | yes | yes |
-| `cancel(run)` | `Promise<NikaCancelResult>` | yes | yes |
+| `run.events(options?)` | `AsyncIterable<NikaRunEvent>` | yes | yes |
+| `run.result()` | `Promise<NikaRunResult>` | yes | yes |
+| `run.cancel()` | `Promise<NikaCancelResult>` | yes | yes |
+| `run.status()` | `Promise<NikaRunStatus>` | no | yes |
 | `traceVerify(receipt, options?)` | `Promise<NikaTraceVerifyResult>` | yes | typed unavailable verdict currently |
 | `attachRun(id, options?)` | `Promise<NikaRun>` | no | yes |
-| `status(run)` | `Promise<NikaRunStatus>` | no | yes |
 | `listWorkflows()` | `Promise<readonly string[]>` | no | yes |
 | `workflow(name)` | `Promise<NikaWorkflowMetadata>` | no | yes |
 | `schedule(workflow, options)` | `Promise<NikaScheduleApplyResult>` | no | yes |
 | `scheduleStatus(id)` | `Promise<NikaScheduleStatus>` | no | yes |
 
-`run.done` is the result for one observation leg, including a pause.
+`run.result()` is the result for one observation leg, including a pause.
 `check()` returns the engine's local findings report or the resident's typed
 served-name acknowledgement/refusal, depending on admission form.
-`cancel()` may acknowledge a pending action; it never replaces `run.done`.
-Methods that require resident
-authority return typed compatibility errors in native mode. `events`,
-`cancel`, and `status` accept only a run owned by that client instance.
+`run.cancel()` may acknowledge a pending action; it never replaces
+`run.result()`. Methods that require resident
+authority return typed compatibility errors in native mode. The run-handle
+methods accept only a run owned by that client instance.
+
+<Accordion title="Compatibility aliases">
+  `nika.events(run)`, `nika.cancel(run)`, `nika.status(run)` and `run.done`
+  remain as deprecated aliases through the compatibility window. `run.done`
+  is the same promise as `run.result()`; the facade wrappers forward to the
+  handle methods unchanged.
+</Accordion>
 
 The facade intentionally has no version, plan, buffered-run, golden-test,
 health, webhook, artifact or environment-constructor convenience methods.

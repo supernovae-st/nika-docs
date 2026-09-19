@@ -10,35 +10,48 @@ icon: "triangle-exclamation"
 | Channel | Example | Handling |
 |---|---|---|
 | Resolved report | `check()` returns `clean: false` | show engine findings |
-| Resolved terminal result | `run.done` returns `status: "failed"` | branch on result data |
-| Rejected promise | invalid config, incompatible option, transport/protocol failure | catch typed SDK error |
+| Resolved terminal result | `run.result()` returns `status: "failed"` | branch on result data |
+| Rejected promise | invalid config, incompatible option, transport/protocol failure, broken observation | catch typed SDK error |
 
 ```ts
 const report = await nika.check(file)
 if (!report.clean) return { admitted: false, report }
 
-const run = await nika.run(file)
-const result = await run.done
+const run = await nika.run(file)   // a dirty file throws here instead
+const result = await run.result()
 
-if (result.status !== 'succeeded') {
+if (!isNikaRunSucceeded(result)) {
+  // 'failed' · 'cancelled' · 'paused' · engine-reported 'interrupted'
   return { admitted: true, status: result.status, error: result.error }
 }
+// narrow outputs only inside the success branch
+return { admitted: true, outputs: result.outputs }
 ```
+
+A rejected `result()` — transport fault, protocol fault, broken observation
+(`NikaObservationInterrupted`) — does **not** mean the engine's workflow
+failed; the run may still be executing. An admitted failure arrives as
+resolved result data (`status: 'failed'` with the engine's `error.code`),
+so a `try/catch` alone never sees it. The two are different channels by
+design.
 
 ## Typed boundary failures
 
 ```text
 NikaError
-├── NikaConfigurationError
+├── NikaConfigurationError      // invalid option or unencodable inputs value
 ├── NikaTransportError
-│   └── NikaProtocolError
-├── NikaCompatibilityError
-├── NikaOperationError
+│   ├── NikaProtocolError
+│   └── NikaObservationInterrupted   // observation lost; the run may still be live
+├── NikaCompatibilityError      // engine lacks the capability (e.g. inputsLiteral)
+├── NikaOperationError          // engine refused an operation with typed findings
 ├── NikaEventBufferOverflowError
 └── NikaRunOwnershipError
 ```
 
-`NikaOperationError` carries schedule operation findings.
+`NikaOperationError` covers engine refusals across operations — a `run()`
+whose file fails admission (no handle is created), schedule operation
+findings, and the other typed operation doors (`NikaOperation` lists them).
 `NikaEventBufferOverflowError` refuses silent observer loss.
 `NikaRunOwnershipError` prevents one facade from acting on another facade's
 run object. `NikaEngineUnavailable` reports local engine resolution failure.

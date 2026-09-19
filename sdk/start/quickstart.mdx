@@ -7,23 +7,26 @@ icon: "play"
 
 import { SDK, SourceContract, LocalContract } from "/snippets/_sdk-contract.mdx"
 
-<SourceContract sdk={SDK} />
-<LocalContract sdk={SDK} />
+Five minutes from zero to a typed workflow result inside your own app:
+install the package, save one file, run it, read the outputs.
 
-Use Node.js 22 or newer. This example runs locally with the package's native
-engine and the mock provider. It needs no server, global CLI or provider key.
+Requires Node.js 22+ on macOS or Linux (arm64/x64). No server, no global
+CLI, no provider key — this example runs on the package's bundled engine
+and the mock provider.
 
 ## 1. Install in your application
 
 ```sh
-npm install @supernovae-st/nika@0.118.7
+npm install @supernovae-st/nika@0.120.0
 npm ls @supernovae-st/nika
 ```
 
-Keep optional dependencies enabled: they provide the native payload for your
-supported platform. An explicit `bin` or `NIKA_BIN` overrides that payload;
-omit both for this first run. The [local client](/sdk/local/client) explains
-binary resolution and compatibility errors.
+Pin the published package. Keep optional dependencies enabled: they provide
+the native payload for your supported platform (macOS and Linux, arm64 and
+x64 — there is no Windows payload). An explicit `bin` or `NIKA_BIN` overrides
+that payload; omit both for this first run. The
+[local client](/sdk/local/client) explains binary resolution and
+compatibility errors.
 
 ## 2. Save a workflow
 
@@ -42,72 +45,121 @@ outputs:
   greeting: ${{ tasks.greet.output }}
 ```
 
-This fixture has no external tools or effects. Choosing a mock model for an
-arbitrary workflow does not disable that workflow's tools or permissions.
-A project `nika.yaml` is optional for this example; the executable source is
+`mock/echo` is a **local simulation**: the engine echoes the prompt back
+(prefixed `mock(echo) ·`) and calls no network LLM. It is a rehearsal for
+the mechanics, not intelligence. Choosing a mock model for an arbitrary
+workflow does not disable that workflow's tools or permissions. A project
+`nika.yaml` is optional for this example; the executable source is
 `hello.nika`.
 
-## 3. Run and observe
+## 3. Run it
 
 Save `demo.mjs` next to the workflow:
 
 ```js
-import { Nika } from '@supernovae-st/nika'
+import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
 
 const nika = new Nika({ cwd: process.cwd() })
-const run = await nika.run('./hello.nika', {
-  maxCostUsd: 0,
-})
 
-const watching = (async () => {
-  for await (const event of nika.events(run)) {
-    console.log(event.kind)
-  }
-})()
+// run() admits the file first — a workflow that fails admission throws
+// here, before any run handle exists.
+const run = await nika.run('hello.nika', { maxCostUsd: 0 })
 
-const result = await run.done
-await watching
+// result() is the sole settlement. An admitted workflow that fails resolves
+// with status 'failed' — it does not throw, so try/catch alone will miss it.
+const result = await run.result()
 
-if (result.status !== 'succeeded') {
-  console.error(result)
-  process.exitCode = result.exitCode ?? 1
-} else {
-  console.log(result.outputs)
+if (result.status === 'paused') {
+  // a human gate holds the run — not a success, not a failure
+  console.error('run paused; resume with nika run --resume')
+  process.exit(4)
 }
-
-if (result.receipt) {
-  const proof = await nika.traceVerify(result.receipt)
-  console.log(proof)
+if (!isNikaRunSucceeded(result)) {
+  console.error(result.status, result.error)
+  process.exit(1)
 }
+console.log(result.outputs.greeting) // mock(echo) · Hello, Nika
 ```
-
-Run the application:
 
 ```sh
 node demo.mjs
 ```
 
-The engine admits the workflow as part of execution. `check()` is available
-for authoring and CI; it is not an extra required step before every `run()`.
-The published native transport can return a handle before admission finishes.
-A handle alone is not evidence that execution started. `run.done` reports the
-terminal result; configuration, compatibility, transport or protocol errors
-can reject and should be handled by your application's error boundary.
+Expected output — the mock prefixes its rehearsal answer:
+
+```text
+mock(echo) · Hello, Nika
+```
+
+That is the whole first loop: one file, one call, one typed result.
+**Challenge:** change the prompt in `hello.nika` and rerun — the echo
+follows the file, no other change needed.
+
+### Then: audit, watch, verify
+
+The same lifecycle opens three deeper doors when you need them. Events
+need a *live* run — the first one already settled, so start a fresh one:
+
+```js
+// 1. Static admission on its own — authoring and CI. A red check never
+//    becomes a run.
+const report = await nika.check('hello.nika', { nativeStrict: true })
+if (!report.clean) process.exit(2)
+
+// 2. Live events while a fresh run executes.
+const secondRun = await nika.run('hello.nika', { maxCostUsd: 0 })
+for await (const event of secondRun.events()) {
+  console.log(event.kind, event.task ?? '', event.status ?? '')
+}
+const secondResult = await secondRun.result()
+
+// 3. Verify the receipt that run wrote.
+if (secondResult.receipt) {
+  console.log(await nika.traceVerify(secondResult.receipt))
+}
+```
+
+On the published package the event stream reads `run.started` →
+`task.scheduled` → `task.started` → `task.completed` → `engine.event`
+(the engine's own `workflow_completed` frame) → `run.settled`
+(`succeeded`) — six events for this one-task workflow. `run.events()`
+yields SDK lifecycle kinds such as `task.started`; the engine protocol
+frame lives on `event.raw`.
+
+Passing inputs from code is literal: `nika.run('greet.nika', { inputs: { name: 'Ada', limit: 2 } })`
+binds typed values. A string `'2'` for an integer input is refused with
+`NikaOperationError` (`input_type_mismatch`), an unknown key with
+`unknown_input`, and a missing required input with `NIKA-1708` — the type
+contract is enforced at the door.
 
 ## 4. Read the proof's scope
 
-Pass an engine-issued receipt to `traceVerify(receipt)` unchanged. Verification reads
-existing evidence; it does not seal an unsigned journal. A mock run may have
-an intact but unsealed trace, so `verified: false` alone does not mean the run
-failed or that the journal is corrupt. Read the returned reason and details.
-With this unsigned fixture, the published SDK can report `receipt_mismatch`
-even while the engine reports an intact chain: the evidence has no verified
-signed SDK receipt binding. This is not a verified receipt; the successful
-workflow result and receipt verification are separate outcomes.
-A trace does not prove that an external recipient read a message or that a
-business goal was achieved.
+Pass an engine-issued receipt to `traceVerify(receipt)` unchanged.
+Verification reads the journal the run already wrote — it does not
+re-execute the workflow, and it does not re-infer a model answer. Two
+outcomes are separate:
+
+| Outcome | Meaning |
+|---|---|
+| **Run succeeded** | The workflow settled `succeeded`; `result.outputs` are real. |
+| **Receipt sealed + verified** | The journal's hash chain is intact **and** a run-signing key on this machine sealed it. |
+
+One inspected case to know: this mock fixture on a keyless machine (a
+fresh `HOME` with no run-signing key) produced an intact but **unsealed**
+journal, where `traceVerify` returned `verified: false` with reason
+`receipt_mismatch` while the run itself succeeded — a missing signature,
+not a failed workflow and not corruption. Do not generalize one fixture's
+outcome to every install: read the returned reason and details. A trace
+does not prove that an external recipient read a message or that a
+business goal was achieved — verification is tamper-evidence, not a
+correctness guarantee.
 
 ## Next
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+  <LocalContract sdk={SDK} />
+</Accordion>
 
 <CardGroup cols={2}>
   <Card title="Project setup" icon="folder-tree" href="/sdk/start/project-setup">

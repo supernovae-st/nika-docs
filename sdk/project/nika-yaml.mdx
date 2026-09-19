@@ -87,7 +87,7 @@ export const nika = new Nika({
 })
 
 const run = await nika.run('workflows/daily-brief.nika')
-const result = await run.done
+const result = await run.result()
 ```
 
 Prefer a `cwd` at the project root. It keeps workflow paths, project discovery

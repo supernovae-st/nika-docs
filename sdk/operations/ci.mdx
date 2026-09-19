@@ -34,8 +34,8 @@ const run = await nika.run(file, {
   maxCostUsd: 0,
 })
 
-for await (const event of nika.events(run)) console.log(event)
-const result = await run.done
+for await (const event of run.events()) console.log(event)
+const result = await run.result()
 if (result.status !== 'succeeded') process.exit(result.exitCode ?? 1)
 ```
 
@@ -60,12 +60,15 @@ declare.
 ## Pin and print both versions
 
 ```sh
-npm exec -- nika --version
+./node_modules/.bin/nika --version
 npm ls @supernovae-st/nika
 ```
 
 Keep the engine and SDK release train visible in logs. Do not debug skew from
-an implicit global binary.
+an implicit global binary — and do not `npm exec -- nika` an uninstalled
+name: with no locked local package, npm would download whatever that name
+resolves to. The direct `node_modules/.bin` path only ever runs the
+lockfile's payload.
 
 <Info>
   Commit the package lockfile and keep optional platform dependencies enabled.
