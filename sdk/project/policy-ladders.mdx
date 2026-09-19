@@ -31,7 +31,7 @@ arm[].plafond = required for every scheduled tick`}</pre>
 const run = await nika.run('workflows/release.nika', {
   maxCostUsd: requestBudget,
 })
-const result = await run.done
+const result = await run.result()
 ```
 
 `maxCostUsd` is invocation-specific. Keep the project default in `nika.yaml`
@@ -84,7 +84,7 @@ project floor ──┘
   Do not create an application `nikaConfig` object that mirrors every project
   key. That produces a second control plane with no precedence contract.
   Construct `Nika` once with `cwd`; pass only invocation-specific inputs,
-  model and ceiling per run. Cancellation is the separate `cancel(run)` verb.
+  model and ceiling per run. Cancellation is the separate `run.cancel()` verb.
 </Warning>
 
 ## Continue

@@ -5,30 +5,49 @@ sidebarTitle: "Run events"
 icon: "wave-pulse"
 ---
 
+`run.events()` yields `NikaRunEvent` — the SDK's lifecycle vocabulary, with
+dotted kinds like `task.started` and the task id on `event.task`:
+
 ```ts
+import type { NikaRunEvent } from '@supernovae-st/nika'
+
 type ViewState = { active: Set<string> }
 
-function reduce(state: ViewState, event: NikaEvent) {
+function reduce(state: ViewState, event: NikaRunEvent) {
   switch (event.kind) {
-    case 'task_started':
-      state.active.add(String(event.task_id))
+    case 'task.started':
+      if (event.task) state.active.add(event.task)
       break
-    case 'task_completed':
-      state.active.delete(String(event.task_id))
+    case 'task.completed':
+    case 'task.failed':
+      if (event.task) state.active.delete(event.task)
       break
     default:
-      telemetry.debug('unrendered event', event.kind)
+      // engine.event and future kinds stay visible to diagnostics
+      telemetry.debug('unrendered event', event.kind, event.raw)
   }
 }
 
 const run = await nika.run('workflow.nika')
-for await (const event of nika.events(run)) reduce(view, event)
-const result = await run.done
+for await (const event of run.events()) reduce(view, event)
+const result = await run.result()
 ```
 
-Kinds and fields are engine-owned and additive. Unknown events should remain
+The dotted lifecycle kinds (`task.started`, `run.settled`, …) are the
+SDK's owned vocabulary; the untouched engine frame rides on `event.raw`.
+`event.task` is present only on frames that named a task — guard it.
+
+For the one-task mock hello, the published package emits exactly six
+events: `run.started` → `task.scheduled` → `task.started` →
+`task.completed` → `engine.event` (the engine's `workflow_completed`
+frame) → `run.settled` (`succeeded`). Longer workflows emit more — never
+assert a fixed count. Engine protocol frames surface as `engine.event`
+with the original frame preserved on `event.raw`; native and HTTP
+transports differ in exactly which raw frames exist.
+
+The kind set is additive: keep a `default` branch so unknown events stay
 visible to diagnostics without crashing an older interface. Never infer
-completion from the last recognized kind; use `run.done`.
+completion from the last recognized kind; use `run.result()`.
 
 `result.settlement` carries the engine's full settlement, including cause,
 elapsed time, task tally, spend and error when present. Remote replay and
@@ -42,7 +61,7 @@ Each event subscriber has a bounded queue. A slow consumer receives
 `bufferSize`, bounded by the client's `eventBufferSize`.
 
 An `AbortSignal` stops only its observer. It does not end engine work. Call
-`nika.cancel(run)` when cancellation is intended.
+`run.cancel()` when cancellation is intended.
 
 <CardGroup cols={2}>
   <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">

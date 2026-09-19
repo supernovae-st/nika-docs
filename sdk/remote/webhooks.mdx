@@ -13,11 +13,11 @@ The source SDK exposes no webhook verifier, and the server OpenAPI exposes no
 webhook registration or delivery routes. Do not call an SDK static verifier or
 claim a Nika signature format.
 
-If your application emits webhooks after `run.done`, that is an
+If your application emits webhooks after `run.result()`, that is an
 application-owned integration:
 
 ```ts
-const result = await run.done
+const result = await run.result()
 
 await applicationWebhookQueue.enqueue({
   runId: run.id,

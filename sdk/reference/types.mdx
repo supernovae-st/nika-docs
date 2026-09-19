@@ -7,22 +7,39 @@ icon: "brackets-curly"
 
 import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 
-<SourceContract sdk={SDK} />
-
 ## Run lifecycle
 
 ```ts
-interface NikaRun {
+interface NikaRun<Outputs extends Record<string, unknown> = Record<string, unknown>> {
   readonly id: NikaRunId
-  readonly done: Promise<NikaRunResult>
+  readonly events: (options?: NikaEventsOptions) => AsyncIterable<NikaRunEvent<Outputs>>
+  readonly result: () => Promise<NikaRunResult<Outputs>>
+  readonly status: () => Promise<NikaRunStatus>      // resident-owned; native rejects (NikaCompatibilityError)
+  readonly cancel: () => Promise<NikaCancelResult>   // idempotent; acceptance is not a result
+  readonly done: Promise<NikaRunResult<Outputs>>     // compatibility alias of result()
 }
+```
 
-interface NikaRunResult {
+The `Outputs` generic narrows `result().outputs` at compile time. It is a
+type-level convenience only — nothing runtime-validates model output against
+it. The workflow's `outputs:` block *exports* named values; it does not
+validate them. Runtime shape enforcement comes from `infer.schema` (checked
+when the model answers) or an explicit validator task (`nika:validate`) —
+not from the export mapping, and never from a TypeScript generic.
+
+`run.id` differs by transport: on HTTP it is the resident's **durable job
+id** (the identity to store); on the native transport it is an ephemeral
+correlation id of this SDK process — it appears in no journal, cannot be
+recovered after the process ends, and `attachRun` refuses it. Resume a
+native run through the engine's own trace instead.
+
+```ts
+interface NikaRunResult<Outputs> {
   id: NikaRunId
   status: NikaRunStatus
   transport: 'native-process' | 'http'
   exitCode?: number
-  outputs?: Record<string, unknown>
+  outputs?: Outputs
   receipt?: NikaReceipt
   error?: NikaMachineError
   execution_id?: NikaExecutionId
@@ -31,15 +48,37 @@ interface NikaRunResult {
 }
 ```
 
-`NikaRunStatus`, `NikaEvent`, `NikaCheckResult` and engine-owned metadata are
-additive. Known words aid completion without closing the vocabulary.
+`result()` has one failure law: it **rejects** on transport, protocol or
+compatibility faults and on a broken observation
+(`NikaObservationInterrupted`, which carries the cursor) — none of which say
+the run failed; it may still be running. It **resolves** `status: 'failed'`
+for an admitted workflow failure (result data, with the engine's
+`error.code` when named), and `status: 'paused'` when a human gate holds the
+run. Read `isNikaRunSucceeded(result)` before treating it as success.
 
-`NikaSettlement` preserves the engine's `status`, `cause`, `elapsed_ms`,
-`tasks`, `spend` and `error` when present. Remote replay and attachment read
-the stored settlement; a missing runtime settlement remains absent.
-`paused` completes the observation represented by `done` while leaving the
-durable job resumable. Branded `NikaRunId`, `NikaJobId` and `NikaExecutionId`
-keep engine-issued identities distinct and remain assignable to `string`.
+## Events
+
+```ts
+type NikaRunEventKind =
+  | 'run.started' | 'task.scheduled' | 'task.started' | 'task.completed'
+  | 'task.failed' | 'run.waiting' | 'run.settled' | 'run.interrupted'
+  | 'run.sealed' | 'engine.event'
+
+interface NikaRunEvent<Outputs> {
+  readonly kind: NikaRunEventKind
+  readonly transport: NikaTransportKind
+  readonly status?: NikaRunStatus   // the engine's own state word, never renamed
+  readonly sequence?: number        // HTTP only — persist for attachRun({ lastEventId })
+  readonly task?: string            // the task a task.* frame named
+  readonly error?: NikaMachineError
+  readonly raw: NikaEvent<Outputs>  // the exact protocol frame the engine wrote
+}
+```
+
+`engine.event` is the preservation door: every frame this SDK version does
+not know yet arrives there with its `raw` frame untouched — nothing is
+dropped, and no lifecycle meaning is invented for it. Keep a `default`
+branch in reducers; the set is additive. `run.sealed` is native-only.
 
 ## Check and cancellation
 
@@ -49,23 +88,14 @@ findings report and process `exitCode`. A served-name HTTP check carries
 `clean: false` with a typed refusal in `error`; it does not invent a local
 findings report or exit code.
 
-`NikaCancelResult` describes action acceptance. Its `status` can be
-`cancellation_requested` while execution continues toward its own settlement.
-Use `run.done` for the actual result, including success racing cancellation.
+`NikaCancelResult` describes action acceptance: `cancelled` (settled on the
+reply), `already_settled`, or `cancellation_requested` — execution continues
+toward its own settlement in the last case. Use `run.result()` for the
+actual result, including success racing cancellation.
 
-## Events and proof
+## Proof
 
 ```ts
-// Common fields across the open NikaEvent union.
-interface NikaEventFields {
-  kind?: string
-  status?: NikaRunStatus
-  sequence?: number
-  receipt?: NikaReceipt
-  outputs?: Record<string, unknown>
-  [key: string]: unknown
-}
-
 type NikaReceipt = Readonly<Record<string, unknown>>
 
 interface NikaTraceVerifyResult {
@@ -79,13 +109,18 @@ interface NikaTraceVerifyResult {
 }
 ```
 
+The native path answers `verified` or `invalid`; the resident answers
+`unavailable` while it has no trace-journal authority — a typed answer, not
+a 404.
+
 ## Errors
 
 ```text
 NikaError
 ├── NikaConfigurationError
 ├── NikaTransportError
-│   └── NikaProtocolError
+│   ├── NikaProtocolError
+│   └── NikaObservationInterrupted
 ├── NikaCompatibilityError
 ├── NikaOperationError
 ├── NikaEventBufferOverflowError
@@ -94,9 +129,16 @@ NikaError
 NikaEngineUnavailable
 ```
 
-`NikaEngineUnavailable` is exported separately by binary resolution. Schedule
-types are exported for the exact CAS-backed resident schedule contract; inspect
-the merged source declarations for their additive engine-owned fields.
+`NikaEngineUnavailable` is exported separately by binary resolution.
+`NikaObservationInterrupted` means this client lost its observation of a run
+that may still be running — an evidence state, never a settlement. Schedule
+types are exported for the exact CAS-backed resident schedule contract;
+inspect the merged source declarations for their additive engine-owned
+fields.
+
+<Accordion title="Which published source this page describes">
+  <SourceContract sdk={SDK} />
+</Accordion>
 
 <Card title="Merged source types" icon="github" href={SDK.sourceCandidate}>
   Review the source declarations at the pinned merged SDK commit.

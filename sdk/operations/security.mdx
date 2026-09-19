@@ -37,9 +37,25 @@ authorizeEngineReport(report)
 const run = await nika.run(file, {
   maxCostUsd: 0.25,
 })
-request.signal.addEventListener('abort', () => void nika.cancel(run), { once: true })
-const result = await run.done
+
+// Wire cancellation defensively: an already-aborted signal never fires
+// 'abort' again, and a rejected cancel promise must not go unhandled.
+if (request.signal.aborted) {
+  void run.cancel().catch(() => {})
+} else {
+  request.signal.addEventListener(
+    'abort',
+    () => { void run.cancel().catch(() => {}) },
+    { once: true },
+  )
+}
+const result = await run.result()
 ```
+
+A `check()` report describes the bytes it read at that moment; `run()`
+re-admits the file's current content. If the path is mutable between the
+two calls, the report does not authorize what actually executes — gate the
+path's integrity, or snapshot first.
 
 Check these facts explicitly:
 
@@ -47,7 +63,7 @@ Check these facts explicitly:
 - model and environment requirements;
 - secret names, never values;
 - the static cost floor and unbounded flag;
-- explicit `cancel(run)` and runtime ceiling.
+- explicit `run.cancel()` and runtime ceiling.
 
 ## Remote seam
 

@@ -8,10 +8,13 @@ icon: "download"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 <Warning>
-  **Latest release: v{STATUS.version}**, what npm, `brew install`, and the install
-  script give you. Main may be ahead with unreleased features. Run `nika --version`
-  and `nika --help` after install; those commands are the executable source of
-  truth for your local binary. A grammar change ships with its `nika check --fix` migration.
+  **Latest engine release: v{STATUS.version}** — what `brew install` and the
+  install script give you. The npm package runs on its own channel (currently
+  one patch behind the engine; it bundles its own engine build, so an npm
+  install never depends on your CLI version). Run `nika --version` and
+  `nika --help` after install; those commands are the executable source of
+  truth for your local binary. A grammar change ships with its `nika check
+  --fix` migration.
 </Warning>
 
 ## Install today
@@ -102,7 +105,7 @@ nika compile hello hello.nika   # local starter · explicit dest · zero keys
 
 Run `nika` with no arguments and read the line it offers. **Your** binary
 is the source of truth; on v{STATUS.version} that line is
-`{STATUS.firstCommand}`, and this page is gated on saying the same thing.
+<code>{STATUS.firstCommand}</code>, and this page is gated on saying the same thing.
 
 It is the zero-spend first contact: a Ready hello candidate written to an
 explicit destination, without a provider call. Omit the destination to
@@ -197,11 +200,9 @@ can reach — not what a flag mentions.
 <Note>
   **The tool you already pay for** — running a workflow on an agent seat
   you are already logged into, with no key of your own — is the
-  `--access harness` class. `nika run --help` names the flag on
-  v{STATUS.version}, but the class is not compiled into that release:
-  `nika doctor` prints no `access` line and no `harness` rows on it. It
-  ships in the next one. Until your own `nika doctor` shows those rows,
-  read [Harness access](/guides/harness-access) as what is coming.
+  `--access harness` class, compiled into v{STATUS.version}. Its
+  prerequisites and limits live in [Harness access](/guides/harness-access);
+  `nika doctor` reports what **your** machine can actually use.
 </Note>
 
 ## What gets installed

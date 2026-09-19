@@ -41,13 +41,13 @@ your machine unless a cloud provider is explicitly selected.
 
 <Steps>
   <Step title="Pick your trust model">
-    Local / self-hosted (Ollama / LM Studio / llama.cpp / LocalAI / vLLM): zero key, zero egress, sovereign by default. EU cloud (Mistral). US frontier (Anthropic / OpenAI / Google). Aggregator (OpenRouter). Each has different residency and compliance trade-offs.
+    Local / self-hosted (Ollama / LM Studio / llama.cpp / LocalAI / vLLM): zero key, zero egress, sovereign by default. Frontier cloud (OpenAI / xAI / Qwen / Kimi / Anthropic / Google). EU cloud (Mistral). Aggregator (OpenRouter). Each has different residency and compliance trade-offs.
   </Step>
   <Step title="Check the `api_dialect`">
     All 5 local providers + most cloud providers speak `openai-chat`: same request shape, differing base URL. `anthropic` and `gemini` have native dialects.
   </Step>
   <Step title="Verify the backend is reachable">
-    Local providers need their server running (e.g. the Ollama daemon on `localhost:11434`) and no key. Cloud providers declare an `env_var` (e.g., `MISTRAL_API_KEY`). `nika doctor` checks provider readiness before run.
+    Local providers need their server running (e.g. the Ollama daemon on `localhost:11434`) and no key. Cloud providers declare an `env_var` (e.g., `OPENAI_API_KEY`). `nika doctor` checks provider readiness before run.
   </Step>
   <Step title="Pick default vs cheap model">
     Every provider declares both. `default_model` is the capable tier; `cheap_model` is the cost-optimized tier. Capability rules in `model-capabilities.toml` determine which models support vision / tools / streaming / structured output.
@@ -56,15 +56,15 @@ your machine unless a cloud provider is explicitly selected.
 
 ## By category
 
-Local/open-weight first (sovereignty default), then cloud starting with
-Mistral (EU) — anthropic/openai are never presented first, per the
-catalog's own presentation-order note in `canon.yaml`.
+Local/open-weight first (sovereignty default), then cloud — featured
+order: OpenAI · xAI · Qwen · Kimi (Moonshot) · Hugging Face · NVIDIA,
+then the rest alphabetically.
 
 <Tabs>
   <Tab title="Local / self-hosted (5)">
     | ID | Name | Dialect | Env var | Example model |
     |---|---|---|---|---|
-    | `ollama` | Ollama daemon (`localhost:11434`) | `openai-chat` | `(none)` | `llama3.1` |
+    | `ollama` | Ollama daemon (`localhost:11434`) | `openai-chat` | `(none)` | `qwen3.5:4b` |
     | `llamacpp` | llama.cpp `llama-server` (`localhost:8080/v1`) | `openai-chat` | `(none)` | `qwen2.5-7b-instruct` |
     | `vllm` | vLLM OpenAI server (`localhost:8000/v1`) | `openai-chat` | `(none)` | `meta-llama-3.1-70b-instruct` |
     | `lmstudio` | LM Studio (`localhost:1234/v1`) | `openai-chat` | `(none)` | `qwen2.5-14b-instruct` |
@@ -72,26 +72,31 @@ catalog's own presentation-order note in `canon.yaml`.
 
     <Tip>
       **The sovereign default.** No API key, no cloud egress:
-      `model: ollama/llama3.2:3b` runs offline / air-gapped. Any other
+      `model: ollama/qwen3.5:4b` runs offline / air-gapped. Any other
       OpenAI-compatible local server (Jan · llamafile · KoboldCpp) routes
       through the `openai` + `base_url` escape hatch.
     </Tip>
   </Tab>
 
-  <Tab title="Cloud (11)">
+  <Tab title="Cloud (11 canonical)">
     | ID | Name | Dialect | Env var | Default model |
     |---|---|---|---|---|
-    | `mistral` | Mistral AI (EU · sovereign-leaning) | `openai-chat` | `MISTRAL_API_KEY` | `mistral-large-latest` |
-    | `huggingface` | Hugging Face Inference Providers (100+ open-weight · 18 backends) | `openai-chat` | `HF_TOKEN` | `Qwen/Qwen3.5-9B:cheapest` |
-    | `openai` | OpenAI | `openai-chat` | `OPENAI_API_KEY` | `gpt-4o` |
+    | `openai` | OpenAI | `openai-chat` | `OPENAI_API_KEY` | `gpt-5.2` |
     | `xai` | xAI Grok | `openai-chat` | `XAI_API_KEY` | `grok-3` |
-    | `anthropic` | Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-4-6` |
-    | `gemini` | Google Gemini | `gemini` | `GEMINI_API_KEY` | `gemini-2.5-flash` |
-    | `deepseek` | DeepSeek | `openai-chat` | `DEEPSEEK_API_KEY` | `deepseek-chat` |
-    | `groq` | Groq (fastest open-weight) | `openai-chat` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` |
-    | `openrouter` | OpenRouter gateway | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-6` |
+    | `qwen` † | Qwen (Alibaba DashScope) | `openai-chat` | `DASHSCOPE_API_KEY` | `qwen-max` |
+    | `moonshot` | Moonshot AI (Kimi · frontier open-weight) | `openai-chat` | `MOONSHOT_API_KEY` | `kimi-k2` |
+    | `huggingface` | Hugging Face Inference Providers (100+ open-weight · 18 backends) | `openai-chat` | `HF_TOKEN` | `Qwen/Qwen3.5-397B-A17B:fastest` |
     | `nvidia` | NVIDIA API (Nemotron 3 · NIM self-hostable) | `openai-chat` | `NVIDIA_API_KEY` | `nvidia/nemotron-3-super-120b-a12b` |
-    | `moonshot` | Moonshot AI (Kimi K3 · frontier open-weight) | `openai-chat` | `MOONSHOT_API_KEY` | `kimi-k3` |
+    | `anthropic` | Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-4-6` |
+    | `deepseek` | DeepSeek | `openai-chat` | `DEEPSEEK_API_KEY` | `deepseek-chat` |
+    | `gemini` | Google Gemini | `gemini` | `GEMINI_API_KEY` | `gemini-2.5-flash` |
+    | `groq` | Groq (fastest open-weight) | `openai-chat` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` |
+    | `mistral` | Mistral AI (EU · sovereign-leaning) | `openai-chat` | `MISTRAL_API_KEY` | `mistral-large-latest` |
+    | `openrouter` | OpenRouter gateway | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-6` |
+
+    † `qwen` ships in the engine's extended catalog (one of the
+    {STATUS.providers} TOML records), outside the {CANON.providersCloud}
+    canonical cloud IDs.
 
     <Tip>
       Keys live in `${{ secrets.* }}` / env vars, never inline in the
@@ -141,7 +146,7 @@ tasks:
   primary:
     on_error: { skip: true }   # a dead provider skips (error preserved) · the gate below reads it
     infer:
-      model: ollama/llama3.2:3b              # local · zero key
+      model: ollama/qwen3.5:4b               # local · zero key
       prompt: "Explain linear algebra in one sentence."
 
   fallback:
@@ -149,13 +154,13 @@ tasks:
       problem: ${{ tasks.primary.error }}   # failure-observation edge · a skip carries its preserved error
     when: "${{ with.problem != null }}"     # local read of the binding
     infer:
-      model: mistral/mistral-large
+      model: openai/gpt-5.2
       prompt: "Explain linear algebra in one sentence."
 ```
 
 ```bash Required env
-ollama pull llama3.2:3b         # local primary · no key
-export MISTRAL_API_KEY=...      # cloud fallback only
+ollama pull qwen3.5:4b          # local primary · no key
+export OPENAI_API_KEY=...       # cloud fallback only
 nika run workflow.nika
 ```
 </CodeGroup>

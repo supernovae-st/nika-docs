@@ -12,7 +12,7 @@ ownership can leave no complete runtime trace.
 
 ```ts
 const run = await nika.run('workflow.nika')
-const result = await run.done
+const result = await run.result()
 
 if (!result.receipt) throw new Error('run did not issue a receipt')
 

@@ -68,7 +68,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 | `--dry-run` | `run` | Plan only; execute zero effects |
 | `--no-progress` | `run` | Deterministic non-animated render |
 | `--quiet` | `run` | Compact final verdict card |
-| `--format json|mermaid|dot` | `graph` | Choose graph projection |
+| `--format json|mermaid|dot` | `inspect` | Choose graph projection |
 | `--force` | `init`, `compile` | Overwrite existing generated files |
 
 ## Environment variables
@@ -81,16 +81,18 @@ loopback defaults built in. Everything below is opt-in:
 |---|---|
 | `NIKA_IMAGE_LOCAL_URL` | Base URL for the `local` image provider (any OpenAI-images-compatible server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni) |
 | `NIKA_TTS_LOCAL_URL` | Base URL for the `local` speech provider (any OpenAI-speech-compatible server — LocalAI · Kokoro · Speaches) |
-| `MISTRAL_API_KEY` | Mistral provider |
-| `ANTHROPIC_API_KEY` | Anthropic provider |
 | `OPENAI_API_KEY` | OpenAI provider |
-| `GEMINI_API_KEY` | Google Gemini provider |
-| `DEEPSEEK_API_KEY` | DeepSeek provider |
 | `XAI_API_KEY` | xAI provider |
-| `GROQ_API_KEY` | Groq provider |
-| `OPENROUTER_API_KEY` | OpenRouter provider |
+| `DASHSCOPE_API_KEY` | Qwen (Alibaba DashScope) provider |
+| `MOONSHOT_API_KEY` | Moonshot (Kimi) provider |
 | `HF_TOKEN` | Hugging Face provider (`NIKA_HUGGINGFACE_API_KEY` wins when set) |
 | `NVIDIA_API_KEY` | NVIDIA provider (`NIKA_NVIDIA_API_KEY` wins when set) |
+| `ANTHROPIC_API_KEY` | Anthropic provider |
+| `GEMINI_API_KEY` | Google Gemini provider |
+| `DEEPSEEK_API_KEY` | DeepSeek provider |
+| `GROQ_API_KEY` | Groq provider |
+| `OPENROUTER_API_KEY` | OpenRouter provider |
+| `MISTRAL_API_KEY` | Mistral provider |
 | `ELEVENLABS_API_KEY` | ElevenLabs speech (`NIKA_ELEVENLABS_API_KEY` wins when set) |
 
 The MCP server is intentionally read-only. It exposes 9 tools — `nika_check` ·

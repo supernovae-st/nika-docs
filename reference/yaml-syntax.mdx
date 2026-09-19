@@ -62,7 +62,7 @@ inputs:
 const:
   output_dir: "./output"                 # the file owns the destination
 secrets:
-  api_key: { source: env, key: MISTRAL_API_KEY }
+  api_key: { source: env, key: OPENAI_API_KEY }
 ```
 
 The integrity column is not decoration: under a `permits:` block an
@@ -280,7 +280,7 @@ provider **class**:
 | Class | Providers | Default deadline |
 |---|---|---|
 | Local | `ollama` · `lmstudio` · `llamacpp` · `localai` · `vllm` | **≥ 300s** |
-| Cloud | `mistral` · `anthropic` · `openai` · `openrouter` · `groq` · `deepseek` · `gemini` · `xai` | 30s |
+| Cloud | `openai` · `xai` · `qwen` · `moonshot` · `anthropic` · `openrouter` · `groq` · `deepseek` · `gemini` · `mistral` | 30s |
 
 A local model routinely needs minutes for one completion on consumer
 hardware — a 30s-everywhere default would silently kill every serious

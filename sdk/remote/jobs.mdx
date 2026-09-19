@@ -12,69 +12,77 @@ import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 ## Admit and persist identity
 
 ```ts
-const run = await nika.run('release.nika', {
-  idempotencyKey: crypto.randomUUID(),
-})
+// Mint the key once per logical job and persist it WITH the request —
+// an uncertain response retries with the same key and the same request.
+const idempotencyKey = crypto.randomUUID()
+await database.runs.insert({ idempotencyKey, workflow: 'release.nika' })
 
-await database.runs.insert({ jobId: run.id, lastEventId: 0 })
+const run = await nika.run('release.nika', { idempotencyKey })
+await database.runs.update({ idempotencyKey }, { jobId: run.id, lastEventId: 0 })
 ```
 
 The contained name in this example submits `{"workflow":"release.nika"}`
 to `POST /v1/jobs`; the resident captures its served workflow itself. No local
 binary or source is needed. An explicit local path such as
 `./release.nika` instead asks a compatible local engine for a snapshot
-and sends those captured bytes.
-Remote run options currently accept `idempotencyKey`; `vars`, `model` and
+and sends those captured bytes — and a snapshot freezes inputs, so `inputs`
+is refused on that form.
+Remote run options accept `idempotencyKey` and (where the resident
+advertises `jobInputs`) literal `inputs`; `vars`, `model` and
 `maxCostUsd` are refused because their request envelopes do not exist.
+A fresh `randomUUID()` per retry defeats the contract: the key is what lets
+the resident deduplicate the retry against the original admission.
 
 ## Observe and settle
 
 ```ts
-for await (const event of nika.events(run)) {
+for await (const event of run.events()) {
   if (event.sequence !== undefined) {
     await saveCheckpoint(run.id, event.sequence)
   }
 }
 
-const result = await run.done
+const result = await run.result()
 ```
 
 ## Recover after a process restart
 
 ```ts
 const recovered = await nika.attachRun(saved.jobId, {
-  lastEventId: saved.lastEventSequence,
+  lastEventId: saved.lastEventId,
 })
 
-for await (const event of nika.events(recovered)) {
+for await (const event of recovered.events()) {
   if (event.sequence !== undefined) {
     await saveCheckpoint(recovered.id, event.sequence)
   }
 }
 
-const result = await recovered.done
+const result = await recovered.result()
 ```
 
-Persist the job id and the last durably consumed sequence. Reattachment avoids
+Persist the job id and the last durably consumed sequence under one name —
+`lastEventId` — and reuse it. Reattachment avoids
 resubmitting a workflow merely because the Node process restarted.
 The engine's settlement remains available on `result.settlement` even when
 the cursor already consumed its terminal event. `paused` settles the current
-observation leg at a human gate and closes its event view and `done` promise.
+observation leg at a human gate and closes its event view and result promise.
 The durable job remains resumable by the engine. `attachRun()` resumes
 observation; it does not answer a human gate or start the next execution leg.
 
 ## Read status or cancel
 
 ```ts
-console.log(await nika.status(run))
-const cancellation = await nika.cancel(run)
-const result = await run.done
+console.log(await run.status())
+const cancellation = await run.cancel()
+const result = await run.result()
 ```
 
 `cancellation.status` may be `cancellation_requested`: the resident accepted
-the action and the runtime is still settling. Await `run.done` for its actual
-status, settlement and evidence. A success or failure racing cancellation is
-preserved; cancellation grace without a runtime result becomes `interrupted`.
+the action and the runtime is still settling. Await `run.result()` for its
+actual status, settlement and evidence. A success or failure racing
+cancellation is preserved; cancellation grace without a runtime result
+becomes `interrupted`.
 Queued jobs can be cancelled before execution, and an already-settled job
 returns its existing result unchanged. The API has no job-list route, so
 application indexes remain application-owned.

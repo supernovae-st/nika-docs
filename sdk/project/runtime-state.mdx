@@ -35,7 +35,7 @@ project root as `cwd`.
 
 ```ts
 const run = await nika.run('workflows/release.nika')
-const result = await run.done
+const result = await run.result()
 
 if (!result.receipt) throw new Error('run did not issue a receipt')
 

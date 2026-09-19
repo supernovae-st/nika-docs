@@ -17,9 +17,9 @@ what protocol crosses the process edge.
 
 | Need | Use | Status | Boundary |
 |---|---|---|---|
-| Product code starts a workflow | local `Nika` | Merged SDK source; npm pending | native process |
+| Product code starts a workflow | local `Nika` | Published npm 0.120.0 (bundled engine) | native process |
 | The project clock starts work | `nika serve` (no `--bind`) | Live | `nika.yaml arm[]` to the resident firer |
-| An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Merged SDK source; public engine | Bearer + OpenAPI · cancellation requests action |
+| An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Published SDK · public engine | Bearer + OpenAPI · cancellation requests action |
 | The host scheduler starts work | `nika arm --emit` | Live | launchd or systemd to `nika arm fire` |
 | The engine needs local inference | `nika model serve` | Live | Loopback OpenAI-compatible model API |
 
@@ -29,15 +29,17 @@ what protocol crosses the process edge.
 
 ```ts
 const run = await nika.run('workflows/support.nika', {
-  vars: { ticket: request.id },
+  inputs: { ticket: request.id },
 })
 
-for await (const event of nika.events(run)) render(event)
-const result = await run.done
+for await (const event of run.events()) render(event)
+const result = await run.result()
 ```
 
 The application owns the user experience and cancellation. The engine owns
-workflow admission, execution and the receipt.
+workflow admission, execution and the receipt. `inputs` carries literal
+typed values — see [configuration](/sdk/reference/configuration) for why
+the deprecated `vars` operator channel is not the app door.
 
 ## Clock-driven project
 
