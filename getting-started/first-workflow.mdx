@@ -83,10 +83,11 @@ mismatched receipt changes the verdict, not the run's result.
     `--var key=value` on the CLI.
   </Accordion>
   <Accordion title="What if a permission is absent?" icon="circle-question">
-    The task that needs it is refused at check (`NIKA-AUTH-006`). An
-    absent `permits:` block means zero authority — effects stay refused
-    until the file declares them. `nika check --infer-permits` drafts the
-    tightest block for you.
+    Admission refuses at check; the finding names the missing
+    permission. An absent `permits:` block is zero authority
+    (`NIKA-AUTH-006`). A declared `permits: {}` that omits a tool the
+    file reaches is `NIKA-SEC-004` — the plate below. `nika check
+    --infer-permits` drafts the tightest block for you.
   </Accordion>
   <Accordion title="What if I switch the model?" icon="circle-question">
     One line. `ollama/qwen3.5:4b` runs locally after
@@ -102,7 +103,7 @@ play — nothing autoplays.
 
 <video
   controls
-  playsinline
+  playsInline
   preload="none"
   poster="/images/posters/check-denied.webp"
   aria-label="nika check refusing a workflow that lacks the permits it needs"
@@ -113,10 +114,11 @@ play — nothing autoplays.
 
 <details>
   <summary>What this plate shows</summary>
-  A `nika check` on engine 0.120.1 names the tool and path the file
-  would touch and the `permits:` entry that is missing. Admission
-  refuses before any task runs. This is a measured CLI plate, not the
-  TypeScript SDK.
+  `nika check denied.nika` on CLI 0.120.1. Task `peek` would invoke
+  `nika:read` on `./hello.nika`. `permits: {}` grants no tools.
+  Admission refuses with `NIKA-SEC-004`: `nika:read` is outside
+  `permits.tools`. Nothing ran. Fix: add `"nika:read"` to
+  `permits.tools`. Condensed measured plate, not the TypeScript SDK.
 </details>
 
 [Download GIF](/images/gifs/check-denied.gif)
@@ -193,24 +195,19 @@ guarantee covers shape, not outcome.
 
 ## 6. See a real job
 
-[Meeting actions](/examples/meeting-actions) turns a transcript into
-typed, tracker-ready action items. It defaults to a local model
-(`ollama/qwen3.5:4b`, no provider key — your own compute); point it at a
-cloud provider and `check` prices the run before anything executes.
-Same file shape as your hello; the model and tools change, the lifecycle
-does not.
+This short recorded demonstration turns synthetic notes into an action
+list using `xai/grok-3-mini`. CLI 0.120.1, condensed timing.
 
-On the CLI, a mock rehearsal of that job prints a **string** (the
-engine's storyboard and `said "…"` line). Typed `{owner, task, due}`
-objects are the workflow's `outputs:` / SDK `result.outputs` — they
-are not the CLI plate below. Captured on CLI 0.120.1:
+The demonstration file has no typed schema, so the run exports a
+**string**. The full [meeting-actions](/examples/meeting-actions)
+example declares `{owner, task, due}` and exports typed actions.
 
 <video
   controls
-  playsinline
+  playsInline
   preload="none"
   poster="/images/posters/meeting-actions.webp"
-  aria-label="CLI 0.120.1 running the meeting-actions example"
+  aria-label="CLI 0.120.1 running a measured xai/grok-3-mini meeting-notes job"
 >
   <source src="/videos/meeting-actions.webm" type="video/webm" />
   <source src="/videos/meeting-actions.mp4" type="video/mp4" />
@@ -218,9 +215,17 @@ are not the CLI plate below. Captured on CLI 0.120.1:
 
 <details>
   <summary>What this plate shows</summary>
-  Input file, the `nika run` command, then the 0.120.1 storyboard and
-  a string result. It does not prove typed action-item objects; those
-  live on `outputs:` after a real local or cloud model answers.
+  Synthetic notes: Maya ships the changelog Friday; Leo pings legal
+  about the DPA; Sam books the staging window. `nika run
+  meeting-actions.nika --model xai/grok-3-mini` on CLI 0.120.1
+  (`9d554c84c`) returned:
+
+  Maya — ship the changelog (Friday).
+  Leo — ping legal about the DPA (TBD).
+  Sam — book the staging window (TBD).
+
+  Measured: 11.4s · 29 output tokens · 235 in · 192 cached · $0.00114.
+  Condensed plates of a live infer, not a mock rehearsal.
 </details>
 
 [Download GIF](/images/gifs/meeting-actions.gif)
