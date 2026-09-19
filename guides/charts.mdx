@@ -3,12 +3,13 @@ title: "Charts"
 description: "Deterministic chart artifacts — rows + a semantic spec compile to byte-identical SVG, sha256-chained into the run's trace. Five types, typed semantics, an optional Vega-Lite sibling."
 ---
 
-`nika:chart` is the data twin of [`nika:image_fx`](/guides/image-effects):
-pure compute plus one permit-gated write — no network, no clock, no
-provider. Rows and a semantic spec compile to an SVG that is
-**byte-identical forever** for identical inputs, and the artifact's sha256
-joins the run's hash-chained trace. Your cost report draws its own
-receipts.
+Need a chart that is itself a receipt? `nika:chart` is the data twin of
+[`nika:image_fx`](/guides/image-effects): pure compute plus one
+permit-gated write — no network, no clock, no provider. Rows and a
+semantic spec compile to an SVG that is **byte-identical forever** for
+identical inputs, and the artifact's sha256 joins the run's hash-chained
+trace. Rehearse any surrounding infer with `mock/echo`; this builtin
+does not call a model.
 
 ## The 30-second chart
 

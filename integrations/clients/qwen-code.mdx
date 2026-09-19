@@ -1,6 +1,6 @@
 ---
 title: "Use Nika with Qwen Code"
-description: "Add the read-only Nika oracle to Qwen Code's settings.json — same key as Gemini CLI, its own dotdir; one wire command in the next release."
+description: "Add the read-only Nika oracle to Qwen Code's settings.json — same key as Gemini CLI, its own dotdir."
 sidebarTitle: "Qwen Code"
 icon: "meteor"
 ---
@@ -16,9 +16,9 @@ Add the `nika` entry to `~/.qwen/settings.json`:
 { "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
 ```
 
-`nika wire qwen` ships in the next release and writes exactly this —
-only the `mcpServers` key is touched, every other setting survives, and
-re-running prints `· current` (idempotent).
+`nika wire qwen` writes exactly this — only the `mcpServers` key is
+touched, every other setting survives, and re-running prints `· current`
+(idempotent).
 
 ## The repo side
 

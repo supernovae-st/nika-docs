@@ -14,7 +14,7 @@ real output from this workflow:
 # Pull commits and tickets in parallel, then digest.
 nika: standup-digest
 
-model: mock/echo                       # swap for ollama/llama3.2:3b or any provider
+model: mock/echo                       # simulation · swap for ollama/qwen3.5:4b or any provider
 
 permits:
   exec: true                           # both probes are shell strings · only the argv form takes an allowlist
@@ -82,6 +82,7 @@ $ nika run standup-digest.nika
   ✔  digest   infer · mock/echo  0ms
   ── 3/3 done · ≥ $0.00 (1 unpriced) · elapsed 0.4s ──────────────
     trace: .nika/traces/2026-07-28T06-58-44Z-bb6e.ndjson · 15 events · chain b35e86afcb024cab8b17cc0c7701d99034ecf5aa70ab4fc5e28d6225933b13be
+  (historical capture 2026-07-28 · re-run for a current journal)
 ```
 
 Four render modes, one per audience:
@@ -181,6 +182,10 @@ theme fine). `--color never` (or `--plain`), `NO_COLOR`, and
 colour chain, no per-verb twins.
 
 ## Related
+
+From an app, iterate `run.events()` then await `run.result()` — see
+[SDK runtime events](/sdk/runtime/events). `traceVerify` only reads
+evidence the run already left.
 
 - [Concepts · Traces](/concepts/traces): the NDJSON event stream behind
   every frame on this page.

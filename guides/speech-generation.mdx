@@ -34,7 +34,7 @@ tasks:
     invoke:
       tool: "nika:tts_generate"
       args:
-        provider: local             # sovereign wire · mock = zero-key dry-run · or openai · elevenlabs
+        provider: mock              # simulation · flip to local / openai / elevenlabs
         text: "Local first. Honest always. That is the whole design."
         speed: 1.1
         output_dir: "./out"

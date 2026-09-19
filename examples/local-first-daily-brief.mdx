@@ -80,7 +80,10 @@ Then:
 nika run daily-brief.nika
 ```
 
-A real run of this exact file (Apple Silicon, qwen3.5:4b):
+Rehearse the shape first with `model: mock/echo` (simulation — tools
+still run; fetch still hits the network). Then swap the model. A real
+run of this exact file (historical capture 2026-07-09 · Apple Silicon,
+qwen3.5:4b):
 
 ```text
 ✔  fetch  invoke · nika:fetch        762ms
@@ -121,3 +124,5 @@ deliberate step in your own job, with your own budget flags.
 - Mix providers: keep `fetch` local, point `brief` at a cloud model with
   `--max-cost-usd` — the budget gate prices the file's own model before
   anything starts ([cost honesty](/guides/cost-honesty)).
+- From an app: `npm install @supernovae-st/nika@0.120.0`, then `run()` /
+  `run.result()` on this file — [SDK quickstart](/sdk/start/quickstart).

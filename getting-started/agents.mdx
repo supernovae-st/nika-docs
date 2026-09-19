@@ -5,8 +5,6 @@ sidebarTitle: "Agents"
 icon: "robot"
 ---
 
-import { STATUS } from "/snippets/_status-snapshot.mdx";
-
 Your agent already does the work: a PR review in Claude Code, a research
 brief in Codex, a triage pass in Cursor. Then the chat scrolls away and the
 procedure is gone. Nika's job is to keep it: the agent writes the workflow
@@ -19,6 +17,11 @@ Two commands wire any agent:
 nika init            # AGENTS.md + schema wiring + Cursor rule + agent skill
 nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
 ```
+
+Driving Nika from an app instead of an editor? Install
+`@supernovae-st/nika@0.120.0`, write `hello.nika`, call `run()`, then
+`run.result()` — [TypeScript quickstart](/sdk/start/quickstart). The
+agent loop below is for the editor/CLI door.
 
 ## `nika init`: teach the repo
 
@@ -78,26 +81,34 @@ stays in your hands):
 
 | Client | Command | What it patches |
 |---|---|---|
+| Detected on this machine | `nika wire detected` | only the clients `nika doctor` can see |
 | Claude Code | `nika wire claude` | `~/.claude.json` → `mcpServers.nika` |
+| Claude Desktop | `nika wire claude-desktop` | `claude_desktop_config.json` |
 | Cursor | `nika wire cursor` | `~/.cursor/mcp.json` |
 | Windsurf | `nika wire windsurf` | `~/.codeium/windsurf/mcp_config.json` |
 | VS Code | `nika wire vscode` | `.vscode/mcp.json` (project-local) |
 | Codex CLI | `nika wire codex` | `~/.codex/config.toml` → `[mcp_servers.nika]` |
-| Everything | `nika wire all` | all of the above |
+| Gemini CLI | `nika wire gemini` | `~/.gemini/settings.json` |
+| Qwen Code | `nika wire qwen` | `~/.qwen/settings.json` |
+| Kimi Code | `nika wire kimi` | `~/.kimi-code/mcp.json` |
+| OpenCode | `nika wire opencode` | `opencode.json` |
+| Hermes | `nika wire hermes` | `~/.hermes/config.yaml` |
+| Zed | `nika wire zed` | `~/.config/zed/settings.json` |
+| Continue | `nika wire continue` | `~/.continue/mcpServers/nika.json` |
+| Cline | `nika wire cline` | `cline_mcp_settings.json` (resolved) |
+| LM Studio | `nika wire lmstudio` | `~/.lmstudio/mcp.json` (resolved) |
+| Junie | `nika wire junie` | `.junie/mcp/mcp.json` |
+| Grok Build | `nika wire grok` | `~/.grok/config.toml` |
+| Everything | `nika wire all` | previewed, then confirmed (or `--yes`) |
 
 Whatever the harness, the payloads an agent parses are the same
 versioned wires — envelopes, exit codes, and evolution rules are
 documented in [Machine surfaces](/reference/machine-surfaces).
 
 Any other MCP client takes the same stanza — a stdio server,
-`command: nika`, `args: ["mcp"]`. Verified shapes:
-
-- **Gemini CLI** (has its own installer): `gemini mcp add nika nika mcp`
-  (writes the project's `.gemini/settings.json`).
-- **Zed**: `settings.json` → `"context_servers": { "nika": { "command":
-  "nika", "args": ["mcp"] } }`.
-- **opencode · Cline · Continue…**: same two fields in each client's MCP
-  config. The oracle is client-agnostic.
+`command: nika`, `args: ["mcp"]`. Gemini CLI also accepts
+`gemini mcp add nika nika mcp`. Per-client files:
+[MCP clients](/integrations/mcp-clients).
 
 The server exposes two tool families — **validate** and **learn**:
 
@@ -106,11 +117,12 @@ The server exposes two tool families — **validate** and **learn**:
   its own file before you ever see it.
 - **`nika_explain`**: any `NIKA-XXX` error code, explained.
 - **`nika_schema` · `nika_examples` · `nika_template` · `nika_canon` ·
-  `nika_catalog` · `nika_tools`**: the authoring surface — the JSON
-  Schema, the runnable examples, the skeletons, the canon SSOT, and the
-  provider + builtin catalogs as versioned machine projections, so the
-  agent follows the template→fill→check→repair path instead of guessing
-  structure. All read-only, all served from the embedded pack.
+  `nika_catalog` · `nika_tools` · `nika_inspect`**: the authoring
+  surface — the JSON Schema, the runnable examples, the skeletons, the
+  canon SSOT, the provider + builtin catalogs, and the typed DAG, as
+  versioned machine projections, so the agent follows the
+  template→fill→check→repair path instead of guessing structure. All
+  read-only, all served from the embedded pack.
 
 <Note>
   The `codex` target is shipped (0.93+): `nika wire codex` patches

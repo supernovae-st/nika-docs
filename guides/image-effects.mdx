@@ -108,7 +108,7 @@ stream, zero wall-clock. So the artifact can be:
 One recipe, one hash, forever. Batch-style a hundred campaign images with
 `for_each` and every one of them is a receipt.
 
-```yaml
+```yaml fragment · paste into the file above
   variants:
     with:
       src: ${{ tasks.generate.output.images[0].path }}

@@ -11,7 +11,8 @@ projects) and project `.kimi-code/mcp.json` (a same-named project entry
 wins). The binary comes first: `brew install supernovae-st/tap/nika`
 ([other paths](/getting-started/installation)).
 
-Add the `nika` entry to `~/.kimi-code/mcp.json`:
+`nika wire kimi` writes `~/.kimi-code/mcp.json` (idempotent). Or add the
+`nika` entry by hand:
 
 ```json
 { "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }

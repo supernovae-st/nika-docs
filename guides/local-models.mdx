@@ -14,23 +14,26 @@ production servers.
 Install [Ollama](https://ollama.com), then:
 
 ```bash
-ollama pull llama3.2:3b
+ollama pull qwen3.5:4b
 ```
 
-That's it. In any workflow:
+That's it. In any workflow (the same local default the engine scaffold
+and brew caveat teach):
 
 ```yaml
-model: ollama/llama3.2:3b
+model: ollama/qwen3.5:4b
 ```
 
 `nika doctor` confirms the wiring (it detects the running Ollama server and
 prints the exact fix if something is off).
 
 <Tip>
-  `llama3.2:3b` is the showcase default: small enough for most laptops,
-  good enough for structured extraction. Swap the tag for anything in the
-  [Ollama library](https://ollama.com/library): `qwen2.5`, `mistral`,
-  `phi4`, larger llama variants.
+  `qwen3.5:4b` is the first-run local default: small enough for most
+  laptops, good enough for structured extraction. Swap the tag for
+  anything in the [Ollama library](https://ollama.com/library):
+  `llama3.2`, `mistral`, `phi4`, larger Qwen variants. Rehearse with
+  `model: mock/echo` when you want zero daemon and zero keys — mock
+  simulates the model reply; it does not disable tools or effects.
 </Tip>
 
 ## 2. Any Hugging Face GGUF, still one command
@@ -122,9 +125,11 @@ The file does not change shape. One line moves the workflow between a
 laptop and an API:
 
 ```yaml
-model: ollama/llama3.2:3b        # local · free · private
-# model: mistral/mistral-small   # EU cloud
-# model: anthropic/claude-haiku-4-5
+model: ollama/qwen3.5:4b         # local · unpriced · private
+# model: openai/gpt-4.1-mini     # cloud · pin a cataloged id
+# model: xai/grok-4
+# model: huggingface/…           # Hub-served
+# model: nvidia/…                # NIM
 ```
 
 <Note>

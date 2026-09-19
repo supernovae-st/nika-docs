@@ -12,15 +12,14 @@ server every wired client talks to. Its contract is one sentence:
 > and teaches; running a workflow stays on the CLI, where `--max-cost-usd`,
 > the permits boundary and the trace file live.
 
-The released binary serves stdio; a **Streamable HTTP** transport
-(`nika mcp --transport http` — POST JSON-RPC, origin-gated against
-DNS-rebinding, loopback bind by default on port 8123) has landed on `main`
-and ships with the next release, for managed hosts that cannot spawn a
-process. Widening `--bind` beyond loopback is on you: put TLS + auth in
-front first. Either transport, there is no write tool and no way to make
-the oracle execute anything. That is the design, not a gap: generation and
-repair belong to [the authoring skill](/getting-started/agents), execution
-belongs to a human-gated `nika run`.
+The released binary serves **stdio** by default. Streamable HTTP also
+ships on 0.120.1: `nika mcp --transport http` (POST JSON-RPC,
+origin-gated, loopback on port 8123 by default). Widening `--bind`
+beyond loopback is on you: put TLS + auth in front first. Either
+transport, there is no write tool and no way to make the oracle execute
+anything. That is the design, not a gap: generation and repair belong to
+[the authoring skill](/getting-started/agents), execution belongs to a
+human-gated `nika run`.
 
 ## Start it
 
@@ -32,10 +31,12 @@ uses the same two fields:
 { "command": "nika", "args": ["mcp"] }
 ```
 
-`nika wire <client>` writes this stanza into the right config file for
-cursor · vscode · windsurf · claude · codex · opencode · hermes (and
-`all`). For any other MCP-capable client, paste the stanza into its
-server config — see [per-client wiring](/integrations/mcp-clients).
+`nika wire <client>` writes this stanza into the right config file.
+Targets on the released binary include cursor · vscode · windsurf ·
+claude · claude-desktop · codex · gemini · qwen · opencode · hermes ·
+zed · continue · cline · lmstudio · junie · grok · kimi (and
+`detected` / `all`). For any other MCP-capable client, paste the stanza
+into its server config — see [per-client wiring](/integrations/mcp-clients).
 
 ## The 9 tools
 
@@ -71,8 +72,8 @@ the category:
   provider needs; it never reads or returns values.
 - What the trace's hash chain proves — and what it does not — is stated
   plainly in [machine surfaces](/reference/machine-surfaces): tamper-evidence
-  for the recorded run, not a signature. Signed attestations are a separate,
-  future layer.
+  for the recorded run, not a signature. Author-binding signatures exist
+  (`nika sign`); they do not replace `nika trace verify`.
 
 ## Context budget
 

@@ -7,7 +7,13 @@ icon: "diagram-project"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika Diamond grows additively across 1.x minors, organized across six
+This page is the **engine crate map**, not the product getting-started
+path. The released binary already includes `nika serve`, `nika mcp`,
+`nika lsp` and the CLI. The published TypeScript SDK is
+`@supernovae-st/nika` — a separate repository from any planned Rust
+`nika-sdk` crate on the graph below.
+
+Nika's engine grows additively across 1.x minors, organized across six
 layers. Today **{STATUS.cratesAdmitted} crates are admitted** and
 {STATUS.wipCrates.length} are WIP
 ({STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}), against a
@@ -15,7 +21,8 @@ projected horizon of **{STATUS.cratesTarget} crates** (hard cap
 {STATUS.cratesCap}, per ADR-037). The horizon is a projection, never a gate:
 crates are admitted when they pass the 12 gates, not to reach a number.
 The remaining crates are future 1.x expansion, not required for the first-run
-CLI/LSP/MCP path.
+CLI/LSP/MCP path. Nodes marked 🧭 on the graph are crate-layout
+reservations; do not read them as "this command has not shipped."
 
 <Tip>
   Live state: [`/reference/status`](/reference/status). Layer model:
@@ -162,9 +169,12 @@ trait reservations already in `nika-kernel`.
   </Accordion>
 </AccordionGroup>
 
-## Admission queue
+## Admission queue (historical 0.8x)
 
-Current admission order (per Q5 decision, rev.2):
+This order records how the Diamond rewrite admitted crates. It is **not**
+a current product roadmap — `nika-schema`, the four verbs, `nika-cli`,
+`nika-mcp`, `nika-lsp` and the `nika` binary already ship. Keep it as
+the original sequence (Q5, rev.2):
 
 <Steps>
   <Step title="Round 3: nika-catalog-codegen">

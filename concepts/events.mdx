@@ -7,15 +7,16 @@ icon: "signal"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-An executing Nika workflow emits a structured stream of **events**. One event is one
-`Event` struct from `nika-kernel::infra::event_sink`, carried as one
-line of NDJSON on stdout (or any other sink you wire in). Events are
-deterministic, typed, and carry source IDs that correlate to the trace
-stack.
+An executing Nika workflow emits a structured stream of **events**.
+From an app, `run.events()` on `@supernovae-st/nika@0.120.0` yields
+normalized kinds; from the CLI, `nika run file.nika --json` prints one
+NDJSON object per line. The last line of a settled run is `run_settled`.
+`traceVerify` / `nika trace verify` then read the journal that already
+exists — they do not seal a run, rerun it, or prove the job was correct.
 
-The observability surface has **five sibling channels**, each a separate
-kernel trait, so impls can be swapped, sampled, or persisted
-independently:
+The observability surface has **five sibling channels** inside the
+engine. Kernel trait names below are the implementation contract, not
+something a workflow author imports:
 
 | Channel | Trait | Semantics |
 |---|---|---|
@@ -211,15 +212,20 @@ Both land as additive, `#[non_exhaustive]` extensions. In a future minor they
 bridge zero-copy into OTel's `SpanContext` when
 `nika-observability-otel` admits.
 
-## Enable the stream (target CLI)
+## Enable the stream
 
 ```bash
 nika run workflow.nika --json             # stdout NDJSON
 nika run workflow.nika --json > run.log   # file
+nika trace export <path>                  # OTLP/JSON lines from a recorded journal
 ```
 
-The CLI JSON lane is live. HTTP/SSE/OTLP export belongs to the future
-`nika-serve` interface; today the local binary owns the run stream.
+The CLI JSON lane is live on the released binary. `nika serve --bind`
+exposes authenticated job lifecycle over HTTP for a resident; `nika trace
+export` projects a recorded journal to OTLP/JSON lines. Admitting a job
+does not guarantee a complete trace — available evidence depends on
+execution and recording. From TypeScript, iterate `run.events()` then
+await `run.result()`; see [SDK runtime events](/sdk/runtime/events).
 
 ## Why five channels, not one
 

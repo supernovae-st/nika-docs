@@ -32,9 +32,12 @@ icon: "plug"
 audit keystroke-fresh buffers without touching the disk.
 
 <Tip>
-  Prefer typed TypeScript over process glue? The released
-  The [`Nika` client](/sdk/local/client) owns binary discovery, JSON
-  decoding, cancellation, run events and typed errors. The
+  Prefer typed TypeScript over process glue? The published
+  [`Nika` client](/sdk/local/client) (`@supernovae-st/nika@0.120.0`)
+  owns binary discovery, JSON decoding, cancellation, `run.events()`
+  and typed errors. `run()` returns an admitted handle; `run.result()`
+  settles. `traceVerify` reads existing evidence — it does not seal,
+  rerun, or prove the job was correct. The
   [SDK runtime guide](/sdk/runtime/events) maps these wires to code.
 </Tip>
 
@@ -96,9 +99,8 @@ payloads — the two lanes cannot drift apart by construction.
   or machine. Requirements name the env var; doctor reports set/unset.
 
 <Note>
-  Next on this page once the next engine tag ships: `nika welcome --deep
-  --json` (`context_version`) — the whole workspace truth in one call
-  (file map with per-file verdicts · run inventory with actual cost ·
-  environment snapshot · wiring state · caps always reported, relative
-  paths only). It is merged on `main` today and rides the next release.
+  `nika welcome --deep --json` ships on the released 0.120.1 binary —
+  the whole workspace truth in one call (file map with per-file verdicts ·
+  run inventory · environment snapshot · wiring state). Caps are always
+  reported; paths stay relative.
 </Note>
