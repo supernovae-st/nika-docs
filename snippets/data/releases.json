@@ -3,6 +3,19 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.120.2",
+      "name": "v0.120.2",
+      "publishedAt": "2026-09-19T17:43:29Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.120.2",
+      "assetCount": 8,
+      "highlights": [
+        "The release train also tags vX.Y.Z on the same GHCR manifest.",
+        "Compile EDIT keeps the source around an edited constant.",
+        "Compile refuses integer answers it cannot hold exactly."
+      ],
+      "notesSha256": "fff5e17bb3dc5053d82ef5006e3c230693bbec6eb5fe553ab7a909a82fe4ab15"
+    },
+    {
       "tag": "v0.120.1",
       "name": "v0.120.1",
       "publishedAt": "2026-09-18T22:35:56Z",
