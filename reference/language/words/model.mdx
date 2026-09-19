@@ -72,7 +72,7 @@ inputs:
     # A `required:` input still carries a `default:` here so the skeleton
 ```
 
-A skeleton may show `required: true` next to `default:` so the compiled file can run immediately. That pair is not the usual app contract: a required input with no default is a HINT at `nika check` and `NIKA-1708` at `nika run` until you pass `--var` or SDK `inputs`.
+The pinned schema text says a `required` input is not satisfied by `default` (the caller must supply a value). Published CLI 0.120.1 still applies `default:` when the key is omitted. That is a source-versus-implementation discrepancy, not one law. Prefer `required: false` plus `default:` for knobs, and required without `default:` for caller-owned values (`NIKA-1708` at run).
 
 
 ### Templates containing this field

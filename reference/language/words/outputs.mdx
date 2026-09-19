@@ -26,7 +26,33 @@ The workflow's return value · symmetric to inputs. Each entry is a `${{ tasks.X
 
 
 ```json
-{"anyOf": [{"type": "string"}, {"type": "object", "required": ["value"], "additionalProperties": false, "properties": {"value": {"type": "string"}, "type": {"$ref": "#/$defs/typeExpr", "description": "The output's type · the full TypeExpr of 09-types (R3b · LAW-GRAMMAR-0211 · the flat 6-enum is dead alongside the inputs half · LAW-SURFACE-0211)."}, "description": {"description": "Free-form prose about this output · what a caller receives. Documentation only — the contract is `value` and `type`.", "type": "string"}}}]}
+{
+  "anyOf": [
+    {
+      "type": "string"
+    },
+    {
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/typeExpr",
+          "description": "The output's type · the full TypeExpr of 09-types (R3b · LAW-GRAMMAR-0211 · the flat 6-enum is dead alongside the inputs half · LAW-SURFACE-0211)."
+        },
+        "description": {
+          "description": "Free-form prose about this output · what a caller receives. Documentation only — the contract is `value` and `type`.",
+          "type": "string"
+        }
+      }
+    }
+  ]
+}
 ```
 
 </details>

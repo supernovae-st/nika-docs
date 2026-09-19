@@ -105,8 +105,21 @@ class KnowledgeMirrorTests(unittest.TestCase):
         self.assertNotIn('$&#123;',page)
         self.assertIn('```json',page)
         self.assertIn('<details>',page)
-        self.assertIn('NIKA-1708',page)
+        self.assertIn('source-versus-implementation',page)
         self.assertNotRegex(page,r'\| additionalProperties \| &#123;')
+        self.assertIn('\n  "type":',page)
+    def test_code_span_keeps_backticks_and_pipes_leave_the_table(self):
+        self.assertIn('`',mirror.code_span('a`b'))
+        self.assertIn('a`b',mirror.code_span('a`b'))
+        word=copy.deepcopy(self.data['words'][0])
+        word['name']='pipe_field';word['id']='language:word:pipe_field';word['docsPath']='reference/language/words/pipe_field'
+        word['contracts']=[{'pointer':'/properties/pipe_field','context':'/','required':False,'siblings':[],
+            'declaration':{'type':'string','pattern':'a|b','enum':['x|y']}}]
+        data=copy.deepcopy(self.data);data['words'].append(word)
+        page=mirror.render(data)['reference/language/words/pipe_field.mdx']
+        self.assertNotRegex(page,r'\| pattern \| `')
+        self.assertIn('declaration below',page)
+        self.assertIn('a|b',page)
     def test_link_audit_handles_underscores_and_rejects_missing_targets(self):
         import tempfile, subprocess
         with tempfile.TemporaryDirectory() as directory:

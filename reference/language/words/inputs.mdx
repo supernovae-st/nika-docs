@@ -26,7 +26,29 @@ Typed workflow inputs · `${{ inputs.X }}` · the parameters an author declares 
 
 
 ```json
-{"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"$ref": "#/$defs/typeExpr"}, "required": {"type": "boolean", "description": "The caller MUST supply a value (no default is consulted)."}, "default": {"description": "The value used when the caller supplies none · MUST conform to `type:` (R3b · LAW-TYPE-0211 · NIKA-DEFAULT-001 · the P0 soundness hole is closed at check)."}, "description": {"description": "Free-form prose about this input · what a caller is being asked for. Documentation only — the contract is `type` and `required`.", "type": "string"}}}
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type"
+  ],
+  "properties": {
+    "type": {
+      "$ref": "#/$defs/typeExpr"
+    },
+    "required": {
+      "type": "boolean",
+      "description": "The caller MUST supply a value (no default is consulted)."
+    },
+    "default": {
+      "description": "The value used when the caller supplies none · MUST conform to `type:` (R3b · LAW-TYPE-0211 · NIKA-DEFAULT-001 · the P0 soundness hole is closed at check)."
+    },
+    "description": {
+      "description": "Free-form prose about this input · what a caller is being asked for. Documentation only — the contract is `type` and `required`.",
+      "type": "string"
+    }
+  }
+}
 ```
 
 </details>
@@ -54,7 +76,7 @@ inputs:
     # `--var goal=…` overrides it at any time.
 ```
 
-A skeleton may show `required: true` next to `default:` so the compiled file can run immediately. That pair is not the usual app contract: a required input with no default is a HINT at `nika check` and `NIKA-1708` at `nika run` until you pass `--var` or SDK `inputs`.
+The pinned schema text says a `required` input is not satisfied by `default` (the caller must supply a value). Published CLI 0.120.1 still applies `default:` when the key is omitted. That is a source-versus-implementation discrepancy, not one law. Prefer `required: false` plus `default:` for knobs, and required without `default:` for caller-owned values (`NIKA-1708` at run).
 
 
 ### Templates containing this field

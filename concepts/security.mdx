@@ -44,8 +44,7 @@ Two laws govern it:
    Hardened defaults (SSRF, shell blocklist, secret masking) still apply,
    and they do **not** grant exec, net, fs, or tools. Measured on
    published 0.120.0 and GitHub 0.120.1: `exec: ["printf", "hello"]`
-   with no `permits:` is `NIKA-AUTH-006` at check, exit 2
-   (`coordination/docs-concept-audit/absent-permits*.json`). Spec
+   with no `permits:` is `NIKA-AUTH-006` at check, exit 2. Spec
    01-envelope · LAW-AUTH-0324.
 2. **Any `permits:` block → default-deny for the whole file.** Anything
    not listed is refused. A task reaching beyond the boundary is caught

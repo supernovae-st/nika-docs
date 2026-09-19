@@ -26,7 +26,39 @@ Named constants · `${{ const.X }}` · a fixed value baked into the workflow. Ei
 
 
 ```json
-{"type": ["string", "number", "boolean", "array", "object", "null"], "if": {"type": "object", "required": ["type", "value"]}, "then": {"additionalProperties": false, "properties": {"type": {"$ref": "#/$defs/typeExpr"}, "value": {"description": "The constant value · MUST conform to `type:` (NIKA-DEFAULT-001)."}, "description": {"description": "Free-form prose about this constant · why the value is what it is. Documentation only — the contract is `type` and `value`.", "type": "string"}}, "$comment": "An object carrying BOTH `type` and `value` is a typed constant · the type speaks the full TypeExpr (R3b) and values_core checks the value against it (NIKA-DEFAULT-001) · an object missing either key is a bare literal object constant."}}
+{
+  "type": [
+    "string",
+    "number",
+    "boolean",
+    "array",
+    "object",
+    "null"
+  ],
+  "if": {
+    "type": "object",
+    "required": [
+      "type",
+      "value"
+    ]
+  },
+  "then": {
+    "additionalProperties": false,
+    "properties": {
+      "type": {
+        "$ref": "#/$defs/typeExpr"
+      },
+      "value": {
+        "description": "The constant value · MUST conform to `type:` (NIKA-DEFAULT-001)."
+      },
+      "description": {
+        "description": "Free-form prose about this constant · why the value is what it is. Documentation only — the contract is `type` and `value`.",
+        "type": "string"
+      }
+    },
+    "$comment": "An object carrying BOTH `type` and `value` is a typed constant · the type speaks the full TypeExpr (R3b) and values_core checks the value against it (NIKA-DEFAULT-001) · an object missing either key is a bare literal object constant."
+  }
+}
 ```
 
 </details>
