@@ -40,7 +40,7 @@ files:
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
-  sha256: e8bd0977ef5706610762879da7bf952846cac3235f9aa3e49afb636c01d80a6d
+  sha256: 32d41b759d5aec9dcb7f412be9e0e5bb10737170ea03e9e7d67a4353b5e0894a
   evidence: "hand-written release-heal workflow: verified installation, atomic projection and validated PR proposal; all docs gates run on the exact proposal commit before a protected merge"
   note: "hourly or manual generated proposal; explicit workflow_dispatch qualifies the exact commit before a REST merge under main protection; no force-push or admin bypass"
 - path: ".nvmrc"
@@ -226,7 +226,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 273
-  aggregate_sha256: e1a305dc2c3d3302f583aa546888c6b81a6004c70c2886ee07d3fba12494628f
+  aggregate_sha256: 0bbba6a7b3f8298eafc6d38ed09b358b4a9cb9cd2d051677ea685f9f1870e549
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -255,7 +255,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 2b5799634f1d99492fd07b42dcdec1be78a1e5e6a37e2374fc9f6a19c55c3102
+  aggregate_sha256: 33889ef2c0890e9ba557870ad2d7827028c20d6bbf77f9c88cebcc6ed9bcc7d5
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
