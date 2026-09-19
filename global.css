@@ -220,8 +220,16 @@ html {
 [class*="card"] a:focus-visible,
 pre:focus-visible,
 button:focus-visible {
-  outline: 2px solid #8db4ff;
+  outline: 2px solid #2f6bff;
   outline-offset: 2px;
+}
+
+.dark .prose a:focus-visible,
+.dark .card:focus-visible,
+.dark [class*="card"] a:focus-visible,
+.dark pre:focus-visible,
+.dark button:focus-visible {
+  outline-color: #8db4ff;
 }
 
 .dark pre,
@@ -253,6 +261,11 @@ pre {
 }
 
 ::selection {
+  background: rgb(47 107 255 / 0.22);
+  color: #08090b;
+}
+
+.dark ::selection {
   background: rgb(47 107 255 / 0.38);
   color: #cfe6ff;
 }
