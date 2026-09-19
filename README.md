@@ -99,7 +99,7 @@ triggers an automatic rebuild (typically ~30 seconds) and updates
 `release-heal.yml` runs hourly and can be dispatched manually. It verifies the
 release binary, refreshes the complete release inventory and engine snapshot,
 and opens a PR containing only generated surfaces. Since `GITHUB_TOKEN` PRs do
-not trigger pull-request workflows, it explicitly dispatches `gate.yml`, waits
+not run pull-request CI unattended, it explicitly dispatches `gate.yml`, waits
 for all five jobs, and merges the exact successful commit through normal branch
 protection. API failures, missing gates, changed PR identity, or a rejected merge
 fail the sync and leave the proposal open. Re-running the same generated tree

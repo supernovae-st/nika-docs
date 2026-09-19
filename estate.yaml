@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: 68ec167fdb4b04201ad4bad103de8ad04baee24387a531aaa5e66ff1b95bc159
+  sha256: 83e9da252027755eadc9198775d246bbbf928b8fa116f324ef95aad541717694
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -255,7 +255,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 1f05ff72162563ad755dec2c8f5b6d359a7d4dc0601ee7f609073c38fb94cbde
+  aggregate_sha256: 3ac4f4db635e49edd37235f959e54f029db95cb0bb88f1edb43b32f1b4cfaafe
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:

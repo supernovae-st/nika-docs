@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Publish only generated release files, qualify their exact commit, then merge.
 
-GITHUB_TOKEN pushes do not trigger pull_request CI. Explicit workflow_dispatch
-does, so never infer checks from a PR's creation or bypass branch protection.
+GITHUB_TOKEN-created pull requests do not run CI unattended. Explicit
+workflow_dispatch starts the qualification run; never infer checks from PR
+creation or bypass branch protection.
 No remote branch code is executed by this script.
 """
 from __future__ import annotations
