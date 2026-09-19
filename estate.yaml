@@ -211,7 +211,7 @@ patterns:
 - glob: "videos/**"
   class: authored
   match_count: 16
-  aggregate_sha256: 542b89ac90dca2a8143267bd001cb0402da73d780f350f177e184ed1faaaecfd
+  aggregate_sha256: 7dd3aafc45174b968b5f8f66c48733a7e270c658820e3c2a94a822b9c14126a3
   evidence: "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/og-*.png"
@@ -229,13 +229,13 @@ patterns:
 - glob: "images/**"
   class: authored
   match_count: 4
-  aggregate_sha256: 7954c1f664882672aff5a3cc8169d3ccdf562ea99aec50733ae752cb7657f7f6
+  aggregate_sha256: 23d510d0e6c7babe0b0e7d88c72a2ce199c889c9608741c5087989693e139a40
   evidence: "bitmap asset · no in-repo derivation evidence"
   note: "unverified-default"
 - glob: "**"
   class: authored
   match_count: 44
-  aggregate_sha256: 5aeb14dd9df0010de8668268dafcb0cc350aadc16d08ed384d6f435171e5c717
+  aggregate_sha256: 48570ac0af85f1ffb5d2cb84460b3ac57cf5f96a1e80b13a6d4e61065a4bf9f0
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
