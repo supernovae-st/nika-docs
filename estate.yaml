@@ -83,7 +83,7 @@ files:
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
   class: authored
-  sha256: 800c58f30f02849dd36e167ba92ba4810f89464610dd85a80e3a4d1a11f38c4a
+  sha256: cf26d84a6eb00cf8f69c48113569ad0df6525d6ff83bfd037efe1ff57126aea3
   evidence: "hand-written polish layer · its own header: 'colors + fonts live in docs.json · pinned to … nika-spec design/tokens.yaml … this file = the polish layer'"
 - path: "images/posters/chat-to-workflow.png"
   class: authored
