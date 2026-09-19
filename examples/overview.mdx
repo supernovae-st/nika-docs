@@ -195,9 +195,10 @@ files, so it cannot go stale.
   (data) — each reference declares a typed edge — and `after:` orders on
   state. The DAG has no invisible edges, and the body reads
   `${{ with.<name> }}`, never `tasks.*` (`NIKA-VAR-021`).
-- **Local by default** · every file leads `ollama/llama3.2:3b`: zero
-  API keys, nothing leaves your machine. Cloud providers appear only as
-  per-task overrides or swap hints, never as the envelope default.
+- **Local by default** · showcase envelopes lead `ollama/qwen3.5:4b`:
+  zero API keys, nothing leaves your machine. Cloud providers appear
+  only as per-task overrides or swap hints, never as the envelope
+  default.
 - **Projection, not copy-paste** · these pages and the
   [nika.sh use-cases explorer](https://nika.sh/#use-cases) render the
   same files, projected by `showcase-projector.py`. Any drift fails CI.

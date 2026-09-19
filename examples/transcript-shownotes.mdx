@@ -143,13 +143,11 @@ outputs:
 
 ## The model choice is part of the lesson
 
-The envelope pins `ollama/llama3.2:3b` — deliberately NOT the
-showcase's usual `qwen3.5` — because this is a strict-schema job and a
-*thinking* model can burn the whole `max_tokens` budget inside its
-think block before emitting the first JSON token (engine issue #428:
-the output arrives empty yet the schema demanded content). The rule of
-thumb this file encodes: **reasoning showcases pick a thinking model;
-strict-schema extraction picks a non-thinking one.**
+The envelope pins `ollama/qwen3.5:4b` — the same local house seat as
+the other showcases. This file is a **strict-schema** job: the think
+block and the JSON both count against `max_tokens`, so the ceiling is
+sized for think + notes, not the notes alone. If the visible answer
+comes back empty, raise `max_tokens` before swapping models.
 
 The typed seam is the other half: because `notes` is schema-shaped,
 the jq step reads `.chapters[]` and `.quotes[]` as data — no regex
@@ -169,7 +167,7 @@ To run a file you own, copy the YAML on this page to
 answer, then:
 
 ```bash
-ollama pull llama3.2:3b
+ollama pull qwen3.5:4b
 nika check transcript-shownotes.nika
 nika run transcript-shownotes.nika
 open out/show-notes.md

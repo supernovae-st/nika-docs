@@ -6,8 +6,9 @@ description: "Deterministic artistic styling — dither, palettes, halftone, ret
 `nika:image_fx` is the deterministic sibling of
 [`nika:image_generate`](/guides/image-generation): a pure pixel transform —
 no provider, no network, no clock. Style a PNG through an ordered pipeline of
-effects and get an artifact that is **byte-identical forever** for identical
-`(input, args)`.
+effects and get an artifact that is **byte-identical** for identical
+`(input, args)` on the **same pinned engine** — not a promise across
+engine versions.
 
 That determinism is the point, not a detail. The artifact's sha256 joins the
 run's hash-chained trace, re-rendering the recipe is the tamper check, and the
