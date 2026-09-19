@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 369
+  classified_files: 377
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 364
+    authored: 372
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 67
+  unverified-default: 75
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -206,12 +206,12 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 273
-  aggregate_sha256: c590be6e225b31bdad4ff6eb7a41a5bf7124339a855917086775c7a0bd5bfde1
+  aggregate_sha256: 4191a3a32542abd3b0f208a6f2e9d4c5264e3a64a3da3d53b5c3087b8d024ff3
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
-  match_count: 12
-  aggregate_sha256: 7146fd535285651fb3b80805921fb75e4ce618ac6c6a27976112a4a581954ecf
+  match_count: 16
+  aggregate_sha256: 542b89ac90dca2a8143267bd001cb0402da73d780f350f177e184ed1faaaecfd
   evidence: "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/og-*.png"
@@ -228,14 +228,14 @@ patterns:
   note: "unverified-default"
 - glob: "images/**"
   class: authored
-  match_count: 0
-  aggregate_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  match_count: 4
+  aggregate_sha256: 7954c1f664882672aff5a3cc8169d3ccdf562ea99aec50733ae752cb7657f7f6
   evidence: "bitmap asset · no in-repo derivation evidence"
   note: "unverified-default"
 - glob: "**"
   class: authored
   match_count: 44
-  aggregate_sha256: 21d01194fe151466ab8e74e1cf8ca17afe75dede64c44aa901b419cb0ea96258
+  aggregate_sha256: 5aeb14dd9df0010de8668268dafcb0cc350aadc16d08ed384d6f435171e5c717
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -245,12 +245,16 @@ unverified:
 - "ENGINE_QUAL_PIN"
 - "api-reference/openapi.json"
 - "images/favicon.svg"
+- "images/gifs/check-denied.gif"
+- "images/gifs/meeting-actions.gif"
 - "images/logo-dark.svg"
 - "images/logo-light.svg"
 - "images/og-card.png"
 - "images/og-default.png"
 - "images/posters/chat-to-workflow.png"
+- "images/posters/check-denied.webp"
 - "images/posters/dag-execution.png"
+- "images/posters/meeting-actions.webp"
 - "images/posters/on-error-recover.png"
 - "images/posters/permits-audit.png"
 - "images/posters/static-check-fix.png"
@@ -296,8 +300,12 @@ unverified:
 - "snippets/data/tool-reference.json"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"
+- "videos/check-denied.mp4"
+- "videos/check-denied.webm"
 - "videos/dag-execution.mp4"
 - "videos/dag-execution.webm"
+- "videos/meeting-actions.mp4"
+- "videos/meeting-actions.webm"
 - "videos/on-error-recover.mp4"
 - "videos/on-error-recover.webm"
 - "videos/permits-audit.mp4"

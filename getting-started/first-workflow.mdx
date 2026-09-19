@@ -97,6 +97,30 @@ mismatched receipt changes the verdict, not the run's result.
   </Accordion>
 </AccordionGroup>
 
+Measured CLI **0.120.1** plates (condensed, not a live recording). Press
+play — nothing autoplays.
+
+<video
+  controls
+  playsinline
+  preload="none"
+  poster="/images/posters/check-denied.webp"
+  aria-label="nika check refusing a workflow that lacks the permits it needs"
+>
+  <source src="/videos/check-denied.webm" type="video/webm" />
+  <source src="/videos/check-denied.mp4" type="video/mp4" />
+</video>
+
+<details>
+  <summary>What this plate shows</summary>
+  A `nika check` on engine 0.120.1 names the tool and path the file
+  would touch and the `permits:` entry that is missing. Admission
+  refuses before any task runs. This is a measured CLI plate, not the
+  TypeScript SDK.
+</details>
+
+[Download GIF](/images/gifs/check-denied.gif)
+
 ## 4. Add a second task that depends on the first
 
 ```yaml hello.nika
@@ -175,6 +199,31 @@ typed, tracker-ready action items. It defaults to a local model
 cloud provider and `check` prices the run before anything executes.
 Same file shape as your hello; the model and tools change, the lifecycle
 does not.
+
+On the CLI, a mock rehearsal of that job prints a **string** (the
+engine's storyboard and `said "…"` line). Typed `{owner, task, due}`
+objects are the workflow's `outputs:` / SDK `result.outputs` — they
+are not the CLI plate below. Captured on CLI 0.120.1:
+
+<video
+  controls
+  playsinline
+  preload="none"
+  poster="/images/posters/meeting-actions.webp"
+  aria-label="CLI 0.120.1 running the meeting-actions example"
+>
+  <source src="/videos/meeting-actions.webm" type="video/webm" />
+  <source src="/videos/meeting-actions.mp4" type="video/mp4" />
+</video>
+
+<details>
+  <summary>What this plate shows</summary>
+  Input file, the `nika run` command, then the 0.120.1 storyboard and
+  a string result. It does not prove typed action-item objects; those
+  live on `outputs:` after a real local or cloud model answers.
+</details>
+
+[Download GIF](/images/gifs/meeting-actions.gif)
 
 ## What you just built
 
