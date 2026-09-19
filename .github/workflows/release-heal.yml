@@ -1,13 +1,14 @@
 name: release-heal
 
 # Resolve and verify one published stable release, project it atomically, then
-# propose the validated snapshot through a normal PR. Main protection applies.
+# propose the generated surfaces through a normal PR, dispatch all docs gates,
+# and merge the exact passing commit. Main protection applies.
 # The projection independently reads latest: if it moves after installation,
 # its tag/build check fails before replacing any snapshot bytes.
 
 on:
   schedule:
-    - cron: '17 6 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -21,10 +22,11 @@ concurrency:
 jobs:
   heal:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     permissions:
       contents: write
       pull-requests: write
+      actions: write # explicitly dispatch CI for GITHUB_TOKEN-created proposals
       attestations: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,7 +47,11 @@ jobs:
           set -euo pipefail
           PATH="$(dirname "$NIKA_BIN"):$PATH"
           export PATH
+          python3 scripts/release_catalog.py --refresh
           bash scripts/mintlify-snapshot.sh
+          python3 scripts/release_catalog.py --refresh --check
+          python3 scripts/tests/test_release_catalog.py
+          python3 scripts/publication-audit.py
           python3 scripts/link-audit.py
           python3 scripts/sdk_contract_gate.py
           python3 scripts/count-drift-gate.py | tee "$RUNNER_TEMP/count-drift.out"
@@ -59,36 +65,14 @@ jobs:
             exit 1
           fi
           python3 scripts/oracle-sweep.py
-      - name: Propose the validated snapshot through main protection
-        # GITHUB_TOKEN-created PRs do not trigger a second workflow run.
-        # The checks above are local proof; a reviewer must arrange any further
-        # required CI/review through the normal policy path before merging.
+      - name: Refresh generated provenance
+        run: |
+          git add snippets/_status-snapshot.mdx snippets/data/releases.json changelog/releases.mdx
+          python3 scripts/estate.py --write
+          python3 scripts/estate.py --check
+      - name: Propose, qualify and merge generated release changes
+        # Explicit workflow_dispatch runs all gates on the proposed commit.
+        # REST merge pins that commit and honors main branch protection.
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git diff --quiet -- snippets/_status-snapshot.mdx && { echo 'snapshot already current'; exit 0; }
-          branch="nika-release-heal/$NIKA_TAG"
-          # An existing proposal stays with its reviewers. Never force-push it.
-          existing="$(gh pr list --head "$branch" --base main --state open --json number --jq 'length')"
-          if [ "$existing" != 0 ]; then
-            echo "proposal for $NIKA_TAG already open"
-            exit 0
-          fi
-          git switch -c "$branch"
-          git config user.name 'nika-release[bot]'
-          git config user.email 'nika@supernovae.studio'
-          git add snippets/_status-snapshot.mdx
-          git commit -m "chore(status): project verified $NIKA_TAG" \
-            -m 'Co-Authored-By: Nika 🦋 <nika@supernovae.studio>'
-          git push origin "HEAD:refs/heads/$branch"
-          cat > "$RUNNER_TEMP/release-heal-pr.md" <<EOF
-          Project the five status fields from the checksum- and attestation-verified $NIKA_TAG binary.
-
-          Validation: link audit, SDK contract, count drift, teach parity, and released-binary oracle sweep.
-          This proposal requires the repository's normal review and merge checks.
-          EOF
-          gh pr create --head "$branch" --base main \
-            --title "chore(status): project verified $NIKA_TAG" \
-            --body-file "$RUNNER_TEMP/release-heal-pr.md"
+        run: python3 scripts/release_proposal.py

@@ -1,12 +1,12 @@
 {
   "selftest": {
-    "inject_path": "changelog/releases.mdx",
+    "inject_path": "changelog/history.mdx",
     "new_file": "scripts/_ratchet-injection.md",
     "new_prefix_file": "api-reference/_ratchet-injection.md"
   },
   "exceptions": [
     {
-      "path": "changelog/releases.mdx",
+      "path": "changelog/history.mdx",
       "category": "historical",
       "reason": "Dated record of the retired spelling as it actually shipped.",
       "owner": "nika-docs",

@@ -1,293 +1,77 @@
 ---
 title: "Roadmap"
-description: "Real semver toward 1.0. What a released CLI and npm SDK do today, versus qualified gates and proposals."
-sidebarTitle: "Roadmap"
-icon: "map"
+description: "What you can build with Nika today, what remains to qualify before launch, and where to follow the public work."
+icon: "route"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { SDK } from "/snippets/_sdk-contract.mdx";
 
-Nika follows **real semver toward 1.0**. 1.0 tags when the release gates
-are green — never on a calendar. Channels differ:
+Nika lets you put AI workflows in an application, describe their permitted
+effects, and inspect what happened after a run. This page separates the parts
+you can use from the goals that still require implementation and evidence.
 
-| Channel | Today (2026-09-19) |
-|---|---|
-| Downloadable CLI / GitHub latest | **v{STATUS.version}** ({STATUS.engineSha}) |
-| npm `@supernovae-st/nika` latest | **0.120.0** (bundled engine 0.120.0) |
-| This docs snapshot | judged by the downloadable CLI, not by engine main |
+## Start with what is available
+
+| I want to… | Available path | Learn it |
+| --- | --- | --- |
+| Add workflows to a TypeScript app | Published {SDK.package}@{SDK.sourceVersion}; local execution with its bundled engine | [SDK quickstart](/sdk/start/quickstart) |
+| Write and validate a workflow | Native CLI v{STATUS.version}; canonical `.nika` files | [First workflow](/getting-started/first-workflow) |
+| Choose what a workflow may do | Explicit permits and governed effects | [Security model](/concepts/security) |
+| Inspect a run | Events, outputs, traces and receipts | [Traces](/concepts/traces) |
+| Run against a resident server | The SDK's authenticated remote API, with a compatible server | [Remote client](/sdk/remote/client) |
+| Start from a bounded skeleton | The released `nika compile` command | [Bounded authoring](/examples/bounded-authoring) |
 
 <Info>
-  **Canonical source:** [`ROADMAP.md`](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md)
-  on the `main` branch. This page summarises the milestones;
-  the full roadmap lives in the repo alongside ADRs. The forward **gates**
-  themselves are machine-carried by the spec's
-  [timeline](/reference/timeline) (conditions, never dates) — when a
-  gate flips, the record gains a dated, proven entry.
+  The CLI and npm package have separate release channels. Read
+  [Current status](/reference/status) for the exact documentation targets and
+  [Releases](/changelog/releases) for published changes. Source on `main`, a
+  closed issue, or an accepted design does not by itself mean a package shipped.
 </Info>
 
-## The road so far
+## What does “Compile” mean here?
 
-| When | What |
-|---|---|
-| Summer → end 2025 | ✧ The exploration — private prototypes before the repo; the idea: durable agent work should be source code — one file, any model, sovereign by default. |
-| 2026-01-01 | ✎ The brouillon era begins — first commit `initial nika v0.1`. Fourteen weeks and ~4,600 commits of private drafting, on the branch literally named `brouillon`. |
-| Feb–Mar 2026 | The version storm: verbs, an MCP client, then a first LSP appear in the brouillon codebase — v0.3 → v0.21 in fifteen days, plus a public crates.io spine (0.20.0 → 0.47.1). |
-| 2026-04-09 | v0.79.3 — the brouillon engine peaks at 322k LOC / 31 crates, and teaches the context lesson that motivates Diamond. |
-| 2026-04-13 | **Diamond begins**: ground-up rewrite on an orphan branch. 12 gates per crate, hard caps, zero `.unwrap()`. |
-| May 2026 | The language locks in the open spec: `nika: v1` envelope · 4 verbs · CEL + jq · 22-builtin stdlib. |
-| 2026-06-10 → 21 | The vertical slice: 23 crates admitted in twelve days — verbs, runtime, LSP, MCP, schema, CLI. |
-| 2026-06-21 | **v0.90.0 — first public release** (Homebrew + install script, 4 platforms). |
-| Since | The 0.9x train: agent wiring (0.92) · resume + test harness (0.93) · media suite (0.94) · local-first catalog (0.95) · time-travel debugging (0.96) · hash-chained evidence (0.97) · native structured output + the shared `${{ }}` lexer (0.98) · deterministic media artifacts (`image_fx` + `chart`) + the models-resolve audit rung + the `egress` valve (0.99). |
+The released command creates a workflow from a bounded skeleton. It is a useful
+starting point you can check, edit and run. Broader natural-language composition,
+cross-surface SDK integration and advanced compiler goals need their own release
+and qualification evidence. The name alone does not establish those capabilities.
 
-The dated, tagged detail lives on the [Releases](/changelog/releases) page.
+Start with [the available authoring path](/examples/bounded-authoring); follow the
+[engine roadmap](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md) and
+[public engine issues](https://github.com/supernovae-st/nika/issues) for ongoing work.
 
-## Why real semver toward 1.0
+## What must be ready before the official launch?
 
-<CardGroup cols={2}>
-  <Card title="1.0 means we stand behind it" icon="circle-check">
-    v0.90.0 was the first public release; the 0.9x line is
-    release-candidate grade. 1.0 is the usable engine we commit to as a
-    stable public API, not a marketing tick. Pre-1.0 the surface is still
-    hardening; 1.0 is the line where the public API is stable and
-    additive from there.
-  </Card>
-  <Card title="Quality bar stays high" icon="medal">
-    Every crate admits with 12 gates. {STATUS.cratesAdmitted} crates meet
-    that bar today. Admission cadence is set by the quality bar, not a
-    calendar — and not by a crate count.
-  </Card>
-  <Card title="Forward-compat = additive" icon="shield-halved">
-    `#[non_exhaustive]` on every public type + pre-planted reservations
-    means new features are additive. No breaking change without an
-    Accepted ADR. See [forward-compat invariants](/architecture/forward-compat-invariants).
-  </Card>
-  <Card title="Public accountability" icon="eye">
-    All work happens on the `main` branch. Every commit is
-    Co-Authored-By Nika 🦋, atomic, bisectable. The engine is the
-    changelog.
-  </Card>
-</CardGroup>
+The public roadmap targets semantic versioning toward **1.0**. The native engine
+is already available, but that availability is separate from completing the
+original launch requirements. The owning roadmap and specification describe:
 
-## What a released binary does
+- **Release and user experience qualification:** installation, documentation,
+  editor setup and supported execution paths must work together.
+- **The contract system and whole Connectome:** the planned memory and cognition
+  system must meet its declared scope and evidence requirements.
+- **Long-term compatibility:** conformance, archives, deterministic checking,
+  a compatibility promise and succession are launch conditions.
+- **Design-partner release candidates:** the public roadmap places these before
+  the official launch.
 
-The [live state](/reference/status) page is the downloadable CLI. Crate,
-test and ADR totals are engine-main bookkeeping and are not a fact about
-the binary you install.
+These are conditions, not delivery dates or claims of completion. The
+[owning engine roadmap](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md)
+and the specification's
+[timeline](https://github.com/supernovae-st/nika-spec/blob/main/timeline/timeline.yaml)
+carry the detailed decisions. [Timeline and evidence](/reference/timeline)
+explains how to read them without confusing a proposal with a shipped feature.
 
-**Shipped on the tagged CLI:** four verbs, `check` / `run` / `test` /
-`trace` / `compile`, LSP, MCP oracle, hash-chained journals, GitHub
-Release attestations + `SHA256SUMS`.
+## Follow the work without losing the product story
 
-**Shipped on npm 0.120.0:** the TypeScript door `@supernovae-st/nika`
-with `run` / `result` / `isNikaRunSucceeded` / native `inputsLiteral`.
+| Question | Best source |
+| --- | --- |
+| What changed in a version? | [Published releases](/changelog/releases) |
+| What can I install now? | [Current status](/reference/status) |
+| What work is still open? | [Engine issues](https://github.com/supernovae-st/nika/issues) and [SDK issues](https://github.com/supernovae-st/nika-client/issues) |
+| Why is the architecture shaped this way? | [Layers](/architecture/layers) and [decisions](/architecture/adrs) |
+| How did the project get here? | [Historical milestones](/changelog/history) |
 
-**Not shipped because it is on a roadmap accordion:** Connectome memory
-crates, Compile-as-research, Sigstore keyless (attestations already
-exist), WASM plugins. Those are ratified *direction* or 1.x proposals.
-
-## Milestones
-
-<AccordionGroup>
-  <Accordion title="0.9x: the historical hardening train (0.90–0.99)" icon="train">
-    **Shipped history, not the current tag.** Each 0.9x minor was a
-    diamond-grade release; the public line is now 0.12x. Remaining 1.0
-    work is gates, not a return to 0.9x numbering:
-
-    - **The remaining L0 slices**: `nika-binding` (types-first slice) and
-      `nika-transform`. There is no "last crate": ADR-037 made the count a
-      projection ({STATUS.cratesTarget}, cap {STATUS.cratesCap}), so the
-      train ends when the gates close, not when a counter fills.
-    - **The 7 shadow zones close** (the 1.0 gates): `nika serve` input
-      trust · cross-provider structured-output parity · binding taint
-      runtime · `for_each` per-element spotlight · L1 taint runtime ·
-      NikaError Display parity · the provider parity matrix.
-    - **The registry story**: shared workflows re-proven by CI (hash +
-      oracle + engine cert) and a client verb to consume them
-      (`nika add` — ADR-106, Proposed).
-    - **Design-partner hardening**: `1.0.0-rc.N` pre-releases once the
-      gates are green, exercised on real workloads before the lock.
-
-    **No date.** The train ships when each release earns its tag.
-  </Accordion>
-
-  <Accordion title="The Connectome: ratified direction, not a shipped product" icon="brain">
-    **Not in the downloadable 0.120.1 CLI or npm 0.120.0.** It is a
-    declared pre-condition of the official 1.0 launch on the timeline's
-    [connectome gate](/reference/timeline#gates) — direction, not a
-    feature you can invoke today:
-
-    - `nika-connectome` L2 orchestrator + the L1 memory satellites
-      (`nika-hnsw`, `nika-bm25`, `nika-rrf`, `nika-fsrs`,
-      `nika-rdfs-reasoner`, `nika-temporal`, `nika-graph-algos`,
-      `nika-autodesc-minimal`, `nika-autodesc-full`), admitted through
-      the same 12 gates as every crate.
-    - Recall and ingest as builtin tools under `invoke:` — never a new
-      verb (the 4 verbs are absolute).
-    - The zero-LLM write path: memory is written by deterministic code,
-      never by a model's output.
-    - A sovereign, exportable store on open standards (RDF/SPARQL ·
-      ADR-004): yours to query, export, delete.
-    - Store digests pinned in receipts, so recall is replayable.
-
-    **Separate count** from the {STATUS.cratesTarget} Diamond horizon: the
-    11 memory crates (1 orchestrator + 10 satellites) add on top. No date: gates, not calendars. The
-    un-numbered next major stays reserved, its content the operator's
-    to declare.
-  </Accordion>
-
-  <Accordion title="Built for a hundred years: the standard's machinery, before 1.0" icon="landmark">
-    **A standard is judged by what outlives its author.** The
-    [hundred-year gate](/reference/timeline#gates) lands before the
-    launch:
-
-    - The NEP door exercised end to end: proposals ratified through it,
-      laws and fixtures landing together.
-    - The conformance suite in tiers (T0/T1/T2), any engine proving
-      itself with the public runner.
-    - Every release archived beyond us: Software Heritage, a citable
-      DOI, the SWHID cited in the spec.
-    - The compatibility promise, published: what a workflow written
-      today is guaranteed tomorrow.
-    - The deterministic checker, proven in CI: same input, same
-      diagnostics, same order.
-    - Succession written down: the project survives its maintainer.
-  </Accordion>
-
-  <Accordion title="1.0.0: Public API lock" icon="rocket">
-    **1.0.0 ships when the gates are green — the culmination, not the
-    start.** The contract system, the whole Connectome and the
-    hundred-year machinery land first
-    (the timeline's gates carry the conditions); the language spec
-    (the v1 contract · the nine-key envelope since 0.109, Apache-2.0) is
-    already public and stable. 1.0
-    is the point where the public API is locked and additive from there,
-    enforced by `cargo public-api` + `cargo semver-checks` on every PR.
-  </Accordion>
-
-  <Accordion title="1.x minors: the foundation completes, additively" icon="diamond">
-    **Arrives across 1.x minors, no breaking changes:**
-
-    - `nika-catalog-sync` shipping catalog freshness (triple-source
-      cross-check: LiteLLM + models.dev + OpenRouter corroboration).
-    - Sigstore keyless signing on release artifacts (GitHub Release
-      attestations and `SHA256SUMS` already ship with each tag; this
-      item is an additional signing path).
-    - `cargo install nika` — crates.io joins the install matrix.
-    - Deeper LSP analysis: full cross-task binding analysis + taint
-      propagation warnings + DAG preview.
-    - Cross-provider parity expansion as models evolve.
-
-    **No date.** The layered architecture, complete and then extended
-    across 1.x minors.
-  </Accordion>
-
-  <Accordion title="Ecosystem tier: plugins + observability" icon="box">
-    **Target state when shipped:**
-
-    - `nika-wasm-host` (L3) + `nika-sandbox` (L3) admitted.
-    - WASM plugin boundary live: community plugins run with fuel
-      metering, Trap taxonomy, capability-scoped syscalls.
-    - `nika-observability` suite: OTel GenAI semconv bridge (ADR-035),
-      Prometheus / StatsD exporters, audit log with tamper-evidence.
-    - `nika-policy` L2 shipping Shield policy engine (prompt injection
-      classification, taint enforcement).
-    - `pck` registry fully live: community workflow packages,
-      signature verification, overlay precedence (User > Pck > Core).
-
-    **No date.** Versions stay honest real-semver tags: there is no
-    marketing version axis.
-  </Accordion>
-
-  <Accordion title="Ongoing" icon="infinity">
-    Beyond the ecosystem tier, Nika continues incrementally:
-
-    - Language bindings (`nika-napi`, `nika-py`): rebuild if demand
-      materializes (currently deferred per POST_AUDIT).
-    - TUI (`nika-tui`): rebuild in the "Act 3" timeframe if needed.
-    - Cross-provider parity expansion as models evolve (GPT-5 family,
-      Claude 5, Gemini 3, etc.).
-    - Community catalogs (`nika-catalog-cn`, `nika-catalog-eu`) via
-      pck admission gates.
-
-    **Real semver.** Additive across minors; the next major stays un-numbered until declared.
-  </Accordion>
-</AccordionGroup>
-
-## How a release ships
-
-<Steps>
-  <Step title="The work earns the tag">
-    Crate admissions (12 gates), shadow-zone closures, and field fixes
-    accumulate on `main` — every commit atomic and bisectable.
-  </Step>
-  <Step title="The tag cuts the binaries">
-    A `vX.Y.Z` tag triggers the release pipeline: four `nika` binaries
-    (macOS arm64/x64 · Linux arm64/x64) + checksums.
-  </Step>
-  <Step title="The release lands everywhere">
-    GitHub Release with curated notes, the Homebrew tap bumps, the
-    install script serves the new version.
-  </Step>
-  <Step title="The changelog tells the story">
-    A curated `CHANGELOG.md` section + an entry on
-    [Releases](/changelog/releases) (subscribable via RSS).
-  </Step>
-</Steps>
-
-## Deliberately excluded
-
-<Warning>
-  These are not "someday maybe": they are architectural non-goals.
-  Re-opening requires a new ADR that supersedes POST_AUDIT.
-</Warning>
-
-- **Rust crate `nika-sdk`**: 0 consumers, speculative (POST_AUDIT
-  2026-04-14). That is **not** the live TypeScript package
-  [`@supernovae-st/nika`](/sdk/overview). Do not read this exclusion as
-  "Nika has no SDK".
-- **`nika-tui`**: W1 speculative. Maybe Act 3, never before.
-- **Proc macros in L0**: Q1 LOCKED. Manual impl + `macro_rules!` forever.
-- **`Box<dyn Error>` in public API**: hygiene vector 19 bans.
-- **`anyhow::Error` in library code**: ADR-005. Binary only.
-- **Plugins as proc macros**: the WASM boundary (ecosystem tier) is the plugin story.
-
-## Governance
-
-<Steps>
-  <Step title="Every change has an ADR">
-    Significant engineering decisions start as Proposed ADRs, discussed
-    in PRs, Accepted or Rejected. See [ADR index](/architecture/adrs).
-  </Step>
-  <Step title="Every commit is atomic + Co-Authored">
-    1 logical change = 1 commit. Co-Authored-By Nika 🦋 always
-    (never Claude). Bisectable history is non-negotiable.
-  </Step>
-  <Step title="Every crate passes 12 gates">
-    No late fixes. No partial admissions. See [admission](/architecture/admission).
-  </Step>
-  <Step title="Forward-compat = additive">
-    No breaking change without Accepted ADR. `cargo public-api` +
-    `cargo semver-checks` on every PR. See [FCI](/architecture/forward-compat-invariants).
-  </Step>
-</Steps>
-
-## See also
-
-<CardGroup cols={2}>
-  <Card title="Releases" icon="clock-rotate-left" href="/changelog/releases">
-    The full arc, dated and tagged: exploration → brouillon → Diamond.
-  </Card>
-  <Card title="Timeline" icon="timeline" href="/reference/timeline">
-    Read the source record: eras, releases, forward gates and their
-    evidence classes.
-  </Card>
-  <Card title="Live state" icon="gauge" href="/reference/status">
-    Where the engine is today.
-  </Card>
-  <Card title="Constellation" icon="diagram-project" href="/reference/constellation">
-    Visual map of every crate across six layers — live admission status.
-  </Card>
-  <Card title="ADR index" icon="scroll" href="/architecture/adrs">
-    Every decision that shapes the roadmap.
-  </Card>
-</CardGroup>
+If you are evaluating Nika, begin with one small workflow in your application.
+Use its output and trace to judge the available product; use the roadmap to
+understand its direction.

@@ -1,143 +1,97 @@
 ---
-title: "Live state"
-description: "What the downloadable Nika binary is, as of the published GitHub release. A teaching page is judged by that binary, not by engine main."
-sidebarTitle: "Live state"
+title: "Current status"
+description: "Which Nika engine and SDK these docs describe, what each snapshot proves, and how release updates reach the documentation."
+sidebarTitle: "Current status"
 icon: "gauge"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 import { CANON } from "/snippets/_canon.mdx";
+import { SDK } from "/snippets/_sdk-contract.mdx";
 
-<Info>
-  This page is judged by the **downloadable release** — `nika --version`
-  must print {STATUS.version} ({STATUS.engineSha}). Catalog counts
-  come from `nika catalog --json` on that binary. Language counts come
-  from `nika spec --canon` (projected into `CANON`). Crate, test, ADR and
-  hygiene totals do not project from the binary and are not on this page.
-</Info>
+## What can I install?
 
-## At a glance
+| Product | Version these docs target | Next step |
+| --- | --- | --- |
+| Native engine and CLI | **v{STATUS.version}** · build {STATUS.engineSha} | [Installation](/getting-started/installation) |
+| TypeScript SDK | **{SDK.package}@{SDK.sourceVersion}** | [SDK quickstart](/sdk/start/quickstart) |
 
-<CardGroup cols={3}>
-  <Card title="Release" icon="tag">
-    **v{STATUS.version}** · {STATUS.engineSha}
-  </Card>
-  <Card title="Catalog" icon="server">
-    **{STATUS.providers}** providers in `nika catalog`
-  </Card>
-  <Card title="Language" icon="code">
-    **{CANON.verbs}** verbs · **{CANON.builtins}** builtins · **{CANON.templates}** skeletons
-  </Card>
-</CardGroup>
+The SDK bundles a native engine and requires Node.js 22 or newer. Its package
+version is a separate publication from the CLI. A merged SDK change or a newer
+engine release does not update an installed npm package.
 
-| field | value | projects from |
-|---|---|---|
-| workspace version | v{STATUS.version} | GitHub latest release / `nika --version` |
-| build | {STATUS.engineSha} | `nika --version` parenthetical |
-| snapshot day | {STATUS.lastUpdated} | the same release |
-| catalog providers | {STATUS.providers} | `nika catalog --json` `.providers.length` |
-| spec-named providers | {CANON.providers} | `nika spec --canon` · local {CANON.providersLocal} · cloud {CANON.providersCloud} · test {CANON.providersTest} |
-| builtins | {CANON.builtins} | `nika catalog --tools --json` / spec `--canon` |
-| skeletons | {CANON.templates} | `nika spec --canon` / `nika compile --list` |
+<Tip>
+  Start with the SDK if you are adding workflows to an app. Start with the CLI
+  if you want to check and run a `.nika` file from your terminal.
+</Tip>
 
-Two nouns, both true, never swapped: the **catalog** is every adapter the
-binary can reach; the **spec-named** set is the language stdlib a
-conformant engine must ship. See [Providers](/reference/providers-catalog).
+## What does the engine snapshot prove?
 
-## How to refresh
+The engine fields below are projected from one selected published stable release.
+The installer verifies its checksums and attestation; the projector checks the
+binary's reported version and build against that release's tag before writing.
+
+| Field | Value | Source |
+| --- | --- | --- |
+| Engine version | v{STATUS.version} | Published GitHub release and `nika --version` |
+| Build identity | {STATUS.engineSha} | The binary's version banner, checked against the release tag |
+| Publication date (UTC) | {STATUS.lastUpdated} | The selected release's publication timestamp |
+| Catalog providers | {STATUS.providers} | `nika catalog --json` on that binary |
+| First command | {STATUS.firstCommand} | A command validated against that binary |
+
+The publication date is not the date of the last website build. For the full
+inventory, including release records with no attached assets, see
+[Releases](/changelog/releases).
+
+## Language facts have a different owner
+
+The specification supplies **{CANON.verbs} verbs**, **{CANON.builtins} builtins**
+and **{CANON.templates} skeletons** through the shared canon projection.
+Its **{CANON.providers} named providers** describe the language contract; the
+engine's catalog can contain additional adapters. See
+[Providers](/reference/providers-catalog) and
+[Sources and synchronization](/reference/knowledge-system).
+
+Crate totals, test totals, architectural decisions and work on engine `main`
+are development records. They do not prove that a feature is in the binary you
+download. The [roadmap](/changelog/roadmap) keeps future work separate from releases.
+
+## How updates reach these pages
+
+The hourly [release sync](https://github.com/supernovae-st/nika-docs/actions/workflows/release-heal.yml)
+collects published stable releases, verifies the selected native release, and
+projects both the release index and the engine snapshot. It proposes the
+generated files, dispatches the documentation checks, and merges only after
+those checks and normal branch protection permit it. Mintlify then deploys `main`.
+
+The native snapshot updates `version`, `engineSha`, `providers`, `firstCommand`
+and `lastUpdated` together. It does not rewrite historical development counts,
+publish an npm package, or turn a roadmap proposal into a released feature.
+Failed validation leaves the previous documentation in place and a failed sync
+run to investigate.
+
+For contributors, run these commands from the documentation repository with the
+verified release selected through `NIKA_BIN`:
 
 ```bash
-bash scripts/mintlify-snapshot.sh           # version + lastUpdated ONLY
-nika catalog --json                         # provider length must match STATUS.providers
+python3 scripts/release_catalog.py --refresh
+bash scripts/mintlify-snapshot.sh
+python3 scripts/release_catalog.py --refresh --check
 ```
 
-Crate, test, ADR, and hygiene totals belong in the engine repo
-(`bash scripts/refresh-status.sh`). Do not copy them back onto this page.
-
-## Drift protection, stated honestly
-
-<Warning>
-  `scripts/mintlify-snapshot.sh` only rewrites `version` and `lastUpdated`.
-  A fresh date is evidence about the **release**, nothing else. The
-  provider count on this page must match `nika catalog --json` on that
-  release binary. Engine hygiene vector 23 guards crate/test claims
-  **inside the engine repo** and cannot see this one.
-</Warning>
-
-## What's admitted today
-
-The admitted crate set lives in the engine repo's `refresh-status.sh`
-block (`ROADMAP.md`, `.claude/CLAUDE.md`), judged there by hygiene vector
-23. This page does not copy those totals: they are not a fact about the
-binary a reader downloads.
-
-## What's locked (decisions the project won't revisit)
-
-- **Crate count is a projection, never a gate**: ADR-037; crates are admitted when they pass the 12 gates, reached additively across 1.x minors.
-- **Real semver toward 1.0**: 0.90.0 is the first public release-candidate; 1.0 ships when release gates are green. Quality over speed.
-- **Layer discipline**: L0 zero I/O, L0.5 traits only, strict downward deps, cargo-deny enforced. See [Layers](/architecture/layers).
-- **12 gates per crate**: no exceptions. See [Admission](/architecture/admission).
-- **Zero `.unwrap()` / `.expect(` in `src/`**: `?` propagation; `workspace.lints.clippy.unwrap_used = "deny"`.
-- **Not an extraction**: every crate written fresh, legacy as reference only.
-- **TDD with mutation ≥ 90%**: RED before GREEN; `cargo mutants -p <crate>` gates admission.
-- **`#[non_exhaustive]` on every public type**: see [Forward-compat invariants](/architecture/forward-compat-invariants).
-
-## What's next
-
-<AccordionGroup>
-  <Accordion title="L0-completion crates">
-    The remaining Diamond target crates are additive hardening work, not
-    prerequisites for the shipped 0.90 release-candidate surface. See the
-    roadmap for the exact current sequence.
-  </Accordion>
-  <Accordion title="1.0 release hardening">
-    The user-facing front door is already installable. The 1.0 work is about
-    proving the release checklist, docs, editor setup, and shadow-zone gates
-    stay true end-to-end.
-  </Accordion>
-  <Accordion title="The Connectome (sovereign memory): post-foundation">
-    Separate from the Diamond crate horizon.
-    One L2 orchestrator (`nika-connectome`) plus L1 satellites (hnsw,
-    bm25, rrf, rerank, fsrs, rdfs-reasoner, temporal, graph-algos,
-    autodesc-minimal, autodesc-full). Plugs into
-    `MemoryStore` / `EmbeddingProvider` trait reservations in `nika-kernel`.
-    No breaking changes. Design tracked via ADR-004 + ADRs 029-032.
-  </Accordion>
-</AccordionGroup>
-
-## What's NOT in scope
-
-Explicitly removed or deferred by POST_AUDIT_REVISIONS 2026-04-14:
-
-| What | Why | Status |
-|---|---|---|
-| `nika-sdk` | 0 consumers, speculative | Deleted |
-| `nika-napi` / `nika-py` | W1 speculative, rebuild Act 3 if needed | Deferred |
-| `nika-tui` | W1 speculative | Deferred to post-1.0 |
-| `nika-macros` | No proc macros in L0 (Q1 locked) | Never a crate |
-| `nika-lsp-core` | Merged into `nika-lsp` | Module, not crate |
-| `nika-policy` / `nika-cache` | Modules in `nika-runtime` | Not crates |
-| `nika-storage` | Module in `nika-daemon` | Not a crate |
-
-## See also
+## Find the right record
 
 <CardGroup cols={2}>
-  <Card title="Constellation" icon="diagram-project" href="/reference/constellation">
-    Visual map of admitted / WIP / planned crates by layer.
+  <Card title="Releases" icon="tag" href="/changelog/releases">
+    Published versions, dates, notes and attached downloads.
   </Card>
-  <Card title="Admission" icon="check-double" href="/architecture/admission">
-    The 12 gates every crate passes before joining.
+  <Card title="Roadmap" icon="route" href="/changelog/roadmap">
+    What is available and what still needs release evidence.
   </Card>
-  <Card title="Error codes" icon="triangle-exclamation" href="/reference/error-codes">
-    NIKA-XXX code reference per crate range.
+  <Card title="Historical milestones" icon="clock-rotate-left" href="/changelog/history">
+    Original dated accounts, preserved with their historical context.
   </Card>
-  <Card title="CHANGELOG" icon="clock-rotate-left" href="https://github.com/supernovae-st/nika/blob/main/CHANGELOG.md">
-    Every crate admission with verified numbers.
+  <Card title="Timeline and evidence" icon="timeline" href="/reference/timeline">
+    How to distinguish a release, a proposal and a historical account.
   </Card>
 </CardGroup>
-
-## The Nika ecosystem
-
-import { Ecosystem } from "/snippets/_ecosystem.mdx";
-
-<Ecosystem />

@@ -1,0 +1,708 @@
+---
+title: "Historical milestones"
+description: "Original dated accounts of Nika's development, including release attempts that did not produce downloadable binaries."
+icon: "clock-rotate-left"
+---
+
+<Warning>
+  This is a historical archive, preserved as written. Statements such as “current”,
+  “ships” and “these docs teach” refer to the date of each entry. Some entries
+  describe tags whose release builds failed. They are not installation instructions.
+  Use the [published release index](/changelog/releases),
+  [current status](/reference/status) and [installation guide](/getting-started/installation)
+  for what you can use today.
+</Warning>
+
+The [timeline guide](/reference/timeline) explains the eras and evidence classes.
+The accounts below predate the automated release inventory and are retained without
+rewriting their original claims.
+
+<Update label="v0.109.2" description="2026-08-19 · the first published nine-key binary · Linux builders jail before the gates run" tags={["release", "language"]}>
+  **The second refusal, one layer down.** `v0.109.1` fixed the fossil
+  envelope in the release gates and died on both Linux builders one leg
+  later: `[consent-run] exit=3 want=4` — since 0.109.0 a workflow that
+  declares `permits:` refuses to start on a host with no sandbox backend
+  (`NIKA-1710`), and a GitHub Linux runner has no bubblewrap. The macOS
+  builders, where seatbelt exists, passed both gates confined. No asset
+  shipped under `v0.109.1` either; the binaries were fine both times.
+  **This patch is the same tree plus the second fix and is the version
+  consumers install.**
+
+  - **The Linux release builders install bubblewrap before the gates run.**
+    The Diamond CI tests-leg recipe (apt bubblewrap · detach
+    ubuntu-24.04's AppArmor bwrap profile · keep unprivileged userns open)
+    now runs on the two Linux builders, so the funnel e2e and the trust
+    battery run confined there exactly as they do on macOS — never a
+    waiver. A gate that spends an `exec` under `permits:` proves the jail
+    as a side effect; a host that cannot jail says so (`NIKA-1710`)
+    instead of being waved through.
+
+  These docs teach 0.109.2 (measured 2026-08-19). A file written for 0.108
+  meets a refusal that names its replacement; `nika check --fix` moves the
+  mechanical parts.
+</Update>
+
+<Update label="v0.109.1" description="2026-08-19 · the first published nine-key binary · the release gates speak the live envelope" tags={["release", "language", "breaking"]}>
+  **The release the release gate refused.** `v0.109.0` was tagged from
+  `f58a17396` and its own pre-upload gates killed all four builders: the
+  funnel e2e and the trust battery still authored their fixtures in the
+  fourteen-key envelope (`nika: v1` + `workflow:`) the nine-key engine
+  refuses at parse. No asset was published under that tag; the binaries
+  were fine and the gate was the fossil, exactly as v0.106.0 died on
+  2026-07-27 when the battery spent an exec without a `permits:` block.
+  `v0.109.0` stays a tag with no release; **this patch ships the same tree
+  plus the gate fix and is the version consumers install.** The language
+  change itself is the v0.109.0 entry below.
+
+  - **The release gates speak the live envelope (funnel e2e · trust
+    battery).** Four fixtures move from `nika: v1` + `workflow:` to
+    `nika: <id>`. Nothing else in the gates changes: the consent-dirty leg
+    still expects `NIKA-SEC-014` at `guard` and `check`, the consent-pause
+    leg still expects exit 4 with the resume line, the trust battery still
+    runs its exec under `permits.exec`.
+  - **Hygiene vector 50 · `check-release-gate-envelope`.** The two gates run
+    only at tag time, so a language change on main could leave them
+    teaching the previous envelope for weeks with nothing red on any push.
+    The vector greps both scripts for the dead envelope forms on every
+    push and is RED on any hit — proven by mutation (one restored fixture →
+    red).
+
+  These docs teach 0.109 (measured 2026-08-19). A file written for 0.108
+  meets a refusal that names its replacement; `nika check --fix` moves the
+  mechanical parts, the table below names the hand moves.
+</Update>
+
+<Update label="v0.109.0" description="2026-08-18 · the nine-key release — tagged, no binary shipped (install 0.109.1)" tags={["release", "language", "breaking"]}>
+  **The nine-key release.** The envelope shrinks from fourteen keys to nine
+  and a workflow written for 0.108.0 will not check on 0.109 · this is the
+  flag-day the 0.106.0 front page announced as possible, and it lands
+  whole. The identity moves onto `nika:` itself (`nika: <id>` · a
+  kebab-case name · the `workflow:` block, its `id:` and its
+  `description:` are gone), the value authorities are exactly three
+  (`inputs` · `const` · `secrets` · `config:` died with the block),
+  `types:` · `policy:` · `assert:` leave the envelope, and the task body
+  loses its second grammars: cleanup is a real task on an `unwind` edge
+  (`on_finally:` is dead · `graph_format: 3` carries the `finally` node),
+  `output:` is spelled `extract:`, `declassify:` and `inert:` merge into
+  one door (`lift:`), `fail_workflow` is gone (`on_error` is `recover` or
+  `skip`), the two fan-out knobs live INSIDE `for_each:`, and `group:`
+  arrives (fan-in · `NIKA-DAG-008`). Two P0 close at the surface users
+  install: an expression sees only its INPUT (the ambient `env` leaves the
+  jaq function set at the three seams, with a pinned inventory of natives
+  that reddens if a future jaq adds one), and a third-party receipt can no
+  longer write the operator's clipboard (every field rides `escape_tty`).
+  The refusal a 0.108.0 file meets first now TEACHES where each retired
+  key's role went, instead of `unknown field`.
+
+  **Tagged 2026-08-18 · no binary shipped under this number.** The tag's
+  own release gate refused the upload (its fixtures still spoke the
+  fourteen-key envelope), so nothing was published as 0.109.0. The first
+  published nine-key binary is **0.109.1**, the same tree plus the gate
+  fix — that is the version to install.
+
+  **① The envelope · fourteen keys become nine** (ADR-113). The live
+  envelope is `nika` · `model` · `inputs` · `const` · `secrets` ·
+  `permits` · `run` · `tasks` · `outputs`. Every other top-level key
+  refuses, and the refusal names the destination:
+
+  | Dead form | Write instead | The teaching |
+  |---|---|---|
+  | `nika: v1` + `workflow: { id, description }` | `nika: <id>` (kebab-case) · the description as a `#` comment above it | the identity IS the envelope key · prose is demoted, never dropped |
+  | top-level `description:` | a `#` comment above `nika:` | shipped twice (bare · inside `workflow:`) · both dead |
+  | `config:` | an `inputs:` entry with `required: false` and a `default:` | a deployment-supplied value is an input with a default · authorities are exactly three |
+  | `types:` (`NIKA-TYPE-002` retired) | the verb's `schema:` (structured output) · a task's `returns:` | a shape rides its consumer · the ten primitives stay lowercase (spec 09) |
+  | `policy:` | `permits:` (`fs` · `net` · `exec` · `tools`) · `secrets:` · the unconditional laws (spec 10 · `NIKA-SEC-015` net-before-exec) | a vocabulary is not a policy · what survived is the boundary |
+  | `assert:` | nothing in the file · `nika trace verify` (spec 15) | obligations are proven on the sealed trace |
+
+  **② The task body · one grammar per thing.**
+
+  | Dead form | Write instead |
+  |---|---|
+  | `on_finally:` mini-tasks | a task of its own · `after: { <parent>: unwind }` (a `finally` node · `graph_format: 3`) · every graph judge governs it because it walks the task map |
+  | `output:` | `extract:` (same shape) |
+  | `declassify:` list · `inert:` string | `lift:` (the law is a parameter of one door · spec 10 §the authored doors) |
+  | `on_error: { fail_workflow: true }` | nothing · the default IS the failure · `on_error` is `recover` or `skip` |
+  | task-level `max_parallel:` · `fail_fast:` | inside the block · `for_each: { items: …, max_parallel: N, fail_fast: false }` |
+  | `depends_on:` | `with:` bindings (the binding IS the edge) · `after: { x: success }` for control (`NIKA-PARSE-024` · unchanged since W2) |
+  | `graph_format: 2` pins (`*.graph.json` goldens) | regenerate · `nika inspect --format json` · never edit a projection by hand |
+
+  **③ What `nika check --fix` migrates · and what it does not.** The rungs
+  are idempotent and equivalence-or-stop · **r1-identity** (new ·
+  `nika: v1` + `workflow: {id, description}` · the block, the pre-W1
+  scalar `workflow: <id>`, the one-line flow form, a bare top-level
+  `description:` · become `nika: <id>` with the prose demoted to a `#`
+  comment ABOVE it, never dropped · it STOPS, never guesses, when `nika:`
+  already names something else, when the block carries a foreign key,
+  when the id is not kebab-case, or when there is no id at all) ·
+  **w1-map** (a `tasks:` sequence becomes the map · atomic or nothing) ·
+  **w2-flow** (`depends_on` + body `tasks.*` reads become `with:` bindings
+  and `after:` predicates) · **d1-split** (the pre-0.103 string `command:`)
+  · **esplit** (`vars:` → `inputs:` / `const:` · classify-not-rename) ·
+  **predicates** (`succeeded` → `success`). One `--fix` runs them all in
+  one loop, so a 0.108.0 file whose only sins are the identity and the
+  tasks list heals to green in one command. Every round is a transaction:
+  a repair whose text no longer parses is rolled back and reported, and
+  the file is written once, from committed text only.
+
+  **Still hand migrations in this release** · the `on_finally:`
+  restructuring (cleanup becomes its own task on an unwind edge),
+  `output:` → `extract:`, `declassify:`/`inert:` → `lift:`, `config:` →
+  `inputs:` (a classification), and the `for_each` re-nesting · the
+  refusal teaches each destination at the point of refusal and `--fix`
+  leaves the file untouched rather than write a document its own checker
+  would reject. Measured on the pack that ships inside this binary:
+  0.108.0 passes 0/40 of these examples · 0.109 passes 40/40 · every
+  existing file outside this repo sits on the 0.108.0 side of that line
+  until it is migrated.
+
+  **④ Two P0, closed where users install.** An expression sees only its
+  input (#959): a `nika:jq` expression could read the ambient environment
+  (`env.PATH`) under an ABSENT permits block while `check` printed « the
+  body is pure compute so nothing escapes »; the retained natives leave
+  the jaq function set at the three seams from ONE list, and a pinned
+  inventory of jaq natives reddens if a future jaq adds one. A third-party
+  receipt wrote the operator's clipboard (#958): three fields of a proof
+  receipt reached the terminal without `escape_tty` while the helper
+  existed in the same file · a foreign evidence pack could emit OSC52;
+  every receipt field rides the escape, proven by mutation before
+  publication.
+
+  **⑤ The two trains.** `stable` is the newest tag · what brew · the
+  Registry · nika-action and the starters install. `next` is `main`, at
+  `<next>.0-dev` between tags · a real semver prerelease ·
+  `nika --version` and every trace say which one they are. Stable
+  consumers move only when a tag they can install exists.
+</Update>
+
+<Update label="v0.108.0" description="2026-08-05 · the access layer arrives · the check stops trusting what it cannot read" tags={["release", "access", "security"]}>
+  **The access layer arrives; the check stops trusting what it cannot
+  read.** Three steps of the access ratification land: `access` picks
+  the path, `model:` picks the intelligence — a deterministic resolver
+  with a strict sovereign order (`local < mock < harness < oauth < api`),
+  an `--access <path>` pin on `run` and `try` judged at the launch gates
+  (unsatisfied refuses with `NIKA-1800/1801/1802`, never substitutes),
+  and the ACP harness class (`nika-acp` · ACP 2.0.0 = wire v1) with its
+  mock agent in a quarantined workspace and the kernel's `AgentBackend`
+  seam. The zero-authority scan now refuses every `exec` spelling, the
+  shell form included. Fixed alongside: the doubled catalog-miss
+  advisory, the taught surfaces that misdirected, two more sandbox
+  tightenings, a resumed run that keeps its seat, and every pack skeleton
+  passing its own golden lane. Proven red-first, like everything on this
+  train.
+</Update>
+
+<Update label="v0.107.0" description="2026-08-01 · the trust release — three doors, one honest machine" tags={["release", "trust", "cli", "breaking"]}>
+  An outside audit measured the **experience** instead of the feature list
+  — five waves, seventy-two receipts, twenty-two P0s — and the arc closed
+  every one. Consent means consent: a non-affirmative answer fires **zero
+  effects** (`NIKA-SEC-014`, minted spec-first with its conformance
+  fixtures). The hooks' judge moved into the binary (`nika guard`,
+  fail-visible). Autonomy is graded before it is colored — the risk rung
+  never renders green past Supervised. The data journey names sources,
+  destinations and secrets **before** the run, and redaction works by
+  provenance: a one-byte secret dies the same death as a long one.
+
+  **The teaching grammar collapses to three doors.** `nika try [slug]` is
+  the showroom — offline by default (the mock rehearsal · zero keys · zero
+  flags), nothing written, nothing owned; bare `nika try` lists what there
+  is to see. `nika new` takes ONE positional gesture: plain words route
+  across the whole catalog, an example slug lands verbatim WITH its
+  ingredients, a skeleton name instantiates (`nika new '?'` lists the
+  set). `nika init` founds. The old doors die loudly:
+
+  | Dead door | The 0.107 door |
+  |---|---|
+  | `nika examples` (the verb tree) | `nika try` to see · `nika new <slug>` to take |
+  | `nika new --from <template> <dest>` | `nika new <slug-or-plain-words> [dest]` |
+  | `nika evidence <trace>` | `nika trace evidence <trace>` |
+  | `nika receipt explain <file>` | `nika trace receipt explain <file>` |
+
+  **A human gate can no longer kill a first run.** A `nika:prompt` with no
+  `default:` used to die in milliseconds on every text-mode run. The rider
+  is now armed on every lane: unattended runs **pause durably** (exit 4,
+  the pause journaled, never a failure frame), and at a terminal the gate
+  asks you directly — confirm `[y/N]`, choice, or input — leaving a
+  paste-able resume line that carries the run's own `--var`/`--model`.
+
+  Around the core, the doors multiplied honestly: `nika wire` previews and
+  never rewrites unasked, six clients join the targets (grok · antigravity
+  · kimi · kiro · copilot · amp — `wire all` covers twenty-one), and
+  `nika init` writes the two project MCP doors (`.mcp.json` +
+  `.agents/mcp_config.json`), handing the read-only oracle to agent
+  surfaces with zero machine wiring. `nika doctor` gives every probed host
+  a capability receipt and names kit↔binary train drift with the exact
+  align command. Cost honesty grows an **energy rung** (NEP-0018 —
+  watt-hours beside dollars), and a priced backend that omits token usage
+  now fails closed.
+
+  These docs teach 0.107 and only 0.107. The 0.106 value/permits grammar
+  is unchanged — what moved is the CLI's teaching surface. Pin the tag
+  you run.
+</Update>
+
+<Update label="v0.106.0" description="2026-07-27 · the values get names, the boundary gets teeth" tags={["release", "language", "security", "breaking"]}>
+  Two flag-days land in one window, and both are the same idea: **a thing
+  the file left implicit becomes a thing the file declares.**
+
+  **① The E-split — `vars:` and `env:` die into four named authorities.**
+  One block for everything a workflow knew was a block that told you
+  nothing: whether a value came from the caller, from the deployment, or
+  from the file itself was invisible, and so was whether it could be
+  trusted. The family is now closed at four, one role each — `inputs:`
+  (the caller supplies it at launch) · `config:` (the deployment supplies
+  it, and it may appear in logs) · `const:` (the file owns it, immutable)
+  · `secrets:` (a governed store, masked). `inputs.*` and `config.*` are
+  **untrusted** (they come from outside the file); literals, `const.*` and
+  `secrets.*` are **trusted** — which is why a destination a `permits:`
+  entry pins belongs in `const:`, where no caller can move it out from
+  under the boundary.
+
+  The old spellings refuse loudly, and they refuse with a *classification*,
+  not a rename: there is no mechanical `vars:` → `inputs:` (that is how you
+  end up with a caller-overridable output path). Each use is classified
+  into the authority its role commands; `nika check --fix` migrates the
+  provable cases and stops on the rest rather than guessing.
+
+  **② An absent `permits:` block declares ZERO authority.** It used to mean
+  "engine floor only" — a hint, and a green check. It now means what its
+  absence always should have: no filesystem, no network, no shell, no
+  tools. Every effect the body requires is refused at check with
+  `NIKA-AUTH-006` before a single token is spent, and any effect that
+  reaches run time fails the task with `NIKA-SEC-004`. A pure-compute
+  workflow still passes; `permits: {}` is the authored spelling of "I
+  touch nothing"; and under composition the absence is a wall — a parent's
+  grants never flow down implicitly (`NIKA-COMP-002`). The repair is one
+  command: `nika check --infer-permits` walks the DAG and prints the
+  tightest boundary the body actually needs, ready to paste.
+
+  | Dead form | Refusal | The 0.106 form |
+  |---|---|---|
+  | `vars:` block | `NIKA-VALUES-001` | classify each entry → `inputs:` · `config:` · `const:` · `secrets:` |
+  | `env:` block (envelope) | `NIKA-VALUES-002` | `config:` for a non-sensitive dial · `secrets:` for a governed reference (`exec.env:` is a different field and is untouched) |
+  | `${{ vars.X }}` · `${{ env.X }}` | `NIKA-VALUES-001` / `-002` | the read follows the declaration |
+  | any other value namespace | `NIKA-VALUES-003` | the family is exactly four |
+  | no `permits:` block, body has effects | `NIKA-AUTH-006` | the block `--infer-permits` writes |
+  | `after: { x: succeeded }` · `failed` | `NIKA-DAG-005` | `success` · `failure` (`skipped` · `terminal` unchanged) |
+  | `type: boolean` in a declaration | `NIKA-TYPE-001` | `bool` — and the flat 6-enum gives way to the type grammar (`{ array: string }`, `{ object: { … } }`). Raw JSON Schema under `infer.schema:` is untouched. |
+
+  Also in the window: an envelope `run:` block declares the run's
+  **entropy** and **clock** (`{ entropy, clock }`, closed) — randomness and
+  time stop being ambient, and `entropy: { seeded: N }` + `clock: virtual`
+  make two runs of the same file byte-identical. The dimensions couple, so
+  a declared contradiction refuses at parse (`NIKA-PARSE-026` /
+  `NIKA-PARSE-027`).
+
+  These docs teach 0.106 and only 0.106 — no dual grammar, no "if you are
+  on 0.105" branch. Pin the tag you run.
+</Update>
+
+<Update label="v0.105.0" description="2026-07-20 · the map comes home" tags={["release", "language", "security", "breaking"]}>
+  The refonte reaches users — **the file becomes a map**. `workflow:` is
+  an object (`id:` + `description:`), `tasks:` is a map keyed by id, and
+  precedence reads the way you think: **the binding IS the edge**
+  (`with: x: ${{ tasks.a.output }}` declares the data edge) · control-only
+  ordering is `after: {producer: succeeded}` against a closed predicate
+  set (succeeded · failed · skipped · terminal). The old forms die loudly
+  — a scalar `workflow:` is NIKA-PARSE-020, `depends_on:` is
+  NIKA-PARSE-024 — and `nika check --fix` machine-migrates the provable
+  cases. The proof layer opens: semantic hash + `nika.lock` +
+  `receipt_format: 1`, workflow composition (`invoke: workflow:`), and
+  `nika:decide`, the deterministic decision kernel. One security seat
+  ships in this tag: the **lethal-trifecta judge** (NIKA-SEC-009) refuses
+  private-read + untrusted-ingress + external-egress with no blocking
+  human gate on the path. The LSP learns the map end-to-end (server-side
+  rename · per-block keysets · `semantic_document_format: 1`). Every
+  surface you copy from re-baked the same day — the site, these docs, the
+  templates and the kit speak the released grammar (the serve-time door
+  law: what you copy runs on YOUR installed binary). Thinking-model note,
+  same honesty as the K3 seat: reasoning spends `max_tokens` — budget
+  generously or declare `thinking:`; an empty answer says why.
+</Update>
+
+<Update label="v0.104.0" description="2026-07-17 · the seventeenth seat" tags={["release", "providers"]}>
+  **Moonshot (Kimi) joins the canonical catalog** — 17 providers (11 cloud
+  · 5 local · 1 test). `model: moonshot/kimi-k3` runs Kimi K3 first-class:
+  1M context, `MOONSHOT_API_KEY`, and the pricing snapshot makes
+  `--max-cost-usd` a **hard ceiling** on kimi spend (the promotion run
+  metered $0.002787 against a $0.0077 printed worst-case). K3 is a
+  thinking model — reasoning spends output tokens, so budget `max_tokens`
+  generously (512+; at 64 the answer comes back empty and the engine says
+  why). Weights are announced open on July 27; until then the hosted API
+  routes through Moonshot's servers with training-by-default — read the
+  permits section of your workflow as the data-residency contract it is:
+  no declared egress, no call. Also in this wave: the lsp/graph/mcp test
+  fixtures that shipped red at the v0.103.0 tag now speak the argv form
+  (a CI-coverage gap banked as a finding), and the tag's rustfmt drift is
+  cleared. Release branch cut from v0.103.0 — `main` is mid-refonte and
+  users never ship a transitional grammar. Spec side: ADR-105 + stdlib
+  16→17 + the escape-hatch doc now names the real variable
+  (`NIKA_OPENAI_BASE_URL`, complete endpoint, verbatim).
+</Update>
+
+<Update label="v0.103.0" description="2026-07-13 · the language tightens" tags={["release", "language", "breaking"]}>
+  The pre-1.0 window pays for itself — three breaking cuts in one wave,
+  spec and engine merged in the same window. `command:` is **argv-only**
+  (`["cargo", "test"]` — execve, no shell: an interpolated value can
+  never break out of its argument) and the string form moves to
+  **`shell:`**, the explicit door — semantics ride the *field*, never
+  the YAML type. A bare `${{ tasks.X }}` is now an error (NIKA-VAR-020):
+  name the projection — `.output` / `.status` / `.error` /
+  `.duration_ms`. And the gate algebra (upstream terminal × gate form →
+  downstream status) becomes a normative spec table — the when-status
+  pattern is a propagation *choice*, not redundancy. ~530 corpus sites
+  migrated; docs, site, editor, kit and registry re-taught in lockstep.
+
+  [Engine release](https://github.com/supernovae-st/nika/releases/tag/v0.103.0)
+</Update>
+
+<Update label="v0.102.0" description="2026-07-13 · the editor speaks the language" tags={["release", "lsp", "editor"]}>
+  The LSP arc lands server-side: the pause after a colon answers
+  itself (space joins the triggers), `args:` keys complete from the
+  tool's own schema, `mode:` enums scope to the enclosing tool,
+  `${{ vars./secrets./env. }}` complete from the FILE's declarations,
+  hover cards read the graph (wave k/N · transitive reach · model
+  fallback tiers), and references resolve closure-aware. Plus:
+  `wave-sweep.sh` (the one-command release sweep) and three new
+  coherence-bot probes born from drifts caught by hand.
+
+  [Engine release](https://github.com/supernovae-st/nika/releases/tag/v0.102.0)
+</Update>
+
+<Update label="v0.101.0" description="2026-07-13 · the sovereign lane ships whole" tags={["release", "sovereign", "models"]}>
+  Every release binary now carries `local-infer` — `nika model pull` →
+  `nika model serve` → workflow `infer` against your own machine: no
+  cloud, no external daemon, no build-from-source wall (#518, the
+  release ruling, executed). CPU on every target on purpose (darwin
+  included) until candle's quantized rms-norm Metal kernel is fixed.
+  The release funnel now pins the teaching both ways: a shipped binary
+  must never utter « built without local inference ».
+
+  [Engine release](https://github.com/supernovae-st/nika/releases/tag/v0.101.0)
+</Update>
+
+<Update label="v0.100.0" description="2026-07-12 · the terminal sings · the models come home · the kit rides three surfaces" tags={["release", "cli", "sovereign", "agents"]}>
+  The terminal learns to sing: a **verb band** colors every task by its
+  verb, the spinner is a real live probe, and `nika run` paints the DAG
+  as **living wire-art in-frame** — states, in-node spinners, edge
+  pulses — while `nika inspect --format json|mermaid|dot` becomes the
+  ONE graph projector (now projecting declared policy too: `retry` ·
+  `timeout` · `on_error` · `outputs`). `nika init` becomes a **founding
+  wizard** (recipes, themes, wiring — everything asked before the first
+  write) and equips a repo for **15 agent surfaces** project-side,
+  Cursor subagents + seatbelt hooks included. The **models come home**:
+  `nika model pull/list/rm` (one models dir by construction, resumable
+  verified downloads) and `nika model serve` (the sovereign sidecar,
+  OpenAI-compatible on loopback) close the local loop — pull → serve →
+  workflow infer, trace-chained. `nika check --fix` is an in-binary
+  repair loop that converges; the machine dry-run ships one versioned
+  plan object; a paused run teaches its exact resume command; registry
+  refs run verified (`nika run @org/flow`). The **agents kit becomes a
+  suite** — 4 skills · 3 subagents · 5 commands · 3 seatbelt hooks in
+  ONE dialect across Claude Code, Cursor and Codex (probe-proven) —
+  and the LSP ships **code actions**: every `check --fix` rename lands
+  as a quickfix in any editor. Wire waves add claude-desktop, cline,
+  continue and qwen (12+ targets).
+</Update>
+
+<Update label="v0.99.0" description="2026-07-10 · the MODELS rung · two media builtins graduate · the boundary earns its valve" tags={["release", "audit", "stdlib"]}>
+  The check ladder earns its **MODELS rung**: every `model:` must resolve
+  in THIS binary — a bare id (`gpt-5-turbo`) or a provider the resolver
+  cannot drive is a finding with the fix taught in-line, pricing refuses
+  to price what cannot resolve (*unpriced beats conjured*), and the MCP
+  `nika_check` lane obeys the same law. Two **media builtins graduate**:
+  `nika:image_fx` (15 deterministic op families — dither · duotone ·
+  halftone · glitch · ascii — over a hand-rolled zero-dep PNG codec, the
+  recipe riding the `tEXt` chunk) and `nika:chart` (five chart types
+  compiled to byte-identical SVG, parity proven across architectures);
+  both artifacts sha256-chain into the trace. **Egress to `outputs`**
+  closes the one documented information-flow gap: a sink-only,
+  secret-specific declassification of the workflow boundary itself —
+  every embedded template now passes its own audit, zero exceptions.
+  `nika explain --forecast` computes duration/cost/risk priors from YOUR
+  local traces (p50/p90 earned at n ≥ 5 — deterministic stats, never a
+  model call). `nika wire` covers **opencode** and **hermes** (8
+  targets), the missing-input trap teaches at check time, and the
+  release tarball is **funnel-gated** — a stranger's broken first run
+  never uploads.
+</Update>
+
+<Update label="v0.98.0" description="2026-07-08 · native answers · the checker closes run-fail gaps · one lexer" tags={["release", "structured-output", "onboarding"]}>
+  Structured output goes **native per provider** — Anthropic's
+  `output_config.format`, Gemini's `responseJsonSchema` (the lossy
+  converter dies), OpenAI strict-mode honesty (`not`/`allOf` stripped at
+  the wire instead of 400ing) — with a **coercion ladder** that repairs
+  case-folded enums, string numbers and singleton arrays before any PAID
+  retry. The checker closes gaps that used to fail at run: the compact
+  block-sequence **bomb** that aborted every check/run is caught as
+  NIKA-PARSE-001, `max_turns` bounds and `for_each` over a typed
+  non-array are check-time findings, and `env:` **binds at run** exactly
+  as checked. The `${{ }}` scanner becomes its own crate (`nika-tmpl`),
+  shared by checker AND runtime — parity by construction. And the first
+  30 seconds learn to speak: `nika welcome` mirrors your machine,
+  `nika explain <file>` narrates a workflow (cost honesty included),
+  `nika init` briefs six agent surfaces, `--max-cost-usd` refuses to
+  start when the static floor already exceeds the budget.
+</Update>
+
+<Update label="v0.97.0" description="2026-07-07 · the run becomes evidence" tags={["release", "trust"]}>
+  Every journal line carries a **hash chain** — `nika trace verify` walks
+  it and names the first broken link; export and replay check the chain
+  before trusting the data. `nika trace reproduce` compares a recorded
+  run against a fresh one and classifies every task (reproduced ·
+  nondeterministic · authored · environment). The journal **attests its
+  engine** (`engine_version` + platform on `workflow_started`). Models
+  are **priced before the first run** — 602 rules refreshed from
+  models.dev, per-model rates in `check --json` (the VS Code preflight
+  shows `$in/$out per 1M` on this tag). `check` IS the dry-run — the
+  plan names what dispatches in which wave. `doctor --json` speaks
+  machine; bare `nika init`/`new` converse on a terminal; and the dap
+  drift warn tells a re-encode from an edit (`workflow_sha256_lf`).
+</Update>
+
+<Update label="v0.96.0" description="2026-07-06 · the run becomes a place" tags={["release", "debugging"]}>
+  `nika dap` brings time-travel replay debugging over the run journal —
+  breakpoints in your `.nika.yaml`, step forward AND backward, recorded
+  outputs in the Variables pane; the VS Code extension's F5 integration
+  lights up on this tag. `nika trace export` projects any journal to
+  OTLP/JSON lines (Jaeger · Grafana · Langfuse — cost rides
+  `gen_ai.usage.cost`). `nika check --json` gains the `requirements`
+  section (models · keys · secrets · env) so editors and CI state
+  blockers before any token. A typo'd field now teaches: « unknown
+  field `infr` — did you mean `infer`? ». Runs record their source
+  (workflow_sha256) and skips say why (when · blocked_by). Plus:
+  doctor --ping v2, strict boolean args, the opt-in CSV
+  formula-injection guard.
+</Update>
+
+<Update label="v0.95.0" description="2026-07-06 · the catalog practices local-first" tags={["release", "providers", "local-first"]}>
+  The 5 local servers (Ollama · LM Studio · llama.cpp · LocalAI · vLLM)
+  join `nika catalog` with descriptions, tags and seed models — keyless
+  by construction, and sovereign models stay unpriced, never « free ».
+  38 providers in the engine's catalog inventory (the canonical spec
+  set stays 16). A bare `nika` now suggests the next command
+  instead of a wall of help text. Fixes: `nika:write` honors
+  `create_dirs: false` loudly, `nika:date` resolves named timezones
+  from the bundled db, `nika:log` neutralizes terminal control
+  sequences, and the MCP stdio transport bounds its line reads.
+</Update>
+
+<Update label="v0.94.0" description="2026-07-06 · the media suite · every run leaves a journal" tags={["release", "media", "providers"]}>
+  Two media builtins take the stdlib to 25: `nika:image_generate`
+  (generation and editing, local-first providers, provenance manifests,
+  content credentials preserved) and `nika:tts_generate` (one sovereign
+  `/v1/audio/speech` wire · a real deterministic WAV under mock). Every
+  run now writes `.nika/traces/` by default and `--task` scopes execution
+  to one upstream cone. The catalog rides the wire (`catalog`/`tools
+  --json` plus their MCP twins — the read-only tool set on protocol
+  `2026-07-28`), `cost_usd` rides `task_completed` without ever faking a
+  zero, Hugging Face and NVIDIA join the 16-provider canonical catalog,
+  and `nika doctor --ping` actually probes the local ports.
+</Update>
+
+<Update label="v0.93.1" description="2026-07-05 · the embedded pack teaches 2026 models" tags={["release", "local-first"]}>
+  The pack vendored into the binary carries the qwen3.5 teach-cascade:
+  the first `nika examples run 01-hello` of a fresh install works against
+  the local models people actually pull in July 2026. Plus the README
+  daily-commands block — the full 0.93 user loop in one place.
+</Update>
+
+<Update label="v0.93.0" description="2026-07-05 · resume · test harness · local thinking models unbricked" tags={["release", "local-first", "debugging"]}>
+  Provider-plane HTTP timeout rises to 180s: 2026 open-weight thinking
+  models (qwen3.5 · gemma4) no longer die at the cloud-calibrated 30s
+  ceiling. `nika run --resume` lands durable-lite resume — the trace IS
+  the checkpoint, completed tasks replay as visible cache hits (ADR-099).
+  `nika test` golden harness + ADR-098 schema wire selection + the CLI
+  verdict card. `nika-cap` admitted (all 12 gates) — 40 of 42 crates.
+</Update>
+
+<Update label="v0.92.0" description="2026-07-03 · MCP learning tools · codex wire · exec hardening" tags={["release", "agents", "security"]}>
+  The MCP oracle grows the learning tools (`nika_schema` ·
+  `nika_examples` · `nika_template` · `nika_canon`). `nika wire codex`
+  patches `~/.codex/config.toml`; the Claude Code marketplace ships one
+  plugin dir for two ecosystems. Exec hardening: provider API keys
+  scrubbed from exec children · env keys restricted to POSIX names ·
+  browser navigation guarded against private/loopback SSRF.
+</Update>
+
+<Update label="v0.91.0" description="2026-06-25 · onboarding wiring · headless builds" tags={["release", "packaging"]}>
+  Explicit onboarding wiring in the CLI · `nika examples run` takes a
+  `--model` override with an offline mock hint · headless build fixes
+  (xcap backend default-off · atspi 0.29) · doctor recognizes the
+  workspace Cursor MCP config · release pipeline separates the dev
+  version from brew assets.
+</Update>
+
+<Update label="v0.90.0" description="2026-06-21 · the first public release" tags={["release", "milestone", "packaging"]}>
+  **Diamond's first tagged public release.** CLI binaries for four
+  platforms (macOS arm64/x64 · Linux arm64/x64) via Homebrew and the
+  install script, cut by the release pipeline on the tag. `nika-cli` and
+  `nika-extract` admitted the same morning — the operator surface and the
+  9 fetch extract modes. Real semver toward a 1.0.0 public launch —
+  quality over speed. Everything before this tag is rewrite history.
+</Update>
+
+<Update label="The vertical slice" description="2026-06-10 → 2026-06-21 · 23 crates in twelve days" tags={["foundation", "milestone"]}>
+  The sprint that turned a foundation into a runnable engine. June 10:
+  the kernel splits into four siblings (`core` · `ai` · `runtime` ·
+  `plugin`) and the effect crates land — `nika-fs`, `nika-http`,
+  `nika-blob`, `nika-exec-runner`, `nika-input`. June 11: `nika-pack`,
+  `nika-providers`, `nika-browser`, and **all four verb crates admitted
+  the same day** — `infer` · `exec` · `invoke` · `agent`. June 12:
+  `nika-runtime` (the DAG scheduler). June 15-18: `nika-lsp`,
+  `nika-mcp`, `nika-builtin`, `nika-schema`. June 21: `nika-cli` +
+  `nika-extract` — and the v0.90.0 tag ships that evening.
+</Update>
+
+<Update label="The language locks" description="May 2026 · the spec goes public · 7 crates climb" tags={["foundation", "language"]}>
+  The month the language reached its final shape, in the open
+  [`nika-spec`](https://github.com/supernovae-st/nika-spec) repo
+  (Apache-2.0): the `nika: v1` envelope (one field, forever), the four
+  verbs locked (`infer` · `exec` · `invoke` · `agent` — everything else
+  is a tool under `invoke`), CEL + jq as the only two expression layers,
+  agent tools default-deny, and the stdlib curated down to 22 builtins
+  with zero capability loss. Meanwhile the climb continued:
+  `nika-catalog-codegen` (May 10), `nika-bm25` (May 12), `nika-event` +
+  `nika-clock` (May 24), `nika-screen` + `nika-ocr` + `nika-a11y`
+  (May 25).
+</Update>
+
+<Update label="The foundation hardens" description="2026-04-17 · hygiene vectors · forward-compat seams · telemetry seeds" tags={["foundation"]}>
+  ### Added
+
+  - **4 new hygiene vectors** (30-33): `check-cancel-safety.sh`,
+    `check-owned-strings.sh`, `check-unsafe-count.sh`, `check-layer-deps.sh` —
+    the suite reaches 33 active vectors.
+  - **Forward-compat reservations**: 5 seams pre-planted for the memory
+    subsystem + WASM eras: `EmbeddingSpec`, `MemoryFrameRef.trust`,
+    `RecallQuery.tenant`, `WasmPluginError::OutOfFuel` +
+    `PluginCallContext`, `MemoryLifecycle` trait.
+  - **Telemetry seeds**: `SpanGuard.parent_span_id` + W3C Trace Context
+    linkage; `Timestamp(i64 unix_ns)` + `WallDuration` in
+    `nika-types::timestamp` with RFC 3339 Display.
+  - **Test depth**: 14 new proptest properties (TrustLevel lattice
+    invariants, ID serde roundtrip); Loom interleaving tests for
+    `CancelCtx`; a mutation baseline for `nika-error`.
+  - **5 new ADRs**: ADR-029 → ADR-032 + ADR-035 (telemetry seams).
+
+  ### Changed
+
+  - `ObservabilitySink` dropped → 5 sibling channels (Event · Metrics ·
+    Trace · Audit · Billing).
+  - Engine hygiene enforces RED as fail / YELLOW as suggestion for
+    routine pushes.
+</Update>
+
+<Update label="v0.80.0-alpha.4" description="2026-04-14 · nika-catalog-verify admitted" tags={["foundation"]}>
+  **Crate admitted:** `nika-catalog-verify` (L4, 600 LOC, 9 tests, all 12
+  gates green). The first L4 interface crate: validates all catalog
+  TOMLs at build time via `cargo run -p nika-catalog-verify`.
+</Update>
+
+<Update label="v0.80.0-alpha.3" description="2026-04-13 · nika-kernel + nika-kernel-mock admitted" tags={["foundation"]}>
+  **Crates admitted:** `nika-kernel` (L0.5) + `nika-kernel-mock` (L0.5).
+  40 ISP traits with sealed supertrait discipline. `trait_variant::make`
+  for async dynamic dispatch. Pure-memory mocks for hermetic test
+  environments. Preludes re-export `nika-types` + `nika-error` types
+  for ergonomic downstream imports.
+</Update>
+
+<Update label="v0.80.0-alpha.2" description="2026-04-13 · nika-catalog admitted" tags={["foundation"]}>
+  **Crate admitted:** `nika-catalog` (L0). TOML-driven provider + model +
+  capability catalog with build-time codegen, perfect-hash lookup, Cow-
+  heavy zero-copy types. At admission: 105 MCP servers, 32 LLM providers,
+  13 embedding models in the inventory. Schema FK-check enforced in
+  `build.rs`.
+</Update>
+
+<Update label="v0.80.0-alpha.1" description="2026-04-13 · nika-error admitted" tags={["foundation"]}>
+  **Crate admitted:** `nika-error` (L0). Typed NIKA-XXX error hierarchy,
+  miette integration for L4 diagnostics, per-crate error range
+  allocation, proptest-backed roundtrip invariants.
+</Update>
+
+<Update label="Diamond begins" description="2026-04-13 · the orphan branch · v0.80.0-alpha.0" tags={["foundation", "milestone"]}>
+  **The rewrite starts.** An orphan branch created from scratch (as
+  `nika-diamond`, renamed `main` in May 2026) — zero shared history with
+  the brouillon. The constraint that defines everything after:
+  every crate must fit in an AI context window. ≤15k LOC per crate,
+  ≤1,500 per file, ≤100 lines per function, zero `.unwrap()` in `src/`,
+  and 12 admission gates before a crate joins the workspace. First
+  admitted crate: `nika-types` (L0 foundation). The versioning policy
+  said « forever v0.x » at the time; it was later amended to real semver
+  toward 1.0.
+</Update>
+
+<Update label="v0.79.3 — the brouillon closes" description="2026-04-09 · 322k LOC · 31 crates · the context lesson" tags={["origins", "milestone"]}>
+  The final sprint says everything about the pace: v0.73 → v0.79 in
+  three days (April 6-8), v0.79.3 on April 9. Fourteen weeks after the
+  first commit, the brouillon engine is a working 322k-LOC, 31-crate
+  system — and it has surfaced the lesson Diamond is built on: at that
+  scale the biggest correctness risk stops being algorithmic and
+  becomes **context**. No human or AI assistant could hold the system
+  in working memory, so refactors happened by pattern-match, and
+  pattern-match hallucinates. Four days later the rewrite began. The
+  era is preserved read-only on the branch that named it —
+  `brouillon`, a private archive; nothing ships from it. Diamond
+  reads it, then rewrites from scratch.
+</Update>
+
+<Update label="The version storm" description="2026-02 → 2026-03 · v0.3 → v0.21 in fifteen days" tags={["origins"]}>
+  February 18 is the day the language grows teeth: `invoke:` and
+  `agent:` land in the AST and the runtime, the MCP client appears,
+  and the provider layer learns tool calling — all in one day. Then
+  the storm: v0.3 (February 19) → v0.10 (February 25) → v0.17
+  (March 2) → v0.21 with a first language server (March 5). March
+  alone counts 2,900+ commits — the month the brouillon engine
+  became an ecosystem: LSP, security releases, CI/CD, release
+  automation. The era even has a public spine: seven crates.io
+  releases, 0.20.0 (March 4) → 0.47.1 (March 26) — later yanked,
+  listed forever.
+</Update>
+
+<Update label="The brouillon era begins" description="2026-01-01 · the first commit" tags={["origins", "milestone"]}>
+  **The first commit lands on New Year's Day 2026**: `initial nika v0.1
+  with strict templating system` — followed the same week by DAG
+  validation, event sourcing for the workflow audit trail, and
+  fine-grained executor events. The shape of everything that followed —
+  declarative workflows, a DAG, an audit trail — is visible in week
+  one. ~4,600 commits follow in fourteen weeks. The era carries the
+  name its git branch carries: `brouillon` — the draft.
+</Update>
+
+<Update label="The exploration" description="summer 2025 → end 2025 · prototypes before the repo" tags={["origins"]}>
+  Nika started as a frustration in 2025: useful AI work kept
+  disappearing into chat histories. A great run — a research brief, a
+  review procedure, a data pipeline — lived and died inside one
+  conversation, unrepeatable and unownable. The bet: **durable agent
+  work should be source code** — one file you can run, diff, review,
+  and keep; local-first; any model; sovereign by default. The idea was
+  tested in code from the start — private prototypes through the
+  summer and fall of 2025, pre-git and testimony-grade, and the
+  [timeline](/reference/timeline) labels them exactly that. The
+  first repo commit followed on January 1, 2026.
+</Update>
+
+## Full history
+
+<CardGroup cols={2}>
+  <Card title="CHANGELOG.md" icon="github" href="https://github.com/supernovae-st/nika/blob/main/CHANGELOG.md">
+    Every crate admission, every hygiene vector deploy, every ADR
+    promotion. Source of truth on the `main` branch.
+  </Card>
+  <Card title="Commit history" icon="code-commit" href="https://github.com/supernovae-st/nika/commits/main">
+    Every commit on the `main` branch: atomic, bisectable,
+    Co-Authored-By Nika 🦋.
+  </Card>
+  <Card title="GitHub Releases" icon="tag" href="https://github.com/supernovae-st/nika/releases">
+    Binaries for every tag: macOS arm64/x64 · Linux arm64/x64 ·
+    checksums + per-release notes.
+  </Card>
+  <Card title="Live state" icon="gauge" href="/reference/status">
+    Current test counts, clippy, hygiene, admitted crate inventory.
+  </Card>
+  <Card title="Roadmap" icon="map" href="/changelog/roadmap">
+    What's next: the 0.9x hardening train, the contract system and the
+    whole Connectome landing before 1.0, the 1.0.0 culmination, 1.x
+    minors completing the layered foundation, then the ecosystem tier.
+  </Card>
+</CardGroup>

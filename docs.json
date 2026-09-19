@@ -662,7 +662,8 @@
             "pages": [
               "changelog/releases",
               "changelog/roadmap",
-              "reference/timeline"
+              "reference/timeline",
+              "changelog/history"
             ]
           }
         ],
