@@ -120,6 +120,44 @@ class KnowledgeMirrorTests(unittest.TestCase):
         self.assertNotRegex(page,r'\| pattern \| `')
         self.assertIn('declaration below',page)
         self.assertIn('a|b',page)
+    def test_md_prose_nested_ticks_pipes_cel_and_jsx_like(self):
+        src='see `` `nested` `` and ${{ inputs.X }} and {Not.JSX} and `a|b`'
+        out=mirror.md_prose(src)
+        self.assertIn('nested',out)
+        self.assertIn('`${{ inputs.X }}`',out)
+        self.assertIn('&#123;Not.JSX&#125;',out)
+        self.assertNotIn('{Not.JSX}',out)
+        self.assertIn('a|b',out)
+        self.assertNotIn('$&#123;',out)
+        # Inner backtick of a double-delimited span survives.
+        self.assertIn('`` `nested` ``',out)
+    def test_representative_pages_compile_as_mdx(self):
+        import subprocess, tempfile
+        runtime=ROOT/'scripts'/'tests'/'mdx-runtime'
+        compiler=runtime/'compile-mdx.mjs'
+        modules=runtime/'node_modules'/'@mdx-js'/'mdx'
+        if not modules.exists():
+            inst=subprocess.run(['npm','ci'],cwd=runtime,capture_output=True,text=True,timeout=120)
+            self.assertEqual(inst.returncode,0,inst.stderr)
+        missing=subprocess.run(['node',str(compiler)],cwd=runtime,capture_output=True,text=True)
+        self.assertNotEqual(missing.returncode,0)
+        self.assertIn('usage:',missing.stderr)
+        pages={
+            'inputs.mdx':mirror.render(self.data)['reference/language/words/inputs.mdx'],
+            'hostile.mdx':'# H\n\n'+mirror.md_prose('CEL ${{ inputs.X }} ticks `` `x` `` jsx {Nope} pipe `a|b`')+'\n',
+        }
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            for name,body in pages.items():
+                path=root/name;path.write_text(body)
+                result=subprocess.run(['node',str(compiler),str(path)],
+                    cwd=runtime,capture_output=True,text=True,timeout=60)
+                self.assertEqual(result.returncode,0,name+'\n'+result.stderr+result.stdout)
+            bad=root/'bad.mdx';bad.write_text('# H\n\n{this is not {valid mdx\n')
+            broken=subprocess.run(['node',str(compiler),str(bad)],
+                cwd=runtime,capture_output=True,text=True,timeout=60)
+            self.assertNotEqual(broken.returncode,0)
+            self.assertTrue(broken.stderr or broken.stdout)
     def test_link_audit_handles_underscores_and_rejects_missing_targets(self):
         import tempfile, subprocess
         with tempfile.TemporaryDirectory() as directory:

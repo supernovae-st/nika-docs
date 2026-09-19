@@ -59,19 +59,22 @@ outputs:
   notes: "${{ tasks.draft.output }}"
 ```
 
-`nika run` already writes `.nika/traces/<timestamp>-<id>.ndjson` when
-the directory exists (the engine creates `.nika/traces/` as it runs).
-Redirecting stdout yourself fails **before Nika starts** if the folder
-is missing (`zsh: no such file or directory`). Prefer the automatic
-journal, or `mkdir -p .nika/traces` first:
+Redirecting stdout into `.nika/traces/...` fails **before Nika starts**
+if the folder is missing. Create it, write a named journal, resume that
+same path:
 
 ```bash
-nika run release-notes.nika
-# then: nika trace verify    # latest journal
-# optional: nika run release-notes.nika --json > .nika/traces/release-notes.ndjson
+mkdir -p .nika/traces
+nika run release-notes.nika --json > .nika/traces/release-notes.ndjson
+nika run release-notes.nika --resume .nika/traces/release-notes.ndjson
 ```
 
-Resume from it:
+A run without `--json` still writes an automatic timestamped journal
+under `.nika/traces/`; `nika trace verify` with no path reads the
+latest. The copyable sequence above is the named file the `--resume`
+line uses.
+
+Resume from the file you just wrote:
 
 ```text
 $ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson

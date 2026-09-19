@@ -70,13 +70,17 @@ verbatim from the engine (`nika-http`):
 
 <Steps>
   <Step title="Static checks (pure)">
-    Scheme allow-list (`http`/`https` only), blocked hostnames
-    (`localhost`, cloud metadata), literal-IP range checks: implicit
-    loopback, RFC 1918, link-local/metadata (`169.254.169.254`), CGN,
-    IPv6 local ranges, v4-mapped v6. An **exact** host you listed under
-    `permits.net.http` (for example `127.0.0.1`) is the spec's grant
-    exception — not "every loopback address is always blocked", and not
-    "localhost always works". Unlisted aliases stay refused.
+    Scheme allow-list (`http`/`https` only), blocked hostnames, and
+    range checks for implicit loopback, RFC 1918, link-local/metadata
+    (`169.254.169.254`), CGN, IPv6 local, v4-mapped v6. Spec
+    [01-envelope Exact-loopback declassification](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/spec/01-envelope.md):
+    the **only** SSRF carve-out is an exact `permits.net.http` literal —
+    the closed set `localhost`, a `127.x.y.z` v4 literal, or `::1` /
+    `[::1]`. Clearing is exact-host: a permitted `localhost` does **not**
+    clear `127.0.0.1` (measured on 0.120.1: that grant + fetch to
+    `127.0.0.1` is `NIKA-SEC-005`; an exact `127.0.0.1` grant fetches);
+    a public name that resolves to loopback stays refused; RFC1918 /
+    metadata named in the list stay floor-blocked (`NIKA-SEC-005`).
   </Step>
   <Step title="DNS resolution check">
     Non-literal hosts are resolved and **every address** is

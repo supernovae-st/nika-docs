@@ -8,10 +8,16 @@ icon: "vial"
 How do you pin what a workflow returns without spending tokens?
 
 `nika test <file>` runs it under the **mock provider** — offline,
-deterministic, zero keys — and compares typed `outputs:` to a golden
-file (`<file>.golden.json`). Predict: if you change only the prompt
-text, does the golden still match? Only if `outputs:` stay the same
-shape; the mock still has to satisfy `infer.schema`.
+deterministic, zero keys — then **diffs the output values** against
+`<file>.golden.json` (deep JSON equality, path-by-path). Schema
+acceptance is a **separate** gate: when `infer.schema` is present the
+mock must synthesize a valid instance *before* that JSON is compared.
+
+Predict: if you change only the prompt text, does the golden still
+match? Not if the recorded values change. `mock/echo` echoes the
+prompt, so the golden fails. A schema mock that still synthesizes the
+same instance can match even when the prompt changed — the golden
+never means “shape only”.
 
 ```bash
 nika test triage.nika

@@ -72,7 +72,7 @@ inputs:
     description: "What the agent must accomplish"   # SLOT
 ```
 
-The pinned schema text says a `required` input is not satisfied by `default` (the caller must supply a value). Published CLI 0.120.1 still applies `default:` when the key is omitted. That is a source-versus-implementation discrepancy, not one law. Prefer `required: false` plus `default:` for knobs, and required without `default:` for caller-owned values (`NIKA-1708` at run).
+The pinned schema text says a `required` input is not satisfied by `default` (the caller must supply a value). Published CLI 0.120.1 still applies `default:` when the key is omitted. That is a source-versus-implementation discrepancy ([nika-spec#348](https://github.com/supernovae-st/nika-spec/issues/348)), not one law. Prefer `required: false` plus `default:` for knobs, and required without `default:` for caller-owned values (`NIKA-1708` at run).
 
 
 ### Templates containing this field
