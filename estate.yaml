@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 366
+  classified_files: 369
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 361
+    authored: 364
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 64
+  unverified-default: 67
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 266341c1f3d309ec3d766bbf58564be79a33319f088e77c63ab78f5a083b3c1a
+  sha256: 60256c9fc244e2f99cff03bdc018dd02a60d45c31322780d09a440e50e801580
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -78,7 +78,7 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: 36bf6c597caa758c13237676a0b778d23f8f0245fa285c7fbce61220c181e93a
+  sha256: b187447687d5a8844adce4647497aca003518ef025bc2d60d2836cc1f2071f0c
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -206,7 +206,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 273
-  aggregate_sha256: 45f4adc99c1e850e7de910001eb9ef8addb332667608eb1e290eb93d34c2d7f7
+  aggregate_sha256: c590be6e225b31bdad4ff6eb7a41a5bf7124339a855917086775c7a0bd5bfde1
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -234,8 +234,8 @@ patterns:
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 41
-  aggregate_sha256: 6adeaf5705373b8de3fc1cae3c3add3231bd7fad710875e3163eb1b7d846013e
+  match_count: 44
+  aggregate_sha256: 21d01194fe151466ab8e74e1cf8ca17afe75dede64c44aa901b419cb0ea96258
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -264,6 +264,9 @@ unverified:
 - "scripts/public-assets.json"
 - "scripts/publication-audit.py"
 - "scripts/suffix_ratchet.py"
+- "scripts/tests/mdx-runtime/compile-mdx.mjs"
+- "scripts/tests/mdx-runtime/package-lock.json"
+- "scripts/tests/mdx-runtime/package.json"
 - "scripts/tests/test_count_drift_first_contact.py"
 - "scripts/tests/test_first_command.py"
 - "scripts/tests/test_install_release.py"
