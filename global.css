@@ -198,12 +198,18 @@ html {
   line-height: 1.15;
   letter-spacing: -0.018em;
   text-wrap: balance;
-  scroll-margin-top: 5.5rem;
+  scroll-margin-top: 13.5rem;
 }
 
 .prose :is(h4, h5, h6) {
   line-height: 1.25;
-  scroll-margin-top: 5.5rem;
+  scroll-margin-top: 13.5rem;
+}
+
+@media (min-width: 768px) {
+  .prose :is(h1, h2, h3, h4, h5, h6) {
+    scroll-margin-top: 10rem;
+  }
 }
 
 .prose table {
