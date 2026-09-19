@@ -59,19 +59,32 @@ def check_jobs(jobs):
         raise ValueError("all documentation gates must succeed on the selected commit")
 
 
+def exact_identity(run, *, head, branch, event):
+    """Every run field that pins the proposal: commit, ref, event, workflow
+    path and both repository ends (a fork's gate run is never this repo's)."""
+    return (run.get("head_sha") == head and run.get("head_branch") == branch
+            and run.get("event") == event and run.get("path") == GATE
+            and (run.get("repository") or {}).get("full_name") == REPO
+            and (run.get("head_repository") or {}).get("full_name") == REPO)
+
+
+def held(run):
+    """Approval-held runs arrive as status=completed + conclusion=action_required
+    (the shape the real PR #195 gate reported); the legacy spelling puts
+    action_required in status. Accept both — never mistake a held run for a
+    completed failure."""
+    return run.get("status") == "action_required" or run.get("conclusion") == "action_required"
+
+
 def select_run(runs, *, head, branch, event, since=None):
     """The latest run carrying the exact proposal identity, or None.
 
-    repository and head_repository must both be this repository — a fork's
-    gate run is never awaited or approved. The run's pull_requests payload is
-    ignored on purpose: GITHUB_TOKEN-created proposals report it empty, so the
-    PR identity comes from check_pr and the run identity from these fields.
+    The run's pull_requests payload is ignored on purpose: GITHUB_TOKEN-created
+    proposals report it empty, so the PR identity comes from check_pr and the
+    run identity from exact_identity.
     """
     selected = [r for r in runs
-                if r.get("head_sha") == head and r.get("head_branch") == branch
-                and r.get("event") == event and r.get("path") == GATE
-                and (r.get("repository") or {}).get("full_name") == REPO
-                and (r.get("head_repository") or {}).get("full_name") == REPO
+                if exact_identity(r, head=head, branch=branch, event=event)
                 and (since is None or r.get("created_at", "") >= since)]
     return max(selected, key=lambda r: r["id"]) if selected else None
 
@@ -81,10 +94,10 @@ def gate_run(event, head, branch, since=None):
     return select_run(runs, head=head, branch=branch, event=event, since=since)
 
 
-def approve_gate(number, head, selected):
+def approve_gate(number, head, branch, selected):
     """Approve the held pull_request gate after exact identity validation."""
-    if selected.get("event") != "pull_request" or selected.get("path") != GATE:
-        raise ValueError("only the held pull_request gate may be approved")
+    if not held(selected) or not exact_identity(selected, head=head, branch=branch, event="pull_request"):
+        raise ValueError("only the exact held pull_request gate may be approved")
     pr = json.loads(run("gh", "pr", "view", number, "--repo", REPO, "--json",
                         "state,isCrossRepository,baseRefName,headRefOid,files"))
     check_pr(pr, head)
@@ -103,11 +116,11 @@ def await_gates(number, head, branch, started):
             selected = gate_run(event, head, branch, since)
             if selected is None:
                 states[event] = "missing"
-            elif selected["status"] == "action_required":
+            elif held(selected):
                 if event != "pull_request":
                     raise ValueError(f"unexpected held {event} gate: {selected['html_url']}")
                 if selected["id"] not in approved:
-                    approve_gate(number, head, selected)
+                    approve_gate(number, head, branch, selected)
                     approved.add(selected["id"])
                 states[event] = "awaiting approval"
             elif selected["status"] != "completed":

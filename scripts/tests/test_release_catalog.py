@@ -218,28 +218,58 @@ class MergeTests(unittest.TestCase):
                     self.assertLess(max(jobs), calls.index(merges[0]))
 
     def test_held_pull_request_gate_is_approved_after_identity_validation(self):
-        approved = []
+        # The real PR #195 gate reported held as completed + action_required;
+        # the legacy spelling puts action_required in status. Both must be
+        # approved — never mistaken for a completed failure.
+        for status, conclusion in [('completed', 'action_required'), ('action_required', None)]:
+            with self.subTest(status=status, conclusion=conclusion):
+                approved = []
 
-        def command_extra(args):
-            if args[:2] == ('gh', 'api') and str(args[-1]).endswith('/approve'):
-                approved.append(args)
-                return ''  # the approve endpoint answers 201 with an empty body
-            return None
+                def command_extra(args):
+                    if args[:2] == ('gh', 'api') and str(args[-1]).endswith('/approve'):
+                        approved.append(args)
+                        return ''  # the approve endpoint answers 201 with an empty body
+                    return None
 
-        def remote(endpoint, *args):
-            if 'event=pull_request' in endpoint:
-                record = (gate_record('pull_request') if approved
-                          else gate_record('pull_request', None, 'action_required'))
-                return {'workflow_runs': [record]}
-            return gates(dispatch=gate_record('workflow_dispatch'))(endpoint, *args)
+                def remote(endpoint, *args):
+                    if 'event=pull_request' in endpoint:
+                        record = (gate_record('pull_request') if approved
+                                  else gate_record('pull_request', conclusion, status))
+                        return {'workflow_runs': [record]}
+                    return gates(dispatch=gate_record('workflow_dispatch'))(endpoint, *args)
 
-        calls, error = self.run_flow(remote, command_extra)
-        self.assertIsNone(error)
-        self.assertEqual(len(approved), 1)
-        self.assertEqual(approved[0][-1], f'repos/{proposal.REPO}/actions/runs/1/approve')
-        viewed = next(i for i, c in enumerate(calls) if c[:3] == ('gh', 'pr', 'view'))
-        self.assertLess(viewed, calls.index(approved[0]))  # identity checked before approval
-        self.assertLess(calls.index(approved[0]), calls.index(self.merge_calls(calls)[0]))
+                calls, error = self.run_flow(remote, command_extra)
+                self.assertIsNone(error)
+                self.assertEqual(len(approved), 1)
+                self.assertEqual(approved[0][-1], f'repos/{proposal.REPO}/actions/runs/1/approve')
+                viewed = next(i for i, c in enumerate(calls) if c[:3] == ('gh', 'pr', 'view'))
+                self.assertLess(viewed, calls.index(approved[0]))  # identity checked before approval
+                self.assertLess(calls.index(approved[0]), calls.index(self.merge_calls(calls)[0]))
+
+    def test_approve_gate_revalidates_exact_run_identity(self):
+        record = gate_record('pull_request', 'action_required', 'completed')
+        rejected = [{'status': 'completed', 'conclusion': 'success'},  # not held
+                    {'status': 'in_progress', 'conclusion': None},     # not held
+                    {'head_sha': 'd' * 40}, {'head_branch': 'main'}, {'event': 'workflow_dispatch'},
+                    {'path': '.github/workflows/other.yml'},
+                    {'repository': {'full_name': 'fork/nika-docs'}},
+                    {'head_repository': {'full_name': 'fork/nika-docs'}}]
+        with patch.object(proposal, 'run') as mocked_run:
+            for changes in rejected:
+                with self.subTest(changes=changes), self.assertRaises(ValueError):
+                    proposal.approve_gate('7', HEAD, BRANCH, dict(record, **changes))
+            mocked_run.assert_not_called()  # identity fails before any API call
+        calls = []
+
+        def command(*args):
+            calls.append(args)
+            if args[:3] == ('gh', 'pr', 'view'):
+                return pr_view()
+            return ''
+
+        with patch.object(proposal, 'run', side_effect=command):
+            proposal.approve_gate('7', HEAD, BRANCH, record)
+        self.assertEqual(calls[-1][-1], f'repos/{proposal.REPO}/actions/runs/1/approve')
 
     def test_wrong_proposal_identity_is_never_approved_or_merged(self):
         for view in [pr_view(isCrossRepository=True), pr_view(headRefOid='d' * 40),
@@ -252,7 +282,7 @@ class MergeTests(unittest.TestCase):
 
                 calls, error = self.run_flow(
                     gates(dispatch=gate_record('workflow_dispatch'),
-                          pr=gate_record('pull_request', None, 'action_required')), command_extra)
+                          pr=gate_record('pull_request', 'action_required', 'completed')), command_extra)
                 self.assertIsInstance(error, ValueError)
                 self.assertEqual(self.approve_calls(calls), [])
                 self.assertEqual(self.merge_calls(calls), [])
@@ -302,7 +332,7 @@ class MergeTests(unittest.TestCase):
 
         calls, error = self.run_flow(
             gates(dispatch=gate_record('workflow_dispatch'),
-                  pr=gate_record('pull_request', None, 'action_required')), command_extra)
+                  pr=gate_record('pull_request', 'action_required', 'completed')), command_extra)
         self.assertIsInstance(error, subprocess.CalledProcessError)
         self.assertEqual(self.merge_calls(calls), [])
 
