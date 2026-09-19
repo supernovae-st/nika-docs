@@ -41,8 +41,7 @@ outputs:
 - **`permits: {}`** declares zero authority up front. A workflow that later
   touches a file, a host or a shell must say so here, or admission refuses
   it.
-- **`max_tokens`** caps the answer's length — for a priced model the audit
-  reads it as the spend ceiling for that step.
+- **`max_tokens`** caps the answer's length.
 - **`outputs:`** names what the run hands back.
 
 ## 2. Check it, then run it
@@ -70,9 +69,9 @@ problems before any model is called, and points at the exact fix. The run
 wrote a hash-chained journal under `.nika/traces/`. Verifying that exact
 journal — `nika trace verify .nika/traces/2026-09-19T13-20-21Z-06c2.ndjson`
 — answered `OK · chain intact` and `SEALED` on this machine (exit 0):
-tamper-evidence about the record, re-executing nothing. A machine without
-a run-signing key still runs fine; its journal is intact but unsealed, and
-verification says so instead of pretending.
+tamper-evidence about the record, re-executing nothing. Verification
+reports the evidence available to it; a missing run-signing key or a
+mismatched receipt changes the verdict, not the run's result.
 
 ## 3. Ask the file three questions
 
