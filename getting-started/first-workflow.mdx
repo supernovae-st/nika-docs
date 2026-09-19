@@ -83,9 +83,12 @@ mismatched receipt changes the verdict, not the run's result.
     `--var key=value` on the CLI.
   </Accordion>
   <Accordion title="What if a permission is absent?" icon="circle-question">
-    The task that needs it is refused at check (`NIKA-AUTH-006`). An
-    absent `permits:` block means zero authority — effects stay refused
-    until the file declares them. `nika check --infer-permits` drafts the
+    Admission refuses at check; the finding names the missing
+    permission. An absent `permits:` block is zero authority
+    (`NIKA-AUTH-006`). A declared `permits: {}` that omits a reached
+    tool or path is `NIKA-SEC-004` — the plate below. The file needs
+    both the named tool (`nika:read`) and the specific path
+    (`./hello.nika`). `nika check --infer-permits` drafts the
     tightest block for you.
   </Accordion>
   <Accordion title="What if I switch the model?" icon="circle-question">
@@ -96,6 +99,33 @@ mismatched receipt changes the verdict, not the run's result.
     what your machine can reach.
   </Accordion>
 </AccordionGroup>
+
+Measured CLI **0.120.1** plates (condensed, not a live recording). Press
+play — nothing autoplays.
+
+<video
+  controls
+  playsInline
+  preload="none"
+  poster="/images/posters/check-denied.webp"
+  aria-label="nika check refusing a workflow that lacks the permits it needs"
+>
+  <source src="/videos/check-denied.webm" type="video/webm" />
+  <source src="/videos/check-denied.mp4" type="video/mp4" />
+</video>
+
+<details>
+  <summary>What this plate shows</summary>
+  `nika check denied.nika` on CLI 0.120.1. Task `peek` would invoke
+  `nika:read` on `./hello.nika`. `permits: {}` grants nothing.
+  Admission refuses with `NIKA-SEC-004`. Adding only
+  `permits.tools: ["nika:read"]` still refuses: the path
+  `./hello.nika` is outside `permits.fs.read`. Authorize both the
+  named tool and that specific file path. Nothing ran. Condensed
+  measured plate, not the TypeScript SDK.
+</details>
+
+[Download GIF](/images/gifs/check-denied.gif)
 
 ## 4. Add a second task that depends on the first
 
@@ -169,12 +199,40 @@ guarantee covers shape, not outcome.
 
 ## 6. See a real job
 
-[Meeting actions](/examples/meeting-actions) turns a transcript into
-typed, tracker-ready action items. It defaults to a local model
-(`ollama/qwen3.5:4b`, no provider key — your own compute); point it at a
-cloud provider and `check` prices the run before anything executes.
-Same file shape as your hello; the model and tools change, the lifecycle
-does not.
+This short recorded demonstration turns synthetic notes into an action
+list using `xai/grok-3-mini`. CLI 0.120.1, condensed timing.
+
+The demonstration file has no typed schema, so the run exports a
+**string**. The full [meeting-actions](/examples/meeting-actions)
+example declares `{owner, task, due}` and exports typed actions.
+
+<video
+  controls
+  playsInline
+  preload="none"
+  poster="/images/posters/meeting-actions.webp"
+  aria-label="CLI 0.120.1 running a measured xai/grok-3-mini meeting-notes job"
+>
+  <source src="/videos/meeting-actions.webm" type="video/webm" />
+  <source src="/videos/meeting-actions.mp4" type="video/mp4" />
+</video>
+
+<details>
+  <summary>What this plate shows</summary>
+  Synthetic notes: Maya ships the changelog Friday; Leo pings legal
+  about the DPA; Sam books the staging window. `nika run
+  meeting-actions.nika --model xai/grok-3-mini` on CLI 0.120.1
+  (`9d554c84c`) returned:
+
+  Maya — ship the changelog (Friday).
+  Leo — ping legal about the DPA (TBD).
+  Sam — book the staging window (TBD).
+
+  Measured: 11.4s · 29 output tokens · 235 in · 192 cached · $0.00114.
+  Condensed plates of a live infer, not a mock rehearsal.
+</details>
+
+[Download GIF](/images/gifs/meeting-actions.gif)
 
 ## What you just built
 

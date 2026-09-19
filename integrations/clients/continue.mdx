@@ -1,6 +1,6 @@
 ---
 title: "Use Nika with Continue"
-description: "Drop one file into ~/.continue/mcpServers/ and Continue gets the read-only Nika oracle — your config.yaml untouched; one wire command in the next release."
+description: "Drop one file into ~/.continue/mcpServers/ and Continue gets the read-only Nika oracle — your config.yaml untouched."
 sidebarTitle: "Continue"
 icon: "forward"
 ---
@@ -18,8 +18,8 @@ Create `~/.continue/mcpServers/nika.json`:
 { "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
 ```
 
-`nika wire continue` ships in the next release and writes exactly this
-file — idempotent, nothing else in your Continue setup touched.
+`nika wire continue` writes exactly this file — idempotent, nothing else
+in your Continue setup touched.
 
 <Note>
 External writes are **not** hot-reloaded: reload Continue (or re-save

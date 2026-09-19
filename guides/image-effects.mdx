@@ -6,8 +6,9 @@ description: "Deterministic artistic styling — dither, palettes, halftone, ret
 `nika:image_fx` is the deterministic sibling of
 [`nika:image_generate`](/guides/image-generation): a pure pixel transform —
 no provider, no network, no clock. Style a PNG through an ordered pipeline of
-effects and get an artifact that is **byte-identical forever** for identical
-`(input, args)`.
+effects and get an artifact that is **byte-identical** for identical
+`(input, args)` on the **same pinned engine** — not a promise across
+engine versions.
 
 That determinism is the point, not a detail. The artifact's sha256 joins the
 run's hash-chained trace, re-rendering the recipe is the tamper check, and the
@@ -108,7 +109,7 @@ stream, zero wall-clock. So the artifact can be:
 One recipe, one hash, forever. Batch-style a hundred campaign images with
 `for_each` and every one of them is a receipt.
 
-```yaml
+```yaml fragment · paste into the file above
   variants:
     with:
       src: ${{ tasks.generate.output.images[0].path }}

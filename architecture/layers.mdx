@@ -7,10 +7,12 @@ icon: "layer-group"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika Diamond is {STATUS.cratesAdmitted} admitted crates organized into **six layers**,
+You run **one `nika` binary**. Internally that binary is
+{STATUS.cratesAdmitted} admitted crates organized into **six layers**,
 with a half-layer (**L0.5**) for trait-only crates. Every workspace-local
 dependency points strictly downward. A CI script (`check-layering.sh`)
-fails the build on any upward import.
+fails the build on any upward import. Workflow authors do not pick a
+layer — this page is the engine's crate contract.
 
 <Note>
   **Canonical source:** [`docs/architecture/crate-layer-registry.md`](https://github.com/supernovae-st/nika/blob/main/docs/architecture/crate-layer-registry.md).
@@ -110,7 +112,9 @@ flowchart TB
   </Card>
 </CardGroup>
 
-<sub>**WIP:** `nika-schema` (parser scaffolding, Round 4 admission gate).</sub>
+`nika-schema` (parser · analyzer · static check) is admitted: it is what
+`nika check` runs. The cards above are a sample of L0/L0.5, not the
+full admitted set — live counts live on [status](/reference/status).
 
 ## Security axes
 

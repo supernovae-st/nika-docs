@@ -1,7 +1,7 @@
 ---
 title: "How to write Nika"
 sidebarTitle: "Patterns"
-description: "The thirteen patterns of well-written Nika: each one taught by a canonical example, each anti-pattern named."
+description: "The twelve patterns of well-written Nika: each one taught by a canonical example, each anti-pattern named."
 icon: "compass-drafting"
 ---
 
@@ -11,9 +11,11 @@ import { SHOWCASE } from "/snippets/_showcase.mdx";
 Nika is a small language ({CANON.verbs} verbs, {CANON.namespaces}
 namespaces, one expression surface), so good Nika is mostly about
 shape: where the determinism lives, where the model is allowed to
-think, and how data crosses task boundaries. These thirteen patterns are
-how the {SHOWCASE.count} showcase workflows are written. Each links
-the canonical example that embodies it.
+think, and how data crosses task boundaries. These twelve patterns
+(plus the corpus-folding variant 5b) are how the {SHOWCASE.count}
+showcase workflows are written. Each links the canonical example that
+embodies it. From an app, the same files run through
+`@supernovae-st/nika` (`run()` admits, `run.result()` settles).
 
 <Tip>
   The spec's normative cousin of this page is the
@@ -264,9 +266,10 @@ outputs:                      # the callable contract · typed
 
 ## Four recipes the patterns compose into
 
-The 12 patterns are the values; these are the moves you reach for when a
+The twelve patterns are the values; these are the moves you reach for when a
 real integration pushes back. Each is canonical in the spec: linked, not
-improvised.
+improvised. The YAML below is **fragments** — paste them into a nine-key
+file with `permits:` covering the tools they reach.
 
 ### Poll until ready
 

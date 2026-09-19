@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 366
+  classified_files: 377
   file_rows: 35
   pattern_rows: 6
   by_class:
-    authored: 361
+    authored: 372
     authored-pin: 1
     generated: 2
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 64
+  unverified-default: 75
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -36,7 +36,7 @@ files:
   evidence: "hand-written grouped-bumps policy (comments narrate the nika-spec PR #135 desync lesson)"
 - path: ".github/workflows/gate.yml"
   class: authored
-  sha256: 266341c1f3d309ec3d766bbf58564be79a33319f088e77c63ab78f5a083b3c1a
+  sha256: 60256c9fc244e2f99cff03bdc018dd02a60d45c31322780d09a440e50e801580
   evidence: "hand-written CI trust model (comments narrate the judge choices — released-binary oracle · wire-asserted counts)"
 - path: ".github/workflows/release-heal.yml"
   class: authored
@@ -78,12 +78,12 @@ files:
   evidence: "hand-written security policy (copy-paste surface + llms.txt threat model)"
 - path: "docs.json"
   class: authored
-  sha256: 36bf6c597caa758c13237676a0b778d23f8f0245fa285c7fbce61220c181e93a
+  sha256: b187447687d5a8844adce4647497aca003518ef025bc2d60d2836cc1f2071f0c
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
   class: authored
-  sha256: 800c58f30f02849dd36e167ba92ba4810f89464610dd85a80e3a4d1a11f38c4a
+  sha256: 0ab141020d354c4a9281b8a84642b097da3385836c8d9fa866fb918ddc75d503
   evidence: "hand-written polish layer · its own header: 'colors + fonts live in docs.json · pinned to … nika-spec design/tokens.yaml … this file = the polish layer'"
 - path: "images/posters/chat-to-workflow.png"
   class: authored
@@ -126,7 +126,7 @@ files:
   note: "the errors-categories, errors-codes and errors-namespaces blocks are projected from nika-spec canon/diagnostics/registry.yaml; edit the registry and re-project, never hand-edit those blocks; this repo's gate does not independently re-derive them"
 - path: "reference/mcp-catalog.mdx"
   class: authored
-  sha256: b828dc4bb40b64cfff1bf62bd8cd6ddb23879653f88cde88d4f55af422996f83
+  sha256: a6d9f648f4bc064b3f722e6003889beaaf756f080faf2404a9227c1c4c2ae223
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
   note: "the body carries authored catalog and category counts with a dated snapshot, not an in-repo projection; the engine's served MCP tool-count check does not prove the separate server-catalog cardinality"
 - path: "scripts/count-drift-gate.py"
@@ -199,19 +199,19 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 372eadd7e7dd036ee859b4713bedd5ac6220f89dae9f791f65433a2c9ff1a47f
+  sha256: 0e3bc92da0ea4f3647fe155bd449889ad4dcabd088eb757a5558a63593db69c4
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 273
-  aggregate_sha256: 19755b057a671abde2b1188d1e7fe200862e64e4c3a644921f6b34e534fc9e68
+  aggregate_sha256: f02f7fd943f40bfc56c78e446f2f8a442932f7d13a163831acfc92751f3668aa
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
-  match_count: 12
-  aggregate_sha256: 7146fd535285651fb3b80805921fb75e4ce618ac6c6a27976112a4a581954ecf
+  match_count: 16
+  aggregate_sha256: 7dd3aafc45174b968b5f8f66c48733a7e270c658820e3c2a94a822b9c14126a3
   evidence: "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/og-*.png"
@@ -228,14 +228,14 @@ patterns:
   note: "unverified-default"
 - glob: "images/**"
   class: authored
-  match_count: 0
-  aggregate_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  match_count: 4
+  aggregate_sha256: 23d510d0e6c7babe0b0e7d88c72a2ce199c889c9608741c5087989693e139a40
   evidence: "bitmap asset · no in-repo derivation evidence"
   note: "unverified-default"
 - glob: "**"
   class: authored
-  match_count: 41
-  aggregate_sha256: 6adeaf5705373b8de3fc1cae3c3add3231bd7fad710875e3163eb1b7d846013e
+  match_count: 44
+  aggregate_sha256: 48570ac0af85f1ffb5d2cb84460b3ac57cf5f96a1e80b13a6d4e61065a4bf9f0
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -245,12 +245,16 @@ unverified:
 - "ENGINE_QUAL_PIN"
 - "api-reference/openapi.json"
 - "images/favicon.svg"
+- "images/gifs/check-denied.gif"
+- "images/gifs/meeting-actions.gif"
 - "images/logo-dark.svg"
 - "images/logo-light.svg"
 - "images/og-card.png"
 - "images/og-default.png"
 - "images/posters/chat-to-workflow.png"
+- "images/posters/check-denied.webp"
 - "images/posters/dag-execution.png"
+- "images/posters/meeting-actions.webp"
 - "images/posters/on-error-recover.png"
 - "images/posters/permits-audit.png"
 - "images/posters/static-check-fix.png"
@@ -264,6 +268,9 @@ unverified:
 - "scripts/public-assets.json"
 - "scripts/publication-audit.py"
 - "scripts/suffix_ratchet.py"
+- "scripts/tests/mdx-runtime/compile-mdx.mjs"
+- "scripts/tests/mdx-runtime/package-lock.json"
+- "scripts/tests/mdx-runtime/package.json"
 - "scripts/tests/test_count_drift_first_contact.py"
 - "scripts/tests/test_first_command.py"
 - "scripts/tests/test_install_release.py"
@@ -293,8 +300,12 @@ unverified:
 - "snippets/data/tool-reference.json"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"
+- "videos/check-denied.mp4"
+- "videos/check-denied.webm"
 - "videos/dag-execution.mp4"
 - "videos/dag-execution.webm"
+- "videos/meeting-actions.mp4"
+- "videos/meeting-actions.webm"
 - "videos/on-error-recover.mp4"
 - "videos/on-error-recover.webm"
 - "videos/permits-audit.mp4"

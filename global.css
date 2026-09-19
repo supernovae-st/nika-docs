@@ -171,3 +171,107 @@ div.mermaid {
     animation: none;
   }
 }
+
+/* ── Reading · Apple/Linear lucidity on existing cosmos tokens ──
+   Fonts stay in docs.json. Tokens: bg #08090b · primary #2f6bff ·
+   accent_bright #8db4ff · ice #9fd0ff. No remote faces, no new deps. */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.prose {
+  line-height: 1.6;
+}
+
+.prose p {
+  max-width: 72ch;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+
+.prose li {
+  overflow-wrap: break-word;
+}
+
+.prose :is(h1, h2, h3) {
+  line-height: 1.15;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+  scroll-margin-top: 13.5rem;
+}
+
+.prose :is(h4, h5, h6) {
+  line-height: 1.25;
+  scroll-margin-top: 13.5rem;
+}
+
+@media (min-width: 768px) {
+  .prose :is(h1, h2, h3, h4, h5, h6) {
+    scroll-margin-top: 10rem;
+  }
+}
+
+.prose table {
+  font-variant-numeric: tabular-nums;
+}
+
+.prose a {
+  text-underline-position: from-font;
+  text-decoration-thickness: from-font;
+}
+
+.prose a:focus-visible,
+.card:focus-visible,
+[class*="card"] a:focus-visible,
+pre:focus-visible,
+button:focus-visible {
+  outline: 2px solid #2f6bff;
+  outline-offset: 2px;
+}
+
+.dark .prose a:focus-visible,
+.dark .card:focus-visible,
+.dark [class*="card"] a:focus-visible,
+.dark pre:focus-visible,
+.dark button:focus-visible {
+  outline-color: #8db4ff;
+}
+
+.dark pre,
+pre {
+  line-height: 1.65;
+}
+
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  [class*="card"] a {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}
+
+::selection {
+  background: rgb(47 107 255 / 0.22);
+  color: #08090b;
+}
+
+.dark ::selection {
+  background: rgb(47 107 255 / 0.38);
+  color: #cfe6ff;
+}

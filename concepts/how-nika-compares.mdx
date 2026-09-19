@@ -5,7 +5,9 @@ sidebarTitle: "How it compares"
 icon: "scale-balanced"
 ---
 
-Most orchestrators plan. Nika sits under them: a plain-text file your agent, cron or CI can hand the repeatable slice of the work to, checked before a single token is spent and verifiable after it runs. This page is an honest map, including the places where the other tools win.
+import { CANON } from "/snippets/_canon.mdx";
+
+Most orchestrators plan. Nika sits under them: a plain-text `.nika` file your agent, app, cron or CI can hand the repeatable slice of the work to, checked before a single token is spent and verifiable after it runs. This page is an honest map, including the places where the other tools win.
 
 ## The one thing that is different
 
@@ -37,7 +39,7 @@ They orchestrate infra, services and code. Nika is the file for the AI-native sl
 We publish this because a comparison that only lists wins is marketing, not a map.
 
 - **No IDE chrome.** Cursor and Continue.dev win for in-editor UX. Nika ships a VS Code extension for `.nika` (syntax, a DAG view, diagnostics), but it is not an agentic editor.
-- **No visual workflow builder.** LangGraph has a graph UI. Nika draws the DAG (`nika graph`) but you author in YAML and CLI.
+- **No visual workflow builder.** LangGraph has a graph UI. Nika draws the DAG (`nika inspect file.nika --format mermaid`) but you author in YAML and CLI.
 - **No enterprise durable-execution track record.** Temporal has a decade of battle-testing for long-lived distributed state. Nika is a finite single-run DAG, one file in, one run out. Different problem.
 - **Younger, smaller community.** LangGraph and Cursor have far larger ecosystems today.
 - **Human gates are explicit, not conversational.** A run can stop at a declared
@@ -53,7 +55,7 @@ We publish this because a comparison that only lists wins is marketing, not a ma
 - **Receipts, not vibes.** The hash-chained trace is tamper-evident: verify exits clean or names the first altered link. Editable, lossy chat logs cannot make that claim. The underlying pattern is tool-neutral — [run receipts](/patterns/run-receipts) — and worth adopting even without Nika.
 - **One static binary.** The same file is a runner, a checker, a golden-test harness, an MCP server, an LSP, and a time-travel DAP debugger. No runtime to stand up, no cluster.
 - **The file is portable.** A Nika workflow is text bound to no framework: any conformant engine runs it. Your logic is not locked to one vendor's Python graph.
-- **Sovereign by construction.** AGPL engine, Apache-2.0 spec, local-first, no mandatory cloud, sixteen providers you pick from.
+- **Sovereign by construction.** AGPL engine, Apache-2.0 spec, local-first, no mandatory cloud, {CANON.providers} canonical providers you pick from (the catalog lists more hosted routes).
 
 ## The honest bottom line
 
@@ -66,4 +68,8 @@ Start the difference in two commands, offline, no keys:
 brew install supernovae-st/tap/nika
 nika compile hello hello.nika
 ```
+
+From an app, install `@supernovae-st/nika@0.120.0` and call `run()` —
+that package does **not** put `nika` on your shell `PATH`. See
+[SDK quickstart](/sdk/start/quickstart).
 </Note>

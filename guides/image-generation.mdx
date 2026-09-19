@@ -199,14 +199,15 @@ tasks:
       args: { provider: local, prompt: "…", output_dir: "./out" }
 ```
 
-## Why this design (versus every other engine)
+## Why the save is gated
 
-No other workflow engine permit-gates image saves, verifies returned bytes
-against declared MIME types, writes a provenance manifest with the resolved
-request, refuses to fetch result URLs, or ships a local-first provider — and
-none embed provenance in the file itself (that practice comes from the
-image-native world). The full comparison lives in the
-[builtins reference](/reference/builtins#media-4).
+Image bytes land on disk under `permits.fs.write`, the engine verifies
+returned MIME types, a provenance manifest records the resolved request,
+and result URLs are never fetched (that would reopen SSRF). Local-first
+is a first-class provider. The PNG can carry a `nika` tEXt chunk — the
+same informal provenance practice ComfyUI and InvokeAI use. The argument
+contract is in [builtins](/reference/builtins#media-4) and
+`nika catalog --tools`.
 
 ## Editing (`mode: edit`)
 

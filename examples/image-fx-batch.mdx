@@ -1,7 +1,7 @@
 ---
 title: "Image FX batch"
 sidebarTitle: "Image FX batch"
-description: "T1 fan-out · creators / media: a folder of photos → deterministic art, byte-identical forever. Zero model, zero network."
+description: "T1 fan-out · creators / media: a folder of photos to deterministic art on the same pinned engine. Zero model, zero network."
 icon: "wand-magic-sparkles"
 ---
 
@@ -16,9 +16,10 @@ icon: "wand-magic-sparkles"
 Batch-stylizing a shoot means opening an editor, replaying the same
 five clicks per photo, and hoping you replayed them identically. This
 workflow IS the preset: the ops chain is written once in YAML, the
-batch fans out in parallel, and re-running it a year from now yields
-byte-identical output — the style is version-controlled with your
-repo.
+batch fans out in parallel, and re-running it on the **same pinned
+engine** with the same input and ops yields the same bytes. An engine
+upgrade is a new pin — re-render before treating an old hash as
+current.
 
 ## The shape
 

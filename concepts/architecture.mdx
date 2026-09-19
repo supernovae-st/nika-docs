@@ -7,11 +7,13 @@ icon: "layer-group"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika is a single Rust binary (`nika` at **L5**) composed of
-**{STATUS.cratesAdmitted} admitted crates** across six layers
+You install one `nika` binary (or `@supernovae-st/nika` for apps). This
+page is why that binary can `check` a file before it runs: internally it
+is **{STATUS.cratesAdmitted} admitted crates** across six layers
 (L0 → L5) plus the **L0.5** trait half-layer. Each crate has one job.
 Together they parse `.nika`, resolve templates, route to providers,
-execute verbs, and emit a structured event stream.
+execute verbs, and emit a structured event stream. Workflow authors do
+not pick a layer.
 
 <Tip>
   **Looking for the authoritative contract?** The [Architecture tab](/architecture/layers)
@@ -101,7 +103,7 @@ foundation types. **Upward imports are a CI hard failure.**
   <Card title="nika-catalog-verify" icon="check">**L4** · Catalog validation tool</Card>
 </CardGroup>
 
-`nika-schema` (parser · analyzer · static check) is admitted and live: it is what `nika check` runs.
+`nika-schema` (parser · analyzer · static check) is admitted and live: it is what `nika check` runs. The six cards above are a sample, not the full admitted set.
 
 [Live constellation →](/reference/constellation) · [12-gate admission →](/architecture/admission)
 

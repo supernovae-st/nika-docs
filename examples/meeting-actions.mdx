@@ -124,19 +124,19 @@ outputs:
 ## How it works
 
 <Steps>
-  <Step title="A required, typed input">
-    `transcript_path` is declared with `type: string · required: true`:
-    the engine validates inputs before any task runs, and the workflow
-    becomes callable with a real contract.
+  <Step title="A typed input with a default">
+    `transcript_path` is `type: string` with a `default:` path — the
+    caller may omit it. The engine still validates the value before any
+    task runs. There is no `required: true` on this input.
   </Step>
   <Step title="The schema IS the contract">
     `infer.schema:` is standard JSON Schema. The model must return a
     matching object. On violation the engine rejects (and may retry).
     Downstream tasks index into it directly: `${{ tasks.extract.output.actions }}`.
   </Step>
-  <Step title="Two consumers, no extra ceremony">
-    `save` writes the JSON, `trace` logs a human-readable line. Both
-    depend on `extract`, both run in parallel.
+  <Step title="Write, then a success-only log">
+    `save` writes the JSON. `trace` is not a parallel sibling: it runs
+    `after: { save: success }` — only if the write succeeded.
   </Step>
 </Steps>
 

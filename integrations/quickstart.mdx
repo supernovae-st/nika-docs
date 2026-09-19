@@ -9,14 +9,23 @@ Nika is not another agent. It is **the workflow file your agents already
 run** — checked before, verified after. Integration therefore means two
 small things: teach your agent the language, and wire the read-only oracle.
 
-## Minute 0-2 · install the binary
+## Minute 0-2 · install the CLI
+
+This 10-minute loop uses the **CLI** (`nika init`, `nika wire`,
+`nika compile`). The later commands on this page require a `nika`
+binary on `PATH`.
 
 ```sh
 brew install supernovae-st/tap/nika    # or: curl -LsSf https://nika.sh/install.sh | sh
 nika --version && nika doctor          # doctor prints exact fixes, never mutates
 ```
 
-No key needed yet — the mock and local providers run without one.
+No key needed yet — `mock/echo` and local providers run without one.
+
+Driving Nika from Node instead of a shell? That is a different door:
+`npm install @supernovae-st/nika@0.120.0` does **not** put `nika` on
+`PATH`. Follow [SDK quickstart](/sdk/start/quickstart) (`run()` admits,
+`run.result()` settles, `run.events()` yields normalized kinds).
 
 ## Minute 2-5 · teach the repo
 
@@ -34,13 +43,17 @@ Idempotent — existing files are skipped.
 ## Minute 5-7 · wire the oracle
 
 ```sh
-nika wire cursor     # or: vscode · windsurf · claude · codex · all
+nika wire detected --dry-run   # preview what this machine shows
+nika wire detected             # or one client: cursor · vscode · claude ·
+                               # claude-desktop · codex · gemini · qwen ·
+                               # opencode · hermes · zed · continue · cline ·
+                               # lmstudio · junie · grok · kimi · …
 ```
 
-For clients without a wire target yet (OpenCode, Hermes, Zed, Gemini CLI,
-Continue, Cline…), it is the same two-field stanza everywhere — copy it from
-[per-client wiring](/integrations/mcp-clients). What the oracle exposes (and
-refuses to): [Nika as an MCP server](/reference/mcp-server).
+`nika wire --help` lists every target on this binary. Clients with no
+target (goose, Open WebUI, AnythingLLM, Cherry Studio, Jan) take the same
+two-field stanza — copy it from [per-client wiring](/integrations/mcp-clients).
+What the oracle exposes (and refuses to): [Nika as an MCP server](/reference/mcp-server).
 
 ## Minute 7-10 · prove the loop
 

@@ -79,10 +79,16 @@ but each half maps to a plain command you can inspect:
   its chain head on close.
 - **The re-proof** is `nika trace verify` — it recomputes the chain and
   either confirms the head or names the first altered link (the full
-  trace verb family is in the [CLI reference](/reference/cli)).
+  trace verb family is in the [CLI reference](/reference/cli)). It
+  never starts a run and never proves the business result was correct.
 - **The exit** is `nika trace export`: the journal projects to OTLP/JSON
   for Jaeger, Grafana or Langfuse — the receipt is portable, not a
   lock-in surface.
+
+From TypeScript (`@supernovae-st/nika@0.120.0`), the same split is
+`check()` (the contract), `run()` then `run.result()` (execution), and
+`traceVerify()` (the re-proof of existing evidence). A succeeded run
+can still be unsealed on a keyless machine.
 
 In CI, the same split powers [Nika × GitHub Actions](/integrations/github-actions):
 pull requests get the contract as a sticky comment, and nothing executes.

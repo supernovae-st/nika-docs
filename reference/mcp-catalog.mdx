@@ -7,26 +7,26 @@ icon: "plug"
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-Nika ships with **105 MCP server entries** in its catalog, aligned with
-the official [MCP Registry schema](https://registry.modelcontextprotocol.io/)
+Nika ships an embedded MCP server catalog aligned with the official
+[MCP Registry schema](https://registry.modelcontextprotocol.io/)
 (`v2025-12-11`). Each entry declares one or more local-install
 `packages` (npm / pypi / oci / cargo / mcpb) and/or `remotes`
 (streamable-http / sse endpoints). The workflow YAML `invoke:` verb
-references servers by id: Nika handles the rest.
+references servers by id: Nika handles the rest. Count the live set from
+the engine source — do not freeze a number here.
 
 <Info>
   **Canonical source:** [`crates/nika-catalog/data/mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/mcp-servers.toml).
-  Schema: `nika/mcp-servers@1.0`. Snapshot 2026-04-17: `grep -c '^\[\[servers\]\]'`
-  = **105**. Build-time invariants (enforced in `build.rs`): unique ids,
-  packages+remotes non-empty, known category, pricing ∈ {free, freemium,
-  paid}, alias non-collision.
+  Schema: `nika/mcp-servers@1.0`. Build-time invariants (enforced in
+  `build.rs`): unique ids, packages+remotes non-empty, known category,
+  pricing ∈ {free, freemium, paid}, alias non-collision.
 </Info>
 
 ## Overview
 
 <CardGroup cols={3}>
   <Card title="Servers" icon="plug">
-    **105** entries
+    Engine catalog · count the source
   </Card>
   <Card title="Categories" icon="folder">
     **17**: from `anthropic` to `vectordb`
@@ -333,12 +333,11 @@ nika run workflow.nika
 
 ## Distribution mix
 
-Of the 105 entries:
-
-- **102** ship as `npm` packages (stdio via `npx`).
-- **1** ships as `pypi` (`qdrant`, runs via `uvx`).
-- **1** ships as `oci` (`grafana`, Go binary in a container image).
-- **1** is a pure `remote` endpoint (`intercom`, OAuth streamable-http).
+Most catalog entries ship as `npm` packages (stdio via `npx`). A few
+use other registries — `pypi` (`qdrant`, via `uvx`), `oci` (`grafana`,
+a Go binary in a container image), and a pure `remote` endpoint
+(`intercom`, OAuth streamable-http). Count the live mix in
+`mcp-servers.toml`; do not freeze it here.
 
 The catalog's `registry_type` field is validated at build time: `runner`
 is required for pypi packages and forbidden for every other registry

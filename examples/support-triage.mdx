@@ -185,7 +185,8 @@ outputs:
 
 - Push the first replies as DRAFTS into your helpdesk via its API (`nika:fetch method: POST`): humans still hit send.
 - Track sentiment over time: append each batch's stats to a CSV with `nika:write`.
-- Speed matters at 9am: `groq/llama-3.3-70b` triages a 40-ticket queue in seconds.
+- Speed matters at 9am: swap the envelope `model:` for a cataloged
+  cloud seat and cap the run with `--max-cost-usd`.
 
 <Card title="Next · Contract guard" icon="scale-balanced" href="/examples/contract-guard">
   The sovereignty example: a LOCAL model reads the contract, and a

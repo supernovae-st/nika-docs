@@ -21,5 +21,13 @@
   "videos/static-check-fix.mp4": "b8d3fa55392ee719b7d8d7bcc8931c597cf53aac23351c51f515bd974691e4e0",
   "videos/static-check-fix.webm": "e34af16b45901fca93077f7a900c21f4ce3e83659bab6fa9298827f2b11391ec",
   "videos/workflow-gallery.mp4": "e94a0d55d3564e3386a6048892599f956ae395f623e47c89dcb49668d62ffd65",
-  "videos/workflow-gallery.webm": "64358230b0d69485aead3b356a66804c2a3c1cd4462dec83776a461ac6106c83"
+  "videos/workflow-gallery.webm": "64358230b0d69485aead3b356a66804c2a3c1cd4462dec83776a461ac6106c83",
+  "videos/meeting-actions.mp4": "cb8bcfc7b2fb877b70aeaa4cdeae0b59480a0225185f632c6b0d34fcee3fbccd",
+  "videos/meeting-actions.webm": "d2fb6774d60fea3ba9980982ba9551391479f111d6b30536360d9d5cf8e50c2b",
+  "videos/check-denied.mp4": "b6c6d0cb78ecc249b6e782ed4158cf90cd029e0c91ffac937201b8fefd2ed75d",
+  "videos/check-denied.webm": "79e0fa3022de4cfe5fd50495451f0dc65a99ed17b21c8d5d1c2ed71b51746808",
+  "images/posters/meeting-actions.webp": "79124053db6d4f6fa07b91c4f24d418b2d6e89a03449ffa96c8e13715623c7b9",
+  "images/posters/check-denied.webp": "08e30638667793bd6e17f523a0b1703db5adc72fd6b4641fb0cae719acb1ecba",
+  "images/gifs/meeting-actions.gif": "07e2bb07d2f60a6a1bbcac601f529476731cb8ce329b71000d4e07d216e9adb8",
+  "images/gifs/check-denied.gif": "4639b1093b618b0df7bda1209d4cede359766a796cc59e2375e53c44478476f8"
 }

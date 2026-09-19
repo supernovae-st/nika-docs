@@ -139,7 +139,7 @@ Type-checking is the analyzer's job, live today in `nika check`
 `Templatable<T>` carries `T` as a phantom type so downstream stages
 can't conflate `Templatable<u32>` with `Templatable<bool>`.
 
-## Taint tracking (target design · Phase D)
+## Taint tracking
 
 External data is tainted by default. The taint set is maintained by
 the analyzer and propagates through bindings:
