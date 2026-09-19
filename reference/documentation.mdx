@@ -1,36 +1,38 @@
 ---
 title: "Find your documentation"
-description: "Choose a guide, look up a language field or tool, and follow the source behind an explanation."
+description: "The learning path through Nika's docs: first result, SDK integration, then the mechanics."
 icon: "book-open"
 ---
 
-`docs.nika.sh` is the home of Nika documentation: installation, workflow authoring,
-language references, SDK guides and architecture. `nika.sh` presents the product.
-Keep documentation bookmarks on this domain as the product site becomes a
-marketing site.
+`docs.nika.sh` is the home of Nika documentation: installation, workflow
+authoring, language references, SDK guides and architecture. `nika.sh` is
+the product site. Keep documentation bookmarks on this domain.
 
-## Choose your next step
+## The path, in order
 
-<CardGroup cols={2}>
-  <Card title="Start a workflow" icon="play" href="/getting-started/first-workflow">
-    Install the engine, create a file and follow its first validation and run.
-  </Card>
-  <Card title="Look up a YAML field" icon="code" href="/reference/language/overview">
-    Find its meaning, placement, type, related fields and pinned schema source.
-  </Card>
-  <Card title="Use a builtin tool" icon="wrench" href="/reference/builtins">
-    Browse tools, then open a dedicated reference such as nika:assert or nika:fetch.
-  </Card>
-  <Card title="Connect an application" icon="plug" href="/sdk/overview">
-    Read the SDK contract, local and remote interfaces, and operational guides.
-  </Card>
-  <Card title="Understand the engine" icon="layer-group" href="/concepts/architecture">
-    Follow the layers, crate admission rules and architectural decisions.
-  </Card>
-  <Card title="Check a reference" icon="file-contract" href="/reference/knowledge-system">
-    Understand source versions and the difference between a contract and an implementation.
-  </Card>
-</CardGroup>
+<Steps>
+  <Step title="Get a first result">
+    [Introduction](/) → [install](/getting-started/installation) →
+    [first workflow](/getting-started/first-workflow). Five minutes,
+    offline, no key: one file, one check, one run, one receipt.
+  </Step>
+  <Step title="Drive it from an app">
+    [SDK overview](/sdk/overview) → [quickstart](/sdk/start/quickstart) →
+    [project setup](/sdk/start/project-setup). The typed lifecycle:
+    check, run, events, result, verify.
+  </Step>
+  <Step title="Learn the mechanics">
+    [Workflows](/concepts/workflows) · [verbs](/concepts/verbs) ·
+    [bindings](/concepts/bindings) · [traces](/concepts/traces) ·
+    [security](/concepts/security) — one concept at a time, after you have
+    a result in hand.
+  </Step>
+  <Step title="Ship a real job">
+    [Examples](/examples/overview) from starter to multi-step ·
+    [patterns](/guides/patterns) for the writing discipline ·
+    [cost honesty](/guides/cost-honesty) before a paid model.
+  </Step>
+</Steps>
 
 ## Find a specific reference
 
@@ -48,8 +50,8 @@ marketing site.
 
 ## Arriving from an older link
 
-Use the current documentation destination when following an older bookmark. For
-example, the reference formerly at `/language/stdlib/assert` is now
+Use the current documentation destination when following an older bookmark.
+For example, the reference formerly at `/language/stdlib/assert` is now
 [the assert reference](/reference/tools/assert); `/templates` opens
 [the template guide](/guides/templates). A general category guide is labeled as
 a guide, rather than presented as the exact reference for an individual object.

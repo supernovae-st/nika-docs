@@ -1,6 +1,6 @@
 ---
 title: "Your first workflow"
-description: "Five minutes from install to a checked and runnable Nika workflow."
+description: "Write one .nika file by hand, check it, run it offline, read the result."
 sidebarTitle: "First workflow"
 icon: "play"
 ---
@@ -8,183 +8,128 @@ icon: "play"
 import { CANON } from "/snippets/_canon.mdx";
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
+**Goal:** write one file, run it offline, read a typed output. No API key,
+no model server, nothing leaves your machine.
+
 <Info>
   **v{STATUS.version}:** `nika check`, `nika run`, `nika doctor`, `nika lsp`,
   and `nika mcp` ship in the binary. Run `nika init` once per repo for schema
-  and agent rules.
+  and agent rules. [Install Nika](/getting-started/installation) first if you
+  have not.
 </Info>
 
-## Goal
-
-Write a `.nika` file, run it, get structured output. No setup beyond
-`nika` installed. **Your first run needs no API key and no model server.**
-
-## 1. Pick how the AI step runs
-
-Three paths, from zero-setup to production:
-
-**Instant (no model at all)**: the built-in `mock/echo` model returns a
-deterministic response, so you can see a workflow's shape right now:
-
-```yaml
-model: mock/echo
-```
-
-**Local (free · private)**: have [Ollama](https://ollama.com) running,
-no API key, nothing leaves your machine:
-
-```bash
-ollama pull llama3.2:3b
-```
-
-**Cloud**: set any provider key:
-
-```bash
-export MISTRAL_API_KEY=...
-# or export ANTHROPIC_API_KEY=... · any provider in the catalog
-```
-
-At any point, `nika doctor` tells you exactly what's wired and how to fix
-what isn't:
-
-```bash
-nika doctor
-```
-
-All provider env vars listed in [Providers catalog](/reference/providers-catalog).
-
-## 2. Write the workflow
+## 1. Write the file
 
 Create `hello.nika`:
 
 ```yaml hello.nika
 nika: hello
-
+model: mock/echo        # rehearsal model: echoes the prompt, no network
+permits: {}             # explicit: this workflow touches nothing
 tasks:
   greet:
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
-      prompt: "Say hi to the chrysalis. Be brief."
+      prompt: "Say hello to a new user, briefly."
+      max_tokens: 32
+outputs:
+  greeting: ${{ tasks.greet.output }}
 ```
 
-Three things to notice:
+- **`nika: <name>`** is the mark and the workflow's kebab-case identifier.
+- **`model: mock/echo`** needs no key and no server — the engine echoes the
+  prompt back. The mechanics are real; the "answer" is a rehearsal.
+- **`permits: {}`** declares zero authority up front. A workflow that later
+  touches a file, a host or a shell must say so here, or admission refuses
+  it.
+- **`max_tokens`** bounds the model step so the cost report is a ceiling,
+  not a guess.
+- **`outputs:`** names what the run hands back.
 
-- **`nika: <name>`** is the mark and the name — the language as the key, the workflow's kebab-case identifier as the value (no version to pin).
-- **`tasks:`** is a map keyed by task id; each task declares one verb (here, `infer`).
-
-## 3. Check it, then run it
+## 2. Check it, then run it
 
 ```bash
-nika check hello.nika   # the static audit: plan · cost · secrets · types · before a single token is spent
+nika check hello.nika   # static audit — before a single token is spent
 nika run hello.nika
 ```
 
-`nika check` catches broken references, missing dependencies and schema
-problems before any model is called, and points at the exact fix.
-
-<Tip>
-  No provider handy? Swap the `model:` line for `mock/echo`. Both commands
-  work fully offline, and you can wire a real model later.
-</Tip>
-
-<Info>
-  **Before a paid model.** `nika check --native-strict` until zero hints.
-  Probe every new builtin on `mock/echo` first. Numeric facts are
-  `type: integer` (`enum: [0, 1, 3]`), never `enum: ["0","1","3"]`.
-  The model extracts facts — `nika:jq` or `nika:decide` is the law
-  (`nika try 13-extract-then-law`). Pin markdown globs
-  (`exclude: "**/README.md"`) before a fan-out infer. Then swap `model:`.
-</Info>
-
-Example output:
-
-```
-▶ greet  infer  → ollama/llama3.2:3b
-  ┌─ output ──────────────────
-  │ Welcome inside the chrysalis. 🦋
-  └───────────────────────────
-✓ greet  T+00:00:01.42  OK
-```
-
-### Read the story back (0.98+)
-
-`nika explain <file>` narrates any checked workflow — the waves, the
-**cost before a token is spent** (an unbounded task reads `FLOOR`, a
-local model reads *unpriced — not « free »* — the whole vocabulary
-lives in [Cost honesty](/guides/cost-honesty)), what it touches, and
-the flight recorder hand-off. Captured verbatim against the released
-`0.107.0` on the chain skeleton after one recorded run:
+Captured on v{STATUS.version}, offline — the audit is fully green
+(`permits {} · est out ≤$0.0000 · 0 hints · risk low`), then:
 
 ```text
-cost before a token is spent
-  bounded portion $0.0000 · no total ceiling · 1 uncapped
-    think: ollama/llama3.2:3b has no catalog price — unknown stays unknown (never $0)
-  local models: your compute · tokens unpriced — not « free »
-
-flight recorder
-  1 run in .nika/traces · latest:
-  nika trace show .nika/traces/2026-08-02T01-11-53Z-7f42.ndjson
-  nika trace verify <same file>   # prove the hash chain
+  ✔  greet  infer · mock/echo  1ms
+  1 task · 1 wave · 0 retries · 9 tok
+  ── 1/1 done · unpriced (1 call) · elapsed 0.0s ──
+    wrote .nika/traces
+    said "mock(echo) · Say hello to a new user, brief…"
+    rehearsal · a mock model echoed the prompt — not a real answer
+    trace: .nika/traces/2026-09-19T12-59-30Z-c4ae.ndjson · 6 events · chain 659f4371… · sealed
 ```
 
-The skeleton already caps the seat (`max_tokens: 800`) — the uncapped
-part is the *unpriced* local model, and the report says so instead of
-printing a fake `$0`. Swap in any priced cloud seat and the same report
-reads `≤ $0.0005 worst case · ≥ $0.0005 cheapest path` — a hard
-ceiling.
+`nika check` catches broken references, missing dependencies and schema
+problems before any model is called, and points at the exact fix. The run
+wrote a hash-chained journal under `.nika/traces/` — `nika trace verify`
+proves it was not tampered with.
+
+## 3. Ask the file three questions
+
+<AccordionGroup>
+  <Accordion title="What if a required input is missing?" icon="circle-question">
+    Declare `inputs:` on the file and the run refuses to start without
+    them (`NIKA-1708`, exit 3) — admission fails, nothing half-executes.
+    Callers pass values with `run(..., { inputs })` in the SDK or
+    `--var key=value` on the CLI.
+  </Accordion>
+  <Accordion title="What if a permission is absent?" icon="circle-question">
+    The task that needs it is refused at check (`NIKA-AUTH-006`). An
+    absent `permits:` block means zero authority — effects stay refused
+    until the file declares them. `nika check --infer-permits` drafts the
+    tightest block for you.
+  </Accordion>
+  <Accordion title="What if I switch the model?" icon="circle-question">
+    One line. `ollama/qwen3.5:4b` runs locally after
+    `ollama pull qwen3.5:4b`; a cloud provider takes its env key
+    (`export OPENAI_API_KEY=...`). The file, the check and the receipt
+    keep the same shape — only the answer changes. `nika doctor` reports
+    what your machine can reach.
+  </Accordion>
+</AccordionGroup>
 
 ## 4. Add a second task that depends on the first
 
 ```yaml hello.nika
 nika: hello
-
+model: mock/echo
+permits: {}
 tasks:
   greet:
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
-      prompt: "Say hi to the chrysalis. Be brief."
+      prompt: "Say hello to a new user, briefly."
+      max_tokens: 32
 
   critique:
     with:
       greeting: ${{ tasks.greet.output }}  # the binding IS the edge
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: |
         The greeting was: ${{ with.greeting }}
-
-        Rewrite it shorter and more enigmatic.
+        Rewrite it shorter.
+      max_tokens: 32
 ```
 
-Notice the `with:` block. Each `${{ tasks.X.* }}` reference in it is a
-[binding](/concepts/bindings): it **names the data** the task consumes
-(`${{ with.greeting }}` in the prompt) and **declares the edge** that
-orders it — greet → critique, one declaration, no invisible edges. The
-engine injects the value at runtime, with explicit taint tracking.
-
-### The graph you just built
-
-```mermaid
-%%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
-flowchart LR
-    classDef task fill:#3F7DFF,color:#fff,stroke:#7FE9FF,font-weight:bold
-    G["greet<br/>infer"]:::task --> F["critique<br/>infer"]:::task
-```
-
-One `with:` binding and the order falls out of the file. Tasks with no
-edge between them run **in parallel automatically**. You never schedule
-anything. (For an ordering with no data — run the deploy after the tests,
-consume nothing — use `after: { tests: success }`, the control door.)
+The `with:` block is a [binding](/concepts/bindings): it names the data the
+task consumes and declares the edge that orders it — greet → critique, one
+declaration, no invisible edges. Tasks with no edge between them run in
+parallel automatically. (For ordering without data — deploy after tests,
+consuming nothing — use `after: { tests: success }`.)
 
 ## 5. Get structured output
 
 ```yaml hello.nika
-nika: hello-structured
-
 tasks:
   names:
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
       prompt: "Generate three names for a butterfly."
+      max_tokens: 200
       schema:                          # structured output · JSON Schema
         type: object
         properties:
@@ -199,38 +144,50 @@ tasks:
         required: [names]
 ```
 
-Nika takes the JSON Schema, asks the provider for output that conforms
-(using each provider's native structured-output API where the [capability
-rules](/reference/capabilities) allow it: schema mode, object mode, or
-JSON-mode emulation), and validates the result against your schema before
-passing it on.
+The engine asks the provider for output that conforms (using each
+provider's native structured-output mode where the [capability
+rules](/reference/capabilities) allow it) and validates the reply against
+your schema before passing it on. On a **successful** run, `outputs:`
+then carries `{ "names": ["...", "...", "..."] }` — the shape is checked
+when the model answers. A failed or refused run produces no output; the
+guarantee covers shape, not outcome.
 
-```bash
-nika run hello.nika
-# Output is guaranteed to be { "names": ["...", "...", "..."] }
-```
+## 6. See a real job
+
+[Meeting actions](/examples/meeting-actions) turns a transcript into
+typed, tracker-ready action items. It defaults to a local model
+(`ollama/qwen3.5:4b`, no key); point it at a cloud provider and the same
+file costs a few cents, priced by `check` before the run. Same file shape
+as your hello; the model and tools change, the lifecycle does not.
 
 ## What you just built
 
 - Workflows are YAML files: `.nika`.
 - Tasks are units of work; the map key is the identity.
-- Four verbs (`infer`, `exec`, `invoke`, `agent`) define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
-- `with:` (data) and `after:` (control) build the DAG — the binding IS the edge.
-- `${{ tasks.X.output }}` crosses a task boundary in `with:`; the body reads `${{ with.<name> }}`, with taint tracking.
-- `schema:` enforces JSON schemas on AI output.
+- Four verbs (`infer`, `exec`, `invoke`, `agent`) define what each task
+  does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
+- `with:` (data) and `after:` (control) build the DAG — the binding IS the
+  edge.
+- `${{ tasks.X.output }}` crosses a task boundary in `with:`; the body
+  reads `${{ with.<name> }}`.
+- `schema:` checks AI output shape at answer time; `outputs:` exports the
+  result.
 
-## Next checks
+## Next lesson
 
 <Steps>
-  <Step title="Check before running">
-    `nika check hello.nika`: static audit before any token or effect.
+  <Step title="Drive it from an app">
+    [SDK quickstart](/sdk/start/quickstart): the same file through
+    `check` → `run` → `result` → `traceVerify` in TypeScript.
   </Step>
   <Step title="Inspect the DAG">
-    `nika inspect hello.nika` (add `--format mermaid|dot|json` for the machine projections).
+    `nika inspect hello.nika` (add `--format mermaid|dot|json` for the
+    machine projections); `nika explain hello.nika` narrates the waves and
+    the cost before a token is spent.
   </Step>
   <Step title="Wire your agent">
-    Run `nika wire cursor` or `nika wire all` for explicit MCP setup, or use
-    the editor extension's agent setup.
+    Run `nika wire cursor` or `nika wire all` for explicit MCP setup, or
+    use the editor extension's agent setup.
   </Step>
 </Steps>
 
@@ -238,12 +195,10 @@ nika run hello.nika
 
 <CardGroup cols={2}>
   <Card title="Examples · real jobs" icon="rocket" href="/examples/overview">
-    Climb the ladder: starter chains to multi-agent swarms, every file
-    conformance-validated.
+    Starter chains to multi-step reports, every file runnable.
   </Card>
   <Card title="How to write Nika" icon="compass-drafting" href="/guides/patterns">
-    The twelve patterns: where the determinism lives, where the model
-    is allowed to think.
+    The patterns of well-written Nika, each taught by a canonical example.
   </Card>
   <Card title="The 4 verbs" icon="play" href="/concepts/verbs">
     Deep dive on `infer`, `exec`, `invoke`, `agent`.
@@ -254,7 +209,7 @@ nika run hello.nika
   <Card title="Providers" icon="server" href="/concepts/providers">
     Why one `InferRequest` works across {CANON.providers} providers.
   </Card>
-  <Card title="Live state" icon="gauge" href="/reference/status">
-    Which verbs are admitted today.
+  <Card title="Cost honesty" icon="scale-balanced" href="/guides/cost-honesty">
+    Read the cost report: floors, ceilings and honest « unpriced ».
   </Card>
 </CardGroup>

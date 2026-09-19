@@ -52,11 +52,15 @@
     "twitter:card": "summary_large_image"
   },
   "banner": {
-    "content": "🦋 Project arming and the resident firer are live. `nika.yaml` proposes; the machine disposes. [Read the current status →](/reference/status)",
+    "content": "New here? Five minutes to your first workflow — offline, no key. [Start →](/getting-started/first-workflow)",
     "dismissible": true
   },
   "navbar": {
     "links": [
+      {
+        "label": "Install",
+        "href": "/getting-started/installation"
+      },
       {
         "label": "nika.sh",
         "href": "https://nika.sh"
@@ -68,8 +72,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Install",
-      "href": "/getting-started/installation"
+      "label": "Build with the SDK",
+      "href": "/sdk/start/quickstart"
     }
   },
   "footer": {
