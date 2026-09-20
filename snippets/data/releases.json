@@ -3,6 +3,18 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.120.3",
+      "name": "v0.120.3",
+      "publishedAt": "2026-09-20T10:14:14Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.120.3",
+      "assetCount": 8,
+      "highlights": [
+        "Serve authoring door (foundation).",
+        "Pending human approvals render task bindings."
+      ],
+      "notesSha256": "9a495e7f8866ec239b24b908660a3e5fc925fadbf0ed3de48b66cf08aa39247d"
+    },
+    {
       "tag": "v0.120.2",
       "name": "v0.120.2",
       "publishedAt": "2026-09-19T17:43:29Z",
