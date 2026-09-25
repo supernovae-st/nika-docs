@@ -1,0 +1,377 @@
+---
+title: "Describe it, review it, run it"
+sidebarTitle: "From a sentence"
+description: "Describe a job in words to bare nika, answer only what is missing, review the exact .nika it proposes, save it, then run it as a separate step and read the result."
+icon: "comments"
+---
+
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { SDK } from "/snippets/_sdk-contract.mdx";
+
+<Info>
+  **Release status.** This path ships with engine **0.121.0**, prepared on
+  25 September 2026 and not yet published when this page was written. It
+  was qualified on release-candidate source `4c728c980`. This site's release
+  snapshot is v{STATUS.version}; `nika --version` shows the binary you have.
+</Info>
+
+Bare `nika` on a terminal is a conversation about work. You say what you
+want in your own words. Nika's compiler turns it into an ordinary `.nika`
+file, asks only for what it cannot decide, and shows you the exact bytes.
+Nothing is written until you say `yes`, and saving never runs anything:
+running is its own line. The result and its proof are then read from the
+run's own trace.
+
+## The path
+
+<Steps>
+  <Step title="Open the session in your project">
+    `cd` into the project and run `nika`. On an interactive terminal it opens
+    on « What do you want to automate? ». The working directory is the
+    project root, and only files under it are read. Piped or in CI, bare
+    `nika` prints the machine mirror and the next command instead, and asks
+    nothing. `nika --plain` (or `NIKA_TUI=0`) keeps plain text lines for
+    screen readers, recorders and harnesses.
+  </Step>
+  <Step title="Describe the outcome">
+    One sentence is enough: « Read ./notes/brief.md and write it to
+    ./out/brief-copy.md ». Name the files and the result you want. Nika
+    reads the files you name, never an unnamed one.
+  </Step>
+  <Step title="Answer only what is missing">
+    When the compiler cannot decide a value, it asks one typed question on
+    a `reply ›` line. `why?` explains what the answer fills and consumes
+    nothing; `cancel` drops the round. Your answer binds to that question
+    only.
+  </Step>
+  <Step title="Review the exact file">
+    The proposal says what the workflow does, when it runs, what it can
+    touch, which file it creates and what it still needs, beside the check
+    of those exact bytes. `/show` prints every line; `/meaning` shows what
+    was kept of your request, clause by clause. A sentence that changes
+    something (« write it to ./out/final.md instead ») revises the proposal
+    instead of saving it.
+  </Step>
+  <Step title="Save with yes">
+    `yes` writes exactly the bytes you reviewed to a new file, never over an
+    existing one, and runs the real check on disk. `no` discards. Saving is
+    not running: the session answers « Saved · checked · not active ·
+    nothing has run ».
+  </Step>
+  <Step title="Run it as its own line">
+    `run it` runs the saved workflow once, only when its check on disk is
+    clean, and announces a ceiling first: the amount you state, otherwise
+    the `ceiling:` in the project's `nika.yaml`, otherwise USD 0.25. The
+    same line can name another file or ceiling: « run brief.nika with a
+    ceiling of 0.05 ». When a run's cost cannot be estimated, the
+    full-screen session asks a separate `yes / no / details` question that
+    approves that one run only. After reopening a history whose saved spending
+    constraint cannot be proved, state a fresh Run ceiling; no default replaces
+    that missing evidence. Required inputs are asked one at a time; a human gate
+    in the workflow pauses the run and asks you.
+  </Step>
+  <Step title="Read the result">
+    The result comes from the run's trace: what was produced, read and sent,
+    which model was asked, what you approved, and the cost Nika can account
+    for. `/proof` verifies the trace chain and re-reads the written files;
+    `/details` shows how the workflow was built. The file stays an ordinary
+    `.nika`: `nika check`, `nika run` and `nika trace verify` work on it
+    outside the session.
+  </Step>
+</Steps>
+
+## A run with no AI and no key
+
+The compiler reads plain, complete requests deterministically, so this whole
+path works with « No AI in this conversation » chosen and no provider key.
+Recorded on the release candidate (condensed; `…` marks removed lines):
+
+```text
+nika › Read ./notes/brief.md and write it to ./out/brief-copy.md
+✓ understood 1 requirement
+Nika proposes `compiled-workflow.nika`:
+Does
+  1. read_source · reads a file
+  2. write_output · writes a file
+Runs
+  when you ask (« run it ») · no schedule was asked
+Can touch
+  external effects · none
+  human approval at run · none
+Changes
+  + `compiled-workflow.nika` · 33 lines · new
+Needs
+  nothing more from you
+Nothing has run yet · `yes` saves these exact bytes and checks them · running is its own line (« run it »)
+…
+  check of these bytes · `compiled-workflow.nika` · clean ✔
+
+apply? › yes
+applied · wrote `compiled-workflow.nika`
+  check · `compiled-workflow.nika` · clean ✔
+Saved · checked · not active · nothing has run
+
+nika › run it
+running `compiled-workflow.nika` once · ceiling $0.25
+  ✔  read_source   invoke · nika:read  42ms
+  ✔  write_output  invoke · nika:write  16ms
+Done · `compiled-workflow.nika` · 102 ms · 2 tasks ran
+  produced · ./out/brief-copy.md (47 B)
+  read · ./notes/brief.md
+  cost · no model usage recorded
+  run observed · exit 0 · succeeded · trace `.nika/traces/2026-09-25T07-32-03Z-6a54.ndjson`
+```
+
+The saved file is the compiler's candidate. It declares its boundary like
+any hand-written workflow: one file read, one file written, two tools. The
+compiler writes its keys in alphabetical order; this copy puts `nika:` first
+and is otherwise the same.
+
+```yaml compiled-workflow.nika
+nika: compiled-workflow
+const:
+  output_path: ./out/brief-copy.md
+  source_path: ./notes/brief.md
+outputs:
+  write_status: ${{ tasks.write_output.status }}
+permits:
+  fs:
+    read:
+    - ./notes/brief.md
+    write:
+    - ./out/brief-copy.md
+  tools:
+  - nika:read
+  - nika:write
+tasks:
+  read_source:
+    invoke:
+      args:
+        path: ${{ const.source_path }}
+      tool: nika:read
+  write_output:
+    after:
+      read_source: success
+    invoke:
+      args:
+        content: ${{ with.content }}
+        create_dirs: true
+        overwrite: true
+        path: ${{ const.output_path }}
+      tool: nika:write
+    with:
+      content: ${{ tasks.read_source.output }}
+```
+
+After that run, `/proof` reported the chain intact, four permit checks
+allowed, and the written file's digest re-read from disk. It also named what
+the record does not prove: that the content is right, or who wrote the
+journal when no signing key was configured.
+
+## When Nika asks a question
+
+A request with a language step needs a model to run that step, and the
+compiler never invents one:
+
+```text
+nika › Read ./notes/brief.md, draft a 3-bullet summary of it and write the summary to ./out/summary.md
+✓ understood 2 requirements
+Which explicit runtime provider/model should run the language steps (extract, classify, draft)?
+  (The compiler cannot invent this authoring value.)
+  reply on the next line · `cancel` drops this · `why?` explains
+
+reply › why?
+This answer fills `model` in the workflow Nika is preparing.
+…
+  the question still waits · reply on the next line · `cancel` drops the round
+
+reply › ollama/qwen3.5:4b
+Nika proposes `compiled-workflow.nika`:
+Does
+  1. read_source · reads a file
+  2. draft · infer · ollama/qwen3.5:4b
+  3. draft_anchors · shapes the data
+  4. draft_admit · checks a condition
+  5. write_output · writes a file
+```
+
+The answer becomes the workflow's `model:`, and the review prices it. A local
+model has no catalog price, so the review says the estimate is unknown
+instead of counting the call as free.
+
+## Choose who helps Nika think
+
+The first time a turn needs more than the deterministic reader (a
+conversation, or work it cannot settle alone), the session asks once and
+keeps your answer in `~/.nika/session-intelligence.json`. `/intelligence`
+changes it; `/status` shows the choice and where your project context goes.
+
+| Answer | What Nika uses | Where the context you ask about goes |
+|---|---|---|
+| `1` · an AI app you already have | A supported assistant you are signed into | Through that app's account |
+| `2` · an API | A provider whose key is in your environment: `2 deepseek`, or `2 deepseek/<model>` | To that provider, metered |
+| `3` · run locally | A reachable local engine: `3 ollama` | Stays on this machine |
+| `4` · no AI in this conversation | The deterministic reader and the engine's own facts | Nothing leaves this machine |
+
+A choice this machine cannot serve is refused with its fix, never silently
+replaced. A key in your environment is not consent on its own: only the
+intelligence you chose is ever called.
+
+## Set up DeepSeek
+
+<Steps>
+  <Step title="Keep the key in your environment">
+    Nika reads provider keys from the environment only. Export
+    `DEEPSEEK_API_KEY` (`NIKA_DEEPSEEK_API_KEY` is read too) from your shell
+    profile or your secret manager so every new terminal has it. Never put a
+    key in a `.nika` file or type it into the session.
+
+    ```bash
+    export DEEPSEEK_API_KEY="…"   # from your DeepSeek account · keep it out of the repository
+    nika doctor                   # reports the key as present, never its value
+    ```
+  </Step>
+  <Step title="Choose it once">
+    Run `nika`. When the session first asks, answer
+    `2 deepseek/deepseek-flash`; naming the model keeps it fixed. With
+    `2 deepseek` alone, Nika uses the provider's default model
+    (`deepseek-flash`) and, when that model cannot settle a request, tries
+    once more with `deepseek/deepseek-v4-pro` unless you stated a spending
+    amount. `/intelligence` switches later. The choice persists across
+    sessions and projects.
+  </Step>
+  <Step title="Confirm where the context goes">
+    `/status` names DeepSeek as the intelligence and says that project
+    context you ask Nika to reason over is sent there. Read DeepSeek's row
+    in the [providers catalog](/reference/providers-catalog), including its
+    data policy, before you point it at private material; `3 ollama` keeps
+    everything on your machine.
+  </Step>
+</Steps>
+
+DeepSeek's native API is a route the session can price from the engine's
+embedded catalog. Without an amount, its calls are recorded with a catalog
+estimate but not capped. Say an amount with its currency in the request
+(« … budget 2 USD ») and the session admits its own model calls against
+that amount. A run keeps its own ceiling, announced before it starts
+(« run it with a ceiling of 0.05 »). Estimates are neither an invoice nor
+a provider-side cap; [Cost honesty](/guides/cost-honesty) explains the
+difference.
+
+A price in the model catalog does not by itself admit a route for a run.
+DeepSeek's direct route is admitted. Other API routes, including the default
+OpenAI and Mistral endpoints, need a fresh, one-time Run cost review when
+their exact route and model are not admitted. The full-screen session and an
+interactive `nika run` ask for it. Scripts and CI without that review refuse
+before dispatch. On `nika serve`, an HTTP job for such a route is queued,
+then settles `failed` with `admission_refused` before any model or tool
+effect, and resident schedule fires use the same gate.
+
+## Three stages, three kinds of authority
+
+| Stage | What it does | Calls a model? | Never |
+|---|---|---|---|
+| **Compiler** | Reads the request: a deterministic reader first, an optional bounded decision for a small finite choice, otherwise one explicitly permitted authoring call. Every path ends in the same deterministic assembler and check. It asks when a value is undecided and refuses a contradiction. | Only a seat you selected, and only when the deterministic reading cannot settle the request | Writes a file, grants a permission or runs anything |
+| **Conversational authoring** | The model you chose proposes a plan or a candidate file and repairs it from the compiler's diagnostics, under per-call deadlines, output limits and a bounded number of repairs. A revision keeps your original request and the base file. | Yes, within those bounds; `/details` shows its calls, tokens and time | Bypasses the check, saves or runs |
+| **Check · admission · runtime** | Deterministic. The same `nika check` and `nika run` as any file: permits enforced, human gates honoured, a hash-chained trace written. | Only the `infer:` or `agent:` tasks your saved file declares, when you run it | Turns a clean check or a verified trace into proof that the content is right |
+
+Consent stays with the closed words: `yes` saves, `no` discards, `run it`
+runs. Nothing a model writes counts as a consent or a run.
+
+## Optional: a bounded decision seat
+
+When a request leaves a small, finite choice open (for example a lookup
+versus a search), an operator can seat an external decision model,
+TypeSafe's Jev, before opening the session:
+
+```bash
+export TYPESAFE_API_KEY="…"                           # the service's key · never in a workflow
+export NIKA_SESSION_DECISION_MODEL="typesafe/<model>" # read once when the session opens
+nika
+```
+
+`nika compile` takes the same seat explicitly with
+`--decision-model typesafe/<model>`.
+
+- It picks only among the options the compiler offers, `none` included,
+  and the compiler validates the pick again.
+- On the qualified candidate: at most three decisions per compile, one
+  attempt each, a 20-second deadline, no retry.
+- The session consults it only under an API intelligence with no numeric
+  budget. Its cost is recorded as unknown, never as zero, and a stated
+  budget refuses it.
+- It routes an ambiguous clause. It does not understand your data, select
+  knowledge, write the workflow or authorize anything.
+
+## From TypeScript
+
+The SDK carries the same compiler without the conversation. `compile()`
+returns a candidate and its questions; it writes nothing and runs nothing.
+Your application reviews the candidate, writes the file, then calls
+`run(path)`, which performs the normal admission.
+
+```ts
+import { writeFile } from 'node:fs/promises'
+import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
+
+const nika = new Nika({ cwd: process.cwd() })
+const draft = await nika.compile({
+  intent: 'Read ./notes/brief.md and write it to ./out/brief-copy.md',
+})
+
+if (draft.ready && draft.candidate !== null) {
+  // Review draft.candidate before anything is written.
+  await writeFile('brief-copy.nika', draft.candidate)
+  const run = await nika.run('brief-copy.nika', { maxCostUsd: 0 })
+  const result = await run.result()
+  console.log(isNikaRunSucceeded(result) ? 'done' : result.status)
+}
+```
+
+Model authoring is explicit (`authoring: { model: 'provider/name' }`), and so
+is the decision seat (`decisionModel`); a key in the environment opts into
+neither. These options come from the SDK source prepared alongside engine
+0.121.0 and reach npm only when that SDK release is published. The
+[SDK section](/sdk/overview) documents the published package,
+currently <code>{SDK.package}@{SDK.sourceVersion}</code>, and the
+[SDK README](https://github.com/supernovae-st/nika-client#compile-a-candidate-without-running-it)
+lists every compile option.
+
+## What it does not promise
+
+- **Bounded reading, not universal understanding.** The deterministic reader
+  recognizes a finite set of request shapes; other requests need the model
+  you chose, and some still cannot be expressed. When Nika cannot settle a
+  request, it says what stopped it and suggests stating the outcome in one
+  sentence or splitting the work. Nothing is written.
+- **The review is yours.** A clean check proves structure and permits, not
+  that the file matches your intent. Read the review and `/meaning`.
+- **Proof is about the record.** `/proof` and `nika trace verify` show that
+  the journal was not altered; they do not show that an output is correct.
+- **The evidence is finite.** Before publication, the candidate passed six
+  synthetic journeys on macOS: filtering and totalling a CSV from a French
+  request, a source-grounded three-bullet summary through DeepSeek, a
+  revision whose pending draft survived closing and reopening the session
+  before it was saved and run, a decimal variant, a JSON variant, and a Jev
+  lookup decision followed by a clarification. Those runs used an operator-installed technical knowledge
+  snapshot that the public installers do not distribute; without one,
+  `/details` reports « no knowledge snapshot ». The journeys do not
+  establish correctness for arbitrary requests, other platforms or every
+  provider, and their costs are catalog estimates, not invoices.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
+    Write the same kind of file by hand, check it and run it.
+  </Card>
+  <Card title="Local models" icon="server" href="/guides/local-models">
+    Keep the conversation and the runs on your own machine.
+  </Card>
+  <Card title="Cost honesty" icon="scale-balanced" href="/guides/cost-honesty">
+    Floors, ceilings, estimates and honest « unknown ».
+  </Card>
+  <Card title="CLI reference" icon="terminal" href="/reference/cli">
+    Every subcommand the release binary answers.
+  </Card>
+</CardGroup>

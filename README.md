@@ -27,6 +27,11 @@ The repo also runs its own drift gate in CI (`.github/workflows/gate.yml`,
 This repo is **not** the Nika engine source, **not** the marketing site, and
 **not** a library you install.
 
+The Guide teaches three ways to reach the same `.nika` file: write it by hand,
+call it from TypeScript, or describe the job in words to bare `nika` and
+review the file it proposes before anything is saved or run
+(`guides/describe-review-run.mdx`).
+
 ## Structure
 
 ```
@@ -34,7 +39,7 @@ nika-docs/
 ├── docs.json              Mintlify config + navigation (every page MUST be registered)
 ├── introduction.mdx       Landing
 ├── getting-started/       installation · your-machine · first-workflow · editors · agents
-├── guides/                patterns · agent-authoring · templates · troubleshooting · local-models · … (task-oriented)
+├── guides/                describe-review-run · patterns · agent-authoring · templates · troubleshooting · local-models · … (task-oriented)
 ├── concepts/              architecture · verbs · workflows · bindings · events · providers · security · …
 ├── examples/              overview + the tiered showcase workflows (PROJECTED; counts live in the projector)
 ├── integrations/          editor · CI · agent-client wiring (nested)
@@ -42,10 +47,10 @@ nika-docs/
 ├── patterns/              cross-cutting pattern index
 ├── architecture/          layers · FCI · L0 decisions · admission · ADR index
 ├── reference/             YAML · CLI · schema · error codes · builtins · providers catalog · MCP catalog · MCP server · capabilities · constellation · design system · machine surfaces · status
-├── changelog/             releases · roadmap
-├── snippets/              _canon · _status-snapshot · _showcase · _ecosystem (auto-generated/shared; see below)
-├── scripts/link-audit.py  the repo's own drift gate (see CI)
-├── .github/workflows/     gate.yml (link-audit on every push/PR)
+├── changelog/             releases (projected) · history · roadmap
+├── snippets/              _canon · _status-snapshot · _showcase · _ecosystem · _sdk-contract (auto-generated/shared; see below)
+├── scripts/               link-audit · publication-audit · oracle-sweep · teach-parity · … (the repo's own gates; see CI)
+├── .github/workflows/     gate.yml (docs gates on every push/PR) · release-heal.yml (published-release sync) · knowledge-freshness.yml
 ├── images/                logos + favicon
 └── global.css             Mermaid transparent background
 ```
