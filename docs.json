@@ -155,6 +155,7 @@
           {
             "group": "Author workflows",
             "pages": [
+              "guides/describe-review-run",
               "guides/patterns",
               "guides/templates",
               "guides/agent-authoring",
