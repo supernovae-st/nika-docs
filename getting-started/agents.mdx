@@ -148,6 +148,22 @@ not pay a second infer to pick a level. Numeric facts are
 The division of labor is the point: the **agent authors**, the **file is
 the contract**, the **human approves**, the **runtime enforces**.
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/agent-plugin.png"
+  aria-label="A coding agent writes release-notes.nika from one request with the plugin's nika-authoring skill; nika check refuses nika:read_file (NIKA-BUILTIN-001), the agent repairs it to nika:read, the re-check says run ready, and a mock/echo rehearsal writes release-notes.md"
+  alt="A coding agent writes release-notes.nika from one request with the plugin's nika-authoring skill; nika check refuses nika:read_file (NIKA-BUILTIN-001), the agent repairs it to nika:read, the re-check says run ready, and a mock/echo rehearsal writes release-notes.md"
+>
+  <source src="/videos/agent-plugin.webm" type="video/webm" />
+  <source src="/videos/agent-plugin.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**The loop, once through.** Asked to turn `CHANGELOG.md` into release notes, the agent drafts a workflow that calls `nika:read_file`. `nika check --native-strict` refuses it (`NIKA-BUILTIN-001`), the agent repairs it to `nika:read`, and the re-check says run ready. A `mock/echo` rehearsal then writes `release-notes.md`. *The checks and the run are captured from the real CLI; the agent session is an illustration.*</p>
+
 ## Editor surface
 
 The [VS Code / Cursor / Windsurf extension](https://marketplace.visualstudio.com/items?itemName=supernovae.nika-lang)

@@ -114,7 +114,21 @@ each permit check, every tool call an `agent:` loop makes, the run seal
 at the end. Nothing the engine did is off the chain, and nothing can be
 edited, reordered, or dropped from the middle without breaking it.
 
-{/* motion: nika trace verify reading an intact trace back, then a copy with one edited event, where verify names the first broken link */}
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/trace-proof.png"
+  aria-label="A run's trace drawn as five hash-linked blocks: nika trace verify reports the chain intact, then one byte of line 4 changes in a copy and verify stops at line 5: BROKEN, exit 2"
+  alt="A run's trace drawn as five hash-linked blocks: nika trace verify reports the chain intact, then one byte of line 4 changes in a copy and verify stops at line 5: BROKEN, exit 2"
+>
+  <source src="/videos/trace-proof.webm" type="video/webm" />
+  <source src="/videos/trace-proof.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Change one byte, and verify says where.** Each line of a run's trace carries the sha256 of the line before it. `nika trace verify` reads the chain back intact; in a copy with one byte of line 4 changed, it stops at line 5 with `BROKEN` and exit code 2. *A `mock/echo` rehearsal captured from the real CLI; the scan and the moving hashes are illustration.*</p>
 
 ```bash
 nika trace verify
