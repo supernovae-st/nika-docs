@@ -97,32 +97,32 @@ files:
   evidence: "hand-written polish layer · its own header: 'colors + fonts live in docs.json · pinned to … nika-spec design/tokens.yaml … this file = the polish layer'"
 - path: "images/posters/chat-to-workflow.png"
   class: authored
-  sha256: 28cd5215cef8ce3508b0fd5b549befb3e28ff374a22a11a65714e9ddf33e838b
+  sha256: 310f9707949508104c1397a3673c57dafc45e4ef5a17db3aa533422ac808ab3f
   evidence: "poster frame paired with videos/chat-to-workflow.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "images/posters/dag-execution.png"
   class: authored
-  sha256: bc31b7e0dd57843254cc5ab0510557c768e9fc32776b851018ea6ac6c61533f1
+  sha256: 768ce302c9744a1e197c9c8cbbd344bf95b80d0193978d24ac14d58e52fa94ca
   evidence: "poster frame paired with videos/dag-execution.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "images/posters/on-error-recover.png"
   class: authored
-  sha256: 5c2b88d58ef4e0c99d336898b8ebbb65a6f37d55b0bdffee2ecf221e05f33866
+  sha256: cf72eea287531e39a07e1f55f04187aa07e65fe706384f84bb6353ae19561c8f
   evidence: "poster frame paired with videos/on-error-recover.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "images/posters/permits-audit.png"
   class: authored
-  sha256: d708ad9ecfc45b16166f41e31f94aecbcb6d666c1513e177955696b8a080c0f1
+  sha256: a1c52e4b9225711d01fa04ba982f307fdaf6522d8fbb11a3589e49c3737c99d9
   evidence: "poster frame paired with videos/permits-audit.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "images/posters/static-check-fix.png"
   class: authored
-  sha256: 76b29ebb16eaaa747fb05b5d09f4422b6bedb928e5005ba734e36e029fdf1b66
+  sha256: 98ea38bab99d59f8a14e4695dd3b6168a9a0e3c43418bce6d2f1d129c837f454
   evidence: "poster frame paired with videos/static-check-fix.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
-- path: "images/workflow-gallery.png"
+- path: "images/posters/workflow-gallery.png"
   class: authored
-  sha256: 47eea81e6dc7911649b5f53be24fd0584ad2aa9b8b3b5908b5a57c258161ff31
+  sha256: 5eecc160aaf4c40838823d7eac31f8808460b857c887c6c270cc8917e187ef4a
   evidence: "poster frame paired with videos/workflow-gallery.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "lefthook.yml"
@@ -231,13 +231,13 @@ patterns:
 - glob: "videos/**"
   class: authored
   match_count: 16
-  aggregate_sha256: 7dd3aafc45174b968b5f8f66c48733a7e270c658820e3c2a94a822b9c14126a3
+  aggregate_sha256: 12890af6f078ca06b20357206144d0b10f4151bdc4652890c0ca0aeedd603978
   evidence: "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/og-*.png"
   class: authored
   match_count: 2
-  aggregate_sha256: 0453dd4b05fc4ce05bceaab7cdd4dde5cf65db0934a1ae7cfd4dfda785a9f5bc
+  aggregate_sha256: c671fd35cdae75dca00dc7e962d14c99076c26ad20c82b9c8cd9ba82cef4a69b
   evidence: "Open Graph card bitmap wired in docs.json metadata · production pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/**.svg"
@@ -255,7 +255,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 33889ef2c0890e9ba557870ad2d7827028c20d6bbf77f9c88cebcc6ed9bcc7d5
+  aggregate_sha256: 88ccc3c70a886d3f48efcf9b38cf339de59aa6d0593a0457212ec4a1a21496ee
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -278,7 +278,7 @@ unverified:
 - "images/posters/on-error-recover.png"
 - "images/posters/permits-audit.png"
 - "images/posters/static-check-fix.png"
-- "images/workflow-gallery.png"
+- "images/posters/workflow-gallery.png"
 - "scripts/first_command.py"
 - "scripts/install_release.py"
 - "scripts/knowledge-mirror.py"
