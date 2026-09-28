@@ -29,5 +29,14 @@
   "images/posters/meeting-actions.webp": "79124053db6d4f6fa07b91c4f24d418b2d6e89a03449ffa96c8e13715623c7b9",
   "images/posters/check-denied.webp": "08e30638667793bd6e17f523a0b1703db5adc72fd6b4641fb0cae719acb1ecba",
   "images/gifs/meeting-actions.gif": "07e2bb07d2f60a6a1bbcac601f529476731cb8ce329b71000d4e07d216e9adb8",
-  "images/gifs/check-denied.gif": "4639b1093b618b0df7bda1209d4cede359766a796cc59e2375e53c44478476f8"
+  "images/gifs/check-denied.gif": "4639b1093b618b0df7bda1209d4cede359766a796cc59e2375e53c44478476f8",
+  "images/posters/editor-diagnostics.png": "4c6fff9e00bc6ca63e9b42e3e14b6afea22efe2e4f1cd9122a5c9a3057314b88",
+  "images/posters/full-loop.png": "c82af6934f81055c08181823eec2fc6928ca0350accfde88f1cb0ab066fbae44",
+  "images/posters/nika-hero.png": "d2872fa577079339a292952fa729098c9f92d4351fc824e3acdac4cc96922df7",
+  "videos/editor-diagnostics.mp4": "e7dbab6fe83cb90ed1fea04fcbfd167d500735f6e50c786f8fb0f96e2ed5ba7e",
+  "videos/editor-diagnostics.webm": "be5d770111c195d60cceda35e5b0e7dee8dcd736fbdb2874f6a944eb431ad40b",
+  "videos/full-loop.mp4": "d8dbeaa5d6c618c3a59486e9114b858e79ecad3368d597a12daa3aca33575074",
+  "videos/full-loop.webm": "81cfd0f432413fd1777cc7bdd3147022554ac56de6d0d4088cd934b0f4d7e9ef",
+  "videos/nika-hero.mp4": "87f48e2e3c689eec1b005e935a5888f1ce730ad2732291cbce2fa424944901b3",
+  "videos/nika-hero.webm": "9132c7d1f5fc9507cacf1a7833e8cf3fda72eb09169650757427738f9783dcda"
 }

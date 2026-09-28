@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 382
-  file_rows: 37
+  classified_files: 391
+  file_rows: 40
   pattern_rows: 6
   by_class:
-    authored: 375
+    authored: 384
     authored-pin: 1
     generated: 4
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 78
+  unverified-default: 87
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -104,6 +104,21 @@ files:
   class: authored
   sha256: 768ce302c9744a1e197c9c8cbbd344bf95b80d0193978d24ac14d58e52fa94ca
   evidence: "poster frame paired with videos/dag-execution.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/editor-diagnostics.png"
+  class: authored
+  sha256: 4c6fff9e00bc6ca63e9b42e3e14b6afea22efe2e4f1cd9122a5c9a3057314b88
+  evidence: "poster frame paired with videos/editor-diagnostics.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/full-loop.png"
+  class: authored
+  sha256: c82af6934f81055c08181823eec2fc6928ca0350accfde88f1cb0ab066fbae44
+  evidence: "poster frame paired with videos/full-loop.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/nika-hero.png"
+  class: authored
+  sha256: d2872fa577079339a292952fa729098c9f92d4351fc824e3acdac4cc96922df7
+  evidence: "poster frame paired with videos/nika-hero.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "images/posters/on-error-recover.png"
   class: authored
@@ -226,12 +241,12 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 273
-  aggregate_sha256: 0bbba6a7b3f8298eafc6d38ed09b358b4a9cb9cd2d051677ea685f9f1870e549
+  aggregate_sha256: 6bcde931168d0f94350b3db026df182a45656d5eb2b80c917583531e97964d8f
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
-  match_count: 16
-  aggregate_sha256: 12890af6f078ca06b20357206144d0b10f4151bdc4652890c0ca0aeedd603978
+  match_count: 22
+  aggregate_sha256: 817c84c63b32d11e04149eb90968f8f01d9fcd00e39418913c2d87d82b8219b5
   evidence: "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/og-*.png"
@@ -255,7 +270,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 88ccc3c70a886d3f48efcf9b38cf339de59aa6d0593a0457212ec4a1a21496ee
+  aggregate_sha256: 6a05854876294ff406387fce41ddd50169e71ca4ae5e7b4bb46f3f10da069d03
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -274,7 +289,10 @@ unverified:
 - "images/posters/chat-to-workflow.png"
 - "images/posters/check-denied.webp"
 - "images/posters/dag-execution.png"
+- "images/posters/editor-diagnostics.png"
+- "images/posters/full-loop.png"
 - "images/posters/meeting-actions.webp"
+- "images/posters/nika-hero.png"
 - "images/posters/on-error-recover.png"
 - "images/posters/permits-audit.png"
 - "images/posters/static-check-fix.png"
@@ -327,8 +345,14 @@ unverified:
 - "videos/check-denied.webm"
 - "videos/dag-execution.mp4"
 - "videos/dag-execution.webm"
+- "videos/editor-diagnostics.mp4"
+- "videos/editor-diagnostics.webm"
+- "videos/full-loop.mp4"
+- "videos/full-loop.webm"
 - "videos/meeting-actions.mp4"
 - "videos/meeting-actions.webm"
+- "videos/nika-hero.mp4"
+- "videos/nika-hero.webm"
 - "videos/on-error-recover.mp4"
 - "videos/on-error-recover.webm"
 - "videos/permits-audit.mp4"

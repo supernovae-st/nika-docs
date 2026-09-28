@@ -342,6 +342,22 @@ digest:
       expression: "[ .[] | select(. != null) ]"   # the survivors · order preserved
 ```
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/on-error-recover.png"
+  aria-label="A missing live feed absorbed by on_error recover: the run finishes on cached data and its trace records the failure"
+  alt="A missing live feed absorbed by on_error recover: the run finishes on cached data and its trace records the failure"
+>
+  <source src="/videos/on-error-recover.webm" type="video/webm" />
+  <source src="/videos/on-error-recover.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Resilience you declare.** The live rates feed is missing, so `on_error: recover:` hands the next task yesterday's cached rates instead. The run still finishes (exit 0), its output says it is stale, and the trace records the failure it absorbed. *Captured from the real CLI, offline.*</p>
+
 ### Matrix expansion
 
 A matrix is precomputed data, not control flow. Build the product with jq,

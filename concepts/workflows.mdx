@@ -146,6 +146,22 @@ third way to connect two tasks — `depends_on` is dead (`NIKA-PARSE-024` ·
 `nika check --fix` migrates it). Nika builds the DAG, topologically sorts,
 and runs tasks in parallel where the graph allows.
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/dag-execution.png"
+  aria-label="nika inspect drawing a workflow as a graph, and nika check planning the waves it runs in"
+  alt="nika inspect drawing a workflow as a graph, and nika check planning the waves it runs in"
+>
+  <source src="/videos/dag-execution.webm" type="video/webm" />
+  <source src="/videos/dag-execution.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**A workflow is a graph.** `nika inspect` draws the tasks and edges of the built-in `pr-review-fanout` example; `nika check` plans them in waves, and tasks that share a wave run side by side. *Output captured from the real CLI; the waves lighting up illustrate the plan, and nothing runs.*</p>
+
 ```yaml
 tasks:
   fetch_data:
