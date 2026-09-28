@@ -50,5 +50,11 @@
   "images/posters/agent-plugin.png": "c261ac3a5c7c13e71b5a0dba69318cc38d9d371f9a4f87393f8c3336ee4112a4",
   "videos/spec-anatomy.mp4": "cb9a4782989e87cb6bf682f26b988f489b810d0d461bd57763554690c9fb024c",
   "videos/spec-anatomy.webm": "b1cf3def77cc2d2bf0cd9da7d3d90dca45dc0e93652f3cfc7801281b7112afa6",
-  "images/posters/spec-anatomy.png": "417b8b98d307a73790a950deb6de0c14d2929513337f24f42391449cf18282e9"
+  "images/posters/spec-anatomy.png": "417b8b98d307a73790a950deb6de0c14d2929513337f24f42391449cf18282e9",
+  "videos/cost-ceiling.mp4": "fa1fcd815eed57af2d5e67409676f34e5d470d017a21e8cc260d081adf798527",
+  "videos/cost-ceiling.webm": "06c12d42b71c87e29363e95fcd61d2228f389d7da167b6b9e1e5de92dda2117a",
+  "images/posters/cost-ceiling.png": "abb99b64fef9d83617a0c5a2ce98d1babc851ec937838deeca2601dae1e23ab9",
+  "videos/approval-gate.mp4": "417569ec83b4243fe89ecbe9811cc54cc7f0afd3a0938faae5b04b5a038a3bf4",
+  "videos/approval-gate.webm": "1a6836aac504d693aae43ac4d957d5e194f35d84b468f56bcb47aa6e7da2131f",
+  "images/posters/approval-gate.png": "4670ab43b896f9c1c34c5d422967db2cae540394c9b6b951ec30b4f7ffe2ad41"
 }

@@ -17,44 +17,71 @@ Every cost surface speaks the same four words:
 
 | Word | Meaning | Where you see it |
 |---|---|---|
-| **FLOOR** | the provable minimum — real spend can only be higher | `check` COST rung · run totals (`≥ $…`) |
-| **ceiling** | the provable worst case — real spend can only be lower | `check` COST rung once every task is bounded |
+| **floor** | the cheapest path's cost — every `when:` gate closed, every call first-try at its declared `max_tokens`: what a budget must cover before a run may start, not the least you will be billed | the `--max-cost-usd` refusal (`unavoidable cost floor`) · `explain` (`≥ … cheapest path`) |
+| **ceiling** | the worst case for the model's **output** tokens at catalog prices — the prompt's input tokens, `exec:` and MCP calls are outside it, and the rung says so | `check` COST rung once every task is bounded (`worst-case output ceiling`) · `explain` (`≤ … worst case`) |
 | **UNBOUNDED** | a task whose spend has no provable limit, with the WHY | `check` per-task rows |
-| **unpriced** | tokens were spent but no catalog price exists (local · unknown model) | run totals (`(N unpriced)`) · `explain` |
+| **unpriced** | tokens were spent but no catalog price exists (local · unknown model) | run totals (`unpriced (N calls)`, or `(N unpriced)` beside a metered total) · `explain` |
 
-There are exactly two ways a task goes UNBOUNDED, and the rung names
-which one:
+A task goes UNBOUNDED in one of three ways, and its row names which
+one:
 
-- `UNBOUNDED — no max_tokens declared` · the model has a price but the
-  task has no output limit. **You can fix this one**: declare
-  `max_tokens:` and the report upgrades from floor to hard ceiling
-  (the check prints that exact hint).
-- `UNBOUNDED — no catalog price (local/unknown model)` · the task is
-  bounded but the model has no price row. Local models stay here **by
-  design** — pricing your own hardware would be invention.
+- `UNBOUNDED — no max_tokens declared` · the task has no output limit.
+  **You can fix this one**: declare `max_tokens:` and, on a priced
+  model, the report becomes a hard ceiling (the check prints that exact
+  hint).
+- `UNBOUNDED — no catalog price (local model; spend not metered)` · the
+  task is bounded but the model has no price row. Local models stay
+  here **by design** — pricing your own hardware would be invention. A
+  cloud model missing from the catalog reads
+  `(cloud provider; spend unpriced)` instead.
+- `UNBOUNDED — for_each over an expression (unknown count)` · a
+  fan-out whose item count is known only at run time.
 
 ## Before a token: the COST rung
 
 `nika check` audits cost statically, next to the plan and the permits —
-the same ladder, every time:
+the same ladder, every time. On `weekly-update.nika`, a cloud workflow
+whose one task declares no `max_tokens`, the COST rung and its hint
+read:
 
 ```text
- ⚠  COST     $0.0000 – $0.0000 FLOOR (unbounded tasks present)
-   think  ollama/qwen3.5:4b  UNBOUNDED — no max_tokens declared
- ↳ HINT     [cost] declare `max_tokens` on `think` — the cost report
-            becomes a hard ceiling instead of UNBOUNDED
+ ⚠  COST     bounded portion $0.0000 no total ceiling · 1 uncapped task · prompts, exec + mcp unpriced · prices 2026-09-23
+   update  anthropic/claude-sonnet-4-6  UNBOUNDED — no max_tokens declared
+ ↳ HINT     [cost] declare `max_tokens` on `update` — the cost report becomes a hard ceiling instead of UNBOUNDED
 ```
 
-Bound every task and the same rung flips to
-`✔ COST $0.0001 – $0.0001 worst-case ceiling` with a per-task
-`≤N tk · $…` row. `nika explain <file>` narrates the same numbers in
-beginner words — *« ≥ $0.0000 — a FLOOR, not a ceiling · local models:
-your compute · tokens unpriced — not « free » »* — and
+Declare `max_tokens: 4096` on that task and the same rung reads:
+
+```text
+ ✔ COST     $0.0614 – $0.0614 worst-case output ceiling · prompts, exec + mcp unpriced · prices 2026-09-23
+   update  anthropic/claude-sonnet-4-6  ≤4096 tk  $0.0614
+```
+
+The ceiling is `$15` per million output tokens × 4096, at the catalog
+price of the snapshot the rung names; the prompt's input tokens,
+`exec:` and MCP calls are outside it. `nika explain <file>` narrates the
+same numbers in beginner words —
+`≤ $0.0614 worst case · ≥ $0.0614 cheapest path`, and for a local model
+`local models: your compute · tokens unpriced — not « free »` — and
 `nika run --dry-run` carries them onto the plan.
 
 ## The budget gate: refusal, not remorse
 
-{/* motion: nika check pricing a cloud workflow before any call (the COST rung), then nika run --max-cost-usd refusing to start when the floor exceeds the budget */}
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/cost-ceiling.png"
+  aria-label="nika check prices weekly-update.nika before any model call: its task is UNBOUNDED until one max_tokens line gives it a worst-case output ceiling of $0.0614, then nika run with a $0.05 budget refuses to start with exit code 2"
+  alt="nika check prices weekly-update.nika before any model call: its task is UNBOUNDED until one max_tokens line gives it a worst-case output ceiling of $0.0614, then nika run with a $0.05 budget refuses to start with exit code 2"
+>
+  <source src="/videos/cost-ceiling.webm" type="video/webm" />
+  <source src="/videos/cost-ceiling.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Priced before the first token, refused before the run.** `nika check` finds no `max_tokens` on the `update` task and marks it UNBOUNDED. One line, `max_tokens: 4096`, gives it a worst-case output ceiling of `$0.0614`: `$15` per million output tokens × 4096. With `--max-cost-usd 0.05`, `nika run` refuses to start (`NIKA-1709`, exit 2): no model is called and no run is recorded. *Every terminal line and number is captured from the real CLI, offline and with no API key. Prices are catalog estimates; the receipt, the meter and the stamp are illustration.*</p>
 
 `--max-cost-usd` is a **block-before-spend** gate, not a post-hoc alarm:
 
@@ -62,34 +89,39 @@ your compute · tokens unpriced — not « free » »* — and
   start** (exit 2, before any provider is touched):
 
   ```text
-  refusing to start: the workflow's unavoidable cost floor $0.040000
-  exceeds --max-cost-usd $0.000100 … (nika check shows the envelope)
+  $ nika run weekly-update.nika --max-cost-usd 0.05
+  NIKA-1709 · refusing to start: the workflow's unavoidable cost floor $0.061440 exceeds --max-cost-usd $0.050000 (cheapest static path · gates closed · first-try) — raise the budget or trim the workflow (`nika check` shows the envelope)
   ```
 
-- On 0.120.1 the pre-start refusal prices the **effective** model —
+- The pre-start refusal prices the **effective** model —
   `--model` override included.
 
 - If unbounded work rides along, the gate says so loudly on stderr —
   a budget over work with no ceiling is a promise it names, not one it
   fakes.
-- Mid-run, the ledger stops the workflow the moment real spend crosses
-  the budget (`NIKA-1704`) — settled tasks stay settled, the trace
-  records what was spent.
+- Mid-run, the ledger stops the workflow the moment metered spend
+  crosses the budget (`NIKA-1704`) — settled tasks stay settled, the
+  trace records what was spent.
 - The flag itself is guarded: a non-finite value (`NaN`, `inf`) is
   rejected at parse time — a budget that cannot compare is not a budget.
 
 ## After the run: the totals stay honest
 
-Every run ends with the same honest line, mock or cloud:
+Every run ends with a totals line that never turns an unknown price
+into `$0.00`. `nika run hello.nika` on the introduction's `mock/echo`
+workflow ends:
 
 ```text
-── 1/1 done · ≥ $0.00 (1 unpriced) · elapsed 0.0s ──
+  ── 1/1 done · unpriced (1 call) · elapsed 0.0s ─────────────────
 ```
 
-The `≥` is load-bearing: it is printed **because** an unpriced task
-rode the run. Per-task spend rides the trace itself (`cost_usd` on the
-terminal events), so `nika trace show` and the run report read the
-recorded ledger — never a summary's opinion.
+Its one call is unpriced, so the total is a word, not a number. A run
+that calls no model says `unmetered`. When priced and unpriced
+calls share a run, the total reads `≥ $… (N unpriced)`: the `≥` is
+printed **because** an unpriced call rode the run. Per-task spend rides
+the trace itself (`cost_usd` on the terminal events), so
+`nika trace show` and the run report read the recorded ledger — never a
+summary's opinion.
 
 ## Where prices come from — and when they rot
 
@@ -113,7 +145,8 @@ tasks:
       max_tokens: 600        # the ceiling lever — every infer should carry one
 ```
 
-- `max_tokens:` per task · turns FLOOR into ceiling.
+- `max_tokens:` per task · turns UNBOUNDED into a ceiling on a priced
+  model (a local model stays unpriced).
 - `agent:` budgets (`max_turns` · token budgets) bound the loop the
   same way — exhaustion is a named failure, never a silent overrun.
 - `nika check` before `nika run`, always: the cost story is part of
@@ -121,7 +154,7 @@ tasks:
 
 <Note>
   Local-first corollary: a workflow that runs entirely on `ollama/…`,
-  `llamacpp/…` or `vllm/…` reports `$0.00` **with the unpriced count
-  attached** — Nika never converts « I don't know the price » into
+  `llamacpp/…` or `vllm/…` reports `unpriced (N calls)`, **not a dollar
+  total** — Nika never converts « I don't know the price » into
   « it's free ». That distinction is the whole doctrine.
 </Note>

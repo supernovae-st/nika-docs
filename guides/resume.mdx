@@ -79,13 +79,16 @@ Resume from the file you just wrote:
 ```text
 $ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson
   🦋 nika · release-notes · 3 tasks
-     permits ✓ declared boundary · default-deny
+     permits ✓ declared boundary · exec outside the fs bounds
 
   ↷  collect  cache hit (resume)
   ↷  draft    cache hit (resume)
   ↷  stamp    cache hit (resume)
-  ── 3/3 done · unmetered · elapsed 0.0s ─────────────────────────────
-    trace: .nika/traces/2026-07-28T07-01-41Z-1a95.ndjson · 8 events · chain 1a101794c8877565c74eb34149b1530d9b59f987f422b9ff4b19acde2d8b5be0
+  3 tasks · 3 waves · 0 retries
+  ── 3/3 done · unmetered · elapsed 0.0s ─────────────────────────
+    wrote .nika/traces
+  explore: nika run release-notes.nika --json > run.ndjson · nika trace outputs run.ndjson
+    trace: .nika/traces/2026-09-28T21-59-33Z-fcf8.ndjson · 8 events · chain 35900cd2bad5935e1e810b6e7c585409c93a3e012578260e5dc81baa04286b2b
 
   resumed · 3 skipped (cache hit) · 0 ran live
 ```
@@ -146,10 +149,20 @@ upstream tasks still cache-hit:
 
 ```text
 $ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson --from draft
-  ✔  collect  cache hit
-  ✔  draft    infer · mock/echo  0ms
-  ✔  stamp    exec · printf      4ms
-  ── 3/3 done · unmetered · elapsed 0.0s ────────────────────────────
+  🦋 nika · release-notes · 3 tasks
+     permits ✓ declared boundary · exec outside the fs bounds
+
+  ↷  collect  cache hit (resume)
+  ✔  draft    infer · mock/echo · untrusted input from collect  0ms
+  ✔  stamp    exec · printf · untrusted input from stamp  5ms
+  3 tasks · 3 waves · 0 retries · 10 tok
+  ── 3/3 done · unpriced (1 call) · elapsed 0.0s ─────────────────
+    wrote .nika/traces
+    said "mock(echo) · Draft release notes from: feat…"
+    see it whole: nika trace outputs
+    rehearsal · a mock model echoed the prompt — not a real answer
+  explore: nika run release-notes.nika --json > run.ndjson · nika trace outputs run.ndjson
+    trace: .nika/traces/2026-09-28T21-59-33Z-8ee7.ndjson · 12 events · chain 01c65fdb4f8ba032b84352c5c43d11f6fe0d864c98b72ec4ae539eff2ca8d940
 
   resumed · 1 skipped (cache hit) · 2 ran live
 ```
@@ -176,7 +189,21 @@ code **4**, and the frame prints the exact resume line (your
 `--var`/`--model` included). Pre-answer in one pass with
 `--answer <task>=<value>` at launch.
 
-{/* motion: gated-ship.nika asking at a terminal [y/N], then the same run in CI pausing durably with exit code 4, and the printed resume line finishing it */}
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/approval-gate.png"
+  aria-label="gated-ship.nika at a terminal asks Ship this build to production? [y/N] and y lets ship run; in CI the same run pauses with exit code 4 and prints one resume line, and running that line reuses build and ships"
+  alt="gated-ship.nika at a terminal asks Ship this build to production? [y/N] and y lets ship run; in CI the same run pauses with exit code 4 and prints one resume line, and running that line reuses build and ships"
+>
+  <source src="/videos/approval-gate.webm" type="video/webm" />
+  <source src="/videos/approval-gate.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Nothing ships without a yes.** At a terminal, the `gated-ship.nika` below asks `Ship this build to production? [y/N]`, and `y` lets `ship` run. Where nobody can answer, as in CI, the same run pauses durably, exits 4 and prints the one line that resumes it. Run that line: `build` is a cache hit, the answer rides in `--answer approve=true`, and `ship` runs. *Every terminal line is captured from the real CLI, offline and with no model; the door, its light, the keypress, the paste and the CI frame are illustration.*</p>
 
 ```yaml gated-ship.nika
 # Build, ask a human, ship only on yes.
@@ -228,10 +255,17 @@ Resume with the answer bound to the task id via `--answer` (repeatable):
 
 ```text
 $ nika run gated-ship.nika --resume .nika/traces/gated-ship.ndjson --answer approve=true
-  ✔  build    cache hit
+  🦋 nika · gated-ship · 3 tasks
+     permits ✓ declared boundary · exec outside the fs bounds
+
+  ↷  build    cache hit (resume)
   ✔  approve  invoke · nika:prompt  0ms
-  ✔  ship     exec · printf         5ms
-  ── 3/3 done · unmetered · elapsed 0.0s ────────────────────────────
+  ✔  ship     exec · printf · untrusted input from ship  6ms
+  3 tasks · 3 waves · 0 retries
+  ── 3/3 done · unmetered · elapsed 0.0s ─────────────────────────
+    wrote .nika/traces
+  explore: nika run gated-ship.nika --json > run.ndjson · nika trace outputs run.ndjson
+    trace: .nika/traces/2026-09-28T21-59-13Z-d1fd.ndjson · 14 events · chain 99aa4f466ff647340c1636b86d13644d6bf5b64fce469eadc8dd7c9ac9c83b5c
 
   resumed · 1 skipped (cache hit) · 2 ran live
 ```

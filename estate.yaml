@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 403
-  file_rows: 44
+  classified_files: 409
+  file_rows: 46
   pattern_rows: 6
   by_class:
-    authored: 396
+    authored: 402
     authored-pin: 1
     generated: 4
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 99
+  unverified-default: 105
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -100,10 +100,20 @@ files:
   sha256: c261ac3a5c7c13e71b5a0dba69318cc38d9d371f9a4f87393f8c3336ee4112a4
   evidence: "poster frame paired with videos/agent-plugin.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
+- path: "images/posters/approval-gate.png"
+  class: authored
+  sha256: 4670ab43b896f9c1c34c5d422967db2cae540394c9b6b951ec30b4f7ffe2ad41
+  evidence: "poster frame paired with videos/approval-gate.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
 - path: "images/posters/chat-to-workflow.png"
   class: authored
   sha256: 310f9707949508104c1397a3673c57dafc45e4ef5a17db3aa533422ac808ab3f
   evidence: "poster frame paired with videos/chat-to-workflow.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/cost-ceiling.png"
+  class: authored
+  sha256: abb99b64fef9d83617a0c5a2ce98d1babc851ec937838deeca2601dae1e23ab9
+  evidence: "poster frame paired with videos/cost-ceiling.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "images/posters/dag-execution.png"
   class: authored
@@ -261,12 +271,12 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 273
-  aggregate_sha256: 9450953c33339ba49fa42c4c73d69f364c340abf350c5119871d70d570bae9a5
+  aggregate_sha256: 29499dde83b57d2548c2706e46a780e0858b15e98990b0ccfebd192c0131fb25
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
-  match_count: 30
-  aggregate_sha256: 368009a627d9bf2ad89fb4e9e92471896a6e7acc9e0f2c54381fcb029f3fc577
+  match_count: 34
+  aggregate_sha256: e9fc38f486f43722cd6e10bd56199a9f1239ff56de29b269bd9d8571c69c1297
   evidence: "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/og-*.png"
@@ -290,7 +300,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 750ba840b0b973562e712d80bca54c57bbeaacb557cbb2e33356ec88b9763555
+  aggregate_sha256: 5fe5172e290dcd11b0fe7e4ccfaa1775f764f9c0c383f072ce13aa5d6f2eea43
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -307,8 +317,10 @@ unverified:
 - "images/og-card.png"
 - "images/og-default.png"
 - "images/posters/agent-plugin.png"
+- "images/posters/approval-gate.png"
 - "images/posters/chat-to-workflow.png"
 - "images/posters/check-denied.webp"
+- "images/posters/cost-ceiling.png"
 - "images/posters/dag-execution.png"
 - "images/posters/editor-diagnostics.png"
 - "images/posters/full-loop.png"
@@ -365,10 +377,14 @@ unverified:
 - "snippets/data/tool-reference.json"
 - "videos/agent-plugin.mp4"
 - "videos/agent-plugin.webm"
+- "videos/approval-gate.mp4"
+- "videos/approval-gate.webm"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"
 - "videos/check-denied.mp4"
 - "videos/check-denied.webm"
+- "videos/cost-ceiling.mp4"
+- "videos/cost-ceiling.webm"
 - "videos/dag-execution.mp4"
 - "videos/dag-execution.webm"
 - "videos/editor-diagnostics.mp4"
