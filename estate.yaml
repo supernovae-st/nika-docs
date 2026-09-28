@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 391
-  file_rows: 40
+  classified_files: 403
+  file_rows: 44
   pattern_rows: 6
   by_class:
-    authored: 384
+    authored: 396
     authored-pin: 1
     generated: 4
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 87
+  unverified-default: 99
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -95,6 +95,11 @@ files:
   class: authored
   sha256: 0ab141020d354c4a9281b8a84642b097da3385836c8d9fa866fb918ddc75d503
   evidence: "hand-written polish layer · its own header: 'colors + fonts live in docs.json · pinned to … nika-spec design/tokens.yaml … this file = the polish layer'"
+- path: "images/posters/agent-plugin.png"
+  class: authored
+  sha256: c261ac3a5c7c13e71b5a0dba69318cc38d9d371f9a4f87393f8c3336ee4112a4
+  evidence: "poster frame paired with videos/agent-plugin.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
 - path: "images/posters/chat-to-workflow.png"
   class: authored
   sha256: 310f9707949508104c1397a3673c57dafc45e4ef5a17db3aa533422ac808ab3f
@@ -130,10 +135,25 @@ files:
   sha256: a1c52e4b9225711d01fa04ba982f307fdaf6522d8fbb11a3589e49c3737c99d9
   evidence: "poster frame paired with videos/permits-audit.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
+- path: "images/posters/pr-check-comment.png"
+  class: authored
+  sha256: 6083b94bfd48a63577479809f1cf337e587f560ea712e964b82ed424b28ffa4a
+  evidence: "poster frame paired with videos/pr-check-comment.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/spec-anatomy.png"
+  class: authored
+  sha256: 417b8b98d307a73790a950deb6de0c14d2929513337f24f42391449cf18282e9
+  evidence: "poster frame paired with videos/spec-anatomy.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
 - path: "images/posters/static-check-fix.png"
   class: authored
   sha256: 98ea38bab99d59f8a14e4695dd3b6168a9a0e3c43418bce6d2f1d129c837f454
   evidence: "poster frame paired with videos/static-check-fix.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/trace-proof.png"
+  class: authored
+  sha256: 9a49ccd35bc94e785335b790c966f5c7a4056fd78afcfb8852753aefb03e6eb8
+  evidence: "poster frame paired with videos/trace-proof.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "images/posters/workflow-gallery.png"
   class: authored
@@ -241,12 +261,12 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 273
-  aggregate_sha256: 6bcde931168d0f94350b3db026df182a45656d5eb2b80c917583531e97964d8f
+  aggregate_sha256: 9450953c33339ba49fa42c4c73d69f364c340abf350c5119871d70d570bae9a5
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
-  match_count: 22
-  aggregate_sha256: 817c84c63b32d11e04149eb90968f8f01d9fcd00e39418913c2d87d82b8219b5
+  match_count: 30
+  aggregate_sha256: 368009a627d9bf2ad89fb4e9e92471896a6e7acc9e0f2c54381fcb029f3fc577
   evidence: "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/og-*.png"
@@ -270,7 +290,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 6a05854876294ff406387fce41ddd50169e71ca4ae5e7b4bb46f3f10da069d03
+  aggregate_sha256: 750ba840b0b973562e712d80bca54c57bbeaacb557cbb2e33356ec88b9763555
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -286,6 +306,7 @@ unverified:
 - "images/logo-light.svg"
 - "images/og-card.png"
 - "images/og-default.png"
+- "images/posters/agent-plugin.png"
 - "images/posters/chat-to-workflow.png"
 - "images/posters/check-denied.webp"
 - "images/posters/dag-execution.png"
@@ -295,7 +316,10 @@ unverified:
 - "images/posters/nika-hero.png"
 - "images/posters/on-error-recover.png"
 - "images/posters/permits-audit.png"
+- "images/posters/pr-check-comment.png"
+- "images/posters/spec-anatomy.png"
 - "images/posters/static-check-fix.png"
+- "images/posters/trace-proof.png"
 - "images/posters/workflow-gallery.png"
 - "scripts/first_command.py"
 - "scripts/install_release.py"
@@ -339,6 +363,8 @@ unverified:
 - "snippets/data/language-reference.json"
 - "snippets/data/tool-mirror.json"
 - "snippets/data/tool-reference.json"
+- "videos/agent-plugin.mp4"
+- "videos/agent-plugin.webm"
 - "videos/chat-to-workflow.mp4"
 - "videos/chat-to-workflow.webm"
 - "videos/check-denied.mp4"
@@ -357,7 +383,13 @@ unverified:
 - "videos/on-error-recover.webm"
 - "videos/permits-audit.mp4"
 - "videos/permits-audit.webm"
+- "videos/pr-check-comment.mp4"
+- "videos/pr-check-comment.webm"
+- "videos/spec-anatomy.mp4"
+- "videos/spec-anatomy.webm"
 - "videos/static-check-fix.mp4"
 - "videos/static-check-fix.webm"
+- "videos/trace-proof.mp4"
+- "videos/trace-proof.webm"
 - "videos/workflow-gallery.mp4"
 - "videos/workflow-gallery.webm"
