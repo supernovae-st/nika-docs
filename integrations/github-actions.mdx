@@ -61,6 +61,22 @@ live, so you can read a real sticky comment before adopting anything.
 
 ## What lands on the PR
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/pr-check-comment.png"
+  aria-label="A pull request adds a Nika workflow; nika-action posts a red sticky comment naming one finding, a second push fixes that line, and the same comment turns clean and draws the workflow's graph"
+  alt="A pull request adds a Nika workflow; nika-action posts a red sticky comment naming one finding, a second push fixes that line, and the same comment turns clean and draws the workflow's graph"
+>
+  <source src="/videos/pr-check-comment.webm" type="video/webm" />
+  <source src="/videos/pr-check-comment.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Every pull request gets a verdict.** The first push refers to a task that does not exist, and the comment names the finding (`NIKA-DAG-002`, *did you mean `assess`?*). The second push fixes that line, and the same comment turns clean and draws the graph. *Both comments are the action's own renderer run on `nika check --json` and `nika inspect`; the pull request page is an illustration.*</p>
+
 > ✅ **nika check** — clean · `flows/report.nika` · 3 task(s) · 3 wave(s)
 > 💰 **cost floor ≥ $0.12** · ⚠ 1 unpriced task — never rendered as $0
 > 🔐 **requires** — models: `ollama/qwen3.5:4b` · `openai/gpt-5.2` · secrets: `OPENAI_API_KEY`

@@ -116,6 +116,22 @@ wiring and agent context when you want a repo, not before. `nika wire
 <client>` is explicit MCP client setup. Installers do not mutate editor
 configs automatically.
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/full-loop.png"
+  aria-label="nika compile writes hello.nika, then nika check audits it, nika run runs it and nika trace verify confirms its record"
+  alt="nika compile writes hello.nika, then nika check audits it, nika run runs it and nika trace verify confirms its record"
+>
+  <source src="/videos/full-loop.webm" type="video/webm" />
+  <source src="/videos/full-loop.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**The loop you will keep using.** `nika compile` writes a starter file, `nika check` audits it before anything runs, `nika run` runs it, and `nika trace verify` confirms the run's record is intact. *All four commands captured from the real CLI, offline; the answer comes from the `mock/echo` rehearsal model, not a real model.*</p>
+
 ## Platforms
 
 | Platform | Release asset | Status |

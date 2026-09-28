@@ -114,6 +114,22 @@ each permit check, every tool call an `agent:` loop makes, the run seal
 at the end. Nothing the engine did is off the chain, and nothing can be
 edited, reordered, or dropped from the middle without breaking it.
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/trace-proof.png"
+  aria-label="A run's trace drawn as five hash-linked blocks: nika trace verify reports the chain intact, then one byte of line 4 changes in a copy and verify stops at line 5: BROKEN, exit 2"
+  alt="A run's trace drawn as five hash-linked blocks: nika trace verify reports the chain intact, then one byte of line 4 changes in a copy and verify stops at line 5: BROKEN, exit 2"
+>
+  <source src="/videos/trace-proof.webm" type="video/webm" />
+  <source src="/videos/trace-proof.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Change one byte, and verify says where.** Each line of a run's trace carries the sha256 of the line before it. `nika trace verify` reads the chain back intact; in a copy with one byte of line 4 changed, it stops at line 5 with `BROKEN` and exit code 2. *A `mock/echo` rehearsal captured from the real CLI; the scan and the moving hashes are illustration.*</p>
+
 ```bash
 nika trace verify
 ```
@@ -123,7 +139,8 @@ highest tier honestly attained. That is the **proof**, distinct from
 `show` / `replay`: those inspect the recorded events; this command
 attests the sequence is intact. The tiers:
 
-- **CHAINED** — the links hold; the sequence is intact.
+- **CHAINED** — the links hold; the sequence is intact (`verify` prints
+  `OK — N events · chain intact` and the head to compare).
 - **SEALED** — a signature over the whole chain verifies against a
   custody key (the run was signed).
 - **ANCHORED** — a detached sidecar verifies **fully offline** against a
@@ -138,9 +155,9 @@ machine. An intact chain is not proof that a human read the output, that
 an external API committed, or that the business goal was met.
 
 Three refusals name themselves rather than hide in a tier: a broken
-chain is `TAMPERED`, lines appended after the seal are `SEAL BURIED`
-(forgery, never a crash), a sidecar that vouches for nothing is `ANCHOR
-FORGED`.
+chain is `BROKEN at line N`, the first line whose recorded link no longer
+matches; a seal with lines appended after it is `TAMPERED` (forgery, never
+a crash); a sidecar that vouches for nothing is `ANCHOR FORGED`.
 
 ## Why this matters
 

@@ -36,6 +36,22 @@ prints the exact fix if something is off).
   simulates the model reply; it does not disable tools or effects.
 </Tip>
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/nika-hero.png"
+  aria-label="nika check auditing a meeting-notes workflow, then a local Ollama model running it and writing typed action items"
+  alt="nika check auditing a meeting-notes workflow, then a local Ollama model running it and writing typed action items"
+>
+  <source src="/videos/nika-hero.webm" type="video/webm" />
+  <source src="/videos/nika-hero.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Audit first, then run on your own machine.** `nika check` clears a meeting-notes workflow before any model is called; then a local Ollama model (`ollama/llama3.2:3b`) turns a sample transcript into typed action items, written to `action-items.json` with a hash-chained trace. No provider key, no cloud call for the model. *Captured from the real CLI; the file is a shorter demo version of the [meeting actions](/examples/meeting-actions) example.*</p>
+
 ## 2. Any Hugging Face GGUF, still one command
 
 Ollama pulls directly from the Hugging Face Hub. Any public GGUF repo

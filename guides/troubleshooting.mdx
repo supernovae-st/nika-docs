@@ -58,6 +58,22 @@ import { CANON } from "/snippets/_canon.mdx";
 
 ## Errors you'll hit, decoded
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/static-check-fix.png"
+  aria-label="nika check stopping a workflow on two mistakes, the fix, and the clean re-check"
+  alt="nika check stopping a workflow on two mistakes, the fix, and the clean re-check"
+>
+  <source src="/videos/static-check-fix.webm" type="video/webm" />
+  <source src="/videos/static-check-fix.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Caught before anything runs.** `nika check` stops a pull-request reviewer on two mistakes: a misspelled task name, with the right one suggested, and a value read outside the task's `with:` boundary (`NIKA-VAR-021`, in the table below). Each finding names its fix; after the fix, the same check says the file is ready to run. *Output captured from the real CLI.*</p>
+
 Every failure is a typed structure with a stable code and a `transient`
 flag ([error model](/reference/error-codes)). The frequent ones:
 

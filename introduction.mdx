@@ -13,6 +13,22 @@ reviewable in a pull request, checked before anything executes, and
 callable from TypeScript. The first run needs no account, no API key and
 no server.
 
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/nika-hero.png"
+  aria-label="nika check auditing a meeting-notes workflow before any model is called, then a local model running it and writing typed action items"
+  alt="nika check auditing a meeting-notes workflow before any model is called, then a local model running it and writing typed action items"
+>
+  <source src="/videos/nika-hero.webm" type="video/webm" />
+  <source src="/videos/nika-hero.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Audit first, then run.** A meeting-notes job you would otherwise redo in a chat, kept as one `.nika` file: `nika check` audits it before any model is called, then a local model (`ollama/llama3.2:3b`) turns a sample transcript into typed action items and the run leaves a hash-chained record. *Captured from the real CLI, on one machine, with no API key; the file is a shorter demo version of the [meeting actions](/examples/meeting-actions) example.*</p>
+
 ## Your first result
 
 Requires Node.js 22+ on macOS or Linux (arm64/x64).
