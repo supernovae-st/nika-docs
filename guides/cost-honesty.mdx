@@ -54,7 +54,21 @@ your compute · tokens unpriced — not « free » »* — and
 
 ## The budget gate: refusal, not remorse
 
-{/* motion: nika check pricing a cloud workflow before any call (the COST rung), then nika run --max-cost-usd refusing to start when the floor exceeds the budget */}
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/cost-ceiling.png"
+  aria-label="nika check prices weekly-update.nika before any model call: its task is UNBOUNDED until one max_tokens line gives it a worst-case output ceiling of $0.0614, then nika run with a $0.05 budget refuses to start with exit code 2"
+  alt="nika check prices weekly-update.nika before any model call: its task is UNBOUNDED until one max_tokens line gives it a worst-case output ceiling of $0.0614, then nika run with a $0.05 budget refuses to start with exit code 2"
+>
+  <source src="/videos/cost-ceiling.webm" type="video/webm" />
+  <source src="/videos/cost-ceiling.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Priced before the first token, refused before the run.** `nika check` finds no `max_tokens` on the `update` task and marks it UNBOUNDED. One line, `max_tokens: 4096`, gives it a worst-case output ceiling of `$0.0614`: `$15` per million output tokens × 4096. With `--max-cost-usd 0.05`, `nika run` refuses to start (`NIKA-1709`, exit 2): no model is called and no run is recorded. *Every terminal line and number is captured from the real CLI, offline and with no API key. Prices are catalog estimates; the receipt, the meter and the stamp are illustration.*</p>
 
 `--max-cost-usd` is a **block-before-spend** gate, not a post-hoc alarm:
 

@@ -176,7 +176,21 @@ code **4**, and the frame prints the exact resume line (your
 `--var`/`--model` included). Pre-answer in one pass with
 `--answer <task>=<value>` at launch.
 
-{/* motion: gated-ship.nika asking at a terminal [y/N], then the same run in CI pausing durably with exit code 4, and the printed resume line finishing it */}
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/approval-gate.png"
+  aria-label="gated-ship.nika at a terminal asks Ship this build to production? [y/N] and y lets ship run; in CI the same run pauses with exit code 4 and prints one resume line, and running that line reuses build and ships"
+  alt="gated-ship.nika at a terminal asks Ship this build to production? [y/N] and y lets ship run; in CI the same run pauses with exit code 4 and prints one resume line, and running that line reuses build and ships"
+>
+  <source src="/videos/approval-gate.webm" type="video/webm" />
+  <source src="/videos/approval-gate.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Nothing ships without a yes.** At a terminal, the `gated-ship.nika` below asks `Ship this build to production? [y/N]`, and `y` lets `ship` run. Where nobody can answer, as in CI, the same run pauses durably, exits 4 and prints the one line that resumes it. Run that line: `build` is a cache hit, the answer rides in `--answer approve=true`, and `ship` runs. *Every terminal line is captured from the real CLI, offline and with no model; the door, its light, the keypress, the paste and the CI frame are illustration.*</p>
 
 ```yaml gated-ship.nika
 # Build, ask a human, ship only on yes.
