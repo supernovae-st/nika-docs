@@ -139,7 +139,8 @@ highest tier honestly attained. That is the **proof**, distinct from
 `show` / `replay`: those inspect the recorded events; this command
 attests the sequence is intact. The tiers:
 
-- **CHAINED** — the links hold; the sequence is intact.
+- **CHAINED** — the links hold; the sequence is intact (`verify` prints
+  `OK — N events · chain intact` and the head to compare).
 - **SEALED** — a signature over the whole chain verifies against a
   custody key (the run was signed).
 - **ANCHORED** — a detached sidecar verifies **fully offline** against a
@@ -154,9 +155,9 @@ machine. An intact chain is not proof that a human read the output, that
 an external API committed, or that the business goal was met.
 
 Three refusals name themselves rather than hide in a tier: a broken
-chain is `TAMPERED`, lines appended after the seal are `SEAL BURIED`
-(forgery, never a crash), a sidecar that vouches for nothing is `ANCHOR
-FORGED`.
+chain is `BROKEN at line N`, the first line whose recorded link no longer
+matches; a seal with lines appended after it is `TAMPERED` (forgery, never
+a crash); a sidecar that vouches for nothing is `ANCHOR FORGED`.
 
 ## Why this matters
 
