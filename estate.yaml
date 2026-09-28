@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: 882b1b226895be380d437207cb94bc9b746c5e86d065f40c7c85141504c60a96
+  sha256: c85ac36fcc186c05da5bbfee9d19a1eefb1b9ec5a80a993ef81fe2c9767dcdee
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored

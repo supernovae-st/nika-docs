@@ -21,12 +21,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/supernovae-st/nika/raw/refs/heads/main/media/videos/full-loop.mp4">
+  <a href="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/full-loop.optimized.gif">
     <img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/full-loop.optimized.gif"
-         alt="The loop the docs teach first: nika compile writes hello.nika, nika check audits it, nika run runs it and nika trace verify confirms its record" width="760">
+         alt="The loop the docs teach first: nika compile writes hello.nika, nika check audits it, nika run runs it and nika trace verify confirms its record" width="960">
   </a>
 </p>
-<p align="center"><sub>The loop the docs teach first: compile, check, run, verify. Real CLI output, offline, answered by the <code>mock/echo</code> rehearsal model. Click to watch the video.</sub></p>
+<p align="center"><sub>The loop the docs teach first: compile, check, run, verify. Real CLI output, offline, answered by the <code>mock/echo</code> rehearsal model.</sub></p>
 
 ## What is Nika?
 
@@ -64,24 +64,45 @@ can verify. One Rust binary, local-first, open source (AGPL-3.0).
 
 ## Watch it work
 
-Each clip plays on the docs page named under it. Click a picture to
-watch it here; the caption on the page says what is captured from the
-real CLI and what is illustrated.
+Every clip below also plays on the docs page that explains it, where its
+caption says what is captured from the real CLI and what is illustrated.
 
-| Chat is for trying, Nika is for keeping | Caught before anything runs | The file is the boundary |
-|:---:|:---:|:---:|
-| [<img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/posters/chat-to-workflow.png" alt="A request retyped into a chat every Monday, kept instead as meeting-actions.nika" width="240">](https://github.com/supernovae-st/nika/raw/refs/heads/main/media/videos/chat-to-workflow.mp4) | [<img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/posters/static-check-fix.png" alt="nika check finding two mistakes in a workflow, then the clean re-check" width="240">](https://github.com/supernovae-st/nika/raw/refs/heads/main/media/videos/static-check-fix.mp4) | [<img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/posters/permits-audit.png" alt="A workflow's permits drawn as a map, with the task that reaches outside them" width="240">](https://github.com/supernovae-st/nika/raw/refs/heads/main/media/videos/permits-audit.mp4) |
-| A weekly chat request becomes a file that runs · [How Nika compares](https://docs.nika.sh/concepts/how-nika-compares) | `nika check` finds two mistakes, then the fix · [Troubleshooting](https://docs.nika.sh/guides/troubleshooting) | A task that reaches too far is refused · [Security model](https://docs.nika.sh/concepts/security) |
+### Nika catches the mistake before anything runs
 
-| A workflow is a graph | The audit, as you type | Start from a workflow |
-|:---:|:---:|:---:|
-| [<img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/posters/dag-execution.png" alt="nika inspect drawing a workflow as a graph, with the waves nika check plans" width="240">](https://github.com/supernovae-st/nika/raw/refs/heads/main/media/videos/dag-execution.mp4) | [<img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/posters/editor-diagnostics.png" alt="The problems nika lsp reports in an editor, fixed until none are left" width="240">](https://github.com/supernovae-st/nika/raw/refs/heads/main/media/videos/editor-diagnostics.mp4) | [<img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/posters/workflow-gallery.png" alt="The ready-made jobs nika try lists" width="240">](https://github.com/supernovae-st/nika/raw/refs/heads/main/media/videos/workflow-gallery.mp4) |
-| `nika inspect` draws it, `nika check` plans its waves · [Workflows](https://docs.nika.sh/concepts/workflows) | `nika lsp` flags problems while you type · [Editor setup](https://docs.nika.sh/getting-started/editors) | `nika try` lists the jobs built into the binary · [Examples](https://docs.nika.sh/examples/overview) |
+<p align="center">
+  <a href="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/static-check-fix.optimized.gif">
+    <img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/static-check-fix.optimized.gif"
+         alt="nika check finding two mistakes in a workflow, the fix, then the clean re-check" width="860">
+  </a>
+</p>
+<p align="center"><sub><code>nika check</code> finds two mistakes, the fix lands, and the re-check is clean. Nothing runs and no token is spent · plays on <a href="https://docs.nika.sh/guides/troubleshooting">Troubleshooting</a></sub></p>
 
-An audit followed by a run on a local model plays on the
-[introduction](https://docs.nika.sh/introduction) and on
-[Local models](https://docs.nika.sh/guides/local-models), and `on_error`
-recovery on [Patterns](https://docs.nika.sh/guides/patterns).
+### The file is the boundary
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/permits-audit.optimized.gif">
+    <img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/permits-audit.optimized.gif"
+         alt="A workflow's permits drawn as a map; the check refuses the task that reaches outside them, and the widened boundary passes" width="860">
+  </a>
+</p>
+<p align="center"><sub>A workflow lists what it may read, write and reach in <code>permits:</code>. The check refuses the task that reaches past it · plays on <a href="https://docs.nika.sh/concepts/security">Security model</a></sub></p>
+
+### A request you retype every week becomes a file
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/chat-to-workflow.optimized.gif">
+    <img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/chat-to-workflow.optimized.gif"
+         alt="A request retyped into a chat every Monday, kept instead as meeting-actions.nika, a file that runs" width="860">
+  </a>
+</p>
+<p align="center"><sub>Chat is for trying; a <code>.nika</code> file is for keeping: the same request, written once and run again · plays on <a href="https://docs.nika.sh/concepts/how-nika-compares">How Nika compares</a></sub></p>
+
+More clips, each on the page it explains:
+▶ [A workflow is a graph](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/dag-execution.optimized.gif) ([Workflows](https://docs.nika.sh/concepts/workflows)) ·
+▶ [The audit, as you type](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/editor-diagnostics.optimized.gif) ([Editor setup](https://docs.nika.sh/getting-started/editors)) ·
+▶ [Start from a ready-made job](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/workflow-gallery.optimized.gif) ([Examples](https://docs.nika.sh/examples/overview)) ·
+▶ [An audit, then a run on a local model](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/nika-hero.optimized.gif) ([Introduction](https://docs.nika.sh/introduction)) ·
+▶ [A failure planned for](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/on-error-recover.optimized.gif) ([Patterns](https://docs.nika.sh/guides/patterns)).
 
 ## Preview the docs on your machine
 
