@@ -23,30 +23,32 @@ Whether the fan-out abandons the batch on the first failure · default true. Fal
 **In the same object:** [items](/reference/language/words/items) · [max_parallel](/reference/language/words/max_parallel)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
 ## In a source template
 
-Excerpt from `templates/fanout.nika.yaml`, source lines 101–110. This is a fragment, not a runnable workflow.
+Excerpt from `templates/bounded-batch.nika`, source lines 48–57. This is a fragment, not a runnable workflow.
 
 ```yaml illustration
     for_each:
-      items: ${{ with.discover }}
-      max_parallel: 8
-      fail_fast: false
-    on_error:
-      recover: null                 # an unreadable item yields null · the batch lives
-    invoke:
-      tool: "nika:read"
-      args: { path: "${{ item }}" }
+      items: ${{ const.items }}
+      max_parallel: 2
+      fail_fast: true
+    timeout: 30s
+    infer:
+      prompt: '${{ const.brief }}
 
+        Item: ${{ item }}'
+      max_tokens: 2048
 ```
 
 ### Templates containing this field
 
 | Template | Source |
 | --- | --- |
-| `templates/fanout.nika.yaml` | [Line 104](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/fanout.nika.yaml#L104) |
+| `templates/bounded-batch.nika` | [Line 51](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/bounded-batch.nika#L51) |
+| `templates/fanout.nika` | [Line 99](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/fanout.nika#L99) |
+| `templates/parallel-review.nika` | [Line 129](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/parallel-review.nika#L129) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -54,6 +56,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:fail_fast`. Spec revision: [`c5ebbb7b862b`](https://github.com/supernovae-st/nika-spec/tree/c5ebbb7b862b68bc6cf7235efba61173b844afc6).
+Canonical identity: `language:word:fail_fast`. Spec revision: [`60696338ef08`](https://github.com/supernovae-st/nika-spec/tree/60696338ef08adb25df6cca23cb47f0a39eb785a).
 
 [How documentation stays connected](/reference/knowledge-system).

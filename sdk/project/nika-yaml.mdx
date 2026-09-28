@@ -10,7 +10,7 @@ import { PROJECT, ProjectContract, ProjectDoors } from "/snippets/_project-contr
 
 <ProjectContract />
 
-`nika.yaml` governs the project around the SDK. A `*.nika.yaml` file carries
+`nika.yaml` governs the project around the SDK. A `*.nika` file carries
 one executable workflow. Keeping those roles separate is the foundation of a
 clean application integration.
 
@@ -24,7 +24,7 @@ nika: my-project
 ceiling: 0.50
 
 arm:
-  - workflow: workflows/daily-brief.nika.yaml
+  - workflow: workflows/daily-brief.nika
     cadence: "TZ=Europe/Paris 30 7 * * 1-5"
     où: local
     plafond: 0.20
@@ -86,7 +86,7 @@ export const nika = new Nika({
   cwd: '/srv/project',
 })
 
-const run = await nika.run('workflows/daily-brief.nika.yaml')
+const run = await nika.run('workflows/daily-brief.nika')
 const result = await run.done
 ```
 
@@ -108,7 +108,7 @@ the run-policy profile through the normal project discovery path.
 
 <Warning>
   Do not pass `nika.yaml` to `Nika.run()`. The SDK runs a
-  `*.nika.yaml` workflow. The engine discovers `nika.yaml` from `cwd` and
+  `*.nika` workflow. The engine discovers `nika.yaml` from `cwd` and
   applies its project policy around that run.
 </Warning>
 

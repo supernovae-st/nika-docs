@@ -28,7 +28,7 @@ arm[].plafond = required for every scheduled tick`}</pre>
 </div>
 
 ```ts
-const run = await nika.run('workflows/release.nika.yaml', {
+const run = await nika.run('workflows/release.nika', {
   maxCostUsd: requestBudget,
 })
 const result = await run.done

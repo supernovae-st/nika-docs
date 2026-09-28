@@ -23,11 +23,11 @@ The schema declares this field at the location below.
 **In the same object:** [model](/reference/language/words/model) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [system](/reference/language/words/system) · [temperature](/reference/language/words/temperature) · [thinking](/reference/language/words/thinking) · [vision](/reference/language/words/vision)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
 ## In a source template
 
-Excerpt from `templates/agent-loop.nika.yaml`, source lines 61–70. This is a fragment, not a runnable workflow.
+Excerpt from `templates/agent-loop.nika`, source lines 55–64. This is a fragment, not a runnable workflow.
 
 ```yaml illustration
       # it emits the first brace, and a ceiling that cuts it off mid-thought
@@ -46,16 +46,19 @@ Excerpt from `templates/agent-loop.nika.yaml`, source lines 61–70. This is a f
 
 | Template | Source |
 | --- | --- |
-| `templates/agent-loop.nika.yaml` | [Line 64](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/agent-loop.nika.yaml#L64) |
-| `templates/chain.nika.yaml` | [Line 66](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/chain.nika.yaml#L66) |
-| `templates/classify-and-route.nika.yaml` | [Line 79](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/classify-and-route.nika.yaml#L79) |
-| `templates/corpus-qa.nika.yaml` | [Line 99](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/corpus-qa.nika.yaml#L99) |
-| `templates/docker-report.nika.yaml` | [Line 73](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/docker-report.nika.yaml#L73) |
-| `templates/document-to-fields.nika.yaml` | [Line 60](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/document-to-fields.nika.yaml#L60) |
-| `templates/evaluate-and-optimize.nika.yaml` | [Line 41](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/evaluate-and-optimize.nika.yaml#L41) |
-| `templates/fanout.nika.yaml` | [Line 129](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/fanout.nika.yaml#L129) |
-| `templates/media-asset-pack.nika.yaml` | [Line 55](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/media-asset-pack.nika.yaml#L55) |
-| `templates/website-brief.nika.yaml` | [Line 65](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/website-brief.nika.yaml#L65) |
+| `templates/agent-loop.nika` | [Line 58](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/agent-loop.nika#L58) |
+| `templates/bounded-batch.nika` | [Line 57](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/bounded-batch.nika#L57) |
+| `templates/chain.nika` | [Line 65](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/chain.nika#L65) |
+| `templates/classify-and-route.nika` | [Line 77](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/classify-and-route.nika#L77) |
+| `templates/corpus-qa.nika` | [Line 97](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/corpus-qa.nika#L97) |
+| `templates/docker-report.nika` | [Line 69](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/docker-report.nika#L69) |
+| `templates/document-to-fields.nika` | [Line 58](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/document-to-fields.nika#L58) |
+| `templates/evaluate-and-optimize.nika` | [Line 39](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/evaluate-and-optimize.nika#L39) |
+| `templates/fanout.nika` | [Line 124](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/fanout.nika#L124) |
+| `templates/media-asset-pack.nika` | [Line 52](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/media-asset-pack.nika#L52) |
+| `templates/parallel-review.nika` | [Line 77](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/parallel-review.nika#L77) |
+| `templates/project-public-fields.nika` | [Line 82](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/project-public-fields.nika#L82) |
+| `templates/website-brief.nika` | [Line 61](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/website-brief.nika#L61) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -63,6 +66,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:max_tokens`. Spec revision: [`c5ebbb7b862b`](https://github.com/supernovae-st/nika-spec/tree/c5ebbb7b862b68bc6cf7235efba61173b844afc6).
+Canonical identity: `language:word:max_tokens`. Spec revision: [`60696338ef08`](https://github.com/supernovae-st/nika-spec/tree/60696338ef08adb25df6cca23cb47f0a39eb785a).
 
 [How documentation stays connected](/reference/knowledge-system).

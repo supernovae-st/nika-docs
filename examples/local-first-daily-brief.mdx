@@ -22,7 +22,7 @@ captures it; your laptop runs it; the trace proves what happened.
 
 ## The file
 
-Save as `daily-brief.nika.yaml`:
+Save as `daily-brief.nika`:
 
 ```yaml
 nika: daily-brief
@@ -58,7 +58,7 @@ tracker's API, a status page.
 ## Check, then run
 
 ```sh
-nika check daily-brief.nika.yaml
+nika check daily-brief.nika
 ```
 
 The static audit passes before a single token is spent — plan, types,
@@ -77,7 +77,7 @@ a fake zero ([cost honesty](/guides/cost-honesty)).
 Then:
 
 ```sh
-nika run daily-brief.nika.yaml
+nika run daily-brief.nika
 ```
 
 A real run of this exact file (Apple Silicon, qwen3.5:4b):

@@ -42,13 +42,13 @@ the matching released artifact.
 ```sh
 nika init --project-file
 mkdir -p workflows
-nika new 01-hello workflows/hello.nika.yaml
+nika compile hello workflows/hello.nika
 ```
 
-Keep the generated `.nika.yaml` workflow in your application, for example as
-`workflows/hello.nika.yaml`.
+Keep the generated `.nika` workflow in your application, for example as
+`workflows/hello.nika`.
 
-`nika.yaml` is the project control plane; `workflows/hello.nika.yaml` is the
+`nika.yaml` is the project control plane; `workflows/hello.nika` is the
 executable workflow. Pass only the latter to `check()` and `run()`.
 
 ## 3. Check, admit, observe, settle
@@ -57,7 +57,7 @@ executable workflow. Pass only the latter to `check()` and `run()`.
 import { Nika } from '@supernovae-st/nika-client'
 
 const nika = new Nika({ cwd: process.cwd() })
-const file = 'workflows/hello.nika.yaml'
+const file = 'workflows/hello.nika'
 const report = await nika.check(file, { nativeStrict: true })
 
 if (!report.clean) {

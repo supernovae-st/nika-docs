@@ -108,6 +108,11 @@ jobs:
         run: |
           python3 scripts/oracle-sweep.py
           python3 scripts/tests/test_oracle_context.py
+      - name: First workflow produces the documented offline business results
+        run: >-
+          python3 scripts/first-workflow-journey.py
+          --binary "$NIKA_BIN"
+          --output "$RUNNER_TEMP/first-workflow-journey"
       # Cliquet: a planted `nika: v1` project fence must stay red on the
       # held binary. Without this, the seventh page re-teaches the retired
       # schema tag and oracle-sweep only notices after a reader copies it.

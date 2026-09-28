@@ -14,7 +14,7 @@ class OracleContextTests(unittest.TestCase):
    root=Path(directory);(root/'scripts').mkdir();shutil.copy(ROOT/'scripts/oracle-sweep.py',root/'scripts/oracle-sweep.py');(root/'case.mdx').write_text(text)
    return subprocess.run(['python3',str(root/'scripts/oracle-sweep.py')],env={**os.environ,'NIKA_BIN':BIN},capture_output=True,text=True)
  def test_mcp_registry_is_required_and_resolved_in_the_example_project(self):
-  page='''```yaml workflow.nika.yaml
+  page='''```yaml workflow.nika
 nika: mcp-example
 permits: {tools: ["mcp:filesystem/read_file"]}
 tasks:
@@ -29,7 +29,7 @@ outputs: {result: "${{ tasks.read.output }}"}
   configured=page+'```json .nika/mcp_servers.json\n{"mcp_servers_format":1,"servers":{"filesystem":{"command":"node","args":["server.js"]}}}\n```'
   result=self.run_page(configured);self.assertEqual(result.returncode,0,result.stdout+result.stderr)
  def test_skeleton_accepts_only_slot_errors(self):
-  page='''```yaml example.nika.yaml skeleton
+  page='''```yaml example.nika skeleton
 nika: skeleton-example
 model: mock/echo
 tasks:

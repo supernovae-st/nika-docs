@@ -18,7 +18,7 @@ provenance manifest out, ready for the site build to pick up.
 
 ## The shape
 
-{/* showcase:dag-begin og-images.nika.yaml */}
+{/* showcase:dag-begin og-images.nika */}
 ```mermaid
 flowchart LR
   hero["hero · nika:image_generate"]:::invoke
@@ -28,8 +28,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin og-images.nika.yaml */}
-```yaml og-images.nika.yaml
+{/* showcase:begin og-images.nika */}
+```yaml og-images.nika
 nika: og-images
 
 permits:
@@ -87,7 +87,7 @@ outputs:
 
 ```sh
 nika try og-images                             # offline · mock renders real PNGs
-nika new og-images                             # take it · ingredients land beside it
+# Save the YAML above as og-images.nika and provide its declared input files.
 ls assets/og/                                  # variants + the provenance manifest
 ```
 

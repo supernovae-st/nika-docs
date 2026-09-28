@@ -22,7 +22,7 @@ repo.
 
 ## The shape
 
-{/* showcase:dag-begin image-fx-batch.nika.yaml */}
+{/* showcase:dag-begin image-fx-batch.nika */}
 ```mermaid
 flowchart LR
   shots["shots · nika:glob"]:::invoke
@@ -36,8 +36,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin image-fx-batch.nika.yaml */}
-```yaml image-fx-batch.nika.yaml
+{/* showcase:begin image-fx-batch.nika */}
+```yaml image-fx-batch.nika
 nika: image-fx-batch
 
 const:
@@ -124,17 +124,15 @@ outputs:
 ## Run it
 
 ```bash
-nika new image-fx-batch fx.nika.yaml   # the file + its two sample photos land beside you
-nika run fx.nika.yaml                  # offline · $0.00 · deterministic renders
+# Save the YAML above as fx.nika and provide its declared input photos.
+nika run fx.nika                  # offline · $0.00 · deterministic renders
 ls out/darkroom/
 ```
 
 <Note>
-  The 0.107 pack embeds this workflow: `nika new image-fx-batch <dest>`
-  lands the file verbatim **with its ingredients** (the two sample
-  photos, at the exact relative path the yaml names). Proven against the
-  released `0.107.0`: the taken copy runs offline end-to-end — `3/3 done
-  · $0.00`, two renders in `out/darkroom/`.
+  `nika try image-fx-batch` runs the bundled rehearsal in its temporary directory.
+  Saving the YAML above does not copy its sample photos. Supply the input images
+  at the paths the workflow declares before running your saved file.
 </Note>
 
 Point `const.photos` at any directory of PNG files. Because every op is

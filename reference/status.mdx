@@ -38,7 +38,7 @@ import { CANON } from "/snippets/_canon.mdx";
 | catalog providers | {STATUS.providers} | `nika catalog --json` `.providers.length` |
 | spec-named providers | {CANON.providers} | `nika spec --canon` · local {CANON.providersLocal} · cloud {CANON.providersCloud} · test {CANON.providersTest} |
 | builtins | {CANON.builtins} | `nika catalog --tools --json` / spec `--canon` |
-| skeletons | {CANON.templates} | `nika spec --canon` / `nika new '?'` |
+| skeletons | {CANON.templates} | `nika spec --canon` / `nika compile --list` |
 
 Two nouns, both true, never swapped: the **catalog** is every adapter the
 binary can reach; the **spec-named** set is the language stdlib a

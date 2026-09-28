@@ -47,14 +47,14 @@ Build with the feature, then declare the adapter:
 ```bash
 cargo build --release --features access-harness
 export NIKA_HARNESS_ADAPTER=gemini-cli   # the registry row's id
-nika run flow.nika.yaml
+nika run flow.nika
 ```
 
 An agent task whose model the harness can serve is planned onto it.
 Pin it explicitly when you mean it:
 
 ```bash
-nika run flow.nika.yaml --access gemini-cli
+nika run flow.nika --access gemini-cli
 ```
 
 A pin is a pin: unsatisfied refuses with the witnesses, never a silent

@@ -12,15 +12,15 @@ import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 Golden testing is an engine CLI operation:
 
 ```sh
-nika test workflows/release.nika.yaml
-nika test workflows/release.nika.yaml --update
+nika test workflows/release.nika
+nika test workflows/release.nika --update
 ```
 
 The source SDK does not duplicate that command as a client method. Receipt
 verification is part of the SDK because it belongs to the run lifecycle.
 
 ```ts
-const run = await nika.run('workflows/release.nika.yaml')
+const run = await nika.run('workflows/release.nika')
 const result = await run.done
 
 if (!result.receipt) throw new Error('run did not issue a receipt')

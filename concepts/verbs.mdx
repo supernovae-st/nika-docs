@@ -56,7 +56,7 @@ flowchart LR
     classDef tool fill:#1f2937,color:#94a3b8,stroke:#475569
     classDef out fill:#0b1530,color:#7FE9FF,stroke:#3F7DFF
 
-    Y["📄 .nika.yaml<br/>intent"]:::out --> D{verb?}
+    Y["📄 .nika<br/>intent"]:::out --> D{verb?}
     D -->|"think"| I["infer<br/>LLM call"]:::verb
     D -->|"run"| E["exec<br/>subprocess"]:::verb
     D -->|"use"| V["invoke<br/>tool dispatch"]:::verb

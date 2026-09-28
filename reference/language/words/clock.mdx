@@ -23,30 +23,34 @@ system (wall time, default) · virtual (the injected virtual clock · time becom
 **In the same object:** [entropy](/reference/language/words/entropy)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/schemas/workflow.schema.json)
 
 ## In a source template
 
-Excerpt from `templates/fanout.nika.yaml`, source lines 58–67. This is a fragment, not a runnable workflow.
+Excerpt from `templates/bounded-batch.nika`, source lines 10–19. This is a fragment, not a runnable workflow.
 
 ```yaml illustration
-  # A `timeout:` is a deadline, and a deadline needs a clock. Declaring it says
-  # out loud which one: `system` is the ambient wall clock (the honest default);
-  # `virtual` drives a simulated clock for deterministic tests.
+nika: bounded-batch
+model: ollama/qwen3.5:4b
+run:
   clock: system
-
 const:
-  collection_source: "./items"      # SLOT: where the collection comes from
-  # Known answers for the fan-in law — computed by hand, never by a model.
-  # `prove` feeds them through the SAME jq `survivors` uses; a drift between
-  # the two is a red assert, not a quietly wrong report.
+  brief: '<SLOT: the per-item instruction>'
+  items:
+  - first note
+  - second note
+permits:
 ```
 
 ### Templates containing this field
 
 | Template | Source |
 | --- | --- |
-| `templates/fanout.nika.yaml` | [Line 61](https://github.com/supernovae-st/nika-spec/blob/c5ebbb7b862b68bc6cf7235efba61173b844afc6/templates/fanout.nika.yaml#L61) |
+| `templates/bounded-batch.nika` | [Line 13](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/bounded-batch.nika#L13) |
+| `templates/fanout.nika` | [Line 56](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/fanout.nika#L56) |
+| `templates/parallel-review.nika` | [Line 13](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/parallel-review.nika#L13) |
+| `templates/project-public-fields.nika` | [Line 13](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/project-public-fields.nika#L13) |
+| `templates/recover-optional-file.nika` | [Line 12](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/templates/recover-optional-file.nika#L12) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -54,6 +58,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:clock`. Spec revision: [`c5ebbb7b862b`](https://github.com/supernovae-st/nika-spec/tree/c5ebbb7b862b68bc6cf7235efba61173b844afc6).
+Canonical identity: `language:word:clock`. Spec revision: [`60696338ef08`](https://github.com/supernovae-st/nika-spec/tree/60696338ef08adb25df6cca23cb47f0a39eb785a).
 
 [How documentation stays connected](/reference/knowledge-system).

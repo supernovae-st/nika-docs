@@ -1,179 +1,86 @@
 ---
 title: "What Nika sees on your machine"
-description: "One offline command maps your environment: editors wired, local model servers, key presence, media planes — and the exact fix for every gap."
+description: "Distinguish configured providers, reachable ports, advertised models and actual inference."
 sidebarTitle: "Your machine"
 icon: "stethoscope"
 ---
 
-Nika never asks you to configure blind. Two commands read your machine —
-**offline, presence-only** — and hand you the exact next step:
-`nika welcome` is the thirty-second mirror, `nika doctor` the exhaustive
-diagnosis with a fix line per gap.
+`nika welcome` summarizes your workspace and suggests a next command.
+`nika doctor` reports environment observations and fixes you can choose to run.
+Both stay offline unless you explicitly request a network probe.
 
-## The mirror
+## Read the environment
 
 ```bash
 nika welcome
-```
-
-Captured verbatim against the released `nika 0.109.2` on a machine with no
-keys, no configs, no editors wired — the stranger's first screen (only the
-workspace path is shortened to `~/demo`):
-
-```text
-🦋 nika 0.109.2 — Intent as Code. The workflow language for AI.
-   one file · 4 verbs · one binary · audited BEFORE it runs
-   every run records a tamper-evident, hash-chained trace
-
-this machine
-  editors    cursor ✗ · windsurf ✗ · claude ✗ · zed ✗ · hermes ✗ · vscode ✗
-             6 unwired · one command each → nika wire cursor
-  local      ollama · lmstudio · llamacpp · localai · vllm · no key needed
-  state      installed · no inference path — start → nika new hello
-  workspace  ~/demo
-             git ✗ · no workflows yet · agents not briefed → nika init
-
-
-this binary
-  4 verbs · 28 builtins · 15 providers · 48 examples · 10 templates
-
-a whole workflow is one file
-  nika: hello
-  model: mock/echo
-  tasks:
-    greet:
-      infer: { prompt: "say hello to the operator", max_tokens: 50 }
-
-start here (offline · zero keys)
-  nika new hello      # local starter · zero keys
-  nika init           # found this repo (wizard)
-  nika new            # guided first workflow
-
-learn: nika.sh · docs: docs.nika.sh · ⭐ github.com/supernovae-st/nika
-```
-
-Three details worth noticing: the five-line workflow **is real** (an
-engine test pins that it checks clean — the sample only appears while
-your workspace has zero workflows), every count on the « this binary »
-line is derived live from the embedded pack (never hand-typed — the
-`15 providers` are the runnable cloud + local set; the
-[catalog](/reference/providers-catalog) counts 17 with the deterministic
-`mock`), and the `state` row names the gap, never a vendor: no inference
-path yet, and the starter door is one command (`nika new hello` —
-offline, zero keys, no provider call).
-`--json` emits the machine mirror (`welcome_version: 1`); `--ascii`
-swaps every glyph for CI logs.
-
-## The diagnosis
-
-```bash
 nika doctor
+nika doctor --verbose
 ```
 
-Three honesty rules shape everything below:
+The report depends on your machine. Provider keys are reported by presence,
+without printing their values. An unset key is advisory: without a workflow,
+Doctor cannot know which provider you need. `--verbose` expands those notes.
 
-- **Presence, never values.** A key is reported set or unset — the value is
-  never read into a variable, so it can never reach your terminal, a log,
-  or a trace.
-- **Offline by default.** The base run touches nothing on the network.
-  `--ping` (opt-in) TCP-probes your **local** ports only — never a vendor
-  endpoint, and nothing is ever sent on the socket.
-- **Diagnose-only.** Doctor prints fixes, it never runs them. Your shell,
-  your `PATH`, your configs stay untouched (`nika wire` is the explicit,
-  idempotent mutator when you want one).
-
-## A fresh machine, honestly
-
-Captured verbatim against `nika 0.109.2` on a machine with no keys, no
-configs, no editors wired — the worst case, and the whole report:
-
-```text
-✔ 11 ok · 18 warn · 0 fail
-✔ binary     v0.109.2 · self-contained (spec v1 embedded)
-✔ lsp        available via `nika lsp` (editor language server)
-✔ traces     keep 10 per workflow · max age 30d · budget 256MB (NIKA_TRACE_KEEP · NIKA_TRACE_MAX_AGE_DAYS · NIKA_TRACE_BUDGET_MB)
-✔ mcp        available via `nika mcp` (9 read-only tools · nika_check through nika_tools)
-✔ sandbox    seatbelt · exec and external MCP spawns confined to the declared boundary
-✔ sidecar    local inference built in — `nika model serve --model <path.gguf>` (loopback · OpenAI-compatible)
-⚠ models     none pulled yet — the sidecar has nothing to serve
-  fix: nika model pull Qwen/Qwen3-4B-Instruct-2507-GGUF
-✔ registry   client matrix · 31 declared · 21 wireable · 6 probed · 15 declared-not-probed (codex · grok-build · claude-desktop · cline · continue · opencode · gemini-cli · antigravity · qwen-code · kimi-code · kiro · copilot-cli · amp · lmstudio · junie)
-✔ local      5 providers (ollama · lmstudio · llamacpp · localai · vllm) — no key · needs a running server
-  fix: nika doctor --ping   # probe the local ports (offline otherwise)
-✔ image      mock ready · local → http://localhost:8080 default (set NIKA_IMAGE_LOCAL_URL to point elsewhere) · no cloud image key set
-✔ tts        mock ready · local → http://localhost:8080 default (set NIKA_TTS_LOCAL_URL to point elsewhere) · no cloud speech key set
-✔ pricing    633 models · 10 providers · snapshot 2026-07-28 · d5aa8fd06062f49e · list rates (public catalog)
-· advisory   a healthy machine's notes — 6 agents unwired · 10 providers unconfigured · config defaults · nika doctor --verbose unfolds each
-```
-
-(A healthy machine reads calm: with no workflow in hand, doctor cannot
-know which provider or editor you need, so unwired agents and unset keys
-fold into the one `advisory` line instead of shouting eighteen warnings —
-`nika doctor --verbose` unfolds every row with its own `fix:` line.)
-
-Read it in one pass:
-
-| Row | What it tells you |
+| Observation | What it establishes |
 |---|---|
-| `binary` | The engine is self-contained — spec, schema, examples, templates all embedded. No install step is missing. |
-| `sandbox` | The jail this host actually has (seatbelt on macOS · bubblewrap on Linux). A `permits:` file will not start on a host that cannot confine (`NIKA-1710`). |
-| `traces` | The flight-recorder retention bounds (`.nika/traces/`): keep-last-N per workflow, age cap, size budget — each env override named inline. |
-| `registry` | The client matrix: how many agent clients the binary knows, how many `nika wire` can write, how many this machine was probed for. |
-| `local` | The keyless, sovereign path — these providers need a running server, not an account. |
-| `image` · `tts` | The media planes — `mock` always works, so media workflows are testable with zero keys too. |
-| `pricing` | The embedded cost snapshot (models · providers · date · digest) — list rates, no network call. |
-| `advisory` | The folded notes — unwired agents, unset keys (by **presence**, values never read), config defaults. `--verbose` unfolds each with its fix. |
+| Configured provider | The provider and its effective route are recognized. |
+| Listening port | A connection succeeded; the service behind it may be unrelated. |
+| Compatible model list | The endpoint answered a validated model-list request. |
+| Advertised model | The response named that model; inference has not been tested. |
+| Verified run trace | The recorded chain verifies; business correctness needs its own oracle. |
 
-## Probe the local ports
-
-The local providers row says « needs a running server » — `--ping` answers
-whether one is actually there (loopback connect, 300 ms cap, nothing sent):
-
-```text
-$ nika doctor --ping
-✔ ping       ollama — listening on 127.0.0.1:11434 (7ms)
-⚠ ping       lmstudio — nothing listening on 127.0.0.1:1234
-⚠ ping       llamacpp — nothing listening on 127.0.0.1:8080
-⚠ ping       localai — nothing listening on 127.0.0.1:8080
-⚠ ping       vllm — nothing listening on 127.0.0.1:8000
-```
-
-One local server up = a fully sovereign inference path: no key, no cloud,
-no account. That is the machine from the capture running
-[local models](/guides/local-models) with nothing else configured.
-
-## For scripts and agents
-
-Every fact above ships as JSON — agents and CI branch on `summary.fail`
-instead of parsing glyphs:
+## Probe local model servers
 
 ```bash
-nika doctor --json
+nika doctor --ping --json
 ```
 
-## The fix that mutates, explicitly
+The opt-in probe checks local ports and sends a bounded GET to each configured
+local-protocol model-list endpoint. It does not send inference prompts, download
+models, follow redirects or retry a failed request. It sends no provider key;
+URL userinfo, query and fragment are removed from model-list requests.
 
-Doctor never edits configs. When a row says `fix: nika wire cursor`, that
-command — and only that command — writes the MCP wiring, idempotently,
-preserving whatever other servers the config already carries:
+The response distinguishes a compatible empty list, advertised models, an
+incompatible response and an observation that could not complete. JSON exposes
+`local_model_probes`; each observation includes `inference_tested: false`.
+A listening port or an advertised model does not prove a working inference path.
+
+Each model-list request has a total deadline and a response-size limit. A timeout,
+unrelated HTML page or HTTP error stays unverified instead of becoming a success.
+Doctor reports what it observed; it does not choose or authorize a model for a Run.
+
+## Run an offline control
 
 ```bash
-nika wire cursor     # or: claude · vscode · windsurf · codex · all
+nika compile hello hello.nika
+nika check hello.nika
+nika run hello.nika
+nika trace verify
 ```
 
-## Next
+This starter uses `mock/echo`: no provider account, model download or inference
+request. It exercises the workflow and trace path. A mock result is not an AI answer.
+Trace verification reads existing evidence and does not create a seal.
+
+## Apply a fix explicitly
+
+Doctor prints proposed commands and does not execute them. For example, after
+reviewing the proposed client configuration:
+
+```bash
+nika wire cursor
+```
+
+That separate command writes MCP wiring while preserving existing server entries.
+A Doctor report does not itself grant network, execution or spending authority.
+
+## Continue
 
 <CardGroup cols={2}>
   <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
-    Your first run needs none of the keys above — `mock/echo` is free and offline.
+    Check and run a workflow with the offline mock control.
   </Card>
   <Card title="Local models" icon="server" href="/guides/local-models">
-    Turn the `local` row into a running, keyless inference path.
-  </Card>
-  <Card title="Editors" icon="code" href="/getting-started/editors">
-    What the wired editor actually does (diagnostics · canvas · time-travel).
-  </Card>
-  <Card title="Agents" icon="robot" href="/getting-started/agents">
-    `nika init` briefs your agents; `nika wire` points them at the oracle.
+    Configure a server and verify the selected model on a real request.
   </Card>
 </CardGroup>

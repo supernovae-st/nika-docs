@@ -10,7 +10,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 Nika is a single Rust binary (`nika` at **L5**) composed of
 **{STATUS.cratesAdmitted} admitted crates** across six layers
 (L0 → L5) plus the **L0.5** trait half-layer. Each crate has one job.
-Together they parse `.nika.yaml`, resolve templates, route to providers,
+Together they parse `.nika`, resolve templates, route to providers,
 execute verbs, and emit a structured event stream.
 
 <Tip>
@@ -124,7 +124,7 @@ fixes. One crate = one atomic commit.
     crypto). Criterion benchmarks on hot paths. `cargo doc` clean.
   </Step>
   <Step title="CANARY → PARITY → REVIEW → COMMIT">
-    End-to-end `.nika.yaml` canary. Golden diff vs legacy (Phase 5+).
+    End-to-end `.nika` canary. Golden diff vs legacy (Phase 5+).
     3-agent swarm review. One atomic commit with a gate checklist in the body.
   </Step>
 </Steps>

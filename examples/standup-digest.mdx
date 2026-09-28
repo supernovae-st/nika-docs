@@ -18,7 +18,7 @@ the three standup bullets in your tone.
 
 ## The shape
 
-{/* showcase:dag-begin standup-digest.nika.yaml */}
+{/* showcase:dag-begin standup-digest.nika */}
 ```mermaid
 flowchart LR
   today["today · nika:date"]:::invoke
@@ -36,8 +36,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin standup-digest.nika.yaml */}
-```yaml standup-digest.nika.yaml
+{/* showcase:begin standup-digest.nika */}
+```yaml standup-digest.nika
 nika: standup-digest
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (a fast one-liner job)
@@ -57,6 +57,8 @@ tasks:
   history:
     exec:
       command: ["git", "log", "--since=yesterday", "--oneline", "--no-merges"]
+    on_error:
+      recover: "Git history unavailable: the command failed or was refused. No commit facts were collected."
 
   digest:
     with:
@@ -70,7 +72,8 @@ tasks:
         ${{ with.history }}
 
         Write my standup note · 3 bullets · done / doing / blocked.
-        Plain words · no fluff. If there are no commits, say so in one line.
+        Plain words · no fluff. If history is unavailable, say that and invent no
+        done / doing / blocked facts. Only an empty successful log means no commits.
 
   save:
     with:
@@ -83,6 +86,7 @@ tasks:
         content: "${{ with.digest }}"
 
 outputs:
+  history: ${{ tasks.history.output }}
   note: ${{ tasks.digest.output }}
 ```
 {/* showcase:end */}

@@ -101,7 +101,7 @@ Listen line (measured): `nika serve · listening http://127.0.0.1:18765 · GET /
 
 `--workflows <dir>` scopes the served registry (0.118): the listing, the
 metadata route and the schedules see only the workflows under that directory,
-named from the project root (`flows/quick.nika.yaml`, never `quick`); a
+named from the project root (`flows/quick.nika`, never `quick`); a
 schedule naming a workflow outside it is refused with the teaching. Executed
 HTTP workflows use the runtime journal under the project's `.nika/traces/`.
 The runtime writes and seals the evidence; `nika trace verify` checks what

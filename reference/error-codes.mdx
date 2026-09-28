@@ -118,7 +118,7 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-VAR-002` | binding cardinality — a jq binding emitted zero or multiple values | `variable_error` | false |
 | `NIKA-VAR-003` | provably-invalid path into a declared schema (static walk) | `validation_error` | false |
 | `NIKA-VAR-004` | jq runtime error while evaluating a binding | `variable_error` | false |
-| `NIKA-VAR-005` | static expression violation — outside cel-subset/0.1 · chained relation · unknown function · non-boolean when: root · jq compile error | `validation_error` | false |
+| `NIKA-VAR-005` | static expression violation — outside cel-subset/0.1 · chained relation · unknown function · non-boolean when: root · jq compile error · single-brace dotted reference lookalike | `validation_error` | false |
 | `NIKA-VAR-006` | expression type error at evaluation — cross-type compare · non-boolean when: value · for_each over a non-array | `variable_error` | false |
 | `NIKA-VAR-007` | bytes value substituted into a string position | `variable_error` | false |
 | `NIKA-VAR-008` | unclosed $&#123;&#123; opener | `validation_error` | false |
@@ -166,6 +166,7 @@ may add codes within a namespace's `001-099` range. Never repurpose one.
 | `NIKA-BUILTIN-001` | builtin invoke violates its statically-checkable arg contract (e.g. nika:fetch without url: · nika:jq arg shape) | `validation_error` | false |
 | `NIKA-BUILTIN-DONE-001` | nika:done invoked outside an agent: loop | `validation_error` | false |
 | `NIKA-DRIFT-001` | declared-but-unused — a vars:/env:/secrets: name or a permits: entry (exec program · tool glob · net host · fs path) that nothing in the body references (advisory check hint · never fails the audit — the reverse direction, used-but-undeclared, is the hard NIKA-VAR-001/NIKA-DAG-002/NIKA-SEC-004 surface) | `validation_error` | false |
+| `NIKA-1708` | admission refuses a required: true input that has neither a declared default: nor a caller-supplied value — before the prologue (zero task events · zero spend · zero inference); an omitted optional input and a required input satisfied by its declared default: are lawful | `validation_error` | false |
 | `NIKA-AUTH-006` | no permits: block declared and the body has effects — absent = zero authority (F-O8 · NEP-0003) | `security_error` | false |
 | `NIKA-AUTH-007` | an interpolation reaches a permit bound (host · glob · program · env name) — a bound MUST be a literal, the boundary would be self-serve (F-O1 · NEP-0004 · env per NEP-0005) | `security_error` | false |
 | `NIKA-AUTH-008` | an untrusted value reaches a permitted verb's argument and its canonical resolved form escapes the step's permit — re-gate refused (F-O1 · NEP-0004) | `security_error` | false |

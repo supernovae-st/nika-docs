@@ -1,265 +1,186 @@
 ---
 title: "Your first workflow"
-description: "Five minutes from install to a checked and runnable Nika workflow."
+description: "Check and run an offline workflow, inspect its result and verify its trace."
 sidebarTitle: "First workflow"
 icon: "play"
 ---
 
-import { CANON } from "/snippets/_canon.mdx";
-import { STATUS } from "/snippets/_status-snapshot.mdx";
+Your first run needs an installed `nika` binary, an empty working directory and
+no API key or model server. The `mock/echo` provider returns a deterministic
+response. It exercises execution; it does not answer a question with AI.
 
-<Info>
-  **v{STATUS.version}:** `nika check`, `nika run`, `nika doctor`, `nika lsp`,
-  and `nika mcp` ship in the binary. Run `nika init` once per repo for schema
-  and agent rules.
-</Info>
+## 1. Write the workflow
 
-## Goal
+Save this complete file as `hello.nika`:
 
-Write a `.nika.yaml` file, run it, get structured output. No setup beyond
-`nika` installed. **Your first run needs no API key and no model server.**
-
-## 1. Pick how the AI step runs
-
-Three paths, from zero-setup to production:
-
-**Instant (no model at all)**: the built-in `mock/echo` model returns a
-deterministic response, so you can see a workflow's shape right now:
-
-```yaml
-model: mock/echo
-```
-
-**Local (free · private)**: have [Ollama](https://ollama.com) running,
-no API key, nothing leaves your machine:
-
-```bash
-ollama pull llama3.2:3b
-```
-
-**Cloud**: set any provider key:
-
-```bash
-export MISTRAL_API_KEY=...
-# or export ANTHROPIC_API_KEY=... · any provider in the catalog
-```
-
-At any point, `nika doctor` tells you exactly what's wired and how to fix
-what isn't:
-
-```bash
-nika doctor
-```
-
-All provider env vars listed in [Providers catalog](/reference/providers-catalog).
-
-## 2. Write the workflow
-
-Create `hello.nika.yaml`:
-
-```yaml hello.nika.yaml
+```yaml hello.nika
 nika: hello
+model: mock/echo
 
 tasks:
   greet:
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
-      prompt: "Say hi to the chrysalis. Be brief."
+      prompt: "Hello, butterfly."
+      max_tokens: 64
+
+outputs:
+  greeting: ${{ tasks.greet.output }}
 ```
 
-Three things to notice:
+- `nika:` names the workflow.
+- `tasks:` maps task IDs to their verbs; `infer` calls the selected model.
+- `outputs:` selects the results exposed to the caller.
 
-- **`nika: <name>`** is the mark and the name — the language as the key, the workflow's kebab-case identifier as the value (no version to pin).
-- **`tasks:`** is a map keyed by task id; each task declares one verb (here, `infer`).
+No filesystem, shell or network effect is requested by this workflow. It needs
+no `permits:` block. The engine still writes its execution evidence.
 
-## 3. Check it, then run it
+## 2. Check, run and compare the result
 
 ```bash
-nika check hello.nika.yaml   # the static audit: plan · cost · secrets · types · before a single token is spent
-nika run hello.nika.yaml
+nika check hello.nika
+nika run hello.nika --json
 ```
 
-`nika check` catches broken references, missing dependencies and schema
-problems before any model is called, and points at the exact fix:
-
-<video autoPlay muted loop playsInline poster="/images/posters/static-check-fix.png" style={{ borderRadius: "0.75rem" }}>
-  <source src="/videos/static-check-fix.webm" type="video/webm" />
-  <source src="/videos/static-check-fix.mp4" type="video/mp4" />
-</video>
-
-<Tip>
-  No provider handy? Swap the `model:` line for `mock/echo`. Both commands
-  work fully offline, and you can wire a real model later.
-</Tip>
-
-<Info>
-  **Before a paid model.** `nika check --native-strict` until zero hints.
-  Probe every new builtin on `mock/echo` first. Numeric facts are
-  `type: integer` (`enum: [0, 1, 3]`), never `enum: ["0","1","3"]`.
-  The model extracts facts — `nika:jq` or `nika:decide` is the law
-  (`nika try 13-extract-then-law`). Pin markdown globs
-  (`exclude: "**/README.md"`) before a fan-out infer. Then swap `model:`.
-</Info>
-
-Example output:
-
-```
-▶ greet  infer  → ollama/llama3.2:3b
-  ┌─ output ──────────────────
-  │ Welcome inside the chrysalis. 🦋
-  └───────────────────────────
-✓ greet  T+00:00:01.42  OK
-```
-
-### Read the story back (0.98+)
-
-`nika explain <file>` narrates any checked workflow — the waves, the
-**cost before a token is spent** (an unbounded task reads `FLOOR`, a
-local model reads *unpriced — not « free »* — the whole vocabulary
-lives in [Cost honesty](/guides/cost-honesty)), what it touches, and
-the flight recorder hand-off. Captured verbatim against the released
-`0.107.0` on the chain skeleton after one recorded run:
+Check validates the workflow without executing its tasks. Run executes it.
+The result's `greeting` must be exactly:
 
 ```text
-cost before a token is spent
-  bounded portion $0.0000 · no total ceiling · 1 uncapped
-    think: ollama/llama3.2:3b has no catalog price — unknown stays unknown (never $0)
-  local models: your compute · tokens unpriced — not « free »
-
-flight recorder
-  1 run in .nika/traces · latest:
-  nika trace show .nika/traces/2026-08-02T01-11-53Z-7f42.ndjson
-  nika trace verify <same file>   # prove the hash chain
+mock(echo) · Hello, butterfly.
 ```
 
-The skeleton already caps the seat (`max_tokens: 800`) — the uncapped
-part is the *unpriced* local model, and the report says so instead of
-printing a fake `$0`. Swap in any priced cloud seat and the same report
-reads `≤ $0.0005 worst case · ≥ $0.0005 cheapest path` — a hard
-ceiling.
+This comparison matters: a successful exit alone does not establish that a
+workflow produced the intended result.
 
-## 4. Add a second task that depends on the first
+## 3. Verify the trace
 
-```yaml hello.nika.yaml
-nika: hello
+```bash
+nika trace verify
+```
+
+In this new working directory, this verifies the latest run's recorded chain.
+It does not certify the meaning of the output or create an authenticated seal.
+Keep the business-result comparison above as a separate check.
+
+To understand the checked plan before another run:
+
+```bash
+nika explain hello.nika
+nika inspect hello.nika --format mermaid
+```
+
+Cost reports distinguish a priced bound, a floor and unknown exposure. A local
+model's missing price is not evidence that its compute is free. See
+[Cost honesty](/guides/cost-honesty).
+
+## 4. Add a dependency
+
+Replace `hello.nika` with this complete file:
+
+```yaml hello.nika
+nika: hello-chain
+model: mock/echo
 
 tasks:
   greet:
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
-      prompt: "Say hi to the chrysalis. Be brief."
-
-  critique:
+      prompt: "Hello, butterfly."
+      max_tokens: 64
+  repeat:
     with:
-      greeting: ${{ tasks.greet.output }}  # the binding IS the edge
+      greeting: ${{ tasks.greet.output }}
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
-      prompt: |
-        The greeting was: ${{ with.greeting }}
+      prompt: "Received: ${{ with.greeting }}"
+      max_tokens: 128
 
-        Rewrite it shorter and more enigmatic.
+outputs:
+  greeting: ${{ tasks.greet.output }}
+  repeated: ${{ tasks.repeat.output }}
 ```
-
-Notice the `with:` block. Each `${{ tasks.X.* }}` reference in it is a
-[binding](/concepts/bindings): it **names the data** the task consumes
-(`${{ with.greeting }}` in the prompt) and **declares the edge** that
-orders it — greet → critique, one declaration, no invisible edges. The
-engine injects the value at runtime, with explicit taint tracking.
-
-### The graph you just built
-
-```mermaid
-%%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
-flowchart LR
-    classDef task fill:#3F7DFF,color:#fff,stroke:#7FE9FF,font-weight:bold
-    G["greet<br/>infer"]:::task --> F["critique<br/>infer"]:::task
-```
-
-One `with:` binding and the order falls out of the file. Tasks with no
-edge between them run **in parallel automatically**. You never schedule
-anything. (For an ordering with no data — run the deploy after the tests,
-consume nothing — use `after: { tests: success }`, the control door.)
-
-## 5. Get structured output
-
-```yaml hello.nika.yaml
-nika: hello-structured
-
-tasks:
-  names:
-    infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · swap for any cloud provider
-      prompt: "Generate three names for a butterfly."
-      schema:                          # structured output · JSON Schema
-        type: object
-        properties:
-          names:
-            type: array
-            items:
-              type: string
-              minLength: 3
-              maxLength: 20
-            minItems: 3
-            maxItems: 3
-        required: [names]
-```
-
-Nika takes the JSON Schema, asks the provider for output that conforms
-(using each provider's native structured-output API where the [capability
-rules](/reference/capabilities) allow it: schema mode, object mode, or
-JSON-mode emulation), and validates the result against your schema before
-passing it on.
 
 ```bash
-nika run hello.nika.yaml
-# Output is guaranteed to be { "names": ["...", "...", "..."] }
+nika check hello.nika
+nika run hello.nika --json
+nika trace verify
 ```
 
-## What you just built
+`repeated` must equal `mock(echo) · Received: mock(echo) · Hello, butterfly.`
+The `with:` binding both names the input and establishes the dependency:
+`greet` completes before `repeat` consumes its output. For an ordering without
+consuming data, use `after: { greet: success }`.
 
-- Workflows are YAML files: `.nika.yaml`.
-- Tasks are units of work; the map key is the identity.
-- Four verbs (`infer`, `exec`, `invoke`, `agent`) define what each task does (HTTP fetch is the `nika:fetch` builtin under `invoke`).
-- `with:` (data) and `after:` (control) build the DAG — the binding IS the edge.
-- `${{ tasks.X.output }}` crosses a task boundary in `with:`; the body reads `${{ with.<name> }}`, with taint tracking.
-- `schema:` enforces JSON schemas on AI output.
+```mermaid
+flowchart LR
+    G["greet: infer"] --> R["repeat: infer"]
+```
 
-## Next checks
+## 5. Rehearse structured output
 
-<Steps>
-  <Step title="Check before running">
-    `nika check hello.nika.yaml`: static audit before any token or effect.
-  </Step>
-  <Step title="Inspect the DAG">
-    `nika inspect hello.nika.yaml` (add `--format mermaid|dot|json` for the machine projections).
-  </Step>
-  <Step title="Wire your agent">
-    Run `nika wire cursor` or `nika wire all` for explicit MCP setup, or use
-    the editor extension's agent setup.
-  </Step>
-</Steps>
+Save this as `structured.nika`:
 
-## Read next
+```yaml structured.nika
+nika: hello-structured
+model: mock/echo
+
+tasks:
+  label:
+    infer:
+      prompt: "Return the label butterfly."
+      max_tokens: 128
+      schema:
+        type: object
+        properties:
+          label:
+            type: string
+            enum: [butterfly]
+        required: [label]
+        additionalProperties: false
+
+outputs:
+  result: ${{ tasks.label.output }}
+```
+
+```bash
+nika check structured.nika
+nika run structured.nika --json
+nika trace verify
+```
+
+The structured result is `{"label":"butterfly"}`. With a schema, the mock
+synthesizes a conforming fixture. This demonstrates the schema and result path;
+it does not demonstrate a real model's reasoning or extraction quality.
+
+## 6. Choose a real model explicitly
+
+For a local model, install and start [Ollama](https://ollama.com), then download
+the model:
+
+```bash
+ollama pull qwen3.5:4b
+```
+
+Change the workflow's model to `ollama/qwen3.5:4b`, then check and run it again.
+A real model can answer differently or fail. Nika validates structured responses
+against the declared schema; an invalid response is a failure, not a guaranteed
+answer. The exact mock strings above are no longer the business oracle.
+
+For cloud models, choose the provider and configure its credentials as described
+in [Providers catalog](/reference/providers-catalog). Review the cost and
+execution authority before authorizing a run. A configured key alone does not
+prove a working inference path.
+
+## Continue
 
 <CardGroup cols={2}>
-  <Card title="Examples · real jobs" icon="rocket" href="/examples/overview">
-    Climb the ladder: starter chains to multi-agent swarms, every file
-    conformance-validated.
-  </Card>
-  <Card title="How to write Nika" icon="compass-drafting" href="/guides/patterns">
-    The twelve patterns: where the determinism lives, where the model
-    is allowed to think.
-  </Card>
-  <Card title="The 4 verbs" icon="play" href="/concepts/verbs">
-    Deep dive on `infer`, `exec`, `invoke`, `agent`.
+  <Card title="Your machine" icon="stethoscope" href="/getting-started/your-machine">
+    Distinguish configuration, a listening port, model listings and inference.
   </Card>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
-    How data flows between tasks with taint tracking.
+    Follow data and control dependencies between tasks.
   </Card>
-  <Card title="Providers" icon="server" href="/concepts/providers">
-    Why one `InferRequest` works across {CANON.providers} providers.
+  <Card title="Examples" icon="rocket" href="/examples/overview">
+    Start from canonical examples and supply their declared inputs.
   </Card>
-  <Card title="Live state" icon="gauge" href="/reference/status">
-    Which verbs are admitted today.
+  <Card title="The four verbs" icon="play" href="/concepts/verbs">
+    Learn infer, exec, invoke and agent.
   </Card>
 </CardGroup>

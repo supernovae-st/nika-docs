@@ -13,7 +13,7 @@ import { ProjectContract } from "/snippets/_project-contract.mdx"
 
 The SDK should make the project boundary visible, not dissolve it into
 application objects. The root `nika.yaml` is the control plane. Each
-`*.nika.yaml` file is executable workflow intent.
+`*.nika` file is executable workflow intent.
 
 ## Recommended layout
 
@@ -22,8 +22,8 @@ application objects. The root `nika.yaml` is the control plane. Each
   <pre tabIndex={0}>{`project/
 ├── nika.yaml                  # project profile + optional armed beats
 ├── workflows/
-│   ├── daily-brief.nika.yaml  # workflow intent
-│   └── release.nika.yaml
+│   ├── daily-brief.nika  # workflow intent
+│   └── release.nika
 ├── src/
 │   ├── nika.ts                # Nika construction
 │   └── release.ts             # product code
@@ -95,7 +95,7 @@ project-file discovery and the `.nika/` state directory.
 
 ```ts
 try {
-  const report = await nika.check('workflows/daily-brief.nika.yaml', {
+  const report = await nika.check('workflows/daily-brief.nika', {
     nativeStrict: true,
   })
   console.info('nika engine ready', report.clean)

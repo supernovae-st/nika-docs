@@ -27,7 +27,7 @@ agent:
   tools: ["nika:done", "nika:compose"]   # done first · mock/echo closes at turn one
 ```
 The teaching shape is
-[`examples/15-compose-self-check.nika.yaml`](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/examples/15-compose-self-check.nika.yaml).
+[`examples/15-compose-self-check.nika`](https://github.com/supernovae-st/nika-spec/blob/561b34f2a60343b6704237c850affec43e15c90b/examples/15-compose-self-check.nika).
 The agent loop's self-verification intrinsic · the model passes a workflow
 YAML draft it wrote, and gets the FULL `nika check` verdict back as JSON:
 conformance violations (with codes + repair hints), secret-flow findings,
@@ -53,9 +53,9 @@ Args · `workflow_yaml` (string · required · the complete draft).
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/stdlib/builtins-v0.1.md#L445) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/561b34f2a60343b6704237c850affec43e15c90b/stdlib/builtins-v0.1.md#L529) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/561b34f2a60343b6704237c850affec43e15c90b/canon/builtins.yaml).
 
-Tool identity: `nika:compose`. Specification revision: `f8c5df2127c7`.
+Tool identity: `nika:compose`. Specification revision: `561b34f2a603`.
 The Lab language identity is `language:tool:compose`; the registry view is `ecosystem:tool/nika:compose`. They refer to this contract without merging their graph identities.
 
 <Ecosystem />

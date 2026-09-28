@@ -23,10 +23,10 @@ const nika = new Nika({
 Supplying `url` selects HTTP. There is no environment-reading constructor:
 read and validate deployment configuration in your application.
 
-Contained names such as `release.nika.yaml` or `flows/release.nika.yaml`
+Contained names such as `release.nika` or `flows/release.nika`
 select a served workflow. `check()` and `run()` send the name directly to the
 resident; no local binary or workflow source is needed. To submit local
-source instead, use an explicit path such as `./flows/release.nika.yaml` or
+source instead, use an explicit path such as `./flows/release.nika` or
 an absolute path. The SDK then resolves a compatible local engine from
 `bin`, `NIKA_BIN`, or the exact platform package and captures an immutable
 snapshot relative to `cwd`. It never falls back from an unserved name to a
@@ -51,7 +51,7 @@ automatic retry or concurrency policy as constructor options.
 ## Check a served name
 
 ```ts
-const report = await nika.check('flows/release.nika.yaml')
+const report = await nika.check('flows/release.nika')
 if (!report.clean) {
   console.error(report.error)
 } else {

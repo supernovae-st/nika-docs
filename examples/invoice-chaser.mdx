@@ -18,7 +18,7 @@ guessing at numbers), drafts every reminder, then stops and asks you.
 
 ## The shape
 
-{/* showcase:dag-begin invoice-chaser.nika.yaml */}
+{/* showcase:dag-begin invoice-chaser.nika */}
 ```mermaid
 flowchart LR
   ledger["ledger · nika:read"]:::invoke
@@ -40,8 +40,8 @@ flowchart LR
 
 ## The file
 
-{/* showcase:begin invoice-chaser.nika.yaml */}
-```yaml invoice-chaser.nika.yaml
+{/* showcase:begin invoice-chaser.nika */}
+```yaml invoice-chaser.nika
 nika: invoice-chaser
 
 model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (drafting is a fast-model job)

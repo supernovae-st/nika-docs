@@ -45,7 +45,7 @@ Projected from the live wire (`tools/list`), never hand-counted:
 |---|---|
 | `nika_check` | Statically audit a workflow (schema · DAG · CEL · effects · permits · cost) **before** running it — findings, or a clean bill. |
 | `nika_explain` | Teach one `NIKA-XXXX` error code: cause, category, and the fix form. |
-| `nika_schema` | The embedded JSON Schema for `*.nika.yaml` — the structural contract an agent authors against. |
+| `nika_schema` | The embedded JSON Schema for `*.nika` — the structural contract an agent authors against. |
 | `nika_examples` | Browse the embedded runnable examples; with a `slug`, that example's full source. |
 | `nika_template` | The canonical workflow skeletons (chain · gate-and-act · fanout · …); with a `name`, that skeleton's source — copy it, never invent structure. |
 | `nika_canon` | The spec canon SSOT (`canon.yaml`) — the locked counts and names. Cite it, never a remembered number. |
@@ -59,7 +59,7 @@ The split is deliberate: **validate** (`nika_check` · `nika_explain`) and
 
 ## Why read-only is the whole point
 
-A `.nika.yaml` can declare `exec:` shell steps — that is the language working
+A `.nika` can declare `exec:` shell steps — that is the language working
 as designed. An MCP tool that *ran* workflows would hand every wired agent a
 shell with your credentials, one prompt-injection away. So the oracle refuses
 the category:
@@ -102,7 +102,7 @@ the file's contents:
 printf '%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"probe","version":"1"}}}' \
   '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-  "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"nika_check\",\"arguments\":{\"workflow\":$(python3 -c 'import json,sys;print(json.dumps(open(sys.argv[1]).read()))' flow.nika.yaml)}}}" \
+  "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"nika_check\",\"arguments\":{\"workflow\":$(python3 -c 'import json,sys;print(json.dumps(open(sys.argv[1]).read()))' flow.nika)}}}" \
   | nika mcp
 ```
 
