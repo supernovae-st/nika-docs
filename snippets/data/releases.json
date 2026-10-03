@@ -3,6 +3,15 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.122.0",
+      "name": "v0.122.0",
+      "publishedAt": "2026-10-02T23:38:44Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.122.0",
+      "assetCount": 8,
+      "highlights": [],
+      "notesSha256": "6b7900f047b9260f5ad461c2488bdf1e1c0d4e478ff76144326ceaea2068303b"
+    },
+    {
       "tag": "v0.121.0",
       "name": "v0.121.0",
       "publishedAt": "2026-09-25T12:58:31Z",
