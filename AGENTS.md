@@ -46,10 +46,16 @@ Public documentation for Nika — the open workflow language for AI
    access syntax the stable binary ships: an unreleased access route is
    never documented as available.
 7. Commit trailer: `Co-Authored-By: Nika 🦋 <nika@supernovae.studio>`.
-8. **These docs teach the current stable binary and only that binary.** The
-   exact version is the projection at `snippets/_status-snapshot.mdx`; never
-   freeze a release number in this rule. No dual grammar, no "if you are on
-   the previous release" branch, no alias (`no-legacy-no-back-compat`). The
+8. **Guides and runnable examples teach the current stable binary and only
+   that binary.** The exact version is the projection at
+   `snippets/_status-snapshot.mdx`; never freeze a release number in this
+   rule. The generated contract references (`reference/language/**`,
+   `reference/tools/**`) instead project the nika-spec revision pinned in
+   their `snippets/data/*-reference.json` input: a declaration there is a
+   public contract, not a promise that the stable binary provides it, and
+   their source fragments stay illustrations. No dual grammar, no "if you
+   are on the previous release" branch, no alias
+   (`no-legacy-no-back-compat`). The
    envelope is the nine keys (`nika` · `model` · `inputs` · `const` ·
    `secrets` · `permits` · `run` · `tasks` · `outputs`), re-verified
    against the current stable binary at each projection (the nine-key
