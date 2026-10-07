@@ -22,8 +22,8 @@ This reference preserves the specification at the revision linked below. Source 
 ## Usage and behavior
 
 ```yaml illustration
-# confirm (default) — a yes/no gate
-invoke: { tool: "nika:prompt", args: { message: "Approve deploy to production?", default: false } }
+# confirm (default mode) — require an answer before deployment
+invoke: { tool: "nika:prompt", args: { message: "Approve deploy to production?" } }
 # input — collect a free-text value
 invoke: { tool: "nika:prompt", args: { mode: input, message: "Paste the OTP:", default: "" } }
 # choice — pick one of N
@@ -45,6 +45,14 @@ Non-interactive contract (normative · all modes) · when no human can answer
 A `choice` whose `default:` is not an element of `choices:` is a parse error
 (`NIKA-BUILTIN-PROMPT-002` · `validation_error`).
 
+For a workflow that requires fresh human approval, omit `default:` from the
+confirmation prompt and gate the effect on its answer. `default: false` is an
+automatic refusal in a non-interactive run; it does not request an answer or
+pause for a human. Keep an unattended refusal in the invocation instead of
+changing the workflow's human gate; for example, the reference engine accepts
+`nika run workflow.nika --answer approval=false` when the prompt task is named
+`approval`. See the [human-gated shipping template](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/templates/human-gated-ship.nika).
+
 ## Related concepts
 
 <CardGroup cols={2}>
@@ -56,8 +64,8 @@ A `choice` whose `default:` is not an element of `choices:` is a parse error
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/stdlib/builtins-v0.1.md#L90) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/stdlib/builtins-v0.1.md#L90) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/canon/builtins.yaml).
 
-Tool identity: `nika:prompt`. Specification revision: `e255dbf72336`.
+Tool identity: `nika:prompt`. Specification revision: `480f5b80cb77`.
 
 <Ecosystem />

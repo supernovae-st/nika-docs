@@ -21,11 +21,16 @@ This reference preserves the specification at the revision linked below. Source 
 
 ## Usage and behavior
 
+The task binds the rows produced by `metrics` before invoking the chart.
+`period` values are Unix epoch milliseconds when their semantic is `timestamp`.
+
 ```yaml illustration
+with:
+  metrics: "${{ tasks.metrics.output }}"
 invoke:
   tool: "nika:chart"
   args:
-    data: "${{ steps.metrics.output }}"   # rows · array of flat objects (strings + numbers) · or { path: <json file> }
+    data: "${{ with.metrics }}"   # rows · array of flat objects (strings + numbers) · or { path: <json file> }
     semantics: { period: timestamp, cost: usd, provider: category }
     chart:
       type: line                          # bar | line | area_band | scatter | heatmap (closed)
@@ -65,8 +70,8 @@ collapsed · 006 type mismatch · 007 too many points · 008 I/O).
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/stdlib/builtins-v0.1.md#L512) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/e255dbf72336bcb98c8163cd8c087e023051a5ab/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/stdlib/builtins-v0.1.md#L665) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/canon/builtins.yaml).
 
-Tool identity: `nika:chart`. Specification revision: `e255dbf72336`.
+Tool identity: `nika:chart`. Specification revision: `480f5b80cb77`.
 
 <Ecosystem />
