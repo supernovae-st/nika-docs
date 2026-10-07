@@ -37,7 +37,7 @@ anything runs, `nika check` shows what the workflow will do, which models
 and tools it uses, what it is allowed to touch and what it can cost,
 without calling a model. You run it when you decide, with the model you
 choose, local or cloud, and every run leaves a tamper-evident record you
-can verify. One Rust binary, local-first, open source (AGPL-3.0).
+can verify. One Rust binary, open source (AGPL-3.0).
 
 | 1 · Say it | 2 · Check it | 3 · Run it | 4 · Prove it |
 |:---:|:---:|:---:|:---:|

@@ -33,11 +33,18 @@ Public documentation for Nika — the open workflow language for AI
    studio). Include it rather than hand-writing link lists per page.
 6. Expression canon: `${{ … }}` = CEL (conditions + references) ·
    `extract:`/`nika:jq` = jq (extraction + transform) · NO template
-   filters. Model id in examples: `ollama/qwen3.5:4b` (local-first ·
-   sovereignty default · the SAME model the engine's own scaffold and
-   the brew caveat teach — one first experience across the funnel) ·
-   cloud variant when needed: `mistral/mistral-large`. Respect an explicitly
-   requested provider/model; examples do not change runtime defaults.
+   filters. Model choice: sovereignty is the reader's freedom to choose
+   and replace every model a workflow uses (LLM or decision model), its
+   provider and its access mode. It is not a local-first or remote-first
+   preference, and no provider is the sovereignty default. A model id in
+   an example is any `provider/model` the current stable binary lists
+   (`nika catalog --json` · each model's `paste_id`) and
+   `scripts/oracle-sweep.py` accepts. Keep the id a page already uses
+   unless it stops validating, and say what it needs (an API key or a
+   running local server). Respect an explicitly requested provider/model;
+   examples do not change runtime defaults. Teach only the model and
+   access syntax the stable binary ships: an unreleased access route is
+   never documented as available.
 7. Commit trailer: `Co-Authored-By: Nika 🦋 <nika@supernovae.studio>`.
 8. **These docs teach the current stable binary and only that binary.** The
    exact version is the projection at `snippets/_status-snapshot.mdx`; never

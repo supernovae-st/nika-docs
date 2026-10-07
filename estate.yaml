@@ -49,7 +49,7 @@ files:
   evidence: "hand-pinned Node major for the local mint preview"
 - path: "AGENTS.md"
   class: authored
-  sha256: e3c6be07c5089c735f8533489fe31887059f9b6ee1db23d30286d6742f71c027
+  sha256: a1b06acc63f32f0a6483d60414e71164e20085294abb6e329d6c7febe65820cb
   evidence: "hand-written agent entry per the AGENTS.md convention · it STATES the projection rules the snippets follow"
 - path: "DEPLOY.md"
   class: authored
@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: c85ac36fcc186c05da5bbfee9d19a1eefb1b9ec5a80a993ef81fe2c9767dcdee
+  sha256: 543da9e690b8c5e98c4ba1a10d7e9428c8a5e1b14b63fd78c02f41545ba444e3
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
