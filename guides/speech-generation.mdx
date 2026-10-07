@@ -1,6 +1,6 @@
 ---
 title: "Speech generation"
-description: "Text to speech inside workflows — the sovereign wire first, one audio file on disk with provenance, duration honesty, and scripts an LLM can write in the same run."
+description: "Text to speech inside workflows — the local wire first, one audio file on disk with provenance, duration honesty, and scripts an LLM can write in the same run."
 ---
 
 `nika:tts_generate` is the image pipeline's sibling for audio: one file
@@ -12,7 +12,7 @@ hash, not megabytes of base64.
 
 | provider | default model | default voice | what to know |
 | --- | --- | --- | --- |
-| `local` | `tts-1` | `alloy` | The sovereign path: any OpenAI-speech-compatible server — LocalAI (`:8080`, also ElevenLabs-compatible upstream), Kokoro-FastAPI, Speaches, openedai-speech. One wire: `POST {base}/v1/audio/speech` → raw bytes. Never inferred from `model:`. |
+| `local` | `tts-1` | `alloy` | The local inference path: any OpenAI-speech-compatible server — LocalAI (`:8080`, also ElevenLabs-compatible upstream), Kokoro-FastAPI, Speaches, openedai-speech. One wire: `POST {base}/v1/audio/speech` → raw bytes. Never inferred from `model:`. |
 | `openai` | `gpt-4o-mini-tts` | `alloy` | Sync, seconds-class. `speed:` 0.25–4.0 native. |
 | `elevenlabs` | `eleven_multilingual_v2` | Rachel's id | `voice:` is a **voice id** (find them in your voice library) — ids ride the URL path, so the engine restricts them to the id alphabet. `speed:` is warned-dropped. |
 | `mock` | `mock-tts-1` | `sine` | A real, playable, deterministic 16 kHz WAV — zero network, zero keys. CI runs the pipeline offline. |

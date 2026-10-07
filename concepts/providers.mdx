@@ -1,6 +1,6 @@
 ---
 title: "Providers"
-description: "The canonical provider catalog — local-first (plus a wider engine catalog) behind one unified InferRequest. Switch provider = change one field."
+description: "The canonical provider catalog, local and hosted (plus a wider engine catalog), behind one unified InferRequest. Switch provider = change one field."
 sidebarTitle: "Providers"
 icon: "server"
 ---
@@ -82,7 +82,7 @@ OpenAI-compatible family that covers 23 providers.
 | `voyage` | voyage | Embeddings-only |
 
 <Note>
-  **In-process runner:** `nika-infer-local` is the sovereign local
+  **In-process runner:** `nika-infer-local` is the local inference
   sidecar (candle-based, per ADR-091): quantized generation without an
   external server. Most users take the simpler path first: a local server
   (Ollama, LM Studio, llama.cpp, vLLM) per the [local models

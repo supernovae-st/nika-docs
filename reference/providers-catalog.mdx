@@ -1,6 +1,6 @@
 ---
 title: "Providers catalog"
-description: "Every LLM provider Nika knows about: the canonical stdlib catalog — local-first — plus API dialects and environment variables."
+description: "Every LLM provider Nika knows about: the canonical stdlib catalog, local and hosted, plus API dialects and environment variables."
 sidebarTitle: "Providers catalog"
 icon: "server"
 ---
@@ -11,8 +11,8 @@ import { CANON } from "/snippets/_canon.mdx";
 Nika's stdlib v0.1 ships **{CANON.providers} canonical providers**:
 {CANON.providersLocal} local / self-hosted runners, {CANON.providersCloud}
 cloud APIs, and {CANON.providersTest} deterministic mock. You select one with
-a single `model: <provider>/<name>` field. **Local first** · nothing leaves
-your machine unless a cloud provider is explicitly selected.
+a single `model: <provider>/<name>` field. **Your choice** · a local provider
+keeps inference on your machine; a cloud provider runs only when selected.
 
 <Info>
   **Canonical source:** [`stdlib/providers-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md)
@@ -41,7 +41,7 @@ your machine unless a cloud provider is explicitly selected.
 
 <Steps>
   <Step title="Pick your trust model">
-    Local / self-hosted (Ollama / LM Studio / llama.cpp / LocalAI / vLLM): zero key, zero egress, sovereign by default. Frontier cloud (OpenAI / xAI / Qwen / Kimi / Anthropic / Google). EU cloud (Mistral). Aggregator (OpenRouter). Each has different residency and compliance trade-offs.
+    Local / self-hosted (Ollama / LM Studio / llama.cpp / LocalAI / vLLM): zero key, no inference egress. Frontier cloud (OpenAI / xAI / Qwen / Kimi / Anthropic / Google). EU cloud (Mistral). Aggregator (OpenRouter). Each has different residency and compliance trade-offs.
   </Step>
   <Step title="Check the `api_dialect`">
     All 5 local providers + most cloud providers speak `openai-chat`: same request shape, differing base URL. `anthropic` and `gemini` have native dialects.
@@ -56,7 +56,7 @@ your machine unless a cloud provider is explicitly selected.
 
 ## By category
 
-Local/open-weight first (sovereignty default), then cloud — featured
+Local/open-weight first, then cloud — featured
 order: OpenAI · xAI · Qwen · Kimi (Moonshot) · Hugging Face · NVIDIA,
 then the rest alphabetically.
 
@@ -71,7 +71,7 @@ then the rest alphabetically.
     | `localai` | LocalAI (`localhost:8080/v1`) | `openai-chat` | `(none)` | `llama-3.1-8b-instruct` |
 
     <Tip>
-      **The sovereign default.** No API key, no cloud egress:
+      **Local inference.** No API key, no cloud egress:
       `model: ollama/qwen3.5:4b` runs offline / air-gapped. Any other
       OpenAI-compatible local server (Jan · llamafile · KoboldCpp) routes
       through the `openai` + `base_url` escape hatch.

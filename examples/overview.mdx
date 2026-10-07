@@ -212,7 +212,7 @@ files, so it cannot go stale.
   state. The DAG has no invisible edges, and the body reads
   `${{ with.<name> }}`, never `tasks.*` (`NIKA-VAR-021`).
 - **Local by default** · showcase envelopes lead `ollama/qwen3.5:4b`:
-  zero API keys, nothing leaves your machine. Cloud providers appear
+  zero API keys, inference stays on your machine. Cloud providers appear
   only as per-task overrides or swap hints, never as the envelope
   default.
 - **Projection, not copy-paste** · these pages and the
