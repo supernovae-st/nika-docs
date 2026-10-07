@@ -235,8 +235,10 @@ Never edit an export by hand: change the clip there and render it again.
 - **Every workflow on a page runs on the released binary.**
   `scripts/oracle-sweep.py` judges each YAML block with the released `nika`,
   and `scripts/mdx-yaml-fix.py` applies the binary's own `--fix` to them.
-- **The docs teach the current release only**, with no branches for older
-  versions.
+- **Guides and runnable examples teach the current release only**, with no
+  branches for older versions. The generated language and tool references
+  follow their pinned spec revision instead, so they can declare a contract
+  the release does not provide yet.
 - **Everything here is public**, including pages missing from the
   navigation and the Git history. Keep private plans and internal material
   out of this repository.
