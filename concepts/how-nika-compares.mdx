@@ -29,7 +29,7 @@ Most orchestrators plan. Nika sits under them: a plain-text `.nika` file your ag
 
 Nika is the only one where you can **audit a workflow before you run it**. `nika check` reads the file statically and tells you the plan, an honest cost floor, which secrets flow into which step, and the permits boundary, before anything executes. Recorded executions leave a hash-chained trace that `nika trace verify` confirms or breaks; refusal before execution need not leave a journal. The receipt comes from the runtime, never from a model's prose.
 
-That is a property of the whole design (one static Rust binary, a frozen language, local-first), not a feature bolted on. It is what the rest of this page is measured against.
+That is a property of the whole design (one static Rust binary, a frozen language, the model you choose), not a feature bolted on. It is what the rest of this page is measured against.
 
 ## Where Nika fits
 
@@ -71,7 +71,7 @@ We publish this because a comparison that only lists wins is marketing, not a ma
 - **Receipts, not vibes.** The hash-chained trace is tamper-evident: verify exits clean or names the first altered link. Editable, lossy chat logs cannot make that claim. The underlying pattern is tool-neutral — [run receipts](/patterns/run-receipts) — and worth adopting even without Nika.
 - **One static binary.** The same file is a runner, a checker, a golden-test harness, an MCP server, an LSP, and a time-travel DAP debugger. No runtime to stand up, no cluster.
 - **The file is portable.** A Nika workflow is text bound to no framework: any conformant engine runs it. Your logic is not locked to one vendor's Python graph.
-- **Sovereign by construction.** AGPL engine, Apache-2.0 spec, local-first, no mandatory cloud, {CANON.providers} canonical providers you pick from (the catalog lists more hosted routes).
+- **Sovereign by construction.** AGPL engine, Apache-2.0 spec, local or hosted inference, no mandatory cloud, {CANON.providers} canonical providers you pick from (the catalog lists more hosted routes).
 
 ## The honest bottom line
 

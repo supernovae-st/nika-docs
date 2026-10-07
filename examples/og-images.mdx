@@ -66,7 +66,7 @@ outputs:
 
 - **`provider: mock` first** — it renders real, decodable PNGs offline,
   deterministically, with zero keys: the pipeline is testable in CI as-is.
-  Production is a one-line flip to `local` (the sovereign path — your
+  Production is a one-line flip to `local` (the local inference path — your
   LocalAI/Ollama/sd.cpp server, `NIKA_IMAGE_LOCAL_URL`), `gemini`
   (`GEMINI_API_KEY`), `openai` (`OPENAI_API_KEY`) or `xai` (`XAI_API_KEY`);
   keys and the local URL are engine-configured, never workflow args.

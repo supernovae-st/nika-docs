@@ -12,7 +12,7 @@ asset *and* inside the PNG itself.
 
 | provider | default model | wire | what to know |
 | --- | --- | --- | --- |
-| `local` | `stablediffusion` | your server's OpenAI-images route | The sovereign path. One wire covers LocalAI (`:8080`), Ollama (`:11434`), stable-diffusion.cpp `sd-server` (`:1234`), SGLang Diffusion and vLLM-Omni. Never inferred from `model:` — always explicit. |
+| `local` | `stablediffusion` | your server's OpenAI-images route | The local inference path. One wire covers LocalAI (`:8080`), Ollama (`:11434`), stable-diffusion.cpp `sd-server` (`:1234`), SGLang Diffusion and vLLM-Omni. Never inferred from `model:` — always explicit. |
 | `openai` | `gpt-image-2` | Images API | Exact sizes (`WxH`), native `n`, `background: transparent`, webp/jpeg `compression`. |
 | `gemini` | `gemini-3.1-flash-image` | `generateContent` | Aspect-ratio classes; may return an interleaved caption (surfaced as `provider_text`, clamped). |
 | `xai` | `grok-imagine-image` | Imagine API | Native aspect ratios + `resolution: 1k\|2k` classes; the `-quality` model tier is the quality knob; **bills exact cost into the run ledger**. |
@@ -24,7 +24,7 @@ Keys and the local URL are **engine config, never workflow args**:
 wired with `nika doctor` — it prints an `image` line naming the ready
 providers.
 
-## Sovereign quickstart (local server)
+## Local server quickstart
 
 ```bash
 # LocalAI (first-party spec-complete compat route · :8080)
@@ -203,7 +203,7 @@ tasks:
 
 Image bytes land on disk under `permits.fs.write`, the engine verifies
 returned MIME types, a provenance manifest records the resolved request,
-and result URLs are never fetched (that would reopen SSRF). Local-first
+and result URLs are never fetched (that would reopen SSRF). Local inference
 is a first-class provider. The PNG can carry a `nika` tEXt chunk — the
 same informal provenance practice ComfyUI and InvokeAI use. The argument
 contract is in [builtins](/reference/builtins#media-4) and

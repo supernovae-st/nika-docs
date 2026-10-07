@@ -117,7 +117,7 @@ Read it in one pass:
 | `sandbox` | The jail this host actually has (seatbelt on macOS · bubblewrap on Linux). A `permits:` file will not start on a host that cannot confine (`NIKA-1710`). |
 | `traces` | The flight-recorder retention bounds (`.nika/traces/`): keep-last-N per workflow, age cap, size budget — each env override named inline. |
 | `registry` | The client matrix: how many agent clients the binary knows, how many `nika wire` can write, how many this machine was probed for. |
-| `local` | The keyless, sovereign path — these providers need a running server, not an account. |
+| `local` | The keyless local inference path — these providers need a running server, not an account. |
 | `image` · `tts` | The media planes — `mock` always works, so media workflows are testable with zero keys too. |
 | `pricing` | The embedded cost snapshot (models · providers · date · digest) — list rates, no network call. |
 | `advisory` | The folded notes — unwired agents, unset keys (by **presence**, values never read), config defaults. `--verbose` unfolds each with its fix. |
@@ -136,7 +136,7 @@ $ nika doctor --ping
 ⚠ ping       vllm — nothing listening on 127.0.0.1:8000
 ```
 
-One local server up = a fully sovereign inference path: no key, no cloud,
+One local server up = a fully local inference path: no key, no cloud,
 no account. That is the machine from the capture running
 [local models](/guides/local-models) with nothing else configured.
 
