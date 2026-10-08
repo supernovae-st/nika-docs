@@ -517,9 +517,15 @@
               {
                 "group": "Execution settings",
                 "pages": [
+                  "reference/language/words/access",
                   "reference/language/words/clock",
+                  "reference/language/words/effort",
                   "reference/language/words/entropy",
-                  "reference/language/words/seeded"
+                  "reference/language/words/fallback",
+                  "reference/language/words/protocol",
+                  "reference/language/words/reasoning",
+                  "reference/language/words/seeded",
+                  "reference/language/words/via"
                 ]
               },
               {
