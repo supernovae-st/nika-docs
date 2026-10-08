@@ -12,7 +12,7 @@ description: "Contract, placement, related fields and source examples for this N
 
 ### document
 
-Default model · `<provider>/<name>` (e.g. ollama/qwen3.5:9b · anthropic/claude-sonnet-4-6 · mock/echo).
+Default model · `<provider>/<name>` (e.g. ollama/qwen3.5:9b · anthropic/claude-sonnet-4-6 · mock/echo). Names WHICH model answers; how the run reaches it and the native effort it asks for are `run.access` and `run.reasoning` (spec/01-envelope.md §run).
 
 | Property | Declaration |
 | --- | --- |
@@ -23,7 +23,7 @@ Default model · `<provider>/<name>` (e.g. ollama/qwen3.5:9b · anthropic/claude
 **In the same object:** [const](/reference/language/words/const) · [inputs](/reference/language/words/inputs) · [nika](/reference/language/words/nika) · [outputs](/reference/language/words/outputs) · [permits](/reference/language/words/permits) · [run](/reference/language/words/run) · [secrets](/reference/language/words/secrets) · [tasks](/reference/language/words/tasks)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/schemas/workflow.schema.json)
 
 ### infer
 
@@ -38,7 +38,7 @@ The schema declares this field at the location below.
 **In the same object:** [max_tokens](/reference/language/words/max_tokens) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [system](/reference/language/words/system) · [temperature](/reference/language/words/temperature) · [thinking](/reference/language/words/thinking) · [vision](/reference/language/words/vision)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/schemas/workflow.schema.json)
 
 ### agent
 
@@ -53,7 +53,7 @@ The schema declares this field at the location below.
 **In the same object:** [max_tokens_total](/reference/language/words/max_tokens_total) · [max_turns](/reference/language/words/max_turns) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [skills](/reference/language/words/skills) · [system](/reference/language/words/system) · [temperature](/reference/language/words/temperature) · [tools](/reference/language/words/tools)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/schemas/workflow.schema.json)
 
 ## In a source template
 
@@ -79,19 +79,19 @@ The pinned schema text says a `required` input is not satisfied by `default` (th
 
 | Template | Source |
 | --- | --- |
-| `templates/agent-loop.nika` | [Line 32](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/agent-loop.nika#L32) |
-| `templates/bounded-batch.nika` | [Line 11](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/bounded-batch.nika#L11) |
-| `templates/chain.nika` | [Line 29](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/chain.nika#L29) |
-| `templates/classify-and-route.nika` | [Line 16](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/classify-and-route.nika#L16) |
-| `templates/corpus-qa.nika` | [Line 17](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/corpus-qa.nika#L17) |
-| `templates/docker-report.nika` | [Line 32](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/docker-report.nika#L32) |
-| `templates/document-to-fields.nika` | [Line 17](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/document-to-fields.nika#L17) |
-| `templates/evaluate-and-optimize.nika` | [Line 29](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/evaluate-and-optimize.nika#L29) |
-| `templates/fanout.nika` | [Line 50](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/fanout.nika#L50) |
-| `templates/media-asset-pack.nika` | [Line 30](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/media-asset-pack.nika#L30) |
-| `templates/parallel-review.nika` | [Line 11](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/parallel-review.nika#L11) |
-| `templates/project-public-fields.nika` | [Line 11](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/project-public-fields.nika#L11) |
-| `templates/website-brief.nika` | [Line 31](https://github.com/supernovae-st/nika-spec/blob/a30727124fe51bcdd595c3228f0d72575d6055c2/templates/website-brief.nika#L31) |
+| `templates/agent-loop.nika` | [Line 32](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/agent-loop.nika#L32) |
+| `templates/bounded-batch.nika` | [Line 11](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/bounded-batch.nika#L11) |
+| `templates/chain.nika` | [Line 29](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/chain.nika#L29) |
+| `templates/classify-and-route.nika` | [Line 16](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/classify-and-route.nika#L16) |
+| `templates/corpus-qa.nika` | [Line 17](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/corpus-qa.nika#L17) |
+| `templates/docker-report.nika` | [Line 32](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/docker-report.nika#L32) |
+| `templates/document-to-fields.nika` | [Line 17](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/document-to-fields.nika#L17) |
+| `templates/evaluate-and-optimize.nika` | [Line 29](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/evaluate-and-optimize.nika#L29) |
+| `templates/fanout.nika` | [Line 50](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/fanout.nika#L50) |
+| `templates/media-asset-pack.nika` | [Line 30](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/media-asset-pack.nika#L30) |
+| `templates/parallel-review.nika` | [Line 11](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/parallel-review.nika#L11) |
+| `templates/project-public-fields.nika` | [Line 11](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/project-public-fields.nika#L11) |
+| `templates/website-brief.nika` | [Line 31](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/website-brief.nika#L31) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -99,6 +99,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:model`. Spec revision: [`a30727124fe5`](https://github.com/supernovae-st/nika-spec/tree/a30727124fe51bcdd595c3228f0d72575d6055c2).
+Canonical identity: `language:word:model`. Spec revision: [`f3a952514b51`](https://github.com/supernovae-st/nika-spec/tree/f3a952514b51ce884f42839c627bd88887fc941e).
 
 [How documentation stays connected](/reference/knowledge-system).
