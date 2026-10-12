@@ -87,7 +87,7 @@ after an individual beat failed or paused.
   </Step>
   <Step title="Preflight there">
     Run `nika arm --plain` with the pinned binary. A clean report validates the
-    arm-ready project and cadence without scheduling work.
+    project file and its cadences without scheduling work.
   </Step>
   <Step title="Switch deliberately">
     Replace the project release or edit the registry. The resident loop swaps
@@ -128,7 +128,7 @@ and investigate the external system before replaying.
 
 - One explicit project `cwd`.
 - One pinned binary path and printed version.
-- An arm-ready `nika.yaml` for the current released cadence reader.
+- A `nika.yaml` whose beats all read `READY` in `nika arm --json`.
 - Provider secrets outside source and generated units.
 - Durable `project/.nika/` storage with chosen retention and access.
 - Captured stdout decision lines and stderr diagnostics.

@@ -55,8 +55,7 @@ file unless `--force` is explicit. Bare `nika arm` reads and validates the
 project and cadence grammar, reports what is armed, and schedules nothing.
 
 The starter is optional and comments every governing example. Start with the
-common rung that the released reader accepts — the same identity
-`nika init --project-file` writes:
+same identity `nika init --project-file` writes:
 
 ```yaml
 nika: my-project
@@ -64,11 +63,10 @@ nika: my-project
 ceiling: 0.50
 ```
 
-Add `arm:` when time or an event should start a workflow. Add `traces:` or
-`registry:` for direct-run policy. The current cadence path does not compose
-those two profiles yet, so the dedicated [project file](/sdk/project/nika-yaml)
-and [arm registry](/sdk/project/arm-registry) pages show valid copy-paste forms
-for each lane.
+Add `arm:` when time or an event should start a workflow, and `traces:` or
+`registry:` for run policy: one file carries both. The
+[project file](/sdk/project/nika-yaml) and [arm registry](/sdk/project/arm-registry)
+pages show copy-paste forms.
 
 ## Create one client
 
