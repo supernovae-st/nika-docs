@@ -14,26 +14,7 @@ import { PROJECT, ProjectContract, ProjectDoors } from "/snippets/_project-contr
 one executable workflow. Keeping those roles separate is the foundation of a
 clean application integration.
 
-## Two valid released profiles
-
-Use the arm-ready profile when the project clock starts work:
-
-```yaml
-nika: my-project
-
-ceiling: 0.50
-
-arm:
-  - workflow: workflows/daily-brief.nika
-    cadence: "TZ=Europe/Paris 30 7 * * 1-5"
-    où: local
-    plafond: 0.20
-    manqué: rattraper-une-fois
-    chevauchement: sauter
-```
-
-Use the run-policy profile when application code or an operator starts direct
-workflow runs:
+## One file for direct runs and armed beats
 
 ```yaml
 nika: my-project
@@ -45,11 +26,20 @@ traces:
 
 registry:
   floor: provenanced
+
+arm:
+  - workflow: workflows/daily-brief.nika
+    cadence: "TZ=Europe/Paris 30 7 * * 1-5"
+    où: local
+    plafond: 0.20
+    manqué: rattraper-une-fois
+    chevauchement: sauter
 ```
 
-Both are live. They are separate because the current released cadence reader
-does not yet accept the direct-run `traces` and `registry` rungs. The closed
-project-shape vocabulary remains {PROJECT.keys}. An unknown key refuses with
+Every block is live, and they compose: direct runs apply the policy rungs, and
+`nika arm`, `nika serve` and `nika arm fire` read the same file. Leave out any
+block whose default suits the project. The closed project-shape vocabulary
+remains {PROJECT.keys}. An unknown key refuses with
 its line and the accepted set. A present file that silently ignores a typo
 would be more dangerous than an absent file, so the parser never drops one.
 
@@ -102,9 +92,9 @@ nika arm
 ```
 
 The init flag lays a commented starter and skips an existing file unless
-`--force` is explicit. `nika arm` validates an arm-ready project and cadence
-grammar, reports its armed beats and schedules nothing. A direct run consumes
-the run-policy profile through the normal project discovery path.
+`--force` is explicit. `nika arm` validates the project file and its cadence
+grammar, reports its armed beats and schedules nothing. A direct run applies the
+same file's policy rungs through the normal project discovery path.
 
 <Warning>
   Do not pass `nika.yaml` to `Nika.run()`. The SDK runs a
