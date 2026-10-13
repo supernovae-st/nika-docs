@@ -266,7 +266,9 @@
         "/$defs/agent",
         "/$defs/infer",
         "/$defs/exec",
-        "/$defs/invoke"
+        "/$defs/invoke",
+        "/$defs/promptText",
+        "/$defs/schemaContract"
       ]
     },
     {

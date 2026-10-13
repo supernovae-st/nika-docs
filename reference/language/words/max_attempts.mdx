@@ -24,7 +24,7 @@ Total attempts, counting the first try · integer ≥ 1 · the one required fiel
 **In the same object:** [backoff_max_ms](/reference/language/words/backoff_max_ms) · [backoff_ms](/reference/language/words/backoff_ms) · [backoff_strategy](/reference/language/words/backoff_strategy) · [jitter](/reference/language/words/jitter) · [on_codes](/reference/language/words/on_codes)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/a4796d976534bddb28562df157ac2afcaadd787c/schemas/workflow.schema.json)
 
 ## In a source template
 
@@ -40,15 +40,15 @@ Excerpt from `templates/fanout.nika`, source lines 115–124. This is a fragment
     on_error:
       recover: null                 # a failed item yields null at its index · the batch lives
     infer:                          # SLOT: the per-item job (any verb)
-      max_tokens: 2000              # SLOT: the per-ITEM ceiling · think + answer · multiply by the fan width
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
 ```
 
 ### Templates containing this field
 
 | Template | Source |
 | --- | --- |
-| `templates/fanout.nika` | [Line 118](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/fanout.nika#L118) |
-| `templates/recover-optional-file.nika` | [Line 32](https://github.com/supernovae-st/nika-spec/blob/f3a952514b51ce884f42839c627bd88887fc941e/templates/recover-optional-file.nika#L32) |
+| `templates/fanout.nika` | [Line 118](https://github.com/supernovae-st/nika-spec/blob/a4796d976534bddb28562df157ac2afcaadd787c/templates/fanout.nika#L118) |
+| `templates/recover-optional-file.nika` | [Line 32](https://github.com/supernovae-st/nika-spec/blob/a4796d976534bddb28562df157ac2afcaadd787c/templates/recover-optional-file.nika#L32) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -56,6 +56,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:max_attempts`. Spec revision: [`f3a952514b51`](https://github.com/supernovae-st/nika-spec/tree/f3a952514b51ce884f42839c627bd88887fc941e).
+Canonical identity: `language:word:max_attempts`. Spec revision: [`a4796d976534`](https://github.com/supernovae-st/nika-spec/tree/a4796d976534bddb28562df157ac2afcaadd787c).
 
 [How documentation stays connected](/reference/knowledge-system).
