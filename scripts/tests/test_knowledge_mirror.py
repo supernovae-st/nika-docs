@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import importlib.util
 import json
 import shutil
@@ -17,8 +18,50 @@ class KnowledgeMirrorTests(unittest.TestCase):
         outputs=mirror.render(self.data)
         self.assertEqual(outputs,mirror.render(copy.deepcopy(self.data)))
         manifest=json.loads(outputs['snippets/data/knowledge-mirror.json'])
+        self.assertEqual(manifest['specRevision'],self.data['revision'])
+        self.assertEqual(manifest['sourceSha256'],hashlib.sha256(
+            (json.dumps(self.data,ensure_ascii=False,indent=2)+'\n').encode()).hexdigest())
+        self.assertEqual([e['id'] for e in manifest['entries']],
+                         [w['id'] for w in self.data['words']])
+        words={w['id']:w for w in self.data['words']}
         for e in manifest['entries']:
             self.assertIn(e['path']+'.mdx',outputs);self.assertEqual(e['publication'],'not-verified')
+            self.assertEqual(e['sourcePointers'],[c['pointer'] for c in words[e['id']]['contracts']])
+            self.assertEqual(e['sha256'],hashlib.sha256(outputs[e['path']+'.mdx'].encode()).hexdigest())
+    def test_file_contracts_keep_both_prompt_and_schema_locations(self):
+        word={'id':'language:word:file','name':'file','docsPath':'reference/language/words/file',
+              'examples':[],'contracts':[
+                  {'pointer':'/$defs/promptText/oneOf/1/properties/file',
+                   'context':'/$defs/promptText/oneOf/1','required':True,'siblings':[],
+                   'declaration':{'type':'string','minLength':1}},
+                  {'pointer':'/$defs/schemaContract/oneOf/0/properties/file',
+                   'context':'/$defs/schemaContract/oneOf/0','required':True,'siblings':[],
+                   'declaration':{'type':'string','minLength':1}}]}
+        data=copy.deepcopy(self.data)
+        data['words']=[w for w in data['words'] if w['name']!='file']+[word]
+        groups=mirror.sections(data)
+        self.assertIn(word,groups['Verbs and models'])
+        outputs=mirror.render(data)
+        page=outputs['reference/language/words/file.mdx']
+        for contract in word['contracts']:
+            self.assertIn('`'+contract['pointer']+'`',page)
+        self.assertEqual(page.count('| Requirement | Required in this object |'),2)
+        self.assertEqual(page.count('| minLength | `1` |'),2)
+    def test_admitted_file_and_fanout_limit_are_exact_contract_references(self):
+        words={w['name']:w for w in self.data['words']}
+        self.assertEqual([c['pointer'] for c in words['file']['contracts']],
+                         ['/$defs/promptText/oneOf/1/properties/file',
+                          '/$defs/schemaContract/oneOf/0/properties/file'])
+        limit=words['max_items']['contracts']
+        self.assertEqual(len(limit),1)
+        self.assertEqual(limit[0]['pointer'],'/$defs/task/properties/for_each/properties/max_items')
+        self.assertEqual(limit[0]['required'],False)
+        self.assertEqual(limit[0]['declaration']['type'],'integer')
+        self.assertEqual(limit[0]['declaration']['minimum'],1)
+        self.assertIn('never a truncation',limit[0]['declaration']['description'])
+        page=mirror.render(self.data)['reference/language/words/max_items.mdx']
+        self.assertIn('| minimum | `1` |',page)
+        self.assertIn('never a truncation',page)
     def test_duplicate_identity_refused(self):
         self.data['words'].append(copy.deepcopy(self.data['words'][0]))
         with self.assertRaises(ValueError):mirror.render(self.data)
