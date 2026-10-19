@@ -1,17 +1,20 @@
 ---
 title: "Introduction"
-description: "Put repeatable AI work in your app: one .nika file, checked before it runs, called from TypeScript."
+description: "Define, check, run and inspect AI workflows with an open-source runtime."
 sidebarTitle: "Introduction"
 icon: "house"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-**Put repeatable AI work in your app.** Nika turns a task you would re-do
-in a chat — summarize, triage, draft, report — into one `.nika` file:
-reviewable in a pull request, checked before anything executes, and
-callable from TypeScript. The first run needs no account, no API key and
-no server.
+**Nika is an open-source AI workflow runtime.** Define a workflow in a
+`.nika` file, check it, run it on your infrastructure, and inspect its
+results and execution record. Your files, models and permissions stay
+under your control. Local execution needs no Nika account or hosted
+service.
+
+**Define → Check → Run → Inspect.** Coding assistants can help write the
+file; the file is the contract you review and execute.
 
 <video
   autoPlay
@@ -31,59 +34,82 @@ no server.
 
 ## Your first result
 
-Requires Node.js 22+ on macOS or Linux (arm64/x64).
+[Install the CLI](/getting-started/installation), then work in an empty
+directory. This example calculates a total and writes `report.md` using
+built-in tools. It needs no model, API key, account or network connection.
 
-```bash
-npm install @supernovae-st/nika@0.120.2
-```
+Save this as `report.nika`:
 
-Save `hello.nika`:
-
-```yaml
-nika: hello
-model: mock/echo        # rehearsal model: echoes the prompt, calls no network LLM
-permits: {}             # explicit: this workflow touches nothing
+```yaml report.nika
+nika: order-report
+permits:
+  tools: ["nika:jq", "nika:write"]
+  fs:
+    write: ["./report.md"]
+const:
+  orders:
+    - {id: a, amount: 10}
+    - {id: b, amount: 20}
 tasks:
-  greet:
-    infer:
-      prompt: "Hello, Nika"
-      max_tokens: 32    # caps the answer's length
+  summarize:
+    invoke:
+      tool: nika:jq
+      args:
+        input: ${{ const.orders }}
+        expression: '{count: length, total: (map(.amount) | add)}'
+  save:
+    with:
+      summary: ${{ tasks.summarize.output }}
+    invoke:
+      tool: nika:write
+      args:
+        path: ./report.md
+        content: |
+          # Order report
+          Orders: ${{ with.summary.count }}
+          Total: ${{ with.summary.total }}
 outputs:
-  greeting: ${{ tasks.greet.output }}
+  summary: ${{ tasks.summarize.output }}
+  report: ${{ tasks.save.output }}
 ```
 
-Save `demo.mjs`:
-
-```js
-import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
-
-const nika = new Nika({ cwd: process.cwd() })
-const run = await nika.run('hello.nika', { maxCostUsd: 0 })
-const result = await run.result()
-
-if (!isNikaRunSucceeded(result)) process.exit(1)
-console.log(result.outputs.greeting)
-```
+Check the file, run it, and read the result:
 
 ```bash
-node demo.mjs
+nika check report.nika
+nika run report.nika --output json
+cat report.md
 ```
 
-Expected output, exactly:
+The run returns:
 
-```text
-mock(echo) · Hello, Nika
+```json
+{"report":"./report.md","summary":{"count":2,"total":30}}
 ```
 
-Your app asked; the engine admitted the file, ran it, and returned typed
-outputs. `mock/echo` is a rehearsal model — it echoes the prompt so the
-mechanics are real before you spend anything. Swap `model:` for a provider
-from the [catalog](/reference/providers-catalog) when you want a real
-answer.
+The file contains:
 
-Prefer the terminal? The CLI runs the same file: `nika run hello.nika`.
-[Install the CLI](/getting-started/installation) ·
-[write the file by hand](/getting-started/first-workflow).
+```markdown
+# Order report
+Orders: 2
+Total: 30
+```
+
+These are actual calculations and a file write, with no model or mock
+response. Re-running replaces only the declared `report.md`. The
+`with:` binding makes `save` wait for `summarize`; `permits:` names the
+allowed tools and output file.
+
+The run prints a trace path under `.nika/traces/`. Pass that exact path
+to `nika trace verify` to inspect the record's integrity. A fresh machine
+without a signing key reports **UNSEALED**, even when the hash chain is
+intact. A successful verification does not establish that a model's
+answer is correct. See [traces](/concepts/traces) for the evidence tiers.
+
+Continue with [offline examples](/examples/offline) for known inputs and
+exact expected outputs, or the [TypeScript quickstart](/sdk/start/quickstart)
+to drive a local engine from an application. A persistent worker is
+optional; the SDK's default local mode starts the engine directly.
 
 ## A real job, when you are ready
 
@@ -99,14 +125,14 @@ not.
 1. **The file is the contract.** The verbs `infer`, `exec`, `invoke` and
    `agent` — nothing else: fetching a URL or writing a file is a *tool*
    under `invoke`, declared and auditable.
-2. **Admission before execution.** `run()` audits the file before anything
-   executes; a broken file throws before a run exists. `nika check` is the
+2. **Admission before execution.** `nika run` audits the file before anything
+   executes; a refused file never starts. `nika check` is the
    same audit on its own, for CI.
 3. **Permits are the blast radius.** `permits: {}` declares zero
    authority. A workflow that touches a file, a host or a shell must say
    so, or admission refuses it (`NIKA-AUTH-006`).
 4. **Runs leave evidence.** Each run writes a hash-chained trace under
-   `.nika/traces/`; when a receipt is present, `traceVerify` reads it back.
+   `.nika/traces/`; `nika trace verify` inspects the record and reports whether it is sealed.
    Verification proves the record was not tampered with — not that a model
    was right.
 

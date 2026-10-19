@@ -18,11 +18,11 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 418
+  classified_files: 419
   file_rows: 46
   pattern_rows: 6
   by_class:
-    authored: 411
+    authored: 412
     authored-pin: 1
     generated: 4
     pinned-copy: 2
@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: c2e95b694371bc5835f3b78e0173aa0a4cadda8290387dbdfd38d1507fa97063
+  sha256: ec4ba75665764419b29382b17589175b6cf76c22e441d3aa8283391963a70840
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -88,7 +88,7 @@ files:
     - "scripts/release_catalog.py"
 - path: "docs.json"
   class: authored
-  sha256: 8d29a771f394fe1949cf3158812f00b229e7f2c2b2ab31744ac87d703452cb0b
+  sha256: 0940de52309b45306eca9172bb5f9957a8e8594263d5ba0d6377f76cc26a74c1
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -270,8 +270,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 282
-  aggregate_sha256: e065c430d2405ce150ba445af42995d10f168eba0ce62786dd52a5e149393574
+  match_count: 283
+  aggregate_sha256: 19a1f8b554d494e26a04e5e2831bac93702d5beac0bcbc722fb4d893cf02591f
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
