@@ -65,7 +65,6 @@ flowchart TB
     VIF["nika-verb-infer ✅"]:::admitted
     VA["nika-verb-agent ✅"]:::admitted
     PCK["nika-pck 🧭"]:::planned
-    MEM["nika-connectome 🧭 v0.85+"]:::planned
     OBS["nika-observability 🧭"]:::planned
     BGH["nika-builtin-github 🧭"]:::planned
     BCL["nika-builtin-cloud 🧭"]:::planned
@@ -135,26 +134,24 @@ flowchart TB
 |---|---|---|---|---|
 | **L0** | nika-types, nika-error, nika-catalog, nika-catalog-codegen, nika-schema, nika-event | — | binding, transform, pck-manifest | Pure sync, zero I/O. |
 | **L0.5** | nika-kernel (facade), nika-kernel-core, nika-kernel-ai, nika-kernel-runtime, nika-kernel-plugin, nika-kernel-mock | — | — | Trait definitions (4-way split + facade hub) + mock companion. Async OK |
-| **L1** | nika-fs, nika-http, nika-exec-runner, nika-clock, nika-providers | — | git, keys-\*, pck-registry, pck-store, memory-satellites (v0.95) | Effect impls. Each declares capability axes |
-| **L2** | nika-verb-infer, nika-verb-exec, nika-verb-invoke, nika-verb-agent, nika-builtin | — | pck, memory (v0.95), observability, builtin-{github,cloud,workspace} | Verbs + domain services (`fetch` is the `nika:fetch` builtin, not a verb crate) |
+| **L1** | nika-fs, nika-http, nika-exec-runner, nika-clock, nika-providers | — | git, keys-\*, pck-registry, pck-store, memory satellites | Effect impls. Each declares capability axes |
+| **L2** | nika-verb-infer, nika-verb-exec, nika-verb-invoke, nika-verb-agent, nika-builtin | — | pck, observability, builtin-{github,cloud,workspace} | Verbs + domain services (`fetch` is the `nika:fetch` builtin, not a verb crate) |
 | **L3** | nika-runtime | — | shield, wasm-host (v0.100), sandbox (v0.100) | Runtime + policy |
 | **L4** | nika-catalog-verify, nika-cli, nika-mcp, nika-lsp | — | serve, sdk | Interfaces, libraries |
 | **L5** | nika | — | — | The public binary surface |
 
-## Memory subsystem (the Connectome): separate count
+## Memory and retrieval satellites
 
-The memory subsystem is **11 crates** — 1 L2 orchestrator + 10 L1
-satellites — and is **not counted** in the {STATUS.cratesTarget} crate
-horizon. It lands **whole before 1.0** (the
-[documented roadmap](/changelog/roadmap) · a declared
-pre-condition of the launch), via the `MemoryStore` + `EmbeddingProvider`
-trait reservations already in `nika-kernel`.
+Memory and retrieval are organized as **10 L1 satellite crates**, reached
+through the `MemoryStore` + `EmbeddingProvider` trait reservations already in
+`nika-kernel`. They count toward the long-term {STATUS.cratesTarget} crate
+horizon. There is no orchestrator crate and no whole-subsystem gate: each
+capability meets its own release acceptance when it ships. The former
+Connectome umbrella, with its planned `nika-connectome` orchestrator and its
+"whole before 1.0" condition, was retired on 2026-10-08 (see the
+[roadmap](/changelog/roadmap)).
 
 <AccordionGroup>
-  <Accordion title="L2 orchestrator" icon="brain">
-    `nika-connectome` ties the 10 satellites together behind the `MemoryStore`
-    trait. Exposes unified put / query / forget / recall API.
-  </Accordion>
   <Accordion title="L1 satellites (10)" icon="satellite-dish">
     - `nika-hnsw`, approximate nearest neighbor (HNSW index)
     - `nika-bm25`, sparse full-text ranking
