@@ -144,8 +144,8 @@ flowchart TB
 
 Memory and retrieval are organized as **10 L1 satellite crates**, reached
 through the `MemoryStore` + `EmbeddingProvider` trait reservations already in
-`nika-kernel`. They count toward the long-term {STATUS.cratesTarget} crate
-horizon. There is no orchestrator crate and no whole-subsystem gate: each
+`nika-kernel`. They are counted separately from the {STATUS.cratesTarget}
+crate horizon. There is no orchestrator crate and no whole-subsystem gate: each
 capability meets its own release acceptance when it ships. The former
 Connectome umbrella, with its planned `nika-connectome` orchestrator and its
 "whole before 1.0" condition, was retired on 2026-10-08 (see the
