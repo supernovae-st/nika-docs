@@ -26,6 +26,7 @@ Three surfaces sound like servers but accept different clients.
 | `GET /health` | unauthenticated health and supported capabilities |
 | `GET /v1/openapi.json` | authenticated contract document |
 | `POST /v1/check` | compact admission acknowledgement or typed workflow refusal |
+| `POST /v1/compile` | stateless authoring: a candidate and a source-only check preview; creates no job, writes no file, contacts no provider |
 | `POST /v1/jobs` | idempotent admission |
 | `GET /v1/jobs/{id}` | durable job projection |
 | `GET /v1/jobs/{id}/status` | current status |
