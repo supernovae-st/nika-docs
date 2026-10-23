@@ -62,11 +62,13 @@ closed family (`${{ params.X }}` and friends) refuses `NIKA-VALUES-003`.
 | `secrets.*` | Vault/env/file-backed secret references (masked in logs) | `secrets.api_key` |
 | `with.*` | The task's **data boundary** — per-task `with:` block; each `tasks.*` reference in a value declares a typed edge, the body reads the binding | `with.model_family` |
 | `tasks.<name>.output` | The result record of a completed task (`.output` · `.status` · `.error` · `.duration_ms` · named bindings) — **boundary surfaces only** (see below) | `tasks.greet.output` |
+| `run.*` | The facts of this run, set by the engine and never declared or supplied. A closed set: `run.scheduled_for` (the instant the run serves, RFC 3339 UTC) and `run.missed` (the slots a catch-up covers, or `null`) | `run.scheduled_for` |
 
 The first three are the **value authorities** — the closed family every
-workflow value is declared under, one role each, no alias. `with` and
-`tasks` are the **runtime namespaces**: legal in `${{ }}`, never value
-authorities.
+workflow value is declared under, one role each, no alias. `with`, `tasks`
+and `run` are the **runtime namespaces**: legal in `${{ }}`, never value
+authorities. A `run.` name outside the closed set (`${{ run.started }}`)
+refuses `NIKA-VAR-001`.
 
 `${{ vars.X }}`, `${{ env.X }}` and `${{ config.X }}` are dead reads
 (`NIKA-VALUES-001` / `NIKA-VALUES-002` / `NIKA-VALUES-003`). Each old use
