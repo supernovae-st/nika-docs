@@ -30,18 +30,19 @@
 
 ## What is Nika?
 
-Nika turns repeatable AI work into a small file you keep. Say what you
-want done, like *"every Monday, pull the action items out of my meeting
-notes"*, and Nika writes it as a readable `.nika` workflow. Before
-anything runs, `nika check` shows what the workflow will do, which models
-and tools it uses, what it is allowed to touch and what it can cost,
-without calling a model. You run it when you decide, with the model you
-choose, local or cloud, and every run leaves a tamper-evident record you
-can verify. One Rust binary, open source (AGPL-3.0).
+Nika is an open-source AI workflow runtime. Define work in a `.nika`
+file, check it before execution, run it on your infrastructure, and inspect
+the outputs and execution record. You choose the models, tools and
+permissions. Local execution needs no Nika account or hosted service.
 
-| 1 · Say it | 2 · Check it | 3 · Run it | 4 · Prove it |
+| Define | Check | Run | Inspect |
 |:---:|:---:|:---:|:---:|
-| Describe the job; Nika writes a `.nika` file | `nika check` audits it before any model is called | `nika run` with the model you choose | `nika trace verify` checks the run's record |
+| Write or review a versioned `.nika` file | `nika check` reports static findings | `nika run` executes under declared permissions | Read outputs and inspect the trace |
+
+Start with the [offline report](https://docs.nika.sh/introduction): actual
+calculation and a Markdown file, without an API key or a mock model.
+[Offline examples](https://docs.nika.sh/examples/offline) give known inputs,
+exact expected outputs and explicit permissions.
 
 > [!TIP]
 > **Here to learn Nika?** Everything is at **[docs.nika.sh](https://docs.nika.sh)**.

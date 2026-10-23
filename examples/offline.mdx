@@ -1,0 +1,112 @@
+---
+title: "Start offline"
+sidebarTitle: "Offline examples"
+description: "Run workflows with known inputs, exact outputs and explicit permissions, without a model or API key."
+icon: "terminal"
+---
+
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
+Start with the [Markdown report](/introduction). It calculates a total
+and writes a real file. Then use the existing examples below to explore
+validation, dependencies, JSON transformations and caller inputs.
+None calls a model or an external service; no API key is required.
+
+## Get the matching files
+
+The examples are part of the engine's released source. Use the files
+from the release matching your binary, rather than copying a development
+branch. The documentation currently describes v{STATUS.version}.
+
+```bash
+nika --version
+```
+
+For each link below, open **Raw** and save the file in your working
+directory. Its `const:` block supplies the known input; the configuration
+example additionally takes `--var team=docs`.
+
+| Example source | Input | What it proves |
+|---|---|---|
+| <a href={`https://github.com/supernovae-st/nika/blob/v${STATUS.version}/crates/nika-pack/pack/examples/19-validate-records.nika`}>Validate records</a> | Orders `a: 10`, `b: 20` | Validate a bounded shape, refuse invalid records, then calculate a total |
+| <a href={`https://github.com/supernovae-st/nika/blob/v${STATUS.version}/crates/nika-pack/pack/examples/20-snapshot-diff.nika`}>Compare snapshots</a> | Before: `alpha, beta`; after: `beta, gamma` | Produce added, removed and retained values deterministically |
+| <a href={`https://github.com/supernovae-st/nika/blob/v${STATUS.version}/crates/nika-pack/pack/examples/21-deduplicate-records.nika`}>Deduplicate records</a> | `a: 10`, `a: 10`, `b: 20` | Collapse exact duplicates after checking for conflicting values |
+| <a href={`https://github.com/supernovae-st/nika/blob/v${STATUS.version}/crates/nika-pack/pack/examples/25-aggregate-by-key.nika`}>Aggregate by key</a> | North: `10, 5`; south: `20` | Group validated integer amounts and calculate exact totals |
+| <a href={`https://github.com/supernovae-st/nika/blob/v${STATUS.version}/crates/nika-pack/pack/examples/08-config-values.nika`}>Caller inputs</a> | Caller `team=docs`; default region `eu` | Keep caller inputs separate from file constants; skip the optional debug task |
+
+## Check, run and compare
+
+Run these commands from the directory containing the saved files:
+
+```bash
+nika check 19-validate-records.nika
+nika run 19-validate-records.nika --output json
+
+nika check 20-snapshot-diff.nika
+nika run 20-snapshot-diff.nika --output json
+
+nika check 21-deduplicate-records.nika
+nika run 21-deduplicate-records.nika --output json
+
+nika check 25-aggregate-by-key.nika
+nika run 25-aggregate-by-key.nika --output json
+
+nika check 08-config-values.nika
+nika run 08-config-values.nika --var team=docs --output json
+```
+
+Expected outputs, in the same order (JSON object key order is immaterial):
+
+```json
+{"report":{"batch":"daily-orders","count":2,"total":30}}
+```
+
+```json
+{"diff":{"added":["gamma"],"kept":["beta"],"removed":["alpha"],"resource":"enabled-features"}}
+```
+
+```json
+{"result":{"dataset":"orders","records":[{"amount":10,"id":"a"},{"amount":20,"id":"b"}]}}
+```
+
+```json
+{"report":{"currency":"EUR","groups":[{"count":2,"region":"north","total":15},{"count":1,"region":"south","total":20}],"total":35}}
+```
+
+```json
+{"report":{"region":"eu","team":"docs","title":"docs · eu · last 7 days","window_days":7}}
+```
+
+The workflows declare only their required built-in tools in `permits:`.
+They export JSON and leave execution traces; they do not write a business
+artifact. The [introductory report](/introduction) adds an explicit
+`./report.md` write permission and verifies the resulting file.
+
+## Inspect the evidence and a refusal
+
+Each run prints the path of its trace under `.nika/traces/`. Pass the
+path printed by your run to `nika trace verify`. An intact hash chain
+and a signed record are separate checks: without a signing key, the
+verdict reports **UNSEALED**. Read the reported tiers rather than
+assuming exit zero means a signed receipt.
+
+To see a runtime refusal, copy `19-validate-records.nika`, change one
+amount from `10` to `-1`, and check and run the copy. The schema rejects
+the negative amount; the dependent assertion fails and the report task
+does not complete. Static validation alone does not establish that
+runtime input data satisfies a schema.
+
+To see a static permission refusal, copy the introductory report and
+remove `nika:write` from its tool permissions. `nika check` refuses the
+missing authority before the file write runs. Restore the specific
+permission to make the intended write possible; do not disable security.
+
+## Add AI or an external integration
+
+Use [meeting actions](/examples/meeting-actions) to summarize documents
+with a configured model, or explore [the full gallery](/examples/overview).
+Those examples have additional requirements: input files, a running
+local model or a provider key, and sometimes authenticated services.
+Check those requirements and the output yourself. A successful offline
+example is evidence for its tested computation, not for every provider,
+connector or schedule.

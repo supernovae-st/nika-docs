@@ -12,6 +12,7 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 | Method | Returns | Local | HTTP |
 |---|---|:---:|:---:|
 | `check(workflow, options?)` | `Promise<NikaCheckResult>` | yes | yes |
+| `compile(request, options?)` | `Promise<NikaCompileOutcome>` | yes | yes |
 | `run(workflow, options?)` | `Promise<NikaRun>` | yes | yes |
 | `run.events(options?)` | `AsyncIterable<NikaRunEvent>` | yes | yes |
 | `run.result()` | `Promise<NikaRunResult>` | yes | yes |
@@ -31,6 +32,18 @@ served-name acknowledgement/refusal, depending on admission form.
 `run.result()`. Methods that require resident
 authority return typed compatibility errors in native mode. The run-handle
 methods accept only a run owned by that client instance.
+
+`compile()` asks the engine for a candidate workflow and runs nothing:
+`ready`, `incomplete` and `refused` all resolve as data. A ready `candidate`
+is ordinary `.nika` source; write it to a file and `run(path)` admits it
+again. Over HTTP it calls `POST /v1/compile` when the server's `/health`
+lists `compile`. A provider round is opt-in: `cognition: 'explicitProvider'`
+on a server that lists `compileNativeV2`, or `authoringModel` on a local
+engine. `nextCompileRequest(request, outcome, answers)` builds the next round
+from the outcome's questions, and `isNikaCompileHeld(outcome)` tells a
+candidate the verifier held, a preview never to run. The package's
+[compile guide](https://github.com/supernovae-st/nika-client/blob/v0.123.0/docs/compile.md)
+covers both doors.
 
 <Accordion title="Compatibility aliases">
   `nika.events(run)`, `nika.cancel(run)`, `nika.status(run)` and `run.done`

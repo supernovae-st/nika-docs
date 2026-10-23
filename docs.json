@@ -52,7 +52,7 @@
     "twitter:card": "summary_large_image"
   },
   "banner": {
-    "content": "New here? Five minutes to your first typed result from an app — no key, no server. [SDK quickstart →](/sdk/start/quickstart)",
+    "content": "New here? Write a workflow, run it, inspect a real result. No account or API key. [Start here →](/introduction)",
     "dismissible": true
   },
   "navbar": {
@@ -327,6 +327,7 @@
             "group": "Start here",
             "pages": [
               "examples/overview",
+              "examples/offline",
               "examples/bounded-authoring"
             ]
           },
@@ -670,6 +671,7 @@
             "group": "Product updates",
             "pages": [
               "changelog/releases",
+              "changelog/known-limits",
               "changelog/roadmap",
               "reference/timeline",
               "changelog/history"

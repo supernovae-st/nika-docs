@@ -1,16 +1,19 @@
 ---
 title: "Examples"
 sidebarTitle: "All examples"
-description: "Real-job workflows, tiered from a 4-task starter to a multi-agent swarm: every file conformance-validated, every industry covered."
+description: "Start with reproducible offline workflows, then configure the models and services a larger example needs."
 icon: "rocket"
 ---
 
 import { CANON } from "/snippets/_canon.mdx";
 import { SHOWCASE } from "/snippets/_showcase.mdx";
 
-If you do the same AI task twice, make it a workflow. Every example on
-these pages is a complete one you can run right now. The whole gallery
-ships inside the binary:
+Start with [offline examples](/examples/offline): known inputs, exact
+outputs, no provider key and no external services. The broader gallery
+contains workflows with their own model, file and service requirements.
+Inspect those prerequisites and permissions before running them.
+
+The binary also includes a rehearsal gallery:
 
 ```bash
 nika try 01-hello                    # the mock rehearsal · zero keys · nothing written
@@ -42,7 +45,10 @@ incomplete and does not pick a substitute.
 The YAML you read here is projected verbatim from
 [`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),
 where each file passes the same conformance gate as the spec's own test
-suite. If a file is on this page, it parses, and it runs.
+suite. That validates the file against that contract; it does not prove
+that an external integration is configured or that a model will produce
+a useful result. A mock rehearsal proves neither a live integration nor
+an AI answer.
 
 These {SHOWCASE.count} workflows ({SHOWCASE.t1} starters · {SHOWCASE.t2} chains
 · {SHOWCASE.t3} fan-outs · {SHOWCASE.t4} epics) plus the foundation set

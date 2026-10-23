@@ -78,7 +78,7 @@ then the rest alphabetically.
     </Tip>
   </Tab>
 
-  <Tab title="Cloud (11 canonical)">
+  <Tab title={`Cloud (${CANON.providersCloud} canonical)`}>
     | ID | Name | Dialect | Env var | Default model |
     |---|---|---|---|---|
     | `openai` | OpenAI | `openai-chat` | `OPENAI_API_KEY` | `gpt-5.2` |
@@ -93,6 +93,7 @@ then the rest alphabetically.
     | `groq` | Groq (fastest open-weight) | `openai-chat` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` |
     | `mistral` | Mistral AI (EU · sovereign-leaning) | `openai-chat` | `MISTRAL_API_KEY` | `mistral-large-latest` |
     | `openrouter` | OpenRouter gateway | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-6` |
+    | `scaleway` | Scaleway Generative APIs | `openai-chat` | `SCALEWAY_API_KEY` | `deepseek-v4-flash-0731` |
 
     † `qwen` ships in the engine's extended catalog (one of the
     {STATUS.providers} TOML records), outside the {CANON.providersCloud}
@@ -126,7 +127,7 @@ then the rest alphabetically.
   <Accordion title={`The ${CANON.providers} canonical spec v0.1 IDs (sorted)`} icon="list">
     `anthropic` · `deepseek` · `gemini` · `groq` · `huggingface` ·
     `llamacpp` · `lmstudio` · `localai` · `mistral` · `mock` · `moonshot` ·
-    `nvidia` · `ollama` · `openai` · `openrouter` · `vllm` · `xai`
+    `nvidia` · `ollama` · `openai` · `openrouter` · `scaleway` · `vllm` · `xai`
 
     {CANON.providers} total: {CANON.providersLocal} local · {CANON.providersCloud} cloud ·
     {CANON.providersTest} test · matches `canon.yaml` in the spec repo. The

@@ -26,6 +26,7 @@ Three surfaces sound like servers but accept different clients.
 | `GET /health` | unauthenticated health and supported capabilities |
 | `GET /v1/openapi.json` | authenticated contract document |
 | `POST /v1/check` | compact admission acknowledgement or typed workflow refusal |
+| `POST /v1/compile` | stateless authoring: a candidate and a source-only check preview; creates no job, writes no file, contacts no provider |
 | `POST /v1/jobs` | idempotent admission |
 | `GET /v1/jobs/{id}` | durable job projection |
 | `GET /v1/jobs/{id}/status` | current status |
@@ -61,7 +62,7 @@ const result = await run.result()
 ```
 
 This path needs no resident server. These examples target the published
-`@supernovae-st/nika@0.120.2` npm package (bundled engine 0.120.2). The
+`@supernovae-st/nika@0.123.0` npm package (bundled engine 0.123.0). The
 standalone engine CLI releases independently.
 
 ## Local model path

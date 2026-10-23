@@ -74,13 +74,14 @@ gate:
       message: "Expected non-empty result"
 ```
 
-## File (5)
+## File (6)
 
 | Builtin | What it does |
 |---|---|
 | [`nika:read`](/reference/tools/read) | Read a file. Returns string content. |
 | [`nika:write`](/reference/tools/write) | Write a file. Returns the path; binary upstream values are written as-is. |
 | [`nika:edit`](/reference/tools/edit) | In-place find/replace. Returns the modified path. |
+| [`nika:remove_file`](/reference/tools/remove_file) | Remove one existing regular file. Returns the requested path. Needs a `permits.fs.write` bound holding the exact path; never a directory, link or pattern. |
 | [`nika:glob`](/reference/tools/glob) | Glob match. Returns an array of paths. |
 | [`nika:grep`](/reference/tools/grep) | Recursive grep. Returns an array of `{ path, line, match }`. |
 

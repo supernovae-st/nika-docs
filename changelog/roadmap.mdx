@@ -27,6 +27,8 @@ you can use from the goals that still require implementation and evidence.
   [Current status](/reference/status) for the exact documentation targets and
   [Releases](/changelog/releases) for published changes. Source on `main`, a
   closed issue, or an accepted design does not by itself mean a package shipped.
+  [Known limits in 0.123](/changelog/known-limits) lists what the release does
+  not do yet.
 </Info>
 
 ## What does “Compile” mean here?
@@ -48,12 +50,18 @@ original launch requirements. The owning roadmap and specification describe:
 
 - **Release and user experience qualification:** installation, documentation,
   editor setup and supported execution paths must work together.
-- **The contract system and whole Connectome:** the planned memory and cognition
-  system must meet its declared scope and evidence requirements.
+- **The contract system:** everything that crosses a boundary carries a
+  declared contract (types, errors, effects and bounds), and unknown
+  information stays visible instead of being reported as success.
 - **Long-term compatibility:** conformance, archives, deterministic checking,
   a compatibility promise and succession are launch conditions.
 - **Design-partner release candidates:** the public roadmap places these before
   the official launch.
+
+Memory, retrieval and cognition are not a single launch condition. Each of
+these capabilities meets its own release acceptance when it ships. The former
+Connectome umbrella, which required the whole memory subsystem before 1.0, was
+retired on 2026-10-08.
 
 These are conditions, not delivery dates or claims of completion. The
 [owning engine roadmap](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md)
@@ -67,6 +75,7 @@ explains how to read them without confusing a proposal with a shipped feature.
 | Question | Best source |
 | --- | --- |
 | What changed in a version? | [Published releases](/changelog/releases) |
+| What does the current release not do yet? | [Known limits in 0.123](/changelog/known-limits) |
 | What can I install now? | [Current status](/reference/status) |
 | What work is still open? | [Engine issues](https://github.com/supernovae-st/nika/issues) and [SDK issues](https://github.com/supernovae-st/nika-client/issues) |
 | Why is the architecture shaped this way? | [Layers](/architecture/layers) and [decisions](/architecture/adrs) |

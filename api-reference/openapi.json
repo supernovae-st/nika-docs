@@ -61,6 +61,290 @@
         ],
         "type": "object"
       },
+      "CompileOutcome": {
+        "description": "The engine-owned machine document of one authoring result — the document `nika compile --json` prints, without the CLI-only `written`. No field grants authority, writes or executes source.",
+        "properties": {
+          "candidate": {
+            "description": "Ordinary `.nika` source. It is proposed only when `status` is `ready`; under any other status it is never proposed. Under `incomplete` it is a preview: it may still carry unfilled holes, or, when an `applied` diagnostic targets `verify_held`, it is a candidate the verifier held: it answered on these bytes against the request and did not accept them. A preview is not to be run or saved as an accepted result. Null when no candidate is shown, a withdrawn one included.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "check_preview": {
+            "description": "The engine's pure Check report over the source only. No child file, skill, credential probe, access plan or admission was evaluated",
+            "properties": {
+              "report": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "scope": {
+                "const": "sourceOnly",
+                "type": "string"
+              }
+            },
+            "required": [
+              "scope",
+              "report"
+            ],
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "compile_version": {
+            "const": 1,
+            "type": "integer"
+          },
+          "diagnostics": {
+            "description": "Findings, in order. `kind` and `target` are their machine-readable part; `message` is for a reader. `target` names what a finding concerns: a question key, a task, a source field, or one of the compiler's own targets, among them `semantic_verification`, a finding on the request against the candidate's bytes (a clause or the whole request that no admitted judgment of these bytes settled, a part a verifier judged missing with its reason, a part it left unsettled or contested, a verification stopped at a judge call that got no answer); `verify_held` (kind `applied`), the candidate is held: the verifier answered on these bytes against the request and did not accept them (it rejected them or abstained), so `candidate` is a preview only, no replayable round is kept, and that verifier is not asked about the same bytes again in this round; and `verify_resume` (kind `applied`), no admitted judgment of the candidate was made (the verifier's call failed or chose no offered answer): the candidate is withdrawn and the round's record kept, and a zero-call replay of that round asks no verifier. Each verification attempt is recorded in `provenance.decision.semantic_verification`.",
+            "items": {
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "applied",
+                    "missed",
+                    "unknown",
+                    "requiresHuman",
+                    "refused"
+                  ],
+                  "type": "string"
+                },
+                "message": {
+                  "description": "For a reader; never parsed to recover compiler state",
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "target",
+                "message"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "provenance": {
+            "description": "Reproduction metadata; neither program identity nor run evidence",
+            "properties": {
+              "cognition": {
+                "const": "deterministicOnly",
+                "type": "string"
+              },
+              "compiler_version": {
+                "type": "string"
+              },
+              "decision": {
+                "additionalProperties": true,
+                "description": "Bounded compiler decision evidence, including deterministic and replay outcomes; it grants no execution or spending authority.",
+                "type": "object"
+              },
+              "plan": {
+                "additionalProperties": true,
+                "description": "The compiler record retained in this outcome; a server replay uses its opaque token rather than accepting this object as authority.",
+                "type": "object"
+              },
+              "skeleton": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "spec_pin": {
+                "type": "string"
+              },
+              "strategy": {
+                "description": "The compiler strategy that produced this outcome.",
+                "type": "string"
+              },
+              "suggested_file": {
+                "description": "A suggested candidate file name, never a file written by compilation.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "compiler_version",
+              "spec_pin",
+              "skeleton",
+              "cognition"
+            ],
+            "type": "object"
+          },
+          "questions": {
+            "items": {
+              "properties": {
+                "key": {
+                  "description": "Stable semantic hole path such as `const.request`, never a session id",
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "mandatory": {
+                  "description": "false: the value belongs to a binding outside the program (a schedule's timezone, missed-run and overlap policies, per-run ceiling) and never blocks a ready candidate",
+                  "type": "boolean"
+                },
+                "options": {
+                  "description": "Present on a choice question only: the admissible answers, keys spelled by the owning grammar",
+                  "items": {
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "label"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "type": {
+                  "description": "text: a JSON string · literal: one JSON value · choice: a JSON string that is the `key` of one of `options`",
+                  "enum": [
+                    "text",
+                    "literal",
+                    "choice"
+                  ],
+                  "type": "string"
+                },
+                "why": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "label",
+                "type",
+                "why",
+                "mandatory"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "requested_boundary": {
+            "additionalProperties": true,
+            "description": "The candidate's requested permits, derived by Check. Requested, never granted",
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "requested_trigger": {
+            "additionalProperties": true,
+            "description": "The trigger the request names (kind · source_hint · event_hint · cadence · at · payload_input · status · timezone · missed · overlap · ceiling · cron), stated beside the candidate whose bytes carry no cadence, host or event. A requirement the operator binds through the schedule contract, never a grant or a schedule row. timezone, missed, overlap and ceiling are the answered binding values (null until answered). cron is the exact five-field schedule projection when supported and fully specified, otherwise null; older engines omit it. It never supplies a missing time or timezone.",
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "Completeness of authoring, never permission to execute",
+            "enum": [
+              "ready",
+              "incomplete",
+              "refused"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "compile_version",
+          "status",
+          "candidate",
+          "questions",
+          "diagnostics",
+          "requested_boundary",
+          "requested_trigger",
+          "check_preview",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "CompileRequest": {
+        "additionalProperties": false,
+        "description": "Generation 1 of the compile request. The encoded body is limited by the listener's configured HTTP body ceiling; no smaller field-size or answer-count quota is imposed. Unknown fields, a present null, duplicate keys (including inside `answers`) and positional arrays are refused. No field names a host path: an EDIT base travels inline in `source`.",
+        "properties": {
+          "answers": {
+            "additionalProperties": true,
+            "description": "Question key → one JSON literal with its type preserved, judged exactly as sent within the HTTP body envelope.",
+            "type": "object"
+          },
+          "change": {
+            "additionalProperties": false,
+            "maxProperties": 1,
+            "minProperties": 1,
+            "properties": {
+              "set_constant": {
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "description": "Bare constant name, not a path",
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "One JSON literal, judged exactly as sent within the HTTP body envelope."
+                  }
+                },
+                "required": [
+                  "name",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "text": {
+                "description": "`Set const.NAME to JSON_LITERAL`, or `Set const.NAME` answered through `answers`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "cognition": {
+            "const": "deterministicOnly",
+            "description": "The only authoring cognition of this build. Any other value is refused; no authoring model is contacted",
+            "type": "string"
+          },
+          "compile_version": {
+            "const": 1,
+            "type": "integer"
+          },
+          "intent": {
+            "type": "string"
+          },
+          "mode": {
+            "description": "create requires `intent` and forbids `source`/`change`; edit requires `source` and `change` and forbids `intent`",
+            "enum": [
+              "create",
+              "edit"
+            ],
+            "type": "string"
+          },
+          "source": {
+            "description": "Accepted `.nika` source, inline. The caller owns source selection, revision checks and materialization",
+            "type": "string"
+          },
+          "workflow_id": {
+            "description": "Names a created workflow. On edit the core refuses it as data: an edit cannot rename its accepted base",
+            "type": "string"
+          }
+        },
+        "required": [
+          "compile_version",
+          "mode"
+        ],
+        "type": "object"
+      },
       "Error": {
         "additionalProperties": false,
         "properties": {
@@ -427,6 +711,14 @@
           },
           {
             "additionalProperties": false,
+            "dependentRequired": {
+              "missed_count": [
+                "missed_first"
+              ],
+              "missed_first": [
+                "missed_count"
+              ]
+            },
             "properties": {
               "arm_generation": {
                 "pattern": "^[0-9a-f]{64}$",
@@ -445,6 +737,16 @@
               },
               "kind": {
                 "const": "schedule",
+                "type": "string"
+              },
+              "missed_count": {
+                "description": "How many slots that silence holds",
+                "minimum": 1,
+                "type": "integer"
+              },
+              "missed_first": {
+                "description": "First slot of the silence a catch-up-once run answers for, on a catch_up firing only; scheduled_for is its last slot",
+                "format": "date-time",
                 "type": "string"
               },
               "schedule_id": {
@@ -663,6 +965,40 @@
             ],
             "type": "string"
           },
+          "stopped_calls": {
+            "description": "Every MCP call the run stopped waiting for, on every path (a task's timeout, an operator Stop, a task that continued or recovered after it): the task, the tool as the workflow names it, the call's id, and whether the call left. `unknown`: the call reached the server, which may have acted, so an effect's outcome is unknown; `not_sent`: it was stopped before it was sent. Absent when the run stopped no MCP call.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "call_id": {
+                  "type": "string"
+                },
+                "outcome": {
+                  "enum": [
+                    "unknown",
+                    "not_sent"
+                  ],
+                  "type": "string"
+                },
+                "task": {
+                  "type": "string"
+                },
+                "tool": {
+                  "description": "`mcp:<server>/<tool>`",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "task",
+                "tool",
+                "call_id",
+                "outcome"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
           "tasks": {
             "additionalProperties": false,
             "properties": {
@@ -749,6 +1085,23 @@
               "on_completion"
             ],
             "type": "string"
+          },
+          "inputs": {
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "description": "Per-fire inputs bound on every resident fire (#1370): one scalar per key the workflow declares under `inputs:`, coerced by the declared type exactly as the CLI `--var` edge does, then judged by the same literal admission validator as POST /v1/jobs. Unknown keys, values the declared type refuses, missing required inputs and the `@env:` channel are refused at PUT and again at fire.",
+            "type": "object"
           },
           "jitter": {
             "enum": [
@@ -1012,9 +1365,9 @@
     }
   },
   "info": {
-    "description": "Authenticated loopback remote execution and declarative schedules. Artifacts, schedule list/delete/trigger/backfill, /v1/arm, and POST /v1/run are absent.",
+    "description": "Authenticated loopback remote execution, declarative schedules and stateless source-only authoring (POST /v1/compile never runs, admits or writes). Artifacts, schedule list/delete/trigger/backfill, /v1/arm, and POST /v1/run are absent.",
     "title": "nika serve",
-    "version": "0.120.0"
+    "version": "0.123.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -1119,6 +1472,104 @@
           }
         },
         "summary": "Judge a workflow without creating a job — by served name, or as immutable snapshot bytes"
+      }
+    },
+    "/v1/compile": {
+      "post": {
+        "description": "The HTTP transport of the same Compile core as `nika compile`. Foundation scope: CREATE resolves an exact embedded skeleton name (or `hello`), EDIT changes one existing constant, answers are explicit JSON literals; any other intent is answered `incomplete` with no substitute workflow. Creates no job, run, approval or trace, writes no file, contacts no provider: ambient keys are never consent. `check_preview` is a REVIEW of the source only, never admission: POST /v1/jobs judges a candidate again. Questions carry stable keys; answering is a new request, not a session.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompileOutcome"
+                }
+              }
+            },
+            "description": "Authoring outcome — ready, incomplete and refused are all data"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error envelope"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Request deadline"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Encoded body above the compile ceiling"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Content-Type or Content-Encoding refused"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "malformed_compile_request · compile_version_unsupported · compile_mode_unsupported · compile_cognition_unsupported · compile_limit"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Compiler machinery failure; nothing is echoed"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "compile_busy — every compile slot is in use"
+          }
+        },
+        "summary": "Author a candidate workflow without running it (stateless · source-only)"
       }
     },
     "/v1/jobs": {

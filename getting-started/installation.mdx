@@ -31,11 +31,12 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
     ```
     One package gives you the `nika` command and the TypeScript SDK. The
     verified release binary for your platform arrives as an optional
-    dependency (macOS and Linux · arm64 and x64): the same bytes every other
-    door installs. Project-local works too: `npm install @supernovae-st/nika`,
+    dependency (macOS and Linux · arm64 and x64). The npm channel can lag
+    the standalone CLI release; check its bundled `nika --version` rather
+    than assuming it matches Homebrew. Project-local works too: `npm install @supernovae-st/nika`,
     then `npx nika …` and `import { Nika } from '@supernovae-st/nika'`.
     The [SDK README](https://github.com/supernovae-st/nika-client#readme) carries
-    the full contract; the package version follows the engine's release train.
+    the full contract and package compatibility.
   </Tab>
 
   <Tab title="Homebrew">
@@ -73,7 +74,7 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
     ```bash
     nix run github:supernovae-st/nika
     ```
-    **Builds the exact release source** via the repo's root `flake.nix` —
+    **Builds repository source** via the repo's root `flake.nix` —
     the first run compiles, the store caches it, and the binary answers as
     `nika` (the flake renames the seed crate at install, same as the
     release). `nix profile install github:supernovae-st/nika` for a durable
@@ -96,8 +97,9 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
 
 ## First-run verification
 
-You already have Claude Code or Codex. You do not need a key and you do
-not need to pull a model for this step.
+No Nika account, coding assistant, API key or model download is required
+for this step. For an actual calculation and file output without a model,
+start with the [offline report](/introduction).
 
 ```bash
 nika --version

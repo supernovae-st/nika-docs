@@ -6,6 +6,7 @@ icon: "terminal"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
 <Info>
   This page mirrors the current docs build (`v{STATUS.version}` from the status
@@ -101,6 +102,6 @@ The MCP server is intentionally read-only. It exposes 9 tools — `nika_check` �
 execution stays behind `nika run`.
 
 <Note>
-  **MCP protocol** · latest `2026-07-28`; the server accepts 5 versions
-  (`2026-07-28` · `2025-11-25` · `2025-06-18` · `2025-03-26` · `2024-11-05`).
+  **MCP protocol** · latest <code>{CANON.mcpLatestProtocol}</code>; the server accepts
+  {CANON.mcpProtocolVersions.length} versions (<code>{CANON.mcpProtocolVersions.join(" · ")}</code>).
 </Note>

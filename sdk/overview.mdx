@@ -53,6 +53,7 @@ to capture immutable bytes before HTTP admission.
 | Intent | Method | Authority |
 |---|---|---|
 | Audit | `check(workflow, options?)` | Engine |
+| Author a candidate | `compile(request, options?)` | Engine or server |
 | Admit + execute | `await run(workflow, options?)` | Engine or server |
 | Observe | `run.events(options?)` | Run session |
 | Settle | `await run.result()` | Run session |

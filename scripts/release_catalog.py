@@ -165,6 +165,7 @@ def render(data):
         out.append(f'| [{row["tag"]}]({row["url"]}) | {row["publishedAt"][:10]} | {count} |')
     out += ['', '## History and next steps', '',
             '- [Historical milestones](/changelog/history) preserve the original dated accounts, including unsuccessful release attempts.',
+            '- [Known limits](/changelog/known-limits) lists what the current release does not do yet, and how to work with each limit.',
             '- [Roadmap](/changelog/roadmap) separates what you can use from future release gates.',
             '- [Timeline and evidence](/reference/timeline) explains the sources behind historical claims.',
             '- [Current status](/reference/status) identifies the released binary used to check these docs.', '',
