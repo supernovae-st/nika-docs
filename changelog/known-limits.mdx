@@ -1,0 +1,77 @@
+---
+title: "Known limits in 0.123"
+description: "What the 0.123 release does not do yet, in plain words, with a way to work with each limit."
+sidebarTitle: "Known limits"
+icon: "triangle-exclamation"
+---
+
+These are the known limits of Nika 0.123. Each one says what happens and what
+you can do about it today. They describe this release, not a promise about the
+next one: the [roadmap](/changelog/roadmap) covers direction, and
+[releases](/changelog/releases) lists what each version changed.
+
+## A rehearsal on a copy skips some steps
+
+Before you save a workflow that the terminal Session proposes, Nika can
+rehearse it on a copy of your project files. Your originals are not touched.
+A rehearsal does not run everything:
+
+- **Model steps do not run.** `infer:` and `agent:` tasks are not called during
+  a rehearsal, so it tells you nothing about a model's answer.
+- **Web requests run only as plain GETs of pages Nika already observed.** Such
+  a request is answered with the observed copy of the page. A GET whose
+  response is filtered inside the fetch (a `nika:fetch` call with `jq:` or
+  `mode: jq`) is not rehearsed, and neither is a crawl or a request other than
+  GET.
+
+The preview names every step that did not run, and the steps that depend on
+them. Treat a rehearsal as evidence about the steps that ran on the copy; run
+the saved workflow to see the model's answer and the live pages.
+
+## Writing a workflow with a large model can take minutes
+
+When a model writes or revises a workflow, Nika checks each proposal, and
+rehearses it when it can, before showing it to you. With a large model this
+can take minutes, and longer when a proposal needs repairs. While Nika
+prepares, the status line shows the elapsed time, the number of calls to the
+authoring model and their estimated cost, for example
+`Preparing · 45s · 12 author calls · ~$0.12 · Ctrl+C stop`.
+
+Nika sets no overall limit on authoring; each call to the provider keeps its
+own deadline. In the terminal workspace, press `Ctrl+C` once to ask the
+preparation to stop: your conversation stays. A call already sent to the
+provider cannot be recalled. When speed matters more than depth, choose a
+faster model with `/intelligence`.
+
+## The terminal mixes English and French
+
+The terminal Session answers in the language you write in, but some of its
+lines exist only in English and others only in French. A conversation in
+English can show a French line, and the reverse. Some command messages, such
+as parts of the scheduling messages from `nika arm`, are in French only. The
+commands and their effects are the same in both languages.
+
+## The VS Code extension stays at 0.120
+
+The editor extension (`supernovae.nika` on the VS Code Marketplace) remains on
+its 0.120 release and was not qualified with 0.123. Its diagnostics come from
+the engine it runs (`nika lsp`), so point its `nika.server.path` setting at
+your installed binary. If the editor and the command line disagree, trust
+`nika check`.
+
+## Scheduled runs need your keys in an env file
+
+A scheduled workflow is started by your operating system (launchd on macOS,
+systemd on Linux), not from your shell, so it does not see the provider keys
+you export in your shell startup file. Put those keys in an env file, one
+`NAME=value` per line, and pass that file when you emit the scheduler unit:
+
+```bash
+nika arm --emit launchd --write --env-file ~/.config/nika/keys.env
+```
+
+Use `--emit systemd` on Linux. The unit loads the file each time it fires; the
+keys stay in the file and are never written into the unit. The file must exist
+before you emit the unit, and Nika records its path in the project so that a
+later emit keeps loading it. [OS schedulers](/sdk/operations/os-schedulers)
+and the [`nika arm` reference](/reference/arm) describe the other options.

@@ -671,6 +671,7 @@
             "group": "Product updates",
             "pages": [
               "changelog/releases",
+              "changelog/known-limits",
               "changelog/roadmap",
               "reference/timeline",
               "changelog/history"
