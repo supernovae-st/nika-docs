@@ -93,6 +93,32 @@ reply), `already_settled`, or `cancellation_requested` — execution continues
 toward its own settlement in the last case. Use `run.result()` for the
 actual result, including success racing cancellation.
 
+## Compile
+
+```ts
+interface NikaCompileOutcome {
+  compile_version: 1 | 2                    // 2 exactly when a provider call happened
+  status: 'ready' | 'incomplete' | 'refused'
+  ready: boolean                            // exactly status === 'ready'
+  candidate: string | null                  // .nika source, proposed only when ready
+  questions: NikaCompileQuestion[]
+  diagnostics: NikaCompileDiagnostic[]
+  requested_boundary: Record<string, unknown> | null
+  requested_trigger?: NikaCompileTrigger | null
+  check_preview: NikaCompilePreview | null  // scope 'sourceOnly', never admission
+  provenance: NikaCompileProvenance
+  replay_token?: string                     // HTTP only: a provider round the server kept
+  written?: string | null                   // local engine only, with `output`
+  // … and further HTTP or local-engine facts
+}
+```
+
+A request is a create (`{ intent }`, or the intent as a bare string) or an
+edit (`{ workflow, change }`, the accepted source plus the change), never
+both. `incomplete` and `refused` are data: the SDK throws only on transport,
+protocol, compatibility and engine-stamped failures. Under `incomplete`, a
+non-null `candidate` is a preview, never a result to run or save.
+
 ## Proof
 
 ```ts
