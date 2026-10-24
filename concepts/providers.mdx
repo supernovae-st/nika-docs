@@ -69,11 +69,11 @@ tasks:
 ## API dialects (7)
 
 Providers speak 7 distinct dialects. One provider crate per dialect + an
-OpenAI-compatible family that covers 23 providers.
+OpenAI-compatible family that covers 31 providers.
 
 | Dialect | Providers | Notes |
 |---|---|---|
-| `openai-chat` | openai, mistral, groq, deepseek, xai, openrouter, together, fireworks, cerebras, sambanova, perplexity, moonshot, qwen, minimax, zhipu, nvidia-nim, deepinfra, replicate, hyperbolic, writer, databricks, azure, cloudflare | 23 providers share OpenAI's `/v1/chat/completions` shape with per-provider base URL + auth header |
+| `openai-chat` | openai, scaleway, mistral, groq, deepseek, xai, huggingface, openrouter, together, fireworks, cerebras, sambanova, azure, perplexity, moonshot, qwen, minimax, zhipu, nvidia, deepinfra, replicate, hyperbolic, writer, databricks, cloudflare, ollama, lmstudio, llamacpp, localai, vllm, native | 31 providers share OpenAI's `/v1/chat/completions` shape with per-provider base URL + auth header |
 | `anthropic` | anthropic | Native Messages API, tool use as schema, extended thinking |
 | `gemini` | gemini, vertex | Native `generateContent` API, safety settings, structured output via `response_schema` |
 | `cohere` | cohere | Native Command API |
