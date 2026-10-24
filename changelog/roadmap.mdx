@@ -8,8 +8,8 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 import { SDK } from "/snippets/_sdk-contract.mdx";
 
 Nika lets you put AI workflows in an application, describe their permitted
-effects, and inspect what happened after a run. This page separates the parts
-you can use from the goals that still require implementation and evidence.
+effects, and inspect what happened after a run. This page separates what you
+can use in 0.123 from the earlier plan the project keeps as a record.
 
 ## Start with what is available
 
@@ -20,7 +20,7 @@ you can use from the goals that still require implementation and evidence.
 | Choose what a workflow may do | Explicit permits and governed effects | [Security model](/concepts/security) |
 | Inspect a run | Events, outputs, traces and receipts | [Traces](/concepts/traces) |
 | Run against a resident server | The SDK's authenticated remote API, with a compatible server | [Remote client](/sdk/remote/client) |
-| Start from a bounded skeleton | The released `nika compile` command | [Bounded authoring](/examples/bounded-authoring) |
+| Turn a request into a workflow | The terminal Session (`nika`), or `nika compile`: exact skeletons offline, free intent with `--authoring-model` | [The terminal Session](/getting-started/session) · [Bounded authoring](/examples/bounded-authoring) |
 
 <Info>
   The CLI and npm package have separate release channels. Read
@@ -28,27 +28,35 @@ you can use from the goals that still require implementation and evidence.
   [Releases](/changelog/releases) for published changes. Source on `main`, a
   closed issue, or an accepted design does not by itself mean a package shipped.
   [Known limits in 0.123](/changelog/known-limits) lists what the release does
-  not do yet.
+  not do.
 </Info>
 
 ## What does “Compile” mean here?
 
-The released command creates a workflow from a bounded skeleton. It is a useful
-starting point you can check, edit and run. Broader natural-language composition,
-cross-surface SDK integration and advanced compiler goals need their own release
-and qualification evidence. The name alone does not establish those capabilities.
+Offline, with no model, `nika compile` writes exact skeletons
+(`nika compile --list` names them), bounded support intents and conservative
+edits of an existing file (`--base` with `--change`). An intent it cannot
+settle stays incomplete and asks its questions; it never writes a substitute.
 
-Start with [the available authoring path](/examples/bounded-authoring); follow the
+For a request in your own words, open the [terminal Session](/getting-started/session)
+(`nika`) or run `nika compile "<request>" --authoring-model <provider/model>`.
+A model you choose writes the candidate, and Nika checks it, and rehearses it
+where it can, before anything is saved or run. Authoring with a large model can
+take minutes, and a rehearsal skips model steps:
+[Known limits in 0.123](/changelog/known-limits) lists what to expect.
+
+Start with [the offline authoring path](/examples/bounded-authoring). The
 [engine roadmap](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md) and
-[public engine issues](https://github.com/supernovae-st/nika/issues) for ongoing work.
+[public engine issues](https://github.com/supernovae-st/nika/issues) track the
+maintenance work.
 
 ## What happens after 0.123?
 
 0.123 is the open-source reference release. From here the project is
 maintained: security fixes, bug fixes and compatibility. No major new
-development is planned. The engine roadmap and the specification keep the
-original conditions for a 1.0 release as the record of that plan, not as a
-commitment:
+development is planned, and no 1.0 release is planned. The engine roadmap and
+the specification keep the conditions once set for a 1.0 release as the record
+of that plan, not as a commitment:
 
 - **Release and user experience qualification:** installation, documentation,
   editor setup and supported execution paths must work together.
@@ -57,15 +65,14 @@ commitment:
   information stays visible instead of being reported as success.
 - **Long-term compatibility:** conformance, archives, deterministic checking,
   a compatibility promise and succession are launch conditions.
-- **Design-partner release candidates:** the public roadmap places these before
-  the official launch.
+- **Design-partner release candidates:** the plan placed these before a
+  launch.
 
-Memory, retrieval and cognition are not a single launch condition. Each of
-these capabilities meets its own release acceptance when it ships. The former
-Connectome umbrella, which required the whole memory subsystem before 1.0, was
-retired on 2026-10-08.
+Memory, retrieval and cognition were never a single launch condition: the
+former Connectome umbrella, which required the whole memory subsystem before
+1.0, was retired on 2026-10-08.
 
-These are conditions, not delivery dates or claims of completion. The
+These were conditions, not delivery dates or claims of completion. The
 [owning engine roadmap](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md)
 and the specification's
 [timeline](https://github.com/supernovae-st/nika-spec/blob/main/timeline/timeline.yaml)
@@ -77,7 +84,7 @@ explains how to read them without confusing a proposal with a shipped feature.
 | Question | Best source |
 | --- | --- |
 | What changed in a version? | [Published releases](/changelog/releases) |
-| What does the current release not do yet? | [Known limits in 0.123](/changelog/known-limits) |
+| What does the current release not do? | [Known limits in 0.123](/changelog/known-limits) |
 | What can I install now? | [Current status](/reference/status) |
 | What work is still open? | [Engine issues](https://github.com/supernovae-st/nika/issues) and [SDK issues](https://github.com/supernovae-st/nika-client/issues) |
 | Why is the architecture shaped this way? | [Layers](/architecture/layers) and [decisions](/architecture/adrs) |
