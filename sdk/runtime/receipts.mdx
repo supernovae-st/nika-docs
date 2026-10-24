@@ -34,6 +34,80 @@ That is a machine with a run-signing key in `~/.nika/keys/`
 ([quickstart step 2](/sdk/start/quickstart)). Without one, the same run
 succeeds and prints `false invalid receipt_mismatch` and `sealed: false`.
 
+<video
+  controls
+  muted
+  playsInline
+  preload="none"
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/sdk-admitted-executed-sealed.png"
+  aria-label="node gate.mts refuses list-files.nika, which runs ls under permits: {}, with NIKA-SEC-004 and never starts it, and a one-line permits fix runs it; node prove.mts on a machine with no signing key prints sealed false and receipt_mismatch, then after NIKA_KEYCHAIN=off nika key init prints sealed true and verified; node tamper.mts changes one byte of the trace, and node verify.mts prints not verified and the engine's BROKEN at line 5"
+  alt="node gate.mts refuses list-files.nika, which runs ls under permits: {}, with NIKA-SEC-004 and never starts it, and a one-line permits fix runs it; node prove.mts on a machine with no signing key prints sealed false and receipt_mismatch, then after NIKA_KEYCHAIN=off nika key init prints sealed true and verified; node tamper.mts changes one byte of the trace, and node verify.mts prints not verified and the engine's BROKEN at line 5"
+>
+  <source src="/videos/sdk-admitted-executed-sealed.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Admitted, executed, sealed: three different facts.** `check()` refuses a file that runs `ls` under `permits: {}` (`NIKA-SEC-004`, with its fix) and `run()` never starts it: no run, events or trace exist. One permits line fixes it. On a machine with no signing key, `prove.mts` runs `hello.nika`: the run succeeds, its receipt reads `sealed false · 5 events` and `traceVerify(receipt)` answers `receipt_mismatch`. After the quickstart's `NIKA_KEYCHAIN=off nika key init` (step 1 in the package README, as the comment on screen says), the next run reads `sealed true · 6 events` and `verified`. Then `tamper.mts` changes one byte on line 4 of the trace, and the stored receipt no longer verifies: the engine reports `BROKEN at line 5`. *Recorded in a terminal from `@supernovae-st/nika` 0.123.0 and its bundled engine `nika 0.123.0 (0bfde3765)`; every model call is `mock/echo`, the engine's offline rehearsal model, with no provider key and no network.*</p>
+
+<Accordion title="Transcript: every screen of the recording, in order">
+  ```text
+  $ cat list-files.nika                          # a teammate's file: runs ls, permits nothing
+  nika: list-files
+  model: mock/echo
+  permits: {}
+  tasks:
+    list:
+      exec:
+        command: ["ls", "-1"]
+  outputs:
+    files: ${{ tasks.list.output }}
+  $ node gate.mts list-files.nika
+  check  refused · exit 2
+         NIKA-SEC-004
+         exec task under a boundary that forbids shells (task `list`) — fix: add "ls" to permits.exec
+  run    not started · NIKA-SEC-004 · no run, no events, no trace
+  $
+
+  ── screen cleared ──
+
+  $ diff -u list-files.nika fixed/list-files.nika
+  --- list-files.nika     2026-10-24 19:02:08
+  +++ fixed/list-files.nika       2026-10-24 19:02:08
+  @@ -1,6 +1,7 @@
+   nika: list-files
+   model: mock/echo
+  -permits: {}
+  +permits:
+  +  exec: [ls]
+   tasks:
+     list:
+       exec:
+  $ node gate.mts fixed/list-files.nika
+  check  clean · exit 0
+  run    succeeded · 10 entries listed
+  $
+
+  ── screen cleared ──
+
+  $ node prove.mts                     # this machine has no signing key yet
+  run      succeeded · mock(echo) · Say hello from the Nika SDK.
+  receipt  sealed false · 5 events · head 0135b1202a1d…
+  verify   not verified · invalid · receipt_mismatch
+  $ NIKA_KEYCHAIN=off ./node_modules/.bin/nika key init   # quick start, step 1
+  run-signing key minted · fingerprint 847bf18789d52318
+    every run on this machine now seals its journal (verify: nika trace verify <file>)
+  $ node prove.mts
+  run      succeeded · mock(echo) · Say hello from the Nika SDK.
+  receipt  sealed true · 6 events · head b69360abfef1…
+  verify   verified
+  $ node tamper.mts
+  changed one byte on line 4 of .nika/traces/2026-10-24T15-02-41Z-7b95.ndjson
+  $ node verify.mts                             # later, from the receipt you stored
+  verify   not verified · invalid
+  engine   BROKEN at line 5 — recorded chain bb6c5faae667604f · computed fe7aa85e4fead3cc
+  $
+  ```
+</Accordion>
+
 ## What the verdict means
 
 Measured with `@supernovae-st/nika@0.123.0` on both transports:

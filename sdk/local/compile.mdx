@@ -81,6 +81,69 @@ console.log(outcome.status, outcome.compile_version) // ready 1
 model the workflow will use when it runs; nothing is spent until you run it,
 with that provider's key.
 
+<video
+  controls
+  muted
+  playsInline
+  preload="none"
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/sdk-compile.png"
+  aria-label="node author.mts with the intent Every morning, summarize ./inbox/*.md into ./digest.md prints round 1 incomplete with one required question, model, and four optional ones, and every morning as a trigger, not a task; answering model = mock/echo gives round 2 ready with no provider calls and a daily schedule that requires binding; the candidate checks clean as digest.nika, its permits read ./inbox/**, write ./digest.md and call nika:assert, nika:glob, nika:jq, nika:read and nika:write, and nika check plans it in nine waves"
+  alt="node author.mts with the intent Every morning, summarize ./inbox/*.md into ./digest.md prints round 1 incomplete with one required question, model, and four optional ones, and every morning as a trigger, not a task; answering model = mock/echo gives round 2 ready with no provider calls and a daily schedule that requires binding; the candidate checks clean as digest.nika, its permits read ./inbox/**, write ./digest.md and call nika:assert, nika:glob, nika:jq, nika:read and nika:write, and nika check plans it in nine waves"
+>
+  <source src="/videos/sdk-compile.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**One sentence, two rounds, no model call.** `author.mts` sends `Every morning, summarize ./inbox/*.md into ./digest.md`. Round 1 is `incomplete`: one required question, the run-time `model`, four optional ones, and `every morning` recorded as a trigger, not a task. Answering `model = mock/echo` through `nextCompileRequest()` makes round 2 `ready`, with no provider call; the daily schedule still `requires_binding`. The candidate checks clean and is kept as `digest.nika`: it asks to read `./inbox/**`, write `./digest.md` and call `nika:assert`, `nika:glob`, `nika:jq`, `nika:read` and `nika:write`, and `nika check` plans it in nine waves. Nothing runs. *Recorded in a terminal from `@supernovae-st/nika` 0.123.0 and its bundled engine `nika 0.123.0 (0bfde3765)`.*</p>
+
+<Accordion title="Transcript: every screen of the recording, in order">
+  ```text
+  $ node author.mts "Every morning, summarize ./inbox/*.md into ./digest.md"
+  round 1  incomplete · 1 required, 4 optional question(s)
+           ? model
+             Which explicit runtime provider/model should run the language steps (extract, classify, draft)?
+           · `every morning` is a trigger, not a task
+  answer   model = mock/echo (the offline rehearsal model)
+  round 2  ready · provider calls: none
+           trigger schedule · daily · requires_binding
+  check    clean · exit 0 · kept as digest.nika
+  $
+
+  ── screen cleared ──
+
+  $ sed -n '/^permits:/,/^tasks:/p' digest.nika      # the boundary the candidate asks for
+  permits:
+    fs:
+      read:
+      - ./inbox/**
+      write:
+      - ./digest.md
+    tools:
+    - nika:assert
+    - nika:glob
+    - nika:jq
+    - nika:read
+    - nika:write
+  tasks:
+  $
+
+  ── screen cleared ──
+
+  $ ./node_modules/.bin/nika check digest.nika | head -n 11
+  nika check · digest.nika
+   ✔ PLAN     9 waves · 9 tasks · max parallelism 1
+        wave 1 glob_source (invoke · nika:glob)
+        wave 2 glob_found (invoke · nika:jq)
+        wave 3 glob_admit (invoke · nika:assert)
+        wave 4 read_source (invoke · nika:read)
+        wave 5 documents (invoke · nika:jq)
+        wave 6 draft (infer · mock/echo)
+        wave 7 draft_anchors (invoke · nika:jq)
+        wave 8 draft_admit (invoke · nika:assert)
+        wave 9 write_output (invoke · nika:write)
+  $
+  ```
+</Accordion>
+
 ## The candidate is source, not a run
 
 A ready `candidate` is ordinary `.nika` text. Review it, write it to a file,

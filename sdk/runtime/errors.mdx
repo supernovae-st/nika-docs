@@ -50,6 +50,80 @@ list-notes.nika: refused NIKA-SEC-004 (status 2)
 `list-notes.nika` runs `ls` under `permits: {}`, see
 [permits](/sdk/runtime/permits).
 
+<video
+  controls
+  muted
+  playsInline
+  preload="none"
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/sdk-check-refused.png"
+  aria-label="node gate.mts list-files.nika, a file that runs ls -1 under permits: {}, prints check refused · exit 2, NIKA-SEC-004 and the fix add ls to permits.exec, then run not started · NIKA-SEC-004 · no run, no events, no trace; the rest of the recording fixes the permits, then seals, verifies and tampers with a run"
+  alt="node gate.mts list-files.nika, a file that runs ls -1 under permits: {}, prints check refused · exit 2, NIKA-SEC-004 and the fix add ls to permits.exec, then run not started · NIKA-SEC-004 · no run, no events, no trace; the rest of the recording fixes the permits, then seals, verifies and tampers with a run"
+>
+  <source src="/videos/sdk-admitted-executed-sealed.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**A refusal is not a run.** The poster is the first screen of the recording: `list-files.nika` runs `ls -1` under `permits: {}`, like `list-notes.nika`. `check()` returns the refusal (`exit 2`, `NIKA-SEC-004`) with its fix, and `run()` rejects with `NikaOperationError`, so no run, events or trace exist. Press play for the rest: the one-line fix, then an unsealed run, a sealed one and a tampered trace, which [Receipts](/sdk/runtime/receipts) explains. *Recorded in a terminal from `@supernovae-st/nika` 0.123.0 and its bundled engine `nika 0.123.0 (0bfde3765)`; every model call is `mock/echo`, the engine's offline rehearsal model, with no provider key and no network.*</p>
+
+<Accordion title="Transcript: every screen of the recording, in order">
+  ```text
+  $ cat list-files.nika                          # a teammate's file: runs ls, permits nothing
+  nika: list-files
+  model: mock/echo
+  permits: {}
+  tasks:
+    list:
+      exec:
+        command: ["ls", "-1"]
+  outputs:
+    files: ${{ tasks.list.output }}
+  $ node gate.mts list-files.nika
+  check  refused · exit 2
+         NIKA-SEC-004
+         exec task under a boundary that forbids shells (task `list`) — fix: add "ls" to permits.exec
+  run    not started · NIKA-SEC-004 · no run, no events, no trace
+  $
+
+  ── screen cleared ──
+
+  $ diff -u list-files.nika fixed/list-files.nika
+  --- list-files.nika     2026-10-24 19:02:08
+  +++ fixed/list-files.nika       2026-10-24 19:02:08
+  @@ -1,6 +1,7 @@
+   nika: list-files
+   model: mock/echo
+  -permits: {}
+  +permits:
+  +  exec: [ls]
+   tasks:
+     list:
+       exec:
+  $ node gate.mts fixed/list-files.nika
+  check  clean · exit 0
+  run    succeeded · 10 entries listed
+  $
+
+  ── screen cleared ──
+
+  $ node prove.mts                     # this machine has no signing key yet
+  run      succeeded · mock(echo) · Say hello from the Nika SDK.
+  receipt  sealed false · 5 events · head 0135b1202a1d…
+  verify   not verified · invalid · receipt_mismatch
+  $ NIKA_KEYCHAIN=off ./node_modules/.bin/nika key init   # quick start, step 1
+  run-signing key minted · fingerprint 847bf18789d52318
+    every run on this machine now seals its journal (verify: nika trace verify <file>)
+  $ node prove.mts
+  run      succeeded · mock(echo) · Say hello from the Nika SDK.
+  receipt  sealed true · 6 events · head b69360abfef1…
+  verify   verified
+  $ node tamper.mts
+  changed one byte on line 4 of .nika/traces/2026-10-24T15-02-41Z-7b95.ndjson
+  $ node verify.mts                             # later, from the receipt you stored
+  verify   not verified · invalid
+  engine   BROKEN at line 5 — recorded chain bb6c5faae667604f · computed fe7aa85e4fead3cc
+  $
+  ```
+</Accordion>
+
 ## `NikaOperationError`
 
 The engine refused an operation. Over the local transport:

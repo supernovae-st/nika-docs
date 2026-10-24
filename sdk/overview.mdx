@@ -66,6 +66,20 @@ local path such as `./release.nika` uses a compatible local engine to capture
 an immutable snapshot first. [How the SDK works](/sdk/how-it-works) compares
 the two doors line by line.
 
+<video
+  controls
+  muted
+  playsInline
+  preload="none"
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/sdk-doors.png"
+  aria-label="Animated illustration of the two doors: line 3 of demo.mts switches between new Nika(), which starts the bundled engine nika 0.123.0 as a child process, and new Nika({ url, token }), which reaches nika serve; the engine refuses list-files.nika with NIKA-SEC-004 before any run exists, runs hello.nika, streams six local or two server events, seals six hash-chained journal lines and verifies the receipt, and one changed byte makes the verifier report BROKEN at line 5"
+  alt="Animated illustration of the two doors: line 3 of demo.mts switches between new Nika(), which starts the bundled engine nika 0.123.0 as a child process, and new Nika({ url, token }), which reaches nika serve; the engine refuses list-files.nika with NIKA-SEC-004 before any run exists, runs hello.nika, streams six local or two server events, seals six hash-chained journal lines and verifies the receipt, and one changed byte makes the verifier report BROKEN at line 5"
+>
+  <source src="/videos/sdk-doors.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**An illustration of the two doors, with captured content.** Only line 3 of `demo.mts`, the quick start in the package README, changes: `new Nika()` starts the bundled engine as a child process, and `new Nika({ url, token })` reaches `nika serve`. The engine checks before anything runs: it refuses `list-files.nika` with `NIKA-SEC-004`, so no run exists, and runs `hello.nika`. The app reads six events from the local engine or two from the server, the run's record is sealed, `traceVerify(receipt)` answers `verified` locally and `sealed` from the server, and one changed byte makes the verifier report `BROKEN at line 5`. *An illustration: every code line, event, verdict, hash and version on screen was captured from `@supernovae-st/nika` 0.123.0, its bundled engine `nika 0.123.0 (0bfde3765)` and `nika serve` 0.123.0 in a `mock/echo` rehearsal; the cards, lanes, packets and pacing are drawn, and a real run takes milliseconds.*</p>
+
 ## One lifecycle vocabulary
 
 | Intent | Method | Door |

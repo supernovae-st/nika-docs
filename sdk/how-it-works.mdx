@@ -73,6 +73,20 @@ stateDiagram-v2
    [receipt](/sdk/runtime/receipts). `traceVerify(receipt)` asks the engine to
    check the run's hash-chained record against it.
 
+<video
+  controls
+  muted
+  playsInline
+  preload="none"
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/sdk-doors.png"
+  aria-label="Animated illustration of the two doors: line 3 of demo.mts switches between new Nika(), which starts the bundled engine nika 0.123.0 as a child process, and new Nika({ url, token }), which reaches nika serve; the engine refuses list-files.nika with NIKA-SEC-004 before any run exists, runs hello.nika, streams six local or two server events, seals six hash-chained journal lines and verifies the receipt, and one changed byte makes the verifier report BROKEN at line 5"
+  alt="Animated illustration of the two doors: line 3 of demo.mts switches between new Nika(), which starts the bundled engine nika 0.123.0 as a child process, and new Nika({ url, token }), which reaches nika serve; the engine refuses list-files.nika with NIKA-SEC-004 before any run exists, runs hello.nika, streams six local or two server events, seals six hash-chained journal lines and verifies the receipt, and one changed byte makes the verifier report BROKEN at line 5"
+>
+  <source src="/videos/sdk-doors.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**The lifecycle on both doors, as an illustration with captured content.** Only line 3 of `demo.mts`, the quick start in the package README, changes between `new Nika()` and `new Nika({ url, token })`. Admission: the engine refuses `list-files.nika` with `NIKA-SEC-004`, `run()` throws `NikaOperationError` and no run exists, while `hello.nika` is admitted. Observation: six local events, or two from `nika serve`. Settlement: `run.result()` reads `succeeded`. Proof: six hash-chained journal lines end in `run_sealed`, `traceVerify(receipt)` answers `verified` locally and `sealed` from the server, and one changed byte makes the verifier report `BROKEN at line 5`. *An illustration: every code line, event, verdict, hash and version on screen was captured from `@supernovae-st/nika` 0.123.0, its bundled engine `nika 0.123.0 (0bfde3765)` and `nika serve` 0.123.0 in a `mock/echo` rehearsal; the cards, lanes, packets and pacing are drawn, and a real run takes milliseconds.*</p>
+
 ## Who owns what
 
 | Concern | Owner | What that means |

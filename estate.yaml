@@ -18,17 +18,17 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 429
-  file_rows: 46
+  classified_files: 440
+  file_rows: 51
   pattern_rows: 6
   by_class:
-    authored: 422
+    authored: 433
     authored-pin: 1
     generated: 4
     pinned-copy: 2
     testimonial: 0
     foreign: 0
-  unverified-default: 105
+  unverified-default: 116
 files:
 - path: ".github/dependabot.yml"
   class: authored
@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: a31f6bc59a352dff2476c2b80a3c478e54f5bd507d7f91252f6989bee0cdf733
+  sha256: 62a5013a41defaaf76bb4cf9b7cbc2e714b85ce339661a4e5dfb18009190279c
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -149,6 +149,31 @@ files:
   class: authored
   sha256: 6083b94bfd48a63577479809f1cf337e587f560ea712e964b82ed424b28ffa4a
   evidence: "poster frame paired with videos/pr-check-comment.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/sdk-admitted-executed-sealed.png"
+  class: authored
+  sha256: 835a2be6aac698c77fbd084b18d93d96ae1c0b2472f20d020aa4958b2008ed32
+  evidence: "poster frame paired with videos/sdk-admitted-executed-sealed.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/sdk-compile.png"
+  class: authored
+  sha256: 20a9da9c6197efcb35dd4f0aac137fc3375a3377e2e76267fd807298fa5f8e79
+  evidence: "poster frame paired with videos/sdk-compile.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/sdk-doors.png"
+  class: authored
+  sha256: 5a6d51868a2384584a46f998036180c18eb51669ae1a685b0331650921594794
+  evidence: "poster frame paired with videos/sdk-doors.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/sdk-events.png"
+  class: authored
+  sha256: 6cb29266a3d79ef988ed953ea078f40b52a3ed3858222e616187edaf76a6b6ed
+  evidence: "poster frame paired with videos/sdk-events.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
+  note: "unverified-default"
+- path: "images/posters/sdk-remote.png"
+  class: authored
+  sha256: 37336dcfb5acd896b9f3d26a9a0d0dad8eb3605328415a20625ac64d7bb40b83
+  evidence: "poster frame paired with videos/sdk-remote.mp4/.webm (wired as the <video poster=…>) · extraction pipeline is not in this repo"
   note: "unverified-default"
 - path: "images/posters/spec-anatomy.png"
   class: authored
@@ -271,12 +296,12 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 293
-  aggregate_sha256: 41657c50a2ff8a62137fc27e7ed184417358ad31dfc34847c311eac000304187
+  aggregate_sha256: b7c7c4899caa268875d31a3a5af41eee08e0c42101b62cdf41caba95d895ce92
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
-  match_count: 34
-  aggregate_sha256: e9fc38f486f43722cd6e10bd56199a9f1239ff56de29b269bd9d8571c69c1297
+  match_count: 39
+  aggregate_sha256: df33de6f21d26af945db9a90a3229ff6fcbd54278f20b2963b72e2438bac711e
   evidence: "screen-capture demo video (poster twin under images/) · recording pipeline is not in this repo"
   note: "unverified-default"
 - glob: "images/og-*.png"
@@ -293,14 +318,14 @@ patterns:
   note: "unverified-default"
 - glob: "images/**"
   class: authored
-  match_count: 4
-  aggregate_sha256: 23d510d0e6c7babe0b0e7d88c72a2ce199c889c9608741c5087989693e139a40
+  match_count: 5
+  aggregate_sha256: 2a084eb949f69ea138ea43b32e7b3b538e73b064f30e664b5b5f0aa94d3a3bc6
   evidence: "bitmap asset · no in-repo derivation evidence"
   note: "unverified-default"
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 97f55060f11c7404661e8f97efc1bd1cc55b78c3f5b3870a49eba8e4abb0273f
+  aggregate_sha256: 4282f5e6a48b1481624d52b0b4c655e09ca8ab387e3ea059b9d72ee0ace6da99
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
@@ -329,6 +354,12 @@ unverified:
 - "images/posters/on-error-recover.png"
 - "images/posters/permits-audit.png"
 - "images/posters/pr-check-comment.png"
+- "images/posters/sdk-admitted-executed-sealed.png"
+- "images/posters/sdk-check-refused.png"
+- "images/posters/sdk-compile.png"
+- "images/posters/sdk-doors.png"
+- "images/posters/sdk-events.png"
+- "images/posters/sdk-remote.png"
 - "images/posters/spec-anatomy.png"
 - "images/posters/static-check-fix.png"
 - "images/posters/trace-proof.png"
@@ -401,6 +432,11 @@ unverified:
 - "videos/permits-audit.webm"
 - "videos/pr-check-comment.mp4"
 - "videos/pr-check-comment.webm"
+- "videos/sdk-admitted-executed-sealed.mp4"
+- "videos/sdk-compile.mp4"
+- "videos/sdk-doors.mp4"
+- "videos/sdk-events.mp4"
+- "videos/sdk-remote.mp4"
 - "videos/spec-anatomy.mp4"
 - "videos/spec-anatomy.webm"
 - "videos/static-check-fix.mp4"

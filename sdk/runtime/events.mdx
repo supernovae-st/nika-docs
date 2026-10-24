@@ -54,6 +54,77 @@ settlement reads `failed`. A human gate ends the stream with `run.waiting`
 count, and build a server-side progress view from `run.started`, the final
 event and `run.status()`.
 
+<video
+  controls
+  muted
+  playsInline
+  preload="none"
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/sdk-events.png"
+  aria-label="nika check plans brief.nika in three waves, with a nika:wait task named review in the second; watch.mts then prints sixteen run.events() with the second each arrived, from run.started at 0.0 s through a two-second gap to run.settled succeeded at 2.1 s, and the result succeeded · cause normal · 4/4 tasks ok"
+  alt="nika check plans brief.nika in three waves, with a nika:wait task named review in the second; watch.mts then prints sixteen run.events() with the second each arrived, from run.started at 0.0 s through a two-second gap to run.settled succeeded at 2.1 s, and the result succeeded · cause normal · 4/4 tasks ok"
+>
+  <source src="/videos/sdk-events.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**Sixteen events for a four-task run.** `nika check` first plans `brief.nika` in three waves, with a `nika:wait` task, `review`, in the second. `watch.mts` then prints each event of `run.events()` with the second it arrived: `run.started`, four `task.scheduled`, a `task.started` and a `task.completed` per task, two `engine.event`s whose frame (`permit_checked`, `workflow_completed`) is on `event.raw.kind`, and `run.settled`; then `result()` reads `succeeded · cause normal · 4/4 tasks ok`. The two-second gap is `review` waiting: engine 0.123.0 streams its start only when it completes. *Recorded in a terminal from `@supernovae-st/nika` 0.123.0 and its bundled engine `nika 0.123.0 (0bfde3765)`; every model call is `mock/echo`, the engine's offline rehearsal model, with no provider key and no network.*</p>
+
+<Accordion title="Transcript: every screen of the recording, in order">
+  ```text
+  $ ./node_modules/.bin/nika check brief.nika | head -n 5
+  nika check · brief.nika
+   ✔ PLAN     3 waves · 4 tasks · max parallelism 2
+        wave 1 audience (infer · mock/echo) · risks (infer · mock/echo)
+        wave 2 review (invoke · nika:wait)
+        wave 3 brief (infer · mock/echo)
+  $
+
+  ── screen cleared ──
+
+  $ cat watch.mts
+  import { Nika } from '@supernovae-st/nika';
+
+  const nika = new Nika({ cwd: process.cwd() });
+  const run = await nika.run<{ brief: string }>('brief.nika', { maxCostUsd: 0 });
+
+  // One lifecycle vocabulary; the engine's own frame stays on event.raw.
+  const t0 = performance.now();
+  for await (const event of run.events()) {
+    const at = ((performance.now() - t0) / 1000).toFixed(1).padStart(4);
+    const frame = event.kind === 'engine.event' ? `(${event.raw.kind})` : '';
+    console.log(`${at}s  ${event.kind.padEnd(15)} ${event.task ?? ''}${event.status ?? ''}${frame}`);
+  }
+
+  // Events are observation; result() is the terminal truth.
+  const { status, settlement } = await run.result();
+  const tasks = settlement?.tasks;
+  console.log(`\nresult  ${status} · cause ${settlement?.cause} · ${tasks?.ok}/${tasks?.total} tasks ok`);
+  $
+
+  ── screen cleared ──
+
+  $ node watch.mts
+   0.0s  run.started
+   0.0s  task.scheduled  audience
+   0.0s  task.scheduled  risks
+   0.0s  task.scheduled  review
+   0.0s  task.scheduled  brief
+   0.0s  task.started    audience
+   0.0s  task.completed  audience
+   0.0s  task.started    risks
+   0.0s  task.completed  risks
+   2.0s  task.started    review
+   2.0s  engine.event    (permit_checked)
+   2.0s  task.completed  review
+   2.0s  task.started    brief
+   2.0s  task.completed  brief
+   2.0s  engine.event    (workflow_completed)
+   2.1s  run.settled     succeeded
+
+  result  succeeded · cause normal · 4/4 tasks ok
+  $
+  ```
+</Accordion>
+
 | `event.kind` | Local frame (`event.raw.kind`) | Server frame (`event.raw.kind`) |
 |---|---|---|
 | `run.started` | `workflow_started` | `execution.started` |

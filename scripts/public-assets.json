@@ -56,5 +56,16 @@
   "images/posters/cost-ceiling.png": "abb99b64fef9d83617a0c5a2ce98d1babc851ec937838deeca2601dae1e23ab9",
   "videos/approval-gate.mp4": "417569ec83b4243fe89ecbe9811cc54cc7f0afd3a0938faae5b04b5a038a3bf4",
   "videos/approval-gate.webm": "1a6836aac504d693aae43ac4d957d5e194f35d84b468f56bcb47aa6e7da2131f",
-  "images/posters/approval-gate.png": "4670ab43b896f9c1c34c5d422967db2cae540394c9b6b951ec30b4f7ffe2ad41"
+  "images/posters/approval-gate.png": "4670ab43b896f9c1c34c5d422967db2cae540394c9b6b951ec30b4f7ffe2ad41",
+  "videos/sdk-doors.mp4": "7dbcfea7d73978d30698e5768bbcbea1be8698b1b60d3370a4883316cb1ef89d",
+  "images/posters/sdk-doors.png": "5a6d51868a2384584a46f998036180c18eb51669ae1a685b0331650921594794",
+  "videos/sdk-events.mp4": "8c479a8e2fdea3eb7f2abdea1888f6dde20673aeeed583966d5d0ff9ec146c59",
+  "images/posters/sdk-events.png": "6cb29266a3d79ef988ed953ea078f40b52a3ed3858222e616187edaf76a6b6ed",
+  "videos/sdk-admitted-executed-sealed.mp4": "827ab3bf65f51dfc8b501864d748943156b24202070258f33675292f60da28bc",
+  "images/posters/sdk-admitted-executed-sealed.png": "835a2be6aac698c77fbd084b18d93d96ae1c0b2472f20d020aa4958b2008ed32",
+  "images/posters/sdk-check-refused.png": "12f693160f91796991d69ec5e31f81b8fcf1359e2ee749f7091a19c7bd54daed",
+  "videos/sdk-remote.mp4": "8989fe33f5edfd742d01c01b96375d70878713a609ef796ddefd43099c0b59d6",
+  "images/posters/sdk-remote.png": "37336dcfb5acd896b9f3d26a9a0d0dad8eb3605328415a20625ac64d7bb40b83",
+  "videos/sdk-compile.mp4": "30b3d780803a40b8a276a182f7fc3d4768f519b89949531ab226c55d06beb61b",
+  "images/posters/sdk-compile.png": "20a9da9c6197efcb35dd4f0aac137fc3375a3377e2e76267fd807298fa5f8e79"
 }

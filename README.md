@@ -187,10 +187,17 @@ flowchart LR
 
 Clips are rendered in the engine repository from captured CLI output
 (see [`media/`](https://github.com/supernovae-st/nika/tree/main/media)).
-Never edit an export by hand: change the clip there and render it again.
+The SDK clips (`sdk-*`) are rendered in the
+[SDK repository](https://github.com/supernovae-st/nika-client) from the
+published npm package; its `media/README.md` says how each one is recorded
+and checked. Never edit an export by hand: change the clip in its repository
+and render it again.
 
 1. **Copy the files.** `media/videos/NAME.webm` and `NAME.mp4` go to
-   `videos/`; `media/posters/NAME.png` goes to `images/posters/`.
+   `videos/`; `media/posters/NAME.png` goes to `images/posters/`. An SDK
+   clip has no WebM: copy `media/videos/NAME.mp4` and its still,
+   `media/stills/NAME.png`, as the poster, and give its `<video>` one
+   `<source>`.
 2. **Review them for a public audience**, then add each file's SHA-256 to
    `scripts/public-assets.json` (`sha256sum videos/NAME.* images/posters/NAME.png`).
    The publication audit refuses media it has not seen.
@@ -221,7 +228,10 @@ Never edit an export by hand: change the clip there and render it again.
 > [!NOTE]
 > One clip per page keeps pages light. `controls` lets a reader pause the
 > loop; `aria-label` names the video for screen readers and `alt` is what
-> `mint a11y` checks. Keep each file well under 20 MB, the Mintlify
+> `mint a11y` checks. The SDK pages drop `autoPlay` and `loop` and add
+> `preload="none"`: their recordings show code to read, so the poster stays
+> until the reader presses play, which also respects a reduced-motion
+> preference. Keep each file well under 20 MB, the Mintlify
 > preview's limit. A page that still waits for its clip carries an MDX
 > comment, `{/* motion: … */}`: `grep -rn "motion:" --include=*.mdx .`
 > lists them.
