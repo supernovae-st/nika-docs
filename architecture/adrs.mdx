@@ -19,7 +19,8 @@ proposed records stay as the record of open designs, not as a plan.
   **Canonical source:** [`docs/adr/index.json`](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/index.json)
   (machine-readable) + [`docs/adr/README.md`](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/README.md)
   (human index). One file per ADR. An accepted ADR changes only by an
-  amendment (recorded in its `amends` trail) or by a superseding ADR.
+  amendment (a later ADR names it in its frontmatter `amends:` list) or by a
+  superseding ADR.
 </Info>
 
 ## At a glance
@@ -329,7 +330,7 @@ Every ADR carries rich metadata in both its frontmatter and `index.json`:
 | `related` | Sibling ADRs in the same design arc |
 | `requires` | Prerequisite ADRs (this one makes no sense without them) |
 | `enables` | Downstream ADRs this one unlocks |
-| `amends` | Accepted ADRs this one amends in place (ADR-154 amends ADR-004, ADR-023 and ADR-143) |
+| `amends` | Accepted ADRs this one amends in place, in the frontmatter only: `index.json` has no `amends` key (ADR-154 amends ADR-004, ADR-023 and ADR-143) |
 
 ## Gate 12 integration
 
