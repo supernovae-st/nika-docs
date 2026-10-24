@@ -20,10 +20,12 @@ tools, cost ceiling, secrets — **before a single token is spent**.
 
 ## Install an artifact
 
-Today the flow is a short, auditable script (the `nika add` verb is on the
-[engine roadmap](https://github.com/supernovae-st/nika)):
+The supported path is a short, auditable script in the registry
+repository. It needs **Python 3.11 or newer** (it reads TOML with the
+standard library) and **PyYAML** for its local audit step:
 
 ```sh
+python3 -m pip install pyyaml                 # once · the audit step reads YAML
 git clone https://github.com/supernovae-st/nika-registry && cd nika-registry
 python3 scripts/get.py --list                 # what exists
 python3 scripts/get.py meeting-actions        # fetch → verify sha256 → local audit → done
@@ -31,7 +33,16 @@ python3 scripts/get.py meeting-actions        # fetch → verify sha256 → loca
 
 `get.py` refuses on any mismatch (hash · advisory · file already there) and
 **never executes anything** — the workflow lands on disk and you decide to
-run it. Not `curl | sh`.
+run it. Not `curl | sh`. Then check and run the file by its path like any
+other workflow.
+
+<Warning>
+  **The engine's `registry:` door is refused in 0.123.0.**
+  `nika check registry:owner/name` and `nika run registry:…` stop at the
+  first fetch with `NIKA-REG-005`: the public index speaks schema 2 and this
+  engine reads schema 1. Use `get.py`, then the local file
+  ([Known limits](/changelog/known-limits#registry-coordinates-are-refused)).
+</Warning>
 
 ## The guarantees
 

@@ -87,10 +87,12 @@ belt-and-braces) · [Support triage](/examples/support-triage) (enums).
 ## 4 · Fan out with a leash
 
 `for_each` over a runtime collection is the power move. The leash lives
-*inside the block* (`items` · `max_parallel` · `fail_fast`) — a bare
-`${{ }}` after `for_each:` is `NIKA-PARSE-019`, and knobs as task
-siblings are `NIKA-PARSE-005`. Bound `max_parallel` (providers
-rate-limit, GPUs thrash), set `fail_fast: false` (collect errors
+*inside the block* (`items` · `max_parallel` · `max_items` ·
+`fail_fast`) — a bare `${{ }}` after `for_each:` is `NIKA-PARSE-019`, and
+knobs as task siblings are `NIKA-PARSE-005`. Bound `max_parallel`
+(providers rate-limit, GPUs thrash), cap the count with `max_items` (a
+longer collection fails the task before its first item, `NIKA-VAR-006`,
+never a silent truncation), set `fail_fast: false` (collect errors
 instead of aborting the batch) and give each iteration its own `retry`
 and `timeout`.
 
@@ -151,7 +153,7 @@ without a `prompt` gate, or claims success without an `assert`, is
 promising more than it checks.
 
 **Anti-pattern** · a `tasks.*` status test inside `when:` as a plain
-success gate. That form is illegal since W2 (`NIKA-VAR-021`): the gate
+success gate. That form is refused (`NIKA-VAR-021`): the gate
 lives on the edges — a value edge already admits on `{success, skipped}`,
 and `after: { a: success }` is the strict form. `when:` decides
 *business* conditions on local values, post-gate.
@@ -182,7 +184,7 @@ it cleanly.
 only needed to read. Least privilege costs one line less.
 
 Taught by · [PR review fan-out](/examples/pr-review-fanout) (the
-read-only swarm) · [Code review](https://github.com/supernovae-st/nika-spec/blob/main/examples/23-code-review.nika)
+read-only swarm) · [Code review](https://github.com/supernovae-st/nika-spec/blob/main/examples/06-code-review.nika)
 (foundation).
 
 ## 9 · Evidence always lands · `unwind` and `terminal`
@@ -222,7 +224,7 @@ A workflow with typed `outputs:` is a building block: another workflow
 out, type it, describe it.
 
 Taught by · [Deep research brief](/examples/deep-research-brief)
-(`{brief, sources}`) · [Schema retry](https://github.com/supernovae-st/nika-spec/blob/main/examples/19-schema-retry.nika)
+(`{brief, sources}`) · [Schema retry](https://github.com/supernovae-st/nika-spec/blob/main/examples/04-schema-retry.nika)
 (foundation · the typed-outputs shape).
 
 ## 12 · Mock-first · runnable with zero keys
@@ -251,7 +253,7 @@ model: mock/echo              # mock-first · sovereignty is one line away
 
 inputs:                       # typed · what the CALLER supplies · a deployment dial is an input with a default
 const:                        # fixed in the file · the destinations the boundary pins
-secrets:                      # vault/env-backed · never inline
+secrets:                      # env- or file-backed · never inline
 
 permits:                      # the blast radius · absent = zero authority
 
@@ -291,8 +293,9 @@ await_export:
     backoff_ms: 30000          # every 30s · 20 attempts · 10-minute ceiling
 ```
 
-Bounded, deterministic, zero LLM. (`retry_when:`, retrying on a value
-condition directly, is reserved for a future minor.)
+Bounded, deterministic, zero LLM. There is no `retry_when:`: `retry:`
+fires on errors only (`on_codes:` narrows which ones), so a value you want
+to wait on has to become an error, as above.
 
 ### Diamond join
 
@@ -322,10 +325,11 @@ what it is:
 ```yaml
 scrape_all:
   with:
-    pages: ${{ tasks.discover.pages }}
+    pages: ${{ tasks.discover.output.pages }}
   for_each:
     items: ${{ with.pages }}
     max_parallel: 5
+    max_items: 50                    # a longer list fails before the first fetch
     fail_fast: false
   on_error: { recover: null }        # this iteration yields null · the batch lives
   invoke:

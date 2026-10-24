@@ -69,7 +69,7 @@ flowchart LR
     | `NIKA-VAR-021` | you referenced `${{ tasks.X.* }}` in a verb body, `when:` or `for_each:`: hoist it into `with:` and read `${{ with.<name> }}` (`nika check --fix` applies it) |
     | `NIKA-PARSE-024` | `depends_on:` is dead: data → a `with:` binding · control → `after: { x: success }` (`nika check --fix` migrates) |
     | `NIKA-DAG-001` | cycle: remove the back-edge |
-    | `NIKA-DAG-005` | unknown `after:` predicate: the set is closed — `success` · `failure` · `skipped` · `terminal` (the participial `succeeded`/`failed` are dead spellings · `nika check --fix` respells them) |
+    | `NIKA-DAG-005` | unknown `after:` predicate: the set is closed — `success` · `failure` · `skipped` · `terminal` · `unwind` (the participial `succeeded`/`failed` are dead spellings · `nika check --fix` respells them) |
     | `NIKA-VAR-001` | undeclared name: declare it under the authority its role commands — `inputs:` · `const:` · `secrets:` — or fix the typo |
     | `NIKA-PROVIDER` | `model:` must be `<provider>/<name>` with a canonical prefix |
     | `NIKA-PARSE` (duplicate id) | two tasks share an id: rename one |
@@ -101,8 +101,8 @@ them; knowing them just saves round-trips:
    nothing.
 7. **`nika:done` only inside `agent.tools`** · it is the loop
    sentinel, meaningless elsewhere.
-8. **Fan-outs get the leash** · `max_parallel` + `fail_fast: false` +
-   per-iteration `retry`/`timeout`.
+8. **Fan-outs get the leash** · `max_parallel` + `max_items` +
+   `fail_fast: false` + per-iteration `retry`/`timeout`.
 9. **Native-first** · `invoke: nika:*` → `mcp:<server>/<tool>` →
    `exec:` last. An `exec:` a builtin covers earns a `native-first`
    hint; `nika check --native-strict` fails on any that remain, and a
@@ -116,8 +116,9 @@ them; knowing them just saves round-trips:
     classify by the role the value plays, never
     rename in bulk.
 11. **A body with effects carries `permits:`** · an absent block is
-    **zero** authority, not a free pass: the check refuses with
-    `NIKA-AUTH-006` before a token is spent, and the run refuses with
+    **zero** authority, not a free pass: `nika check` and `nika run` both
+    refuse it with `NIKA-AUTH-006` before a token is spent (the run applies
+    the same audit). A declared block that misses a tool or a path is
     `NIKA-SEC-004`. Write the block with `nika check --infer-permits`,
     which prints the tightest one and is paste-ready.
 12. **Extract facts, then the law** · the model emits closed numeric

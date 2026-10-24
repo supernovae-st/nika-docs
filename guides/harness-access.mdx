@@ -1,18 +1,20 @@
 ---
 title: "Run it with what you already have"
 sidebarTitle: "Harness access (experimental)"
-description: "Point an agent task at the harness you already pay for — gemini-cli, qwen-code, codex, claude — under nika's authority, billed honestly."
+description: "Point a task at an agent CLI you already pay for — Codex, Claude Code, Copilot, Grok Build, Gemini CLI and others — under nika's authority, billed honestly."
 icon: "key"
 ---
 
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
 <Warning>
-Experimental. Engine 0.120.1 ships the adapters in the default CLI
+Experimental. Engine {STATUS.version} ships the adapters in the default CLI
 build (`default = ["access-harness"]` in
-[`nika-cli` at `v0.120.1`](https://github.com/supernovae-st/nika/blob/v0.120.1/crates/nika-cli/Cargo.toml#L64)).
+[`nika-cli` at `v0.123.0`](https://github.com/supernovae-st/nika/blob/v0.123.0/crates/nika-cli/Cargo.toml#L72)).
 You still need the harness **installed and signed in**, and a `model:`
 that seat can serve. `nika doctor` listing a CLI is detection, not a
 completed generation. Retired ACP wrapper ids (`claude-agent-acp` ·
-`codex-acp`) refuse with `NIKA-1802`.
+`codex-acp`) are not seats and refuse with `NIKA-1802`.
 </Warning>
 
 `model:` picks the intelligence. **Access** picks the path the run
@@ -24,23 +26,38 @@ that path with a witness. Unsatisfied pins refuse (`NIKA-1801` ·
 ## What you need
 
 The harness, signed in the way IT expects. Nika never holds its
-credential. Seats on 0.120.1:
+credential. `nika doctor` prints one `runtime` row per seat (detected,
+signed in or not) and the fix for each one that is not ready. The seats
+in {STATUS.version}:
 
-| `--access` seat | Serves |
-|---|---|
-| `gemini-cli` | `gemini/…` models |
-| `qwen-code` | `qwen/…` models |
-| `kimi-code` | Moonshot / Kimi models |
-| `codex` | `openai/…` models |
-| `claude-code` | `anthropic/…` models |
+| `--access` seat | The harness | Routed to it when nothing is pinned | `infer:` tasks |
+|---|---|---|---|
+| `codex` | Codex | `openai/…` models | yes |
+| `claude-code` | Claude Code | `anthropic/…` models | yes |
+| `copilot` | GitHub Copilot CLI | its own routing | yes |
+| `grok-build` | Grok Build | `xai/…` models | yes |
+| `gemini-cli` | Gemini CLI | `gemini/…` models | no: `agent:` tasks only |
+| `kimi-code` | Kimi Code | `moonshot/…` models | no: `agent:` tasks only |
+| `qwen-code` | Qwen Code | `qwen/…` models, which this build does not resolve | no: `agent:` tasks only |
+| `opencode` | OpenCode | its own routing | no: `agent:` tasks only |
+
+Every seat runs `agent:` tasks over the Agent Client Protocol. An `infer:`
+task needs a one-shot, tool-free answer, which only the four seats marked
+`yes` are admitted for. With `--access <seat>`, every model in the file
+goes to that seat, and only the run proves the seat can serve it.
 
 Classes also pin: `local` · `mock` · `harness` · `oauth` · `api`.
 
-## Run it
+## Check, then run
 
 ```bash
-nika run flow.nika --access gemini-cli
+nika check flow.nika --access codex   # installed? signed in? fit for each task?
+nika run flow.nika --access codex
 ```
+
+`nika check --access` judges the same access plan the run uses, so a seat
+that is missing, signed out or unfit for an `infer:` task is named before
+anything runs.
 
 ## The authority bridge
 
