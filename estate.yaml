@@ -176,7 +176,7 @@ files:
   evidence: "hand-written pre-push gate config (mint broken-links · link-audit · teach-parity · oracle-sweep)"
 - path: "reference/error-codes.mdx"
   class: authored
-  sha256: 808ea327f507fc7ccb578594e117c91e1f040dda7f1082e61b7d0bbe11ba7c1c
+  sha256: 530a320af484233351b63ae7294326a044d424f9f6e3f0a5ff9b8974b40300a5
   evidence: "mixed page: authored frontmatter and prose around errors-*:begin/end tables projected from the spec diagnostic registry by showcase-projector.py"
   note: "the errors-categories, errors-codes and errors-namespaces blocks are projected from nika-spec canon/diagnostics/registry.yaml; edit the registry and re-project, never hand-edit those blocks; this repo's gate does not independently re-derive them"
 - path: "reference/mcp-catalog.mdx"
@@ -271,7 +271,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 292
-  aggregate_sha256: 2fb4ef91e08088650f6bf3a7b07f6cf54396d5cfb2aab8eee5527d254c86a137
+  aggregate_sha256: 526d1b0243e798170a845aa2a7a192ac24d4b88bca81b10ea303dce49e93a058
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

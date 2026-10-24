@@ -5,6 +5,8 @@ description: "The versioned JSON wires — every human surface has a machine twi
 icon: "plug"
 ---
 
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
 > The law: **every human-facing surface has a `--json` twin**, every
 > machine payload carries a **version envelope**, and evolution is
 > **additive-only** — a field is added, never renamed or removed within
@@ -15,18 +17,26 @@ icon: "plug"
 
 | Surface | Envelope | What it carries |
 |---|---|---|
-| `nika check <file> --json` | `report_version` | the full audit report: conformance findings (each with `code` · `severity` · `docs_url` · span), cost intervals per task, the derivation certificate, requirements (models · secrets · env), secret-flow findings, hints, pricing provenance (`pricing.snapshot`) |
-| `nika doctor --json` | — (stable shape) | the environment diagnosis: per-finding status + the exact fix command, key PRESENCE (never values), local provider reachability |
-| `nika catalog --json` | `catalog_version` | the provider/model vocabulary: models, capabilities, key env-var NAMES |
-| `nika catalog --tools --json` | `tools_version` | the builtin tool catalog with model-facing JSON Schemas per tool |
-| `nika inspect <file> --format json` | `graph_format` (`3`) | the ONE graph projection: nodes (id · `kind`: `task` · `finally` · verb · model/tool · when · fan-out · permits · cost interval) + **typed edges** (`kind`: `value` · `terminal-observation` · `failure-observation` · `control` + `predicate` · `recovery` · `finally` with `predicate: unwind` — `binding` on data edges) — mermaid and dot are derived from this, never parallel truths. Formats 1 and 2 are dead: a reader refuses a format it does not speak; a pinned golden is regenerated from the binary, never hand-edited; within format 3, evolution is additive-only |
-| `nika run <file> --json` | NDJSON stream | the live event stream, one JSON object per line — the same events the trace records · the last line is `run_settled` with `status` ∈ `succeeded` · `failed` · `paused` · `cancelled` (0.118), the `error` cause on a failed run, `evidence` ∈ `sealed` · `unsealed` · `lost` · `none` (what the run left behind, said, never implied by an absent receipt) and the lanes that served |
-| `nika trace ls --json` | — (stable shape) | the run inventory: every recorded trace with its state (`succeeded` · `failed` · `paused` · `cancelled` · `running` · `dead`) and its writer's `liveness` (`alive` · `dead` · `unknown` — the lease beside the journal, never a guess), age, size, resume marker (0.118) |
-| `nika trace outputs --json` | — (stable shape) | one run's task projection: `state` and per task `status` · `error_code` · `recovered_from` · `integrity_source` (the upstream whose recovered fallback fed it) · a fan-out's `items` rows (0.118) |
-| `nika trace export` | OTLP | any recorded journal projected to OpenTelemetry (Jaeger · Grafana · Langfuse) |
-| `nika spec --canon` | `schema_version` | the embedded canon SSOT (counts and names — cite it, never a remembered number) |
-| `nika spec --schema` | JSON Schema `$id` | the embedded workflow schema — the same one editors validate against |
-| `nika spec --schema --project` | JSON Schema `$id` | the project file's schema (`nika.yaml` · `ceiling` · `traces` · `arm:` beats) — emitted from the parser, proven against its closed key sets (0.118) |
+| `nika check <file> --json` | `report_version` (`1`) | the full audit report: `clean` and the `verdicts` layers (`valid` · `access_ready` · `capacity_fit` · `run_ready` · `blockers`), conformance findings (each with `code` · `severity` · `docs_url` · span), the access plan, cost intervals per task, the derivation certificate, requirements (models · secrets · inputs), secret-flow and order-law findings, hints, `risk_grade`, pricing provenance (`pricing.snapshot`) |
+| `nika run <file> --dry-run --json` | `plan_version` (`1`) | the plan only, zero effects: waves, tasks, access, cost, permits, requirements |
+| `nika run <file> --json` | NDJSON stream | the live event stream, one JSON object per line, the same events the trace records. The last line is `run_settled`: `status` (`succeeded` · `failed` · `paused` · `cancelled`), `cause`, `outputs`, the `tasks` tally, `spend` with its qualifier, the `receipt` (trace path, chain head, `sealed`), `evidence` (`sealed` · `unsealed` · `lost` · `none`: what the run left behind, said rather than implied), the `access_plan` that served, and the `error` of a failed run |
+| `nika explain <file> --json` | `explain_version` (`1`) | the narration of a workflow file as data: waves, cost before a token is spent, what it touches |
+| `nika doctor --json` | none (stable shape) | the environment diagnosis: findings with the exact fix command, access paths, local model probes, key presence (never values) |
+| `nika welcome --json` | `welcome_version` (`1`) | the mirror: what this binary contains and what this machine has, presence only |
+| `nika welcome --deep --json` | `context_version` (`1`) | the whole workspace in one call: every workflow with its verdict, recent runs from the trace store, the environment, roll-ups; caps are always reported and paths stay relative |
+| `nika catalog --json` | `catalog_version` (`1`) | the provider and model vocabulary: models, capabilities, key env-var names, `resolves` (whether this build drives the provider) |
+| `nika catalog --tools --json` | `tools_version` (`1`) | the builtin tool catalog with model-facing JSON Schemas per tool |
+| `nika inspect <file> --format json` | `graph_format` (`3`) | the one graph projection: nodes (id · `kind`: `task` · `finally` · verb · model/tool · when · fan-out · permits · cost interval) and **typed edges** (`kind`: `value` · `terminal-observation` · `failure-observation` · `control` with its `predicate` · `recovery` · `finally` with `predicate: unwind`; `binding` on data edges). Mermaid, dot and ascii derive from it. Formats 1 and 2 are retired: a reader refuses a format it does not speak; within format 3, evolution is additive-only |
+| `nika compile … --json` | `compile_version` (`1`) | the compile result: its status (`ready` · `incomplete` …), the candidate, its provenance and any questions |
+| `nika arm --json` | `schedule_readiness_version` (`2`) | each beat's readiness (`READY` · `UNREADY` · `DORMANT`), blockers, inputs and next fire ([arm](/reference/arm)) |
+| `nika trace ls --json` | `ls_version` (`1`) | the trace store: every recorded trace with its `state` (`succeeded` · `failed` · `paused` · `cancelled` · `running` · `dead`), its writer's `liveness`, age, size, workflow and the resume marker |
+| `nika trace outputs --json` | `outputs_version` (`2`) | one run's settlement and its tasks: per task `status` · `error_code` · `recovered_from` · `integrity_source` · a fan-out's `items` rows |
+| `nika trace verify --json` | `verify_version` (`1`) | the verdict of the chain and the proof ladder (OK · SEALED · ANCHORED · REPLAYED) |
+| `nika trace cost --json` | `cost_inspect_version` (`1`) | this project's unknown cost exposures, as data |
+| `nika trace export` | OTLP | a recorded journal projected to OpenTelemetry spans with GenAI attributes (Jaeger, Grafana, Langfuse) |
+| `nika spec --canon` | `schema_version` | the embedded canon (counts and names: cite it, never a remembered number) |
+| `nika spec --schema` | JSON Schema `$id` | the embedded workflow schema, the same one editors validate against |
+| `nika spec --schema --project` | JSON Schema `$id` | the project file's schema (`nika.yaml` · `ceiling` · `traces` · `arm:` beats), emitted from the parser and proven against its closed key sets |
 
 `nika check -` reads the workflow from **stdin** — editors and agents
 audit keystroke-fresh buffers without touching the disk.
@@ -66,10 +76,10 @@ exit-code contract (locked · additive-only), not an accident:
 
 | Code | Meaning |
 |---|---|
-| `0` | success — clean check · completed run |
-| `1` | the workflow ran and failed (a task settled failed) |
-| `2` | findings / usage / refusal — check findings, bad flags, the `--max-cost-usd` floor refusal |
-| `3` | environment — missing file, no golden to compare, binary-level trouble |
+| `0` | success: a clean check, a settled run |
+| `1` | the workflow ran and failed: a task settled failed, or a budget stop (`NIKA-1704`) |
+| `2` | the file: check findings, a grammar refusal, a mistyped flag, a cost floor above `--max-cost-usd` (`NIKA-1709`) |
+| `3` | the environment: a missing or unreadable file, no ready access path (`NIKA-1800`), an unsatisfied `--access` pin, a missing required input (`NIKA-1708`), no golden to compare |
 | `4` | paused — the run parked on a blocking `nika:prompt` (durable pause · ADR-099) · not a failure but non-zero on purpose · resume with `nika run --resume <trace> --answer <task>=<value>` |
 | `130` | the runtime settled as cancelled after an operator request (0.118) — completed in-flight work is counted and unstarted tasks are cancelled; read the reported evidence state to determine whether a trace was sealed · a second Ctrl-C aborts mid-flight and can leave the trace incomplete · 128 + SIGINT, the code every shell already reads as interrupted |
 
@@ -79,12 +89,13 @@ moves to stderr so stdout stays parseable.
 
 ## The MCP oracle
 
-`nika mcp` serves the same truths over the Model Context Protocol
-(stdio, read-only): validate (`nika_check` — a dirty workflow returns
-`isError: true`, mirroring the CLI's exit 2) and learn (`nika_schema` ·
-`nika_examples` · `nika_template` · `nika_canon` · `nika_catalog` ·
-`nika_tools` · `nika_explain`). Same owning builders as the CLI
-payloads — the two lanes cannot drift apart by construction.
+`nika mcp` serves the same truths over the Model Context Protocol, read-only,
+over stdio by default or Streamable HTTP with `--transport http`: validate
+(`nika_check`: a dirty workflow returns `isError: true`, mirroring the CLI's
+exit 2) and learn (`nika_schema` · `nika_examples` · `nika_template` ·
+`nika_canon` · `nika_catalog` · `nika_tools` · `nika_explain` ·
+`nika_inspect`). The same builders produce the CLI payloads, so the two
+cannot drift apart. [MCP server](/reference/mcp-server) describes each tool.
 
 ## The evolution rules
 
@@ -99,8 +110,6 @@ payloads — the two lanes cannot drift apart by construction.
   or machine. Requirements name the env var; doctor reports set/unset.
 
 <Note>
-  `nika welcome --deep --json` ships on the released 0.120.1 binary —
-  the whole workspace truth in one call (file map with per-file verdicts ·
-  run inventory · environment snapshot · wiring state). Caps are always
-  reported; paths stay relative.
+  Every row above was read from `nika {STATUS.version}`. An envelope you do
+  not recognize is a newer payload: refuse it rather than guess.
 </Note>

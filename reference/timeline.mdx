@@ -5,8 +5,8 @@ icon: "timeline"
 ---
 
 Nika's timeline is owned by the specification's
-[`timeline/timeline.yaml`](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/timeline/timeline.yaml).
-This guide explains that record at the linked revision. Read
+[`timeline/timeline.yaml`](https://github.com/supernovae-st/nika-spec/blob/7937fc93a278b07da00f67e80ede672da269eba3/timeline/timeline.yaml).
+This guide explains that record at the linked revision, which includes the 0.121.0 and 0.123.0 engine releases. Read
 [releases](/changelog/releases) for the automatically synchronized publication index,
 [historical milestones](/changelog/history) for the original dated accounts,
 [current status](/reference/status) for the released engine, and
@@ -34,7 +34,7 @@ grammar. Use the current reference when authoring a workflow.
 | `private-archive` | A recorded archive reference that requires access |
 | `testimony` | A dated account without mechanical proof |
 
-The source's [`timeline/verify.py`](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/timeline/verify.py)
+The source's [`timeline/verify.py`](https://github.com/supernovae-st/nika-spec/blob/7937fc93a278b07da00f67e80ede672da269eba3/timeline/verify.py)
 checks mechanically verifiable references. Testimony and private archives keep
 their labels; they do not become public proof. This page describes the checking
 contract and does not claim that a fresh verification run has just passed.
@@ -46,17 +46,18 @@ A gate being listed is not evidence that it has closed. Follow its source and
 the dated evidence before interpreting it as a delivered capability.
 
 One example referenced by the roadmap is the
-[hundred-year gate](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/timeline/timeline.yaml#L410)
+[hundred-year gate](https://github.com/supernovae-st/nika-spec/blob/7937fc93a278b07da00f67e80ede672da269eba3/timeline/timeline.yaml#L498)
 (conformance, archival, compatibility, deterministic checking and succession).
 It is a condition in the cited revision, not a release announcement.
 
 The cited revision also lists a
-[Connectome gate](https://github.com/supernovae-st/nika-spec/blob/f8c5df2127c7867b2e51a2cd5712fa9d8461e73e/timeline/timeline.yaml#L401)
-that required the whole memory subsystem before 1.0. The
+[Connectome gate](https://github.com/supernovae-st/nika-spec/blob/7937fc93a278b07da00f67e80ede672da269eba3/timeline/timeline.yaml#L489)
+that required the whole memory subsystem before a 1.0 release. The
 [engine roadmap](https://github.com/supernovae-st/nika/blob/main/ROADMAP.md)
-retired that umbrella on 2026-10-08, so it is no longer a launch condition:
-each memory, retrieval or cognition capability meets its own release
-acceptance. Read that entry as history, not as a pending gate.
+retired that umbrella on 2026-10-08, and since the 0.123 reference release
+the engine is maintained (security fixes, bug fixes, compatibility) with no
+1.0 release planned. Read that entry, and the other forward gates of that
+plan, as history rather than as pending work.
 
 The record is append-only: a correction adds a note rather than silently
 rewriting an earlier claim. The [roadmap](/changelog/roadmap) gives the wider

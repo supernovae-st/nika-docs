@@ -16,6 +16,19 @@ errors (`NIKA-BUILTIN-WAIT-001`). The full grammar:
 ^NIKA-[A-Z]{2,9}(-[A-Z][A-Z0-9_]{1,15})?-[0-9]{3}$
 ```
 
+The tables below are the specification's registry. The reference engine adds
+two kinds of codes on top of it:
+
+- **Runtime codes** `NIKA-<NNNN>`: `17xx` for admission and budget
+  (`NIKA-1708` a missing required input, `NIKA-1709` a cost floor above the
+  budget, `NIKA-1704` a budget stop mid-run) and `18xx` for access
+  (`NIKA-1800` no ready access path, `NIKA-1801` an unsatisfied `--access`
+  pin). `nika explain NIKA-1709` teaches each one.
+- **Engine-specific codes** that the message itself explains, such as
+  `NIKA-MCP-003` and `NIKA-MCP-006` (an MCP tool whose definition changed
+  since its pin, a server with no pinned tools: `nika mcp approve <server>`)
+  and `NIKA-REG-005` (a registry index this engine cannot read).
+
 <Info>
   **Canonical source:** [`spec/05-errors.md`](https://github.com/supernovae-st/nika-spec/blob/main/spec/05-errors.md)
   owns the taxonomy: engines *derive* from it, never the reverse. The

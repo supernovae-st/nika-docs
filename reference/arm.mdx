@@ -1,18 +1,32 @@
 ---
 title: "Arming a project"
-description: "Declare beats in nika.yaml and let the machine fire them — the read-only report, the one firer, the OS bridge, and the resident firer."
+description: "Declare beats in nika.yaml and let the machine fire them: the readiness report, the one firer, the OS bridge and the resident firer."
 sidebarTitle: "arm / serve"
 icon: "bell"
 ---
 
 <Info>
   **The file proposes, the machine disposes.** Arming a project means
-  declaring *beats* in `nika.yaml` — what runs, when, under which
-  policies — and letting the machinery fire them: an OS unit
-  (`launchd` · `systemd`), or the resident `nika serve` where no OS
-  scheduler exists. Reading this page schedules nothing; firing is
-  always a machine act.
+  declaring *beats* in `nika.yaml`, what runs, when and under which
+  policies, and letting the machinery fire them: an OS unit (`launchd` ·
+  `systemd`), or the resident `nika serve` where no OS scheduler exists.
+  Reading this page schedules nothing; firing is always a machine act.
 </Info>
+
+<Steps>
+  <Step title="Declare the beat">
+    Add an entry under `arm:` in `nika.yaml`: the workflow, its cadence with
+    its time zone, a spend ceiling and a missed-run policy.
+  </Step>
+  <Step title="Read the report">
+    `nika arm` checks every beat and prints `READY`, `UNREADY` or `DORMANT`
+    with the next three slots. It schedules nothing.
+  </Step>
+  <Step title="Hand it to the machine">
+    `nika arm --emit launchd --write` (or `systemd`) installs the OS unit,
+    or `nika serve` fires the beats from a resident process.
+  </Step>
+</Steps>
 
 ## The `arm:` block
 
@@ -20,7 +34,7 @@ Each entry under `arm:` in `nika.yaml` is one beat:
 
 ```yaml
 nika: my-project
-ceiling: 0.50            # the run default when a beat says nothing — a beat always says its own
+ceiling: 0.50            # the run default when a beat says nothing; a beat always says its own
 
 arm:
   - workflow: workflows/nightly-report.nika
@@ -29,6 +43,8 @@ arm:
     manqué: rattraper-une-fois
     chevauchement: sauter
     après_saut: prochain-créneau
+    inputs:
+      topic: "the night"
   - workflow: workflows/on-event.nika
     cadence: on-webhook
     plafond: 0.05
@@ -37,167 +53,204 @@ arm:
 
 | Key | Required | What it means |
 |---|---|---|
-| `workflow` | yes | The workflow to fire — a repo-relative `*.nika` path |
-| `cadence` | yes | `on-webhook`, a 5-field cron (`"TZ=Europe/Paris 30 7 * * *"`), or a readable schedule such as `"TZ=Europe/Paris lundi 9h07"` — the IANA zone resolves against the embedded tzdb, never the host's |
-| `plafond` | yes | Per-tick cost ceiling in USD — no default exists (the pay law: a beat always names its own) |
-| `manqué` | yes | The missed-run policy — no default either (the run-missed law) |
-| `chevauchement` | no | Overlap — `sauter` (default) and `file` are live today. `remplacer` is accepted by the registry but the firer refuses it until serve v0.2 rather than approximating it |
-| `après_saut` | no | After an overlap skip — `prochain-créneau` is the live default. `à-complétion` is accepted by the registry but refused by the current firer until serve v0.2 |
-| `où` | no | `local` (default) · `cloud` — the calendar stays in the registry; a `cloud` beat skips honestly at fire today (the paid cloud lane is ③) |
-| `actif` + `raison` + `jusqu_au` | together | The suspension triple — `actif: false` requires the reason and the expiry date. **Deleting the line does not disarm** (law N4); the triple does |
-| `tolérance` | no | Declares an (m,k)-firm skip tolerance (`3/4`). The current engine parses and reports it but does not enforce the outage threshold yet |
-| `décalage` | no | Reserved deterministic jitter (`hash` only). The current firer refuses it until serve v0.2; slots fire at their declared instant today |
-| `par` | no | Declares the human who armed it — proves nothing by itself (N3: the machine's key is what authorizes; a merge arms nothing) |
+| `workflow` | yes | The workflow to fire: a `*.nika` path relative to the project root |
+| `cadence` | yes | The IANA zone first, then five cron fields (`"TZ=Europe/Paris 30 7 * * *"`), a French weekday and time (`"TZ=Europe/Paris lundi 9h07"`) or an anchored interval (`"TZ=Europe/Paris every 2 weeks from 2026-10-05 09:00"`); or `on-webhook`, the one form without a zone. The zone resolves against the embedded tzdb, never the host's, and a scheduled cadence without one is refused (`cadence.tz-missing`) |
+| `plafond` | yes | The spend ceiling of each fire in USD (`--max-cost-usd`), above zero. It has no default: choosing for the operator would be choosing who pays |
+| `manqué` | yes | What a missed slot becomes when the firer comes back (table below). No default either |
+| `chevauchement` | no | A new slot while the previous fire still runs: `sauter` (skip it, the default) or `file` (queue it). `remplacer` is accepted by the registry and refused by the 0.123.0 firer |
+| `après_saut` | no | When the beat resumes after a skipped slot: `prochain-créneau` (the default). `à-complétion` is accepted by the registry and refused by the 0.123.0 firer |
+| `où` | no | `local` (the default) or `cloud`. A `cloud` beat stays in the registry and every fire on this machine skips it |
+| `actif` + `raison` + `jusqu_au` | together | The suspension triple: `actif: false` needs the reason and an ISO date. The beat sleeps until that date, then fires again. **Deleting the line does not disarm**; the triple does |
+| `inputs` | no | The `--var KEY=VALUE` pairs every fire binds, one scalar per key, coerced by the workflow's declared types. A key the workflow does not declare makes the beat `UNREADY` (`input_refused`) |
+| `tolérance` | no | An (m,k)-firm skip tolerance (`3/4`). The report shows it; the firer does not enforce it |
+| `décalage` | no | `hash`, a deterministic offset derived from the workflow path. Accepted by the registry and refused by the 0.123.0 firer |
+| `par` | no | Who armed the beat, verbatim. It proves nothing by itself: the machine's key is what authorizes, and a merge arms nothing |
 
-`signature:` and `budget:` are reserved and **refused** today — they
-fail loudly during registry validation rather than silently doing nothing.
+The set is closed: any other key, such as `signature:` or `budget:`, is
+refused (`project.unknown-key`) and `nika arm` exits `2`.
+
+A beat that uses a refused policy is reported `UNREADY` with the reason, and
+both firers refuse to fire it. Change the policy, or suspend the beat with the
+triple.
 
 ### The miss policies (`manqué:`)
 
-| Value | What a silence does |
-|---|---|
-| `rattraper` | Reserved for serve v0.2. The current firer refuses it rather than silently collapsing several missed slots |
-| `rattraper-une-fois` | Fire ONE catch-up for the whole silence |
-| `sauter` | Never catch up — a skip is an event, never an execution |
+| Value | What a silence does | In 0.123.0 |
+|---|---|---|
+| `rattraper-une-fois` | Fire one catch-up run that answers for the whole silence | fires |
+| `sauter` | Never catch up: a skip is an event, never an execution | fires |
+| `rattraper` | Fire the latest missed slot once | refused by the firer |
+| `{ rattraper: N }` | Fire up to the N latest missed slots, one run each, oldest first | refused by the firer |
 
-## `nika arm` — the report
+## `nika arm`: the report
 
-Bare, the verb READS the registry and reports what is armed, what
-fired, and what fires next — it schedules nothing:
+Bare, the verb reads the registry, checks each beat and its workflow, and
+reports what is ready, what fired and what fires next. It schedules nothing:
 
 ```text
 $ nika arm
-2 beats in /home/alice/project/nika.yaml
+4 beats in /home/alice/project/nika.yaml
 
-  [armed] workflows/nightly-report.nika · TZ=Europe/Paris 30 7 * * *
-         ✓ PROUVÉ · fired · 2026-08-19T05:30:01Z · slot 2026-08-19T05:30:00Z · 0 sauts / 12 tirs
-         → 2026-08-20 07:30 CEST
-         → 2026-08-21 07:30 CEST
-         → 2026-08-22 07:30 CEST
+  [READY] workflows/nightly-report.nika · TZ=Europe/Paris 30 7 * * *
+         · ready in the current configuration; OS activation not verified · authority not acquired
+         ✓ PROUVÉ (génération + créneau · ni projet ni hôte) · fired · 2026-10-26T06:30:20Z · slot 2026-10-26T06:30:00Z · gen 5c1ca718 · état succeeded · 0 sauts / 2 tirs
+         → 2026-10-25 07:30 CET
+         → 2026-10-26 07:30 CET
+         → 2026-10-27 07:30 CET
 
-  [armed] workflows/on-event.nika · on-webhook
+  [READY] workflows/on-event.nika · on-webhook
+         ? cadence on-webhook: its event route fires it, never the clock (not observed)
+         · ready in the current configuration with 1 unknown named above; OS activation not verified · authority not acquired
          · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
          → no upcoming slot (a webhook beat fires on its event)
 
+  [UNREADY] workflows/weekly.nika · TZ=Europe/Paris every 2 weeks from 2026-10-05 09:00
+         ✗ manqué: { rattraper: N } is not supported by this firer (arrives with serve v0.2): every fire refuses (policy_unsupported)
+         · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
+         → 2026-11-02 09:00 CET
+         → 2026-11-16 09:00 CET
+         → 2026-11-30 09:00 CET
+
+  [DORMANT] workflows/vacation.nika · TZ=Europe/Paris lundi 9h07
+         · dormant — actif: false · vacation · jusqu_au 2099-12-31
+         · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
+
+READY · UNREADY · DORMANT judge the current configuration only — never OS activation, acquired authority or the current window.
 nothing was scheduled — `nika arm` READS the file. The machine that fires them is the arming edge.
 ```
 
-The proof line separates **PROUVÉ** from **DÉCLARÉ** (law N3): the
-registry *declares*, only the sidecar *proves* the machine fired. A beat
-carrying the suspension triple is reported `idle` and never computed —
-asking a disarmed beat for its next slot would print a date nobody will
-see fire. A `par:` line is shown for what it is: declared, not verified.
+<sub>Captured from nika 0.123.0; only the project path is shortened. The French phrases are the binary's own wording.</sub>
 
-Sidecar directories no registry entry names are the **orphelins** —
-reported, NEVER erased (law N4). Exit `0` clean · exit `2` when the
-registry refuses, and the refusal teaches the fix.
+| State | Meaning |
+|---|---|
+| `READY` | The beat's workflow, inputs, model and cost admission hold in the current configuration. It does not prove that an OS unit is installed or that the next fire will succeed |
+| `UNREADY` | A blocker, named on a `✗` line: a refused policy, an undeclared input, a workflow that does not check. Every fire would refuse |
+| `DORMANT` | Suspended with the triple; no slot is computed |
 
-`on-webhook` is a declaration seam today, not a live listener. The report
-shows no clock slot and `arm fire` records an honest webhook skip; an event
-bridge that actually delivers the beat has not shipped yet.
+The proof line separates **PROUVÉ** (a recorded fire, read from the beat's
+ledger) from **DÉCLARÉ** (the registry says so; the machine never fired it).
+`on-webhook` is a declaration: the report shows no clock slot, and
+`nika arm fire` records a webhook skip. Sidecar directories that no registry
+entry names are reported as orphans and never erased.
 
-## `nika arm fire <label>` — the one firer
+`nika arm --json` prints the same judgment for programs
+(`schedule_readiness_version: 2`): one object per beat in `schedules`, with
+`status`, `next_fire`, `blockers`, `required_inputs` and the workflow's
+`snapshot_digest`. Exit `0` when the registry reads, `2` when it refuses; the
+refusal teaches the fix.
+
+## `nika arm fire <label>`: the one firer
 
 ```text
 $ nika arm fire nightly-report
-fired nightly-report · slot 2026-08-19T05:30:00Z · exit 0
+fired nightly-report · slot 2026-10-26T06:30:00Z · exit 0 · trace .nika/traces/2026-10-24T14-41-35Z-8672.ndjson
 ```
 
-ONE function applies the on-time window, the miss policy, the overlap
-lock, the per-tick ceiling and the firing record — the emitted OS units
-and `nika serve` both end here, so the law lives exactly once. The label
-is the workflow file's radical (`workflows/doctor.nika` → `doctor`;
-a radical collision takes `-2`, `-3` in file order).
+One function applies the on-time window, the miss policy, the overlap lock,
+the per-fire ceiling and the firing record; the emitted OS units and
+`nika serve` both end there, so the policy lives in one place. The label is
+the workflow file's name without its extension (`workflows/doctor.nika` →
+`doctor`); a collision takes `-2`, `-3` in file order.
 
-The stdout contract: a decision prints **exactly one line** —
-`fired …` · `skipped …` · `paused …` · `failed …` — so a launchd or
-serve log stays byte-pure. Two honest exceptions: a registry refusal
-(exit `2`) teaches multi-line, and an environment death (exit `3`)
-rides stderr.
+A decision prints **exactly one line on stdout**: `fired …`, `skipped …`
+(for example `skipped nightly-report · not-due`), `paused …` or `failed …`,
+so a launchd or serve log stays clean. The run's own storyboard goes to
+stderr. A registry refusal (exit `2`) explains itself on several lines.
 
 What a fire guarantees:
 
-- The per-beat lock is taken BEFORE the decision and held until AFTER
-  the receipt lands — **at-least-once**: a crash between the claim and
-  its receipt leaves a durable unmatched claim in `history.ndjson`, never
-  a silent double-fire. The current report does not fold that unsettled
-  claim into its own line yet. Exactly-once is never promised; when the
-  workflow's effects are idempotent, the result is effectively-once.
-- Every fire is a FRESH run (law N2): a run you pause is parked with its
-  trace (`paused … · trace …`), never resumed by the firer.
-- The clock is injectable (hidden `--now`) so a replay and a test are
-  deterministic.
+- The per-beat lock is taken before the decision and held until the
+  receipt lands. Delivery is **at-least-once**: a crash between the claim
+  and its receipt leaves a durable unmatched claim in `history.ndjson`,
+  never a silent double fire. Exactly-once is never promised; keep the
+  workflow's effects idempotent and the result is effectively-once.
+- Every fire is a fresh run: a run that pauses on a human gate is parked
+  with its trace (`paused … · trace …`), never resumed by the firer.
+- The beat's `inputs:` are bound like `--var` pairs, and the beat's
+  `plafond` is the run's `--max-cost-usd`.
 
 | Exit | Meaning |
 |---|---|
-| `0` | Clean — fired, or honestly skipped by policy |
+| `0` | Fired, or skipped by policy |
 | `1` | The run itself failed (the workflow's exit) |
-| `2` | A project, registry, or target workflow file refused — the message teaches the fix |
+| `2` | The project, the registry, a refused policy or the target workflow file refused; the message teaches the fix |
 | `3` | Environment failure |
-| `4` | The run was paused and parked with its trace |
+| `4` | The run paused and was parked with its trace |
 
-What a fire leaves — the sidecar `.nika/arm/<label>/`:
+What a fire leaves in `.nika/arm/<label>/`:
 
 | File | Role |
 |---|---|
-| `history.ndjson` | The versioned ledger (`nika/arm-event@1`), hash-chained and verified before every append. A journaled skip is one event; an attempted run is a claim followed by its receipt |
-| `last.json` | The projection of the last slot-bearing decision (fired, skipped, paused, or failed) — what the report reads |
+| `history.ndjson` | The ledger (`nika/arm-event@1`), hash-chained and verified before every append. A skip is one event; an attempted run is a claim followed by its receipt |
+| `head.json` | The chain head the next append must extend (`nika/arm-head@1`: sequence and hash) |
+| `last.json` | The last slot-bearing decision (fired, skipped, paused or failed), which the report reads |
 | `watermark` | The timestamp of the latest recorded decision |
-| `ledger.lock` | A transient inner lock that serializes verify + append; normal RAII cleanup removes it after the operation |
+| `lock` · `ledger.lock` | The per-beat lock held across a fire, and the inner lock that serializes verify and append |
+
+`nika arm migrate` upgrades sidecars written by older engines into this
+chained ledger, verifies each chain and rebuilds its projections. It is
+idempotent and gives every beat a verdict.
 
 ## `nika arm disarm <label>`
 
-Prints the disarm gesture (law N4): removing the line from the file is
-not it — `actif: false` + `raison:` + `jusqu_au:` is, because that
-leaves an auditable trail. `--write` removes only generated unit files
-and prints the `launchctl bootout` or `systemctl --user disable --now`
-command for the operator; it never executes that unload command itself.
-When it removed at least one unit, it then attempts to journal the gesture
-and reports a journal failure even though the file removal already happened.
+Prints the disarm gesture: removing the line from the file is not it;
+`actif: false` + `raison:` + `jusqu_au:` is, because that leaves an
+auditable trail. `--write` removes only generated unit files and prints the
+`launchctl bootout` or `systemctl --user disable --now` command for you to
+run; it never runs that command itself.
 
-## `nika arm --emit` — the OS bridge
+## `nika arm --emit`: the OS bridge
 
-`--emit launchd|systemd` prints the OS unit that fires the beats
-instead of reading the registry; add `--write` to install it:
+`--emit launchd|systemd` prints the OS unit that fires the beats instead of
+reading the registry; add `--write` to install it:
 
 | Flag | With `--emit` |
 |---|---|
-| `--write` | Write the unit file instead of printing it |
-| `--out <dir>` | The directory the unit writes to |
-| `--mode user\|system` | `user` is the live scope (and default). `system` is present in the CLI vocabulary but refused until the root-scoped serve lane ships |
-| `--env-file <file>` | The env file the unit loads — provider keys live there, NEVER in the unit |
+| `--write` | Write the unit files instead of printing them |
+| `--beat <label>` | Emit the unit of one beat only |
+| `--out <dir>` | The directory the units are written to |
+| `--mode user\|system` | `user` (the default). `system` is refused in 0.123.0 |
+| `--env-file <file>` | The env file the unit loads: provider keys live there, never in the unit |
 | `--nika-bin <path>` | The nika binary the unit invokes |
 
-`launchd` emits a macOS user agent
-(`~/Library/LaunchAgents/nika.arm.<radical>.plist`); `systemd` emits a
-user timer + service pair. Any of these flags set WITHOUT `--emit`
-refuses honestly — a flag that does nothing is a lie.
+`launchd` writes a macOS user agent,
+`~/Library/LaunchAgents/nika.arm.<project key>.<label>.plist`, and prints the
+`launchctl bootstrap` line that loads it; `systemd` writes a user timer and
+service pair. A unit never arms a beat that cannot run: while any beat is
+`UNREADY`, `--emit` refuses and names it; fix it, suspend it, or emit the
+ready beats one by one with `--beat`. Any of these flags without `--emit`
+is refused, and so is `--json` with `--emit`: `--json` reports readiness only.
 
-## `nika serve` — the resident firer
+## `nika serve`: the resident firer
 
-In normal mode, the resident loop ends at the same firer as an emitted OS
-unit — for machines where no OS scheduler exists (a container, a bare
-server, a VM you own):
+Where no OS scheduler exists (a container, a bare server, a VM you own), the
+resident loop ends at the same firer as an emitted unit:
 
 ```text
-$ nika serve --once     # one sweep: fire every due beat, then exit
-$ nika serve --dry      # preview calendar-due beats; run and record nothing
+$ nika serve --once          # one sweep: fire every due beat, then exit
+$ nika serve --dry --once    # print `would fire <label> · slot …` for each beat due now; run nothing
+$ nika serve                 # stay resident and fire each beat at its slot
 ```
 
-`--dry` is deliberately narrower than a real fire: it previews the cadence
-only. It does not take the beat lock or apply missed-run, overlap, cost, or
-execution policy, so `would fire` is not a promise that the real firer will
-run; `nika arm fire` can still answer `skipped` or refuse.
+`--dry` runs and records nothing, and stays resident unless combined with
+`--once`. It previews the cadence only: it does not take the beat lock or
+apply the missed-run, overlap, cost or execution policy, so `would fire` is
+not a promise that the real firer will run. To see upcoming slots, use
+`nika arm`.
 
-Startup, registry, clock, and loop failures exit `1`. Once the loop is
-running, each beat's result is carried by its stdout line and ledger; a
-completed `--once` sweep exits `0` even when an individual run failed or
-paused. The hidden `--now` / `--until` pair injects the clock so a replay
-stays deterministic.
+Startup, registry, clock and loop failures exit `1`. Once the loop runs, each
+beat's result is carried by its stdout line and ledger; a completed `--once`
+sweep exits `0` even when an individual run failed or paused.
+
+With `--bind`, `--workflows` and `--token-file`, the same process also serves
+the authenticated HTTP API, including runtime schedules declared over HTTP
+([Server surfaces](/sdk/operations/server-surfaces)). Those schedules live in
+the server's state root, separate from this registry
+([Schedules](/sdk/remote/schedules)).
 
 <Warning>
-  **The honesty contract.** Delivery is at-least-once and exactly-once
-  is never claimed: a crash between the claim and the receipt leaves a
-  visible orphan, not a silent double-fire. Keep a fired workflow's
-  effects idempotent and the result is effectively-once.
+  **The honesty contract.** Delivery is at-least-once and exactly-once is
+  never claimed: a crash between the claim and the receipt leaves a visible
+  orphan, not a silent double fire. Keep a fired workflow's effects
+  idempotent and the result is effectively-once.
 </Warning>
