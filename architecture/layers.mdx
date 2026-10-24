@@ -1,23 +1,25 @@
 ---
 title: "Layer registry"
-description: "Six layers (L0 → L5) + L0.5 for trait-only crates. Upward dependencies are a CI hard failure."
+description: "The engine's crate layers, from pure types to interfaces, with two half-layers for kernel traits and model wires. Upward dependencies fail CI."
 sidebarTitle: "Layers"
 icon: "layer-group"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-You run **one `nika` binary**. Internally that binary is
-{STATUS.cratesAdmitted} admitted crates organized into **six layers**,
-with a half-layer (**L0.5**) for trait-only crates. Every workspace-local
-dependency points strictly downward. A CI script (`check-layering.sh`)
-fails the build on any upward import. Workflow authors do not pick a
-layer — this page is the engine's crate contract.
+You run **one `nika` binary**. Internally, at v{STATUS.version}, it is a
+workspace of {STATUS.cratesWorkspace} crates ({STATUS.cratesAdmitted}
+admitted, {STATUS.wipCrates.length} pre-admission) organized in layers:
+**L0, L0.5, L1, L1.5, L2, L3 and L4**. Every workspace-local dependency points
+downward, and a CI script (`check-layering.sh`) fails the build on any upward
+import. Workflow authors do not pick a layer: this page is the engine's crate
+contract.
 
 <Note>
-  **Canonical source:** [`docs/architecture/crate-layer-registry.md`](https://github.com/supernovae-st/nika/blob/main/docs/architecture/crate-layer-registry.md).
-  This page curates the layer model for readers; the authoritative manifest
-  lives in the engine repo next to the enforcement script.
+  **Canonical source:** [`docs/architecture/crate-layer-registry.md`](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/architecture/crate-layer-registry.md)
+  and the `[workspace.metadata.diamond]` table of the engine's `Cargo.toml`.
+  This page curates the layer model for readers; the engine repository holds
+  the manifest next to the enforcement script.
 </Note>
 
 ## Mechanical sort test
@@ -25,153 +27,122 @@ layer — this page is the engine's crate contract.
 Every new crate answers these questions in order. First hit wins.
 
 <Steps>
-  <Step title="Does it produce the `nika` binary?">
-    → **L5** (the binary)
+  <Step title="Does it expose a transport or UI surface (CLI, HTTP, MCP, LSP, DAP, terminal)?">
+    → **L4** (interfaces). The `nika` binary itself is built from `nika-cli`
+    here.
   </Step>
-  <Step title="Does it expose a transport / UI surface (CLI, HTTP, MCP, LSP, SDK)?">
-    → **L4** (interfaces)
+  <Step title="Does it orchestrate a whole workflow or enforce runtime law?">
+    → **L3** (runtime and execution)
   </Step>
-  <Step title="Does it enforce runtime policy, sandboxing, or orchestration?">
-    → **L3** (runtime + policy + sandbox)
+  <Step title="Does it implement a verb, or a client a verb calls?">
+    → **L2** (verbs)
   </Step>
-  <Step title="Does it implement a verb or a domain service?">
-    → **L2** (verbs + services)
+  <Step title="Is it a provider wire, a builtin tool, extraction or local inference?">
+    → **L1.5** (provider and builtin effects)
   </Step>
-  <Step title="Is it a primitive with I/O (fs, net, exec, env)?">
-    → **L1** (effect impls)
+  <Step title="Is it a primitive with I/O (fs, net, process, sandbox, clock)?">
+    → **L1** (effects)
   </Step>
   <Step title="None of the above?">
-    → **L0** (pure, sync, zero I/O). If it's trait-only but async is OK, → **L0.5**.
+    → **L0** (pure, sync, zero I/O). If it is trait-only and async is fine,
+    → **L0.5**.
   </Step>
 </Steps>
 
-## The pyramid
+## The layers
 
 ```mermaid
 %%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
 flowchart TB
   classDef layer0 fill:#1e3a8a,color:#fff,stroke:#3b82f6
-  classDef layer05 fill:#6d28d9,color:#fff,stroke:#8b5cf6
+  classDef layer05 fill:#0e3a5c,color:#fff,stroke:#22d3ee
   classDef layer1 fill:#065f46,color:#fff,stroke:#10b981
   classDef layer2 fill:#92400e,color:#fff,stroke:#f59e0b
   classDef layer3 fill:#9a3412,color:#fff,stroke:#f97316
   classDef layer4 fill:#991b1b,color:#fff,stroke:#ef4444
-  classDef layer5 fill:#4c1d95,color:#fff,stroke:#a78bfa,font-weight:bold
 
-  L5["L5 — `nika` binary (&lt;500 LOC)"]:::layer5
-  L4["L4 — interfaces · cli · serve · mcp · lsp · sdk"]:::layer4
-  L3["L3 — runtime · policy · shield · sandbox"]:::layer3
-  L2["L2 — verbs · builtins · pck · observability"]:::layer2
-  L1["L1 — effects · fs · http · process · keys · provider impls"]:::layer1
-  L05["L0.5 — kernel traits + mock (async OK, zero I/O)"]:::layer05
-  L0["L0 — pure types · sync · zero I/O · zero deps on runtimes"]:::layer0
+  L4["L4 — interfaces · cli (the binary) · serve · mcp · lsp · dap · session · tui"]:::layer4
+  L3["L3 — runtime · runtime laws · execution"]:::layer3
+  L2["L2 — the four verbs · registry client"]:::layer2
+  L15["L1.5 — provider wires · access · builtins · extraction · local inference"]:::layer1
+  L1["L1 — effects · fs · http · exec runner · sandboxes · clock · secrets"]:::layer1
+  L05["L0.5 — kernel traits + mocks (async OK, zero I/O)"]:::layer05
+  L0["L0 — pure types · parser · checker · CEL · catalog · zero I/O"]:::layer0
 
-  L5 --> L4 --> L3 --> L2 --> L1 --> L05 --> L0
+  L4 --> L3 --> L2 --> L15 --> L1 --> L05 --> L0
 ```
 
-<sub>Arrows read "depends on". Upward arrows are forbidden: `check-layering.sh` fails on any workspace-local dep that points up.</sub>
+<sub>Arrows read "depends on". Upward arrows are forbidden: `check-layering.sh` fails on any workspace-local dependency that points up.</sub>
 
 ## Layer table
 
-| Layer | Role | Allowed I/O | Allowed deps | Example crates |
+Crate counts per layer at v0.123.0: L0 22 · L0.5 6 · L1 17 · L1.5 5 · L2 5 ·
+L3 4 · L4 31.
+
+| Layer | Role | Allowed I/O | Allowed deps | Example crates at v0.123.0 |
 |---|---|---|---|---|
-| **L0** | Pure types, lookup tables, sync-only APIs | none | (leaf) | `nika-types`, `nika-error`, `nika-catalog`, `nika-schema`, `nika-event`, `nika-binding`, `nika-transform`, `nika-pck-manifest`, `nika-catalog-codegen` |
-| **L0.5** | Kernel trait definitions + companions (mock) · async OK | none (traits only) | L0 | `nika-kernel` (facade hub), `nika-kernel-core`, `nika-kernel-ai`, `nika-kernel-runtime`, `nika-kernel-plugin`, `nika-kernel-mock` |
-| **L1** | Effect implementations · async, per-crate capability axis | declared axes only (fs / net / exec / env) | L0, L0.5 | `nika-fs`, `nika-http`, `nika-process`, `nika-git`, `nika-keys-*`, `nika-pck-registry`, `nika-pck-store`, `nika-<provider>-*` |
-| **L2** | Verbs + domain services · orchestrates L1 impls behind kernel traits | via L1 traits only | L0, L0.5, L1 | `nika-pck`, `nika-verb-*`, `nika-policy`, `nika-observability`, `nika-builtin-{github,cloud,workspace}` |
-| **L3** | Runtime + policy + sandbox · enforces execution contracts | via L2 | L0..L2 | `nika-runtime`, `nika-shield`, `nika-wasm-host` (v0.100), `nika-sandbox` (v0.100) |
-| **L4** | Interfaces · transport / UI surfaces (libraries) | via L3 | L0..L3 | `nika-cli`, `nika-serve`, `nika-mcp`, `nika-lsp`, `nika-sdk`, `nika-catalog-verify` |
-| **L5** | The binary · sole `[[bin]]` composition root | via L4 | L0..L4 | `nika` (&lt;500 LOC) |
+| **L0** | Pure types, the parser and checker, lookup tables, sync-only APIs | none | (leaf) | `nika-types`, `nika-error`, `nika-event`, `nika-schema`, `nika-check`, `nika-cel`, `nika-tmpl`, `nika-catalog`, `nika-pck-manifest` |
+| **L0.5** | Kernel trait definitions and their mocks · async OK | none (traits only) | L0 | `nika-kernel` (facade), `nika-kernel-core`, `nika-kernel-ai`, `nika-kernel-runtime`, `nika-kernel-plugin`, `nika-kernel-mock` |
+| **L1** | Effect implementations | the effect the crate exists for | L0, L0.5 | `nika-fs`, `nika-http`, `nika-exec-runner`, `nika-sandbox-seatbelt`, `nika-sandbox-landlock`, `nika-clock`, `nika-secret` |
+| **L1.5** | Provider wires, access paths, builtins, extraction, local inference | through L1 | L0, L0.5, L1 | `nika-providers`, `nika-providers-access`, `nika-builtin`, `nika-extract`, `nika-infer-local` |
+| **L2** | The verbs · orchestrate effects behind kernel traits | through lower layers | L0 … L1.5 | `nika-verb-infer`, `nika-verb-exec`, `nika-verb-invoke`, `nika-verb-agent`, `nika-registry-client` |
+| **L3** | Runtime and execution · enforce execution contracts | through L2 | L0 … L2 | `nika-runtime`, `nika-runtime-laws`, `nika-execution`, `nika-service-execution` |
+| **L4** | Interfaces · transport and UI surfaces | through L3 | L0 … L3 | `nika-cli` (builds `nika`), `nika-serve`, `nika-mcp`, `nika-lsp`, `nika-dap`, `nika-trace`, `nika-session`, `nika-tui` |
+
+An **L5** composition root is reserved but not built: the public executable
+is born `nika` in `nika-cli` (ADR-135). The TypeScript SDK is not a crate: it
+is the npm package `@supernovae-st/nika`, in its own repository.
 
 <Tip>
-  `nika-http` is the **L1 HTTP client** (used by `fetch` / catalog sync).
-  The HTTP server surface of `nika serve` lives **inline inside
-  `nika-serve` L4**: no separate server crate.
+  `nika-http` is the **L1 HTTP client** (used by `nika:fetch` and catalog
+  sync). The HTTP server of `nika serve --bind` lives inside `nika-serve` at
+  L4: there is no separate server crate.
 </Tip>
 
-## Admitted today (v{STATUS.version})
+## Enforcement
 
-<CardGroup cols={2}>
-  <Card title="nika-types" icon="cube" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-types">
-    **L0** · Foundation value types. Leaf of the DAG.
-  </Card>
-  <Card title="nika-error" icon="triangle-exclamation" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-error">
-    **L0** · NIKA-XXX error hierarchy + `miette` integration.
-  </Card>
-  <Card title="nika-catalog" icon="book" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-catalog">
-    **L0** · Provider / capability TOML catalog, phf lookup.
-  </Card>
-  <Card title="nika-kernel" icon="circuit-board" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-kernel">
-    **L0.5** · 40 ISP traits, sealed supertrait, prelude re-export hub.
-  </Card>
-  <Card title="nika-kernel-mock" icon="circuit-board" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-kernel-mock">
-    **L0.5** · Pure-memory trait mocks for testing.
-  </Card>
-  <Card title="nika-catalog-verify" icon="check" href="https://github.com/supernovae-st/nika/tree/main/crates/nika-catalog-verify">
-    **L4** · Build-only catalog validation tool.
-  </Card>
-</CardGroup>
+- **`check-layering.sh`** (`scripts/ci/` and `scripts/hygiene/`, fails on
+  violation) reads layer membership from `[workspace.metadata.diamond.layers]`
+  and verifies every workspace-local dependency is at an equal or lower layer.
+- **`check-no-async-in-l0.sh`** (`scripts/hygiene/`) refuses `async fn` and
+  `async {` in L0 source trees.
+- **`check-crate-gates.sh`** (`scripts/ci/`) runs the
+  [admission gates](/architecture/admission) for a crate.
 
-`nika-schema` (parser · analyzer · static check) is admitted: it is what
-`nika check` runs. The cards above are a sample of L0/L0.5, not the
-full admitted set — live counts live on [status](/reference/status).
-
-## Security axes
-
-Every L1 crate declares the capabilities it exercises in
-`docs/architecture/security-axes.toml`. Reserving an axis costs nothing
-today and forbids its silent later use.
-
-<AccordionGroup>
-  <Accordion title="The 12 capability axes" icon="shield">
-    | Axis | Meaning |
-    |---|---|
-    | `reads-env` | Reads process environment variables |
-    | `reads-fs` | Reads filesystem (read-only) |
-    | `rw-fs` | Reads and writes filesystem |
-    | `exec-shell` | Spawns subprocesses |
-    | `net-egress` | Initiates outbound network connections |
-    | `net-ingress` | Accepts inbound connections |
-    | `spawns-thread` | Uses `std::thread::spawn` or `tokio::task::spawn_blocking` |
-    | `mutates-global` | Mutates process-global state (env, CWD, signals) |
-    | `panics-allowed` | Explicit opt-out from zero-panic discipline (rare) |
-    | `reads-secrets` | Reads `Secret<T>` / `SecretRef` material |
-    | `time-mutation` | Manipulates clocks (`MockClock`, `tokio::time::pause`) |
-    | `allocator-sensitive` | Imposes allocator constraints (pre-flight for WASM v0.100) |
-    | `thread-local-state` | Uses `thread_local!` / static `RefCell` (incompatible with WASM) |
-  </Accordion>
-
-  <Accordion title="How enforcement works" icon="gavel">
-    Three CI vectors enforce layer discipline:
-
-    - **`check-layering.sh`** (hygiene vector 11, P0, fail on violation): reads layer membership from `[workspace.metadata.diamond.layers]` and verifies every workspace-local dependency is equal or lower layer.
-    - **`check-security-axes.sh`** (vector 12, P1): cross-checks declared axes against static analysis of the source tree.
-    - **`check-no-async-in-l0.sh`** (vector 16, P1): greps `async fn` / `async {` in L0 source trees; fails on any match.
-  </Accordion>
-</AccordionGroup>
+<Accordion title="Capability axes: a vocabulary, not enforced in 0.123.0" icon="shield">
+  The engine's design gave each effect crate a list of capability axes
+  (`reads-env`, `reads-fs`, `rw-fs`, `exec-shell`, `net-egress`,
+  `net-ingress`, `spawns-thread`, `mutates-global`, `panics-allowed`,
+  `reads-secrets`, `time-mutation`, `allocator-sensitive`,
+  `thread-local-state`). No registry file declares them and no CI check
+  enforces them at v0.123.0. The runtime boundary a workflow meets is its
+  `permits:` block and the OS sandbox ([Security](/concepts/security)).
+</Accordion>
 
 ## Forward compatibility
 
-- **Memory and retrieval satellites**: 10 L1 crates (hnsw, bm25, rrf, rerank, fsrs, rdfs-reasoner, temporal, graph-algos, autodesc-minimal, autodesc-full). No renumber: they slot into L1 naturally. Each capability meets its own release acceptance. The planned L2 orchestrator (`nika-connectome`) was retired on 2026-10-08, and no other orchestrator replaces it.
-- **v0.100 WASM** plugin host + sandbox: L3 crates alongside `nika-runtime`. No renumber.
+The layer model leaves room for additive crates without renumbering. After
+0.123 the engine is in maintenance (security fixes, bug fixes,
+compatibility), and none is planned.
 
 ## Anti-patterns
 
 <Warning>
-  Seven patterns that tank the layer contract. If you catch yourself writing one, stop and re-ask the mechanical sort test.
+  Seven patterns that break the layer contract. If you catch yourself writing
+  one, stop and ask the mechanical sort test again.
 </Warning>
 
-1. **Kitchen-sink crate**: "I'll just add this utility to `nika-error`" leads to a 10k-LOC bag-of-tricks every crate transitively pulls in. One caller = stays in the caller.
-2. **Facade mega-crate**: "Re-export everything from `nika` for convenience" collapses the layer contract and tanks compile time.
-3. **Upward re-exports**: an L1 crate `pub use nika_pck::...` turns its API into an L2 consumer and breaks mechanical sorting.
-4. **`async` in L0**: forces a runtime choice on every L1 / L2 consumer; makes the crate unusable in build scripts.
-5. **`anyhow::Error` in library code**: L5 binary only. L0..L4 uses the typed error hierarchy.
-6. **`Box<dyn Error>` in public API**: hygiene vector 19 bans it. Swap to the typed error hierarchy.
+1. **Kitchen-sink crate**: "I'll just add this utility to `nika-error`" leads to a bag of tricks every crate transitively pulls in. One caller = stays in the caller.
+2. **Facade mega-crate**: "Re-export everything for convenience" collapses the layer contract and slows every build.
+3. **Upward re-exports**: an L1 crate re-exporting an L2 API turns it into an L2 consumer and breaks mechanical sorting.
+4. **`async` in L0**: forces a runtime choice on every consumer and makes the crate unusable in build scripts.
+5. **`anyhow::Error` in library code**: binaries only. Libraries use the typed error hierarchy.
+6. **`Box<dyn Error>` in public API**: hygiene vector 19 bans it. Use the typed error hierarchy.
 7. **Runtime imports in L0**: `tokio::spawn` in `nika-error` is a layer violation even if it compiles.
 
 ## See also
 
-- [Forward-compat invariants](/architecture/forward-compat-invariants), the 8 patterns + 5 decisions that protect the public API
-- [L0 foundation decisions](/architecture/l0-decisions): Q1 through Q13, locked
-- [12-gate admission](/architecture/admission), how a crate earns a seat at the workspace
-- [Constellation](/reference/constellation), live map of admitted / WIP / planned crates
+- [Forward-compat invariants](/architecture/forward-compat-invariants): the patterns that protect the public API
+- [L0 foundation decisions](/architecture/l0-decisions): the early decisions and what became of them
+- [Admission](/architecture/admission): how a crate earns its seat
+- [Constellation](/reference/constellation): the map of admitted and pre-admission crates

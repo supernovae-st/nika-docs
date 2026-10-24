@@ -1,6 +1,6 @@
 ---
 title: "Forward-compat invariants"
-description: "Eight patterns + five decisions that protect Nika's public API against breaking change. LOCKED at v0.80."
+description: "The patterns and early decisions that protect the engine's public API against breaking change, and where 0.123.0 departs from them."
 sidebarTitle: "Forward-compat"
 icon: "shield-halved"
 ---
@@ -12,37 +12,31 @@ security fixes, bug fixes and compatibility. These invariants are what keeps a l
 from breaking the public API: any feature must fit **without breaking changes to the public API**.
 
 <Info>
-  **Status: LOCKED at v0.80.** Every crate admitted to the Diamond workspace must
-  comply before passing Gate 12. Patterns distilled from Rust (2015→), Tokio
-  (0.1→1.x), Deno, Cargo, Serde (9+ years stable), Axum/Tower, Bevy.
+  **Status: locked at v0.80, with later amendments noted inline.** Every crate
+  admitted to the workspace must comply before passing gate 12. Patterns
+  distilled from Rust, Tokio, Deno, Cargo, Serde, Axum/Tower and Bevy.
 
   **Canonical source:** [`docs/architecture/forward-compat-invariants.md`](https://github.com/supernovae-st/nika/blob/main/docs/architecture/forward-compat-invariants.md).
 </Info>
 
-## The 8 patterns
+## The patterns
 
 <AccordionGroup>
   <Accordion title="FCI-001: Kernel traits upfront, implementations deferred" icon="key">
-    Define traits in `nika-kernel` at v0.90 for subsystems that ship later.
-    Default methods return `Err(Unsupported)` until real implementations land.
+    Define the kernel traits for a subsystem before its implementations exist,
+    so an implementation can plug in without changing the kernel. At v0.123.0,
+    memory is three small traits, `MemoryRemember`, `MemoryRecall` and
+    `MemoryForget`, with a blanket `MemoryStore` over them
+    (`crates/nika-kernel-ai/src/memory.rs`); `nika-store` provides a signed
+    implementation, still pre-admission.
 
-    ```rust
-    #[trait_variant::make(MemoryStoreDyn: Send)]
-    pub trait MemoryStore: Send + Sync + 'static {
-        async fn put(&self, frame: MemoryFrame) -> Result<MemoryFrameRef>;
-        async fn query(&self, q: &MemoryQuery) -> Result<Vec<MemoryFrame>>;
-        async fn forget(&self, _r: &MemoryFrameRef) -> Result<()> {
-            Err(NikaError::Unsupported("forget"))
-        }
-    }
-    ```
+    **Reserved traits:** `MemoryStore`, `EmbeddingProvider`, `ToolExecutor`,
+    `WasmPluginHost`, `MetricsExporter`, `TracerProvider`, `AuditSink`,
+    `BillingSink`, `Sandbox`. Several have no production implementation at
+    v0.123.0 (see [Events](/concepts/events#kernel-interfaces-for-engine-implementers)).
 
-    **Locked traits (v0.90):** `MemoryStore`, `EmbeddingProvider`, `ToolExecutor`,
-    `WasmPluginHost`, `MetricsExporter` + `TracerProvider` + `AuditSink` +
-    `EventSink` + `BillingSink`, `Sandbox`. Stubs in `src/plugin/`, `src/infra/`.
-
-    **Impact:** v0.95 lights up the memory subsystem by adding `nika-memory-oxigraph` that implements
-    `MemoryStore`. **Zero v0.90 code modification.**
+    **Impact:** a memory, metrics or audit implementation plugs into its
+    traits without changing the kernel.
   </Accordion>
 
   <Accordion title="FCI-002: `#[non_exhaustive]` on every public struct, enum, error variant" icon="lock">
@@ -53,14 +47,13 @@ from breaking the public API: any feature must fit **without breaking changes to
     ```rust
     #[non_exhaustive]
     pub struct InferRequest {
-        pub provider: ProviderId,
-        pub model: ModelId,
+        pub model: String,
         pub messages: Vec<Message>,
         // adding fields here never breaks downstream
     }
 
     impl InferRequest {
-        pub fn new(provider: ProviderId, model: ModelId) -> Self { /* ... */ }
+        pub fn new(model: impl Into<String>, messages: Vec<Message>) -> Self { /* ... */ }
     }
     ```
 
@@ -73,19 +66,21 @@ from breaking the public API: any feature must fit **without breaking changes to
     nine-key envelope of 0.109 · supersedes the `nika: v1` + `workflow:
     { id }` form and the older K8s `apiVersion:` / `schema:
     nika/workflow@X` forms). The document type is the `tasks:` key: present
-    = a workflow · absent = the project file `nika.yaml`, whose mark stays
-    `nika: v1`, frozen. Parsers refuse the previous envelope with a clear
-    error and `nika check --fix` migrates it.
+    = a workflow · absent = the project file `nika.yaml`, whose `nika:` key is
+    the project's name (`nika: my-project`); its schema version is on the
+    editor's `$schema` line, and `nika: v1` is refused in both documents.
+    Parsers refuse the previous envelope with a clear error and
+    `nika check --fix` migrates it.
 
     ```yaml illustration · the envelope mark
     nika: my-flow
     tasks: { ... }
     ```
 
-    A grammar change before 1.0 ships with its migration and a refusal that
-    names the move (the pre-1.0 stability contract) · after engine 1.0.0 the
-    grammar is additive only. Non-workflow artifacts (package manifests,
-    events, the project file) carry their own frozen schema marker.
+    A grammar change ships with its migration and a refusal that names the
+    move (spec 00-overview, the stability contract). Non-workflow artifacts
+    carry their own marker: the project file's `$schema` line, a trace's
+    `trace_format`, a package manifest's version.
   </Accordion>
 
   <Accordion title="FCI-004: Extension namespaces (`nika.*` core + `x-*` community)" icon="plug">
@@ -118,8 +113,11 @@ from breaking the public API: any feature must fit **without breaking changes to
   <Accordion title="FCI-006: Sealed traits for core, open traits for extension" icon="seal">
     Core kernel traits (e.g., `Provider`, `EventSink`, `Sandbox`) are
     **sealed** via a private supertrait: only Nika-owned crates can
-    implement them. Extension traits (e.g., `MemoryStore`) are open for
-    community crates to implement.
+    implement them. The design kept extension traits open for community
+    crates; at v0.123.0 the memory traits (`MemoryRemember`, `MemoryRecall`,
+    `MemoryForget`) are sealed too, and the provider sub-traits
+    (`ProviderInfer`, `ProviderStream`, `ProviderMeta`) stay open while their
+    combination, `Provider`, is sealed.
 
     ```rust
     mod sealed { pub trait Sealed {} }
@@ -149,22 +147,23 @@ from breaking the public API: any feature must fit **without breaking changes to
     - **`cargo semver-checks`**: verifies SemVer compatibility.
     - **`cargo deny`**: enforces license + advisories + layer bans.
 
-    Gate 12 fails on any unintentional public API drift. `.public-api.json`
-    snapshots are checked into the repo per crate.
+    Gate 12 fails on any unintentional public API drift. A `public-api.txt`
+    snapshot is checked in for each crate, and the `public-api.yml` and
+    `semver-checks.yml` CI workflows compare against it.
   </Accordion>
 </AccordionGroup>
 
-## The 5 locked decisions (v0.80)
+## The five early decisions (v0.80)
 
-| ID | Decision | Impact |
+| ID | Decision | At v0.123.0 |
 |---|---|---|
-| **FCI-009** | `EventKind` = scoped sub-enums (Pattern B), ~22 categories | Emit site is compile-time checked; sub-enums evolve independently |
-| **FCI-010** | `InferRequest` / `InferResponse` fields reserved: `memory`, `budget`, `baggage`, `trust_level`, `trace_id` | v0.95 adds memory without touching kernel |
-| **FCI-011** | `schema:` field mandatory day-1 | Every on-disk artifact versioned from v0.90 forward |
-| **FCI-012** | `Provider` trait shape frozen (4 methods, 1 sealed supertrait) | Cross-provider parity testable (shadow zone 2 + 7) |
-| **FCI-013** | Telemetry = 5 sibling sinks (Event, Metrics, Trace, Audit, Billing) | OTel GenAI semconv bridged via typed `GenAiAttrs` (Q13 rev.3) |
+| **FCI-009** | `EventKind` = scoped sub-enums, about 22 categories | **Superseded:** `nika_event::EventKind` is one flat `#[non_exhaustive]` enum of 35 kinds |
+| **FCI-010** | `InferRequest` fields reserved for memory, budget, baggage, trust and tracing | `memory`, `budget` and `baggage` are present fields; a memory implementation still needs no kernel change |
+| **FCI-011** | `schema:` field mandatory on every on-disk artifact | **Superseded by ADR-113:** a workflow file carries no version (a root `schema:` is refused, `NIKA-PARSE-005`); other artifacts carry their own marker (the project file's `$schema` line, a trace's `trace_format`) |
+| **FCI-012** | The `Provider` trait shape is frozen behind a sealed supertrait | `Provider` is the sealed combination of `ProviderInfer`, `ProviderStream` and `ProviderMeta` |
+| **FCI-013** | Telemetry = five sibling sinks (Event, Metrics, Trace, Audit, Billing) | The event journal ships; the other four are kernel interfaces with no production implementation. GenAI attributes ride `nika trace export` spans |
 
-## The 10 rules
+## The rules
 
 <Check>
   Every crate admission answers "yes" to each. `cargo public-api` +
@@ -176,7 +175,7 @@ from breaking the public API: any feature must fit **without breaking changes to
 3. All `async` trait methods use `trait_variant::make` for dynamic dispatch.
 4. All core traits seal via private supertrait.
 5. All error types expose a `NIKA-XXX` code via `NikaError::code()`.
-6. All on-disk schemas carry `schema: "nika/<kind>@<major>"`.
+6. Every on-disk artifact other than a workflow carries its own version marker (a workflow's identity is `nika: <name>`, ADR-113).
 7. All DTO fields reserve forward-compat extension slots (see FCI-010).
 8. All feature flags default to a stable subset: new caps ship OFF.
 9. All public API changes emit a `cargo public-api` diff in the PR.
@@ -186,15 +185,15 @@ from breaking the public API: any feature must fit **without breaking changes to
 
 <CardGroup cols={2}>
   <Card title="Layer registry" icon="layer-group" href="/architecture/layers">
-    Six layers + L0.5, mechanical sort test, security axes.
+    The layers and the mechanical sort test.
   </Card>
   <Card title="L0 foundation decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13 locked 2026-04-16: proc macros, kernel prelude, transform crate, memory sinks.
+    The early foundation decisions and what became of them.
   </Card>
   <Card title="12-gate admission" icon="check-double" href="/architecture/admission">
     How a crate earns a seat at the workspace: SPEC through ATOMIC commit.
   </Card>
   <Card title="ADR index" icon="scroll" href="/architecture/adrs">
-    Live ADR counts from the status snapshot.
+    Every decision record at v0.123.0.
   </Card>
 </CardGroup>

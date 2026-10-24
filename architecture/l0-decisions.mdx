@@ -1,18 +1,18 @@
 ---
 title: "L0 foundation decisions"
-description: "Q1-Q13: the 13 architectural decisions that lock the L0 + L0.5 layer shape."
+description: "Q1-Q13: the early architectural decisions that shaped the L0 and L0.5 layers, and what each became at v0.123.0."
 sidebarTitle: "L0 decisions"
 icon: "list-check"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-These are **engine-internal** locks, not workflow-language rules.
-Thirteen questions, thirteen locks. They shape the **L0 foundation**
-({STATUS.cratesAdmitted} admitted crates in the live snapshot) and the
-**L0.5 kernel contract**. Revised twice by swarm audit: current state is
-rev. 3. Do not read "Round 4" as unfinished product work — `nika check`
-already runs on admitted schema.
+These are **engine-internal** decisions, not workflow-language rules.
+Thirteen questions, locked in April 2026 (revision 3), shaped the **L0
+foundation** (22 crates at v{STATUS.version}) and the **L0.5 kernel
+contract**. Some were executed as written, some differently, and some not at
+all: the index records what each became at v{STATUS.version}, and the deep
+dives keep the original rationale as history.
 
 <Info>
   **Canonical source:** [`docs/architecture/l0-l05-architecture-decisions.md`](https://github.com/supernovae-st/nika/blob/main/docs/architecture/l0-l05-architecture-decisions.md).
@@ -21,32 +21,35 @@ already runs on admitted schema.
 
 ## Decision index
 
-| Q | Decision | Status |
+| Q | Decision (April 2026) | At v0.123.0 |
 |---|---|---|
-| **Q1** | No proc macros in L0 · manual impl + `macro_rules!` | LOCKED |
-| **Q2** | No `nika-stdx`; split `nika-error` → `nika-types` + `nika-error` | LOCKED · executed |
-| **Q3** | Extract `nika-catalog-codegen` NOW (testable + reusable) | LOCKED |
-| **Q4** | `nika-event`: 3-layer split (L0 types + L1 store + L2 export) | LOCKED |
-| **Q5** | Admission order: schema → codegen → event → binding → pck-manifest | LOCKED |
-| **Q6** | `EventKind` = scoped sub-enums (Pattern B, ~22 categories) | LOCKED |
-| **Q7** | `nika-kernel` prelude re-export hub (4 lines, 0 new deps) | LOCKED |
-| **Q8** | `nika-transform` = standalone L0 crate (rev.2: 2 consumers found) | LOCKED rev.2 |
-| **Q9** | `Timestamp` + `WallDuration` = module in `nika-types` | LOCKED rev.2 |
-| **Q10** | Canonical-JSON (RFC 8785) = module in `nika-types` | LOCKED rev.2 |
-| **Q11** | Token-streaming cardinality = delta-batching, not 1-event-per-token | LOCKED rev.3 |
-| **Q12** | Drop `ObservabilitySink` + add `AuditSink` (5 sibling channels) | LOCKED rev.3 · executed |
-| **Q13** | Bridge OTel GenAI semconv via typed `GenAiAttrs` on Infer{Request,Response} | LOCKED rev.3 · executed |
+| **Q1** | No proc macros in L0 · manual impl + `macro_rules!` | **Holds.** No crate in the workspace is a proc macro; the L2 `#[builtin_tool]` escape hatch was never built |
+| **Q2** | No `nika-stdx`; split `nika-error` → `nika-types` + `nika-error` | **Executed** |
+| **Q3** | Extract `nika-catalog-codegen` | **Executed** (`nika-catalog-codegen`, L0); the community overlay it was meant to serve was not built |
+| **Q4** | `nika-event`: L0 types + L1 store + L2 export | **Not executed as split.** `nika-event` holds the types; the journal is written by the runtime and exported by `nika trace export`; no `nika-event-store` or `nika-event-export` crate exists |
+| **Q5** | Admission order: schema → codegen → event → binding → pck-manifest | **Superseded.** No `nika-binding` crate: templates live in `nika-tmpl`, expressions in `nika-cel` |
+| **Q6** | `EventKind` = scoped sub-enums, about 22 categories | **Superseded.** One flat `#[non_exhaustive]` `EventKind` of 35 kinds |
+| **Q7** | `nika-kernel` prelude re-export hub | **Executed.** `nika-kernel` is a facade with a `prelude` over `nika-kernel-core`, `-ai`, `-runtime` and `-plugin` |
+| **Q8** | `nika-transform` as a standalone L0 crate | **Not executed.** No transform crate and no template filters: transformation is jq (`extract:`, `nika:jq`) |
+| **Q9** | `Timestamp` + `WallDuration` as a module in `nika-types` | **Executed** |
+| **Q10** | Canonical JSON (RFC 8785) as a module in `nika-types` | **Not executed** |
+| **Q11** | Token streaming: deltas, not one event per token | **Executed in a different shape.** `InferEvent::Delta { text }`, alongside `ToolUseStart`, `ToolUseDelta`, `Thinking`, `Usage` and `Done` |
+| **Q12** | Drop `ObservabilitySink`, add `AuditSink` (five sibling channels) | **Interface only.** `AuditSink` exists as a kernel trait with no production implementation |
+| **Q13** | Bridge OTel GenAI conventions via typed `GenAiAttrs` | **Executed.** `GenAiAttrs` lives in `nika-kernel-ai`; the attributes ride the spans of `nika trace export` |
 
 ## Why these decisions exist
 
 <Warning>
-  L0 is the foundation. A wrong choice at L0 propagates through 40+ crates.
-  These decisions were made BEFORE any L1 / L2 admission to avoid costly
-  migrations. Each was validated by ≥3 Rust council agents + cross-checked
-  against 17 Phase-C research agents.
+  L0 is the foundation: a wrong choice there propagates through every crate
+  above it. These decisions were made before any L1 or L2 admission, to avoid
+  costly migrations, and each was reviewed independently several times.
 </Warning>
 
 ## Deep dives
+
+The deep dives keep the April 2026 rationale as it was written. Where it
+names a crate or a filter that does not exist, the index above records what
+was built instead.
 
 <AccordionGroup>
   <Accordion title="Q1: No proc macros in L0" icon="ban">
@@ -187,15 +190,15 @@ already runs on admitted schema.
 
 <CardGroup cols={2}>
   <Card title="Layer registry" icon="layer-group" href="/architecture/layers">
-    How these L0 crates fit into the 6-layer pyramid.
+    How these L0 crates fit into the layers.
   </Card>
   <Card title="Forward-compat invariants" icon="shield-halved" href="/architecture/forward-compat-invariants">
-    The 8 patterns that make these decisions safe to evolve.
+    The patterns that make these decisions safe to evolve.
   </Card>
   <Card title="12-gate admission" icon="check-double" href="/architecture/admission">
     How each L0 crate earns its seat.
   </Card>
   <Card title="Constellation" icon="diagram-project" href="/reference/constellation">
-    Live state: which L0 crates are admitted today.
+    Which crates are admitted at v0.123.0.
   </Card>
 </CardGroup>
