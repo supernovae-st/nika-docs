@@ -17,13 +17,25 @@ def acquire(root):
 def mdx(text,revision):
     # Keep code literal. Escape MDX outside code; resolve source-relative links
     # against the pinned spec, never against a same-named documentation page.
-    pieces=re.split(r'(```[^\n]*\n[\s\S]*?```|`[^`\n]+`)',text)
+    # A double-backtick span (`` ` ``) quotes a backtick; match it before the
+    # single form so the pairing of later spans does not shift.
+    pieces=re.split(r'(```[^\n]*\n[\s\S]*?```|``[^\n]*?``|`[^`\n]+`)',text)
     def convert(part):
         if part.startswith('```'):return re.sub(r'^```ya?ml[^\n]*', '```yaml illustration',part)
         if part.startswith('`'):return part
         part=re.sub(r'\]\(([^)\s]+)\)',lambda m:']('+('https://github.com/supernovae-st/nika-spec/blob/'+revision+'/'+posixpath.normpath(posixpath.join('stdlib',m[1])) if not re.match(r'https?://',m[1]) else m[1])+')',part)
         return html.escape(part,quote=False).replace('{','&#123;').replace('}','&#125;')
-    return ''.join(map(convert,pieces))
+    # A leading `>` is Markdown's blockquote marker: html.escape turns it into
+    # `&gt;`, which renders as literal text. Restore it only at a real line
+    # start of prose (never inside code).
+    out=[];line_start=True
+    for part in pieces:
+        converted=convert(part)
+        if not part.startswith('`'):
+            converted=re.sub(r'(?m)^([ \t]*)&gt;' if line_start else r'(?m)(?<=\n)([ \t]*)&gt;',r'\1>',converted)
+        out.append(converted)
+        if part:line_start=part.endswith('\n')
+    return ''.join(out)
 def render(source):
     rev=source['revision']
     if not re.fullmatch('[a-f0-9]{40}',rev):raise ValueError('Invalid revision')

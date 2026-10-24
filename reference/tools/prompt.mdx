@@ -26,8 +26,9 @@ This reference preserves the specification at the revision linked below. Source 
 invoke: { tool: "nika:prompt", args: { message: "Approve deploy to production?" } }
 # input — collect a free-text value
 invoke: { tool: "nika:prompt", args: { mode: input, message: "Paste the OTP:", default: "" } }
-# choice — pick one of N
-invoke: { tool: "nika:prompt", args: { mode: choice, message: "Which title?", choices: ["${{ tasks.a.output }}", "${{ tasks.b.output }}"] } }
+# choice — pick one of N (the candidates arrive through with:)
+with: { a: "${{ tasks.a.output }}", b: "${{ tasks.b.output }}" }
+invoke: { tool: "nika:prompt", args: { mode: choice, message: "Which title?", choices: ["${{ with.a }}", "${{ with.b }}"] } }
 ```
 Interactive human-in-the-loop · blocks until answered. **`mode:` selects what
 is collected** (default `confirm`) ·
@@ -42,8 +43,16 @@ Non-interactive contract (normative · all modes) · when no human can answer
 (CI · daemon) the engine MUST use `default:` when present · and MUST fail
 `NIKA-BUILTIN-PROMPT-001` (`validation_error` · non-interactive without a
 `default:`) when absent: never hang forever · never silently pick an answer.
-A `choice` whose `default:` is not an element of `choices:` is a parse error
-(`NIKA-BUILTIN-PROMPT-002` · `validation_error`).
+`PROMPT-001` names only that unanswerable prompt, the one failure an engine
+may turn into a durable pause awaiting an answer. Every configuration error
+is a parse error (`NIKA-BUILTIN-PROMPT-002` · `validation_error`), judged
+before anyone is asked, attended or not, and never a pause, since no answer
+repairs it: a missing `message:`, an unknown `mode:`, an empty `choices:`, and
+a `default:` the mode cannot use — a `choice` default that is not an element
+of `choices:`, an `input` default that is not a string, a `confirm` default
+that is neither a boolean nor a word a person answers a confirm with (`yes` ·
+`y` · `no` · `n` · `true` · `false`, case-insensitive, read as that answer;
+YAML 1.2 reads an unquoted `yes` as a string).
 
 For a workflow that requires fresh human approval, omit `default:` from the
 confirmation prompt and gate the effect on its answer. `default: false` is an
@@ -51,7 +60,7 @@ automatic refusal in a non-interactive run; it does not request an answer or
 pause for a human. Keep an unattended refusal in the invocation instead of
 changing the workflow's human gate; for example, the reference engine accepts
 `nika run workflow.nika --answer approval=false` when the prompt task is named
-`approval`. See the [human-gated shipping template](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/templates/human-gated-ship.nika).
+`approval`. See the [human-gated shipping template](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/templates/human-gated-ship.nika).
 
 ## Related concepts
 
@@ -64,8 +73,8 @@ changing the workflow's human gate; for example, the reference engine accepts
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/stdlib/builtins-v0.1.md#L90) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/stdlib/builtins-v0.1.md#L91) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/canon/builtins.yaml).
 
-Tool identity: `nika:prompt`. Specification revision: `480f5b80cb77`.
+Tool identity: `nika:prompt`. Specification revision: `6390b08eb979`.
 
 <Ecosystem />

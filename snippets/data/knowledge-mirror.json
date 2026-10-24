@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "public-documentation-mirror",
-  "specRevision": "a4796d976534bddb28562df157ac2afcaadd787c",
-  "sourceSha256": "85555c72d962aeb0859fb26f0d1da41d455fb66d77d9438f67830e2f3f35586a",
+  "specRevision": "6390b08eb9791ce49c63ee17f8466fab118cadb8",
+  "sourceSha256": "93c6a30c876995b2c9fd8226df3fbe803bf462f137d790bf02f3aa87424d3bfc",
   "entries": [
     {
       "id": "language:word:access",
@@ -13,7 +13,7 @@
       "sourcePointers": [
         "/properties/run/properties/access"
       ],
-      "sha256": "6a649790892722d67c08eff211c2e66d7bd198f8ab63ae13cdde862aa3d3e314"
+      "sha256": "0907479543a90673579fbd39679e01657ce119058d3093f1f24ca1913fd98c4b"
     },
     {
       "id": "language:word:additional",
@@ -24,7 +24,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/additional"
       ],
-      "sha256": "2b93425e0158ba1d9ecf6e39b7e6f3dc97c4e53bdcf7aa4015d1b62b6e860431"
+      "sha256": "54fbdecd913822c03a0e424cfdff64634b909ebaeb671e17724e9fc64815e7fc"
     },
     {
       "id": "language:word:after",
@@ -35,7 +35,7 @@
       "sourcePointers": [
         "/$defs/task/properties/after"
       ],
-      "sha256": "eb59d5bd17c7b8825de166ed68e886a40a21486f21eabbbfea763a6bc9d7cdf8"
+      "sha256": "a383ecfe5557e56363181856611c584ab59eac200a022b9b068a026ca782b073"
     },
     {
       "id": "language:word:agent",
@@ -46,7 +46,7 @@
       "sourcePointers": [
         "/$defs/task/properties/agent"
       ],
-      "sha256": "aec2987b04a83fbb250fa65cdcd89e24e30dfeb960afd9515b23335d69350f6a"
+      "sha256": "d641609562f07a41958c9292860040a703b529a35fb1c9caac6502d53eed0c9a"
     },
     {
       "id": "language:word:args",
@@ -57,7 +57,7 @@
       "sourcePointers": [
         "/$defs/invoke/properties/args"
       ],
-      "sha256": "b4e63c5908b6036f5d3dc2d5dd3f7eb12883e367a3414cd0698d24e2008e9910"
+      "sha256": "5ade36b66ee8c769c25f65cf57e55fccf2d33cc19ff16fd3b9640a73c5c37fd4"
     },
     {
       "id": "language:word:array",
@@ -68,7 +68,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/array"
       ],
-      "sha256": "84c99d07ed84bb3b8c6544ceeb104a1cd1da6a563f5ba20f1da7816f79ae956b"
+      "sha256": "d402a58e7fde5630bd6f07c72cd95063be394f6a3baefeaa6e2d1cd88ae46bb6"
     },
     {
       "id": "language:word:backoff_max_ms",
@@ -79,7 +79,7 @@
       "sourcePointers": [
         "/$defs/retry/properties/backoff_max_ms"
       ],
-      "sha256": "b289ee0a61dfb7e82c98251bcc13ce819579e46f783e5c5764022edcab2c3a69"
+      "sha256": "eba8234321a3151d1479d25c209b27f340cd897b07efbd2c972b2cf8b35fd2d6"
     },
     {
       "id": "language:word:backoff_ms",
@@ -90,7 +90,7 @@
       "sourcePointers": [
         "/$defs/retry/properties/backoff_ms"
       ],
-      "sha256": "11d1656b2bedb82811a68344899fe6c026b0067c9bebad98d26de7d8dfa79f40"
+      "sha256": "a2e0e5aacc3eba5af0c003acef18513cb5dfa8f55a3ee8702fce6e691766ca92"
     },
     {
       "id": "language:word:backoff_strategy",
@@ -101,7 +101,7 @@
       "sourcePointers": [
         "/$defs/retry/properties/backoff_strategy"
       ],
-      "sha256": "d2db426aaf7adc2a8ac0d57beed23913b025103e1e958d43a3fa5bbf280e940d"
+      "sha256": "a128ea822b1357a7ddae672583064955d70713e83900932a8c94ac0a3ae65470"
     },
     {
       "id": "language:word:because",
@@ -112,7 +112,7 @@
       "sourcePointers": [
         "/$defs/task/properties/lift/items/properties/because"
       ],
-      "sha256": "3dd781575657b87583b5add402e29550f2b40666f9c6f3d2309ad41c0c0d1642"
+      "sha256": "59d8e17ef2395d4efbee61a653bb58be1a4df9e67480e368f0e85b4718becab2"
     },
     {
       "id": "language:word:budget_tokens",
@@ -123,7 +123,7 @@
       "sourcePointers": [
         "/$defs/infer/properties/thinking/properties/budget_tokens"
       ],
-      "sha256": "b15a9dc8adfc1b41642b99ac986b7b368c5c38434b60718623922e7dbff8380a"
+      "sha256": "7bd94af24d485ada3375b7c7bde05ddafa8a25c1b5a160ea484bc8ec2fb2bda6"
     },
     {
       "id": "language:word:capture",
@@ -134,7 +134,7 @@
       "sourcePointers": [
         "/$defs/exec/properties/capture"
       ],
-      "sha256": "46b54cf1eb033bd03c25e6a357a6a5e051521335b81be3a7ce755a51bbd16e65"
+      "sha256": "4cde307da8688e23c4e8fb0ef33263ff8142504f14248875a9d0d5dbd29009a6"
     },
     {
       "id": "language:word:clock",
@@ -145,7 +145,7 @@
       "sourcePointers": [
         "/properties/run/properties/clock"
       ],
-      "sha256": "8ee7f772ec0ce88be8034eeb2ef2ea38c356391d5a02135f0ec095b5391434b2"
+      "sha256": "29673e995023004cc43c55aedc884de253a9199da54ba00be4c17c445cc2a9b2"
     },
     {
       "id": "language:word:command",
@@ -156,7 +156,7 @@
       "sourcePointers": [
         "/$defs/exec/properties/command"
       ],
-      "sha256": "f1cbeb92b456a6d7d6597651294d455af583914486d5a1288f5c097553fad02d"
+      "sha256": "fffbbbb24fb2c2022c72692168ad283e71a39eddf146fe701dace0abc5eb85c8"
     },
     {
       "id": "language:word:const",
@@ -167,7 +167,7 @@
       "sourcePointers": [
         "/properties/const"
       ],
-      "sha256": "4fc3c1343053acca80d3c5017c79ae4f248db251067d1cfa5079688e9cc60316"
+      "sha256": "fdf9b5192bbc67b4f608effc6e515c92ad6d5075cc63c92bd4d2bb9755b39a06"
     },
     {
       "id": "language:word:cwd",
@@ -178,7 +178,7 @@
       "sourcePointers": [
         "/$defs/exec/properties/cwd"
       ],
-      "sha256": "2c0941438a585dd18f1485033059a7a1b80856a5be9d858af29e60b86da02ede"
+      "sha256": "f368ea0ac13daa87e93952ca60534d722192281c5abea4b4751e24e6d3646102"
     },
     {
       "id": "language:word:decode",
@@ -189,7 +189,7 @@
       "sourcePointers": [
         "/$defs/exec/properties/decode"
       ],
-      "sha256": "76eb7615db308efabd5e87d8db5a02670e0b88d48fa25a6217c4847d3d6a5ee6"
+      "sha256": "46ea9a204e785ea6f5290fc3a0ed675943456200ef615c7d41284378f1638996"
     },
     {
       "id": "language:word:default",
@@ -200,7 +200,7 @@
       "sourcePointers": [
         "/properties/inputs/additionalProperties/properties/default"
       ],
-      "sha256": "e2ace5398f9b1cffead509610d0d449b4c820a491380821a70ffaff9677336e3"
+      "sha256": "a91ab0581f2191bc6ab92ccb3eaa52aaa60c1e9f390dd07068c82d68926fc542"
     },
     {
       "id": "language:word:description",
@@ -213,7 +213,7 @@
         "/properties/const/additionalProperties/then/properties/description",
         "/properties/outputs/additionalProperties/anyOf/1/properties/description"
       ],
-      "sha256": "705414f473e588423b4dc610a1113fe9d36062f1f8aca47e2d1a801e4f004ac2"
+      "sha256": "9e9a29608b3b7e050022a939e6b1bbb1b7fb3c1d99ee19caf4bc05e7f22d3820"
     },
     {
       "id": "language:word:effort",
@@ -224,7 +224,7 @@
       "sourcePointers": [
         "/properties/run/properties/reasoning/properties/effort"
       ],
-      "sha256": "ff224a5c234e334f4963484417cf8bedeef948f42790bf37bcee02c58c54cde0"
+      "sha256": "b10753e071dde1a4865e660234c1551183c8027e2fb5948173f4273203b8f2e7"
     },
     {
       "id": "language:word:egress",
@@ -235,7 +235,7 @@
       "sourcePointers": [
         "/properties/secrets/additionalProperties/properties/egress"
       ],
-      "sha256": "ee1382e652e20c7ae979ac1656c540b8508ace8792b2eba7c5ea4922b255a6d0"
+      "sha256": "0b2a672f417f34bd4ba108b040ce310560f21b2c4bded532d008d3b024e76fd6"
     },
     {
       "id": "language:word:enabled",
@@ -246,7 +246,7 @@
       "sourcePointers": [
         "/$defs/infer/properties/thinking/properties/enabled"
       ],
-      "sha256": "b756eac836bc5ffb2b83ff9733867ab0af8143f73cbcb66a77b75d2634b3acbf"
+      "sha256": "2f5828efa407c02cb9e0696ef9e3843c2cffc3f05c8ba83a7a665198dbfc0db0"
     },
     {
       "id": "language:word:entropy",
@@ -257,7 +257,7 @@
       "sourcePointers": [
         "/properties/run/properties/entropy"
       ],
-      "sha256": "0f5bfce56edb5145bf2eae47d0d33034c02163ca074947a4367241e1ff464822"
+      "sha256": "eb10000be12b847083d7b1be298e2d34e565d2b36d3f1551bf172a92cd10c0aa"
     },
     {
       "id": "language:word:enum",
@@ -268,7 +268,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/enum"
       ],
-      "sha256": "5601e317ca95caa68924c0f0567e49804d2ba0a29c64a72348eec4786509316d"
+      "sha256": "dd04f0a479a99f9a49f510969a220c7cc25217bcdef37fa1b0f0072f39701179"
     },
     {
       "id": "language:word:env",
@@ -280,7 +280,7 @@
         "/properties/permits/properties/env",
         "/$defs/exec/properties/env"
       ],
-      "sha256": "054c1817356d209cbc2541bed5cac2e4eb4e3fe9893394e5b421bf1ccf03f004"
+      "sha256": "909d0505d5ba1e71ee5bade73dd581c91e48ecd5d0400e14f9ebe43635ef37e5"
     },
     {
       "id": "language:word:exec",
@@ -292,7 +292,7 @@
         "/properties/permits/properties/exec",
         "/$defs/task/properties/exec"
       ],
-      "sha256": "5df1f98ddb59a19d2e96259a3a5c1fb0a215eb8c8fe0e80add984be741a27bc7"
+      "sha256": "503939215910fb02a3869b424d2a2d87881154967105f471b6e3f330b0d7991b"
     },
     {
       "id": "language:word:extract",
@@ -303,7 +303,7 @@
       "sourcePointers": [
         "/$defs/task/properties/extract"
       ],
-      "sha256": "734b07c3b6c03c2de892152d11a3b87ed292ad0907445ab5c997773c171bbc82"
+      "sha256": "05c28856b08b63acc19c3cbe735f1ef07bf3755b8eadb4b11ba37f0a33cad2d0"
     },
     {
       "id": "language:word:fail_fast",
@@ -314,7 +314,7 @@
       "sourcePointers": [
         "/$defs/task/properties/for_each/properties/fail_fast"
       ],
-      "sha256": "abc661d02f5c46ae47d2a4d9f6c7a19c5ded31d685b4f532d86443e150ed5904"
+      "sha256": "f36995c51dd9978ce4abefa9592e5ff55b683ba2a2b7af29a3c8349cb068ba60"
     },
     {
       "id": "language:word:fallback",
@@ -325,7 +325,7 @@
       "sourcePointers": [
         "/properties/run/properties/access/properties/fallback"
       ],
-      "sha256": "1e8b62d1fb16536658d087412b7a2c168d68d52bfd63d6cbe655ec4ed1f18417"
+      "sha256": "1a946903759c3fe3c0c71685ec001bdbb9b408033e43fdaf2a238e0a7c308220"
     },
     {
       "id": "language:word:file",
@@ -337,7 +337,7 @@
         "/$defs/promptText/oneOf/1/properties/file",
         "/$defs/schemaContract/oneOf/0/properties/file"
       ],
-      "sha256": "2b091ce31516929af73c3826252c5fec2df87a43ab05c5d937c3d60d631a5368"
+      "sha256": "0de2e1bdc7d7705eeac070bf548e3d36e5f1a97ce2e2cf85860fe08919df2bf9"
     },
     {
       "id": "language:word:for_each",
@@ -348,7 +348,7 @@
       "sourcePointers": [
         "/$defs/task/properties/for_each"
       ],
-      "sha256": "01b6ef5642bb992bb9ea952be72a146d7d4b14f0b06183dbe165788930024873"
+      "sha256": "c7d83906b0774bec87ab2a0799e0859bb9453557e502eaa9fadd6b9d7f1b9ba5"
     },
     {
       "id": "language:word:from",
@@ -359,7 +359,7 @@
       "sourcePointers": [
         "/$defs/task/properties/lift/items/properties/from"
       ],
-      "sha256": "dfbf54fc1066fd50b625126606005d0275d19e28053264bc71521a546a9b7271"
+      "sha256": "a8cd3817643f90a1d9ca377cb84883b3d92393037c0f0fec3200a70ade3a9424"
     },
     {
       "id": "language:word:fs",
@@ -370,7 +370,7 @@
       "sourcePointers": [
         "/properties/permits/properties/fs"
       ],
-      "sha256": "76d9ec5a9f780798306085f0a607bcf8fa7f144a399dcd08628350cd6b12d4fc"
+      "sha256": "d97582178f0dcbec5175b6e79c0c959395ee6378a755ba5732fab3a89c5e5426"
     },
     {
       "id": "language:word:group",
@@ -381,7 +381,7 @@
       "sourcePointers": [
         "/$defs/task/properties/group"
       ],
-      "sha256": "a326681447ec49c56d2e2b1922edb6db16de8e7a6d3fabb91c36181ab75f55d0"
+      "sha256": "fd7eb5a71847ef085e0ba8989c5c77637ac32ce1456d3bc8840c2f00f771c3b5"
     },
     {
       "id": "language:word:host",
@@ -392,7 +392,7 @@
       "sourcePointers": [
         "/properties/secrets/additionalProperties/properties/egress/items/properties/host"
       ],
-      "sha256": "9067d6766a67566c8251caec53ce23cc63647d2907737da7c92fbc1ab3f9830d"
+      "sha256": "ea9d60b914fd6937e4ebe92a3f44c7b05e20e459833d55db9e006a9cd3b40424"
     },
     {
       "id": "language:word:host_from_self",
@@ -403,7 +403,7 @@
       "sourcePointers": [
         "/properties/secrets/additionalProperties/properties/egress/items/properties/host_from_self"
       ],
-      "sha256": "b6e6f75afca8d28235d8e60f835c916996e5d45f0f6292a0f1aaad6c49afcc4d"
+      "sha256": "b42a04157de3dc0825ad6e9e080da5d445027ed06f52a18dd738447249898217"
     },
     {
       "id": "language:word:http",
@@ -414,7 +414,7 @@
       "sourcePointers": [
         "/properties/permits/properties/net/properties/http"
       ],
-      "sha256": "4925574fc698d69850dcb63f54cfa2abfdaaadd6f5557c6f3cdd52e5ad78261c"
+      "sha256": "c7e79d9ae4b2eb246c810e52123895f6879747aaa3d331ca8cf9da2954d3df07"
     },
     {
       "id": "language:word:infer",
@@ -425,7 +425,7 @@
       "sourcePointers": [
         "/$defs/task/properties/infer"
       ],
-      "sha256": "fc35063626933f0df4f35a03a87d5434e05627e2a2b3903ec7b05b04ad315c85"
+      "sha256": "88a2905cf5f005a8e9653d9bd95cd0d0933a7b4617c0401702386cec762e112b"
     },
     {
       "id": "language:word:inputs",
@@ -436,7 +436,7 @@
       "sourcePointers": [
         "/properties/inputs"
       ],
-      "sha256": "36bc5dc2ba1754e1387b970b0f2cf45d1cf18893afbd17ebbd2350d23a78693c"
+      "sha256": "3a05c6a773ba947416ec61a7e03cf0d20bb64378dc488158a6259ab301d71dea"
     },
     {
       "id": "language:word:integer",
@@ -447,7 +447,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/integer"
       ],
-      "sha256": "b6c50afc6c5234375f0ed1381ac224af1b810257e6d4902fc40b1072decfa1a4"
+      "sha256": "1d947d657d628bb366347b635f0d295f467f05ab3cf4282f7dfe8368fa07da82"
     },
     {
       "id": "language:word:invoke",
@@ -458,7 +458,7 @@
       "sourcePointers": [
         "/$defs/task/properties/invoke"
       ],
-      "sha256": "f816ac5cf3886085030af31387849eb049f77b69478b7ca51d2067640547555a"
+      "sha256": "628a37cf814790b6d13c0a2a9ff475e1c2c2f78c9073614f8528a8470dd481f6"
     },
     {
       "id": "language:word:items",
@@ -469,7 +469,7 @@
       "sourcePointers": [
         "/$defs/task/properties/for_each/properties/items"
       ],
-      "sha256": "dc6e56cbc1d114e3a2171e115aa36beb191505a226c4d6c0409a331ba33a024e"
+      "sha256": "c7b93043587fb31d78dcb398b4db74ff48ab52e6dc9e092bad1703605b9a9321"
     },
     {
       "id": "language:word:jitter",
@@ -480,7 +480,7 @@
       "sourcePointers": [
         "/$defs/retry/properties/jitter"
       ],
-      "sha256": "440b451bb0df0b2417690d045b67c9e8de3c454de2f73102edc2227c87db92c8"
+      "sha256": "69c95a0d3c8fa65b8fcd13601823480f56b222295a339c4ed9b1f7b243198c6d"
     },
     {
       "id": "language:word:key",
@@ -491,7 +491,7 @@
       "sourcePointers": [
         "/properties/secrets/additionalProperties/properties/key"
       ],
-      "sha256": "a10af5436fea9e3892eb2cd44d68dcb6f6e76fcf287d329228a8a87004ce04d7"
+      "sha256": "41845f633029c42b78f802668a2df5a6ff0cf33c8326a7e7e266cf5379873a57"
     },
     {
       "id": "language:word:law",
@@ -503,7 +503,7 @@
         "/$defs/task/properties/lift/items/properties/law",
         "/$defs/task/properties/lift/items/allOf/0/if/properties/law"
       ],
-      "sha256": "0905352341f5c6d2960750a4b9489f5d946e8f35583a00dda456b4aec0e2281c"
+      "sha256": "78cb164b64921378af02ab79625fb225775f77cba0f54697abff579496020354"
     },
     {
       "id": "language:word:lift",
@@ -514,7 +514,7 @@
       "sourcePointers": [
         "/$defs/task/properties/lift"
       ],
-      "sha256": "722455bb78ea0cbaae29c6293f661c4d50beb025c51c80937b646b556ca94576"
+      "sha256": "a91ad7e2cb73df0e7fc1240017cf954a9b0fb0ad71de5cc91d2892539d02d4fc"
     },
     {
       "id": "language:word:map",
@@ -525,7 +525,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/map"
       ],
-      "sha256": "18262f358ce0b277cd75cde597ec1982d14214f96b4ad93397b7602a2906aee3"
+      "sha256": "cf3bb8f64f40d79f39e2d47cc62a771975e9717e515d388d71d50ceefcd8e927"
     },
     {
       "id": "language:word:max",
@@ -537,7 +537,7 @@
         "/$defs/typeExpr/oneOf/2/properties/integer/properties/max",
         "/$defs/typeExpr/oneOf/2/properties/number/properties/max"
       ],
-      "sha256": "0eb9491cf9da1c883681728d39e34c96fbf11f55750819d2ce8af2cc3a9dfdc8"
+      "sha256": "c48e5cd861f72c1c22e4e79a4d1c27442f31950c7a6637a0c69616c26a8be102"
     },
     {
       "id": "language:word:max_attempts",
@@ -548,7 +548,7 @@
       "sourcePointers": [
         "/$defs/retry/properties/max_attempts"
       ],
-      "sha256": "24803929e43f23519bf22a22b3ec8041f5d6237dfde3762a241e5386b6c637ba"
+      "sha256": "bc0df5df0cfd06ccb612b40a954d01c67f1c0dea6924b1be575ebe3eaf0030a8"
     },
     {
       "id": "language:word:max_items",
@@ -559,7 +559,7 @@
       "sourcePointers": [
         "/$defs/task/properties/for_each/properties/max_items"
       ],
-      "sha256": "251b80bee6270b23952bde741056f676bfa67b482ac66f5730c5579ad1bdc79d"
+      "sha256": "4ae4648c88e7e179b95342ea313cee047c61c42a0250a9327d7838ad1e02e1a8"
     },
     {
       "id": "language:word:max_len",
@@ -570,7 +570,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/string/properties/max_len"
       ],
-      "sha256": "3fa34efaf950d69414498ac41179357bf79c5e727183cd9e9a272bab9d560fc2"
+      "sha256": "88edf326ba0d5a4c7cf26283a04bc6aa18f039430d09bcde31b5933b8ca06a34"
     },
     {
       "id": "language:word:max_parallel",
@@ -581,7 +581,7 @@
       "sourcePointers": [
         "/$defs/task/properties/for_each/properties/max_parallel"
       ],
-      "sha256": "5c1d0b321175a50c082f11e46299f118cb257a9a99572cd9f62c7dd63dad5dc0"
+      "sha256": "67aacd3f30aeaac2ee4e49efe64743313613290dc5215c9f1cc04866fc655925"
     },
     {
       "id": "language:word:max_tokens",
@@ -592,7 +592,7 @@
       "sourcePointers": [
         "/$defs/infer/properties/max_tokens"
       ],
-      "sha256": "3d7a98c7e9ab7a8c7172f98451c7a07c8cbe32458f59844b9caf1f3b441735ab"
+      "sha256": "c1d842eb75da332c69144745e57d0fb57056997b5f52caec9de7c1fb4ea7ce40"
     },
     {
       "id": "language:word:max_tokens_total",
@@ -603,7 +603,7 @@
       "sourcePointers": [
         "/$defs/agent/properties/max_tokens_total"
       ],
-      "sha256": "c212a78f5cf5506b8ed1a94f9157a01fe479ec75ab575be78b200866a6daf6dd"
+      "sha256": "29d8cfe2baa6aab24267a7a81c51ec38fde3eee3f20bf8d380ef199fa652af31"
     },
     {
       "id": "language:word:max_turns",
@@ -614,7 +614,7 @@
       "sourcePointers": [
         "/$defs/agent/properties/max_turns"
       ],
-      "sha256": "3aa90f424cadd6a4bed34657f7bf3a08469a6367bfe0ee8b88b5259ac3a77b60"
+      "sha256": "e55294469756d0f11d41364d7e002ac719624f79f0b788c6a6c1c8b5e3871696"
     },
     {
       "id": "language:word:min",
@@ -626,7 +626,7 @@
         "/$defs/typeExpr/oneOf/2/properties/integer/properties/min",
         "/$defs/typeExpr/oneOf/2/properties/number/properties/min"
       ],
-      "sha256": "5e9ac4d38c0944f9319788d117731033aaaf8020196c8a0294b0fed572183f4a"
+      "sha256": "17cc7eea126f5ee6e1234fb92575e74a3ff182ef29e9b2d7a88d527b074e8c57"
     },
     {
       "id": "language:word:min_len",
@@ -637,7 +637,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/string/properties/min_len"
       ],
-      "sha256": "0561e298d5fd281fc1abe05fa8f457843b9d5bb85057d9bd85355156e0f66b83"
+      "sha256": "7ef481560225c4faa06fddf9f8fa33f9fec2942a7bc12208b350583d072c38b3"
     },
     {
       "id": "language:word:model",
@@ -650,7 +650,7 @@
         "/$defs/infer/properties/model",
         "/$defs/agent/properties/model"
       ],
-      "sha256": "5de6aedd87d38d021ab2c29f69a5ec203877c55b41e9d1fb67c37dd7430b9f07"
+      "sha256": "f03e8bc769e5f18fb4ed4242339feb5a3b7163acab063703ef9b49d64b0ea6a5"
     },
     {
       "id": "language:word:net",
@@ -661,7 +661,7 @@
       "sourcePointers": [
         "/properties/permits/properties/net"
       ],
-      "sha256": "2fed190ee6eeff03a745f836c101b24fa143b3027a4755ec58b81cac9f3de532"
+      "sha256": "82999b9eb64841a225285b37db630ba42c3ef0cfe3c35c9b84339f4969255544"
     },
     {
       "id": "language:word:nika",
@@ -672,7 +672,7 @@
       "sourcePointers": [
         "/properties/nika"
       ],
-      "sha256": "c537cc0a3c67c9261da898d15db513f8d58b602cbcf39eca0af9b7025157da7e"
+      "sha256": "9d4df4a8a34d650754987ff47218fbba000aebf1e0522a6fbcfddf6dfc06234a"
     },
     {
       "id": "language:word:number",
@@ -683,7 +683,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/number"
       ],
-      "sha256": "a15614bfc6818f20ed59ea25d952555a124b1890879d3d1b3927622d68f48e8b"
+      "sha256": "f0a94c8959fd438aa46838055d9792cd300fe3c3800628c554559fa81d280ae7"
     },
     {
       "id": "language:word:object",
@@ -694,7 +694,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/object"
       ],
-      "sha256": "c829adb2014cd52a37d4331a5183892e7a0f3dd2e445a6c1310496b62e04286d"
+      "sha256": "88e5b615d73fbc0dfed670fcc2a4442de8e273fa8138615919e15260bd94cf51"
     },
     {
       "id": "language:word:on_codes",
@@ -706,7 +706,7 @@
         "/$defs/retry/properties/on_codes",
         "/$defs/onError/properties/on_codes"
       ],
-      "sha256": "e5c0e8f85d4e1b407cc2194c6e753c16a3668342a740005d0ceee372341d0177"
+      "sha256": "c0fdf50547b567904e1f30517a522a2ddd9771dd3cf14596868bddfad9f603e2"
     },
     {
       "id": "language:word:on_error",
@@ -717,7 +717,7 @@
       "sourcePointers": [
         "/$defs/task/properties/on_error"
       ],
-      "sha256": "1c8bca60ded18c134c7e68fe4ef3a00572782638c9af4dba41c897e55a46182d"
+      "sha256": "c910284e7e518ee19b72a45037b7faebe25c9d3e9cc28badfa2106c39b33122e"
     },
     {
       "id": "language:word:optional",
@@ -728,7 +728,7 @@
       "sourcePointers": [
         "/$defs/fieldTypeExpr/oneOf/1/properties/optional"
       ],
-      "sha256": "1a3dba9a7fb3dfaf570872e6164762c431aabfaee9ab9b52700277c35577e783"
+      "sha256": "f129ffa7947efe928ec4f86350983fe865943994519e1c824c8880982da7e71e"
     },
     {
       "id": "language:word:outputs",
@@ -739,7 +739,7 @@
       "sourcePointers": [
         "/properties/outputs"
       ],
-      "sha256": "e9322f347492d28354480541c8f6910fe70b3e0580d8e9b064248bbfd76bfd74"
+      "sha256": "a17954b3ec60753d709ba1dd790f906a0323ea9f30192a936a1a9375925bd88e"
     },
     {
       "id": "language:word:path",
@@ -751,7 +751,7 @@
         "/properties/secrets/additionalProperties/properties/path",
         "/$defs/infer/properties/vision/items/properties/path"
       ],
-      "sha256": "75aa43a8e35f380b95376f102711aac7cd7d8ea8a746a9cc233dfc186dad730b"
+      "sha256": "a666734cd3e8dcc5825f594d4ff89f4e765739d536d929d90339fd9cf0fcedd0"
     },
     {
       "id": "language:word:pattern",
@@ -762,7 +762,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/string/properties/pattern"
       ],
-      "sha256": "2fc613394cd636c4e518c7e28f721e6e8965008f45400e2daf062810362fd057"
+      "sha256": "295134ad161c76258038dec80bd0a604f066d94f568f24727e4575fef5dd6814"
     },
     {
       "id": "language:word:permits",
@@ -773,7 +773,7 @@
       "sourcePointers": [
         "/properties/permits"
       ],
-      "sha256": "9b369a26888b5f4fe324239fd7fddac83b14bf474b2021c16e21b30ad634d63f"
+      "sha256": "e648df082904b246aaa7836112b2cb1f9332b6f5350f537ce47797523aaf786e"
     },
     {
       "id": "language:word:prompt",
@@ -785,7 +785,7 @@
         "/$defs/infer/properties/prompt",
         "/$defs/agent/properties/prompt"
       ],
-      "sha256": "d9d947dfacbcbe0e719ac9e0cb9feb52f1fc546768120c4397f62cbebb2d80f2"
+      "sha256": "be7110761be618a59046d2f49971548ffedf21ae10260c6ff5b1d2fa0d89c889"
     },
     {
       "id": "language:word:protocol",
@@ -796,7 +796,7 @@
       "sourcePointers": [
         "/properties/run/properties/access/properties/protocol"
       ],
-      "sha256": "6510ad810588f25505e038454c4578be259482f07c827ecb4166150056aac702"
+      "sha256": "eae0a41ddea91e206a0e09ed4504f260bee818ea0a50e21948da6a9305c6addd"
     },
     {
       "id": "language:word:read",
@@ -807,7 +807,7 @@
       "sourcePointers": [
         "/properties/permits/properties/fs/properties/read"
       ],
-      "sha256": "31a70e0cddab03d168d30857fa92d74ca754b4b31d3e7fda8bb34112a26472d7"
+      "sha256": "c49660497233a98a12b7b9d90094063fd7e77b78244e1cc2a62e2391cd169712"
     },
     {
       "id": "language:word:reasoning",
@@ -818,7 +818,7 @@
       "sourcePointers": [
         "/properties/run/properties/reasoning"
       ],
-      "sha256": "9a2900413a3f0eb760d2f127e88367bf53711542b6064af27e52b95f9ec5b845"
+      "sha256": "a99d177884b8739a378c8c9e14defba4b90e341af190289d6ed64c4df85af514"
     },
     {
       "id": "language:word:recover",
@@ -829,7 +829,7 @@
       "sourcePointers": [
         "/$defs/onError/properties/recover"
       ],
-      "sha256": "31e29f99f2f084e0667789b47391dc27517003a0ff472d4642452301fe15ca61"
+      "sha256": "cb8c023b17dbed99687b4995cf8816c429d502830bf577988e57b843dc34426c"
     },
     {
       "id": "language:word:required",
@@ -840,7 +840,7 @@
       "sourcePointers": [
         "/properties/inputs/additionalProperties/properties/required"
       ],
-      "sha256": "1ae94823036675afe465299d2c0e86b0bb4ed50fa00a25de7138956b56fa0620"
+      "sha256": "1a450d9b69550a2fd9c64155037f6795d24a18a585f118522501336551a3424b"
     },
     {
       "id": "language:word:retry",
@@ -851,7 +851,7 @@
       "sourcePointers": [
         "/$defs/task/properties/retry"
       ],
-      "sha256": "e8766f583b3a93cd900db4f03d6614745c66db86d9ee6ee3352d4e24fc98273a"
+      "sha256": "08f7f9672e0915d628e8ac56140c6f0096c0a918c816f4816b955ecd9afddd3e"
     },
     {
       "id": "language:word:returns",
@@ -862,7 +862,7 @@
       "sourcePointers": [
         "/$defs/task/properties/returns"
       ],
-      "sha256": "f2c2763accac8c4168d900bcb51bce1d205fd754078592ab2a6c9a9a6186f455"
+      "sha256": "22a8304dfaadb3e955119194e3debd500c0da15248ea7c383ba40355e6deeb83"
     },
     {
       "id": "language:word:run",
@@ -873,7 +873,7 @@
       "sourcePointers": [
         "/properties/run"
       ],
-      "sha256": "0a049fd8d8cf332600494e8d2929c8dd64804d4b7b4f419f8811e9af4cc75b4a"
+      "sha256": "2892bdd0c43228ba9ba7bfeb72bf23283c5c39294794553281971ca480389f55"
     },
     {
       "id": "language:word:schema",
@@ -885,7 +885,7 @@
         "/$defs/infer/properties/schema",
         "/$defs/agent/properties/schema"
       ],
-      "sha256": "abd23c795e3b9612573dfb2f114d263b235f0b92f54de5f37f0e4f4ce3402996"
+      "sha256": "b56f52532b59f37176db947d50cf6744182fed8ecf2963d7dc6e235b3e5513a2"
     },
     {
       "id": "language:word:secrets",
@@ -896,7 +896,7 @@
       "sourcePointers": [
         "/properties/secrets"
       ],
-      "sha256": "40456361477bd33addbed6654dcea448efe721413e627e90f38128777682649e"
+      "sha256": "7ea2354469289c9231d52c38be41f6b9417330fcb37f9fbfcb996e6d7ffd01e1"
     },
     {
       "id": "language:word:seeded",
@@ -907,7 +907,7 @@
       "sourcePointers": [
         "/properties/run/properties/entropy/anyOf/1/properties/seeded"
       ],
-      "sha256": "4dc5ed7b75af7bd893607002c688c884fe2a5d6b06e55142a2f639d7b70f57d5"
+      "sha256": "3c7c0425bf0b3247913cca9d224905b0a2e85e615e7ce06fd8064dbbb7b953ed"
     },
     {
       "id": "language:word:shell",
@@ -918,7 +918,7 @@
       "sourcePointers": [
         "/$defs/exec/properties/shell"
       ],
-      "sha256": "e93dd04b6e1aed2c735227abcf433989066a649b2b5041d99519e09f8ecee937"
+      "sha256": "6f831e4491fa34d353cc2784b30cf76fc499a1de7b269fa88be8a4f21d5cb87a"
     },
     {
       "id": "language:word:skills",
@@ -929,7 +929,7 @@
       "sourcePointers": [
         "/$defs/agent/properties/skills"
       ],
-      "sha256": "96a5310a3ea9516516031b9d058d701ec9bcb6a774869b684dd64d95b2111cf9"
+      "sha256": "a1a4543420e48f36b8858802ece66e05e07976dc899570a475cc97be3b87a133"
     },
     {
       "id": "language:word:skip",
@@ -940,7 +940,7 @@
       "sourcePointers": [
         "/$defs/onError/properties/skip"
       ],
-      "sha256": "da60321cfc6dc1c6994155c2e081af5a8b18b5e4f73d27f54a216264abb74918"
+      "sha256": "8f44491bc3c85fd6a6ecfb5af275dfd6d9109ce2e9e4944d3afe883405cd4937"
     },
     {
       "id": "language:word:source",
@@ -953,7 +953,7 @@
         "/properties/secrets/additionalProperties/allOf/0/if/properties/source",
         "/$defs/infer/properties/vision/items/properties/source"
       ],
-      "sha256": "43a394f77e03fa44af98b1e5ccf918a9eb6338560ccf665dd37fbd041a3e5edf"
+      "sha256": "80713b2493743ade8cd15d6ade89797dfe575b499df980d674019f49a40e20ec"
     },
     {
       "id": "language:word:stdin",
@@ -964,7 +964,7 @@
       "sourcePointers": [
         "/$defs/exec/properties/stdin"
       ],
-      "sha256": "e3c9d138873a59b2d9084a53c95fbd5252f49d7c55a1124d6e87128c12831031"
+      "sha256": "6d2bdb9ce5086f6ce5daaeba2913b556b2f75c0e2e3d7303863ac72244288192"
     },
     {
       "id": "language:word:string",
@@ -975,7 +975,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/string"
       ],
-      "sha256": "fe2ea58949fbdd88831e2f404e464f54d6ee87e61c92c984f2715b1650532862"
+      "sha256": "47d50076af3f98942ac28873e278da261410d144b97b527ae833fb6568d15b92"
     },
     {
       "id": "language:word:system",
@@ -987,7 +987,7 @@
         "/$defs/infer/properties/system",
         "/$defs/agent/properties/system"
       ],
-      "sha256": "f7a80c5fca5e296958dad2f250c9b5bd95de73d8ab41821ba857f46ce52e093a"
+      "sha256": "2305a469be05c9a3f5d46f049d41fff8c3565f87ec3583ba3b04df04fc83dc3f"
     },
     {
       "id": "language:word:tasks",
@@ -998,7 +998,7 @@
       "sourcePointers": [
         "/properties/tasks"
       ],
-      "sha256": "c109bf00dcc070d2d504f95f942398008cd0545cf966a183e86eae0fe3eb8cff"
+      "sha256": "802f70494114abc400533bad42bb77a90133a86cd6c209a5f7c4498545edbff2"
     },
     {
       "id": "language:word:temperature",
@@ -1010,7 +1010,7 @@
         "/$defs/infer/properties/temperature",
         "/$defs/agent/properties/temperature"
       ],
-      "sha256": "1e77afd379fed296faf16a4c5480a88d409221e9afede0bd033d77383ff6337b"
+      "sha256": "cc3a199189b00885cd6d8dd7d1585fb1da875197f207e88b3e6c1bbbcfdeb3c9"
     },
     {
       "id": "language:word:thinking",
@@ -1021,7 +1021,7 @@
       "sourcePointers": [
         "/$defs/infer/properties/thinking"
       ],
-      "sha256": "bcc50dc1b9099bcbe4282e049339bfebb163a5312fd77df133ce4d1c6860f094"
+      "sha256": "a02d4aa064ec7ef96792e5b7166a394cf2f2823dc28a4874417fd9641f85151e"
     },
     {
       "id": "language:word:timeout",
@@ -1032,7 +1032,7 @@
       "sourcePointers": [
         "/$defs/task/properties/timeout"
       ],
-      "sha256": "c2a4e8470587f07c7ad30a5c64ae78d9978c3c6cdc6ddb03032d276f20844999"
+      "sha256": "24f8e870f2ed106d1a8c688f21cdb59b7a03d8b3e4c06fbc7c0e588b4a43f48c"
     },
     {
       "id": "language:word:to",
@@ -1043,7 +1043,7 @@
       "sourcePointers": [
         "/properties/secrets/additionalProperties/properties/egress/items/properties/to"
       ],
-      "sha256": "6a49b3440bb9e4cb19b730ded97fa6cdc54eeef761d68b0a1f3b8bb883b949f9"
+      "sha256": "1c5480aad1bf30d23ecd5de1b9fc48ad7387c4bc013232ae81c53981077aba3b"
     },
     {
       "id": "language:word:tool",
@@ -1054,7 +1054,7 @@
       "sourcePointers": [
         "/$defs/invoke/properties/tool"
       ],
-      "sha256": "9a8bf18db19b98c84be28d3f87e8084fb96812ae555dbf159cb92601e76542ba"
+      "sha256": "a6ce5d9b95389e0ffb70e40694472c980f2940b49c49337a0de566aecfa05d27"
     },
     {
       "id": "language:word:tools",
@@ -1066,7 +1066,7 @@
         "/properties/permits/properties/tools",
         "/$defs/agent/properties/tools"
       ],
-      "sha256": "51e17ac326e610fcb2a78cba8b20f916c1b3cf4f4759fac2e695f21c04ce7e79"
+      "sha256": "68eba75e718a1b08da41ceccf091023092bb66c035b1f66041695f0b1d860232"
     },
     {
       "id": "language:word:type",
@@ -1079,7 +1079,7 @@
         "/properties/const/additionalProperties/then/properties/type",
         "/properties/outputs/additionalProperties/anyOf/1/properties/type"
       ],
-      "sha256": "3112e7b13770f2098c6557261c275df4cfa36eabb964ca68fae060b6a257c0d7"
+      "sha256": "26413a622de02259e1da1dc56aff6023b98148fa98185dfc0f14c55b2ae54ec4"
     },
     {
       "id": "language:word:union",
@@ -1090,7 +1090,7 @@
       "sourcePointers": [
         "/$defs/typeExpr/oneOf/2/properties/union"
       ],
-      "sha256": "24389b1935a01487bb395b98dd6599f72fe6828f048e12c94d6dd84424d02f17"
+      "sha256": "293087671cab0f84f1b4f337acfa6555dfe13d103439caa9f82a958a03345ba7"
     },
     {
       "id": "language:word:url",
@@ -1101,7 +1101,7 @@
       "sourcePointers": [
         "/$defs/infer/properties/vision/items/properties/url"
       ],
-      "sha256": "fd21ca30ff14ede3a82bc6a013da3599430a61ba5fc71f82384f69df8ddd16f3"
+      "sha256": "3a0cd8d5a70dc237da3b0cc7cdc681dc64ae252c0821b07d66aac06f6dd14ff2"
     },
     {
       "id": "language:word:value",
@@ -1113,7 +1113,7 @@
         "/properties/const/additionalProperties/then/properties/value",
         "/properties/outputs/additionalProperties/anyOf/1/properties/value"
       ],
-      "sha256": "d002ea04296a983667c854346a26583ba7a6058988159a92d8ad8679dff6ea45"
+      "sha256": "0d646b0096655a0bf470a9b82a9b8acb6794ef249da850308014cb1217d3fc1b"
     },
     {
       "id": "language:word:via",
@@ -1124,7 +1124,7 @@
       "sourcePointers": [
         "/properties/run/properties/access/properties/via"
       ],
-      "sha256": "8d4a1c0bf1f037a13d2189a1111993f0c8bea9e0f7d84ee1e624c93a5c6bb8e5"
+      "sha256": "8851377d1956240463b80aee6bc334f4d3e1c071e0260663d7231b0a49d8689c"
     },
     {
       "id": "language:word:vision",
@@ -1135,7 +1135,7 @@
       "sourcePointers": [
         "/$defs/infer/properties/vision"
       ],
-      "sha256": "7122a4a0b4d6713c5513715eb8c9a1ffcfebadfed8ffbd70ff11cb5468ab2ef5"
+      "sha256": "911444f4b0dc66df01ab813bcfafebbb8d6a0c1a522823e4bc3f5754cc4089ab"
     },
     {
       "id": "language:word:when",
@@ -1146,7 +1146,7 @@
       "sourcePointers": [
         "/$defs/task/properties/when"
       ],
-      "sha256": "3b7ba0655636b28cf90e5bbe198d87717004b28c9828b1b30b344d20a37a2f5d"
+      "sha256": "a7bfbb47c40497ccdcc448be3d74623b52d30abe00b176aa3419781afd448100"
     },
     {
       "id": "language:word:with",
@@ -1157,7 +1157,7 @@
       "sourcePointers": [
         "/$defs/task/properties/with"
       ],
-      "sha256": "9ed1313bfc149cdbc8711e28ac6e466cc970d56d1061014e6eda043ab5091fc0"
+      "sha256": "d0aed3d8e6a1eb674b6ee1345d7662f981d71616ecab07535dd5c975e6ff6eee"
     },
     {
       "id": "language:word:workflow",
@@ -1168,7 +1168,7 @@
       "sourcePointers": [
         "/$defs/invoke/properties/workflow"
       ],
-      "sha256": "a42c6cc5e5d227fcacdefe204d4dbc030db0a39d9906a3386357506d88837f6d"
+      "sha256": "00a2a493eb69216a53e449c4826a884d3f4590ef4c80895803abb4b007bc8581"
     },
     {
       "id": "language:word:write",
@@ -1179,7 +1179,7 @@
       "sourcePointers": [
         "/properties/permits/properties/fs/properties/write"
       ],
-      "sha256": "b4026d0e0de706787a9f8a0bd87877858901e0dce3a6237b1e25538d047d1a9e"
+      "sha256": "c19e8fe79bb258be42d06bb00be256d4692a8670845c10e2e3d585940642ff56"
     }
   ]
 }

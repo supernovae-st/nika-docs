@@ -22,9 +22,20 @@ This reference preserves the specification at the revision linked below. Source 
 ## Usage and behavior
 
 ```yaml illustration
-invoke: { tool: "nika:notify", args: { channel: webhook, target: "https://hooks.slack.com/...", message: "Done · ${{ tasks.X.status }}", severity: info, data: { run: "${{ tasks.X.output }}" } } }
+with: { status: "${{ tasks.X.status }}", run: "${{ tasks.X.output }}" }
+invoke: { tool: "nika:notify", args: { channel: webhook, target: "https://hooks.slack.com/...", message: "Done · ${{ with.status }}", severity: info, data: { run: "${{ with.run }}" } } }
 ```
 Send notifications · `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms` · one builtin not 5). The 1.0 engine MUST support `webhook` · others MAY be feature-gated. `data:` (OPTIONAL · any JSON value) carries structured context alongside the human `message`: the webhook payload is `{ message, severity, data? }` (the key is absent when not given · receivers branch on machine fields, never parse the message). Returns `null` on accepted delivery. Throws · `NIKA-BUILTIN-NOTIFY-001` (channel unconfigured · `validation_error`) · `-002` (delivery failed · `network_error` · transient engine-assessed).
+
+**Chat webhooks (normative · `webhook`)** · a chat service's incoming webhook reads its own text field and refuses the payload above (a Slack incoming webhook answers HTTP 400 `no_text`). The engine MUST shape the `webhook` body for the receivers it recognizes from `target:` and MUST keep `{ message, severity, data? }` for every other target:
+
+| `target:` | Body |
+|---|---|
+| a Slack incoming webhook (host `hooks.slack.com` or `hooks.slack-gov.com`, path `/services/…`) | `{ text, mrkdwn: false }` |
+| a Discord webhook (host `discord.com`, `discordapp.com` or their `canary.`/`ptb.` subdomains, path `/api/webhooks/{id}/{token}` or `/api/v{N}/webhooks/{id}/{token}`) | `{ content, allowed_mentions: { parse: [] } }` |
+| any other target, including a Slack Workflow Builder trigger (`/triggers/…`) and Discord's `/slack` or `/github` adapters | `{ message, severity, data? }` |
+
+The text a person reads is the `message`, prefixed `[<severity>] ` when `severity` is not `info`, then the `data:` context on its own line (a string as written, any other value as compact JSON). For Slack, `&` `<` `>` become `&amp;` `&lt;` `&gt;`. For Discord, every character that opens markdown, a masked link or a mention (`\` `*` `_` `~` `` ` `` `|` `[` `]` `<` `>`, and a line's opening `#` or `-`) is backslash-escaped outside a bare `http://`/`https://` URL, and `content` is bounded to 2,000 UTF-16 units, ending `…` when cut, without splitting an escape. A refused delivery (`-002`) names the receiver's answer as one bounded line, with control and invisible characters removed and every part of `target:` withheld (a webhook URL carries its credential in its path or query), and carries `details.status_code`.
 
 **Injection defense (normative)** · the `webhook` payload is JSON-encoded, so the `message` cannot break its transport (serde escaping neutralizes `"`/newlines). A channel that renders the `message` into a DIFFERENT medium MUST neutralize that medium's injection surface when implemented · **email** MUST reject/strip CR/LF in any header-bound field (`target:`/subject) against RFC 5322 header injection · **slack**/**discord** MUST treat the `message` as text, never a trusted mrkdwn/mention control string · **sms** MUST bound length to the carrier segment limit. The `webhook target:` rides the same SSRF boundary as `nika:fetch` (private-network / cloud-metadata rejected). Same discipline as the `nika:fetch` SSRF requirement · an output channel that reaches an interpreter neutralizes that interpreter's control surface.
 
@@ -41,8 +52,8 @@ Send notifications · `channel:` enum (`webhook`/`slack`/`email`/`discord`/`sms`
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/stdlib/builtins-v0.1.md#L592) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/stdlib/builtins-v0.1.md#L613) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/canon/builtins.yaml).
 
-Tool identity: `nika:notify`. Specification revision: `480f5b80cb77`.
+Tool identity: `nika:notify`. Specification revision: `6390b08eb979`.
 
 <Ecosystem />
