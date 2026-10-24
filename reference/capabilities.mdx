@@ -65,7 +65,7 @@ matches wins. Zero regex, zero allocation, zero runtime dependencies.
     name  = "mock-full"
     scope = { providers = ["mock"] }
     match = { kind = "any" }
-    caps  = { reasoning = true, tokenizer = "cl100k", input_modalities = ["audio", "image", "pdf", "text", "video"], output_modalities = ["text"], json_mode = "schema" }
+    caps  = { reasoning = true, tokenizer = "cl100k", input_modalities = ["audio", "image", "pdf", "text", "video"], output_modalities = ["text"], supported_parameters = ["batch-api", "citations", "computer-use", "context-caching", "file-search", "include-reasoning", "parallel-tool-calls", "predicted-outputs", "prompt-caching", "reasoning-effort", "streaming-thinking", "thinking-budget", "web-search"], supports_system_messages = true, json_mode = "schema" }
     ```
     A provider-wide fallback. It must be the last rule of its scope.
   </Accordion>
@@ -87,7 +87,7 @@ matches wins. Zero regex, zero allocation, zero runtime dependencies.
     name  = "openai-o-series-exact"
     scope = { providers = ["openai", "openrouter"] }
     match = { kind = "exact_any", models = ["o1", "o3", "o4"] }
-    caps  = { token_limit_param = "max-completion-tokens", supports_temperature = false, reasoning = true, supported_parameters = ["reasoning-effort"], supports_system_messages = false, json_mode = "schema" }
+    caps  = { token_limit_param = "max-completion-tokens", supports_temperature = false, reasoning = true, tokenizer = "o200k", input_modalities = ["image", "text"], output_modalities = ["text"], supported_parameters = ["reasoning-effort"], supports_system_messages = false, json_mode = "schema" }
     ```
     An explicit list when the ids share no prefix.
   </Accordion>
@@ -175,7 +175,7 @@ caps  = { supports_temperature = false, reasoning = true, tokenizer = "claude-v3
 name  = "claude-on-anthropic"
 scope = { providers = ["anthropic"] }
 match = { kind = "prefix_any", prefixes = ["claude"] }
-caps  = { reasoning = true, tokenizer = "claude-v3", input_modalities = ["image", "pdf", "text"], output_modalities = ["text"], supported_parameters = ["prompt-caching", "streaming-thinking", "thinking-budget"], json_mode = "schema" }
+caps  = { reasoning = true, tokenizer = "claude-v3", input_modalities = ["image", "pdf", "text"], output_modalities = ["text"], supported_parameters = ["prompt-caching", "streaming-thinking", "thinking-budget"], json_mode = "schema", reasoning_facts = { by_default = false, in_output_cap = true, off = "by-default" } }
 ```
 
 ```text Resolved (anthropic, claude-sonnet-5-5)
