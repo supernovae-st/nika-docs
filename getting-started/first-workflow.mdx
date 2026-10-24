@@ -86,7 +86,7 @@ The chain is intact, but the run is `UNSEALED`: this machine has no
 run-signing key yet. Mint one once, run again, and the record is signed:
 
 ```bash
-nika key init
+NIKA_KEYCHAIN=off nika key init
 nika run hello.nika
 nika trace verify     # … SEALED — the run_sealed signature verifies · key …
 ```
@@ -94,7 +94,7 @@ nika trace verify     # … SEALED — the run_sealed signature verifies · key 
 Verification re-executes nothing: it reads the record and reports the
 evidence available to it. A missing key changes the verdict, not the run's
 result. [Seal your runs](/getting-started/installation#seal-your-runs)
-explains where the key is stored.
+explains the variable and where the key is stored.
 
 ## 3. Ask the file three questions
 

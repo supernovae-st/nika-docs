@@ -162,12 +162,30 @@ verified in 0.123.0.
 - **Node.js 22 or newer.** On an older Node, npm only warns (`EBADENGINE`)
   and installs the package without its engine.
 - **Runs your app starts are sealed only with key files.** Engines the SDK
-  starts, and `nika serve`, never open the OS keychain, so a key that
-  `nika key init` stored there (what it does in a macOS terminal) does not
-  seal their runs. Run `nika key align` once in a terminal to copy it to
-  `~/.nika/keys/`, or mint the key as files with
-  `NIKA_KEYCHAIN=off nika key init`
-  ([Seal your runs](/getting-started/installation#seal-your-runs)).
+  starts, and `nika serve`, never open an OS keychain: they sign with
+  `~/.nika/keys/` or the explicit `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE`
+  pair. Mint the key as files with `NIKA_KEYCHAIN=off nika key init`
+  ([The run-signing key and the OS keychain](#the-run-signing-key-and-the-os-keychain)).
+
+## The run-signing key and the OS keychain
+
+On macOS, 0.123.0 never opens the keychain, even from a terminal, and
+`nika doctor` says `the keychain is not opened by this ad-hoc build` even for
+the signed release. Its run-signing key lives in files under
+`~/.nika/keys/`. A run-key that Nika 0.122 or older stored in the keychain
+can be neither read nor copied: while it is there, `nika key init` refuses,
+and the repair it names, `nika key align`, exits with
+`this process does not open the keychain`.
+
+On Linux, `nika` run from a terminal also uses the desktop's Secret Service,
+and 0.123.0 cannot tell whether it already holds a run-key, so a plain
+`nika key init` refuses with `run-signing key material already exists`, even
+on a new machine.
+
+On both, `NIKA_KEYCHAIN=off nika key init` mints the key as files, where the
+CLI, the engines the SDK starts and `nika serve` all read it. On a Mac with
+an old keychain key, that is a new signing identity beside it
+([Seal your runs](/getting-started/installation#seal-your-runs)).
 
 ## Scheduled runs need your keys in an env file
 

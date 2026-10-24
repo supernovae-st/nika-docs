@@ -34,14 +34,16 @@ or connect to a [`nika serve`](/sdk/remote/serve-quickstart).
     NIKA_KEYCHAIN=off ./node_modules/.bin/nika key init
     ```
 
-    This writes a run-signing key pair to `~/.nika/keys/` (mode `0600`), the
-    only place engines started by your app read it. With it, the engine signs
-    each run's record and `traceVerify(receipt)` answers `verified`. Skip it and runs
-    still succeed, unsigned. Already ran `nika key init` in a macOS terminal?
-    That key sits in your keychain, which engines started by an app never
-    open: run `./node_modules/.bin/nika key align` once, in a terminal, to
-    copy it to `~/.nika/keys/`. In CI, point `NIKA_RUN_KEY_FILE` and
-    `NIKA_RUN_PUB_FILE` at a key pair you provide.
+    This writes a run-signing key pair to `~/.nika/keys/` (mode `0600`). That
+    is where the engine your app starts and `nika serve` read it, on macOS and
+    on Linux: neither opens an OS keychain. With it, the engine signs each
+    run's record and `traceVerify(receipt)` answers `verified`. Skip it and
+    runs still succeed, unsigned. Keep `NIKA_KEYCHAIN=off`: without it,
+    `nika key init` refuses on a Linux terminal (its `--force` puts the key in
+    the desktop's Secret Service, where neither looks) and on a Mac whose
+    keychain holds a key from Nika 0.122 or older, which 0.123.0 can neither
+    read nor copy. In CI, point `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` at
+    a key pair you provide.
   </Step>
   <Step title="Save a workflow">
     Create `hello.nika` in the application directory:
@@ -108,7 +110,9 @@ file.
 <Note>
   **Seeing `not verified: receipt_mismatch`?** The run succeeded, but the
   engine found no run-signing key in `~/.nika/keys/`, so the record is
-  unsealed. Do step 2, then run the demo again.
+  unsealed. Do step 2, then run the demo again. On Linux, a key that
+  `nika key init --force` put in the Secret Service can be copied there
+  instead, from a terminal: `./node_modules/.bin/nika key align`.
 </Note>
 
 ## What `maxCostUsd: 0` does

@@ -204,20 +204,32 @@ Every run writes a hash-chained record. To also sign it, so that
 machine:
 
 ```bash
-nika key init
+NIKA_KEYCHAIN=off nika key init
 ```
 
-Typed in a terminal, `nika key init` stores the key in your OS keychain when
-it can open one (the macOS login keychain, or a desktop Secret Service on
-Linux), and otherwise in key files under `~/.nika/keys/` (mode `0600`).
-Engines your applications start through the [SDK](/sdk/start/quickstart), and
-`nika serve`, never open a keychain: they sign only with those key files. For
-them, mint the key as files, or copy an existing keychain key there once:
+This writes the key as files under `~/.nika/keys/` (the private key in mode
+`0600`), where every process reads it, on macOS and on Linux: `nika` in your
+terminal, the engines your applications start through the
+[SDK](/sdk/start/quickstart), and `nika serve`. The SDK's engines and
+`nika serve` never open an OS keychain, so for them the key must be a file.
+`NIKA_KEYCHAIN=off` skips only the keychain. Without it, `nika key init`
+depends on the platform:
 
-```bash
-NIKA_KEYCHAIN=off nika key init   # key files in ~/.nika/keys/
-nika key align                    # or: copy the keychain key to ~/.nika/keys/ (run it in a terminal)
-```
+- **macOS.** 0.123.0 opens no keychain, even from a terminal: `nika doctor`
+  says `the keychain is not opened by this ad-hoc build`, even for the signed
+  release. A plain `nika key init` writes the same files, unless the keychain
+  holds a run-key that Nika 0.122 or older stored there. Then it refuses, and
+  the repair it names, `nika key align`, cannot read or copy that key: it
+  exits with `this process does not open the keychain`. With the variable,
+  `nika key init` mints a new key as files, a new signing identity beside the
+  old keychain key.
+- **Linux.** Run from a terminal, `nika` also uses the desktop's Secret
+  Service, and 0.123.0 cannot tell whether it already holds a run-key. A
+  plain `nika key init` therefore refuses with
+  `run-signing key material already exists`, even on a new machine. On a
+  desktop, its `--force` stores the key in the Secret Service only, where SDK
+  engines and `nika serve` never look; `nika key align`, run once from a
+  terminal, copies that key to `~/.nika/keys/`.
 
 In CI, point `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` at a key pair you
 provide. Without any key, runs still succeed and `nika trace verify` reports
@@ -331,7 +343,7 @@ it never prints a key's value.
   | `~/.nika/inference-choice.json` | bare `nika`, `nika welcome` | the intelligence recommendation shown in the mirror |
   | `~/.nika/session-intelligence.json` | the Session | your intelligence choice |
   | `~/.nika/sessions/` | the Session | conversation history, per project |
-  | `~/.nika/keys/` | `nika key init`, `nika key align` | run-signing keys (private key mode `0600`) |
+  | `~/.nika/keys/` | `nika key init`, `nika key align` on Linux | run-signing keys (private key mode `0600`) |
   | `~/.nika/models/` | `nika model pull` | downloaded model files |
   | `~/.nika/approval-claims/` | runs with a human gate | which approvals were already used |
   | `~/.nika/bin/nika` | the install script, without Homebrew | the binary |
@@ -394,8 +406,10 @@ rm -rf ~/.nika
 <Warning>
   `~/.nika/keys/` holds your run-signing key. Without it you can no longer
   seal new runs under the same key, and a verifier needs the public key to
-  check old seals. Keep a copy if you need one. A key minted in a terminal
-  may live in your OS keychain instead, under the `nika` service.
+  check old seals. Keep a copy if you need one. A key that Nika 0.122 or
+  older minted in a macOS terminal, or that `nika key init --force` stored in
+  a Linux desktop's Secret Service, lives there instead, under the `nika`
+  service.
 </Warning>
 
 ## Next

@@ -112,8 +112,9 @@ UNSEALED — no run_sealed frame: the run was not signed …
 The trace is a hash chain: edit any event after the fact and `verify`
 exits non-zero. Your brief comes with proof of what ran, in what order,
 against which inputs, even offline. `UNSEALED` means no run-signing key
-signed this record: mint one once per machine with `nika key init`, and
-later runs verify as `SEALED` ([Seal your runs](/getting-started/installation#seal-your-runs)).
+signed this record: mint one once per machine with
+`NIKA_KEYCHAIN=off nika key init`, and later runs verify as `SEALED`
+([Seal your runs](/getting-started/installation#seal-your-runs)).
 
 ## Make it daily
 

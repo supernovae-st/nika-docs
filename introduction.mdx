@@ -109,8 +109,8 @@ allowed tools and output file.
 The run prints a trace path under `.nika/traces/`. `nika trace verify` reads
 the latest one (pass a path to pick another) and checks the record's
 integrity. A fresh machine without a signing key reports **UNSEALED**, even
-when the hash chain is intact: run `nika key init` once and later runs report
-**SEALED** ([Seal your runs](/getting-started/installation#seal-your-runs)). A
+when the hash chain is intact: run `NIKA_KEYCHAIN=off nika key init` once and
+later runs report **SEALED** ([Seal your runs](/getting-started/installation#seal-your-runs)). A
 successful verification does not establish that a model's answer is correct.
 See [traces](/concepts/traces) for the evidence tiers.
 
