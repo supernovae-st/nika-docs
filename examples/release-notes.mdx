@@ -20,9 +20,9 @@ quotes the same headline the CHANGELOG got.
 
 <Warning>
   **Limit on macOS in 0.123.0.** The sandbox confines `exec: git` to the
-  workflow's declared filesystem boundary, which grants no read of `.git`.
-  The confined `git` cannot read the repository and exits with status 128
-  (`NIKA-EXEC-001`), even inside a real one, so `history` takes its
+  workflow's declared filesystem boundary, which grants no read of `.git`
+  or of git's global configuration. The confined `git` exits with status
+  128, even inside a real repository, so `history` takes its
   `recover:` value and the notes are written from the sample log, not your
   commits. See
   [Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos).

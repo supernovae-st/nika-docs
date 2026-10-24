@@ -63,18 +63,24 @@ installed binary, and if the editor and the command line disagree, trust
 ## Git inside a workflow is refused on macOS
 
 An `exec:` task runs inside the workflow's declared `fs` boundary, and on
-macOS the Seatbelt sandbox holds `git` to that boundary too. Unless the
-boundary grants the repository's `.git` directory, git cannot see the
-repository: `git log`, `git diff` and the like exit 128 with
-`fatal: not a git repository`, and the task fails with `NIKA-EXEC-001`.
-`NIKA_SANDBOX=off` does not change this: the setting only matters on a host
-without a sandbox backend, and macOS always has one.
+macOS the Seatbelt sandbox holds `git` to that boundary too. The sandbox
+denies git the repository's `.git` directory unless the boundary grants it,
+and it also denies git's global configuration (`~/.gitconfig`). `git log`,
+`git diff` and the like exit 128, and in a typical setup the task fails with
+`NIKA-SEC-001` ("seatbelt refused the confined process", naming the denied
+`.gitconfig` when one exists). Which code you see depends on the git that runs
+and on its configuration: Homebrew's git with no global configuration to read
+reports `fatal: not a git repository` instead, and the task fails with
+`NIKA-EXEC-001`. `NIKA_SANDBOX=off` does not change this: the setting only
+matters on a host without a sandbox backend, and macOS always has one.
 
-Granting `./.git/**` in `permits.fs.read` lets `git` read the history. In a
-workflow where git's output then reaches another effect, such as a file
-write, that grant completes the lethal trifecta (`NIKA-SEC-009`), and
-`nika check` refuses it unless a blocking `invoke: nika:prompt` gates every
-path to that effect. The examples that read git history
+Granting `./.git/**` in `permits.fs.read` lets `git` read the history only
+when git has no global configuration to read: with a `~/.gitconfig`, the step
+still fails with `NIKA-SEC-001`. In a workflow where git's output then
+reaches another effect, such as a file write, that grant completes the
+lethal trifecta (`NIKA-SEC-009`), and `nika check` refuses it unless a
+blocking `invoke: nika:prompt` gates every path to that effect. The examples
+that read git history
 ([standup digest](/examples/standup-digest),
 [PR review fan-out](/examples/pr-review-fanout),
 [release notes](/examples/release-notes),
