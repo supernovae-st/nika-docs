@@ -18,11 +18,11 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 421
+  classified_files: 428
   file_rows: 46
   pattern_rows: 6
   by_class:
-    authored: 414
+    authored: 421
     authored-pin: 1
     generated: 4
     pinned-copy: 2
@@ -88,7 +88,7 @@ files:
     - "scripts/release_catalog.py"
 - path: "docs.json"
   class: authored
-  sha256: 133ae973631c189031261788a545d18b955296000c4aa831536f6b2454f7b86a
+  sha256: 7cbd9adb043889a25af5c96e20534997f8fbb9b4c025d0a33923425d8aa91327
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -212,7 +212,7 @@ files:
   evidence: "hand-written entry to mintlify_snapshot.py, the atomic owner of version, engineSha, providers, firstCommand and lastUpdated"
 - path: "scripts/oracle-sweep.py"
   class: authored
-  sha256: 5e7efa8f2c5faae799ee30b12fc36e274164557eabd88e05b9f49bc99b4b29b8
+  sha256: 8f876735e0714f28954f2eddee8f8880936d4b8f0f1d15208e07789c0b5ce223
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/sdk_contract_gate.py"
   class: authored
@@ -270,8 +270,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 285
-  aggregate_sha256: c2037224f49d0e6605a879a8bdfd6ec2a49d663d2c47d094b20878fc544c63cf
+  match_count: 292
+  aggregate_sha256: faa15df379970e73560cb3e305ec2444efd6c14a46c24e089554d8fe05ab01ae
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

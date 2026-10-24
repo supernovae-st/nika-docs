@@ -10,6 +10,9 @@ import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 ## Admit, observe and settle
 
 ```ts
+import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
+
+const nika = new Nika({ cwd: process.cwd() })
 const run = await nika.run('workflows/release.nika', {
   maxCostUsd: 0.25,
 })
@@ -29,14 +32,25 @@ if (!isNikaRunSucceeded(result)) {
 }
 ```
 
-`run()` admits the workflow first — a file that fails admission throws
-`NikaOperationError` and no handle is created. The returned `NikaRun`
-carries `id` plus the observation methods; the run itself is not an async
-iterator. Subscribe through `run.events()`; the result for this observation
-leg lives in `run.result()`. The result's `settlement` carries the engine's
-cause, task tally, spend, elapsed time and error when available. A `paused`
-result closes observation at a human gate without claiming the workflow can
-never resume.
+`run()` admits the workflow first: a file that fails admission throws
+`NikaOperationError` and no handle is created. The returned `NikaRun` carries
+`id` plus its lifecycle methods; the run itself is not an async iterator.
+Subscribe through `run.events()`; the run's ending lives in `run.result()`.
+The result's [settlement](/sdk/runtime/results) carries the engine's cause,
+task tally, spend, elapsed time and error.
+
+A `paused` result means a human gate (`nika:prompt` with no default) holds the
+run: it is neither a failure nor a success, and the result's `exitCode` is 4.
+Resume a paused local run from the command line, with the trace its receipt
+names and the answer:
+
+```sh
+./node_modules/.bin/nika run workflows/release.nika \
+  --resume .nika/traces/<run>.ndjson --answer approve=true
+```
+
+The trace path is `result.receipt.trace_path`. Give a gate a `default:` (used
+when no human can answer) for a run that must never wait.
 
 ## Stop observation without cancelling
 
@@ -51,7 +65,8 @@ for await (const event of run.events({
 }
 ```
 
-Aborting the observer stops only that view. It never cancels engine work.
+Aborting the observer ends only that view: the loop exits without an error,
+and the run keeps running. It never cancels engine work.
 
 ## Cancel explicitly
 
@@ -59,16 +74,59 @@ Aborting the observer stops only that view. It never cancels engine work.
 const cancellation = await run.cancel()
 const result = await run.result()
 
-console.log(cancellation.accepted, result.status)
+console.log(cancellation.accepted, cancellation.status, result.status)
+// true cancellation_requested cancelled
 ```
 
-Cancellation is idempotent for a run owned by this client. Passing a run from
-another client instance throws `NikaRunOwnershipError`.
-`cancellation_requested` acknowledges the action, not its outcome. Keep
-awaiting `run.result()`: the actual runtime result may be cancelled,
-succeeded, failed or paused. A missing runtime settlement after the
-resident's grace period is reported as interrupted rather than fabricated
-cancellation.
+`run.cancel()` is idempotent: every call returns the same request. Locally the
+SDK sends the engine `SIGTERM`. The task already running (a model call, a
+`nika:wait`) finishes and is counted, tasks not yet started are cancelled, and
+`run.result()` then resolves `cancelled` with `exitCode` 130 and
+`settlement.cause` `operator`. That can take as long as the task in flight:
+cancelling a run inside a 20-second `nika:wait` settled after the wait ended.
+
+<Accordion title="Try it: cancel a run that waits">
+  Save `slow.nika`, then start it and cancel it after a second and a half:
+
+  ```yaml slow.nika
+  nika: slow
+  model: mock/echo
+  permits:
+    tools: ["nika:wait"]
+  tasks:
+    hold:
+      invoke:
+        tool: nika:wait
+        args:
+          duration: "20s"
+    after_hold:
+      after: { hold: success }
+      infer:
+        prompt: "done waiting"
+        max_tokens: 16
+  ```
+
+  ```ts cancel.mts
+  import { Nika } from '@supernovae-st/nika'
+
+  const nika = new Nika({ cwd: process.cwd() })
+  const run = await nika.run('slow.nika')
+  await new Promise((resolve) => setTimeout(resolve, 1500))
+
+  const cancellation = await run.cancel()
+  const result = await run.result()
+  console.log(cancellation.status, result.status, result.exitCode, result.settlement?.cause)
+  // cancellation_requested cancelled 130 operator
+  ```
+</Accordion>
+
+`cancellation_requested` acknowledges the request, not its outcome: keep
+awaiting `run.result()`, which may still read `succeeded` or `failed` if the
+run ended first. On [`nika serve`](/sdk/remote/jobs#read-status-or-cancel) an
+execution that has not settled within the server's 5-second grace ends
+`interrupted` instead. Only the deprecated `nika.cancel(run)` wrapper can
+throw `NikaRunOwnershipError`, for a run another client created; the handle's
+own methods are bound to their run.
 
 <Accordion title="Which published source this page describes">
   <LocalContract sdk={SDK} />

@@ -1,73 +1,127 @@
 ---
 title: "Run events"
-description: "Consume an additive, bounded event view without replacing terminal truth."
+description: "Follow a run through one lifecycle vocabulary on both transports, without replacing the result as the source of truth."
 sidebarTitle: "Run events"
 icon: "wave-pulse"
 ---
 
-`run.events()` yields `NikaRunEvent` — the SDK's lifecycle vocabulary, with
-dotted kinds like `task.started` and the task id on `event.task`:
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 
-```ts
-import type { NikaRunEvent } from '@supernovae-st/nika'
+`run.events()` yields `NikaRunEvent`s: a lifecycle `kind` that means the same
+on both transports, the task a `task.*` event names, the engine's own status
+word, and the exact engine frame on `event.raw`.
 
-type ViewState = { active: Set<string> }
+```ts events.mts
+import { Nika } from '@supernovae-st/nika'
 
-function reduce(state: ViewState, event: NikaRunEvent) {
+const nika = new Nika({ cwd: process.cwd() })
+const run = await nika.run('hello.nika')
+
+for await (const event of run.events()) {
   switch (event.kind) {
-    case 'task.started':
-      if (event.task) state.active.add(event.task)
-      break
-    case 'task.completed':
-    case 'task.failed':
-      if (event.task) state.active.delete(event.task)
-      break
-    default:
-      // engine.event and future kinds stay visible to diagnostics
-      telemetry.debug('unrendered event', event.kind, event.raw)
+    case 'run.started': console.log('started'); break
+    case 'task.completed': console.log('done:', event.task); break
+    case 'task.failed': console.error('failed:', event.task, event.error?.code); break
+    case 'run.waiting': console.log('a human gate holds the run'); break
+    case 'run.settled': console.log('ended:', event.status); break
+    case 'run.interrupted': console.warn('the engine lost this execution'); break
+    default: break // engine.event and future kinds: event.raw.kind names the frame
   }
 }
-
-const run = await nika.run('workflow.nika')
-for await (const event of run.events()) reduce(view, event)
-const result = await run.result()
+console.log((await run.result()).status)
 ```
 
-The dotted lifecycle kinds (`task.started`, `run.settled`, …) are the
-SDK's owned vocabulary; the untouched engine frame rides on `event.raw`.
-`event.task` is present only on frames that named a task — guard it.
+```text
+started
+done: greeting
+ended: succeeded
+succeeded
+```
 
-For the one-task mock hello, the published package emits exactly six
-events: `run.started` → `task.scheduled` → `task.started` →
-`task.completed` → `engine.event` (the engine's `workflow_completed`
-frame) → `run.settled` (`succeeded`). Longer workflows emit more — never
-assert a fixed count. Engine protocol frames surface as `engine.event`
-with the original frame preserved on `event.raw`; native and HTTP
-transports differ in exactly which raw frames exist.
+## How many events, on which door
 
-The kind set is additive: keep a `default` branch so unknown events stay
-visible to diagnostics without crashing an older interface. Never infer
-completion from the last recognized kind; use `run.result()`.
+The vocabulary is one; the number of events is not. For the quickstart's
+one-task `hello.nika`, measured on 0.123.0:
 
-`result.settlement` carries the engine's full settlement, including cause,
-elapsed time, task tally, spend and error when present. Remote replay and
-attachment preserve it even after the event cursor has passed the settlement.
-Unknown evidence stays absent; an interrupted job need not have a runtime
-settlement. A paused result ends this observation leg and event view while
-leaving the durable job available for a later engine-owned resume.
+| Door | Events |
+|---|---|
+| Local engine | six: `run.started` → `task.scheduled` → `task.started` → `task.completed` → `engine.event` (the engine's `workflow_completed`) → `run.settled` (`succeeded`) |
+| `nika serve` | two: `run.started` → `run.settled` (`succeeded`). The server streams no per-task frame, and the SDK never invents one |
 
-Each event subscriber has a bounded queue. A slow consumer receives
-`NikaEventBufferOverflowError` instead of silent loss. Tune a view with
-`bufferSize`, bounded by the client's `eventBufferSize`.
+A failing task adds `task.failed` locally (with `event.error`), and the
+settlement reads `failed`. A human gate ends the stream with `run.waiting`
+(`paused`) on both doors. Longer workflows emit more: never assert a fixed
+count, and build a server-side progress view from `run.started`, the final
+event and `run.status()`.
 
-An `AbortSignal` stops only its observer. It does not end engine work. Call
-`run.cancel()` when cancellation is intended.
+| `event.kind` | Local frame (`event.raw.kind`) | Server frame (`event.raw.kind`) |
+|---|---|---|
+| `run.started` | `workflow_started` | `execution.started` |
+| `task.scheduled` · `task.started` · `task.completed` · `task.failed` | `task_scheduled` · `task_started` · `task_completed` · `task_failed` | none |
+| `run.waiting` | `run_settled` carrying `paused` | `execution.settled` carrying `paused` |
+| `run.settled` | `run_settled` carrying `succeeded`, `failed` or `cancelled` | `execution.settled` (or `execution.cancelled`, `execution.refused`) carrying the final status |
+| `run.interrupted` | `workflow_interrupted` | `execution.interrupted` |
+| `run.sealed` | a `run_sealed` frame, if an engine streams one | none |
+| `engine.event` | every other frame (`workflow_completed`, `permit_checked`…) | every other frame |
+
+`run.sealed` names a frame engine 0.123.0 does not stream: it writes the seal
+to the run's record only. Read `result.receipt.sealed` locally, or
+[`traceVerify(receipt)`](/sdk/runtime/receipts), to know whether a run is sealed.
+
+## Rules for a reducer
+
+- **The result is the truth.** Never infer completion from the last event you
+  recognized; await `run.result()`.
+- **Keep a default branch.** The set is additive: `engine.event` and future
+  kinds stay visible through `event.raw` without crashing an older interface.
+- **Guard `event.task`.** It is present only on events that named a task.
+- **`event.status` is the engine's word**, never renamed: a waiting run reads
+  `paused`.
+- **`event.sequence` exists only over HTTP.** It is the server's replay
+  cursor: persist it for [`attachRun()`](/sdk/remote/jobs#recover-after-a-process-restart).
+
+## Read events late
+
+A run keeps its most recent events, so a view opened after the result
+replays them:
+
+```ts
+const run = await nika.run('hello.nika')
+const result = await run.result()            // first the result,
+for await (const event of run.events()) {}   // then every event the run kept
+```
+
+The bound is `eventBufferSize`, 4096 by default. Past it, the run still runs
+and `run.result()` still resolves; only a late view is refused, with
+`NikaEventBufferOverflowError` (`reason: 'replay_truncated'`, and
+`error.observed` says how many events there were). A live view that falls more
+than its `bufferSize` behind fails with `reason: 'live_backpressure'`. Neither
+refusal skips an event, and neither is about the run.
+
+## Stop a view, not the run
+
+```ts
+const observer = new AbortController()
+setTimeout(() => observer.abort(), 1000)
+
+for await (const event of run.events({ signal: observer.signal, bufferSize: 64 })) {
+  console.log(event.kind)
+}
+```
+
+An `AbortSignal` stops only its own view: a live loop simply ends at the
+abort, without an error, while the run keeps running. It never cancels engine
+work: call `run.cancel()` for that.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+</Accordion>
 
 <CardGroup cols={2}>
-  <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">
-    Open the view and await terminal settlement.
+  <Card title="Results" icon="flag-checkered" href="/sdk/runtime/results">
+    The settlement every event stream ends on.
   </Card>
-  <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">
-    Move from transient presentation to durable proof.
+  <Card title="SSE streaming" icon="satellite-dish" href="/sdk/remote/streaming">
+    Server events, sequence cursors and recovery.
   </Card>
 </CardGroup>

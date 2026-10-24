@@ -87,7 +87,7 @@ but each half maps to a plain command you can inspect:
 
 From TypeScript (`@supernovae-st/nika@0.123.0`), the same split is
 `check()` (the contract), `run()` then `run.result()` (execution), and
-`traceVerify()` (the re-proof of existing evidence). A succeeded run
+`traceVerify(receipt)` (the re-proof of existing evidence). A succeeded run
 can still be unsealed on a keyless machine.
 
 In CI, the same split powers [Nika × GitHub Actions](/integrations/github-actions):

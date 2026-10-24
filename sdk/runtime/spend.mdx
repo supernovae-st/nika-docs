@@ -1,0 +1,120 @@
+---
+title: "Spend caps"
+description: "Bound what a run may spend on paid models: refused before it starts, stopped when it crosses, never blocked for local or mock models."
+sidebarTitle: "Spend caps"
+icon: "scale-balanced"
+---
+
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
+
+The engine prices a workflow before it runs, from each model's catalog price
+and the output limit each step declares (`max_tokens`). A spend cap turns that
+price into a rule: a run whose cost floor is above the cap never starts.
+
+```ts spend.mts
+import { Nika, NikaOperationError, isNikaRunSucceeded } from '@supernovae-st/nika'
+
+const nika = new Nika({ cwd: process.cwd() })
+
+// The engine prices the file before anything runs.
+const report = await nika.check('summary.nika')
+const cost = report.cost as { bounded_total_usd?: number; has_unbounded?: boolean }
+console.log('worst case:', cost.bounded_total_usd, 'unbounded:', cost.has_unbounded)
+
+try {
+  await nika.run('summary.nika', { maxCostUsd: 0 })
+} catch (error) {
+  if (error instanceof NikaOperationError && error.code === 'NIKA-1709') {
+    // Refused before any provider call: nothing was spent.
+    console.log('refused:', error.status, error.message.split(' — ')[0])
+  } else throw error
+}
+
+// The same file, rehearsed on the mock model: allowed under a zero cap.
+const run = await nika.run('summary.nika', { model: 'mock/echo', maxCostUsd: 0 })
+const result = await run.result()
+console.log(isNikaRunSucceeded(result), result.settlement?.spend)
+```
+
+<CodeGroup>
+```yaml summary.nika
+nika: summary
+model: anthropic/claude-sonnet-5-5
+permits: {}
+tasks:
+  summarize:
+    infer:
+      prompt: "Summarize the week in three bullet points."
+      max_tokens: 1000
+outputs:
+  summary: ${{ tasks.summarize.output }}
+```
+
+```text output
+worst case: 0.01 unbounded: false
+refused: 2 NIKA-1709 · refusing to start: the workflow's unavoidable cost floor $0.010000 exceeds --max-cost-usd $0.000000 (cheapest static path · gates closed · first-try)
+true { priced_calls: 0, qualifier: 'unpriced', unpriced_calls: 1 }
+```
+</CodeGroup>
+
+This runs offline, with no Anthropic key: the refusal comes before any access
+check or provider call.
+
+## The rules, on the local engine
+
+`maxCostUsd` is the run's budget over **metered** spend, in USD, at the
+catalog's list prices.
+
+- **Before the run.** A cost floor above the cap makes `run()` throw
+  `NikaOperationError` with code `NIKA-1709` (`status` 2). So does a cloud
+  model the catalog cannot price under any cap: the engine cannot bound spend
+  it cannot meter, and an unpriced model never counts as `$0`.
+- **During the run.** The call that crosses the cap completes and counts,
+  nothing new starts, unstarted tasks are cancelled, and `run.result()`
+  resolves `failed` with `NIKA-1704` and no outputs.
+- **Local and mock models are never blocked.** They are unpriced, not free:
+  the settlement reports them as `unpriced`.
+- **Without `maxCostUsd`**, the `ceiling:` in the project's
+  [`nika.yaml`](/sdk/project/nika-yaml) applies; `maxCostUsd` wins over it.
+- **The floor is an output-token estimate** (`max_tokens` × output price).
+  Prompt tokens are not priced statically, and a wide wave of parallel tasks
+  can overshoot by up to that wave's spend before the crossing is seen:
+  `max_parallel:` narrows that window.
+
+## `model` replaces only the default
+
+The `model` option replaces the workflow's envelope `model:` only. A task that
+pins its own `infer.model`, and a child workflow it invokes, keep their models:
+`model: 'mock/echo'` does not make those calls offline. Keep `maxCostUsd: 0`
+next to it, so a priced pin is refused (`NIKA-1709`) instead of spending. A
+local-model pin still runs.
+
+## On `nika serve`
+
+There is no per-run `maxCostUsd` over HTTP: the SDK refuses it with
+`NikaCompatibilityError` (`capability: 'runOptions'`) instead of dropping it.
+The server bounds spend itself:
+
+- `nika serve --run-cost-ceiling <USD>` caps every job your code submits:
+  **1 USD by default**; `none` removes the cap explicitly.
+- A job whose floor exceeds it is admitted and then settles `failed` with
+  `error.code` `NIKA-1709`; `run()` does not throw.
+- A schedule carries its own `maxCostUsd`, which must be positive
+  ([Schedules](/sdk/remote/schedules)).
+
+Catalog prices are estimates, not invoices: your provider meters and bills
+the calls. [Cost honesty](/guides/cost-honesty) explains how `nika check`
+reads them.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+</Accordion>
+
+<CardGroup cols={2}>
+  <Card title="Results" icon="flag-checkered" href="/sdk/runtime/results">
+    How a budget stop reads in the settlement.
+  </Card>
+  <Card title="CI gate" icon="shield-check" href="/sdk/operations/ci">
+    Rehearse on the mock model before a protected job spends.
+  </Card>
+</CardGroup>

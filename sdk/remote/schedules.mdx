@@ -1,0 +1,121 @@
+---
+title: "Schedules"
+description: "Declare a cadence on nika serve, read its next slots, and change or pause it safely by revision."
+sidebarTitle: "Schedules"
+icon: "calendar"
+---
+
+import { SDK, SourceContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+A schedule belongs to a server: `schedule()` declares one on a
+`nika serve --bind`, and the server fires it, stores its state under its
+`--state-root` and survives restarts. A local client refuses `schedule()` and
+`scheduleStatus()`, because a short-lived process cannot honestly own a
+schedule.
+
+## Declare, read, pause
+
+Against the server of the [server quickstart](/sdk/remote/serve-quickstart):
+
+```ts schedule.mts
+import { readFile } from 'node:fs/promises'
+import { Nika, NikaOperationError } from '@supernovae-st/nika'
+
+const token = (await readFile('.nika/serve.token', 'utf8')).trim()
+const nika = new Nika({ url: 'http://127.0.0.1:8787', token, allowInsecureHttp: true })
+
+const declaration = {
+  id: 'weekday-hello',
+  when: { kind: 'cadence', expression: 'TZ=Europe/Paris 0 9 * * 1-5' },
+  maxCostUsd: 0.01,
+  missed: 'catch-up-once',
+  overlap: 'skip',
+  afterSkip: 'next_slot',
+} as const
+
+// 1 · Create it. Applying the same declaration again changes nothing.
+const applied = await nika.schedule('workflows/hello.nika', declaration)
+console.log(applied.changed, applied.status.next[0]?.scheduledFor)
+
+// 2 · Read it: the next slots, in UTC, and the revision to change it by.
+const status = await nika.scheduleStatus('weekday-hello')
+console.log(status.revision, status.due)
+
+// 3 · Pause it: send the whole declaration again, with the revision you read.
+await nika.schedule('workflows/hello.nika', {
+  ...declaration,
+  revision: status.revision,
+  active: false,
+  pauseReason: 'maintenance',
+  pauseUntil: '2026-12-01',
+})
+
+// 4 · A writer holding a stale revision is refused, and told the current one.
+try {
+  await nika.schedule('workflows/hello.nika', { ...declaration, revision: status.revision })
+} catch (error) {
+  if (error instanceof NikaOperationError && error.code === 'schedule_conflict') {
+    console.log(error.status, error.currentRevision)
+  } else throw error
+}
+```
+
+```text
+true 2026-10-26T08:00:00Z
+sha256:24b8a2562dd2e7ea442f26895b8e14943c6b658dbc28e0f071b2e1b9837b7f5f { kind: 'not_due' }
+412 sha256:393ce78966b4cd33f8723b0afea4c2e32fc12f659f744268a8d2964dde6ac215
+```
+
+Captured on 24 October 2026: the first slot is Monday 26 October at 09:00 in
+Paris, 08:00 UTC. A status carries the next eight slots (`requestedCivil`,
+`scheduledFor`, `shift`), the server's `lastDecision`, and `due`, which
+reads `{ kind: 'paused', pauseUntil, reason }` once paused.
+
+## Rules the server enforces
+
+- **Revisions.** A create is sent with `If-None-Match: *`; an update needs the
+  exact current revision (`If-Match`). Revisions are the engine's opaque
+  `sha256:<64 hex>` values: never make one up. A stale one fails with
+  `schedule_conflict` (HTTP 412), and `error.currentRevision` names the
+  current one.
+- **Time zone.** A cron cadence names its zone: `TZ=<IANA zone> <cron>`. A
+  cadence without one is refused (`schedule_refused`, 422).
+- **Budget.** A schedule's `maxCostUsd` must be positive: `0` is refused,
+  where a local `run()` accepts it.
+- **Served workflows only.** The workflow is a served name under the server's
+  `--workflows` directory, named from the project root. Anything else is
+  refused with `schedule.workflow_outside_registry`.
+- **Pausing.** `active: false` needs a `pauseReason` and a `pauseUntil`
+  calendar date (`YYYY-MM-DD`).
+- **Overlap.** `afterSkip` needs `overlap: 'skip'`, the default, so leaving
+  `overlap` out works too. Hash jitter is refused.
+- **Catch-up.** After the server was down, a `catch-up-once` run's
+  `receipt.origin` names the silence it answers for: `missed_first`, the first
+  slot that passed unfired, and `missed_count`.
+
+## `schedule()` or `arm:`
+
+| | `schedule()` on `nika serve` | `arm:` in `nika.yaml` |
+|---|---|---|
+| Declared by | your application, at runtime | a reviewed file, in Git |
+| Stored in | the server's `--state-root` | the project file |
+| Changed by | a new declaration with the current revision | a commit |
+| Fired by | that server | `nika serve` (without `--bind`), or launchd or systemd units from `nika arm --emit` |
+
+Both run the same workflows under the same engine. Choose by who should own
+the cadence: your product, or your repository.
+[Arm registry](/sdk/project/arm-registry) covers the project-file lane.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+  <RemoteContract sdk={SDK} />
+</Accordion>
+
+<CardGroup cols={2}>
+  <Card title="Server quickstart" icon="server" href="/sdk/remote/serve-quickstart">
+    The server this page talks to.
+  </Card>
+  <Card title="Arm registry" icon="clock" href="/sdk/project/arm-registry">
+    Cadences reviewed in the project file.
+  </Card>
+</CardGroup>

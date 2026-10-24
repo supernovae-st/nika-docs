@@ -1,57 +1,124 @@
 ---
 title: "Receipts and verification"
-description: "Persist engine-issued proof and return it unchanged for verification."
+description: "Keep the engine-issued receipt, hand it back unchanged, and read what the engine's verdict proves on each transport."
 sidebarTitle: "Receipts"
 icon: "link"
 ---
 
-A live event view is presentation. An engine-issued receipt identifies the
-run and its available evidence; its presence alone does not prove a sealed
-journal exists. Refusal before execution, queued cancellation and interrupted
-ownership can leave no complete runtime trace.
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 
-```ts
-const run = await nika.run('workflow.nika')
+Every run writes a hash-chained record. The result hands your code a
+**receipt**, an engine-issued pointer to that record, and
+`nika.traceVerify(receipt)` asks the engine to check the record against it.
+The SDK never reads a trace or does cryptography itself.
+
+```ts verify.mts
+import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
+
+const nika = new Nika({ cwd: process.cwd() })
+const run = await nika.run('hello.nika')
 const result = await run.result()
+if (!isNikaRunSucceeded(result) || !result.receipt) throw new Error(`run ended ${result.status}`)
 
-if (!result.receipt) throw new Error('run did not issue a receipt')
-
-await auditStore.write({ runId: run.id, receipt: result.receipt })
-
-const verdict = await nika.traceVerify(result.receipt)
-if (!verdict.verified) {
-  throw new Error(verdict.output ?? verdict.reason ?? 'verification failed')
-}
+const proof = await nika.traceVerify(result.receipt)
+console.log(proof.verified, proof.verdict, proof.reason ?? '')
+console.log('sealed:', result.receipt.sealed, 'trace:', result.receipt.trace_path)
 ```
 
-`NikaReceipt` is an opaque readonly record. The SDK never constructs it,
-extracts a path from it, enriches it by reading a workflow, or implements
-cryptography. It asks the authoritative engine to verify the object unchanged.
-The runtime writes and seals trace evidence. Verification reads what already
-exists; it never creates a journal or seals an incomplete one. Paused results
-can carry evidence for the completed observation leg while the durable job
-remains resumable.
+```text
+true verified
+sealed: true trace: .nika/traces/2026-10-24T10-33-15Z-72de.ndjson
+```
 
-Local verification can return `verified` or `invalid`. The remote endpoint
-currently returns a typed `unavailable` verdict with reason
-`trace_journal_unavailable` because it has no path-free journal authority. The
-diagnostic route exists; this is not a 404.
+That is a machine with a run-signing key in `~/.nika/keys/`
+([quickstart step 2](/sdk/start/quickstart)). Without one, the same run
+succeeds and prints `false invalid receipt_mismatch` and `sealed: false`.
 
-CLI trace inspection remains available for operators:
+## What the verdict means
+
+Measured with `@supernovae-st/nika@0.123.0` on both transports:
+
+| Transport | Signing key | `traceVerify(receipt)` answers |
+|---|---|---|
+| Local engine | yes | `{ verified: true, verdict: 'verified' }`: the record is sealed and matches the receipt |
+| Local engine | no | `{ verified: false, verdict: 'invalid', reason: 'receipt_mismatch' }`: the run succeeded, but its record is unsealed |
+| `nika serve` | yes, on the server | `{ verified: true, verdict: 'sealed', reason: 'sealed' }` |
+| `nika serve` | no | `{ verified: true, verdict: 'ok', reason: 'unsealed' }`: the chain is intact but unsigned |
+
+Over HTTP, the server runs the CLI verifier on the journal it wrote for the
+job and answers in the CLI's words, lower case: `ok`, `sealed`, `anchored` and
+`replayed` hold; `incomplete`, `tampered` and `broken` do not; `unavailable`
+means the server holds no journal for that job (refused before its first
+event, or still queued). The SDK sets `verified: true` only for a verdict that
+holds **and** names this receipt's `trace_id`.
+
+<Warning>
+  `verified: true` therefore means different things on the two doors. When the
+  signature matters, require `verdict === 'sealed'` over HTTP, or
+  `receipt.sealed === true` with `verdict === 'verified'` locally. Locally,
+  `receipt_mismatch` is also the answer for an edited or forged receipt: do
+  not read every one as "just unsigned".
+</Warning>
+
+## What a receipt carries
+
+Pass a receipt back exactly as you received it.
+
+- **A local receipt** carries `trace_path`, `chain_head`, `chain_len`,
+  `sealed`, `trace_id`, `execution_id`, `snapshot_digest` and
+  `receipt_format`.
+- **A `nika serve` receipt** carries `job_id`, `execution_id`, `trace_id`,
+  `snapshot_digest`, `origin` (`{ kind: 'manual' }` for a job your code
+  submitted) and `chain_head`. Store it with the job id.
+
+## Keep a local receipt verifiable
+
+A local receipt points at its trace file by a path **relative to the client's
+`cwd`**, and that file is subject to retention:
+
+- Verify it from a client with the same `cwd`. From another directory, or
+  once the file is gone, `traceVerify(receipt)` answers `verdict: 'invalid'` with
+  `exitCode` 3 and no `reason`: the engine cannot read the trace.
+- By default the engine keeps the last 10 traces per workflow, at most 30
+  days old, within 256 MB. `NIKA_TRACE_KEEP`, `NIKA_TRACE_MAX_AGE_DAYS` and
+  `NIKA_TRACE_BUDGET_MB` change the three bounds, and `traces.keep` in
+  [`nika.yaml`](/sdk/project/nika-yaml) sets the age cap. For long-lived
+  audit evidence, export a dossier (journal, manifest, receipt and
+  `VERIFY.md`) when the run ends:
+
+  ```sh
+  ./node_modules/.bin/nika trace evidence .nika/traces/<run>.ndjson -o evidence/<run>
+  ```
+
+  The pack is redacted by default: it proves the run's integrity, not its
+  content. `--full` includes the content verbatim.
+
+- Store `receipt.trace_id` and `receipt.execution_id` to identify a run.
+  `run.id` is a throwaway id on the local transport.
+
+## Inspect a trace from the command line
 
 ```sh
-nika trace show .nika/traces/<run>.ndjson
-nika trace replay .nika/traces/<run>.ndjson
-nika trace export .nika/traces/<run>.ndjson
+./node_modules/.bin/nika trace verify .nika/traces/<run>.ndjson   # the same verifier, for people
+./node_modules/.bin/nika trace show .nika/traces/<run>.ndjson
+./node_modules/.bin/nika trace replay .nika/traces/<run>.ndjson   # re-renders; never re-runs
+./node_modules/.bin/nika trace export .nika/traces/<run>.ndjson   # OTLP spans
 ```
 
-Replay reprojects recorded events; it never reruns the workflow.
+A verified record proves the record is intact and matches the receipt. It
+does not prove that the workflow was right, or that a person read its output:
+it is tamper-evident, not tamper-proof. [Traces](/concepts/traces) explains the
+evidence tiers.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+</Accordion>
 
 <CardGroup cols={2}>
-  <Card title="Test and trace" icon="vial-circle-check" href="/sdk/local/test-and-trace">
-    Keep goldens and proof verification distinct.
-  </Card>
   <Card title="Run receipts pattern" icon="receipt" href="/patterns/run-receipts">
     Carry receipts through application boundaries.
+  </Card>
+  <Card title="Traces" icon="link" href="/concepts/traces">
+    The journal under the receipt.
   </Card>
 </CardGroup>

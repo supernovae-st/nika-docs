@@ -17,9 +17,16 @@ for await (const event of run.events({ bufferSize: 64 })) {
 ```
 
 `NikaRunEvent` is open to additive fields and event kinds. Render only what
-the application understands, preserve sequence when it is present, and use
-`run.result()` for terminal truth. The untouched protocol frame is on
-`event.raw`.
+the application understands, preserve the sequence, and use `run.result()`
+for terminal truth. The untouched protocol frame is on `event.raw`.
+
+A `nika serve` 0.123.0 job streams two lifecycle events: `run.started`
+(`execution.started`), then `run.settled` (`execution.settled`, or
+`execution.cancelled` / `execution.refused`) or `run.waiting` for a paused
+job. There are no per-task events over HTTP, and the SDK never invents one;
+read `run.status()` for the current state between them.
+[Run events](/sdk/runtime/events#how-many-events-on-which-door) maps every
+kind on both transports.
 
 Each subscriber has a bounded queue. If a consumer falls behind, the SDK
 throws `NikaEventBufferOverflowError` rather than silently losing evidence.
@@ -50,10 +57,10 @@ const recovered = await nika.attachRun(jobId, {
 The HTTP adapter uses the persisted cursor for SSE continuity. The application
 owns when a sequence is durable.
 
-A `paused` settlement closes the current stream and resolves `run.result()`
-with that leg's result and evidence. The durable job can later resume under
-engine authority; a new attachment can observe that later leg. Replaying or
-attaching after the settlement event has already been consumed still reads
+A `paused` settlement closes the stream and resolves `run.result()` with
+`status: 'paused'`. In 0.123.0 the server has no route to answer the gate, so
+the job stays paused ([Jobs](/sdk/remote/jobs#recover-after-a-process-restart)).
+Replaying or attaching after the settlement event was consumed still reads
 the full stored settlement. Stopping a stream or attaching to a job never
 answers a human gate.
 

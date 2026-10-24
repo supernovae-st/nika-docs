@@ -1,6 +1,6 @@
 ---
 title: "Application webhooks"
-description: "Own webhook delivery and verification outside the One SDK contract."
+description: "Own webhook delivery and verification in your application: the SDK and nika serve provide neither."
 sidebarTitle: "Application webhooks"
 icon: "webhook"
 ---
@@ -9,9 +9,9 @@ import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
 <RemoteContract sdk={SDK} />
 
-The source SDK exposes no webhook verifier, and the server OpenAPI exposes no
-webhook registration or delivery routes. Do not call an SDK static verifier or
-claim a Nika signature format.
+The SDK exposes no webhook verifier, and the server's OpenAPI has no webhook
+registration or delivery routes. Do not call an SDK verifier or claim a Nika
+signature format.
 
 If your application emits webhooks after `run.result()`, that is an
 application-owned integration:

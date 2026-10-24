@@ -1,72 +1,114 @@
 ---
-title: "Errors and results"
-description: "Separate dirty reports, admitted workflow results and typed boundary failures."
-sidebarTitle: "Errors and results"
+title: "Errors"
+description: "Tell a refused run, a failed run and a broken connection apart: three channels, each handled differently."
+sidebarTitle: "Errors"
 icon: "triangle-exclamation"
 ---
 
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
+
 ## Three channels
 
-| Channel | Example | Handling |
+| What happened | Where it arrives | Handle it by |
 |---|---|---|
-| Resolved report | `check()` returns `clean: false` | show engine findings |
-| Resolved terminal result | `run.result()` returns `status: "failed"` | branch on result data |
-| Rejected promise | invalid config, incompatible option, transport/protocol failure, broken observation | catch typed SDK error |
+| A check found problems | `check()` resolves `clean: false` with the findings | showing the engine's findings |
+| The engine refused the run before it started: a red check, a cost floor above `maxCostUsd`, bad inputs, an unreadable file | `run()` **throws** `NikaOperationError`; no run exists | reading `error.code` and `error.findings` |
+| The engine admitted the run, then it failed, paused or was refused late (no provider access `NIKA-1800`; over HTTP, a cost floor above the server's ceiling `NIKA-1709`) | `run.result()` **resolves** with `status: 'failed'` (or `paused`, `cancelled`, `interrupted`) | branching on `result.status` and `result.error.code` |
+| Configuration, compatibility, transport or protocol trouble, or a lost observation | the promise **rejects** with a typed `NikaError` | catching the typed error; the run may still be running |
 
-```ts
-const report = await nika.check(file)
-if (!report.clean) return { admitted: false, report }
+```ts errors.mts
+import { Nika, NikaOperationError, isNikaRunSucceeded } from '@supernovae-st/nika'
 
-const run = await nika.run(file)   // a dirty file throws here instead
-const result = await run.result()
+const nika = new Nika({ cwd: process.cwd() })
 
-if (!isNikaRunSucceeded(result)) {
-  // 'failed' · 'cancelled' · 'paused' · engine-reported 'interrupted'
-  return { admitted: true, status: result.status, error: result.error }
+async function attempt(file: string) {
+  try {
+    const run = await nika.run(file)
+    const result = await run.result() // admitted: a failure here is result data
+    if (!isNikaRunSucceeded(result)) return `${file}: ${result.status} ${result.error?.code}`
+    return `${file}: succeeded`
+  } catch (error) {
+    if (error instanceof NikaOperationError && error.operation === 'run') {
+      return `${file}: refused ${error.code} (status ${error.status})`
+    }
+    throw error // configuration, transport, protocol: not about the workflow
+  }
 }
-// narrow outputs only inside the success branch
-return { admitted: true, outputs: result.outputs }
+
+console.log(await attempt('hello.nika'))
+console.log(await attempt('failing.nika'))
+console.log(await attempt('list-notes.nika'))
 ```
 
-A rejected `result()` — transport fault, protocol fault, broken observation
-(`NikaObservationInterrupted`) — does **not** mean the engine's workflow
-failed; the run may still be executing. An admitted failure arrives as
-resolved result data (`status: 'failed'` with the engine's `error.code`),
-so a `try/catch` alone never sees it. The two are different channels by
-design.
+```text
+hello.nika: succeeded
+failing.nika: failed NIKA-BUILTIN-ASSERT-001
+list-notes.nika: refused NIKA-SEC-004 (status 2)
+```
 
-## Typed boundary failures
+`failing.nika` is on the [results page](/sdk/runtime/results);
+`list-notes.nika` runs `ls` under `permits: {}`, see
+[permits](/sdk/runtime/permits).
+
+## `NikaOperationError`
+
+The engine refused an operation. Over the local transport:
+
+- `code` is the engine's own: the first check finding that names one
+  (`NIKA-SEC-004`, `NIKA-PARSE-005`, `NIKA-AUTH-006`…) or the refusal's code
+  (`NIKA-1709`, `NIKA-1708`). When the engine named none, as for an unreadable
+  file, `code` is the SDK's `run_refused`.
+- `findings` holds the engine's check findings untouched (`code`, `message`,
+  `severity`, `gate`, `kind`, `task`). A budget or launch refusal has none.
+- `status` is the engine's **exit code**: `2` for the file or its cost floor,
+  `3` for the environment or the inputs.
+- `operation` names the refused call (`run`, `check`, `compile`…).
+
+Over HTTP, a refusal the server types as `{ error: { code, message } }`
+becomes a `NikaOperationError` whose `status` is the **HTTP status** (`404`
+not found, `409` conflict, `412` stale schedule revision, `422` refused) and
+whose `code` is the server's (`not_found`, `idempotency_conflict`,
+`schedule_conflict`, a stamped `NIKA-…` admission code). Messages carry no
+paths, and a reflected bearer token is redacted.
+
+## The error tree
+
+Every error the SDK raises for an engine, transport, configuration or
+compatibility problem extends `NikaError`:
 
 ```text
 NikaError
-├── NikaConfigurationError      // invalid option or unencodable inputs value
+├── NikaConfigurationError       // an invalid option, or an inputs value JSON cannot carry
+├── NikaEngineUnavailable        // no engine for this host (code NIKA_ENGINE_UNAVAILABLE, platform, arch)
 ├── NikaTransportError
-│   ├── NikaProtocolError
-│   └── NikaObservationInterrupted   // observation lost; the run may still be live
-├── NikaCompatibilityError      // engine lacks the capability (e.g. inputsLiteral)
-├── NikaOperationError          // engine refused an operation with typed findings
-├── NikaEventBufferOverflowError
-└── NikaRunOwnershipError
+│   ├── NikaProtocolError        // output that proves neither an admission nor a refusal
+│   └── NikaObservationInterrupted   // this client lost its view; the run may still be live
+├── NikaCompatibilityError       // the engine or server lacks a capability (capability names it)
+├── NikaOperationError           // the engine refused an operation, with its code and findings
+├── NikaEventBufferOverflowError // one event view hit its bound; never about the run
+└── NikaRunOwnershipError        // a deprecated wrapper was given another client's run
 ```
 
-`NikaOperationError` covers engine refusals across operations — a `run()`
-whose file fails admission (no handle is created), schedule operation
-findings, and the other typed operation doors (`NikaOperation` lists them).
-`NikaEventBufferOverflowError` refuses silent observer loss.
-`NikaRunOwnershipError` prevents one facade from acting on another facade's
-run object. `NikaEngineUnavailable` reports local engine resolution failure.
+Misusing the API itself (an empty workflow name, a negative event cursor, a
+receipt that is not an object) throws a plain `TypeError` or `RangeError`
+before any engine or network work starts.
 
 <Warning>
-  An HTTP trace verification can resolve with
-  `verified: false, verdict: "unavailable"`; that typed engine verdict is not a
-  transport 404 and must not be converted into one.
+  Over HTTP, `traceVerify(receipt)` can resolve `verdict: "unavailable"` when the
+  server holds no journal for a job (refused before its first event, or still
+  queued). That typed verdict is not a transport error and must not be
+  converted into one.
 </Warning>
 
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+</Accordion>
+
 <CardGroup cols={2}>
-  <Card title="Type index" icon="brackets-curly" href="/sdk/reference/types">
-    Scan every public result and error type.
+  <Card title="Results" icon="flag-checkered" href="/sdk/runtime/results">
+    Every status an admitted run can end on.
   </Card>
-  <Card title="Run lifecycle" icon="circle-play" href="/sdk/local/run-and-cancel">
-    Keep observation and settlement separate.
+  <Card title="Type index" icon="brackets-curly" href="/sdk/reference/types">
+    Every exported result and error type.
   </Card>
 </CardGroup>

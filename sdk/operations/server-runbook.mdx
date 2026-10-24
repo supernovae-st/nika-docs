@@ -20,12 +20,14 @@ Run every probe from the working directory production will use:
 cd /srv/nika/project
 /usr/local/bin/nika --version
 /usr/local/bin/nika arm --plain
-/usr/local/bin/nika serve --dry --plain
+/usr/local/bin/nika serve --dry --once --plain
 ```
 
 This proves binary resolution, project discovery and cadence parsing before a
-resident process starts. `serve --dry` is only a calendar preview. It does not
-exercise provider credentials or external effects.
+resident process starts. `nika arm` lists the beats and their next slots;
+`serve --dry --once` prints what would fire now and exits (without `--once`,
+`--dry` stays resident). Neither exercises provider credentials or external
+effects.
 
 ## Supervise the foreground process
 

@@ -1,6 +1,6 @@
 ---
 title: "Local client"
-description: "Use the One SDK facade with its default native-process transport."
+description: "Use the Nika client with its default local transport: the bundled engine as a child process."
 sidebarTitle: "Local client"
 icon: "terminal"
 ---
@@ -18,15 +18,25 @@ const nika = new Nika({
 })
 ```
 
-Both options are optional. Binary resolution is strict: explicit `bin`, then
-`NIKA_BIN`, then the exact optional platform package. The client refuses an
-implicit `PATH` lookup. `cwd` anchors relative workflow paths and project
-discovery.
+Both options are optional. Engine resolution is strict: `bin`, then
+`NIKA_BIN`, then the platform package npm installed with the SDK
+(`@supernovae-st/nika-<os>-<arch>`). `bin` and `NIKA_BIN` must be absolute
+paths: a bare name or a relative path throws `NikaConfigurationError`, and a
+missing file fails the engine's identity probe with `NikaCompatibilityError`.
+A `nika` on your `PATH` is never used. `cwd` anchors relative workflow paths,
+project-file discovery and the `.nika/` state directory.
+
+On a platform without a bundled engine (Windows, Alpine or another musl
+Linux), `new Nika()` with neither `bin` nor `NIKA_BIN` throws
+`NikaEngineUnavailable`. Point `bin` at a compatible engine, or use a
+[`nika serve`](/sdk/remote/serve-quickstart) by URL.
 
 ## Probe compatibility with a check
 
-The One SDK has no separate version method. Make a real, read-only check at
-startup when the application cannot operate without Nika:
+The client has no separate version method: before any operation it probes the
+engine's identity (`nika --sdk-identity`) and refuses an engine of another
+machine protocol with `NikaCompatibilityError`. Make a real, read-only check
+at startup when the application cannot operate without Nika:
 
 ```ts
 const report = await nika.check('workflows/health.nika', {
@@ -41,15 +51,16 @@ future engine fields pass through unchanged.
 
 ## Native method boundary
 
-Local mode supports `check`, `run`, `run.events()`, `run.result()`,
-`run.cancel()` and `traceVerify`. `attachRun`, `run.status()`, workflow
-discovery and schedules require resident HTTP authority and return typed
-compatibility errors in native mode.
+Local mode supports `check`, `compile`, `run`, `run.events()`,
+`run.result()`, `run.cancel()` and `traceVerify`. `attachRun`, `run.status()`,
+workflow discovery and schedules need a server that owns durable state; on the
+local transport they throw `NikaCompatibilityError`.
 
 <Info>
-  The driver spawns a binary with an argv array. This protects the application
-  seam from shell interpolation; the engine still enforces permits, secrets,
-  spend and its hardened runtime floor.
+  The client spawns the engine with an argv array (`nika run <file> --json`),
+  never through a shell, so a workflow path cannot inject a command. Literal
+  `inputs` travel on the engine's standard input, never in argv. The engine
+  still enforces permits, secrets, spend and its runtime floor.
 </Info>
 
 <Accordion title="Which published source this page describes">

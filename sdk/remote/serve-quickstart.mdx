@@ -1,0 +1,163 @@
+---
+title: "Server quickstart"
+description: "Start nika serve with a private token, then run, observe and verify a workflow over HTTP with the same Nika client."
+sidebarTitle: "Server quickstart"
+icon: "server"
+---
+
+import { SDK, SourceContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+`nika serve --bind` is the same engine running as a server: it holds durable
+jobs and schedules, and your application reaches it over HTTP. This page
+starts one on your machine and drives it with the client from the
+[quickstart](/sdk/start/quickstart). Every step was run with
+`@supernovae-st/nika@0.123.0` and its bundled engine.
+
+<Steps>
+  <Step title="Make a project with one workflow">
+    The server refuses to start outside a project, and a project file is one
+    line. In the folder where you installed the package:
+
+    ```sh
+    printf 'nika: my-project\n' > nika.yaml
+    mkdir -p workflows
+    ```
+
+    Save the quickstart's workflow as `workflows/hello.nika`:
+
+    ```yaml hello.nika
+    nika: hello
+    model: mock/echo
+    permits: {}
+    tasks:
+      greeting:
+        infer:
+          prompt: "Say hello from the Nika SDK."
+          max_tokens: 32
+    outputs:
+      greeting: ${{ tasks.greeting.output }}
+    ```
+  </Step>
+  <Step title="Mint a private token">
+    The server reads its bearer token from a file and refuses one that is not
+    mode `0600`:
+
+    ```sh
+    mkdir -p .nika
+    umask 077 && openssl rand -hex 24 > .nika/serve.token && chmod 600 .nika/serve.token
+    ```
+
+    The token never appears on a command line. Keep `.nika/` out of source
+    control.
+  </Step>
+  <Step title="Start the server">
+    ```sh
+    ./node_modules/.bin/nika serve \
+      --bind 127.0.0.1:8787 \
+      --workflows ./workflows \
+      --token-file .nika/serve.token
+    ```
+
+    It stays in the foreground and prints one line that starts with
+    `nika serve · listening http://127.0.0.1:8787 · GET /health` and lists the
+    routes it answers. Job state goes to `.nika/serve/` (`--state-root`
+    chooses another place). Leave it running and open a second terminal in
+    the same folder.
+  </Step>
+  <Step title="Run the workflow over HTTP">
+    Save `remote.mts`:
+
+    ```ts remote.mts
+    import { readFile } from 'node:fs/promises'
+    import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
+
+    const token = (await readFile('.nika/serve.token', 'utf8')).trim()
+    const nika = new Nika({
+      url: 'http://127.0.0.1:8787',
+      token,
+      allowInsecureHttp: true, // plain HTTP, accepted only to a loopback host
+    })
+
+    console.log(await nika.listWorkflows()) // [ 'workflows/hello.nika' ]
+
+    // A served name is the workflow's path from the project root.
+    const run = await nika.run<{ greeting: string }>('workflows/hello.nika', {
+      idempotencyKey: `hello-${Date.now()}`, // store it before the call; reuse it on retry
+    })
+    for await (const event of run.events()) console.log(event.sequence, event.kind, event.status)
+
+    const result = await run.result()
+    if (!isNikaRunSucceeded(result) || !result.receipt) throw new Error(`job ended ${result.status}`)
+    console.log(run.id, result.outputs?.greeting)
+
+    const proof = await nika.traceVerify(result.receipt)
+    console.log(proof.verified, proof.verdict, proof.reason)
+    ```
+
+    ```sh
+    node remote.mts
+    ```
+
+    ```text
+    [ 'workflows/hello.nika' ]
+    1 run.started running
+    2 run.settled succeeded
+    277e5b29-301a-4366-b1a5-00d89a93d14e mock(echo) · Say hello from the Nika SDK.
+    true ok unsealed
+    ```
+
+    `run.id` is the server's durable job id: the one to store. `ok unsealed`
+    means the record is intact but the server has no run-signing key; with a
+    key in the server's `~/.nika/keys/`, the verdict is `sealed`.
+  </Step>
+  <Step title="Stop it">
+    `Ctrl+C` (or `SIGTERM`) stops new admissions, then lets running and queued
+    jobs finish for up to 30 seconds. A restart with the same `--state-root`
+    resumes queued jobs; a job interrupted by the shutdown is not retried.
+  </Step>
+</Steps>
+
+## What changes from the local engine
+
+After the constructor, the code reads the same, with four differences you
+just met:
+
+- **Workflows by served name.** `workflows/hello.nika` is the workflow's path
+  from the project root (the folder that holds `nika.yaml`), whatever
+  `--workflows` says. A short name such as `hello.nika` answers `not_found`
+  (404). `listWorkflows()` returns the exact names.
+- **An idempotency key per job.** `run()` over HTTP requires one. Retry a
+  request whose response was lost with the same key and you get the same job,
+  not a second one.
+- **Two events, not six.** The server streams `run.started` and the
+  settlement, with an `event.sequence` cursor, and no per-task events.
+- **No per-run `maxCostUsd` or `model`.** The server caps every job at 1 USD
+  by default (`--run-cost-ceiling`); see [Spend caps](/sdk/runtime/spend).
+
+## Serve other machines
+
+Plain HTTP is accepted only to a loopback host (`localhost`, `127.0.0.0/8`,
+`[::1]`), and only with `allowInsecureHttp: true`. To serve other machines,
+start the server with `--allow-remote` behind a reverse proxy that terminates
+TLS (the server does not), and connect with `https://`. Authentication is
+unchanged.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+  <RemoteContract sdk={SDK} />
+</Accordion>
+
+<CardGroup cols={2}>
+  <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
+    Idempotency, recovery after a restart, status and cancellation.
+  </Card>
+  <Card title="Schedules" icon="calendar" href="/sdk/remote/schedules">
+    Declare a cadence on the server and change it by revision.
+  </Card>
+  <Card title="Server surfaces" icon="server" href="/sdk/operations/server-surfaces">
+    Every route the released server answers.
+  </Card>
+  <Card title="Server runbook" icon="clipboard-check" href="/sdk/operations/server-runbook">
+    Supervise, probe and investigate a resident.
+  </Card>
+</CardGroup>

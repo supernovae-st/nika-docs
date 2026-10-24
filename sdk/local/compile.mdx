@@ -1,0 +1,160 @@
+---
+title: "Compile a workflow"
+description: "Ask the engine for a candidate workflow from a skeleton, an intent or an edit, review it, write it, then run it."
+sidebarTitle: "Compile"
+icon: "wand-magic-sparkles"
+---
+
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
+
+`compile()` asks the engine for a candidate `.nika` workflow and runs nothing.
+Every outcome is data: `ready`, `incomplete` and `refused` all resolve, with
+the candidate, the engine's questions and its diagnostics. It works on both
+doors; this page uses the local engine.
+
+## Without a model
+
+Offline, the deterministic compiler resolves the exact skeleton names
+`nika compile --list` shows, settles bounded intents (such as filtering rows
+of a file), and edits the constants of an existing workflow. No provider is
+called, whatever keys your environment holds.
+
+```ts compile.mts
+import { Nika } from '@supernovae-st/nika'
+
+const nika = new Nika({ cwd: process.cwd() })
+
+// 1 · Create from a skeleton, answering its one question.
+const created = await nika.compile({
+  intent: 'classify-and-route',
+  answers: { 'const.request': 'An outage affects support customers.' },
+}, { timeoutMs: 15_000 })
+console.log(created.status, created.diagnostics[0]?.message)
+// ready Filled the existing semantic hole from an explicit answer.
+
+// 2 · Edit the candidate: a conservative constant change, nothing else moves.
+if (created.ready && created.candidate !== null) {
+  const edited = await nika.compile({
+    workflow: created.candidate,
+    change: { set_constant: { name: 'request', value: 'One customer is affected.' } },
+  })
+  console.log(edited.status) // ready
+}
+
+// 3 · Free text: the compiler asks only for what is missing.
+const open = await nika.compile({ intent: 'Every morning at 9, summarize ./inbox/*.md into ./digest.md' })
+console.log(open.status, open.questions.map((q) => q.key))
+// incomplete [ 'model', 'trigger.timezone', 'trigger.missed', 'trigger.overlap', 'trigger.ceiling' ]
+```
+
+The third request's summary needs a model every time it runs, so the
+compiler asks which one (`model`). Its "every morning at 9" is a trigger, not
+a task: the engine records it as `requested_trigger` (`cron: 0 9 * * *`) for a
+schedule to bind later, and the candidate's bytes carry no cadence. The
+`trigger.*` questions are not mandatory: they belong to that later schedule.
+
+## Answer the questions
+
+`nextCompileRequest(request, outcome, answers)` builds the next round from an
+incomplete outcome, keyed by each question's `key`. The deterministic
+compiler settles this request's structure; only the run-time model is open:
+
+```ts answer.mts
+import { Nika, isNikaCompileHeld, nextCompileRequest, type NikaCompileRequest } from '@supernovae-st/nika'
+
+const nika = new Nika({ cwd: process.cwd() })
+
+let request: NikaCompileRequest = {
+  intent: 'Summarize ./notes/launch.md in three bullet points and write them to ./out/summary.md.',
+}
+let outcome = await nika.compile(request)
+console.log(outcome.status, outcome.questions.map((q) => q.key)) // incomplete [ 'model' ]
+
+if (outcome.status === 'incomplete' && !isNikaCompileHeld(outcome)) {
+  request = nextCompileRequest(request, outcome, { model: 'deepseek/deepseek-flash' })
+  outcome = await nika.compile(request)
+}
+console.log(outcome.status, outcome.compile_version) // ready 1
+```
+
+`compile_version: 1` means no provider was called. The answer only names the
+model the workflow will use when it runs; nothing is spent until you run it,
+with that provider's key.
+
+## The candidate is source, not a run
+
+A ready `candidate` is ordinary `.nika` text. Review it, write it to a file,
+then `run()` it: the normal admission applies again.
+
+```ts
+import { writeFile } from 'node:fs/promises'
+
+const hello = await nika.compile('hello')
+if (hello.ready && hello.candidate !== null) {
+  await writeFile('hello.nika', hello.candidate)
+  const run = await nika.run('hello.nika')
+  console.log((await run.result()).status) // succeeded
+}
+```
+
+Locally, a request can name `output` to have the engine write a ready
+candidate for you; the outcome then reports `written`:
+
+```ts
+const outcome = await nika.compile({ intent: 'hello', output: 'compiled-hello.nika' })
+console.log(outcome.status, outcome.written) // ready compiled-hello.nika
+```
+
+- `requested_boundary` and the source-only `check_preview` grant no
+  authority: `nika check` and `nika run` judge the real environment.
+- Compile creates no run, job, approval or proof. A local engine keeps its
+  plan records under `.nika/compile/`; an HTTP compile writes nothing.
+- `signal` and `timeoutMs` stop only the compile request.
+- An outcome has `compile_version` 1 when no provider was called, 2 when one
+  was, with its receipt in `provenance.authoring`.
+
+## With a model
+
+A provider reads free intent only when the request opts in, and you choose
+the model:
+
+| Door | How to opt in |
+|---|---|
+| Local engine | `authoringModel: 'provider/name'` in the request; the engine reads that provider's key from its own environment |
+| `nika serve` | `cognition: 'explicitProvider'`, on a server started with `nika serve --authoring-model <provider/name>` (its `/health` then lists `compileNativeV2`) |
+
+```ts
+// Needs DEEPSEEK_API_KEY in the engine's environment; the provider meters the call.
+const outcome = await nika.compile({
+  intent: 'Read ./data/orders.csv and write the paid total per customer to ./out/totals.csv.',
+  authoringModel: 'deepseek/deepseek-flash',
+})
+console.log(outcome.compile_version, outcome.status) // 2 when a provider was called
+```
+
+Answer its questions with `nextCompileRequest()` as above. When the verifier
+does not accept a candidate, the outcome stays `incomplete` and
+`isNikaCompileHeld(outcome)` is true: that candidate is a preview, never a
+workflow to run. Over HTTP, `cognition: 'explicitProvider'` on a default
+server, one started without `--authoring-model`, throws
+`NikaCompatibilityError` (`capability: 'compileNativeV2'`) instead of falling
+back.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+</Accordion>
+
+<CardGroup cols={2}>
+  <Card title="Bounded authoring" icon="list-check" href="/examples/bounded-authoring">
+    The skeletons and bounded intents the deterministic compiler settles.
+  </Card>
+  <Card title="The terminal Session" icon="terminal" href="/getting-started/session">
+    The same compiler, in a conversation.
+  </Card>
+  <Card title="Method index" icon="list" href="/sdk/reference/methods">
+    Every method and the door it needs.
+  </Card>
+  <Card title="Types" icon="brackets-curly" href="/sdk/reference/types">
+    `NikaCompileOutcome` and its fields.
+  </Card>
+</CardGroup>

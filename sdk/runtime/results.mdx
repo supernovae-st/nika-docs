@@ -1,0 +1,142 @@
+---
+title: "Results and settlement"
+description: "Read how an admitted run ended: its status, typed outputs, error, exit code and the engine's settlement."
+sidebarTitle: "Results"
+icon: "flag-checkered"
+---
+
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
+
+`run.result()` resolves once, with the engine's account of how an admitted
+run ended. An admitted failure **resolves**: it does not throw. Read the
+status before you trust the outputs.
+
+```ts results.mts
+import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
+
+const nika = new Nika({ cwd: process.cwd() })
+
+for (const file of ['hello.nika', 'failing.nika']) {
+  const run = await nika.run<{ greeting: string }>(file)
+  const result = await run.result()
+
+  if (isNikaRunSucceeded(result)) {
+    console.log(file, 'succeeded:', result.outputs?.greeting)
+  } else {
+    // An admitted failure is data: read it, do not wait for an exception.
+    console.log(file, result.status, result.exitCode, result.error?.code, result.error?.task)
+  }
+  const { cause, tasks, spend } = result.settlement ?? {}
+  console.log('  settlement:', cause, `${tasks?.ok}/${tasks?.total} ok`, spend?.qualifier)
+}
+```
+
+With the quickstart's `hello.nika` and a `failing.nika` whose only task is a
+failing assertion:
+
+<CodeGroup>
+```yaml failing.nika
+nika: failing
+model: mock/echo
+permits:
+  tools: ["nika:assert"]
+tasks:
+  gate:
+    invoke:
+      tool: nika:assert
+      args:
+        condition: false
+        message: "the input file was empty"
+```
+
+```text output
+hello.nika succeeded: mock(echo) · Say hello from the Nika SDK.
+  settlement: normal 1/1 ok unpriced
+failing.nika failed 1 NIKA-BUILTIN-ASSERT-001 gate
+  settlement: task_failed 0/1 ok unmetered
+```
+</CodeGroup>
+
+<Warning>
+  A `try { await run.result() } catch {}` alone never catches a failed
+  workflow. A CI job or an app must read `result.status`, or call
+  `isNikaRunSucceeded(result)`, and treat anything but `succeeded` as its own
+  failure. Otherwise a red run passes silently.
+</Warning>
+
+## Statuses
+
+| `result.status` | What happened | Local `exitCode` |
+|---|---|---|
+| `succeeded` | The run finished; `outputs` holds the workflow's declared `outputs:` | 0 |
+| `failed` | The engine admitted the run and it failed; `error` names the code, message and, for a task failure, the task | 1 (a task failed) or 3 (refused after admission, for example no provider access: `NIKA-1800`) |
+| `paused` | A human gate holds the run: neither a failure nor a finished run | 4 |
+| `cancelled` | The run was cancelled ([Run and cancel](/sdk/local/run-and-cancel)) | 130 |
+| `interrupted` | The engine lost the execution; how it would have ended is unknown | not defined |
+
+`isNikaRunSucceeded(result)` is `true` only for `succeeded`. `exitCode` is the
+engine process's exit code and exists only on the local transport; over HTTP
+read `status`. Statuses stay open to future engine words: keep a default
+branch.
+
+## Typed outputs
+
+`run<Outputs>()` types `result.outputs` at compile time:
+
+```ts
+const run = await nika.run<{ greeting: string }>('hello.nika')
+const result = await run.result()
+if (isNikaRunSucceeded(result)) console.log(result.outputs?.greeting) // string | undefined
+```
+
+The generic validates nothing at runtime, and `outputs` stays optional even on
+success. The workflow's `outputs:` block exports values; it does not validate
+them. Shape enforcement comes from `infer.schema:` (checked when the model
+answers) or a validator task such as `nika:validate`. A run that failed, or
+stopped on its budget (`NIKA-1704`), resolves no outputs.
+
+## The settlement
+
+`result.settlement` is the engine's own record of the ending, built once,
+never derived from an exit code:
+
+| Field | Meaning |
+|---|---|
+| `status` | the state word the settlement carries |
+| `cause` | why it ended: `normal`, `human_gate`, `task_failed`, `output_contract`, `budget`, `operator`, `refused` |
+| `elapsed_ms` | wall time of the run |
+| `tasks` | the tally: `total`, `ok`, `failed`, `recovered`, `skipped`, `cancelled`, `never_started` |
+| `spend.qualifier` | `priced`, `partially_priced`, `unpriced` (a local, mock or subscription model: never free) or `unmetered` (no metered call) |
+| `spend.priced_calls` · `spend.unpriced_calls` | how many calls the catalog could and could not price |
+| `spend.total_cost_usd` | present only when a call metered real spend; an unknown cost is never reported as zero |
+| `error` | the failure of a `failed` settlement |
+
+`result.receipt` points at the run's record for [verification](/sdk/runtime/receipts).
+Over HTTP, `result.evidence` would report a journal mirror the server lost;
+no released engine writes it yet.
+
+## Rejections are not results
+
+`run.result()` **rejects** only for transport, protocol, configuration and
+compatibility problems, or a lost observation (`NikaObservationInterrupted`).
+None of those says the run failed: it may still be running. The
+[errors page](/sdk/runtime/errors) lists the three channels.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+</Accordion>
+
+<CardGroup cols={2}>
+  <Card title="Events" icon="wave-pulse" href="/sdk/runtime/events">
+    Follow a run while it runs.
+  </Card>
+  <Card title="Errors" icon="triangle-exclamation" href="/sdk/runtime/errors">
+    What throws, what resolves.
+  </Card>
+  <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">
+    Verify the record behind a result.
+  </Card>
+  <Card title="Spend caps" icon="scale-balanced" href="/sdk/runtime/spend">
+    How `maxCostUsd` refuses or stops a run.
+  </Card>
+</CardGroup>

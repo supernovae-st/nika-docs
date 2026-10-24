@@ -34,10 +34,18 @@ const run = await nika.run(file, {
   maxCostUsd: 0,
 })
 
-for await (const event of run.events()) console.log(event)
+for await (const event of run.events()) console.log(event.kind, event.task ?? '', event.status ?? '')
 const result = await run.result()
 if (result.status !== 'succeeded') process.exit(result.exitCode ?? 1)
 ```
+
+`model: 'mock/echo'` replaces only the workflow's default `model:`. A task
+that pins its own `infer.model`, and a child workflow it invokes, keep their
+models: the mock does not make those calls offline. `maxCostUsd: 0` is what
+refuses a priced pin before it spends (`NIKA-1709`, thrown by `run()`); a
+local-model pin still runs. Keep both options in pull-request jobs. A refused
+run throws `NikaOperationError` with the engine's exit code on `error.status`:
+let it fail the job.
 
 ## Authority ladder
 

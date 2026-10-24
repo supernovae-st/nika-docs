@@ -1,6 +1,6 @@
 ---
 title: "SDK method index"
-description: "The merged One SDK source contract's lifecycle vocabulary."
+description: "Every method of @supernovae-st/nika 0.123.0, what it returns, and which transport serves it."
 sidebarTitle: "Method index"
 icon: "list"
 ---
@@ -12,26 +12,27 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 | Method | Returns | Local | HTTP |
 |---|---|:---:|:---:|
 | `check(workflow, options?)` | `Promise<NikaCheckResult>` | yes | yes |
-| `compile(request, options?)` | `Promise<NikaCompileOutcome>` | yes | yes |
+| `compile(request, options?)` | `Promise<NikaCompileOutcome>` | yes | yes ([Compile](/sdk/local/compile)) |
 | `run(workflow, options?)` | `Promise<NikaRun>` | yes | yes |
 | `run.events(options?)` | `AsyncIterable<NikaRunEvent>` | yes | yes |
 | `run.result()` | `Promise<NikaRunResult>` | yes | yes |
 | `run.cancel()` | `Promise<NikaCancelResult>` | yes | yes |
 | `run.status()` | `Promise<NikaRunStatus>` | no | yes |
-| `traceVerify(receipt, options?)` | `Promise<NikaTraceVerifyResult>` | yes | typed unavailable verdict currently |
+| `traceVerify(receipt, options?)` | `Promise<NikaTraceVerifyResult>` | yes | yes: the server's verdict on its journal (`ok`, `sealed`…; `unavailable` when it holds none) |
 | `attachRun(id, options?)` | `Promise<NikaRun>` | no | yes |
 | `listWorkflows()` | `Promise<readonly string[]>` | no | yes |
 | `workflow(name)` | `Promise<NikaWorkflowMetadata>` | no | yes |
-| `schedule(workflow, options)` | `Promise<NikaScheduleApplyResult>` | no | yes |
+| `schedule(workflow, options)` | `Promise<NikaScheduleApplyResult>` | no | yes ([Schedules](/sdk/remote/schedules)) |
 | `scheduleStatus(id)` | `Promise<NikaScheduleStatus>` | no | yes |
 
-`run.result()` is the result for one observation leg, including a pause.
-`check()` returns the engine's local findings report or the resident's typed
-served-name acknowledgement/refusal, depending on admission form.
-`run.cancel()` may acknowledge a pending action; it never replaces
-`run.result()`. Methods that require resident
-authority return typed compatibility errors in native mode. The run-handle
-methods accept only a run owned by that client instance.
+`run.result()` resolves once with how the run ended, including a pause.
+`check()` returns the engine's local findings report, or the server's typed
+acknowledgement or refusal for a served name. `run.cancel()` may acknowledge a
+pending request; it never replaces `run.result()`. Methods that need a server
+throw `NikaCompatibilityError` on the local transport. The run-handle methods
+are bound to their run; only the deprecated facade wrappers
+(`nika.events(run)`, `nika.cancel(run)`, `nika.status(run)`) check that a run
+belongs to this client, with `NikaRunOwnershipError`.
 
 `compile()` asks the engine for a candidate workflow and runs nothing:
 `ready`, `incomplete` and `refused` all resolve as data. A ready `candidate`

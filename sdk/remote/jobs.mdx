@@ -15,23 +15,35 @@ import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 // Mint the key once per logical job and persist it WITH the request —
 // an uncertain response retries with the same key and the same request.
 const idempotencyKey = crypto.randomUUID()
-await database.runs.insert({ idempotencyKey, workflow: 'release.nika' })
+await database.runs.insert({ idempotencyKey, workflow: 'workflows/release.nika' })
 
-const run = await nika.run('release.nika', { idempotencyKey })
+const run = await nika.run('workflows/release.nika', { idempotencyKey })
 await database.runs.update({ idempotencyKey }, { jobId: run.id, lastEventId: 0 })
 ```
 
-The contained name in this example submits `{"workflow":"release.nika"}`
-to `POST /v1/jobs`; the resident captures its served workflow itself. No local
-binary or source is needed. An explicit local path such as
-`./release.nika` instead asks a compatible local engine for a snapshot
-and sends those captured bytes — and a snapshot freezes inputs, so `inputs`
-is refused on that form.
-Remote run options accept `idempotencyKey` and (where the resident
-advertises `jobInputs`) literal `inputs`; `vars`, `model` and
-`maxCostUsd` are refused because their request envelopes do not exist.
-A fresh `randomUUID()` per retry defeats the contract: the key is what lets
-the resident deduplicate the retry against the original admission.
+The served name in this example submits
+`{"workflow":"workflows/release.nika"}` to `POST /v1/jobs`; the server captures
+its served workflow itself. A served name is the workflow's path from the
+project root, not from `--workflows`. An explicit local path such as
+`./release.nika` instead asks a compatible local engine for a snapshot and
+sends those captured bytes; a snapshot freezes inputs, so `inputs` is refused
+on that form.
+
+Remote run options accept `idempotencyKey` and, where the server advertises
+`jobInputs`, literal `inputs`. `vars`, `model` and `maxCostUsd` are refused
+with `NikaCompatibilityError` (`capability: 'runOptions'`) because their
+request envelopes do not exist. A fresh `randomUUID()` per retry defeats the
+contract: the key is what lets the server return the original job instead of
+starting a second one. Keys cover the whole `--state-root` and do not expire,
+so never reuse one for another operation.
+
+## Spend on the server
+
+The server bounds spend itself: `nika serve --run-cost-ceiling <USD>` caps
+every job your code submits, **1 USD by default** (`none` removes the cap).
+A job whose cost floor exceeds it is admitted, then settles `failed` with
+`error.code` `NIKA-1709`; `run()` does not throw. Bound a job through its
+workflow (its model and `max_tokens`), and see [Spend caps](/sdk/runtime/spend).
 
 ## Observe and settle
 
@@ -61,14 +73,21 @@ for await (const event of recovered.events()) {
 const result = await recovered.result()
 ```
 
-Persist the job id and the last durably consumed sequence under one name —
-`lastEventId` — and reuse it. Reattachment avoids
-resubmitting a workflow merely because the Node process restarted.
-The engine's settlement remains available on `result.settlement` even when
-the cursor already consumed its terminal event. `paused` settles the current
-observation leg at a human gate and closes its event view and result promise.
-The durable job remains resumable by the engine. `attachRun()` resumes
-observation; it does not answer a human gate or start the next execution leg.
+Persist the job id and the last durably consumed sequence under one name,
+`lastEventId`, and reuse it. Reattachment avoids resubmitting a workflow
+merely because the Node process restarted. The engine's settlement remains
+available on `result.settlement` even when the cursor already consumed its
+terminal event. Only a server job id is durable: a local `run.id` is a
+throwaway id, and `attachRun()` refuses it.
+
+<Warning>
+  **A paused job stays paused.** In 0.123.0, `nika serve` has no route to
+  answer a human gate: a job that reaches a `nika:prompt` without a
+  `default:` settles `paused` (a `run.waiting` event), no request resumes it,
+  and cancelling it answers `already_settled`. For served workflows, give
+  every `nika:prompt` a `default:` (used when no human can answer), or keep
+  human gates on the local engine, where the CLI resumes a paused run.
+</Warning>
 
 ## Read status or cancel
 
@@ -78,14 +97,15 @@ const cancellation = await run.cancel()
 const result = await run.result()
 ```
 
-`cancellation.status` may be `cancellation_requested`: the resident accepted
-the action and the runtime is still settling. Await `run.result()` for its
-actual status, settlement and evidence. A success or failure racing
-cancellation is preserved; cancellation grace without a runtime result
-becomes `interrupted`.
-Queued jobs can be cancelled before execution, and an already-settled job
-returns its existing result unchanged. The API has no job-list route, so
-application indexes remain application-owned.
+A running job answers `202` with `{ accepted: true, status:
+'cancellation_requested' }`: the server accepted the request and the run is
+still settling. Await `run.result()` for its actual status. A success or
+failure that wins the race is preserved; an execution that has not settled
+within the server's 5-second grace ends `interrupted`, with no settlement. A
+job cancelled before its execution started settles `cancelled` on the reply
+itself (`200`), and a job that already ended answers `accepted: false`,
+`status: 'already_settled'`. The API has no job-list route, so application
+indexes remain application-owned.
 
 <CardGroup cols={2}>
   <Card title="SSE streaming" icon="wave-pulse" href="/sdk/remote/streaming">

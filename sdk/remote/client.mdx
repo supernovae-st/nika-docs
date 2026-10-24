@@ -1,6 +1,6 @@
 ---
 title: "Remote client"
-description: "Select authenticated nika serve HTTP with the same Nika facade."
+description: "Select authenticated nika serve HTTP with the same Nika client: served names, local snapshots and connection rules."
 sidebarTitle: "Remote client"
 icon: "satellite-dish"
 ---
@@ -18,20 +18,33 @@ const nika = new Nika({
 ```
 
 Supplying `url` selects HTTP. There is no environment-reading constructor:
-read and validate deployment configuration in your application.
+read and validate deployment configuration in your application. New to
+`nika serve`? Start with the [server quickstart](/sdk/remote/serve-quickstart).
 
-Contained names such as `release.nika` or `flows/release.nika`
-select a served workflow. `check()` and `run()` send the name directly to the
-resident; no local binary or workflow source is needed. To submit local
-source instead, use an explicit path such as `./flows/release.nika` or
-an absolute path. The SDK then resolves a compatible local engine from
-`bin`, `NIKA_BIN`, or the exact platform package and captures an immutable
-snapshot relative to `cwd`. It never falls back from an unserved name to a
-local file.
+## Served names and local snapshots
 
-Plain HTTP is refused unless `allowInsecureHttp: true` is explicit. Reserve
-that option for deliberate loopback use. URLs cannot carry credentials,
-queries or fragments; bearer tokens must be 32–512 visible ASCII bytes.
+A **served name** selects a workflow the server serves. It is the workflow's
+path from the server's project root (the folder holding `nika.yaml`), not
+from `--workflows`: a server started with `--workflows ./workflows` serves
+`workflows/release.nika`, and the short `release.nika` answers `not_found`
+(404). `await nika.listWorkflows()` returns the exact names. `check()` and
+`run()` send the name directly; no local engine or file is needed.
+
+To submit local source instead, pass an explicit path such as
+`./flows/release.nika` or an absolute path. The SDK then resolves a compatible
+local engine from `bin`, `NIKA_BIN` or the platform package, captures an
+immutable snapshot relative to `cwd`, and sends its exact bytes. It never
+falls back from an unserved name to a local file. A snapshot freezes its
+inputs, so a local path refuses `inputs`.
+
+## Connection rules
+
+Plain HTTP is accepted only to a loopback host (`localhost`, `127.0.0.0/8`,
+`[::1]`), and only with `allowInsecureHttp: true`: even with the flag, a
+plain-HTTP URL to another host is refused. Every other host needs HTTPS, so
+the token never leaves the machine in plaintext. URLs cannot carry
+credentials, queries or fragments; bearer tokens must be 32–512 visible ASCII
+bytes.
 
 ```ts
 const loopback = new Nika({
@@ -48,7 +61,7 @@ automatic retry or concurrency policy as constructor options.
 ## Check a served name
 
 ```ts
-const report = await nika.check('flows/release.nika')
+const report = await nika.check('workflows/release.nika')
 if (!report.clean) {
   console.error(report.error)
 } else {

@@ -19,7 +19,7 @@ what protocol crosses the process edge.
 |---|---|---|---|
 | Product code starts a workflow | local `Nika` | Published npm 0.123.0 (bundled engine) | native process |
 | The project clock starts work | `nika serve` (no `--bind`) | Live | `nika.yaml arm[]` to the resident firer |
-| An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Published SDK · public engine | Bearer + OpenAPI · cancellation requests action |
+| An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Published SDK · released engine | Bearer + OpenAPI · cancellation requests an action |
 | The host scheduler starts work | `nika arm --emit` | Live | launchd or systemd to `nika arm fire` |
 | The engine needs local inference | `nika model serve` | Live | Loopback OpenAI-compatible model API |
 
@@ -55,11 +55,13 @@ process lifetime and wakeups, not because one lane changes workflow semantics.
 ## Inference provider
 
 ```sh
-nika model serve --model Qwen/Qwen3-0.6B-GGUF --port 8712
+nika model pull unsloth/Qwen3-4B-Instruct-2507-GGUF
+nika model serve --model unsloth/Qwen3-4B-Instruct-2507-GGUF --port 8712
 ```
 
-This process serves a model on loopback for the engine to call. It does not
-accept Nika workflow jobs.
+This process serves a pulled Qwen3-family model on loopback for the engine to
+call (`NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712`, then
+`model: llamacpp/<model id>`). It does not accept Nika workflow jobs.
 
 ## Loopback HTTP (opt-in)
 

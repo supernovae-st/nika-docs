@@ -16,8 +16,11 @@ that the server does not advertise.
 Engine-owned outputs arrive on events and the terminal result:
 
 ```ts
+import { isNikaRunSettledEvent } from '@supernovae-st/nika'
+
 for await (const event of run.events()) {
-  if (event.outputs) preview(event.outputs)
+  // The settlement frame carries the outputs: `execution.settled` over HTTP.
+  if (isNikaRunSettledEvent(event.raw) && event.raw.outputs) preview(event.raw.outputs)
 }
 
 const result = await run.result()
@@ -29,8 +32,9 @@ shape. Validate it at the application boundary before mapping it into business
 state.
 
 When a workflow writes files, the engine owns their placement and authority.
-Remote retrieval requires a separate application-controlled store until a
-future published OpenAPI contract adds artifact routes.
+`nika serve` 0.123.0 has no route to retrieve them: return what your
+application needs through the workflow's `outputs:`, or have the workflow
+write to a store your application controls.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">

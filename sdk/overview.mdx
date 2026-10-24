@@ -1,6 +1,6 @@
 ---
 title: "TypeScript SDK"
-description: "One Nika facade for local processes and authenticated servers."
+description: "Run .nika workflows from a TypeScript application, local or on your server, with typed results and verifiable receipts."
 sidebarTitle: "Overview"
 icon: "code"
 ---
@@ -8,11 +8,16 @@ icon: "code"
 import { SDK, SourceContract, LocalContract, RemoteContract, SdkDoors } from "/snippets/_sdk-contract.mdx"
 import { ProjectContract } from "/snippets/_project-contract.mdx"
 
-`Nika` is one application seam around the engine. Your product owns the
-request, interface and business state. Nika owns parsing, admission,
-execution, policy, events, receipts and traces.
+`@supernovae-st/nika` runs `.nika` workflows from your application and proves
+what they did. Your product owns the request, the interface and the business
+state. The Nika engine owns parsing, admission, execution, policy, events,
+receipts and traces, and the engine comes inside the npm package.
 
-The first integration is two calls — admit and settle:
+```sh
+npm install @supernovae-st/nika@0.123.0
+```
+
+The first integration is two calls, admit and settle:
 
 ```ts
 import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
@@ -29,10 +34,22 @@ if (!isNikaRunSucceeded(result)) {
 console.log(result.outputs)
 ```
 
-`run()` admits the workflow **before** it returns: an invalid file throws a
-typed `NikaOperationError` and no handle is ever handed out. `result()` is
-the sole settlement — an admitted workflow that fails resolves as
-`status: 'failed'` data, not a throw.
+`run()` admits the workflow **before** it returns: a file the engine refuses
+throws a typed `NikaOperationError`, and no handle is ever handed out.
+`result()` is the one settlement: an admitted workflow that fails resolves as
+`status: 'failed'` data, not a throw. The [quickstart](/sdk/start/quickstart)
+runs this end to end in five minutes.
+
+## Two doors, one client
+
+```mermaid
+flowchart LR
+  app(["Your app"]) --> sdk["@supernovae-st/nika"]
+  sdk -->|"new Nika({ cwd })"| local["bundled engine<br/>child process"]
+  sdk -->|"new Nika({ url, token })"| serve["nika serve --bind<br/>your server"]
+  local --> out["typed result + receipt"]
+  serve --> out
+```
 
 ```ts
 const local = new Nika({ cwd: process.cwd() })
@@ -42,42 +59,44 @@ const remote = new Nika({
 })
 ```
 
-Omit `url` for the native-process transport. Supply `url` and `token` for the
-HTTP transport. A contained served name such as `flows/release.nika`
-goes directly to the resident without a local binary or source. An explicit
-local path such as `./flows/release.nika` uses a compatible local engine
-to capture immutable bytes before HTTP admission.
+Omit `url` for the local transport. Supply `url` and `token` for HTTP. On a
+server, a served name such as `workflows/release.nika` (the workflow's path
+from the server's project root) needs no local engine or file; an explicit
+local path such as `./release.nika` uses a compatible local engine to capture
+an immutable snapshot first. [How the SDK works](/sdk/how-it-works) compares
+the two doors line by line.
 
 ## One lifecycle vocabulary
 
-| Intent | Method | Authority |
+| Intent | Method | Door |
 |---|---|---|
-| Audit | `check(workflow, options?)` | Engine |
-| Author a candidate | `compile(request, options?)` | Engine or server |
-| Admit + execute | `await run(workflow, options?)` | Engine or server |
-| Observe | `run.events(options?)` | Run session |
-| Settle | `await run.result()` | Run session |
-| Cancel | `run.cancel()` | Run session |
-| Verify proof | `traceVerify(receipt, options?)` | Engine |
+| Audit | `check(workflow, options?)` | both |
+| Author a candidate | [`compile(request, options?)`](/sdk/local/compile) | both |
+| Admit and execute | `await run(workflow, options?)` | both |
+| Observe | [`run.events(options?)`](/sdk/runtime/events) | both |
+| Settle | [`await run.result()`](/sdk/runtime/results) | both |
+| Cancel | `run.cancel()` | both |
+| Verify proof | [`traceVerify(receipt, options?)`](/sdk/runtime/receipts) | both |
 | Recover a durable job | `attachRun(id, options?)` | HTTP only |
 | Read live status | `run.status()` | HTTP only |
 | Discover workflows | `listWorkflows()` · `workflow(name)` | HTTP only |
-| Manage one schedule | `schedule()` · `scheduleStatus()` | HTTP only |
+| Manage one schedule | [`schedule()` · `scheduleStatus()`](/sdk/remote/schedules) | HTTP only |
 
-`run()` returns a handle only after admission; the handle is not a terminal
-result. Events are additive and optional to render; `run.result()` is the
-only terminal truth for that observation leg, including a pause. A paused
-durable job may later resume under engine authority. Configuration,
-compatibility, transport and protocol failures throw typed SDK errors.
+`run()` returns a handle only after admission; the handle is not a result.
+Events are optional to render; `run.result()` is the run's one ending,
+including a pause at a human gate. Locally, a paused run resumes from the
+command line; `nika serve` 0.123.0 has no route to answer the gate.
+Configuration, compatibility, transport and protocol failures throw typed
+[errors](/sdk/runtime/errors).
 
 <Accordion title="Compatibility aliases from earlier releases">
-  `nika.events(run)`, `nika.cancel(run)`, `run.done` and the facade-level
-  wrappers remain as compatibility aliases. `run.done` is the same promise
-  as `run.result()`. New code should call the methods on the run handle:
+  `nika.events(run)`, `nika.cancel(run)`, `nika.status(run)` and `run.done`
+  remain as deprecated aliases. `run.done` is the same promise as
+  `run.result()`. New code should call the methods on the run handle:
   `run.events()`, `run.result()`, `run.cancel()`, `run.status()`.
 </Accordion>
 
-## Documentation graph
+## Documentation map
 
 <SdkDoors />
 
@@ -87,11 +106,11 @@ compatibility, transport and protocol failures throw typed SDK errors.
 - It does not reconstruct traces or receipts in TypeScript.
 - An observer `AbortSignal` does not cancel a run; call `run.cancel()`.
 - It does not infer success from an event kind.
-- It exposes only the pinned engine's supported routes.
+- It exposes only the routes the released server answers.
 
-## Source and channel contract
+## Version and channel
 
-<Accordion title="Which published source these pages describe">
+<Accordion title="Which published release these pages describe">
   <SourceContract sdk={SDK} />
   <ProjectContract />
   <LocalContract sdk={SDK} />
@@ -99,5 +118,5 @@ compatibility, transport and protocol failures throw typed SDK errors.
 </Accordion>
 
 <Card title="Review the published source" icon="github" href={SDK.sourceCandidate}>
-  Inspect the source corresponding to the published SDK and native payloads.
+  The source of the published SDK release and its engine payloads.
 </Card>

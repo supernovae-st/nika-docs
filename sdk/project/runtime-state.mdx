@@ -68,10 +68,12 @@ watermark used to reason about missed slots.
 ## Source-control boundary
 
 ```text .gitignore
-.nika/traces/
-.nika/arm/
+.nika/
 .env
 ```
+
+`.nika/` also holds `nika serve` job state (`.nika/serve/`) and, when you
+serve over HTTP, the bearer token (`.nika/serve.token`): never commit it.
 
 Ignoring live state does not mean deleting it on deployment. Mount, back up or
 export it according to the workload's evidence and retention policy.

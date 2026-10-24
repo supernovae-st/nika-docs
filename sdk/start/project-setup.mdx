@@ -40,28 +40,40 @@ Each `*.nika` file is executable workflow intent.
 - `workflows/` is reviewed as intent.
 - `src/nika.ts` owns binary resolution and the working directory, not a
   second copy of project policy.
-- `.nika/` is runtime state. Ignore it in source control and mount it
-  deliberately on a server.
+- `.nika/` is runtime state: run records, firing ledgers, server job state
+  and, when you serve over HTTP, the server's bearer token. Ignore it in
+  source control and mount it deliberately on a server.
 
 ## Found the project
 
+A project file is one line: the project's kebab-case name. Create it and let
+the engine read it back:
+
 ```sh
-nika init --project-file --recipe starter
-nika arm
+printf 'nika: my-project\n' > nika.yaml
+./node_modules/.bin/nika arm
 ```
 
-`--project-file` is the scripted door to the starter. It skips an existing
-file unless `--force` is explicit. Bare `nika arm` reads and validates the
-project and cadence grammar, reports what is armed, and schedules nothing.
+```text
+nothing armed — /path/to/project/nika.yaml carries no `arm:` entry
+```
 
-The starter is optional and comments every governing example. Start with the
-same identity `nika init --project-file` writes:
+`nika arm` reads and validates the project file and its cadences, reports
+what is armed, and schedules nothing. Add policy as you need it, for example a
+default spending ceiling for every run of the project:
 
-```yaml
+```yaml nika.yaml
 nika: my-project
 
 ceiling: 0.50
 ```
+
+<Note>
+  `nika init` does much more than create `nika.yaml`: it writes about 30
+  agent, editor and hook files and a starter workflow
+  ([the full list](/getting-started/agents#nika-init-teach-the-repo)). Run it
+  only when you want that scaffold.
+</Note>
 
 Add `arm:` when time or an event should start a workflow, and `traces:` or
 `registry:` for run policy: one file carries both. The
@@ -90,9 +102,11 @@ Binary resolution follows one ladder:
 2. `NIKA_BIN`
 3. exact optional platform package
 
-Use an explicit application variable for packaged services. Implicit `PATH`
-lookup is refused. `cwd` anchors relative workflow paths,
-project-file discovery and the `.nika/` state directory.
+Use an explicit application variable for packaged services. `bin` and
+`NIKA_BIN` must be absolute paths: a bare name or a relative path throws
+`NikaConfigurationError`, and a `nika` on your `PATH` is never used. `cwd`
+anchors relative workflow paths, project-file discovery and the `.nika/`
+state directory.
 
 ## Probe at startup
 
@@ -120,14 +134,29 @@ false.
 ## Keep receipts governed
 
 ```text .gitignore
-.nika/traces/
-.nika/arm/
+.nika/
 .env
 ```
 
-Traces may carry run metadata and outputs. Arm state carries firing claims,
-receipts and cadence watermarks. If a deployment retains them, choose the
-volume, retention window and access policy explicitly.
+Everything under `.nika/` is machine state:
+
+| Path | Holds |
+|---|---|
+| `.nika/traces/` | run records, which can carry model outputs, file contents and tool arguments |
+| `.nika/arm/` | firing claims, receipts and cadence watermarks |
+| `.nika/serve/` | `nika serve` job snapshots and schedule state |
+| `.nika/serve.token` | the server's bearer token: a secret |
+| `.nika/compile/` | recorded compile plans |
+| `.nika/approval-claims/` | which human approvals were already used |
+| `.nika/quarantine/` | outputs a failed run moved aside, one folder per trace |
+
+<Warning>
+  Never commit `.nika/serve.token`: it is the bearer token that lets a client
+  run workflows on your server.
+</Warning>
+
+If a deployment retains this state, choose the volume, retention window and
+access policy explicitly.
 
 ## Connect the next systems
 

@@ -18,12 +18,15 @@ for (const name of names) {
 }
 ```
 
-`listWorkflows()` returns contained workflow names. `workflow(name)` returns
-path-free, engine-owned metadata with an open additive shape.
+`listWorkflows()` returns the served names, each the workflow's path from the
+project root (`workflows/release.nika`). `workflow(name)` confirms that a
+served name exists: it returns `{ workflow }` and answers `not_found` (404)
+otherwise. In 0.123.0 the metadata is closed to that one field: the server
+exposes no declared inputs or description over HTTP.
 
-The source client has no pagination, reload or raw-source methods. The
-resident server controls its configured workflow root; applications should
-not infer filesystem paths or ask the public API to reveal YAML bytes.
+The client has no pagination, reload or raw-source methods. The server
+controls its served directory (`--workflows`); applications should not infer
+filesystem paths or ask the API to reveal workflow bytes.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">

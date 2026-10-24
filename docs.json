@@ -249,7 +249,8 @@
           {
             "group": "Overview",
             "pages": [
-              "sdk/overview"
+              "sdk/overview",
+              "sdk/how-it-works"
             ]
           },
           {
@@ -275,23 +276,29 @@
               "sdk/local/client",
               "sdk/local/check-and-plan",
               "sdk/local/run-and-cancel",
+              "sdk/local/compile",
               "sdk/local/test-and-trace"
             ]
           },
           {
             "group": "Runtime",
             "pages": [
+              "sdk/runtime/results",
               "sdk/runtime/events",
               "sdk/runtime/errors",
-              "sdk/runtime/receipts"
+              "sdk/runtime/receipts",
+              "sdk/runtime/spend",
+              "sdk/runtime/permits"
             ]
           },
           {
             "group": "Remote API",
             "pages": [
+              "sdk/remote/serve-quickstart",
               "sdk/remote/client",
               "sdk/remote/jobs",
               "sdk/remote/streaming",
+              "sdk/remote/schedules",
               "sdk/remote/artifacts",
               "sdk/remote/workflows",
               "sdk/remote/webhooks"
