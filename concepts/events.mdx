@@ -5,6 +5,8 @@ sidebarTitle: "Events"
 icon: "signal"
 ---
 
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
 An executing workflow emits a stream of typed **events**: a run starting, a
 task scheduled, started, completed or failed, a permit checked, a cost
 incurred. Every event is hash-chained into the run's journal under
@@ -67,7 +69,7 @@ it carries the run's `status`, `cause`, `tasks`, `spend`, `outputs` and
 
 ## Event kinds
 
-Engine 0.123.0 emits 35 kinds. Most runs only produce the first two groups.
+Engine {STATUS.version} emits {STATUS.eventKinds} kinds. Most runs only produce the first two groups.
 
 | Group | Kinds |
 |---|---|

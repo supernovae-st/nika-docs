@@ -9,7 +9,7 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 These are **engine-internal** decisions, not workflow-language rules.
 Thirteen questions, locked in April 2026 (revision 3), shaped the **L0
-foundation** (22 crates at v{STATUS.version}) and the **L0.5 kernel
+foundation** ({STATUS.cratesL0} crates at v{STATUS.version}) and the **L0.5 kernel
 contract**. Some were executed as written, some differently, and some not at
 all: the index records what each became at v{STATUS.version}, and the deep
 dives keep the original rationale as history.
@@ -28,7 +28,7 @@ dives keep the original rationale as history.
 | **Q3** | Extract `nika-catalog-codegen` | **Executed** (`nika-catalog-codegen`, L0); the community overlay it was meant to serve was not built |
 | **Q4** | `nika-event`: L0 types + L1 store + L2 export | **Not executed as split.** `nika-event` holds the types; the journal is written by the runtime and exported by `nika trace export`; no `nika-event-store` or `nika-event-export` crate exists |
 | **Q5** | Admission order: schema → codegen → event → binding → pck-manifest | **Superseded.** No `nika-binding` crate: templates live in `nika-tmpl`, expressions in `nika-cel` |
-| **Q6** | `EventKind` = scoped sub-enums, about 22 categories | **Superseded.** One flat `#[non_exhaustive]` `EventKind` of 35 kinds |
+| **Q6** | `EventKind` = scoped sub-enums, about 22 categories | **Superseded.** One flat `#[non_exhaustive]` `EventKind` of {STATUS.eventKinds} kinds |
 | **Q7** | `nika-kernel` prelude re-export hub | **Executed.** `nika-kernel` is a facade with a `prelude` over `nika-kernel-core`, `-ai`, `-runtime` and `-plugin` |
 | **Q8** | `nika-transform` as a standalone L0 crate | **Not executed.** No transform crate and no template filters: transformation is jq (`extract:`, `nika:jq`) |
 | **Q9** | `Timestamp` + `WallDuration` as a module in `nika-types` | **Executed** |

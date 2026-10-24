@@ -279,7 +279,7 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 6c27a20153ace0abfbad936467c1ceec91922eb177cdbd05425c754220dcd707
+  sha256: 934916f28513f215be0c5112ebefc6320e5c5160ddfe5c6000c82d250605ba2e
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 - path: "snippets/data/releases.json"
@@ -296,7 +296,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 293
-  aggregate_sha256: 204d758836c1f6eaa5ad94fcea72d63ec8af4353b914cf7b64aca1e892d0290d
+  aggregate_sha256: a353c9ee445bb9e8fc32d2a2f952631eaed81a1e6e619eb7316e252e06bab936
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

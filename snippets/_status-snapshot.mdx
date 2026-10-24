@@ -10,14 +10,17 @@
       count-drift-gate check (g) is what stops that happening again.
 
     STILL HAND-MAINTAINED (measured at the release tag, not projected):
-      head · crates* · wipCrates · adrs* · capabilityRules · hygieneVectors.
+      head · crates* · wipCrates · adrs* · capabilityRules · eventKinds ·
+      hygieneVectors.
       Re-measure them at each release tag: crates* and wipCrates from the
       tag's Cargo.toml [workspace.metadata.diamond] (members · wip · layers,
-      as the tag's ROADMAP status block prints them), adrs* from
-      docs/adr/index.json, capabilityRules = the [[rules]] count of
-      crates/nika-catalog/data/model-capabilities.toml. They do NOT project
-      from the binary. Do not put them on reference/status.mdx. Hygiene
-      vector 23 cannot see this repo.
+      as the tag's ROADMAP status block prints them; cratesL0 … cratesL4 count
+      the crates each layer value names, cratesL05 and cratesL15 for L0.5 and
+      L1.5), adrs* from docs/adr/index.json, capabilityRules = the [[rules]]
+      count of crates/nika-catalog/data/model-capabilities.toml, eventKinds =
+      the variants of nika_event::EventKind (crates/nika-event/src/kind.rs).
+      They do NOT project from the binary. Do not put them on
+      reference/status.mdx. Hygiene vector 23 cannot see this repo.
 
     Language facts (verbs, builtins, templates, spec-named providers) live in
     snippets/_canon.mdx — projected from nika-spec canon.yaml / `nika spec --canon`.
@@ -35,6 +38,13 @@ export const STATUS = {
   cratesTarget: "50-90",
   cratesCap: 100,
   wipCrates: ["nika-chart", "nika-fx", "nika-proof", "nika-store", "nika-harness", "nika-execution", "nika-service-execution", "nika-serve", "nika-session", "nika-session-change", "nika-session-agent", "nika-session-host", "nika-session-intelligence", "nika-tui", "nika-tui-view"],
+  cratesL0: 22,
+  cratesL05: 6,
+  cratesL1: 17,
+  cratesL15: 5,
+  cratesL2: 5,
+  cratesL3: 4,
+  cratesL4: 31,
   adrs: 114,
   adrsAccepted: 93,
   adrsProposed: 17,
@@ -42,6 +52,7 @@ export const STATUS = {
   adrsRejected: 1,
   providers: 39,
   capabilityRules: 57,
+  eventKinds: 35,
   hygieneVectors: 40,
   lastUpdated: "2026-10-23"
 };

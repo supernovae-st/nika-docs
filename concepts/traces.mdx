@@ -5,6 +5,8 @@ sidebarTitle: "Traces"
 icon: "clock-rotate-left"
 ---
 
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
 You ran a workflow an hour ago. It worked (or it didn't), and now someone
 asks: *what exactly happened?* With most AI tooling the answer scrolled
 away. With Nika the run itself is a file: every event the engine emitted,
@@ -79,7 +81,7 @@ The spine is not the whole vocabulary. Deeper kinds record retries
 `workflow_cancelled`), money (`cost_incurred`), security checks
 (`permit_checked`), streaming (`infer_chunk`) and the agent loop
 (`agent_tools_selected`, `agent_budget_checkpoint`, and friends). The
-35 event kinds of engine 0.123.0 are listed in
+{STATUS.eventKinds} event kinds of engine {STATUS.version} are listed in
 [Concepts · Events](/concepts/events).
 
 Real spend also rides the spine: a priced `task_completed` carries a

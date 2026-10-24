@@ -6,6 +6,7 @@ icon: "shield-halved"
 ---
 
 import { CANON } from "/snippets/_canon.mdx";
+import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Nika follows **real semver**. 0.123 is the open-source reference release and the project is maintained:
 security fixes, bug fixes and compatibility. These invariants are what keeps a later change, whoever makes it,
@@ -157,7 +158,7 @@ from breaking the public API: any feature must fit **without breaking changes to
 
 | ID | Decision | At v0.123.0 |
 |---|---|---|
-| **FCI-009** | `EventKind` = scoped sub-enums, about 22 categories | **Superseded:** `nika_event::EventKind` is one flat `#[non_exhaustive]` enum of 35 kinds |
+| **FCI-009** | `EventKind` = scoped sub-enums, about 22 categories | **Superseded:** `nika_event::EventKind` is one flat `#[non_exhaustive]` enum of {STATUS.eventKinds} kinds |
 | **FCI-010** | `InferRequest` fields reserved for memory, budget, baggage, trust and tracing | `memory`, `budget` and `baggage` are present fields; a memory implementation still needs no kernel change |
 | **FCI-011** | `schema:` field mandatory on every on-disk artifact | **Superseded by ADR-113:** a workflow file carries no version (a root `schema:` is refused, `NIKA-PARSE-005`); other artifacts carry their own marker (the project file's `$schema` line, a trace's `trace_format`) |
 | **FCI-012** | The `Provider` trait shape is frozen behind a sealed supertrait | `Provider` is the sealed combination of `ProviderInfer`, `ProviderStream` and `ProviderMeta` |
