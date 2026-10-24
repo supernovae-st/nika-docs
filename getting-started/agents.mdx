@@ -179,7 +179,7 @@ the contract**, the **human approves**, the **runtime enforces**.
   <source src="/videos/agent-plugin.webm" type="video/webm" />
   <source src="/videos/agent-plugin.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**The loop, once through.** Asked to turn `CHANGELOG.md` into release notes, the agent drafts a workflow that calls `nika:read_file`. `nika check --native-strict` refuses it (`NIKA-BUILTIN-001`), the agent repairs it to `nika:read`, and the re-check says run ready. A `mock/echo` rehearsal then writes `release-notes.md`. *The checks and the run are captured from the real CLI; the agent session is an illustration.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**The loop, once through.** Asked to turn `CHANGELOG.md` into release notes, the agent drafts a workflow that calls `nika:read_file`. `nika check --native-strict` refuses it (`NIKA-BUILTIN-001`), the agent repairs it to `nika:read`, and the re-check says run ready. A `mock/echo` rehearsal then writes `release-notes.md`. *The checks and the run are captured from the real CLI on nika 0.121.0; the agent session is an illustration.*</p>
 
 ## Editor surface
 

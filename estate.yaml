@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: 62a5013a41defaaf76bb4cf9b7cbc2e714b85ce339661a4e5dfb18009190279c
+  sha256: a9b7bc316cc813a2178dbd88e5b16068b25a4aa80bf743f4bb773bcb3917ddb1
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -296,7 +296,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 293
-  aggregate_sha256: 54f33ddbd8d2536b3fd30a996d86e19a8ae0d86d47ecd1c6e688a522f414a8c9
+  aggregate_sha256: 204d758836c1f6eaa5ad94fcea72d63ec8af4353b914cf7b64aca1e892d0290d
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

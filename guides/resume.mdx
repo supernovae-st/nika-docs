@@ -205,7 +205,7 @@ code **4**, and the frame prints the exact resume line (your
   <source src="/videos/approval-gate.webm" type="video/webm" />
   <source src="/videos/approval-gate.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**Nothing ships without a yes.** At a terminal, the `gated-ship.nika` below asks `Ship this build to production? [y/N]`, and `y` lets `ship` run. Where nobody can answer, as in CI, the same run pauses durably, exits 4 and prints the one line that resumes it. Run that line: `build` is a cache hit, the answer rides in `--answer approve=true`, and `ship` runs. *Every terminal line is captured from the real CLI, offline and with no model; the door, its light, the keypress, the paste and the CI frame are illustration.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**Nothing ships without a yes.** At a terminal, the `gated-ship.nika` below asks `Ship this build to production? [y/N]`, and `y` lets `ship` run. Where nobody can answer, as in CI, the same run pauses durably, exits 4 and prints the one line that resumes it. Run that line: `build` is a cache hit, the answer rides in `--answer approve=true`, and `ship` runs. *Every terminal line is captured from the real CLI on nika 0.121.0, offline and with no model; the door, its light, the keypress, the paste and the CI frame are illustration.*</p>
 
 ```yaml gated-ship.nika
 # Build, ask a human, ship only on yes.

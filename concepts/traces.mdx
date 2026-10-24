@@ -132,7 +132,7 @@ edited, reordered, or dropped from the middle without breaking it.
   <source src="/videos/trace-proof.webm" type="video/webm" />
   <source src="/videos/trace-proof.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**Change one byte, and verify says where.** Each line of a run's trace carries the sha256 of the line before it. `nika trace verify` reads the chain back intact; in a copy with one byte of line 4 changed, it stops at line 5 with `BROKEN` and exit code 2. *A `mock/echo` rehearsal captured from the real CLI; the scan and the moving hashes are illustration.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**Change one byte, and verify says where.** Each line of a run's trace carries the sha256 of the line before it. `nika trace verify` reads the chain back intact; in a copy with one byte of line 4 changed, it stops at line 5 with `BROKEN` and exit code 2. *A `mock/echo` rehearsal captured from the real CLI on nika 0.121.0; the scan and the moving hashes are illustration.*</p>
 
 ```bash
 nika trace verify

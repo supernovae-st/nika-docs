@@ -26,7 +26,7 @@
          alt="The loop the docs teach first: nika compile writes hello.nika, nika check audits it, nika run runs it and nika trace verify confirms its record" width="960">
   </a>
 </p>
-<p align="center"><sub>The loop the docs teach first: compile, check, run, verify. Real CLI output, offline, answered by the <code>mock/echo</code> rehearsal model.</sub></p>
+<p align="center"><sub>The loop the docs teach first: compile, check, run, verify. Real CLI output from nika 0.121.0, offline, answered by the <code>mock/echo</code> rehearsal model.</sub></p>
 
 ## What is Nika?
 
@@ -73,6 +73,8 @@ exact expected outputs and explicit permissions.
 
 Every clip below also plays on the docs page that explains it, where its
 caption says what is captured from the real CLI and what is illustrated.
+They were captured on nika 0.121.0; the local-model run of the meeting-notes
+workflow, which two of them show, was captured on nika 0.109.2.
 
 ### Nika catches the mistake before anything runs
 
@@ -82,7 +84,7 @@ caption says what is captured from the real CLI and what is illustrated.
          alt="nika check finding two mistakes in a workflow, the fix, then the clean re-check" width="860">
   </a>
 </p>
-<p align="center"><sub><code>nika check</code> finds two mistakes, the fix lands, and the re-check is clean. Nothing runs and no token is spent · plays on <a href="https://docs.nika.sh/guides/troubleshooting">Troubleshooting</a></sub></p>
+<p align="center"><sub><code>nika check</code> finds two mistakes, the fix lands, and the re-check is clean. Nothing runs and no token is spent · captured on nika 0.121.0 · plays on <a href="https://docs.nika.sh/guides/troubleshooting">Troubleshooting</a></sub></p>
 
 ### The file is the boundary
 
@@ -92,7 +94,7 @@ caption says what is captured from the real CLI and what is illustrated.
          alt="A workflow's permits drawn as a map; the check refuses the task that reaches outside them, and the widened boundary passes" width="860">
   </a>
 </p>
-<p align="center"><sub>A workflow lists what it may read, write and reach in <code>permits:</code>. The check refuses the task that reaches past it · plays on <a href="https://docs.nika.sh/concepts/security">Security model</a></sub></p>
+<p align="center"><sub>A workflow lists what it may read, write and reach in <code>permits:</code>. The check refuses the task that reaches past it · captured on nika 0.121.0 · plays on <a href="https://docs.nika.sh/concepts/security">Security model</a></sub></p>
 
 ### A request you retype every week becomes a file
 
@@ -102,7 +104,7 @@ caption says what is captured from the real CLI and what is illustrated.
          alt="A request retyped into a chat every Monday, kept instead as meeting-actions.nika, a file that runs" width="860">
   </a>
 </p>
-<p align="center"><sub>Chat is for trying; a <code>.nika</code> file is for keeping: the same request, written once and run again · plays on <a href="https://docs.nika.sh/concepts/how-nika-compares">How Nika compares</a></sub></p>
+<p align="center"><sub>Chat is for trying; a <code>.nika</code> file is for keeping: the same request, written once and run again · check captured on nika 0.121.0, local-model run on nika 0.109.2 · plays on <a href="https://docs.nika.sh/concepts/how-nika-compares">How Nika compares</a></sub></p>
 
 More clips, each on the page it explains:
 ▶ [A workflow is a graph](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/dag-execution.optimized.gif) ([Workflows](https://docs.nika.sh/concepts/workflows)) ·
