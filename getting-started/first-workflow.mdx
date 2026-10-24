@@ -306,8 +306,9 @@ example declares `{owner, task, due}` and exports typed actions.
     the cost before a token is spent.
   </Step>
   <Step title="Wire your agent">
-    Run `nika wire cursor` or `nika wire all` for explicit MCP setup, or
-    use the editor extension's agent setup.
+    Run `nika wire detected --dry-run` to preview, then `nika wire detected`
+    to add Nika's MCP server to the agent clients this machine shows, or
+    `nika wire cursor` for one client.
   </Step>
 </Steps>
 
