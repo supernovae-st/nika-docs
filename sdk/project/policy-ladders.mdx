@@ -63,6 +63,13 @@ The project floor max-composes with the operator policy under `~/.nika`. A
 repository can demand stronger provenance. It cannot weaken the machine
 owner's floor.
 
+<Note>
+  In 0.123.0 a first fetch of a `registry:` coordinate is refused
+  (`NIKA-REG-005`) whatever the floor says: take the workflow file from the
+  registry repository and use it by path
+  ([Known limits](/changelog/known-limits#registry-coordinates-are-refused)).
+</Note>
+
 ```text
 operator floor ─┐
                 ├── maximum ── admitted artifact tier
