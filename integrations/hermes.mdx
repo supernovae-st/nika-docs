@@ -85,10 +85,11 @@ quietly until the final card. The skill teaches the fix: launch with
   crosses — the crossing call completes, nothing new starts, the run fails
   `NIKA-1704` (exit 1) with spent-vs-budget.
 - Prefer local models for drafts (`ollama/…`) — no key, no meter.
-- An **uncataloged** model cannot be priced, so the cap cannot bound it:
-  under `--max-cost-usd` the run refuses before any spend (`NIKA-1709`),
-  unless you confirm a one-time cost review in an interactive local
-  `nika run`. Local and mock models stay admitted
+- A cloud model the catalog **cannot price** (uncataloged, or listed
+  without a price) has no meter the cap can bound: the run refuses before
+  any call, with or without `--max-cost-usd` (exit 3, `price unknown: …`,
+  no `NIKA-` code), unless you confirm a one-time cost review in an
+  interactive local `nika run`. Local and mock models stay admitted
   ([cost honesty](/guides/cost-honesty)).
 
 ## Field notes (verified on hermes v0.18.2)

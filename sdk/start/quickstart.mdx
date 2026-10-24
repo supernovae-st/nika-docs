@@ -114,10 +114,11 @@ file.
 ## What `maxCostUsd: 0` does
 
 `maxCostUsd` caps what this run may spend on metered models, at the catalog's
-list prices. Before anything runs, a cost floor above the cap, or a cloud
-model the catalog cannot price, makes `run()` throw `NikaOperationError` with
-code `NIKA-1709`: nothing is called and nothing is spent. During a run, the
-call that crosses the cap completes and counts, nothing new starts, and the
+list prices. Before anything runs, a cost floor above the cap makes `run()`
+throw `NikaOperationError` with code `NIKA-1709`, and a cloud model the
+catalog cannot price makes it throw with code `run_refused`
+(`price unknown: …`): nothing is called and nothing is spent. During a run,
+the call that crosses the cap completes and counts, nothing new starts, and the
 result is `failed` with `NIKA-1704`. Local and `mock/echo` models are never
 blocked. When you switch `model:` to a paid cloud model, raise `maxCostUsd` to
 the budget you accept. [Spend caps](/sdk/runtime/spend) has the details.

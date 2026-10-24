@@ -24,10 +24,13 @@ console.log('worst case:', cost.bounded_total_usd, 'unbounded:', cost.has_unboun
 try {
   await nika.run('summary.nika', { maxCostUsd: 0 })
 } catch (error) {
-  if (error instanceof NikaOperationError && error.code === 'NIKA-1709') {
-    // Refused before any provider call: nothing was spent.
-    console.log('refused:', error.status, error.message.split(' — ')[0])
-  } else throw error
+  if (!(error instanceof NikaOperationError)) throw error
+  // Both refusals come before any provider call: nothing was spent.
+  // NIKA-1709 (status 2): a priced cost floor above the cap.
+  // run_refused (status 3), "price unknown": a cloud model the catalog cannot price.
+  const unpriced = error.code === 'run_refused' && error.message.startsWith('price unknown')
+  if (error.code !== 'NIKA-1709' && !unpriced) throw error
+  console.log('refused:', error.status, error.message.split(' — ')[0])
 }
 
 // The same file, rehearsed on the mock model: allowed under a zero cap.
@@ -66,9 +69,14 @@ check or provider call.
 catalog's list prices.
 
 - **Before the run.** A cost floor above the cap makes `run()` throw
-  `NikaOperationError` with code `NIKA-1709` (`status` 2). So does a cloud
-  model the catalog cannot price under any cap: the engine cannot bound spend
-  it cannot meter, and an unpriced model never counts as `$0`.
+  `NikaOperationError` with code `NIKA-1709` (`status` 2).
+- **A cloud model the catalog cannot price** is refused before any call
+  too, with or without `maxCostUsd`: the engine cannot bound spend it cannot
+  meter, and an unpriced model never counts as `$0`. The engine names no
+  code for this refusal, so `code` is the SDK's `run_refused`, `status` is
+  3 and the message starts `price unknown:`. The engine your app starts has
+  no terminal to ask; `nika run` in an interactive terminal asks once for a
+  cost review instead.
 - **During the run.** The call that crosses the cap completes and counts,
   nothing new starts, unstarted tasks are cancelled, and `run.result()`
   resolves `failed` with `NIKA-1704` and no outputs.

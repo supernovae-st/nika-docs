@@ -72,7 +72,7 @@ With no path, they read the workspace's latest trace under `.nika/traces/`.
 
 | Flag | What it does |
 |---|---|
-| `--max-cost-usd <USD>` | The run's budget over metered spend. A cost floor above it refuses to start (exit 2, `NIKA-1709`), and so does a cloud model the catalog cannot price; the call that crosses it mid-run completes, then the run fails `NIKA-1704`. Local and mock models are never blocked. `nika guard` denies a priced run without it |
+| `--max-cost-usd <USD>` | The run's budget over metered spend. A cost floor above it refuses to start (exit 2, `NIKA-1709`); the call that crosses it mid-run completes, then the run fails `NIKA-1704`. Local and mock models are never blocked. `nika guard` denies a priced run without it. A cloud model the catalog cannot price is refused before any call, with or without the flag (exit 3, `price unknown: …`, no `NIKA-` code), unless an interactive terminal run confirms its one-time cost review; `--max-cost-usd 0` refuses it there too |
 | `--access <class\|seat>` | Pin the access path: a class (`local`, `mock`, `harness`, `oauth`, `api`) or a harness seat (`claude-code`, `codex`, `copilot`, `gemini-cli`, `grok-build`, `kimi-code`, `opencode`, `qwen-code`). An unsatisfied pin refuses and never substitutes |
 | `--model <provider/name>` | Replace the workflow's default `model:` only; task pins and child workflows keep theirs. `--model mock/echo` rehearses offline |
 | `--var key=value` | Set an `inputs:` value (repeatable): overrides a `default:`, satisfies `required: true`, parsed as JSON when it parses, unknown keys refused |

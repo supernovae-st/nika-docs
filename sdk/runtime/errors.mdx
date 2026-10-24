@@ -131,11 +131,12 @@ The engine refused an operation. Over the local transport:
 - `code` is the engine's own: the first check finding that names one
   (`NIKA-SEC-004`, `NIKA-PARSE-005`, `NIKA-AUTH-006`…) or the refusal's code
   (`NIKA-1709`, `NIKA-1708`). When the engine named none, as for an unreadable
-  file, `code` is the SDK's `run_refused`.
+  file or a cloud model the catalog cannot price (`price unknown: …`), `code`
+  is the SDK's `run_refused`.
 - `findings` holds the engine's check findings untouched (`code`, `message`,
   `severity`, `gate`, `kind`, `task`). A budget or launch refusal has none.
 - `status` is the engine's **exit code**: `2` for the file or its cost floor,
-  `3` for the environment or the inputs.
+  `3` for the environment, the inputs or an unpriced cloud model.
 - `operation` names the refused call (`run`, `check`, `compile`…).
 
 Over HTTP, a refusal the server types as `{ error: { code, message } }`
