@@ -1,6 +1,6 @@
 ---
 title: "Install Nika"
-description: "Install Nika, verify the binary, scaffold a repo, and wire editor/agent MCP clients."
+description: "Install the nika binary, verify it, take the first offline step, and know what it writes on your machine."
 sidebarTitle: "Installation"
 icon: "download"
 ---
@@ -8,115 +8,173 @@ icon: "download"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 import { SDK } from "/snippets/_sdk-contract.mdx";
 
-<Warning>
-  **Latest engine release: v{STATUS.version}** — what `brew install` and the
-  install script give you. The npm package
-  <code>{SDK.package}@{SDK.sourceVersion}</code> runs on its own channel; it
-  bundles its own engine build, so an npm install never depends on your CLI
-  version.
-  Run `nika --version` and `nika --help` after install; those commands are
-  the executable source of truth for your local binary. A grammar change
-  ships with its `nika check --fix` migration.
-</Warning>
+<Info>
+  **Latest engine release: v{STATUS.version}**, the open-source reference
+  release. It is maintained (security fixes, bug fixes, compatibility); no
+  major new development is planned. Homebrew, the install script, the release
+  archives and the container image all give you this version. The npm package
+  <code>{SDK.package}@{SDK.sourceVersion}</code> bundles its own engine build,
+  so an npm install never depends on the CLI you installed another way.
+  After installing, `nika --version` and `nika --help` are the source of truth
+  for your binary.
+</Info>
 
-## Install today
+## Install
 
 <Tabs>
+  <Tab title="Homebrew">
+    macOS and Linux:
+
+    ```bash
+    brew install supernovae-st/tap/nika
+    nika --version
+    ```
+
+    Recent Homebrew versions gate third-party taps behind a trust prompt.
+    If the install reports the tap as untrusted, run
+    `brew trust supernovae-st/tap` once and retry.
+  </Tab>
+
+  <Tab title="Install script">
+    ```bash
+    curl -LsSf https://nika.sh/install.sh | sh
+    nika --version
+    ```
+
+    On macOS the script tries Homebrew first when it is available, then falls
+    back to the GitHub release archive; on Linux it always uses the release
+    archive. Without Homebrew the binary lands in `~/.nika/bin/nika`, and the
+    script tells you the `PATH` line to add. Pass `--no-brew` to skip Homebrew,
+    `--version <x.y.z>` to pin a release, or `--install-dir <dir>` to choose
+    the destination. Read the script before you pipe it to `sh`; it is a small
+    shell file.
+  </Tab>
+
   <Tab title="npm">
-    Requires Node.js 22 or newer.
+    Requires Node.js 22 or newer, on macOS (arm64, x64) or Linux with glibc
+    (x64, arm64).
 
     ```bash
     npm install -g @supernovae-st/nika
     nika --version
     ```
-    One package gives you the `nika` command and the TypeScript SDK. The
-    verified release binary for your platform arrives as an optional
-    dependency (macOS and Linux · arm64 and x64). The npm channel can lag
-    the standalone CLI release; check its bundled `nika --version` rather
-    than assuming it matches Homebrew. Project-local works too: `npm install @supernovae-st/nika`,
-    then `npx nika …` and `import { Nika } from '@supernovae-st/nika'`.
-    The [SDK README](https://github.com/supernovae-st/nika-client#readme) carries
-    the full contract and package compatibility.
+
+    One package gives you the `nika` command and the
+    [TypeScript SDK](/sdk/overview). The verified engine for your platform
+    arrives as an optional dependency, so keep optional dependencies enabled.
+    Installed per project instead (`npm install @supernovae-st/nika`), the
+    command is `./node_modules/.bin/nika`, or `npm exec --no -- nika`.
+
+    <Warning>
+      Do not type `npx nika` outside a project that has the package
+      installed: the unscoped npm name `nika` belongs to an unrelated package,
+      and `npx` would download and run it.
+    </Warning>
   </Tab>
 
-  <Tab title="Homebrew">
-    ```bash
-    brew install supernovae-st/tap/nika
-    ```
-    Recent Homebrew versions gate third-party taps behind a trust prompt —
-    if the install reports the tap as untrusted, run
-    `brew trust supernovae-st/tap` once and retry.
-  </Tab>
+  <Tab title="Container">
+    The official image, for linux/amd64 and linux/arm64, has `nika` as its
+    entrypoint:
 
-  <Tab title="curl">
     ```bash
-    curl -LsSf https://nika.sh/install.sh | sh
+    docker run --rm ghcr.io/supernovae-st/nika:0.123.0 --version
+    docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.123.0 check flow.nika
+    docker run -i --rm ghcr.io/supernovae-st/nika:0.123.0 mcp
     ```
-    Detects platform (macOS / Linux), prefers Homebrew when `NIKA_VERSION=latest`
-    and Homebrew is available, then falls back to the GitHub release binary.
-    Continue with [your first workflow](/getting-started/first-workflow) after
-    installation. This documentation is the maintained installation guide.
+
+    The image carries the base shell and coreutils, nothing more; build your
+    own image `FROM ghcr.io/supernovae-st/nika:0.123.0` when a workflow runs
+    heavier tools. It has no bubblewrap, so a workflow that declares
+    `permits:` and runs `exec:` refuses to start there (`NIKA-1710`, see
+    [Servers and headless Linux](#servers-and-headless-linux)) unless you
+    install bubblewrap in your image or set the attested `NIKA_SANDBOX=off`.
   </Tab>
 
   <Tab title="cargo binstall">
     ```bash
     cargo binstall --git https://github.com/supernovae-st/nika nika-cli
-    ```
-    Fetches the **prebuilt release tarball** (no compile — the crate ships
-    [binstall metadata](https://github.com/cargo-bins/cargo-binstall) mapping
-    every release asset). One honest wart until the crates.io publish: the
-    binary lands as `~/.cargo/bin/nika-cli` (the crate's declared bin name) —
-    add the public name once with
-    `ln -sf ~/.cargo/bin/nika-cli ~/.cargo/bin/nika`.
-  </Tab>
-
-  <Tab title="nix">
-    ```bash
-    nix run github:supernovae-st/nika
-    ```
-    **Builds repository source** via the repo's root `flake.nix` —
-    the first run compiles, the store caches it, and the binary answers as
-    `nika` (the flake renames the seed crate at install, same as the
-    release). `nix profile install github:supernovae-st/nika` for a durable
-    install. Zero gatekeeper: no nixpkgs queue, the flake ships in-repo.
-  </Tab>
-
-  <Tab title="source">
-    ```bash
-    git clone https://github.com/supernovae-st/nika.git
-    cd nika
-    cargo test --workspace --lib
-    cargo build --release -p nika-cli
-    mkdir -p ~/.nika/bin
-    ln -sf "$PWD/target/release/nika-cli" ~/.nika/bin/nika
-    export PATH="$HOME/.nika/bin:$PATH"
     nika --version
     ```
+
+    Fetches the prebuilt release archive (no compilation) and installs the
+    binary as `~/.cargo/bin/nika`. The crate is named `nika-cli`; the binary
+    it installs is `nika`.
+  </Tab>
+
+  <Tab title="Nix">
+    ```bash
+    nix run github:supernovae-st/nika/v0.123.0 -- --version
+    nix profile install github:supernovae-st/nika/v0.123.0
+    ```
+
+    Builds the release tag with the repository's `flake.nix`: the first run
+    compiles, and the store caches it. The bare `github:supernovae-st/nika`
+    reference builds the default branch, which can be ahead of the release.
+  </Tab>
+
+  <Tab title="From source">
+    ```bash
+    git clone --branch v0.123.0 https://github.com/supernovae-st/nika.git
+    cd nika
+    cargo install --locked --path crates/nika-cli
+    nika --version
+    ```
+
+    `cargo install` builds the `nika` binary into `~/.cargo/bin`. Cloning
+    without `--branch` gives you `main`, which carries maintenance fixes that
+    are not released yet.
   </Tab>
 </Tabs>
 
-## First-run verification
+Native Windows binaries are not shipped. On Windows, use WSL2 with the Linux
+archive.
 
-No Nika account, coding assistant, API key or model download is required
-for this step. For an actual calculation and file output without a model,
-start with the [offline report](/introduction).
+## First run
 
-```bash
-nika --version
-nika                 # the mirror, and the line to type next
-nika compile hello hello.nika   # local starter · explicit dest · zero keys
-```
+No account, API key, model download or agent is needed for this step.
 
-Run `nika` with no arguments and read the line it offers. **Your** binary
-is the source of truth; on v{STATUS.version} that line is
-<code>{STATUS.firstCommand}</code>, and this page is gated on saying the same thing.
+<Steps>
+  <Step title="Check the binary">
+    ```bash
+    nika --version
+    ```
 
-It is the zero-spend first contact: a Ready hello candidate written to an
-explicit destination, without a provider call. Omit the destination to
-preview. `nika init` scaffolds repo-local schema
-wiring and agent context when you want a repo, not before. `nika wire
-<client>` is explicit MCP client setup. Installers do not mutate editor
-configs automatically.
+    It prints `nika {STATUS.version} ({STATUS.engineSha})` for this release.
+  </Step>
+  <Step title="Read the mirror">
+    ```bash
+    nika welcome
+    ```
+
+    `nika welcome` prints what this binary contains, what it sees on your
+    machine, and the next line to type. On v{STATUS.version} that line is
+    <code>{STATUS.firstCommand}</code>; this page is gated on saying the same
+    thing. [Your machine](/getting-started/your-machine) reads the screen line
+    by line.
+  </Step>
+  <Step title="Write and run a first file, offline">
+    ```bash
+    nika compile hello hello.nika
+    nika check hello.nika
+    nika run hello.nika
+    nika trace verify
+    ```
+
+    `nika compile hello` writes a ready starter file without calling any
+    model, `nika check` audits it, `nika run` runs it on `mock/echo` (a
+    rehearsal model that echoes the prompt back) and `nika trace verify`
+    checks the record the run left in `.nika/traces/`.
+  </Step>
+</Steps>
+
+<Note>
+  On a terminal, bare `nika` (no arguments) opens the
+  [terminal Session](/getting-started/session), where you describe a job in
+  your own words. On a machine with no key, local model or signed-in agent
+  app, it first asks you to choose an intelligence. You can leave with
+  `Ctrl+C` and come back once one is ready. Piped or redirected, bare `nika`
+  prints the same mirror as `nika welcome`.
+</Note>
 
 <video
   autoPlay
@@ -132,109 +190,160 @@ configs automatically.
   <source src="/videos/full-loop.webm" type="video/webm" />
   <source src="/videos/full-loop.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**The loop you will keep using.** `nika compile` writes a starter file, `nika check` audits it before anything runs, `nika run` runs it, and `nika trace verify` confirms the run's record is intact. *All four commands captured from the real CLI, offline; the answer comes from the `mock/echo` rehearsal model, not a real model.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**The loop you will keep using.** `nika compile` writes a starter file, `nika check` audits it before anything runs, `nika run` runs it, and `nika trace verify` confirms the run's record is intact. *All four commands captured from the real CLI on 0.121.0, offline; the answer comes from the `mock/echo` rehearsal model, not a real model.*</p>
+
+`nika init` scaffolds a repository for agents and editors when you want one,
+not before ([what it writes](/getting-started/agents#nika-init-teach-the-repo)).
+`nika wire <client>` adds Nika's read-only MCP server to one agent client.
+Installers never edit editor or agent configuration.
+
+## Seal your runs
+
+Every run writes a hash-chained record. To also sign it, so that
+`nika trace verify` answers `SEALED`, mint a run-signing key once per
+machine:
+
+```bash
+nika key init
+```
+
+Typed in a terminal, `nika key init` stores the key in your OS keychain when
+it can open one (the macOS login keychain, or a desktop Secret Service on
+Linux), and otherwise in key files under `~/.nika/keys/` (mode `0600`).
+Engines your applications start through the [SDK](/sdk/start/quickstart), and
+`nika serve`, never open a keychain: they sign only with those key files. For
+them, mint the key as files, or copy an existing keychain key there once:
+
+```bash
+NIKA_KEYCHAIN=off nika key init   # key files in ~/.nika/keys/
+nika key align                    # or: copy the keychain key to ~/.nika/keys/ (run it in a terminal)
+```
+
+In CI, point `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` at a key pair you
+provide. Without any key, runs still succeed and `nika trace verify` reports
+them `UNSEALED`.
 
 ## Platforms
 
 | Platform | Release asset | Status |
 |---|---|---|
-| macOS Apple Silicon | `nika-macos-arm64-<release>.tar.gz` | shipped |
+| macOS Apple silicon | `nika-macos-arm64-<release>.tar.gz` | shipped |
 | macOS Intel | `nika-macos-x64-<release>.tar.gz` | shipped |
 | Linux x86_64 | `nika-linux-x64-<release>.tar.gz` | shipped |
 | Linux aarch64 | `nika-linux-arm64-<release>.tar.gz` | shipped |
-| Windows | `x86_64-pc-windows-msvc` | 🧭 planned post-1.0 |
-| WASM (sandboxed) | `wasm32-wasip2` | 🧭 planned · a future major |
+| Container (linux/amd64, linux/arm64) | `ghcr.io/supernovae-st/nika:<release>` | shipped |
+| Windows | none | not supported: use WSL2 |
+| WebAssembly runtime | none | not supported |
+
+Each release also publishes `supernovae-st-nika-check-wasm-<release>.tgz`, a
+WebAssembly build of the static checker only; it does not run workflows.
 
 ## Servers and headless Linux
 
-Nika jails every `exec:` child and external MCP spawn inside an OS
-sandbox when the host provides one: **Seatbelt** on macOS (ships with the
-OS, nothing to install), **bubblewrap** on Linux. A minimal VPS image
-usually does not carry bubblewrap — install it once:
+Nika confines every `exec:` child and external MCP server inside an OS
+sandbox when the host provides one: **Seatbelt** on macOS (part of the OS) and
+**bubblewrap** on Linux. A minimal server image often lacks bubblewrap; install
+it once:
 
 ```bash
 # Debian / Ubuntu
 apt install bubblewrap
 ```
 
-Without a backend the host answers `noop`, and what that means depends on
-what the workflow declares:
+Without a sandbox backend the host reports `noop`, and the outcome depends on
+the workflow:
 
-- **No `permits:` block** — the run proceeds (best effort). The exec
-  blocklist floor still applies; nothing else changes.
-- **A `permits:` block plus `exec:` tasks** — the run refuses to start
-  (`NIKA-1710`). A declared boundary the host cannot enforce is a broken
-  promise, so the engine fails closed instead of running unjailed.
+- **No `permits:` block.** An absent block declares zero authority, so only a
+  file with no effect at all (pure computation, nothing spawned) runs, on a
+  best-effort basis. Any `exec:` or other effect is refused at admission
+  (`NIKA-AUTH-006`).
+- **A `permits:` block and `exec:` tasks.** The run refuses to start
+  (`NIKA-1710`). A declared boundary the host cannot enforce would be a broken
+  promise, so the engine fails closed instead of running unconfined.
 
-The posture is one knob, read once at launch:
+The posture is one setting, read once at launch:
 
 ```bash
 NIKA_SANDBOX=auto     # default · the behavior above
 NIKA_SANDBOX=require  # refuse ANY unconfined start, permits or not
-NIKA_SANDBOX=off      # proceed unconfined — attested
+NIKA_SANDBOX=off      # proceed unconfined · attested
 ```
 
 `off` is a waiver, not a silent escape: the run's journal records
-`sandbox_policy` and `sandbox_waived` on its opening frame, so a sealed
-trace shows you chose it. An unknown value refuses to start (`NIKA-1711`)
-— a typo'd security knob never loudly defaults.
+`sandbox_policy` and `sandbox_waived` on its opening frame, so a sealed trace
+shows you chose it. An unknown value refuses to start (`NIKA-1711`).
+`nika doctor` shows the backend in its `sandbox` row, and
+`nika explain NIKA-1710` teaches the refusal with the fix for each OS.
 
-`nika doctor` shows the selection (the sandbox row names the backend or
-`noop`), and `nika explain NIKA-1710` teaches the refusal with the
-per-OS fix.
-
-## Trust but verify
+## Verify a download
 
 <Check>
-  The install script lives at [nika.sh/install.sh](https://nika.sh/install.sh).
-  **Read it before piping to `sh`.** It's a small POSIX shell script.
-
-  Release binaries are published at
-  [github.com/supernovae-st/nika/releases](https://github.com/supernovae-st/nika/releases)
-  with SHA256 sums.
-
-  If you download one platform archive rather than all four, verify only that
-  row. Running the checksum file wholesale reports the three archives you did
-  not download as failures:
+  Every release publishes its archives with `SHA256SUMS` and two kinds of
+  build provenance. Download one archive and the checksum file:
 
   ```bash
-  asset="$(find . -maxdepth 1 -name 'nika-*.tar.gz' -print -quit | sed 's#^./##')"
-  test -n "$asset"
-  grep -E "[[:space:]]${asset}$" SHA256SUMS | shasum -a 256 -c -
+  gh release download v0.123.0 --repo supernovae-st/nika \
+    -p 'nika-macos-arm64-0.123.0.tar.gz' -p SHA256SUMS
   ```
+
+  Then check what you hold, in up to three independent ways:
+
+  ```bash
+  # 1 · checksum: the bytes you hold are the bytes CI hashed
+  shasum -a 256 -c SHA256SUMS --ignore-missing     # Linux: sha256sum -c SHA256SUMS --ignore-missing
+
+  # 2 · GitHub build attestation for this exact archive
+  gh attestation verify nika-macos-arm64-0.123.0.tar.gz --repo supernovae-st/nika
+
+  # 3 · SLSA provenance, verifiable offline
+  gh release download v0.123.0 --repo supernovae-st/nika -p multiple.intoto.jsonl
+  slsa-verifier verify-artifact nika-macos-arm64-0.123.0.tar.gz \
+    --provenance-path multiple.intoto.jsonl \
+    --source-uri github.com/supernovae-st/nika --source-tag v0.123.0
+  ```
+
+  Replace `macos-arm64` with `macos-x64`, `linux-x64` or `linux-arm64` for
+  your platform. `--ignore-missing` checks only the archives you downloaded.
 </Check>
 
 ## A real answer, later
 
-The first run is a rehearsal. When you want a billed or local answer:
+The first run is a rehearsal. When you want a real answer, choose one path:
 
-- **A local server**, when you choose to run one — not a first-run
-  download. [Local models](/guides/local-models).
-- **A cloud key**, when you choose to set one. Env var names live in
-  [Providers catalog](/reference/providers-catalog).
+- **A model on this machine.** `nika model pull` and `nika model serve`, or a
+  local server such as Ollama. See [Local models](/guides/local-models).
+- **A provider key.** Export the provider's variable in your shell; the
+  [providers catalog](/reference/providers-catalog) names each one.
+- **An agent app you already use.** A signed-in agent CLI such as Claude Code
+  or Codex can serve a run through `--access`. See
+  [Harness access](/guides/harness-access).
 
-Run `nika doctor`. It reports key *presence* (never values) and which
-clients are wired, and it is the honest inventory of what **your** binary
-can reach — not what a flag mentions.
+`nika doctor` reports which of these your machine can use, by presence only:
+it never prints a key's value.
 
-<Note>
-  **The tool you already pay for** — running a workflow on an agent seat
-  you are already logged into, with no key of your own — is the
-  `--access harness` class, compiled into v{STATUS.version}. Its
-  prerequisites and limits live in [Harness access](/guides/harness-access);
-  `nika doctor` reports what **your** machine can actually use.
-</Note>
+## What Nika writes on your machine
 
-## What gets installed
+- **`nika`**, one binary. No daemon, no background service, no telemetry.
+- **`~/.nika/`**, created when you first need it:
 
-- **`nika`**, the binary (single file, no daemon, no background process)
-- **Nothing else.** No service, no telemetry, no home-dir pollution beyond
-  files you explicitly create with `nika init` or `nika wire`.
+  | Path | Written by | Holds |
+  |---|---|---|
+  | `~/.nika/inference-choice.json` | bare `nika`, `nika welcome` | the intelligence recommendation shown in the mirror |
+  | `~/.nika/session-intelligence.json` | the Session | your intelligence choice |
+  | `~/.nika/sessions/` | the Session | conversation history, per project |
+  | `~/.nika/keys/` | `nika key init`, `nika key align` | run-signing keys (private key mode `0600`) |
+  | `~/.nika/models/` | `nika model pull` | downloaded model files |
+  | `~/.nika/approval-claims/` | runs with a human gate | which approvals were already used |
+  | `~/.nika/bin/nika` | the install script, without Homebrew | the binary |
+
+- **In a project directory:** `.nika/traces/` (run records) and other
+  `.nika/` state appear when you run workflows there; `nika init` and
+  `nika wire` write only the files they list.
 
 ## Shell completions
 
-The binary generates its own completions — no separate package, always in
-sync with the verbs your version actually ships:
+The binary generates its own completions, always in step with the verbs your
+version ships:
 
 <Tabs>
   <Tab title="zsh">
@@ -260,39 +369,49 @@ sync with the verbs your version actually ships:
   </Tab>
 </Tabs>
 
-Also available: `elvish` and `powershell`. Re-run the same command after an
-upgrade to pick up new verbs.
-
-<Note>
-On engines up to 0.93.x the generated script bound completions to the
-internal binary name instead of `nika` — fixed on current main. If
-completions don't fire after installing, upgrade and regenerate.
-</Note>
+`elvish` and `powershell` are available too. Run the same command again after
+an upgrade to pick up new verbs.
 
 ## Uninstall
 
-```bash
-# Homebrew
-brew uninstall nika
+Remove the binary the way you installed it:
 
-# Manual install
-rm ~/.nika/bin/nika
+```bash
+brew uninstall nika                          # Homebrew
+rm ~/.nika/bin/nika                          # install script without Homebrew
+npm uninstall -g @supernovae-st/nika         # npm
+rm ~/.cargo/bin/nika                         # cargo binstall or cargo install
+nix profile remove nika                      # Nix (see `nix profile list` for the name)
+docker image rm ghcr.io/supernovae-st/nika:0.123.0   # container
 ```
+
+Then, if you want no trace left, remove Nika's state:
+
+```bash
+rm -rf ~/.nika
+```
+
+<Warning>
+  `~/.nika/keys/` holds your run-signing key. Without it you can no longer
+  seal new runs under the same key, and a verifier needs the public key to
+  check old seals. Keep a copy if you need one. A key minted in a terminal
+  may live in your OS keychain instead, under the `nika` service.
+</Warning>
 
 ## Next
 
 <CardGroup cols={2}>
-  <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
-    Your first `.nika`.
+  <Card title="The terminal Session" icon="terminal" href="/getting-started/session">
+    Describe a job in your own words; review the file before it is saved.
   </Card>
-  <Card title="Editor setup" icon="code" href="/getting-started/editors">
-    Schema validation + LSP roadmap.
+  <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
+    Write one `.nika` file by hand, check it, run it.
   </Card>
   <Card title="Your machine" icon="stethoscope" href="/getting-started/your-machine">
-    The mirror this binary prints.
+    Read the mirror and the diagnosis this binary prints.
   </Card>
-  <Card title="Agents" icon="robot" href="/getting-started/agents">
-    Claude Code and Codex you already have.
+  <Card title="Editor setup" icon="code" href="/getting-started/editors">
+    Schema validation and the `nika lsp` language server.
   </Card>
 </CardGroup>
 

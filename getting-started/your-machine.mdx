@@ -1,14 +1,16 @@
 ---
 title: "What Nika sees on your machine"
-description: "One offline command maps your environment: editors wired, local model servers, key presence, media planes — and the exact fix for every gap."
+description: "Two offline commands map your environment: what the binary contains, which agents, local servers and keys it can reach, and the exact fix for every gap."
 sidebarTitle: "Your machine"
 icon: "stethoscope"
 ---
 
-Nika never asks you to configure blind. Two commands read your machine —
-**offline, presence-only** — and hand you the exact next step:
-`nika welcome` is the thirty-second mirror, `nika doctor` the exhaustive
-diagnosis with a fix line per gap.
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
+
+Nika never asks you to configure blind. Two commands read your machine
+offline, by presence only, and hand you the next step: `nika welcome` is the
+short mirror, `nika doctor` the full diagnosis with a fix line for each gap.
 
 ## The mirror
 
@@ -16,12 +18,21 @@ diagnosis with a fix line per gap.
 nika welcome
 ```
 
-Captured against candidate `nika 0.120.0` on a machine with no keys, no
-configs, no editors wired — the stranger's first screen (only the
-workspace path is shortened to `~/demo`):
+Captured from `nika 0.123.0` in an empty folder on a machine with no keys, no
+configuration and no editor wired. The workspace path is shortened to `~/demo`.
 
 ```text
-🦋 nika 0.120.0 — Intent as Code. The workflow language for AI.
+Local first. Cloud when you want it.
+
+Nika runs a plan from a file, with a model you pick.
+this hardware · 18 GB · Gear One standard (7.4 GB)
+
+▸ Nika Gear One          ours · free · 7.4 GB to pull
+
+Next:
+  nika compile hello hello.nika
+…
+🦋 nika 0.123.0 — Intent as Code. The workflow language for AI.
    one file · 4 verbs · one binary · audited BEFORE it runs
    every run records a tamper-evident, hash-chained trace
 
@@ -34,8 +45,8 @@ this machine
              git ✗ · no workflows yet · agents not briefed → nika init
 
 this binary
-  4 verbs · 28 builtins · 16 providers · 61 examples · 22 templates
-  16 wired in this build (5 local · 11 cloud · plus mock)
+  4 verbs · 29 builtins · 17 providers · 62 examples · 22 templates
+  17 wired in this build (5 local · 12 cloud · plus mock)
 
 a whole workflow is one file
   nika: hello
@@ -44,23 +55,35 @@ a whole workflow is one file
     greet:
       infer: { prompt: "say hello to the operator", max_tokens: 50 }
 
-Next:
-  nika compile hello hello.nika
-
 learn: nika.sh · docs: docs.nika.sh · ⭐ github.com/supernovae-st/nika
 ```
 
-Three details worth noticing: the five-line workflow **is real** (an
-engine test pins that it checks clean — the sample only appears while
-your workspace has zero workflows), every count on the « this binary »
-line is derived live from the embedded pack (never hand-typed — the
-`15 providers` are the runnable cloud + local set; the
-[catalog](/reference/providers-catalog) counts 17 with the deterministic
-`mock`), and the `state` row names the gap, never a vendor: no inference
-path yet, and the starter door is one command (`nika compile hello hello.nika` —
-explicit destination, offline, zero keys, no provider call).
-`--json` emits the machine mirror (`welcome_version: 1`); `--ascii`
-swaps every glyph for CI logs.
+Read it from the top:
+
+- **The recommendation.** The first lines name one way to a real answer for
+  this machine. **Nika Gear One** is a local model sized to your memory that
+  `nika model pull` downloads: here a 7.4 GB Gemma 3 12B file for an 18 GB
+  machine. Other rows appear when Nika detects a signed-in agent app or a
+  provider key. See [Local models](/guides/local-models#gear-one) for the
+  sizes, and the one limit of serving them.
+- **`Next:`** is the line to type now: <code>{STATUS.firstCommand}</code>
+  writes a starter file offline, without any key or model call.
+- **`this machine`** names each gap and the command that closes it, never a
+  vendor to buy from.
+- **`this binary`** is derived from the embedded language pack, never typed by
+  hand. Its providers are the ones this build can drive:
+  {CANON.providersLocal} local servers and {CANON.providersCloud} cloud APIs,
+  without `mock`. The specification names {CANON.providers}
+  providers, counting `mock`, the offline rehearsal provider. `nika catalog`
+  lists {STATUS.providers} entries and marks the ones this build cannot drive
+  as catalog only; `nika check` refuses those.
+- **The five-line workflow is real**: an engine test pins that it checks
+  clean. It appears only while your workspace has no workflow.
+
+`nika welcome --json` emits the same mirror for programs (`welcome_version: 1`),
+and `--ascii` swaps every glyph for plain characters. A line of the mirror
+(cut above) announces a "Nika Cloud": there is no hosted service, and none is
+planned.
 
 ## The diagnosis
 
@@ -68,110 +91,135 @@ swaps every glyph for CI logs.
 nika doctor
 ```
 
-Three honesty rules shape everything below:
+Three rules shape the report:
 
-- **Presence, never values.** A key is reported set or unset — the value is
-  never read into a variable, so it can never reach your terminal, a log,
-  or a trace.
-- **Offline by default.** The base run touches nothing on the network.
-  `--ping` (opt-in) TCP-probes your **local** ports only — never a vendor
-  endpoint, and nothing is ever sent on the socket.
-- **Diagnose-only.** Doctor prints fixes, it never runs them. Your shell,
-  your `PATH`, your configs stay untouched (`nika wire` is the explicit,
-  idempotent mutator when you want one).
+- **Presence, never values.** A key is reported set or unset; its value is
+  never read into a variable, so it cannot reach your terminal, a log or a
+  trace.
+- **Offline by default.** The base report touches nothing on the network.
+  `--ping` (opt-in) probes the local servers you can configure: a connect to
+  each loopback port, then a bounded `GET` of its model list. It runs no
+  inference, downloads nothing and never contacts a vendor endpoint.
+- **Diagnose only.** Doctor prints fixes and never runs them. `nika wire` and
+  `nika key init` are the explicit commands that change something.
 
 ## A fresh machine, honestly
 
-Captured verbatim against `nika 0.109.2` on a machine with no keys, no
-configs, no editors wired — the worst case, and the whole report:
+Captured from `nika 0.123.0` with an empty `HOME` and no agent app installed,
+the whole report:
 
 ```text
-✔ 11 ok · 18 warn · 0 fail
-✔ binary     v0.109.2 · self-contained (spec v1 embedded)
+✔ 12 ok · 29 warn · 0 fail
+✔ binary     v0.123.0 · self-contained (spec v1 embedded)
 ✔ lsp        available via `nika lsp` (editor language server)
 ✔ traces     keep 10 per workflow · max age 30d · budget 256MB (NIKA_TRACE_KEEP · NIKA_TRACE_MAX_AGE_DAYS · NIKA_TRACE_BUDGET_MB)
 ✔ mcp        available via `nika mcp` (9 read-only tools · nika_check through nika_tools)
+✔ access     --access classes: local · mock · harness · oauth · api · harness seats: claude-code · codex · copilot · gemini-cli · grok-build · kimi-code · opencode · qwen-code (ACP wrapper ids are not pins)
 ✔ sandbox    seatbelt · exec and external MCP spawns confined to the declared boundary
+⚠ run-key    none · runs stay unsigned · the keychain is not opened without a terminal
+  fix: nika key init
 ✔ sidecar    local inference built in — `nika model serve --model <path.gguf>` (loopback · OpenAI-compatible)
 ⚠ models     none pulled yet — the sidecar has nothing to serve
-  fix: nika model pull Qwen/Qwen3-4B-Instruct-2507-GGUF
+  fix: nika model pull unsloth/gemma-3-12b-it-GGUF:Q4_K_M
 ✔ registry   client matrix · 31 declared · 21 wireable · 6 probed · 15 declared-not-probed (codex · grok-build · claude-desktop · cline · continue · opencode · gemini-cli · antigravity · qwen-code · kimi-code · kiro · copilot-cli · amp · lmstudio · junie)
 ✔ local      5 providers (ollama · lmstudio · llamacpp · localai · vllm) — no key · needs a running server
-  fix: nika doctor --ping   # probe the local ports (offline otherwise)
-✔ image      mock ready · local → http://localhost:8080 default (set NIKA_IMAGE_LOCAL_URL to point elsewhere) · no cloud image key set
-✔ tts        mock ready · local → http://localhost:8080 default (set NIKA_TTS_LOCAL_URL to point elsewhere) · no cloud speech key set
-✔ pricing    633 models · 10 providers · snapshot 2026-07-28 · d5aa8fd06062f49e · list rates (public catalog)
-· advisory   a healthy machine's notes — 6 agents unwired · 10 providers unconfigured · config defaults · nika doctor --verbose unfolds each
+  fix: nika doctor --ping   # probe local ports and model lists (offline otherwise)
+✔ image      mock ready · local backend unset · NIKA_IMAGE_LOCAL_URL (engine fallback http://localhost:8080 · unprobed) · no cloud image key set
+✔ tts        mock ready · local backend unset · NIKA_TTS_LOCAL_URL (engine fallback http://localhost:8080 · unprobed) · no cloud speech key set
+✔ pricing    728 price rules · 11 providers priced · snapshot 2026-10-12 · 12 days old · abd9babb167a88e4 · list rates (public catalog)
+⚠ runtime    gemini-cli — Gemini CLI · not installed · `--access gemini-cli`
+  fix: install Gemini CLI itself · then `--access gemini-cli`
+⚠ runtime    qwen-code — Qwen Code · not installed · `--access qwen-code`
+  fix: install Qwen Code itself · then `--access qwen-code`
+⚠ runtime    kimi-code — Kimi Code · not installed · `--access kimi-code`
+  fix: install Kimi Code itself · then `--access kimi-code`
+⚠ runtime    opencode — OpenCode · not installed · `--access opencode`
+  fix: install OpenCode itself · then `--access opencode`
+⚠ runtime    codex — Codex · not installed · `--access codex`
+  fix: install Codex itself · then `--access codex`
+⚠ runtime    copilot — GitHub Copilot CLI · not installed · `--access copilot`
+  fix: install GitHub Copilot CLI itself · then `--access copilot`
+⚠ runtime    grok-build — Grok Build · not installed · `--access grok-build`
+  fix: install Grok Build itself · then `--access grok-build`
+⚠ runtime    claude-code — Claude Code · not installed · `--access claude-code`
+  fix: install Claude Code itself · then `--access claude-code`
+· advisory   a healthy machine's notes — 6 agents unwired · 12 providers unconfigured · config defaults · nika doctor --verbose unfolds each
 ```
 
-(A healthy machine reads calm: with no workflow in hand, doctor cannot
-know which provider or editor you need, so unwired agents and unset keys
-fold into the one `advisory` line instead of shouting eighteen warnings —
-`nika doctor --verbose` unfolds every row with its own `fix:` line.)
-
-Read it in one pass:
+Warnings are not failures: with no workflow in hand, doctor cannot know which
+provider, agent app or editor you need, so it lists every path you could
+take. `nika doctor --verbose` unfolds the `advisory` line with a fix for each
+note.
 
 | Row | What it tells you |
 |---|---|
-| `binary` | The engine is self-contained — spec, schema, examples, templates all embedded. No install step is missing. |
-| `sandbox` | The jail this host actually has (seatbelt on macOS · bubblewrap on Linux). A `permits:` file will not start on a host that cannot confine (`NIKA-1710`). |
-| `traces` | The flight-recorder retention bounds (`.nika/traces/`): keep-last-N per workflow, age cap, size budget — each env override named inline. |
-| `registry` | The client matrix: how many agent clients the binary knows, how many `nika wire` can write, how many this machine was probed for. |
-| `local` | The keyless local inference path — these providers need a running server, not an account. |
-| `image` · `tts` | The media planes — `mock` always works, so media workflows are testable with zero keys too. |
-| `pricing` | The embedded cost snapshot (models · providers · date · digest) — list rates, no network call. |
-| `advisory` | The folded notes — unwired agents, unset keys (by **presence**, values never read), config defaults. `--verbose` unfolds each with its fix. |
+| `binary` | The engine is self-contained: spec, schema, examples and templates are embedded. |
+| `access` | The access classes `--access` accepts, and the agent apps (harness seats) this build can drive. |
+| `sandbox` | The sandbox this host has (Seatbelt on macOS, bubblewrap on Linux). A `permits:` file with `exec:` does not start on a host that cannot confine it (`NIKA-1710`). |
+| `run-key` | Whether runs will be signed. `fix: nika key init` mints the key once ([Seal your runs](/getting-started/installation#seal-your-runs)). |
+| `sidecar` · `models` | Nika's built-in local inference, and whether a model is pulled for it. |
+| `traces` | Run-record retention under `.nika/traces/`: the last N per workflow, an age cap, a size budget, each with its environment override. |
+| `registry` | The agent clients the binary knows, how many `nika wire` can write, how many this machine was probed for. |
+| `local` | The local servers that need no key, only a running process. |
+| `image` · `tts` | The media backends. `mock` always works, so media workflows can be tested without keys. |
+| `pricing` | The embedded price snapshot (rules, providers, date, digest): list rates, read with no network call. |
+| `runtime` | One row per agent app: installed or not, signed in or not, and the `--access` seat that uses it. |
+| `advisory` | Folded notes: unwired agents, unset keys (by presence), configuration defaults. |
 
-## Probe the local ports
+## Probe the local servers
 
-The local providers row says « needs a running server » — `--ping` answers
-whether one is actually there (loopback connect, 300 ms cap, nothing sent):
+The `local` row says the providers need a running server; `--ping` checks
+whether one is there. Each probe connects to the default loopback port (300 ms
+cap), then asks the server for its model list with one bounded `GET`:
 
 ```text
 $ nika doctor --ping
-✔ ping       ollama — listening on 127.0.0.1:11434 (7ms)
+✔ ping       ollama — listening on 127.0.0.1:11434 (0ms)
 ⚠ ping       lmstudio — nothing listening on 127.0.0.1:1234
 ⚠ ping       llamacpp — nothing listening on 127.0.0.1:8080
 ⚠ ping       localai — nothing listening on 127.0.0.1:8080
 ⚠ ping       vllm — nothing listening on 127.0.0.1:8000
+⚠ models     ollama — protocol/model availability unverified · model-list HTTP status 404; redirects are not followed
+…
 ```
 
-One local server up = a fully local inference path: no key, no cloud,
-no account. That is the machine from the capture running
-[local models](/guides/local-models) with nothing else configured.
+One reachable server with a model is a fully local inference path: no key, no
+cloud, no account. [Local models](/guides/local-models) sets one up.
 
 ## For scripts and agents
 
-Every fact above ships as JSON — agents and CI branch on `summary.fail`
-instead of parsing glyphs:
+Every fact above ships as JSON; agents and CI branch on `summary.fail` instead
+of parsing glyphs:
 
 ```bash
 nika doctor --json
 ```
 
-## The fix that mutates, explicitly
+## The fixes that change something
 
-Doctor never edits configs. When a row says `fix: nika wire cursor`, that
-command — and only that command — writes the MCP wiring, idempotently,
-preserving whatever other servers the config already carries:
+Doctor never edits a configuration. When a row says `fix: nika wire cursor`,
+that command, and only that command, writes the MCP wiring, idempotently,
+keeping whatever other servers the file already lists:
 
 ```bash
-nika wire cursor     # or: claude · vscode · windsurf · codex · all
+nika wire detected --dry-run   # preview the clients this machine shows
+nika wire detected             # wire them
+nika wire cursor               # or one client by name
 ```
 
 ## Next
 
 <CardGroup cols={2}>
   <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
-    Your first run needs none of the keys above — `mock/echo` is free and offline.
+    Your first run needs none of the keys above: `mock/echo` is offline.
   </Card>
   <Card title="Local models" icon="server" href="/guides/local-models">
-    Turn the `local` row into a running, keyless inference path.
+    Turn the `local` or `sidecar` row into a working, keyless inference path.
   </Card>
   <Card title="Editors" icon="code" href="/getting-started/editors">
-    What the wired editor actually does (diagnostics · canvas · time-travel).
+    Schema validation and the `nika lsp` language server.
   </Card>
   <Card title="Agents" icon="robot" href="/getting-started/agents">
-    `nika init` briefs your agents; `nika wire` points them at the oracle.
+    `nika init` briefs your agents; `nika wire` gives them the oracle.
   </Card>
 </CardGroup>

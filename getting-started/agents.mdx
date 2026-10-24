@@ -14,8 +14,8 @@ runs again next week without re-prompting.
 Two commands wire any agent:
 
 ```sh
-nika init            # AGENTS.md + schema wiring + Cursor rule + agent skill
-nika wire <client>   # adds Nika's read-only MCP oracle to your agent client
+nika init            # agent guides + authoring skill + editor schema + project MCP configs + Claude Code and Cursor hooks
+nika wire <client>   # adds Nika's read-only MCP oracle to one agent client's own configuration
 ```
 
 Driving Nika from an app instead of an editor? Install
@@ -25,38 +25,51 @@ agent loop below is for the editor/CLI door.
 
 ## `nika init`: teach the repo
 
-`nika init` scaffolds the repo (idempotent: existing files are skipped,
-`--force` overwrites):
+`nika init` founds a repository for agents and editors. Existing files are
+skipped (`.gitignore` is the one file it updates in place, adding the traces
+line); `--force` overwrites. On a terminal it asks a few questions;
+`--yes` accepts every default, and pipes and CI never prompt. In an empty
+folder, `nika init --yes` writes these files:
 
-- **`AGENTS.md`**, the agent operating guide: the four verbs, the authoring
-  loop (`nika compile <skeleton> --json` → answer remaining questions →
-  write a Ready dest → `nika check` → repair from the
-  error), and the rules that keep generated workflows valid. Read natively by
-  **Codex**, **Claude Code**, **Cursor**, **Jules** and every AGENTS.md-aware
-  tool.
-- **`.vscode/settings.json`**: maps `*.nika` to the canonical JSON
-  schema, so completions and validation work in any YAML-aware editor.
-- **`.cursor/rules/nika.mdc`**, the Cursor rules file (globs `*.nika`):
-  the syntax floor + the check loop, auto-attached whenever the agent touches
-  a workflow file.
-- **Cursor, fully equipped** (next release): the three kit subagents
-  (`.cursor/agents/nika-{author,debugger,migrator}.md`), the delegation rule
-  (`.cursor/rules/nika-delegation.mdc`) and the three seatbelt hooks
-  (`.cursor/hooks.json` + `.cursor/hooks-nika/` — session context ·
-  check-on-edit · a guard that audits before any `nika run`). Cursor's local
-  plugin loader consumes MCP + skills only, so the binary carries the rest
-  project-side; every body is byte-identical to the kit.
-- **`.agents/skills/nika-authoring/SKILL.md`** (0.93+): a
-  repo-level [agent skill](https://agentskills.io) — Codex and every
-  `.agents`-aware client discover it automatically and can invoke it as
-  `$nika-authoring`. Same author → check → repair loop, packaged as a skill.
+| File | What it is for |
+|---|---|
+| `AGENTS.md` | The agent operating guide: the four verbs, the authoring loop (`nika compile` → answer the questions → `nika check` → repair), and the rules that keep generated workflows valid. Read natively by Codex, Claude Code, Cursor and other AGENTS.md-aware tools |
+| `CLAUDE.md` | Claude Code's entry point, pointing at `AGENTS.md` |
+| `NIKA.md` | A guide for people: the first workflow, team settings and what to commit |
+| `.github/copilot-instructions.md` | The same guidance for GitHub Copilot |
+| `.agents/skills/nika-authoring/` | An [agent skill](https://agentskills.io) (`SKILL.md` and its references) that `.agents`-aware clients such as Codex discover and invoke as `$nika-authoring` |
+| `.cursor/rules/nika.mdc` · `.cursor/rules/nika-delegation.mdc` | Cursor rules, attached whenever the agent touches a `.nika` file |
+| `.cursor/agents/nika-{author,debugger,migrator}.md` | Three Cursor subagents |
+| `.mcp.json` · `.cursor/mcp.json` · `.agents/mcp_config.json` | Project MCP configurations that start Nika's read-only oracle (`nika mcp`) |
+| `.claude/settings.json` · `.claude/hooks-nika/*.sh` | Claude Code hooks: session context at start, a native-strict check after each edit, and a guard before shell commands |
+| `.cursor/hooks.json` · `.cursor/hooks-nika/*.sh` | The same three hooks for Cursor |
+| `.vscode/settings.json` | Maps `*.nika` to YAML and to the workflow JSON Schema |
+| `nika.yaml` | The [project file](/sdk/project/nika-yaml), its settings commented until you edit them |
+| `workflows/01-hello.nika` · `workflows/README.md` | A starter workflow and an index |
+| `.gitignore` | Adds `.nika/traces/` (run records hold the data a run read) |
+
+<Warning>
+  The hooks are shell scripts that Claude Code and Cursor run inside your
+  repository: `session-context.sh` at session start, `check-on-edit.sh` after
+  an edit, and `guard-run.sh` before the agent runs a shell command (it asks
+  `nika guard` to judge the command). Read them before you commit them, as you
+  would any script an agent executes. The project MCP files make those clients
+  start `nika mcp` in this repository.
+</Warning>
+
+Flags shape the scaffold: `--recipe agentic|starter|ship|content|minimal`
+chooses a workflow set, `--example <slug>` founds the project from one
+embedded example (any slug from bare `nika try`), and `--wire <clients>` also
+runs `nika wire` for those clients afterwards.
 
 ## Or: install the plugin (Codex · Claude Code)
 
-Codex and Claude Code users can skip per-repo setup entirely — the engine
-repo hosts one plugin for both ecosystems: 4 skills, 3 subagents, 5 slash
-commands, the three seatbelt hooks (one dialect, sniffed — Codex speaks
-Claude Code's hook contract verbatim) **and** the MCP oracle:
+Codex and Claude Code users can skip per-repo setup entirely: the
+[nika-plugins](https://github.com/supernovae-st/nika-plugins) repository
+publishes one plugin (version 0.123.0) for both ecosystems: 4 skills, 3
+subagents, 2 rules, 6 slash commands (`check` · `compile` · `doctor` ·
+`explain` · `permits` · `trace`), 3 hooks (one dialect: Codex speaks Claude
+Code's hook contract) **and** the read-only MCP oracle:
 
 ```sh
 # Codex
@@ -81,9 +94,9 @@ stays in your hands):
 
 | Client | Command | What it patches |
 |---|---|---|
-| Detected on this machine | `nika wire detected` | only the clients `nika doctor` can see |
+| Detected on this machine (recommended) | `nika wire detected --dry-run`, then `nika wire detected` | only the clients this machine shows |
 | Claude Code | `nika wire claude` | `~/.claude.json` → `mcpServers.nika` |
-| Claude Desktop | `nika wire claude-desktop` | `claude_desktop_config.json` |
+| Claude Desktop | `nika wire claude-desktop` | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) |
 | Cursor | `nika wire cursor` | `~/.cursor/mcp.json` |
 | Windsurf | `nika wire windsurf` | `~/.codeium/windsurf/mcp_config.json` |
 | VS Code | `nika wire vscode` | `.vscode/mcp.json` (project-local) |
@@ -95,10 +108,14 @@ stays in your hands):
 | Hermes | `nika wire hermes` | `~/.hermes/config.yaml` |
 | Zed | `nika wire zed` | `~/.config/zed/settings.json` |
 | Continue | `nika wire continue` | `~/.continue/mcpServers/nika.json` |
-| Cline | `nika wire cline` | `cline_mcp_settings.json` (resolved) |
+| Cline | `nika wire cline` | `~/.cline/data/settings/cline_mcp_settings.json` |
 | LM Studio | `nika wire lmstudio` | `~/.lmstudio/mcp.json` (resolved) |
 | Junie | `nika wire junie` | `.junie/mcp/mcp.json` |
 | Grok Build | `nika wire grok` | `~/.grok/config.toml` |
+| Antigravity | `nika wire antigravity` | `~/.gemini/config/mcp_config.json` |
+| Kiro | `nika wire kiro` | `~/.kiro/settings/mcp.json` |
+| GitHub Copilot CLI | `nika wire copilot` | `~/.copilot/mcp-config.json` |
+| Amp | `nika wire amp` | `~/.config/amp/settings.json` |
 | Everything | `nika wire all` | previewed, then confirmed (or `--yes`) |
 
 Whatever the harness, the payloads an agent parses are the same
@@ -125,10 +142,10 @@ The server exposes two tool families — **validate** and **learn**:
   read-only, all served from the embedded pack.
 
 <Note>
-  The `codex` target is shipped (0.93+): `nika wire codex` patches
-  `~/.codex/config.toml` (`[mcp_servers.nika]` · `command = "nika"` ·
-  `args = ["mcp"]`, comments preserved) — Codex also reads `AGENTS.md`
-  natively, so `nika init` alone already teaches it the authoring loop.
+  `nika wire codex` patches `~/.codex/config.toml` (`[mcp_servers.nika]` ·
+  `command = "nika"` · `args = ["mcp"]`, comments preserved). Codex also
+  reads `AGENTS.md` natively, so `nika init` alone already teaches it the
+  authoring loop.
 </Note>
 
 ## The loop
@@ -166,9 +183,13 @@ the contract**, the **human approves**, the **runtime enforces**.
 
 ## Editor surface
 
-The [VS Code / Cursor / Windsurf extension](https://marketplace.visualstudio.com/items?itemName=supernovae.nika)
-adds check-as-you-type, cost inlay hints, DAG visualization and trace replay
-on top. See [Editors](/getting-started/editors).
+`nika lsp`, the language server built into the binary, gives any editor
+check-as-you-type diagnostics and quick fixes. The
+[VS Code extension](https://marketplace.visualstudio.com/items?itemName=supernovae.nika)
+adds a DAG view and trace replay on top; it stays at its 0.120 release, frozen
+and not qualified with 0.123, so set its `nika.server.path` to your installed
+`nika` and trust `nika check` if the two disagree. See
+[Editors](/getting-started/editors).
 
 ## Read next
 

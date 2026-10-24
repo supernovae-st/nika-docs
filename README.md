@@ -30,14 +30,19 @@
 
 ## What is Nika?
 
-Nika is an open-source AI workflow runtime. Define work in a `.nika`
-file, check it before execution, run it on your infrastructure, and inspect
-the outputs and execution record. You choose the models, tools and
-permissions. Local execution needs no Nika account or hosted service.
+Nika turns repeatable AI work into a small file you keep. Say what you want
+done and Nika writes it as a readable `.nika` workflow. Before anything runs,
+its check shows what the workflow will do, which models and tools it uses,
+what it may touch and what it can cost, without calling a model. You run it
+when you decide, with the model you choose, and every run leaves a
+tamper-evident record you can verify. No Nika account and no hosted service.
 
-| Define | Check | Run | Inspect |
+| 1 · Say it | 2 · Check it | 3 · Run it | 4 · Prove it |
 |:---:|:---:|:---:|:---:|
-| Write or review a versioned `.nika` file | `nika check` reports static findings | `nika run` executes under declared permissions | Read outputs and inspect the trace |
+| Describe the job; Nika writes a `.nika` file | `nika check` audits it before any model is called | `nika run` with the model you choose | `nika trace verify` checks the run's record |
+
+0.123 is the open-source reference release; the project is maintained with
+security fixes, bug fixes and compatibility work.
 
 Start with the [offline report](https://docs.nika.sh/introduction): actual
 calculation and a Markdown file, without an API key or a mock model.
@@ -55,6 +60,7 @@ exact expected outputs and explicit permissions.
 | You want to… | Read |
 |---|---|
 | Install Nika and get a first result | [Install Nika](https://docs.nika.sh/getting-started/installation) |
+| Describe a job in your own words | [The terminal Session](https://docs.nika.sh/getting-started/session) |
 | Write a workflow by hand, line by line | [Your first workflow](https://docs.nika.sh/getting-started/first-workflow) |
 | Run a workflow from your TypeScript app | [TypeScript quickstart](https://docs.nika.sh/sdk/start/quickstart) |
 | Start from a ready-made job | [Examples](https://docs.nika.sh/examples/overview) |
@@ -268,14 +274,12 @@ maintained by hand, and they are not evidence about the released binary.
 
 - **Headings** in sentence case, never title case.
 - **Voice:** direct, technical, AGPL-proud, never try-hard.
-- **Vocabulary** (locked): "organ", not "module"; "admitted", not "added";
-  "grew", not "shipped"; "chrysalis", not "beta". "Emerge" is kept for the
-  1.0 release.
+- **Vocabulary**: say what a reader can do with the released binary; name
+  the version a capture comes from; never promise a future release.
 - **The butterfly** 🦋 appears once, in the closing line of
   `introduction.mdx`; never in navigation, chrome or headings.
 - **Brand assets** (`images/logo-{light,dark}.svg`, `images/favicon.svg`)
-  come from the Nika brand kit ([nika.sh/brand](https://nika.sh/brand/nika-logo-dark.svg),
-  usage rules in [BRAND.md](https://github.com/supernovae-st/nika.sh/blob/main/BRAND.md)).
+  come from the Nika brand kit at [nika.sh/brand](https://nika.sh/brand).
   Sync them from the kit; never retune their colors here.
 
 </details>

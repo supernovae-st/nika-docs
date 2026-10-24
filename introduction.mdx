@@ -1,20 +1,26 @@
 ---
 title: "Introduction"
-description: "Define, check, run and inspect AI workflows with an open-source runtime."
+description: "Say what you want done and keep it as a file: checked before it runs, run with the model you choose, proven afterwards."
 sidebarTitle: "Introduction"
 icon: "house"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-**Nika is an open-source AI workflow runtime.** Define a workflow in a
-`.nika` file, check it, run it on your infrastructure, and inspect its
-results and execution record. Your files, models and permissions stay
-under your control. Local execution needs no Nika account or hosted
-service.
+**Say what you want done. Keep it as a file.** Nika turns repeatable AI
+work into a small `.nika` workflow you keep. Before anything runs, its check
+shows what the workflow will do, which models and tools it uses, what it may
+touch and what it can cost, without calling a model. You run it when you
+decide, with the model you choose, local or cloud, and every run leaves a
+tamper-evident record you can verify. One open-source binary: no Nika account
+and no hosted service.
 
-**Define → Check → Run → Inspect.** Coding assistants can help write the
-file; the file is the contract you review and execute.
+| 1 · Say it | 2 · Check it | 3 · Run it | 4 · Prove it |
+|:---:|:---:|:---:|:---:|
+| Describe the job in the [Session](/getting-started/session), or write the file | `nika check` audits it before any model is called | `nika run` with the model you choose | `nika trace verify` checks the run's record |
+
+0.123 is the open-source reference release, maintained with security fixes,
+bug fixes and compatibility work.
 
 <video
   autoPlay
@@ -100,25 +106,29 @@ response. Re-running replaces only the declared `report.md`. The
 `with:` binding makes `save` wait for `summarize`; `permits:` names the
 allowed tools and output file.
 
-The run prints a trace path under `.nika/traces/`. Pass that exact path
-to `nika trace verify` to inspect the record's integrity. A fresh machine
-without a signing key reports **UNSEALED**, even when the hash chain is
-intact. A successful verification does not establish that a model's
-answer is correct. See [traces](/concepts/traces) for the evidence tiers.
+The run prints a trace path under `.nika/traces/`. `nika trace verify` reads
+the latest one (pass a path to pick another) and checks the record's
+integrity. A fresh machine without a signing key reports **UNSEALED**, even
+when the hash chain is intact: run `nika key init` once and later runs report
+**SEALED** ([Seal your runs](/getting-started/installation#seal-your-runs)). A
+successful verification does not establish that a model's answer is correct.
+See [traces](/concepts/traces) for the evidence tiers.
 
 Continue with [offline examples](/examples/offline) for known inputs and
-exact expected outputs, or the [TypeScript quickstart](/sdk/start/quickstart)
-to drive a local engine from an application. A persistent worker is
-optional; the SDK's default local mode starts the engine directly.
+exact expected outputs, the [terminal Session](/getting-started/session) to
+describe a job in your own words, or the
+[TypeScript quickstart](/sdk/start/quickstart) to run workflows from an
+application. The SDK starts its bundled engine directly; no server is needed.
 
 ## A real job, when you are ready
 
 [Meeting actions](/examples/meeting-actions) turns a transcript into
 typed, tracker-ready action items. It defaults to a local model
-(`ollama/qwen3.5:4b`, no provider key — your own compute); point it at a
+(`ollama/qwen3.5:4b`, no provider key, your own compute); point it at a
 cloud provider and `nika check` prices the run before anything executes.
-Same file shape as above; the model and tools change, the lifecycle does
-not.
+`nika try meeting-actions` rehearses it offline, and the page lists what a
+real run needs. Same file shape as above; the model and tools change, the
+lifecycle does not.
 
 ## What just happened, one concept at a time
 
@@ -130,7 +140,8 @@ not.
    same audit on its own, for CI.
 3. **Permits are the blast radius.** `permits: {}` declares zero
    authority. A workflow that touches a file, a host or a shell must say
-   so, or admission refuses it (`NIKA-AUTH-006`).
+   so, or admission refuses it (`NIKA-SEC-004`; with no `permits:` block at
+   all, `NIKA-AUTH-006`).
 4. **Runs leave evidence.** Each run writes a hash-chained trace under
    `.nika/traces/`; `nika trace verify` inspects the record and reports whether it is sealed.
    Verification proves the record was not tampered with — not that a model
@@ -140,9 +151,10 @@ not.
 
 <AccordionGroup>
   <Accordion title="What changes if a required input is missing?" icon="circle-question">
-    The run refuses to start — the CLI exits 3 naming the missing key
-    (`NIKA-1708`), the SDK throws `NikaOperationError`. Nothing is
-    half-executed; a red admission never becomes a run.
+    For an input marked `required: true` with no `default:`, the run refuses
+    to start: the CLI exits 3 naming the missing key (`NIKA-1708`), and the
+    SDK's `run()` throws `NikaOperationError`. Nothing is half-executed; a red
+    admission never becomes a run.
   </Accordion>
   <Accordion title="What changes if a permission is absent?" icon="circle-question">
     The task that needs it is refused at check. An absent `permits:` block
@@ -151,10 +163,11 @@ not.
     tightest block for you.
   </Accordion>
   <Accordion title="What changes if I switch the model?" icon="circle-question">
-    One line. `mock/echo` rehearses offline, `ollama/qwen3.5:4b` runs
-    locally, cloud providers take their env key. The file, the check and
-    the receipt keep the same shape — `check` re-prices the run for the
-    new seat.
+    One line. `mock/echo` rehearses offline, `ollama/llama3.2:3b` runs
+    locally, and cloud providers take their environment key. The file, the
+    check and the record keep the same shape; `nika check` re-prices the run
+    for the new model, and asks for a larger `max_tokens` when a reasoning
+    model needs room to think.
   </Accordion>
 </AccordionGroup>
 
@@ -169,7 +182,8 @@ not.
     Write a workflow by hand: tasks, bindings, structured output.
   </Card>
   <Card title="Examples · real jobs" icon="rocket" href="/examples/overview">
-    Starter chains to multi-step reports, every file runnable.
+    Starter chains to multi-step reports: every file passes `nika check`, and
+    each page lists what it needs to run.
   </Card>
   <Card title="Providers" icon="server" href="/concepts/providers">
     Your model choice: local inference (Ollama needs no provider API
@@ -191,13 +205,14 @@ import { Ecosystem } from "/snippets/_ecosystem.mdx";
 
 <Visibility for="agents">
   You are reading Nika's documentation. For programmatic discovery: each
-  page exposes its heading tree via the Mintlify `.md` export at
-  `<url>/.md`. The canonical engine state lives at `/reference/status`
-  (imports `/snippets/_status-snapshot.mdx`, which is auto-generated by
-  `scripts/mintlify-snapshot.sh` from `scripts/refresh-status.sh`). Do
-  not quote hard-coded counts. Import `STATUS` for version and
-  engineSha. Language counts live in `CANON`. Live-state integers that
-  the downloadable binary does not project stay off these pages.
+  page has a Markdown export at `<url>.md` (for example
+  `https://docs.nika.sh/introduction.md`). The canonical engine state lives
+  at `/reference/status` (it imports `/snippets/_status-snapshot.mdx`, whose
+  binary fields `scripts/mintlify-snapshot.sh` and
+  `scripts/mintlify_snapshot.py` project from the released binary). Do not
+  quote hard-coded counts. Import `STATUS` for version and engineSha.
+  Language counts live in `CANON`. Live-state integers that the downloadable
+  binary does not project stay off these pages.
 </Visibility>
 
 🦋

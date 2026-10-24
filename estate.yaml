@@ -18,11 +18,11 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 420
+  classified_files: 421
   file_rows: 46
   pattern_rows: 6
   by_class:
-    authored: 413
+    authored: 414
     authored-pin: 1
     generated: 4
     pinned-copy: 2
@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: ec4ba75665764419b29382b17589175b6cf76c22e441d3aa8283391963a70840
+  sha256: ef77cab76e33e3b7045a9ec1edabdaba9c16c47bc4fe485fd75c9c27d9229feb
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -88,7 +88,7 @@ files:
     - "scripts/release_catalog.py"
 - path: "docs.json"
   class: authored
-  sha256: b405059b9197ef5f86f789e623ef270c5b82e2c0f6863cdaf0c40547a9b91b93
+  sha256: 133ae973631c189031261788a545d18b955296000c4aa831536f6b2454f7b86a
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -270,8 +270,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 284
-  aggregate_sha256: b98a44d7e80e4902d740282877ad7ac680cbeaf483ec33fad0ef8f7904970b0f
+  match_count: 285
+  aggregate_sha256: c2037224f49d0e6605a879a8bdfd6ec2a49d663d2c47d094b20878fc544c63cf
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -300,7 +300,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 20fc43fc93ae01332d305baf9f5bfc3914216992aedd75c25e9b6247e34436c2
+  aggregate_sha256: 67b86270940aedef439e1bfbad06b39bf9d51c0a8099733eb06e6c93bdcb8645
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:

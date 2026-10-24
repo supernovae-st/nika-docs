@@ -114,7 +114,7 @@ print(json.dumps(value) if isinstance(value, (dict,list)) else value)
         calls = [json.loads(line) for line in self.log.read_text().splitlines()]
         self.assertTrue(all(call["snapshot"].encode() == SNAPSHOT for call in calls), "a probe saw a partial write")
         self.assertEqual([call["args"] for call in calls if call["program"] == "selected-nika"],
-                         [["--version"], ["catalog", "--json"], []])
+                         [["--version"], ["catalog", "--json"], ["welcome"]])
         self.assertIn("not", result.stdout.lower())
         self.assertIn("provenance", result.stdout.lower())
 
@@ -222,7 +222,7 @@ print(json.dumps(value) if isinstance(value, (dict,list)) else value)
                 self.assertGreater(kwargs["timeout"], 0)
                 self.assertLessEqual(kwargs["timeout"], 15)
                 self.assertTrue(kwargs["check"])
-                if len(arguments) == 1:
+                if arguments[1:] == ["welcome"]:
                     actual = "screen"
                 elif arguments[1:3] == ["release", "view"]:
                     actual = "release"
@@ -264,7 +264,7 @@ print(json.dumps(value) if isinstance(value, (dict,list)) else value)
 
         def run(arguments, **kwargs):
             result = real_run(arguments, **kwargs)
-            if len(arguments) == 1:
+            if arguments[1:] == ["welcome"]:
                 self.snap.write_bytes(changed)
             return result
 
@@ -279,7 +279,7 @@ print(json.dumps(value) if isinstance(value, (dict,list)) else value)
 
         def run(arguments, **kwargs):
             result = real_run(arguments, **kwargs)
-            if len(arguments) == 1:
+            if arguments[1:] == ["welcome"]:
                 self.selected.write_bytes(self.selected.read_bytes() + b'\n# replaced\n')
             return result
 

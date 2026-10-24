@@ -1,6 +1,6 @@
 ---
 title: "Editor setup"
-description: "Schema validation, nika-lsp, the VS Code/Cursor extension, and MCP agent wiring."
+description: "Schema validation in any YAML editor, the nika lsp language server, and the frozen VS Code extension."
 sidebarTitle: "Editor setup"
 icon: "code"
 ---
@@ -8,15 +8,16 @@ icon: "code"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 import { CANON } from "/snippets/_canon.mdx";
 
-Nika's editor story has two tiers: **(1)** generic JSON-Schema validation
-that works with any yaml-language-server-compatible editor, and **(2)** the
-`nika lsp` server plus the VS Code/Cursor extension for deeper workflow
-intelligence.
+Nika's editor support has two tiers: **(1)** JSON Schema validation, which
+works in any editor with `yaml-language-server`, and **(2)** the `nika lsp`
+language server built into the binary, plus the VS Code extension built on
+it.
 
 <Info>
-  **v{STATUS.version} state:** the binary ships `nika spec --schema`, `nika lsp`,
-  `nika mcp`, and `nika wire`. Use `nika init` for repo-local schema/rules,
-  or `nika wire <client>` for explicit MCP client setup.
+  **v{STATUS.version}:** the binary ships `nika spec --schema`, `nika lsp`,
+  `nika mcp` and `nika wire`. `nika init` writes the repository's schema
+  wiring and agent rules; `nika wire <client>` adds the MCP server to one
+  agent client. `nika lsp` is the editor path qualified with this release.
 </Info>
 
 ## Tier 1: JSON schema validation (today)
@@ -27,33 +28,39 @@ the workflow schema.
 <Tabs>
   <Tab title="VS Code">
     Install the [YAML extension (Red Hat)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml).
-    It picks up the schema via the `# yaml-language-server` directive at
-    the top of `.nika`, or via `settings.json`:
+    It only reads YAML documents, so map `.nika` to YAML and point the
+    schema at it in `settings.json`:
 
     ```json settings.json
     {
+      "files.associations": { "*.nika": "yaml" },
       "yaml.schemas": {
         "https://nika.sh/spec/v1/workflow.schema.json": "*.nika"
       }
     }
     ```
 
-    Or let `nika init` write this wiring for the current repo.
+    `nika init` writes exactly this `.vscode/settings.json` for the current
+    repository.
   </Tab>
 
   <Tab title="Neovim">
-    Wire via `nvim-lspconfig`:
+    Neovim 0.11 or newer, with `yaml-language-server` installed. Map the
+    extension to YAML so the server attaches, then give it the schema:
 
     ```lua
-    require('lspconfig').yamlls.setup {
+    vim.filetype.add({ extension = { nika = 'yaml' } })
+
+    vim.lsp.config('yamlls', {
       settings = {
         yaml = {
           schemas = {
-            ["https://nika.sh/spec/v1/workflow.schema.json"] = "*.nika",
+            ['https://nika.sh/spec/v1/workflow.schema.json'] = '*.nika',
           },
         },
       },
-    }
+    })
+    vim.lsp.enable('yamlls')
     ```
   </Tab>
 
@@ -69,10 +76,10 @@ the workflow schema.
   </Tab>
 
   <Tab title="Zed / Cursor / JetBrains">
-    Any editor supporting `yaml-language-server` will validate
-    `.nika` against `https://nika.sh/spec/v1/workflow.schema.json`
-    once it publishes. Zed has native LSP; JetBrains supports via the
-    YAML plugin.
+    Any editor that runs `yaml-language-server` validates `.nika` against
+    `https://nika.sh/spec/v1/workflow.schema.json` once `.nika` is mapped
+    to YAML. Zed runs language servers natively; JetBrains IDEs map a JSON
+    Schema to a file pattern in their YAML settings.
   </Tab>
 </Tabs>
 
@@ -84,12 +91,16 @@ zero editor configuration:
 ```yaml
 # yaml-language-server: $schema=https://nika.sh/spec/v1/workflow.schema.json
 nika: hello
+model: ollama/llama3.2:3b            # <provider>/<name> · local · zero key
+permits: {}
 
 tasks:
   greet:
     infer:
-      model: ollama/llama3.2:3b            # <provider>/<name> · local · zero key
-      prompt: "..."
+      prompt: "Say hello in one short sentence."
+      max_tokens: 64
+outputs:
+  greeting: ${{ tasks.greet.output }}
 ```
 
 ## What tier 1 gets you
@@ -109,9 +120,18 @@ tasks:
   </Card>
 </CardGroup>
 
-## Tier 2: the extension (VS Code · Cursor · Windsurf · VSCodium)
+## Tier 2: `nika lsp` and the VS Code extension
 
-One extension, both registries — the
+<Warning>
+  The extension (`supernovae.nika`) stays at its 0.120 release: it is frozen
+  and was not qualified with 0.123. Its diagnostics come from the engine it
+  runs, so set its `nika.server.path` setting to your installed `nika`. If the
+  editor and the command line disagree, trust `nika check`. The language
+  server below is the editor path qualified with 0.123.0.
+  [Known limits](/changelog/known-limits).
+</Warning>
+
+The extension, frozen at 0.120, is published on both registries, the
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika)
 and [OpenVSX](https://open-vsx.org/extension/supernovae/nika), so
 Cursor, Windsurf and VSCodium install it natively. It consumes the same
@@ -334,15 +354,15 @@ line in your settings until the upstream icons land:
   </Tab>
 </Tabs>
 
-## Roadmap
+## Status in 0.123
 
-| Capability | Status | Admission |
+| Capability | Status | How |
 |---|---|---|
-| JSON Schema (yaml-language-server) | shipped | `nika spec --schema` + public schema URL |
-| `nika lsp` L4 crate | shipped | `nika lsp` (hover · completion · definition · symbols · diagnostics) |
-| VS Code / Cursor extension | shipped | Marketplace + OpenVSX |
-| MCP agent oracle | shipped, read-only | `nika mcp` (9 tools: check · explain · the authoring surface) |
-| Zed / Neovim native integrations | 🧭 planned | Community + v1.0 |
+| JSON Schema (yaml-language-server) | shipped | `nika spec --schema` and the public schema URL |
+| `nika lsp` language server | shipped, qualified with 0.123.0 | hover · completion · definition · symbols · diagnostics · quick fixes |
+| VS Code extension (`supernovae.nika`) | 0.120, frozen | Marketplace and Open VSX; not qualified with 0.123 |
+| MCP agent oracle | shipped, read-only | `nika mcp` (check · explain · the authoring surface) |
+| Zed, Neovim, Helix | no dedicated plugin | `nika lsp` plus the JSON Schema, as above |
 
 ## Next
 
@@ -354,9 +374,9 @@ line in your settings until the upstream icons land:
     Full grammar for every verb step.
   </Card>
   <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
-    Preview of the target first-run experience.
+    Write, check and run a workflow by hand.
   </Card>
-  <Card title="Constellation" icon="diagram-project" href="/reference/constellation">
-    When each crate admits.
+  <Card title="Agents" icon="robot" href="/getting-started/agents">
+    Brief your coding agent and give it the read-only oracle.
   </Card>
 </CardGroup>
