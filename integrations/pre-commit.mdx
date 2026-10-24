@@ -29,9 +29,9 @@ git commit             # every staged .nika is audited from now on
 
 `nika-check` is the full static audit, the same one the
 [GitHub Action](/integrations/github-actions) posts on PRs and
-[`nika lsp`](/getting-started/editors) surfaces in your editor (the VS Code
-extension, frozen at its 0.120 release, runs the `nika lsp` you point its
-`nika.server.path` at):
+[`nika lsp`](/getting-started/editors) surfaces in your editor. The editor
+extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the
+JSON Schema. The audit covers:
 
 - the **plan** — every task, wave and wire the file declares, as a DAG
 - the **types** across each wire, before any model is called

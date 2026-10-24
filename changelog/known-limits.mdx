@@ -53,10 +53,11 @@ commands and their effects are the same in both languages.
 
 ## The VS Code extension stays at 0.120
 
-The editor extension (`supernovae.nika` on the VS Code Marketplace) remains on
-its 0.120 release and was not qualified with 0.123. Its diagnostics come from
-the engine it runs (`nika lsp`), so point its `nika.server.path` setting at
-your installed binary. If the editor and the command line disagree, trust
+The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema
+([Editor setup](/getting-started/editors)). The extension
+(`supernovae.nika` on the VS Code Marketplace and Open VSX) remains on its
+0.120 release. If you keep it, point its `nika.server.path` setting at your
+installed binary, and if the editor and the command line disagree, trust
 `nika check`.
 
 ## Git inside a workflow is refused on macOS

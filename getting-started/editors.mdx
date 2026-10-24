@@ -123,11 +123,11 @@ outputs:
 ## Tier 2: `nika lsp` and the VS Code extension
 
 <Warning>
-  The extension (`supernovae.nika`) stays at its 0.120 release: it is frozen
-  and was not qualified with 0.123. Its diagnostics come from the engine it
-  runs, so set its `nika.server.path` setting to your installed `nika`. If the
-  editor and the command line disagree, trust `nika check`. The language
-  server below is the editor path qualified with 0.123.0.
+  The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema
+  (the schema is Tier 1 above; the language server follows). If you keep the
+  extension (`supernovae.nika`), set its
+  `nika.server.path` setting to your installed `nika`, and if the editor and
+  the command line disagree, trust `nika check`.
   [Known limits](/changelog/known-limits).
 </Warning>
 
@@ -360,7 +360,7 @@ line in your settings until the upstream icons land:
 |---|---|---|
 | JSON Schema (yaml-language-server) | shipped | `nika spec --schema` and the public schema URL |
 | `nika lsp` language server | shipped, qualified with 0.123.0 | hover · completion · definition · symbols · diagnostics · quick fixes |
-| VS Code extension (`supernovae.nika`) | 0.120, frozen | Marketplace and Open VSX; not qualified with 0.123 |
+| VS Code extension (`supernovae.nika`) | 0.120, frozen | The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema |
 | MCP agent oracle | shipped, read-only | `nika mcp` (check · explain · the authoring surface) |
 | Zed, Neovim, Helix | no dedicated plugin | `nika lsp` plus the JSON Schema, as above |
 

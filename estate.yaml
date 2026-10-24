@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: ef77cab76e33e3b7045a9ec1edabdaba9c16c47bc4fe485fd75c9c27d9229feb
+  sha256: a31f6bc59a352dff2476c2b80a3c478e54f5bd507d7f91252f6989bee0cdf733
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -241,7 +241,7 @@ files:
     - "supernovae-st/nika-spec canon.yaml (the Nika language single source of truth)"
 - path: "snippets/_ecosystem.mdx"
   class: authored
-  sha256: 9d6b22d7f003c341d9067ec6bf4d90e61f30c851899f96a1e9c0312ed69f53c9
+  sha256: bee8ccdb984b7d8332772f558f69ccd174eb505b9a4580621986eeb2c5c5ab19
   evidence: "its own header: 'Edit HERE, never per-page' — the one hand-edited snippet (a single-source link mesh, not a projection)"
 - path: "snippets/_showcase.mdx"
   class: generated
@@ -271,7 +271,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 292
-  aggregate_sha256: 04415ceb61059cab3e9d4f3b526944abadfa702d86e95710423a3ff96c81fe45
+  aggregate_sha256: ed914737a68eaf756843e2637533c836ad6e5f04da0c81d6a7879e690bb93378
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

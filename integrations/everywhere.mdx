@@ -53,12 +53,12 @@ train, and prints the exact per-client fix. Drift is advisory
 | Surface | Mechanism | Where |
 |---|---|---|
 | **Any LSP editor** | `nika lsp`, the language server built into the binary and the editor path qualified with 0.123 (hover · completion · diagnostics · quick fixes) | [Editors guide](/getting-started/editors) |
-| **VS Code** | `nika wire vscode` + the extension on the [Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) (DAG canvas · preflight), which stays at its 0.120 release, frozen and not qualified with 0.123: set its `nika.server.path` to your installed `nika` ([known limits](/changelog/known-limits)) | [VS Code / Copilot guide](/integrations/clients/vscode) |
+| **VS Code** | `nika wire vscode` for the MCP oracle. The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema ([Marketplace listing](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) · [known limits](/changelog/known-limits)) | [VS Code / Copilot guide](/integrations/clients/vscode) |
 | **Cursor** | marketplace plugin (skill · subagent · commands · check-on-edit hook · MCP, one Add) + `nika wire cursor` + `nika init` (`.cursor/rules` + `.cursor/mcp.json`) | [Cursor guide](/integrations/clients/cursor) |
 | **Windsurf** | `nika wire windsurf` | [Windsurf guide](/integrations/clients/windsurf) |
 | **Zed** | `nika wire zed` (0.99+) | [Zed guide](/integrations/clients/zed) |
 | **JetBrains (Junie)** | project-scope `.junie/mcp/mcp.json` stanza | [Junie guide](/integrations/clients/junie) |
-| **Cursor forks / VSCodium** | the same frozen 0.120 extension via [OpenVSX](https://open-vsx.org/extension/supernovae/nika) | — |
+| **Cursor forks / VSCodium** | The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema ([OpenVSX listing](https://open-vsx.org/extension/supernovae/nika)) | — |
 | **Antigravity · Kiro** | `nika wire antigravity` · `nika wire kiro` write the MCP stanza | [MCP clients](/integrations/mcp-clients) |
 | **LM Studio** | `nika wire lmstudio` writes the MCP stanza | [LM Studio guide](/integrations/clients/lm-studio) |
 | **Neovim** | add the `nika` stdio stanza to mcphub.nvim's servers file by hand (covers avante · codecompanion); the mcphub registry listing is pending review | [MCP clients → Neovim](/integrations/mcp-clients#neovim) |
@@ -129,7 +129,7 @@ Marketplaces and directories where you'll find us today — the public
 submissions ledger (with pinned descriptions and review cadence) lives in
 [`listings.yaml`](https://github.com/supernovae-st/nika-plugins/blob/main/listings.yaml).
 
-- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) · [OpenVSX](https://open-vsx.org/extension/supernovae/nika) — the extension, frozen at its 0.120 release
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) · [OpenVSX](https://open-vsx.org/extension/supernovae/nika) — the editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema
 - [skills.sh](https://skills.sh/supernovae-st/nika-plugins) — the skill pack
 - GitHub topics + release feeds — engine · kit · action · docs · spec · client
 - Other MCP registries and community catalogs, including submissions still

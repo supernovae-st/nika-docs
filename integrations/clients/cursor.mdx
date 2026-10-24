@@ -32,10 +32,9 @@ by hand:
 being told — plus the Cursor subagents, `.cursor/mcp.json` and the Cursor
 hooks ([what `nika init` writes](/getting-started/agents#nika-init-teach-the-repo)).
 The VS Code extension also installs into Cursor via
-[OpenVSX](https://open-vsx.org/extension/supernovae/nika); it stays at its
-0.120 release, frozen and not qualified with 0.123, so set its
-`nika.server.path` to your installed `nika` and trust `nika check` if they
-disagree ([known limits](/changelog/known-limits)).
+[OpenVSX](https://open-vsx.org/extension/supernovae/nika). The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema;
+if you keep it, set its `nika.server.path` to your installed `nika` and trust
+`nika check` if they disagree ([known limits](/changelog/known-limits)).
 
 ## Verify
 
