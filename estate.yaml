@@ -241,7 +241,7 @@ files:
     - "supernovae-st/nika-spec canon.yaml (the Nika language single source of truth)"
 - path: "snippets/_ecosystem.mdx"
   class: authored
-  sha256: 6a91f758c17eb7cc74d278e1be9e1d00b2d4c3d1f24bd620efe5657f76d82cd6
+  sha256: 7d9e113ed53555db7439bf97601bb9a2a7d53c1cfd9554aad6f384e0e8207d08
   evidence: "its own header: 'Edit HERE, never per-page' — the one hand-edited snippet (a single-source link mesh, not a projection)"
 - path: "snippets/_showcase.mdx"
   class: generated
@@ -271,7 +271,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 284
-  aggregate_sha256: 56da9d254f285ff4e70016208d2bdd98fbb87506cfb33cb4e603449cda4d20f0
+  aggregate_sha256: 8536d3b5b146f5adf664b753c428b26e905450eb2631fa23f69666cb59b77ab8
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
