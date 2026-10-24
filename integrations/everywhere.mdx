@@ -18,13 +18,14 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 | Surface | What you get | Where |
 |---|---|---|
 | **Homebrew tap** | `brew install supernovae-st/tap/nika` (macOS + Linux) | [Quickstart](/integrations/quickstart) |
-| **Release tarballs** | per-platform binaries + `SHA256SUMS` (verify before you trust) | [GitHub releases](https://github.com/supernovae-st/nika/releases/latest) |
+| **Release tarballs** | per-platform binaries + `SHA256SUMS` + SLSA provenance (`multiple.intoto.jsonl`): verify before you trust | [Verify a download](/getting-started/installation#verify-a-download) |
 | **`install.sh`** | one-command install from the site | [Installation guide](/getting-started/installation) |
+| **npm** | `npm install -g @supernovae-st/nika` (Node.js 22+, macOS or glibc Linux): the `nika` command plus the TypeScript SDK; inside a project, `./node_modules/.bin/nika` | [Installation](/getting-started/installation) |
+| **Container image** | `docker run --rm ghcr.io/supernovae-st/nika:0.123.0 --version` (linux/amd64 · linux/arm64, entrypoint `nika`); mount a project with `docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.123.0 check flow.nika` | [Installation](/getting-started/installation) |
 | **cargo binstall** | the prebuilt release tarball, no compile (`cargo binstall --git https://github.com/supernovae-st/nika nika-cli`) | [Installation](/getting-started/installation) |
-| **nix flake** | `nix run github:supernovae-st/nika` — builds the exact release source, store-cached | [Installation](/getting-started/installation) |
+| **nix flake** | `nix run github:supernovae-st/nika/v0.123.0` builds that release tag, store-cached (the bare `github:supernovae-st/nika` builds `main`, which can be ahead of the release) | [Installation](/getting-started/installation) |
 | **GitHub CLI extension** | `gh extension install supernovae-st/gh-nika` → `gh nika check/run` — pass-through to a PATH `nika`, else a one-time checksum-verified release fetch (Actions runners · Codespaces) | [gh-nika](https://github.com/supernovae-st/gh-nika) |
-| **`.mcpb` bundles** | one-click MCP bundle (macOS arm64 · Linux x64) with checksums | [Claude Desktop guide](/integrations/clients/claude-desktop) |
-| **Docker image** | the read-only oracle in a container (`integrations/mcp/Dockerfile` in the kit) | [nika-plugins kit](https://github.com/supernovae-st/nika-plugins) |
+| **MCP oracle Dockerfile (kit)** | the read-only oracle in a container you build (`integrations/mcp/Dockerfile` in the kit) | [nika-plugins kit](https://github.com/supernovae-st/nika-plugins) |
 
 ## Keeping the suite fresh
 
@@ -51,14 +52,16 @@ train, and prints the exact per-client fix. Drift is advisory
 
 | Surface | Mechanism | Where |
 |---|---|---|
-| **VS Code** | extension on the [Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) (LSP · DAG canvas · preflight) | [VS Code / Copilot guide](/integrations/clients/vscode) |
+| **Any LSP editor** | `nika lsp`, the language server built into the binary and the editor path qualified with 0.123 (hover · completion · diagnostics · quick fixes) | [Editors guide](/getting-started/editors) |
+| **VS Code** | `nika wire vscode` + the extension on the [Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) (DAG canvas · preflight), which stays at its 0.120 release, frozen and not qualified with 0.123: set its `nika.server.path` to your installed `nika` ([known limits](/changelog/known-limits)) | [VS Code / Copilot guide](/integrations/clients/vscode) |
 | **Cursor** | marketplace plugin (skill · subagent · commands · check-on-edit hook · MCP, one Add) + `nika wire cursor` + `nika init` (`.cursor/rules` + `.cursor/mcp.json`) | [Cursor guide](/integrations/clients/cursor) |
 | **Windsurf** | `nika wire windsurf` | [Windsurf guide](/integrations/clients/windsurf) |
 | **Zed** | `nika wire zed` (0.99+) | [Zed guide](/integrations/clients/zed) |
 | **JetBrains (Junie)** | project-scope `.junie/mcp/mcp.json` stanza | [Junie guide](/integrations/clients/junie) |
-| **Cursor forks / VSCodium** | extension via [OpenVSX](https://open-vsx.org/extension/supernovae/nika) | — |
+| **Cursor forks / VSCodium** | the same frozen 0.120 extension via [OpenVSX](https://open-vsx.org/extension/supernovae/nika) | — |
+| **Antigravity · Kiro** | `nika wire antigravity` · `nika wire kiro` write the MCP stanza | [MCP clients](/integrations/mcp-clients) |
 | **LM Studio** | `nika wire lmstudio` writes the MCP stanza | [LM Studio guide](/integrations/clients/lm-studio) |
-| **Neovim** | via the mcphub.nvim registry (covers avante · codecompanion) | [MCP clients](/integrations/mcp-clients) |
+| **Neovim** | add the `nika` stdio stanza to mcphub.nvim's servers file by hand (covers avante · codecompanion); the mcphub registry listing is pending review | [MCP clients → Neovim](/integrations/mcp-clients#neovim) |
 | **Any editor with YAML-LSP** | the `# yaml-language-server: $schema=` modeline `nika init` writes | [Editors guide](/getting-started/editors) |
 
 ## Agents & assistants
@@ -66,7 +69,7 @@ train, and prints the exact per-client fix. Drift is advisory
 | Surface | Mechanism | Where |
 |---|---|---|
 | **Claude Code** | first-party plugin (`.claude-plugin` · the six `/nika:*` commands · 4 skills · 3 subagents) + `nika wire claude` | [Claude Code guide](/integrations/clients/claude-code) |
-| **Claude Desktop** | `claude_desktop_config.json` stanza + one-click `.mcpb` bundles | [Claude Desktop guide](/integrations/clients/claude-desktop) |
+| **Claude Desktop** | `nika wire claude-desktop` writes the `claude_desktop_config.json` stanza | [Claude Desktop guide](/integrations/clients/claude-desktop) |
 | **Codex** | first-party plugin (`.codex-plugin` · same commands) + `nika wire codex` | [Codex guide](/integrations/clients/codex) |
 | **Grok Build** | reads the Claude Code kit natively · one marketplace add installs the full plugin (skills · subagents · commands · hooks · oracle) | [Grok Build guide](/integrations/clients/grok-build) |
 | **OpenClaude** | its loader reads the Claude Code marketplace layout · `openclaude plugin marketplace add supernovae-st/nika-plugins && openclaude plugin install nika@nika` installs the whole bundle unported | [kit dossier](https://github.com/supernovae-st/nika-plugins/tree/main/integrations/openclaude) |
@@ -76,13 +79,13 @@ train, and prints the exact per-client fix. Drift is advisory
 | **Gemini CLI · Qwen Code** | `mcpServers` stanza in the user-scope `settings.json` | [Gemini CLI](/integrations/clients/gemini-cli) · [Qwen Code](/integrations/clients/qwen-code) |
 | **Kimi Code CLI** | `mcpServers` entry in `~/.kimi-code/mcp.json` + the `.agents/skills` authoring skill discovered natively | [Kimi Code guide](/integrations/clients/kimi-code) |
 | **Warp (Oz)** | reads the Claude Code and Codex configs plus the project `.mcp.json` natively — `nika wire claude` or `nika init` opens this door | [MCP clients](/integrations/mcp-clients) |
-| **GitHub Copilot CLI** | reads the project `.mcp.json` (cwd up to repo root) and `AGENTS.md` — `nika init` covers both · `copilot mcp add nika -- nika mcp` for the machine level | [MCP clients](/integrations/mcp-clients) |
-| **Amp** | reads `AGENTS.md` and the `.agents/skills` dir natively (both written by `nika init`) · `amp mcp add nika -- nika mcp` wires the oracle | [MCP clients](/integrations/mcp-clients) |
+| **GitHub Copilot CLI** | reads the project `.mcp.json` (cwd up to repo root) and `AGENTS.md` — `nika init` covers both · `nika wire copilot` writes `~/.copilot/mcp-config.json` for the machine level | [MCP clients](/integrations/mcp-clients) |
+| **Amp** | reads `AGENTS.md` and the `.agents/skills` dir natively (both written by `nika init`) · `nika wire amp` wires the oracle into `~/.config/amp/settings.json` | [MCP clients](/integrations/mcp-clients) |
 | **Cline · Continue** | `cline_mcp_settings.json` (hot-reloaded) · own-file `~/.continue/mcpServers/nika.json` | [Cline](/integrations/clients/cline) · [Continue](/integrations/clients/continue) |
 | **Open WebUI · AnythingLLM · Cherry Studio · Jan** | mcpo recipe · generic stdio stanza | [Open WebUI](/integrations/clients/open-webui) · [AnythingLLM](/integrations/clients/anythingllm) · [Cherry Studio](/integrations/clients/cherry-studio) · [Jan](/integrations/clients/jan) |
 | **Aider** | no MCP — `AGENTS.md` (written by `nika init`) covers it | [MCP clients → Aider](/integrations/mcp-clients#aider) |
-| **Any MCP client** | `nika mcp` over stdio · the `server.json` registry shape and the Docker image cover hosted listers | [MCP clients](/integrations/mcp-clients) |
-| **Any AGENTS.md reader** | `nika init` writes 7 agent-facing files (AGENTS.md · `.cursor/{rules,mcp.json}` included) | [Quickstart](/integrations/quickstart) |
+| **Any MCP client** | `nika mcp` over stdio (or Streamable HTTP with `--transport http`) · the kit's `server.json` registry shape and MCP Dockerfile serve directories that list or containerize MCP servers | [MCP clients](/integrations/mcp-clients) |
+| **Any AGENTS.md reader** | `nika init` writes `AGENTS.md` with the rest of the agent scaffold: the authoring skill, Cursor rules and subagents, project MCP configs and the Claude Code and Cursor hooks | [What `nika init` writes](/getting-started/agents#nika-init-teach-the-repo) |
 
 ## Skills & plugins (the teaching surfaces)
 
@@ -102,7 +105,7 @@ execution, no mutation, by design** ([threat model](https://github.com/supernova
 |---|---|
 | Full tool reference | [MCP server reference](/reference/mcp-server) |
 | Per-client wiring (one dedicated page per client — the matrix) | [MCP clients](/integrations/mcp-clients) |
-| `server.json` (registry shape) + bundles + Dockerfile | [kit `integrations/mcp/`](https://github.com/supernovae-st/nika-plugins/tree/main/integrations/mcp) |
+| `server.json` (registry shape) + Dockerfile + threat model | [kit `integrations/mcp/`](https://github.com/supernovae-st/nika-plugins/tree/main/integrations/mcp) |
 
 ## CI/CD
 
@@ -117,8 +120,8 @@ execution, no mutation, by design** ([threat model](https://github.com/supernova
 |---|---|---|
 | **TypeScript SDK** | `@supernovae-st/nika@0.123.0` — one typed facade (`check` · `compile` · `run` · `run.events()` · `run.result()` · `traceVerify`) · Apache-2.0. `traceVerify` reads existing evidence; it does not seal, rerun, or prove the job was correct. | [SDK overview](/sdk/overview) · [source](https://github.com/supernovae-st/nika-client) |
 | **Language spec** | the `.nika` contract — Apache-2.0, runtime-agnostic | [nika-spec](https://github.com/supernovae-st/nika-spec) |
-| **Registry** | CI-re-proven workflow artifacts (hash + oracle + engine cert) — the engine pulls them natively: `nika check registry:owner/name` (digest verify · cache · the normal audit-before-run) | [nika-registry](https://github.com/supernovae-st/nika-registry) |
-| **Local inference lane** | `nika model serve --model x.gguf` — the in-process candle sidecar (loopback · in every release binary from 0.101) · `pull`/`list`/`rm` acquire and manage GGUFs | [CLI reference](/reference/cli) |
+| **Registry** | CI-re-proven workflow artifacts (hash + oracle + engine cert). In 0.123.0 a `registry:owner/name` coordinate is refused (`NIKA-REG-005`: the public index is schema 2, this engine reads schema 1): clone the registry and run `python3 scripts/get.py <name>` (Python 3.11+ with PyYAML), which fetches the pinned bytes and verifies their sha256, then `nika check` the local file | [nika-registry](https://github.com/supernovae-st/nika-registry) · [Known limits](/changelog/known-limits#registry-coordinates-are-refused) |
+| **Local inference lane** | `nika model pull <owner/repo[:QUANT]>` downloads a GGUF into `~/.nika/models`, then `nika model serve --model <id>` starts an OpenAI-compatible server on `127.0.0.1:8712` (Qwen3-family models in 0.123.0) that a workflow reaches as `llamacpp/<id>` with `NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712` · `list`/`rm` manage the disk | [Local models](/guides/local-models) · [CLI reference](/reference/cli) |
 
 ## Where Nika is listed
 
@@ -126,20 +129,24 @@ Marketplaces and directories where you'll find us today — the public
 submissions ledger (with pinned descriptions and review cadence) lives in
 [`listings.yaml`](https://github.com/supernovae-st/nika-plugins/blob/main/listings.yaml).
 
-- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) · [OpenVSX](https://open-vsx.org/extension/supernovae/nika) — the extension
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=supernovae.nika) · [OpenVSX](https://open-vsx.org/extension/supernovae/nika) — the extension, frozen at its 0.120 release
 - [skills.sh](https://skills.sh/supernovae-st/nika-plugins) — the skill pack
 - GitHub topics + release feeds — engine · kit · action · docs · spec · client
-- More MCP registries and community catalogs are in flight — the ledger above
-  is the always-current truth (every submission registers there the day it
-  goes out).
+- Other MCP registries and community catalogs, including submissions still
+  under review (the mcphub.nvim registry, for one), are recorded in the ledger
+  above, the day each submission goes out.
 
 ## Learn the patterns first
 
-New to agentic workflows as a concept? [agentic-ai-systems](https://github.com/ThibautMelen/agentic-ai-systems)
-(282★) teaches the workflow taxonomy with diagrams — and its
-[patterns-as-code](https://github.com/ThibautMelen/agentic-ai-systems/tree/main/patterns-as-code)
-folder expresses each pattern as a runnable `.nika`, checked in CI on
-every push.
+New to agentic workflows as a concept?
+[agentic-ai-systems](https://github.com/ThibautMelen/agentic-ai-systems)
+explains the workflow taxonomy (chaining, routing, parallelization,
+orchestrator and workers, evaluator and optimizer) with diagrams. Read it for
+the ideas only: the files in its `patterns-as-code` folder use a retired file
+suffix and the retired envelope (`nika: v1`, `vars:`), and 0.123.0 refuses
+them. For patterns that run, use `nika try`, which lists the
+worked path and the jobs and rehearses any of them offline, and the
+[examples](/examples/overview).
 
 <Tip>
 Something missing? The kit contract makes adding a surface a folder-copy:

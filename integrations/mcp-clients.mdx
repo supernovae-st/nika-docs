@@ -20,6 +20,20 @@ One-click where the client supports it (binary still required first):
 And in every case, `nika init` first — the agent-teaching surface
 (`AGENTS.md`, rules, the repo skill) is what makes the oracle useful.
 
+## Wire what this machine has
+
+The recommended door previews, then wires, every client this machine shows:
+
+```sh
+nika wire detected --dry-run   # the plan: created · updated · current · manual
+nika wire detected             # write it
+```
+
+`nika wire <client>` wires one client by name, and `nika wire all` is the
+advanced sweep over every supported client (previewed, then confirmed on a
+terminal or with `--yes`). `nika wire --help` lists the targets your binary
+knows.
+
 ## The client matrix
 
 | Client | Wire | Where it lands |
@@ -37,6 +51,10 @@ And in every case, `nika init` first — the agent-teaching surface
 | [Qwen Code](/integrations/clients/qwen-code) | `nika wire qwen` | `~/.qwen/settings.json` |
 | [Kimi Code](/integrations/clients/kimi-code) | `nika wire kimi` | `~/.kimi-code/mcp.json` |
 | [Grok Build](/integrations/clients/grok-build) | `nika wire grok` | `~/.grok/config.toml` |
+| [Antigravity](#antigravity) | `nika wire antigravity` | `~/.gemini/config/mcp_config.json` |
+| [Kiro](#kiro) | `nika wire kiro` | `~/.kiro/settings/mcp.json` |
+| [GitHub Copilot CLI](#github-copilot-cli) | `nika wire copilot` | `~/.copilot/mcp-config.json` |
+| [Amp](#amp) | `nika wire amp` | `~/.config/amp/settings.json` |
 | [Cline](/integrations/clients/cline) | `nika wire cline` | `cline_mcp_settings.json` (resolved) |
 | [Continue](/integrations/clients/continue) | `nika wire continue` | `~/.continue/mcpServers/nika.json` |
 | [LM Studio](/integrations/clients/lm-studio) | `nika wire lmstudio` | `~/.lmstudio/mcp.json` (resolved) |
@@ -46,12 +64,14 @@ And in every case, `nika init` first — the agent-teaching surface
 | [AnythingLLM](/integrations/clients/anythingllm) | manual stanza | its `mcpServers` file |
 | [Cherry Studio](/integrations/clients/cherry-studio) | manual stanza | settings UI (stdio) |
 | [Jan](/integrations/clients/jan) | manual stanza | settings UI (stdio) |
+| [Neovim](#neovim) | manual stanza (mcphub.nvim) | `~/.config/mcphub/servers.json` |
 | [Aider](#aider) | no MCP — `AGENTS.md` covers it | `.aider.conf.yml` |
+
 Every `nika wire` write is idempotent (re-run prints `· current`) and
 preserves unrelated servers.
 
-The anchors below stay for directory deep-links — each points to its
-dedicated page.
+The sections below give each client's essentials for directory deep-links;
+most point to a dedicated page.
 
 ## Cursor
 
@@ -120,6 +140,57 @@ Cursor-notation `mcp.json`, with the real macOS path quirk —
 
 A stdio extension stanza + native `AGENTS.md` reading —
 [full page](/integrations/clients/goose).
+
+## Antigravity
+
+`nika wire antigravity` → `~/.gemini/config/mcp_config.json`, the same
+`mcpServers` stanza Gemini CLI uses:
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+## Kiro
+
+`nika wire kiro` → `~/.kiro/settings/mcp.json`, with the same `mcpServers`
+stanza.
+
+## GitHub Copilot CLI
+
+`nika wire copilot` → `~/.copilot/mcp-config.json`, the machine-level
+configuration. Copilot's local servers carry a type and a tool list:
+
+```json
+{ "mcpServers": { "nika": { "type": "local", "command": "nika", "args": ["mcp"], "tools": ["*"] } } }
+```
+
+Inside a repository, the `.mcp.json` and `AGENTS.md` that `nika init` writes
+cover it too.
+
+## Amp
+
+`nika wire amp` → `~/.config/amp/settings.json`, under Amp's own key:
+
+```json
+{ "amp.mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+Amp also reads the `AGENTS.md` and `.agents/skills` that `nika init` writes.
+
+## Neovim
+
+Neovim reaches MCP through [mcphub.nvim](https://github.com/ravitemer/mcphub.nvim),
+which serves avante and codecompanion. `nika wire` has no Neovim target: add
+the stdio stanza by hand to mcphub's servers file, `~/.config/mcphub/servers.json`
+by default.
+
+```json
+{ "mcpServers": { "nika": { "command": "nika", "args": ["mcp"] } } }
+```
+
+Nika's listing in the mcphub registry is a submission still under review
+([ravitemer/mcp-registry#39](https://github.com/ravitemer/mcp-registry/pull/39)),
+so the registry does not offer it yet.
 
 ## Aider
 

@@ -23,9 +23,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      # in real use, pin by full commit SHA with the release in a comment —
-      # the form Dependabot/Renovate bump: @<sha> # v1.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # in real use, pin the action by full commit SHA with the release in a
+      # comment, the form Dependabot/Renovate bump: @<sha> # v1.0.28
       - uses: supernovae-st/nika-action@v1
         with:
           workflow: flows/report.nika

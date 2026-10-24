@@ -28,9 +28,10 @@ git commit             # every staged .nika is audited from now on
 ## What the hook checks
 
 `nika-check` is the full static audit, the same one the
-[GitHub Action](/integrations/github-actions) posts on PRs and the
-[VS Code extension](https://github.com/supernovae-st/nika-vscode) surfaces
-in-editor:
+[GitHub Action](/integrations/github-actions) posts on PRs and
+[`nika lsp`](/getting-started/editors) surfaces in your editor (the VS Code
+extension, frozen at its 0.120 release, runs the `nika lsp` you point its
+`nika.server.path` at):
 
 - the **plan** — every task, wave and wire the file declares, as a DAG
 - the **types** across each wire, before any model is called
@@ -48,9 +49,9 @@ the same trade [actionlint](https://github.com/rhysd/actionlint)'s system
 hook takes. Any install lane works:
 
 ```bash
-brew install supernovae-st/tap/nika        # macOS / Linux
-cargo binstall nika --git https://github.com/supernovae-st/nika   # prebuilt
-nix profile install github:supernovae-st/nika                      # flake
+brew install supernovae-st/tap/nika                                  # macOS / Linux
+cargo binstall --git https://github.com/supernovae-st/nika nika-cli   # prebuilt release
+nix profile install github:supernovae-st/nika/v0.123.0                # flake, pinned to the release
 ```
 
 Staged files are passed in one argv and audited in one call; each file gets

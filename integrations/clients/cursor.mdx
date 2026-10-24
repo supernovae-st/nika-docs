@@ -29,8 +29,13 @@ by hand:
 
 `nika init` writes `.cursor/rules/nika.mdc` — auto-attached on
 `*.nika`, so Cursor's agent knows the check-before-run law without
-being told. The VS Code extension also installs into Cursor via
-[OpenVSX](https://open-vsx.org/extension/supernovae/nika).
+being told — plus the Cursor subagents, `.cursor/mcp.json` and the Cursor
+hooks ([what `nika init` writes](/getting-started/agents#nika-init-teach-the-repo)).
+The VS Code extension also installs into Cursor via
+[OpenVSX](https://open-vsx.org/extension/supernovae/nika); it stays at its
+0.120 release, frozen and not qualified with 0.123, so set its
+`nika.server.path` to your installed `nika` and trust `nika check` if they
+disagree ([known limits](/changelog/known-limits)).
 
 ## Verify
 
