@@ -133,6 +133,17 @@ pauses once more (exit `4`) with a new trace path. Answer that pause within
 (`nika run <file> --answer <task>=<value>`). [Resume](/guides/resume) covers
 pausing and resuming.
 
+## The built-in model server loads Qwen3 files only
+
+`nika model serve` loads Qwen3-family GGUF files; a file of another family
+is refused when it loads. The local pick `nika welcome` proposes on a 16 to
+23 GB machine (Nika Gear One, standard tier) is a Gemma 3 file, so the
+built-in server cannot serve it: pull the lite pick
+(`unsloth/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M`) for the built-in server, or
+serve the Gemma file with llama.cpp's `llama-server`, LM Studio or Ollama
+([Local models](/guides/local-models)). None of the Gear One picks is marked
+verified in 0.123.0.
+
 ## The TypeScript SDK
 
 - **No engine for Windows or musl Linux.** `@supernovae-st/nika` brings its

@@ -271,7 +271,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 292
-  aggregate_sha256: 9d6eab970711f6bc19adfdbd76804991f3644eaea69045b423d293972d1f944f
+  aggregate_sha256: 0d1c0fd67dde80828b97584a353ee9c7f86407b21e626dac3d6a352531f6cdf0
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
