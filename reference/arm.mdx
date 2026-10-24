@@ -38,7 +38,7 @@ ceiling: 0.50            # the run default when a beat says nothing; a beat alwa
 
 arm:
   - workflow: workflows/nightly-report.nika
-    cadence: "TZ=Europe/Paris 30 7 * * *"
+    cadence: "TZ=Europe/Paris 45 22 * * *"
     plafond: 0.20
     manqué: rattraper-une-fois
     chevauchement: sauter
@@ -91,12 +91,12 @@ reports what is ready, what fired and what fires next. It schedules nothing:
 $ nika arm
 4 beats in /home/alice/project/nika.yaml
 
-  [READY] workflows/nightly-report.nika · TZ=Europe/Paris 30 7 * * *
+  [READY] workflows/nightly-report.nika · TZ=Europe/Paris 45 22 * * *
          · ready in the current configuration; OS activation not verified · authority not acquired
-         ✓ PROUVÉ (génération + créneau · ni projet ni hôte) · fired · 2026-10-26T06:30:20Z · slot 2026-10-26T06:30:00Z · gen 5c1ca718 · état succeeded · 0 sauts / 2 tirs
-         → 2026-10-25 07:30 CET
-         → 2026-10-26 07:30 CET
-         → 2026-10-27 07:30 CET
+         ✓ PROUVÉ (génération + créneau · ni projet ni hôte) · fired · 2026-10-24T20:45:20.16053Z · slot 2026-10-24T20:45:00Z · gen cdc9c273 · état succeeded · 0 sauts / 1 tir
+         → 2026-10-25 22:45 CET
+         → 2026-10-26 22:45 CET
+         → 2026-10-27 22:45 CET
 
   [READY] workflows/on-event.nika · on-webhook
          ? cadence on-webhook: its event route fires it, never the clock (not observed)
@@ -119,7 +119,7 @@ READY · UNREADY · DORMANT judge the current configuration only — never OS ac
 nothing was scheduled — `nika arm` READS the file. The machine that fires them is the arming edge.
 ```
 
-<sub>Captured from nika 0.123.0; only the project path is shortened. The French phrases are the binary's own wording.</sub>
+<sub>Captured from nika 0.123.0 right after the fire below, with the wall clock, at the beat's real 22:45 slot; only the project path is replaced. The French phrases are the binary's own wording.</sub>
 
 | State | Meaning |
 |---|---|
@@ -143,7 +143,7 @@ refusal teaches the fix.
 
 ```text
 $ nika arm fire nightly-report
-fired nightly-report · slot 2026-10-26T06:30:00Z · exit 0 · trace .nika/traces/2026-10-24T14-41-35Z-8672.ndjson
+fired nightly-report · slot 2026-10-24T20:45:00Z · exit 0 · trace .nika/traces/2026-10-24T20-45-20Z-88a6.ndjson
 ```
 
 One function applies the on-time window, the miss policy, the overlap lock,
