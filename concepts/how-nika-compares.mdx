@@ -54,7 +54,7 @@ They orchestrate infra, services and code. Nika is the file for the AI-native sl
 
 We publish this because a comparison that only lists wins is marketing, not a map.
 
-- **No IDE chrome.** Cursor and Continue.dev win for in-editor UX. Nika ships a VS Code extension for `.nika` (syntax, a DAG view, diagnostics), but it is not an agentic editor.
+- **No IDE chrome.** Cursor and Continue.dev win for in-editor UX. Nika's language server (`nika lsp`) gives any editor diagnostics and quick fixes, and a VS Code extension (`supernovae.nika` 0.120) adds syntax, a DAG view and diagnostics; the extension is frozen and not qualified with 0.123, so point its `nika.server.path` at your 0.123 binary and trust `nika check` ([Known limits](/changelog/known-limits)). Neither is an agentic editor.
 - **No visual workflow builder.** LangGraph has a graph UI. Nika draws the DAG (`nika inspect file.nika --format mermaid`) but you author in YAML and CLI.
 - **No enterprise durable-execution track record.** Temporal has a decade of battle-testing for long-lived distributed state. Nika is a finite single-run DAG, one file in, one run out. Different problem.
 - **Younger, smaller community.** LangGraph and Cursor have far larger ecosystems today.
@@ -71,7 +71,7 @@ We publish this because a comparison that only lists wins is marketing, not a ma
 - **Receipts, not vibes.** The hash-chained trace is tamper-evident: verify exits clean or names the first altered link. Editable, lossy chat logs cannot make that claim. The underlying pattern is tool-neutral — [run receipts](/patterns/run-receipts) — and worth adopting even without Nika.
 - **One static binary.** The same file is a runner, a checker, a golden-test harness, an MCP server, an LSP, and a time-travel DAP debugger. No runtime to stand up, no cluster.
 - **The file is portable.** A Nika workflow is text bound to no framework: any conformant engine runs it. Your logic is not locked to one vendor's Python graph.
-- **Sovereign by construction.** AGPL engine, Apache-2.0 spec, local or hosted inference, no mandatory cloud, {CANON.providers} canonical providers you pick from (the catalog lists more hosted routes).
+- **Sovereign by construction.** AGPL engine, Apache-2.0 spec, local or hosted inference, no mandatory cloud, {CANON.providers} canonical providers you pick from, all wired in this binary (the catalog also records vendors it does not drive).
 
 ## The honest bottom line
 

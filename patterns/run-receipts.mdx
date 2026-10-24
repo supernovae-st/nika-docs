@@ -70,10 +70,11 @@ not in any engine.
 Nika ships the pattern end to end, which is why this page lives here —
 but each half maps to a plain command you can inspect:
 
-- **The contract** is [`nika check`](/concepts/how-nika-compares): the
-  static audit that prints the plan, the cost bound, the secret flows and
-  the permits boundary before a single token is spent, and exits non-zero
-  when the file breaks its own contract.
+- **The contract** is [`nika check`](/reference/cli): the static audit that
+  prints the plan, the cost bound, the secret flows and the permits boundary
+  before a single token is spent, and exits non-zero when the file breaks its
+  own contract. Its `--json` report (`report_version: 1`) is the machine form
+  ([Machine surfaces](/reference/machine-surfaces)).
 - **The record** is the [flight recorder](/concepts/traces): every run
   journals to `.nika/traces/` as hash-chained NDJSON, and the run prints
   its chain head on close.

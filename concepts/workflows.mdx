@@ -15,8 +15,8 @@ executes the task graph. Four verbs only: `infer` · `exec` · `invoke` ·
 `agent`. Fetching a URL is `invoke: { tool: "nika:fetch" }`, not a fifth
 verb.
 
-Qualified on `nika 0.120.1 (9d554c84c)` with `mock/echo` (a local
-simulation — output is prefixed `mock(echo) ·`):
+Qualified on `nika {STATUS.version} ({STATUS.engineSha})` with `mock/echo`
+(a local simulation: output is prefixed `mock(echo) ·`):
 
 ```yaml
 # hello.nika
@@ -38,8 +38,9 @@ nika run hello.nika --max-cost-usd 0
 # said "mock(echo) · Say hi in one line."
 ```
 
-Swap `model:` later for a local or cloud seat. The file is the contract;
-`--var` / SDK `inputs` supply caller values.
+Swap `model:` later for a local model, or a provider you have a key or a
+signed-in agent app for ([Model and access](/concepts/providers#model-and-access)).
+The file is the contract; `--var` and the SDK's `inputs` supply caller values.
 
 <Info>
   Envelope law: [nika-spec 01-envelope](https://github.com/supernovae-st/nika-spec/blob/main/spec/01-envelope.md).
@@ -53,21 +54,23 @@ name as the key, the workflow's own name as the value. Earlier drafts
 explored a Kubernetes-style `apiVersion` + `kind` + `metadata` + `spec`
 envelope, and until 0.108 the line read `nika: v1` with a separate
 `workflow: { id }` object; the nine-key envelope (0.109) folded the identity
-onto the mark and dropped the version: a grammar change before 1.0 ships with
-its migration (`nika check --fix` moves the id, keeps the description as a
-comment) and after 1.0 the grammar is additive only, so a number the author
-types would never change.
+onto the mark and dropped the version: a grammar change ships with its
+migration (`nika check --fix` moves the id, keeps the description as a
+comment), so a version number the author types would carry no information.
 
 - No separate `kind:` field: the presence of `tasks:` is itself the
-  document-type discriminator — a `tasks:` key makes a workflow, its absence
-  makes the project file (`nika.yaml`, the one document that still spells
-  `nika: v1`). The rule holds without the filename: a registry blob, an HTTP
-  body, a stdin pipe still say what they are.
+  document-type discriminator. A `tasks:` key makes a workflow; its absence
+  makes the project file (`nika.yaml`, whose `nika:` key is the project's
+  name, for example `nika: my-project`; its schema version rides on the
+  editor's `$schema` comment line). `nika: v1` is refused in both. The rule
+  holds without the filename: a registry blob, an HTTP body, a stdin pipe
+  still say what they are.
 - The engine's internal canonical URI stays `https://nika.sh/spec/v1` for
   RDF / conformance tooling, but the author never types a URL.
 
-Multi-document YAML is supported: one file may declare multiple documents
-separated by `---`, parsed into `Vec<RawDocument>`.
+A `.nika` file holds **one** workflow. Do not separate several with `---`:
+0.123.0 reads only the first document and ignores the rest without a
+warning, even an invalid one.
 
 ## Anatomy of a workflow
 
@@ -123,14 +126,14 @@ all the way into the diagnostic layer (ADR-010 miette bridge). The
 
 ```
          ┌───────────────┐
- .yaml   │  nika-schema  │   RawWorkflow
+ .nika   │  nika-schema  │   RawWorkflow
   ─────► │     parser    │ ──────────────┐
          │ (marked-yaml) │               │
          └───────────────┘               ▼
                                  ┌────────────────┐
-                                 │ nika-schema    │   DAG · typed
+                                 │  nika-check    │   DAG · typed
                                  │    analyzer    │   scope · taint
-                                 │   (admitted)   │
+                                 │ (`nika check`) │   permits · cost
                                  └────────────────┘
                                           │
                                           ▼
@@ -145,7 +148,7 @@ all the way into the diagnostic layer (ADR-010 miette bridge). The
                                  └────────────────┘
                                           │
                                           ▼
-                                  EventSink · BillingSink · AuditSink
+                       journal (.nika/traces) · --json stream
 ```
 
 ASCII by intent: Mintlify renders fine, but the diagram above is plain
@@ -217,10 +220,74 @@ deploy:
 ```
 
 The predicate set is **closed** (`NIKA-DAG-005` otherwise): `success` ·
-`failure` · `skipped` · `terminal` — where `terminal` admits any terminal
-state, `cancelled` included (the always-pattern: « run once X is settled,
-whatever happened »). The participial spellings `succeeded` and `failed`
-are dead; `nika check --fix` respells them.
+`failure` · `skipped` · `terminal` · `unwind`. `terminal` admits any
+terminal state, `cancelled` included (the always-pattern: « run once X is
+settled, whatever happened »). The participial spellings `succeeded` and
+`failed` are dead; `nika check --fix` respells them.
+
+### Cleanup: unwind
+
+`after: { x: unwind }` is the cleanup edge. The task runs once after a
+producer that **started**, whether it succeeded or failed, and its body may
+read that producer. A producer that never started unwinds nothing. It is not
+the same as a `terminal` report task, which also runs after a producer that
+was skipped or never ran:
+
+```yaml unwind-cleanup.nika
+nika: work-with-cleanup
+model: mock/echo
+permits:
+  tools: ["nika:assert", "nika:log"]
+tasks:
+  work:
+    invoke:
+      tool: nika:assert
+      args:
+        condition: false
+        message: "the work failed"
+  cleanup:
+    after: { work: unwind }
+    invoke:
+      tool: nika:log
+      args:
+        level: info
+        message: "cleanup ran"
+```
+
+The run fails (`work` failed, exit 1), and `cleanup` still runs and logs.
+[Spec 03 · unwind](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md)
+has the full rule.
+
+### Fan-in: group
+
+Tasks that share a `group:` name can be read together: `${{ group.<name> }}`
+in a `with:` value folds every member's record (`id`, `status`, `output`,
+`error`, `duration_ms`) into one array.
+
+```yaml group-fan-in.nika
+nika: probes
+model: mock/echo
+permits: {}
+tasks:
+  check_api:
+    group: probes
+    infer:
+      prompt: "Is the API healthy?"
+      max_tokens: 32
+  check_db:
+    group: probes
+    infer:
+      prompt: "Is the database healthy?"
+      max_tokens: 32
+  report:
+    with:
+      legs: ${{ group.probes }}
+    infer:
+      prompt: "Summarize these probe results: ${{ with.legs }}"
+      max_tokens: 64
+outputs:
+  report: ${{ tasks.report.output }}
+```
 
 Fan-out over a collection (`files` here is a jq
 [extract binding](/concepts/bindings) on `list_files`, e.g.
@@ -289,8 +356,8 @@ flaky_api:
 Workflow inputs live in `inputs:`, available in every task via
 `${{ inputs.<name> }}`. Every entry is a **typed declaration** (`type:` is
 required, and speaks the full type grammar): that is what lets the engine
-validate what a caller passes and generate a callable schema for
-`nika.run_workflow` over MCP.
+validate what a caller passes, from `--var`, `--inputs-json -`, the SDK's
+`inputs` or a `nika serve` job.
 
 A value the caller may override belongs here — a deployment dial too, as an
 input with `required: false` and a `default:`. A value the file owns and
@@ -332,7 +399,7 @@ absent means **zero** authority, and the check refuses the body with
   workflow *calls* another as a typed, bounded step. See below.
 </Note>
 
-## Composition · one workflow calls another
+## Composition: one workflow calls another
 
 `invoke:` is a **tagged union**: exactly one of `tool:` (a builtin or an MCP
 tool) or `workflow:` (another workflow). Same verb, same call site — the
@@ -408,10 +475,11 @@ nika run brief-with-stats.nika --var topic="local-first AI"
 
 ### The rules the checker enforces
 
-- **Static target** — `workflow:` is a filesystem path or a pinned
-  `registry:owner/name@version`. A `${{ }}`-templated target is refused
-  (`NIKA-COMP-001`): a call graph you cannot draw before the run is a call
-  graph you cannot bound.
+- **Static target** — `workflow:` is a static filesystem path. A
+  `${{ }}`-templated target is refused (`NIKA-COMP-001`): a call graph you
+  cannot draw before the run is a call graph you cannot bound. A
+  `registry:` child is refused the same way in 0.123.0
+  ([Known limits](/changelog/known-limits)).
 - **Typed call** — the parent's `args:` must fit the child's `inputs:`, and
   what the parent declares in `returns:` must fit the child's `outputs:`
   (`NIKA-COMP-004`). The child's contract is *derived from its body*, never
@@ -448,7 +516,7 @@ caller can pass is declared in `inputs:`:
 - **A supplied value overrides a declared `default:`.** `--var bullets=5`
   wins over `default: 3` for this run.
 - **It satisfies `required: true`.** A required input with no default must
-  be supplied at launch. Measured on 0.120.1: `nika check` stays clean and
+  be supplied at launch. On 0.123.0, `nika check` stays clean and
   prints `HINT [inputs] required input(s) with no default · pass at run
   time: --var name=…`. `nika run` refuses before any task:
   `NIKA-1708 · missing required inputs` (exit 3). The SDK throws
@@ -472,17 +540,19 @@ value is an input with a `default:`, so `--var` may still override it.
 
 ## Outputs and events
 
-Every task emits a structured `Event` stream during execution
-(`nika-kernel::infra::event_sink::Event`). Consumers subscribe via
-`EventSink` and receive one JSON object per line (NDJSON on stdout by
-default). See [Events](/concepts/events) for the event model and
-[Bindings](/concepts/bindings) for how the DAG propagates values.
+Every run writes its events, hash-chained, to a journal under
+`.nika/traces/`. Add `--json` and `nika run` also prints one NDJSON object per
+event on stdout, ending with a `run_settled` frame; without it, `nika run`
+prints the human storyboard. `--output json` prints only the typed `outputs:`.
+See [Events](/concepts/events) for the event model, [Traces](/concepts/traces)
+for the journal, and [Bindings](/concepts/bindings) for how the DAG
+propagates values.
 
 <Info>
-  The workflow grammar is locked and implemented: the `nika-schema`
-  crate ships the envelope, the analyzer and semantic validation
-  (type-checked bindings, secret-flow audit, cycle detection). That is
-  exactly what `nika check` runs on your file today.
+  The workflow grammar is implemented in the `nika-schema` crate (the
+  envelope and its parser); `nika-check` runs the analyzer and semantic
+  validation (type-checked bindings, secret-flow audit, cycle detection,
+  permits and cost). That is exactly what `nika check` runs on your file.
 </Info>
 
 ## Read next

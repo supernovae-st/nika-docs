@@ -48,7 +48,12 @@ MCP_REGISTRY_FENCE = re.compile(
 # green means the lesson broke.
 #   list-notes.nika · sdk/runtime/permits.mdx · `ls` under `permits: {}`
 #     is refused NIKA-SEC-004 at check, the refusal run() then throws.
-DELIBERATE_RED: dict[str, str] = {"list-notes.nika": "NIKA-SEC-004"}
+#   fetch-then-shell.nika · concepts/security.mdx · fetched content piped
+#     to `wc` through stdin: is refused by the order law, NIKA-SEC-015.
+DELIBERATE_RED: dict[str, str] = {
+    "list-notes.nika": "NIKA-SEC-004",
+    "fetch-then-shell.nika": "NIKA-SEC-015",
+}
 CODE = re.compile(r"NIKA-[A-Z]+-\d+")
 # A fence may name its file (```yaml child.nika). Named fences are
 # materialized as SIBLINGS before judging, so a composition parent can

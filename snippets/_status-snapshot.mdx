@@ -9,10 +9,15 @@
       It moved twice in three releases while these pages taught the old one;
       count-drift-gate check (g) is what stops that happening again.
 
-    STILL HAND-MAINTAINED (engine-main snapshot · frozen pages interpolate these):
-      head · crates* · libTests · clippyWarnings · adrs* · capabilityRules ·
-      hygieneVectors. They do NOT project from the binary. Do not put them
-      on reference/status.mdx. Hygiene vector 23 cannot see this repo.
+    STILL HAND-MAINTAINED (measured at the release tag, not projected):
+      head · crates* · wipCrates · adrs* · capabilityRules · hygieneVectors.
+      Re-measure them at each release tag: crates* and wipCrates from the
+      tag's Cargo.toml [workspace.metadata.diamond] (members · wip · layers,
+      as the tag's ROADMAP status block prints them), adrs* from
+      docs/adr/index.json, capabilityRules = the [[rules]] count of
+      crates/nika-catalog/data/model-capabilities.toml. They do NOT project
+      from the binary. Do not put them on reference/status.mdx. Hygiene
+      vector 23 cannot see this repo.
 
     Language facts (verbs, builtins, templates, spec-named providers) live in
     snippets/_canon.mdx — projected from nika-spec canon.yaml / `nika spec --canon`.
@@ -20,23 +25,23 @@
     Regenerate the binary fields: NIKA_BIN=… bash scripts/mintlify-snapshot.sh */}
 
 export const STATUS = {
-  head: "79588ad76",
+  head: "0bfde3765",
   branch: "main",
   version: "0.123.0",
   engineSha: "0bfde3765",
   firstCommand: "nika compile hello hello.nika",
-  cratesWorkspace: 56,
-  cratesAdmitted: 54,
+  cratesWorkspace: 90,
+  cratesAdmitted: 75,
   cratesTarget: "50-90",
   cratesCap: 100,
-  wipCrates: ["nika-chart", "nika-fx"],
-  libTests: 4809,
-  clippyWarnings: 0,
-  adrs: 67,
-  adrsAccepted: 53,
-  adrsProposed: 12,
+  wipCrates: ["nika-chart", "nika-fx", "nika-proof", "nika-store", "nika-harness", "nika-execution", "nika-service-execution", "nika-serve", "nika-session", "nika-session-change", "nika-session-agent", "nika-session-host", "nika-session-intelligence", "nika-tui", "nika-tui-view"],
+  adrs: 114,
+  adrsAccepted: 93,
+  adrsProposed: 17,
+  adrsSuperseded: 3,
+  adrsRejected: 1,
   providers: 39,
-  capabilityRules: 49,
+  capabilityRules: 57,
   hygieneVectors: 40,
   lastUpdated: "2026-10-23"
 };

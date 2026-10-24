@@ -1,6 +1,6 @@
 ---
 title: "Security model"
-description: "Absent permits is zero authority. SSRF, the shell blocklist, taint, and typed NIKA-SEC errors on the declared boundary."
+description: "Absent permits is zero authority. The SSRF floor, the shell floor, the order law, taint, the lethal trifecta, and typed NIKA-SEC errors."
 sidebarTitle: "Security"
 icon: "shield-halved"
 ---
@@ -17,10 +17,10 @@ typed `NIKA-SEC-*` error your workflow can read, not a stack trace.
 
 | You write | The attacker controls | The defense |
 |---|---|---|
-| `invoke: nika:fetch` | the URL (or a page that redirects) | 3-layer SSRF defense, on by default |
-| `exec:` | argument values flowing from upstream tasks | shell blocklist + data-channel pattern |
-| `infer:` → tool use | the fetched content the model reads | trust levels + spotlight + injection scanning |
-| `secrets.*` bindings | log access | masked at the binding layer, never logged |
+| `invoke: nika:fetch` | the URL (or a page that redirects) | 3-layer SSRF floor, on by default (`NIKA-SEC-005`) |
+| `exec:` | argument values flowing from upstream tasks | shell floor (`NIKA-SEC-001`) + `permits.exec` allowlist + the order law (`NIKA-SEC-015`) |
+| `agent:` / tool use | the fetched content the model reads | agent tools whitelist (`NIKA-SEC-002`) + permit re-gate on tainted arguments (`NIKA-SEC-004`) + lethal-trifecta check with its human gate (`NIKA-SEC-009`) |
+| `secrets.*` bindings | log access | masked before events are written; a secret reaching a sink without `egress:` is refused (`NIKA-SEC-006`) |
 
 ## Permits — declare the blast radius
 
@@ -42,10 +42,9 @@ Two laws govern it:
 
 1. **No `permits:` block → zero authority**, not an unrestricted floor.
    Hardened defaults (SSRF, shell blocklist, secret masking) still apply,
-   and they do **not** grant exec, net, fs, or tools. Measured on
-   published 0.120.0 and GitHub 0.120.1: `exec: ["printf", "hello"]`
-   with no `permits:` is `NIKA-AUTH-006` at check, exit 2. Spec
-   01-envelope · LAW-AUTH-0324.
+   and they do **not** grant exec, net, fs, or tools. On 0.123.0,
+   `exec: ["printf", "hello"]` with no `permits:` is `NIKA-AUTH-006` at
+   check, exit 2. Spec 01-envelope · LAW-AUTH-0324.
 2. **Any `permits:` block → default-deny for the whole file.** Anything
    not listed is refused. A task reaching beyond the boundary is caught
    by `nika check` (`NIKA-SEC-004` or `NIKA-AUTH-006`, with the exact
@@ -89,12 +88,13 @@ verbatim from the engine (`nika-http`):
     Scheme allow-list (`http`/`https` only), blocked hostnames, and
     range checks for implicit loopback, RFC 1918, link-local/metadata
     (`169.254.169.254`), CGN, IPv6 local, v4-mapped v6. Spec
-    [01-envelope Exact-loopback declassification](https://github.com/supernovae-st/nika-spec/blob/60696338ef08adb25df6cca23cb47f0a39eb785a/spec/01-envelope.md):
+    [01-envelope Exact-loopback declassification](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/spec/01-envelope.md):
     the **only** SSRF carve-out is an exact `permits.net.http` literal —
     the closed set `localhost`, a `127.x.y.z` v4 literal, or `::1` /
     `[::1]`. Clearing is exact-host: a permitted `localhost` does **not**
-    clear `127.0.0.1` (measured on 0.120.1: that grant + fetch to
-    `127.0.0.1` is `NIKA-SEC-005`; an exact `127.0.0.1` grant fetches);
+    clear `127.0.0.1` (on 0.123.0, that grant with a fetch to
+    `127.0.0.1` is `NIKA-SEC-005` at check; an exact `127.0.0.1` grant
+    passes);
     a public name that resolves to loopback stays refused; RFC1918 /
     metadata named in the list stay floor-blocked (`NIKA-SEC-005`).
   </Step>
@@ -114,34 +114,85 @@ Response sizes are capped (64 MiB default) and self-signed TLS is
 rejected by default. Private-network access is opt-in configuration,
 never the default.
 
-## exec: the data-channel rule
+## exec: the order law (NIKA-SEC-015)
 
-`exec` in shell mode runs every command against a blocklist before
-spawn. But the structural defense is in how you write workflows:
-**tainted data goes through data channels, never code channels**.
+Content the workflow did not author must never reach a shell. An `exec:`
+task that sits downstream of a `nika:fetch` or `nika:notify` task, over a
+`with:` data edge or an `after:` control edge, is refused at check, whatever
+the channel: an argv element, `stdin:`, or no data at all. No `permits:`
+entry and no `lift:` can open this law.
 
-```yaml
-# ❌ tainted output interpolated into the argv
-bad:
-  with:
-    comment: ${{ tasks.fetch_comment.output }}
-  exec:
-    command: ["echo", "${{ with.comment }}"]
-
-# ✅ tainted output passed as data
-good:
-  with:
-    comment: ${{ tasks.fetch_comment.output }}
-  exec:
-    command: ["tee", "/tmp/comment.txt"]
-    stdin: "${{ with.comment }}"
+```yaml fetch-then-shell.nika
+# Refused at check: NIKA-SEC-015, the order law
+nika: fetch-then-shell
+model: mock/echo
+permits:
+  tools: ["nika:fetch"]
+  net:
+    http: ["api.github.com"]
+  exec: ["wc"]
+tasks:
+  pull:
+    invoke:
+      tool: nika:fetch
+      args:
+        url: "https://api.github.com/repos/supernovae-st/nika"
+        mode: raw
+  count:
+    with:
+      body: ${{ tasks.pull.output }}
+    exec:
+      command: ["wc", "-c"]
+      stdin: "${{ with.body }}"
+outputs:
+  bytes: ${{ tasks.count.output }}
 ```
 
-Passing tainted data to a privileged sink without going through a data
-channel raises a typed taint violation: taint is a property of the
-**data**, not of who runs the workflow.
+```text
+✖ ORDER    [NIKA-SEC-015] the order law · `count` shells on content `pull` fetched — `pull` → `count`. …
+           Fix: do the work in a builtin (`nika:jq` · `nika:grep`) instead of a shell, or cut the route so the fetched value never reaches `count`.
+```
 
-## The two authored doors
+Do the work in a builtin instead. Here the fetch extracts with `mode: jq`
+and a builtin writes the result, with no shell anywhere:
+
+```yaml fetch-then-transform.nika
+nika: fetch-then-transform
+model: mock/echo
+permits:
+  tools: ["nika:fetch", "nika:write"]
+  net:
+    http: ["api.github.com"]
+  fs:
+    write: ["./out/stars.json"]
+tasks:
+  pull:
+    invoke:
+      tool: nika:fetch
+      args:
+        url: "https://api.github.com/repos/supernovae-st/nika"
+        mode: jq
+        jq: "{stars: .stargazers_count, forks: .forks_count}"
+  save:
+    with:
+      stats: ${{ tasks.pull.output }}
+    invoke:
+      tool: nika:write
+      args:
+        path: ./out/stars.json
+        content: "${{ with.stats }}"
+        create_dirs: true
+outputs:
+  stats: ${{ tasks.pull.output }}
+```
+
+For values that may reach `exec:` (a caller's `inputs`, a model's answer),
+keep them in data channels: argv elements, each substituted on its own with
+no shell to break out of, or `stdin:`; never a `shell:` string. The resolved
+program must still match `permits.exec`: a model that answers a program name
+the allowlist does not hold fails the run with `NIKA-SEC-004`.
+
+## One authored door: lift: (two laws)
 
 Some legitimate workflows do need to cross one of these lines. Nika refuses
 to let that happen silently: there is exactly one door, `lift:`, authored,
@@ -175,50 +226,54 @@ Because it is one plain YAML key, `grep -rn 'lift:'` over a repo returns
 every place a law was opened, with the reason attached. That is the point:
 the escape hatch is auditable by construction.
 
-## Trust levels + prompt injection
+## Prompt injection: the boundary checks
 
-Content entering a workflow carries a trust level. Untrusted content
-(fetched pages, user comments) is tracked as it flows into prompts and
-tools:
+Nika does not try to detect injected instructions in text. It bounds what a
+model that has read untrusted content can make happen, with checks that hold
+whatever the model decides:
 
-| Defense layer | Error surface |
-|---|---|
-| dangerous tool invoked on untrusted data → blocked | `NIKA-SEC` family (`security_error`) |
-| strict-mode trust-level violation | `NIKA-SEC` family |
-| exfiltration canary token found in output | `NIKA-SEC` family |
-| prompt-injection scanner (+ ML detection) | `NIKA-SEC` family |
-| untrusted data reached a prompt without spotlight wrapping | `NIKA-SEC` family |
-| workflow recursion depth / self-launch blocked | `NIKA-SEC-003` (registered) |
+| Check | What it refuses | Code |
+|---|---|---|
+| Agent tools whitelist | an `agent:` calling a tool outside its declared `tools:` (default-deny) | `NIKA-SEC-002` |
+| Permit re-gate | a tainted argument that resolves outside `permits:` at run time | `NIKA-SEC-004` |
+| SSRF floor | a fetch into loopback, private, link-local or metadata space | `NIKA-SEC-005` |
+| Secret flow | a secret reaching a sink with no matching `egress:` entry | `NIKA-SEC-006` |
+| Lethal trifecta | a boundary that grants private reads, untrusted ingress (a fetch, an MCP tool, an agent that can reach one) and external egress, where the untrusted content reaches the egress and no blocking `nika:prompt` gate dominates it | `NIKA-SEC-009` |
+| Order law | fetched or notified content reaching any `exec:` task | `NIKA-SEC-015` |
+| Recursion bound | a self-launching workflow, or nested runs past the depth limit | `NIKA-SEC-003` |
 
-Do not freeze the `NIKA-SEC` family at three codes. The catalog on
-[Error codes](/reference/error-codes) is the live set (`NIKA-SEC-001`
-blocklist, `NIKA-SEC-002` agent whitelist, `NIKA-SEC-003` recursion,
-`NIKA-SEC-004` permit miss, and later SEC laws). Runtime trust layers
-emit in that namespace as they land.
-
-Every failure is a [typed error](/reference/error-codes) with a stable
-code and a `transient` flag. Your `on_error:` can act on it.
+Every failure is a [typed error](/reference/error-codes) with a stable code
+and a `transient` flag; `on_error:` can act on it. The catalog lists the full
+`NIKA-SEC` namespace.
 
 ## Secrets
 
-`${{ secrets.* }}` is a first-class namespace (vault/env/file-backed).
-Secret values are **masked in logs and traces** at the binding layer:
-they never appear in the event stream, and they are not readable back
-from a task's recorded output.
+`${{ secrets.* }}` is a first-class namespace, backed by an environment
+variable (`source: env`) or a file (`source: file`). Secret values are
+**masked** before events are written: they never appear in the event stream,
+and they are not readable back from a task's recorded output. A secret that
+reaches any sink without a matching `egress:` entry is refused
+(`NIKA-SEC-006`).
 
 ## Supply-chain hardening (the engine itself)
 
 - `unsafe_code = "forbid"` workspace-wide · zero `.unwrap()` in `src/` (CI-enforced)
 - `cargo deny` on every PR · `cargo audit` on every dependency change
 - Sealed kernel traits · external code cannot impersonate engine I/O
-- {STATUS.libTests} lib tests · {STATUS.clippyWarnings} clippy warnings · every crate passes 12 admission gates
+- An AGPL engine of {STATUS.cratesAdmitted} admitted crates plus
+  {STATUS.wipCrates.length} still pre-admission, some of which ship in the
+  binary (the Session, the terminal workspace, `nika serve`)
+- Every release ships SHA256 sums, a GitHub build attestation and SLSA
+  provenance ([Verify a download](/getting-started/installation#verify-a-download))
 - AGPL-3.0-or-later · the source travels with the binary, always auditable
 
 ## Reporting a vulnerability
 
 **security@supernovae.studio** (please not via public issues).
-Acknowledgement ≤72h, triage ≤7 days, disclosure ≤90 days. Full policy,
-disclosure process and the out-of-scope list:
+Acknowledgement ≤72h, triage ≤7 days, disclosure ≤90 days. Security fixes
+land on 0.123.x patch releases and on `main`; versions older than 0.123 are
+unsupported, so upgrade before reporting. Full policy, disclosure process and
+the out-of-scope list:
 [SECURITY.md](https://github.com/supernovae-st/nika/blob/main/SECURITY.md).
 
 ## See also

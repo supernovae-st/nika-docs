@@ -1,151 +1,127 @@
 ---
 title: "Architecture"
-description: "Nika is a single Rust binary composed of layered crates, six layers deep plus the L0.5 trait half-layer. Strict downward dependencies, enforced by cargo-deny."
+description: "How the nika binary is built: Rust crates in strict layers, from pure types to the command line, with downward-only dependencies enforced in CI."
 sidebarTitle: "Architecture"
 icon: "layer-group"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-You install one `nika` binary (or `@supernovae-st/nika` for apps). This
-page is why that binary can `check` a file before it runs: internally it
-is **{STATUS.cratesAdmitted} admitted crates** across six layers
-(L0 → L5) plus the **L0.5** trait half-layer. Each crate has one job.
-Together they parse `.nika`, resolve templates, route to providers,
-execute verbs, and emit a structured event stream. Workflow authors do
-not pick a layer.
+You install one `nika` binary (or `@supernovae-st/nika` for apps). This page
+explains why that binary can `check` a file before it runs. Workflow authors
+never pick a layer: this is how the engine is built, not how you use it.
+
+Internally the engine is a Rust workspace of {STATUS.cratesWorkspace} crates
+at v{STATUS.version}: {STATUS.cratesAdmitted} admitted past the twelve
+[admission gates](/architecture/admission), and
+{STATUS.wipCrates.length} still pre-admission, several of which ship in the
+binary (the Session, the terminal workspace, `nika serve`). Each crate has one
+job. Together they parse `.nika`, check it, route to providers, execute verbs
+and record the run.
 
 <Tip>
   **Looking for the authoritative contract?** The [Architecture tab](/architecture/layers)
-  holds the curated specs:
-  [Layer registry](/architecture/layers) · [Forward-compat invariants](/architecture/forward-compat-invariants)
-  · [L0 decisions](/architecture/l0-decisions) · [12-gate admission](/architecture/admission).
-  This page orients the concept; those pages are the contract.
+  holds it: [layers](/architecture/layers) ·
+  [forward-compatibility invariants](/architecture/forward-compat-invariants) ·
+  [L0 decisions](/architecture/l0-decisions) · [admission](/architecture/admission).
+  This page orients; those pages are the record.
 </Tip>
 
-## One binary, six layers
+## Layers, bottom up
 
 ```mermaid
 %%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
 flowchart BT
-  L0["L0 · pure types · zero I/O · sync"]:::z
+  L0["L0 · pure types · parser · checker · zero I/O"]:::z
   L05["L0.5 · kernel traits (async OK)"]:::a
-  L1["L1 · effects (fs · http · process · provider impls)"]:::b
-  L2["L2 · verbs · services · builtins"]:::c
-  L3["L3 · runtime · policy · sandbox"]:::d
-  L4["L4 · interfaces · cli · serve · mcp · lsp · sdk"]:::e
-  L5["L5 · nika binary (&lt;500 LOC)"]:::f
+  L1["L1 · effects (fs · http · process · sandbox · clock)"]:::b
+  L15["L1.5 · provider wires · builtins · local inference"]:::b
+  L2["L2 · the four verbs · registry client"]:::c
+  L3["L3 · runtime · execution"]:::d
+  L4["L4 · interfaces · cli · serve · mcp · lsp · dap · session"]:::e
 
-  L0 --> L05 --> L1 --> L2 --> L3 --> L4 --> L5
+  L0 --> L05 --> L1 --> L15 --> L2 --> L3 --> L4
 
   classDef z fill:#1e3a8a,color:#fff,stroke:#3b82f6
-  classDef a fill:#6d28d9,color:#fff,stroke:#8b5cf6
+  classDef a fill:#0e3a5c,color:#fff,stroke:#22d3ee
   classDef b fill:#065f46,color:#fff,stroke:#10b981
   classDef c fill:#92400e,color:#fff,stroke:#f59e0b
   classDef d fill:#9a3412,color:#fff,stroke:#f97316
   classDef e fill:#991b1b,color:#fff,stroke:#ef4444
-  classDef f fill:#4c1d95,color:#fff,stroke:#a78bfa,font-weight:bold
 ```
 
-Arrows read "built on". The `nika` binary at L5 composes L4 interface
-crates, which consume L3 runtime + policy, which orchestrate L2 verbs,
-which call L1 effects through L0.5 kernel traits, which use L0
-foundation types. **Upward imports are a CI hard failure.**
+Arrows read "built on". L4 interface crates consume the L3 runtime, which
+orchestrates the L2 verbs, which call L1 effects and L1.5 provider wires
+through L0.5 kernel traits, which use L0 types. **An upward import fails CI.**
+The `nika` binary is built from the `nika-cli` crate at L4; a separate L5
+composition root is not built.
 
 ## Each layer answers one question
 
-| Layer | Question | Examples |
+| Layer | Question | Examples at v{STATUS.version} |
 |---|---|---|
-| **L0** | What shapes does the engine use to talk about itself? | `WorkflowId`, `NikaError`, `ModelCapabilities`, `Timestamp` |
-| **L0.5** | What contract does a provider / fs / clock / tool executor implement? | `Provider`, `Fs`, `Clock`, `ToolExecutor`, `MemoryStore` |
-| **L1** | How do I actually call OpenAI / read a file / run a process? | `nika-provider-openai`, `nika-fs`, `nika-process`, `nika-http` |
-| **L2** | How do I execute a Nika verb end-to-end? | `nika-verb-exec`, `nika-verb-infer`, `nika-verb-agent` |
-| **L3** | How do I orchestrate a full workflow safely? | `nika-runtime`, `nika-shield`, `nika-sandbox` (future minors) |
-| **L4** | How does a human / tool / IDE talk to Nika? | `nika-cli`, `nika-serve`, `nika-mcp`, `nika-lsp` |
-| **L5** | What's the single entrypoint that wires it all? | `nika` binary (&lt;500 LOC) |
+| **L0** | What shapes does the engine use, and what does a file mean? | `nika-types`, `nika-error`, `nika-event`, `nika-schema`, `nika-check`, `nika-cel`, `nika-catalog` |
+| **L0.5** | What contract does a provider, filesystem, clock or tool executor implement? | `nika-kernel` (a facade over `nika-kernel-core`, `-ai`, `-runtime`, `-plugin`), `nika-kernel-mock` |
+| **L1** | How do I read a file, call a host, run a process safely? | `nika-fs`, `nika-http`, `nika-exec-runner`, `nika-sandbox-seatbelt`, `nika-sandbox-landlock`, `nika-clock` |
+| **L1.5** | How do I speak to a model provider, run a builtin, infer locally? | `nika-providers`, `nika-providers-access`, `nika-builtin`, `nika-extract`, `nika-infer-local` |
+| **L2** | How do I execute a Nika verb end-to-end? | `nika-verb-infer`, `nika-verb-exec`, `nika-verb-invoke`, `nika-verb-agent` |
+| **L3** | How do I orchestrate a whole workflow safely? | `nika-runtime`, `nika-runtime-laws`, `nika-execution` |
+| **L4** | How does a person, tool or editor talk to Nika? | `nika-cli` (the binary), `nika-serve`, `nika-mcp`, `nika-lsp`, `nika-dap`, `nika-trace`, `nika-session` |
 
 ## Why layers matter
 
 <AccordionGroup>
   <Accordion title="Mechanical sorting · no debate" icon="layer-group">
     New crate? Answer the [mechanical sort test](/architecture/layers#mechanical-sort-test)
-    in under 10 seconds. No meetings, no "where should this live", no
-    spiral into abstraction-first design.
+    in under ten seconds. No meetings, no "where should this live".
   </Accordion>
   <Accordion title="Trustable L0 · no hidden I/O" icon="shield">
-    L0 has **zero I/O, zero async, zero runtime deps**. Your build script
-    can safely `use nika_types::*` without pulling in tokio. Property tests
-    against L0 types run in milliseconds.
+    L0 has **zero I/O, zero async, zero runtime dependencies**. The parser and
+    the checker that `nika check` runs live there: the command line reads the
+    file, and the judgment itself calls no model and performs no effect.
+    Property tests against L0 types run in milliseconds.
   </Accordion>
   <Accordion title="Swappable effects · test hermetically" icon="rotate">
-    Every I/O crate implements a kernel trait with a mock twin. Unit tests
-    use `nika-kernel-mock::MockClock`, `MockFs`, `MockProvider`: no
-    network, no disk, no wall-clock flakiness. Invariant #27.
+    Every I/O crate implements a kernel trait with a mock twin. Unit tests use
+    `nika-kernel-mock` (`MockClock`, `MockFs`, `MockProvider`): no network, no
+    disk, no wall-clock flakiness.
   </Accordion>
-  <Accordion title="Capped blast radius · per-axis capabilities" icon="explosion">
-    Every L1 crate declares its capability axes in
-    `docs/architecture/security-axes.toml` (e.g., `net-egress` for HTTP,
-    `rw-fs` for filesystem). Silent axis escalation fails CI.
-    [12 axes total](/architecture/layers#security-axes).
+  <Accordion title="The runtime boundary · permits and the sandbox" icon="explosion">
+    What a workflow may touch is declared in its `permits:` block and enforced
+    at run time, with `exec:` children confined by the OS sandbox (Seatbelt on
+    macOS, bubblewrap on Linux). Crates were also meant to declare capability
+    axes in a registry; no CI check enforces that vocabulary in 0.123.0. See
+    [Security](/concepts/security).
   </Accordion>
 </AccordionGroup>
 
-## What ships at v{STATUS.version}
-
-**{STATUS.cratesAdmitted} crates admitted** past 12 gates:
-
-<CardGroup cols={3}>
-  <Card title="nika-types" icon="cube">**L0** · Foundation value types</Card>
-  <Card title="nika-error" icon="triangle-exclamation">**L0** · NIKA-XXX error infra</Card>
-  <Card title="nika-catalog" icon="book">**L0** · {STATUS.providers} providers · {STATUS.capabilityRules} rules</Card>
-  <Card title="nika-kernel" icon="circuit-board">**L0.5** · 40 ISP traits</Card>
-  <Card title="nika-kernel-mock" icon="circuit-board">**L0.5** · Pure-memory mocks</Card>
-  <Card title="nika-catalog-verify" icon="check">**L4** · Catalog validation tool</Card>
-</CardGroup>
-
-`nika-schema` (parser · analyzer · static check) is admitted and live: it is what `nika check` runs. The six cards above are a sample, not the full admitted set.
-
-[Live constellation →](/reference/constellation) · [12-gate admission →](/architecture/admission)
-
 ## The build model
 
-Every crate earns its seat through twelve gates. No exceptions, no late
-fixes. One crate = one atomic commit.
+A crate is admitted when it passes [twelve gates](/architecture/admission):
+specification first, tests red before code, zero clippy warnings, mutation
+testing, property tests where they matter, benchmarks on hot paths, clean
+docs, a canary workflow, a review, and one atomic commit. Pre-admission crates
+can live in the workspace, and ship, while they work towards those gates;
+`Cargo.toml` lists them.
 
-<Steps>
-  <Step title="SPEC → TDD → IMPL">
-    Spec at `docs/crate-specs/<crate>.md` first. Tests red before
-    implementation. Minimal code to green.
-  </Step>
-  <Step title="CLIPPY 0 → MUTATION ≥ 90%">
-    Zero clippy warnings. `cargo mutants -p <crate>` kills ≥ 90% of
-    generated mutants.
-  </Step>
-  <Step title="PROPERTY → BENCHMARKS → DOCS">
-    Property tests via `proptest` where it matters (parsers, taint,
-    crypto). Criterion benchmarks on hot paths. `cargo doc` clean.
-  </Step>
-  <Step title="CANARY → PARITY → REVIEW → COMMIT">
-    End-to-end `.nika` canary. Golden diff vs legacy (Phase 5+).
-    3-agent swarm review. One atomic commit with a gate checklist in the body.
-  </Step>
-</Steps>
+After 0.123 the engine is maintained: security fixes, bug fixes and
+compatibility. No new crate admissions are planned.
 
-[Full 12-gate spec →](/architecture/admission)
+[The crate constellation →](/reference/constellation) · [Admission →](/architecture/admission)
 
 ## See also
 
 <CardGroup cols={2}>
   <Card title="Layers" icon="layer-group" href="/architecture/layers">
-    Authoritative layer registry with mechanical sort test.
+    The layer registry and the mechanical sort test.
   </Card>
   <Card title="Forward-compat invariants" icon="shield-halved" href="/architecture/forward-compat-invariants">
-    The 8 patterns that keep the public API stable across years.
+    The patterns that keep the public API stable.
   </Card>
   <Card title="L0 decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13: why no proc macros in L0, why sibling sinks not god-trait.
+    The early foundation decisions and what became of them.
   </Card>
   <Card title="Admission" icon="check-double" href="/architecture/admission">
-    The 12 gates with rationale per gate.
+    The twelve gates with their rationale.
   </Card>
 </CardGroup>

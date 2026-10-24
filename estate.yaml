@@ -212,7 +212,7 @@ files:
   evidence: "hand-written entry to mintlify_snapshot.py, the atomic owner of version, engineSha, providers, firstCommand and lastUpdated"
 - path: "scripts/oracle-sweep.py"
   class: authored
-  sha256: 8f876735e0714f28954f2eddee8f8880936d4b8f0f1d15208e07789c0b5ce223
+  sha256: 1658ff0526f4add1328f9991ff87ac39a3e25611a3fd80214c893d2c2358f4ad
   evidence: "hand-written gate · SPDX header + the copy-paste-invariant design prose"
 - path: "scripts/sdk_contract_gate.py"
   class: authored
@@ -254,7 +254,7 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: de1bd2a1b34987527549e65513b3c4fdb11ed3d8f80b6e91ff3d1bef0178ec73
+  sha256: 6c27a20153ace0abfbad936467c1ceec91922eb177cdbd05425c754220dcd707
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 - path: "snippets/data/releases.json"
@@ -271,7 +271,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 292
-  aggregate_sha256: faa15df379970e73560cb3e305ec2444efd6c14a46c24e089554d8fe05ab01ae
+  aggregate_sha256: fd69dbf61fefd2bcff3d602ccdab429dda8991509bd7c9d29a7b97b41efe3e39
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

@@ -51,7 +51,7 @@ without reading). → [Bindings](/concepts/bindings)
 the unwind task runs after that producer, success or failure. A producer
 that never started has no cleanup. A terminal report task (`after: {x:
 terminal}`) is a different edge — it is not unwind.
-→ [Workflows](/concepts/workflows)
+→ [Workflows · Cleanup](/concepts/workflows#cleanup-unwind)
 
 ## The expressions
 
@@ -61,8 +61,9 @@ not a template engine and not shell: it evaluates an expression and gives
 back a value. → [Bindings](/concepts/bindings)
 
 **`jq`** — the query language used to pull a field out of a result or reshape
-one, in `outputs:` and in extraction. Same `jq` as the command-line tool.
-→ [Bindings](/concepts/bindings)
+one: in `extract:` bindings, the `nika:jq` builtin and `nika:fetch`'s
+`mode: jq`, never inside `${{ }}` or `outputs:` (those are CEL). Same `jq` as
+the command-line tool. → [Bindings](/concepts/bindings)
 
 ## Safety and cost
 
@@ -85,11 +86,24 @@ human gate stands in the path. → [Security](/concepts/security)
 network, and it costs nothing, so a workflow can be rehearsed end to end
 before any real model is named. → [Providers](/concepts/providers)
 
+**Access path** — how Nika reaches a model: a local server, a provider API
+with your key, or an agent app you are signed into (a **harness seat**). The
+model is in the file; the access path is chosen on the machine.
+→ [Providers · Model and access](/concepts/providers#model-and-access)
+
 ## Records and process
 
 **Trace** — the record a run leaves: one **NDJSON** file (one JSON object per
 line) holding what ran, in what order, and at what cost, hash-chained so a
 later edit is visible. → [Traces](/concepts/traces)
+
+**Seal** — a run's record signed with the machine's run-signing key. A
+**sealed** trace verifies as `SEALED`; an unsigned one is intact but
+`UNSEALED`. → [Seal your runs](/getting-started/installation#seal-your-runs)
+
+**Receipt** — the engine-issued pointer to a run's record that the SDK hands
+your code; `traceVerify(receipt)` asks the engine to check it.
+→ [Receipts](/sdk/runtime/receipts)
 
 **Hint** — advisory output from `nika check`, named like `native-first/002`.
 A hint never fails your check on its own; `--native-strict` is the flag that
@@ -99,6 +113,30 @@ promotes the `native-first` family to a failure.
 **NEP** — *Nika Enhancement Proposal*, the numbered process by which the
 language changes. A `NEP-00NN` reference in output points at the proposal
 that introduced the rule you just met.
+
+## The TypeScript SDK
+
+**Admission** — the engine's check before a run starts. Refused: the SDK's
+`run()` throws and no run exists. Admitted: you get a run handle.
+→ [How the SDK works](/sdk/how-it-works)
+
+**Run, job, execution** — a **run** is this client's handle on one admitted
+workflow (`run.id`); over HTTP the same id names the server's durable
+**job**; an **execution** is the engine's own id for what ran
+(`execution_id`). → [How the SDK works](/sdk/how-it-works)
+
+**Settlement** — how a run ended: its status, cause, task tally and spend
+(`result.settlement`). → [Results](/sdk/runtime/results)
+
+**Served name** — a workflow's path from a `nika serve` project root, such
+as `workflows/hello.nika`. → [Server quickstart](/sdk/remote/serve-quickstart)
+
+**Resident** — a running `nika serve` process.
+→ [Resident server](/sdk/operations/resident-server)
+
+**Session** — the conversation bare `nika` opens on a terminal: describe a
+job, review the proposed file, save it, run it.
+→ [The terminal Session](/getting-started/session)
 
 ## Coming from somewhere else
 
