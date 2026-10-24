@@ -64,8 +64,9 @@ installed binary, and if the editor and the command line disagree, trust
 
 An `exec:` task runs inside the workflow's declared `fs` boundary, and on
 macOS the Seatbelt sandbox holds `git` to that boundary too. Unless the
-boundary grants the repository's `.git` directory, `git log`, `git diff` and
-the like fail with `NIKA-SEC-001` ("seatbelt refused the confined process").
+boundary grants the repository's `.git` directory, git cannot see the
+repository: `git log`, `git diff` and the like exit 128 with
+`fatal: not a git repository`, and the task fails with `NIKA-EXEC-001`.
 `NIKA_SANDBOX=off` does not change this: the setting only matters on a host
 without a sandbox backend, and macOS always has one.
 
