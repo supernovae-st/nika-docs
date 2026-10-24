@@ -6,7 +6,6 @@ icon: "rocket"
 ---
 
 import { CANON } from "/snippets/_canon.mdx";
-import { SHOWCASE } from "/snippets/_showcase.mdx";
 
 Start with [offline examples](/examples/offline): known inputs, exact
 outputs, no provider key and no external services. The broader gallery
@@ -43,17 +42,18 @@ incomplete and does not pick a substitute.
 <p className="mt-2 text-sm text-center opacity-80">**Start from a workflow.** Run `nika try` with no argument to see the gallery built into the binary: a numbered learning path and a shelf of ready-made jobs, each marked with the verbs it uses. `nika try <name>` previews one offline. *The listing is captured from the real CLI.*</p>
 
 The YAML you read here is projected verbatim from
-[`nika-spec/examples/showcase/`](https://github.com/supernovae-st/nika-spec/tree/main/examples/showcase),
+[`nika-spec/examples/`](https://github.com/supernovae-st/nika-spec/tree/main/examples),
 where each file passes the same conformance gate as the spec's own test
 suite. That validates the file against that contract; it does not prove
 that an external integration is configured or that a model will produce
 a useful result. A mock rehearsal proves neither a live integration nor
 an AI answer.
 
-These {SHOWCASE.count} workflows ({SHOWCASE.t1} starters · {SHOWCASE.t2} chains
-· {SHOWCASE.t3} fan-outs · {SHOWCASE.t4} epics) plus the foundation set
-exercise **all {CANON.builtins} builtins**, the {CANON.verbs} verbs, and
-{CANON.providers} providers: cloud, local and mock.
+Together with the numbered learning path that `nika try` lists, these
+workflows exercise **all {CANON.builtins} builtins** and the
+{CANON.verbs} verbs. Each job page ends with a **Run it** section: the
+offline rehearsal, the sample files to download, and what the real run
+needs.
 
 ## How to read a workflow diagram
 
@@ -72,8 +72,8 @@ flowchart LR
 
 ## T1 · Starters
 
-Four tasks or fewer, one chain or one diamond. You can run one of these
-in your first five minutes.
+Small files: one chain, one diamond or one small fan-out. You can run one
+of these in your first five minutes.
 
 <Columns cols={2}>
   <Card title="Standup digest" icon="sunrise" href="/examples/standup-digest">
@@ -95,12 +95,24 @@ in your first five minutes.
     **Marketing**: one post becomes a thread, a LinkedIn post and a
     newsletter blurb, in parallel.
   </Card>
+  <Card title="Local-first daily brief" icon="house-signal" href="/examples/local-first-daily-brief">
+    **Local-first**: a real fetch, a local model and a verifiable trace,
+    with no key anywhere.
+  </Card>
+  <Card title="Image FX batch" icon="wand-magic-sparkles" href="/examples/image-fx-batch">
+    **Creators / Media**: a folder of photos to deterministic art. No
+    model, no network.
+  </Card>
+  <Card title="Remove an owned file" icon="trash-can" href="/examples/remove-owned-file">
+    **Any team**: write a scratch file, then remove exactly that file and
+    never one the workflow did not create.
+  </Card>
 </Columns>
 
 ## T2 · Chains
 
-Four to six tasks. Structured outputs, human gates, and the data
-builtins start pulling their weight.
+Chains of a handful of tasks: structured outputs, human gates, and the
+data builtins start pulling their weight.
 
 <Columns cols={2}>
   <Card title="Release notes" icon="rocket" href="/examples/release-notes">
@@ -130,6 +142,21 @@ builtins start pulling their weight.
   <Card title="Release radar" icon="signal" href="/examples/release-radar">
     **DevOps**: dependency feeds diffed against last run. Only the
     NEW ships reach you.
+  </Card>
+  <Card title="Model bench" icon="scale-unbalanced" href="/examples/model-bench">
+    **Engineering**: the same question, three local models, one measured
+    table.
+  </Card>
+  <Card title="CSV chart report" icon="chart-column" href="/examples/csv-chart-report">
+    **Data**: a CSV becomes a chart and a one-page report. No model.
+  </Card>
+  <Card title="Transcript show-notes" icon="podcast" href="/examples/transcript-shownotes">
+    **Podcasts / Meetings**: a raw transcript becomes typed chapters,
+    quotes and a summary in one bounded call.
+  </Card>
+  <Card title="Bookmark triage" icon="bookmark" href="/examples/bookmark-triage">
+    **Research**: a pile of saved URLs becomes one table, dead links
+    included.
   </Card>
 </Columns>
 
@@ -168,16 +195,20 @@ report on themselves.
 
 <Columns cols={2}>
   <Card title="Deep research brief" icon="microscope" href="/examples/deep-research-brief">
-    **Research / VC**: plan → budgeted research agent → thinking-model
-    synthesis. Auditable end to end.
+    **Research / VC**: plan → budgeted research agent → synthesis.
+    Auditable end to end.
+  </Card>
+  <Card title="Corpus digest" icon="layer-group" href="/examples/corpus-digest">
+    **Research**: a pile of documents becomes one sourced brief, and no
+    model window ever holds two of them.
   </Card>
   <Card title="Incident war room" icon="fire-extinguisher" href="/examples/incident-war-room">
     **SRE / On-call**: evidence in parallel, a typed timeline, and a
     recovery check before the draft.
   </Card>
   <Card title="CEO Monday brief" icon="briefcase" href="/examples/ceo-monday-brief">
-    **Founders / Execs**: market + engineering + KPIs synthesized, and
-    the ping tells you what the run cost.
+    **Founders / Execs**: market, engineering pulse and KPIs gathered
+    behind one human decision, one dated brief.
   </Card>
   <Card title="Release train" icon="train" href="/examples/release-train">
     **DevOps / Release**: parallel gates, a human GO, a hold until the
@@ -217,16 +248,18 @@ files, so it cannot go stale.
   (data) — each reference declares a typed edge — and `after:` orders on
   state. The DAG has no invisible edges, and the body reads
   `${{ with.<name> }}`, never `tasks.*` (`NIKA-VAR-021`).
-- **Local by default** · showcase envelopes lead `ollama/qwen3.5:4b`:
-  zero API keys, inference stays on your machine. Cloud providers appear
-  only as per-task overrides or swap hints, never as the envelope
-  default.
+- **Local by default** · a showcase that calls a model names a local
+  Ollama model (`ollama/qwen3.5:4b` for most): zero API keys, inference
+  stays on your machine. Cloud providers appear only as swap hints, never
+  as the default.
 - **Projection, not copy-paste** · these pages and the
-  [nika.sh use-cases explorer](https://nika.sh/#use-cases) render the
-  same files, projected by `showcase-projector.py`. Any drift fails CI.
+  [nika.sh use cases](https://nika.sh/use-cases) render the same spec
+  files, projected by the spec's `showcase-projector.py`; nobody edits
+  the copies by hand.
 
-Repeat an AI task weekly? Send it: [nika.sh/convert](https://nika.sh/convert).
-We convert the best ones into showcase workflows, credited to you.
+Repeat an AI task every week? Describe it in the
+[terminal Session](/getting-started/session) and keep the `.nika` file it
+writes.
 
 <Card title="Write your first workflow" icon="pen" href="/getting-started/first-workflow">
   Ready to write your own? Start from the guided first-workflow walk.

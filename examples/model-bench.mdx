@@ -149,26 +149,32 @@ bench is FOR:
 
 ## Run it
 
-Rehearsal writes nothing:
+<Note>
+  **What it needs:** [Ollama](https://ollama.com) with the three contenders pulled (`qwen2.5:14b`, `llama3.2:3b`, `qwen2.5:0.5b`). There is no offline rehearsal: each task pins its own model, `--model` replaces only a workflow's default model, and this file has none, so `nika try model-bench` needs the same three models.
+</Note>
 
-```bash
-nika try model-bench
-```
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try model-bench
+    ```
 
-To run a file you own, copy the YAML on this page to `model-bench.nika`,
-pull the seats you want to compare, then:
+    It runs the same three pinned models: pull them first (next step), or the rehearsal fails on each one that is missing (`NIKA-INFER-001`).
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `model-bench.nika` in a new folder. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    ollama pull qwen2.5:14b
+    ollama pull llama3.2:3b
+    ollama pull qwen2.5:0.5b
+    nika check model-bench.nika
+    nika run model-bench.nika
+    ```
 
-```bash
-ollama pull qwen2.5:14b llama3.2:3b qwen2.5:0.5b
-nika check model-bench.nika
-nika run model-bench.nika
-cat bench/model-bench.md
-```
+    The run writes `out/model-bench.md`.
 
-`nika compile` does not instantiate showcase jobs.
-
-The first call to each model pays its load time — run the bench twice
-and read the warm numbers. Swap any seat for `openai/…`,
-`xai/…` or `anthropic/…` to bench a cloud contender against your
-local incumbents (the cost column of `nika check` starts telling the
-price story the moment a priced model enters).
+    The first call to each model pays its load time: run the bench twice and read the warm numbers. Swap any seat for a cloud model (`mistral/…`, `anthropic/…`, `openai/…`) to bench it against your local models, with its key and `--max-cost-usd`.
+  </Step>
+</Steps>

@@ -6,19 +6,22 @@ icon: "train"
 ---
 
 > **T4 epic · devops / release engineering**: time is a first-class
-> citizen. The train holds with `nika:wait until:` (an absolute
-> timestamp, not a sleep), the gates' duration is computed with
-> `nika:date op: diff`, a human signs the departure, and the record
-> lands in the journal **whether the ship success or not**.
+> citizen. The train holds with `nika:wait until:` (an absolute instant
+> computed when the departure is signed, not a sleep), the gates'
+> duration is computed with `nika:date op: diff`, a human signs the
+> departure, and the record lands in the journal **whether the train
+> left or not**.
 
 ## The job
 
-Release day choreography: tests, lint and audit run as one parallel
-wave; an assert refuses departure on any red; the conductor signs with
-full information (« gates GREEN in 12 min · ship 1.4.0 in the 09:00Z
-window? »); the train holds until the window; ships; re-polls prod
-until it reports the new version; and `after: { live: terminal }` files
-the departure record either way.
+Release day choreography: three gate checks run as one parallel wave
+(the version file matches the version you ship, the changelog has its
+section, the schema parses), jq folds them into one board, and an assert
+refuses departure on any red. The conductor signs with full information
+(« Green in 3 min · ship 1.4.0, departure window opens in 15m? »), the
+train holds until the window, ships only when armed, re-polls prod until
+it reports the new version, and `after: { live: terminal }` files the
+departure record either way.
 
 ## The shape
 
@@ -344,20 +347,25 @@ outputs:
 
 <Steps>
   <Step title="until: is a hold, not a sleep">
-    `nika:wait` with `until: 2026-07-28T09:00:00Z` parks the train at
-    an ABSOLUTE time (capped by `timeout: 48h`). A relative `duration:`
-    would drift with however long the gates took.
+    `window` adds `inputs.hold_for` to the moment the departure was signed
+    (`signed_at`), and `hold` waits `until:` that instant, capped by
+    `timeout: 48h`. An instant survives a restart where a `duration:` would
+    start counting again, and computing it after the signature keeps it in
+    the future: a literal timestamp fails `NIKA-BUILTIN-WAIT-002` the day
+    after it was written.
   </Step>
   <Step title="The human signs with full information">
     `nika:date op: diff` computes the gates' wall time, and the
     `nika:prompt` message carries it: the conductor decides knowing
-    how fresh the green is. The assert after makes « no » terminal.
+    how fresh the green is. A « no » skips `signed_at`, so nothing after it
+    runs except the record.
   </Step>
   <Step title="The record always lands">
-    `verify` re-polls prod (retry × 5, exponential) until it reports
-    the shipped version · the final assert refuses to claim success
-    otherwise · `after: { live: terminal }` emits the journal event with
-    the REAL status, even on failure.
+    `ship` runs only with `--var depart=true`. `verify` re-polls prod
+    (retry × 5, exponential) until it reports the shipped version, the
+    final assert refuses to claim success otherwise, and
+    `after: { live: terminal }` emits the journal event with the REAL
+    status, even on failure.
   </Step>
 </Steps>
 
@@ -367,14 +375,48 @@ outputs:
 |---|---|---|
 | `nika:wait` `until:` (absolute) | `hold` | [Builtins](/reference/builtins) |
 | `nika:date` `op: diff` | `gate_time` | [Builtins](/reference/builtins) |
-| parallel gate wave + asserts | `tests`/`lint`/`audit` → `gates_green` | [Workflows](/concepts/workflows) |
+| parallel gate wave, one fold, one assert | `declared` · `notes` · `schema` → `board` → `gates_green` | [Workflows](/concepts/workflows) |
 | `after: { live: terminal }` departure record | `record` | [Workflows](/concepts/workflows) |
+
+## Run it
+
+<Note>
+  **What it needs:** A folder that holds `VERSION`, a `CHANGELOG.md` with a `[<version>]` heading, and `schemas/workflow.schema.json` (a JSON Schema with an `$id`): the three gates read them. No model and no key. The departure itself (`--var depart=true`) also needs `./scripts/release.sh` and a live `/version` endpoint; an unarmed run never reaches either.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try release-train
+    ```
+
+    The rehearsal brings its own release files, writes nothing in your folder and stops at the `conductor` gate, as a real run does.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `release-train.nika`. To try it outside a real release, create the three files its gates read:
+
+    ```bash
+    mkdir -p schemas
+    printf '0.1.0\n' > VERSION
+    printf '# Changelog\n\n## [0.1.0]\n\n- First release.\n' > CHANGELOG.md
+    printf '{"$id": "https://example.com/workflow.schema.json"}\n' > schemas/workflow.schema.json
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check release-train.nika
+    nika run release-train.nika --var version="$(cat VERSION)" --var hold_for=5s --answer conductor=true
+    ```
+
+    A green board, a signed departure, a five-second hold, then no ship: `depart` is off, so `ship` is skipped and the run emits a `release.train.departed` event with `departed: false`. Without `--answer`, a terminal asks you at the `conductor` gate; a script pauses there (exit 4) and prints the `--resume` line.
+  </Step>
+</Steps>
 
 ## Make it yours
 
-- Generate the notes on the same train: insert [Release notes](/examples/release-notes) between `approved` and `hold`.
+- Generate the notes on the same train: call [Release notes](/examples/release-notes) as a child workflow between `conductor` and `hold`.
 - Canary first: duplicate `ship`/`verify` against staging, gate prod behind a second assert.
-- The `inputs.hold_for` dial makes this a scheduled artifact: your cron passes next Tuesday 09:00Z, the train handles the rest.
+- Move the window: `inputs.hold_for` sets how long after the signature it opens (`15m` by default), so `--var hold_for=2h` holds the train two hours after the conductor signs.
 
 <Card title="Back to all examples" icon="rocket" href="/examples/overview">
   The full gallery: four tiers, every construct taught by a real job.

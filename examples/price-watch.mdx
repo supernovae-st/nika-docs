@@ -112,8 +112,10 @@ outputs:
     comparison. False → the task is skipped, not failed.
   </Step>
   <Step title="The webhook stays secret">
-    `secrets:` declares a vault/env-backed reference. The URL is masked
-    in logs: `${{ secrets.alerts_webhook }}` never appears in a trace.
+    `secrets:` declares an env-backed reference (`source: env`; `file` is
+    the other store 0.123.0 resolves, and a `vault` source passes check but
+    fails at run with `NIKA-1702`). The URL is masked in logs:
+    `${{ secrets.alerts_webhook }}` never appears in a trace.
   </Step>
 </Steps>
 
@@ -125,6 +127,35 @@ outputs:
 | `extract:` jq bindings | `check.price` | [Bindings](/concepts/bindings) |
 | `when:` CEL comparison | `alert` | [Workflows](/concepts/workflows) |
 | `secrets:` | envelope | [YAML syntax](/reference/yaml-syntax) |
+
+## Run it
+
+<Note>
+  **What it needs:** Nothing: the placeholder shop host resolves nowhere, and the `recover:` sample sits above the target, so the alert is skipped. No model, no key.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try price-watch
+    ```
+
+    Nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `price-watch.nika` in a new folder. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check price-watch.nika
+    nika run price-watch.nika
+    ```
+
+    The run writes no file: it pings your webhook only when the price drops below the target.
+
+    To watch a real product, point `const.product_api` at it, add its host to `permits.net.http`, and set `ALERTS_WEBHOOK_URL`.
+  </Step>
+</Steps>
 
 ## Make it yours
 

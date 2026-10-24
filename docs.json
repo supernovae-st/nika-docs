@@ -348,7 +348,8 @@
               "examples/og-images",
               "examples/price-watch",
               "examples/social-repurpose",
-              "examples/image-fx-batch"
+              "examples/image-fx-batch",
+              "examples/remove-owned-file"
             ]
           },
           {

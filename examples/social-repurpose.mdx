@@ -123,9 +123,10 @@ outputs:
     no deps between them, so the engine runs all three at the same time.
   </Step>
   <Step title="with: keeps the merge readable">
-    `bundle` aliases the three outputs to one-letter names. `with:` is
-    optional sugar, but a template interpolating three long task paths
-    is where you want it.
+    `bundle` binds the three outputs to one-letter names in `with:`, the
+    boundary every task reference crosses: a `${{ tasks.… }}` written
+    straight into `args:` is refused (`NIKA-VAR-021`). Short names keep a
+    template that interpolates three outputs readable.
   </Step>
   <Step title="One multi-line write">
     The `content:` is a YAML block scalar with three interpolations:
@@ -140,6 +141,43 @@ outputs:
 | diamond fan-out / fan-in | the whole DAG | [Workflows](/concepts/workflows) |
 | `with:` aliasing | `bundle` | [Bindings](/concepts/bindings) |
 | block-scalar `content:` | `bundle.args` | [YAML syntax](/reference/yaml-syntax) |
+
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample launch post.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try social-repurpose
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `social-repurpose.nika` in a new folder, then download the sample it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/launch-post.md "$FIXTURES/launch-post.md"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check social-repurpose.nika
+    nika run social-repurpose.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run social-repurpose.nika
+    ```
+
+    The run writes `out/social-bundle.md`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+  </Step>
+</Steps>
 
 ## Make it yours
 

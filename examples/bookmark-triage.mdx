@@ -148,23 +148,29 @@ when all you need is identity, don't ask for the body.
 
 ## Run it
 
-Rehearsal writes nothing:
+<Note>
+  **What it needs:** Network access to `example.com` and `github.com`. No model and no key. With no network the run still succeeds: every row takes the `recover:` path and the table lists it as dead.
+</Note>
 
-```bash
-nika try bookmark-triage
-```
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try bookmark-triage
+    ```
 
-To run a file you own, copy the YAML on this page to
-`bookmark-triage.nika`, then:
+    Nothing is written in your folder. Its network fetches still go out: a rehearsal replaces the model, not the tools.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `bookmark-triage.nika` in a new folder. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check bookmark-triage.nika
+    nika run bookmark-triage.nika
+    ```
 
-```bash
-nika check bookmark-triage.nika
-nika run bookmark-triage.nika
-open out/bookmarks.md
-```
+    The run writes `out/bookmarks.md`.
 
-`nika compile` does not instantiate showcase jobs.
-
-Replace `inputs.bookmarks` with your own export (most browsers dump
-bookmarks to HTML — one jq pass turns that into the URL list this file
-expects).
+    Replace `const.bookmarks` with your own list (most browsers export bookmarks as HTML; one jq pass turns that into the URL list this file expects), and add each new host to `permits.net.http`.
+  </Step>
+</Steps>

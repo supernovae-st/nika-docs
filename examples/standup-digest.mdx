@@ -14,9 +14,20 @@ icon: "sunrise"
 Every morning you reconstruct yesterday from memory. Your git history
 already knows. This workflow reads the commits since yesterday, stamps
 the date from a builtin (not from the model's imagination), and writes
-the three standup bullets in your tone. If Git fails or the sandbox refuses
-the read, the workflow records “Git history unavailable” and tells the model
-to invent no commit facts. This is distinct from an empty successful log.
+the three standup bullets in your tone. When Git fails or is refused, the
+workflow records “Git history unavailable” and tells the model to invent
+no commit facts. This is distinct from an empty successful log, and on
+macOS in 0.123.0 it is the default outcome:
+
+<Warning>
+  **Limit on macOS in 0.123.0.** The sandbox confines `exec: git` to the
+  workflow's declared filesystem boundary, which grants no read of `.git`.
+  The confined `git` cannot read the repository and exits with status 128
+  (`NIKA-EXEC-001`), even inside a real one, so `history` takes its
+  `recover:` value and the note says history is unavailable instead of
+  listing your commits. See
+  [Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos).
+</Warning>
 
 ## The shape
 
@@ -110,8 +121,9 @@ outputs:
     the bindings (`${{ with.today }}` · `${{ with.history }}`).
   </Step>
   <Step title="The note lands on disk">
-    `nika:write` takes an explicit `content:`. A write without content
-    writes nothing. The workflow also returns the note via `outputs:`.
+    `nika:write` takes an explicit `content:`: a write without it is refused
+    by `nika check` (`NIKA-BUILTIN-001`). The workflow also returns the note
+    via `outputs:`.
   </Step>
 </Steps>
 
@@ -123,6 +135,37 @@ outputs:
 | `exec:` | `history` | [The 4 verbs](/concepts/verbs) |
 | `nika:date` · `nika:write` | `today` · `save` | [Builtins](/reference/builtins) |
 | `outputs:` | envelope tail | [YAML syntax](/reference/yaml-syntax) |
+
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`), run from a Git repository you work in. Git is refused on macOS in 0.123.0, so there the note says history is unavailable ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try standup-digest
+    ```
+
+    A mock model answers and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `standup-digest.nika` at the root of a Git repository you work in. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check standup-digest.nika
+    nika run standup-digest.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run standup-digest.nika
+    ```
+
+    The run writes `out/standup-note.md`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+  </Step>
+</Steps>
 
 ## Make it yours
 

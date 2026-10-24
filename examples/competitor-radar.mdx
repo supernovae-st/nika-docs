@@ -14,8 +14,9 @@ icon: "satellite-dish"
 ## The job
 
 Monday 8am: what did they ship? Instead of 40 tabs, the sitemap is
-mapped, the 8 freshest pages are read concurrently, and one brief tells
-you what it signals. Every page that survives lands in the fan-in; every
+mapped, every page it says changed in the last `window_days` days (at
+most `max_pages` of them) is read concurrently, and one brief tells you
+what it signals. Every page that survives lands in the fan-in; every
 page that doesn't is reported, not fatal.
 
 ## The shape
@@ -256,10 +257,11 @@ outputs:
 
 <Steps>
   <Step title="The collection is computed, not hardcoded">
-    The URL list crosses the boundary
-    (`map_recent: ${{ tasks.map.recent }}` in `with:`), then
-    `for_each: { items: ${{ with.map_recent }} }` fans out: eight URLs this week,
-    three next week. The DAG doesn't change.
+    `nika:date` computes the cutoff and `recent` keeps the sitemap entries
+    modified since then. That URL list crosses the boundary
+    (`urls: ${{ tasks.recent.output }}` in `with:`), then
+    `for_each: { items: ${{ with.urls }} }` fans out: six URLs this week,
+    two next week. The DAG doesn't change.
   </Step>
   <Step title="Resilience is per-iteration">
     `retry:` (exponential + jitter) and `timeout: "30s"` apply to EACH
@@ -267,8 +269,10 @@ outputs:
     the batch.
   </Step>
   <Step title="The fan-in is just a reference">
-    `${{ tasks.pages.output }}` is the ARRAY of per-page outputs, in
-    input order. One prompt consumes the whole crawl.
+    `${{ tasks.pages.output }}` is the array of per-page outputs, in
+    input order. `readable` zips it back onto the URLs with jq
+    `transpose` and drops the pages that failed; one prompt reads the
+    result.
   </Step>
 </Steps>
 
@@ -280,11 +284,45 @@ outputs:
 | `max_parallel` + `fail_fast` | `pages` | [Workflows](/concepts/workflows) |
 | per-iteration `retry:` + `timeout:` | `pages` | [Error model](/reference/error-codes) |
 | `${{ item }}` loop-local | `pages.args.url` | [Bindings](/concepts/bindings) |
+| `nika:date` now → subtract → format | `now` · `cutoff` · `cutoff_day` | [Builtins](/reference/builtins) |
+
+## Run it
+
+<Note>
+  **What it needs:** Network access to the site you watch (`nika.sh` by default) and a local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) for the digest. No key and no secret.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try competitor-radar
+    ```
+
+    A mock model answers and nothing is written in your folder. Its network fetches still go out: a rehearsal replaces the model, not the tools.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `competitor-radar.nika` in a new folder. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check competitor-radar.nika
+    nika run competitor-radar.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run competitor-radar.nika
+    ```
+
+    The run writes `radar/competitor-brief.md`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    To watch another site, change `inputs.sitemap_url` and the host in `permits.net.http` together: a permit is a literal and cannot read an input (`NIKA-AUTH-007`).
+  </Step>
+</Steps>
 
 ## Make it yours
 
-- Track THREE competitors: lift the sitemap URL into a list and nest the pattern, or run the workflow per competitor and merge the briefs.
-- Filter the sitemap by date with a sharper jq binding before fanning out.
+- Track THREE competitors: run the workflow once per sitemap with `--var sitemap_url=…`, each host listed in `permits.net.http`, and merge the briefs.
+- Narrow the selection in the `recent` jq expression (a path prefix such as `/blog/`, for example) before fanning out.
 - Schedule it for Monday 07:30 from your host's cron. The brief is on your desk before standup.
 
 <Card title="Next · Localization factory" icon="language" href="/examples/localization-factory">

@@ -5,10 +5,10 @@ description: "T4 epic · research: plan → budgeted research agent → thinking
 icon: "microscope"
 ---
 
-> **T4 epic · research / consulting / VC**: plan-then-execute. A fast
-> model writes the plan, an agent works the web **under explicit
-> budgets**, a thinking model synthesizes. Three stages, three different
-> cost profiles, every intermediate on disk.
+> **T4 epic · research / consulting / VC**: plan-then-execute. A planning
+> pass turns the topic into four queries, an agent works the web **under
+> explicit budgets**, and a synthesis pass writes the brief. Three stages,
+> each with its own ceiling, and the brief lands on disk with its sources.
 
 ## The job
 
@@ -179,10 +179,11 @@ outputs:
 ## How it works
 
 <Steps>
-  <Step title="Right model, right stage">
-    Planning is a haiku-class job (`model:` override on the task);
-    synthesis gets a `thinking:` budget. The envelope default covers the
-    middle. One file, three cost profiles.
+  <Step title="Each stage has its own ceiling">
+    `plan` is a schema-typed call capped at 400 tokens, the agent is
+    bounded by turns and tokens, and `brief` is capped at 2,000 tokens. One
+    envelope model serves the three stages; a task can pin its own
+    `model:` when one stage deserves a different model.
   </Step>
   <Step title="The agent has a leash">
     `max_turns: 25` + `max_tokens_total: 120000` bound the loop;
@@ -200,10 +201,43 @@ outputs:
 
 | Construct | Where | Reference |
 |---|---|---|
-| per-task `model:` override | `plan` | [Providers](/concepts/providers) |
+| `infer.schema:` plan | `plan` | [The 4 verbs](/concepts/verbs) |
 | agent budgets + `nika:done` | `investigate` | [The 4 verbs](/concepts/verbs) |
-| `thinking:` | `brief` | [The 4 verbs](/concepts/verbs) |
+| derived filename slug (`nika:jq`) | `slug` | [Builtins](/reference/builtins) |
 | typed `outputs:` | envelope tail | [YAML syntax](/reference/yaml-syntax) |
+
+## Run it
+
+<Note>
+  **What it needs:** Nothing to rehearse: under `--model mock/echo` the whole file, agent loop included, runs offline. Real research needs a model that calls tools and network access to the hosts in `permits.net.http`.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try deep-research-brief
+    ```
+
+    A mock model answers and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `deep-research-brief.nika` in a new folder. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check deep-research-brief.nika
+    nika run deep-research-brief.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run deep-research-brief.nika
+    ```
+
+    The run writes `research/<slug>.md`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    `--var topic="…"` picks the subject; the file derives a safe slug from it for the filename.
+  </Step>
+</Steps>
 
 ## Make it yours
 

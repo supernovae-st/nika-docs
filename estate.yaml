@@ -18,11 +18,11 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 428
+  classified_files: 429
   file_rows: 46
   pattern_rows: 6
   by_class:
-    authored: 421
+    authored: 422
     authored-pin: 1
     generated: 4
     pinned-copy: 2
@@ -88,7 +88,7 @@ files:
     - "scripts/release_catalog.py"
 - path: "docs.json"
   class: authored
-  sha256: 7cbd9adb043889a25af5c96e20534997f8fbb9b4c025d0a33923425d8aa91327
+  sha256: 6d307f29ea08be9b8f6ed6987b4f3300100049429c2c2be5cc1b25e0fc9bfedd
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -270,8 +270,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 292
-  aggregate_sha256: 0d1c0fd67dde80828b97584a353ee9c7f86407b21e626dac3d6a352531f6cdf0
+  match_count: 293
+  aggregate_sha256: 9957d37a80c3af9e872aa5248dc8caf1cf54bfaf6e88ee0cbc437c217f4cb783
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

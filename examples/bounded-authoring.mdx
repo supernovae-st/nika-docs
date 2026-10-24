@@ -23,6 +23,7 @@ the model, check with that exact `provider/model` and evaluate real outputs.
 | Resource | Bound | What it does not guarantee |
 |---|---|---|
 | Collection | JSON Schema `maxItems` followed by `nika:assert` before the fan | `max_parallel` alone cannot cap the number of items |
+| Collection count | `for_each.max_items`: a longer collection fails the task before its first item (`NIKA-VAR-006`), never truncated | The size of each item, or a cost ceiling |
 | Active fan iterations | `for_each.max_parallel` | A total run duration or cost ceiling |
 | Model call | `infer.max_tokens` | Input token count or semantic correctness |
 | Attempt duration | Task `timeout` with `run.clock` | A single deadline for all retry attempts |

@@ -18,6 +18,17 @@ READ and nothing else, in parallel, four at a time. A deterministic
 `nika:grep` sweep counts the TODO debt beside the LLM pass, and the
 final REVIEW.md ends with a verdict.
 
+<Warning>
+  **Limit on macOS in 0.123.0.** The sandbox confines `exec: git` to the
+  workflow's declared filesystem boundary, which grants no read of `.git`.
+  The confined `git` cannot read the repository and exits with status 128
+  (`NIKA-EXEC-001`), even inside a real one, so `changed` takes its
+  `recover:` value: no file reaches the swarm, no agent runs, and the
+  summary says the diff was unavailable instead of calling the branch
+  clean. See
+  [Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos).
+</Warning>
+
 ## The shape
 
 {/* showcase:dag-begin pr-review-fanout.nika */}
@@ -284,13 +295,46 @@ outputs:
 | `agent.schema:` | `reviews` | [The 4 verbs](/concepts/verbs) |
 | `nika:grep` sweep | `todo_sweep` | [Builtins](/reference/builtins) |
 
+## Run it
+
+<Note>
+  **What it needs:** A Git repository with changes under `./src` and a `const.base_ref` that exists, plus a local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`). Git is refused on macOS in 0.123.0, so there the diff is reported unavailable and no agent runs ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try pr-review-fanout
+    ```
+
+    A mock model answers and nothing is written in your folder. It stops at the `approve` gate, as a real run does.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `pr-review-fanout.nika` at the root of the repository you want reviewed. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check pr-review-fanout.nika
+    nika run pr-review-fanout.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run pr-review-fanout.nika
+    ```
+
+    The run writes `REVIEW.md`.
+
+    It asks at the `approve` gate before anything else runs. On a terminal you answer; in a script it pauses (exit 4) and prints the `--resume` line that continues it, or you answer up front with `--answer approve=true`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+  </Step>
+</Steps>
+
 ## Make it yours
 
 - Specialize the swarm: route `*.rs` files to a Rust-prompted agent and `*.sql` to a migrations-prompted one with two filtered fan-outs.
-- Add `mcp:git/*` to the tools to let reviewers read blame and history (still no write).
+- Let reviewers read blame and history (still no write): declare a Git MCP server in `.nika/mcp_servers.json`, pin its tools with `nika mcp approve <server>`, and add its read tools to the agent's `tools:` and to `permits.tools`.
 - Fail CI on blockers: end with `nika:assert` on `size()` of the blocker slice.
 
 <Card title="Level up · T4 epic" icon="microscope" href="/examples/deep-research-brief">
-  Final tier: multi-stage pipelines. Plan, budgeted agent, thinking
-  synthesis, self-reporting runs.
+  Final tier: multi-stage pipelines. A plan, a budgeted agent, a
+  synthesis, and human gates where effects begin.
 </Card>
