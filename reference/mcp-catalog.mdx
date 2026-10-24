@@ -16,8 +16,8 @@ references servers by id: Nika handles the rest. Count the live set from
 the engine source — do not freeze a number here.
 
 <Info>
-  **Canonical source:** [`crates/nika-catalog/data/mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/mcp-servers.toml).
-  Schema: `nika/mcp-servers@1.0`. Build-time invariants (enforced in
+  **Canonical source:** [`crates/nika-catalog/data/mcp-servers.toml`](https://github.com/supernovae-st/nika/blob/v0.123.0/crates/nika-catalog/data/mcp-servers.toml).
+  Schema: `nika/mcp-servers@1.1`. Build-time invariants (enforced in
   `build.rs`): unique ids, packages+remotes non-empty, known category,
   pricing ∈ {free, freemium, paid}, alias non-collision.
 </Info>
@@ -78,16 +78,20 @@ outputs:
 
 Install the server package in this project, create `data/article.txt`, then
 check the workflow. The checker validates the declared server; a successful
-check does not attest a server installation or handshake. Inspect the installed server before running it. Nika records its tool
-definitions at the first handshake; subsequent drift requires review. `mock/echo`
-keeps model calls offline and echoes the prompt; choose a configured language
-model for an actual summary.
+check does not attest a server installation or handshake. Before a run may
+call any of its tools, review them and pin them: `nika mcp approve <server>`
+pins the tool definitions the server serves now. A run refuses a server with
+no pinned tools (`NIKA-MCP-006`) and a tool whose definition changed since
+(`NIKA-MCP-003`) until you approve again. `mock/echo` keeps model calls
+offline and echoes the prompt; choose a configured language model for an
+actual summary.
 
 ```bash
 npm install @modelcontextprotocol/server-filesystem
 mkdir -p data
 printf 'A short article to read.\n' > data/article.txt
 nika check workflow.nika
+nika mcp approve filesystem   # review the listed tools, then pin them
 nika run workflow.nika
 ```
 

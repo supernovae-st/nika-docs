@@ -22,10 +22,11 @@ This reference preserves the specification at the revision linked below. Source 
 ## Usage and behavior
 
 ```yaml illustration
+with: { data: "${{ tasks.A.output }}" }
 invoke:
   tool: "nika:convert"
   args:
-    input: "${{ tasks.A.output }}"     # the data to convert · string for text formats · structured for json/yaml/toml
+    input: "${{ with.data }}"          # the data to convert · string for text formats · structured for json/yaml/toml
     from: csv                          # REQUIRED · enum · json | yaml | toml | csv
     to: json                           # REQUIRED · enum · json | yaml | toml | csv
     has_header: true                   # OPTIONAL · CSV only · default true
@@ -33,6 +34,8 @@ invoke:
     formula_guard: false               # OPTIONAL · CSV emit only · default false (see below)
 ```
 Universal format converter · 4 formats v0.1 (`json` · `yaml` · `toml` · `csv`) · 12 directions in scope (4×3 minus identity) · `from == to` is rejected (`NIKA-BUILTIN-CONVERT-001` · `validation_error` · an identity conversion is an authoring bug). Throws · `-002` (the input does not parse as `from:` · `tool_error`).
+
+**CSV cells (normative)** · reading CSV yields every cell as a **string** (`"10"`, never `10`): convert before arithmetic or ordering, e.g. `map(.amount | tonumber) | add` in `nika:jq`, since `add` over strings concatenates and `max_by` over strings orders text. The field separator is counted on the first line outside double quotes: a semicolon (a European spreadsheet export, whose decimals take the comma) or a tab that outnumbers the comma is the separator, otherwise the comma (RFC 4180). Emitting CSV writes a JSON `null` as an empty cell, as an absent key already is, never the text `null`.
 
 **`columns`** (CSV emit only) · an array of column names in the required order. JSON objects carry no key order: without `columns`, output keys are sorted alphabetically. Named columns come first (even for empty rows); any other keys follow sorted. To preserve a CSV header through filtering, pass its observed columns in their original order to the JSON→CSV conversion. Duplicate names retain their first position; a named column absent from every row is emitted with empty cells. A non-array or non-string member is a `NIKA-BUILTIN-CONVERT-001` error, never a silent fallback to the default order. `formula_guard` still applies to the emitted headers and cells.
 
@@ -55,8 +58,8 @@ Reference implementation · `serde_transcode` 1.1+ orchestrator (zero-allocation
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/stdlib/builtins-v0.1.md#L341) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/stdlib/builtins-v0.1.md#L357) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/canon/builtins.yaml).
 
-Tool identity: `nika:convert`. Specification revision: `480f5b80cb77`.
+Tool identity: `nika:convert`. Specification revision: `6390b08eb979`.
 
 <Ecosystem />

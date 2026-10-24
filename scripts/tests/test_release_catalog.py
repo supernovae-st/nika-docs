@@ -32,6 +32,19 @@ class CatalogTests(unittest.TestCase):
         self.assertNotIn('{value}', page)
         self.assertNotIn('Fourth.', page)
 
+    def test_a_bold_lead_sentence_in_what_is_a_highlight(self):
+        # Notes with no bulleted change headings still lead their What section
+        # with one bold sentence; that sentence, not a guess, is the summary.
+        body = ('## What\n\n**A conversation from the request to a result.** Open\n'
+                '`nika`, describe the work.\n\n## Verify\n\n**Not a highlight.** Details.')
+        data = catalog.fetch(lambda _: [release(body=body)])
+        self.assertEqual(data['releases'][0]['highlights'],
+                         ['A conversation from the request to a result.'])
+        # Bulleted headings still win, and a What section with neither stays empty.
+        both = '## What\n\n**Lead.** Text.\n\n- **Bullet heading.** More.'
+        self.assertEqual(catalog.highlights(both), ['Bullet heading.'])
+        self.assertEqual(catalog.highlights('## What\n\nRead the changes.\n\n## Install\n\n**x**'), [])
+
     def test_rendered_text_preserves_flags_and_inert_prose(self):
         for value in ['nika check --json', '<Tag>{value}</Tag> [x](javascript:x)',
                       'quotes " and backslashes \\ with `code`', 'Unicode — « »']:

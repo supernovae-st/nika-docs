@@ -40,16 +40,20 @@ FENCE = re.compile(r"```yaml([^\n]*)\n(.*?)```", re.DOTALL)
 MCP_REGISTRY_FENCE = re.compile(
     r"```json\s+(\.nika/mcp_servers\.json)\s*\n(.*?)```", re.DOTALL
 )
-# No deliberate reds today. release-radar carried one (the SEC-009
-# witness · verdict-coverage 2026-07-28 §DECIDED) until 2026-07-31, when
-# the registry proof pass superseded it: the same file ships as an
-# installable entry whose cert says conformance=pass, its two trifecta
-# twins already carry the canonical NEP-0020 gate, and the refusal
-# witness lives where witnesses belong — the spec's conformance fixture
-# pair (trifecta-realized-flow-ungated / -human-gate-dominates). The
-# inverted-assertion MECHANISM stays: register any future witness here
-# as {"file.nika": "NIKA-CODE"} and a green means the lane broke.
-DELIBERATE_RED: dict[str, str] = {}
+# Deliberate reds: a page that TEACHES a refusal shows the refused file
+# whole, so a reader can reproduce the refusal. release-radar carried one
+# (the SEC-009 witness) until 2026-07-31, when the spec's conformance
+# fixture pair took it over. The inverted assertion stays: each entry
+# {"file.nika": "NIKA-CODE"} must be refused with exactly that code, and a
+# green means the lesson broke.
+#   list-notes.nika · sdk/runtime/permits.mdx · `ls` under `permits: {}`
+#     is refused NIKA-SEC-004 at check, the refusal run() then throws.
+#   fetch-then-shell.nika · concepts/security.mdx · fetched content piped
+#     to `wc` through stdin: is refused by the order law, NIKA-SEC-015.
+DELIBERATE_RED: dict[str, str] = {
+    "list-notes.nika": "NIKA-SEC-004",
+    "fetch-then-shell.nika": "NIKA-SEC-015",
+}
 CODE = re.compile(r"NIKA-[A-Z]+-\d+")
 # A fence may name its file (```yaml child.nika). Named fences are
 # materialized as SIBLINGS before judging, so a composition parent can

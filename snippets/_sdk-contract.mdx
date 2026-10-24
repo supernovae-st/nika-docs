@@ -16,59 +16,64 @@ export const SourceContract = ({ sdk }) => (
   <Info>
     These pages describe the published <code>{sdk.package}@{sdk.sourceVersion}</code>
     {" "}<a href={sdk.sourceCandidate}>SDK release</a> and its matching
-    {" "}<a href={sdk.engineCandidate}>bundled native engine</a>. A newer engine
+    {" "}<a href={sdk.engineCandidate}>bundled engine</a>. A newer engine
     release or SDK main commit does not change an installed package. Use Node.js
-    22 or newer; no global Nika installation is required for local mode.
+    22 or newer, on macOS (arm64, x64) or Linux with glibc (x64, arm64); no
+    global Nika installation is required for local mode.
   </Info>
 )
 
 export const LocalContract = ({ sdk }) => (
   <Tip>
-    <strong>One facade, local by default.</strong> Import <code>Nika</code> from
-    the package root and omit <code>url</code>. The client resolves the engine
-    from <code>bin</code>, then <code>NIKA_BIN</code>, then the exact optional
-    platform package. It deliberately refuses an implicit <code>PATH</code>
-    {" "}lookup. These examples target the published
-    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} SDK release</a>.
+    <strong>One client, local by default.</strong> Import <code>Nika</code> from
+    the package root and omit <code>url</code>. The client takes the engine
+    from <code>bin</code>, then <code>NIKA_BIN</code> (both absolute paths), then
+    the platform package npm installed with it; it never uses a
+    {" "}<code>nika</code> found on your <code>PATH</code>. These examples target
+    the published <a href={sdk.sourceCandidate}>{sdk.sourceVersion} SDK release</a>.
   </Tip>
 )
 
 export const RemoteContract = ({ sdk }) => (
   <Info>
-    <strong>The same facade selects HTTP when <code>url</code> and
-    {" "}<code>token</code> are present.</strong> Contained served names go directly
-    to the resident and need no local binary or source. Explicit local paths
-    such as <code>./workflow.nika</code> require a compatible local engine
-    to capture an immutable snapshot. The source OpenAPI includes jobs,
-    SSE, cancellation, trace diagnostics, workflows, schedule read/write
+    <strong>The same client selects HTTP when <code>url</code> and
+    {" "}<code>token</code> are present.</strong> A served name such as
+    {" "}<code>workflows/release.nika</code> (its path from the project root) goes
+    directly to the server and needs no local engine or file. An explicit local
+    path such as <code>./release.nika</code> needs a compatible local engine to
+    capture an immutable snapshot. The released OpenAPI of
+    {" "}<code>nika serve</code> {sdk.sourceVersion} covers jobs, SSE events,
+    cancellation, trace verification, workflow listing, schedule read and write,
     and stateless authoring (<code>POST /v1/compile</code>, behind
-    {" "}<code>compile()</code>). It does not include
-    {" "}<code>POST /v1/run</code>, artifact routes, job listing, or schedule
-    list/delete/trigger/backfill routes. These examples target the published
-    <a href={sdk.sourceCandidate}> {sdk.sourceVersion} SDK release</a>. The remote server owns its engine version; check its
-    compatibility separately from the bundled local payload.
+    {" "}<code>compile()</code>). It has no <code>POST /v1/run</code>, artifact,
+    job-list, or schedule list, delete, trigger or backfill route. The server
+    owns its engine version; check its compatibility separately from the
+    bundled local engine.
   </Info>
 )
 
 export const SdkDoors = () => (
   <CardGroup cols={3}>
+    <Card title="How it works" icon="diagram-project" href="/sdk/how-it-works">
+      The two doors, the run lifecycle and who owns what.
+    </Card>
     <Card title="Start" icon="play" href="/sdk/start/quickstart">
-      Install the published package and complete one typed run.
+      Install the published package and complete one typed, verified run.
     </Card>
     <Card title="Project" icon="folder-tree" href="/sdk/project/nika-yaml">
       nika.yaml, arm policy, precedence and runtime state.
     </Card>
     <Card title="Local API" icon="terminal" href="/sdk/local/client">
-      Check, run, observe, cancel and verify through the local engine.
+      Check, run, observe, cancel and compile through the bundled engine.
     </Card>
-    <Card title="Runtime" icon="wave-pulse" href="/sdk/runtime/events">
-      Admission, events, terminal results and durable receipts.
+    <Card title="Runtime" icon="wave-pulse" href="/sdk/runtime/results">
+      Results, events, errors, receipts, spend caps and permits.
     </Card>
-    <Card title="Remote API" icon="satellite-dish" href="/sdk/remote/client">
-      Authenticated jobs, recovery, SSE, workflows and schedules.
+    <Card title="Remote API" icon="satellite-dish" href="/sdk/remote/serve-quickstart">
+      Authenticated jobs, recovery, SSE, workflows and schedules on nika serve.
     </Card>
     <Card title="Operations" icon="shield-halved" href="/sdk/operations/ci">
-      Admission, resident serving, OS bridges and security.
+      CI admission, resident serving, OS schedulers and security.
     </Card>
     <Card title="Reference" icon="brackets-curly" href="/sdk/reference/methods">
       Constructor, methods, errors and exported types.

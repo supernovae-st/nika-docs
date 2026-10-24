@@ -1,6 +1,6 @@
 ---
 title: "SDK configuration"
-description: "Local, remote and per-operation options for the merged One SDK source contract."
+description: "Constructor, remote and per-operation options of @supernovae-st/nika 0.123.0."
 sidebarTitle: "Configuration"
 icon: "sliders"
 ---
@@ -13,8 +13,8 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 
 ```ts
 interface NikaSharedConfig {
-  eventBufferSize?: number      // default 256
-  machineBufferBytes?: number   // default 64 KiB
+  eventBufferSize?: number      // default 4096 (256 up to 0.118.7); also the largest per-view bufferSize
+  machineBufferBytes?: number   // default 64 KiB: one engine frame or diagnostic
 }
 ```
 
@@ -27,8 +27,10 @@ interface NikaLocalConfig extends NikaSharedConfig {
 }
 ```
 
-Engine resolution is explicit `bin`, then `NIKA_BIN`, then the exact optional
-platform package. Implicit `PATH` lookup is refused.
+Engine resolution is `bin`, then `NIKA_BIN`, then the platform package npm
+installed with the SDK. `bin` and `NIKA_BIN` must be absolute paths: a bare
+name or a relative path throws `NikaConfigurationError`. A `nika` on your
+`PATH` is never used.
 
 ## Remote when a URL is present
 
@@ -58,11 +60,11 @@ interface NikaCheckOptions {
 }
 
 interface NikaRunOptions {
-  inputs?: Record<string, unknown>             // literal typed values — the app channel
+  inputs?: Record<string, unknown>             // literal typed values: the app channel
   vars?: Record<string, string | number | boolean>  // deprecated: native --var operator channel
-  model?: string
-  maxCostUsd?: number
-  idempotencyKey?: string                      // required for HTTP admission
+  model?: string                               // local only: replaces the envelope model, not task pins
+  maxCostUsd?: number                          // local only: the run's metered-spend cap, in USD
+  idempotencyKey?: string                      // required for HTTP admission; refused locally
 }
 
 interface NikaEventsOptions {
@@ -93,9 +95,11 @@ form. Combining `vars` with `inputs` rejects `run()`.
 
 Remote `check` refuses `model` and `nativeStrict`. Remote `run` requires
 `idempotencyKey` (reuse the same key and request after an uncertain
-response) and refuses `vars`, `model` and `maxCostUsd`. Signals stop a
-request or observer; only `run.cancel()` requests cancellation of admitted
-work; `run.result()` carries the actual outcome.
+response) and refuses `vars`, `model` and `maxCostUsd` with
+`NikaCompatibilityError`; the server applies its own spending ceiling
+([Spend caps](/sdk/runtime/spend)). Signals stop a request or observer; only
+`run.cancel()` requests cancellation of admitted work; `run.result()` carries
+the actual outcome.
 
 <CardGroup cols={2}>
   <Card title="Method index" icon="list" href="/sdk/reference/methods">

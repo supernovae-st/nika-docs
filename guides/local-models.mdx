@@ -1,6 +1,6 @@
 ---
 title: "Local models"
-description: "Get a model onto your machine in one command: Ollama, any Hugging Face GGUF, LM Studio, llama.cpp or vLLM. Inference stays on your laptop."
+description: "Run every model step on your own machine: Nika's built-in local inference, Ollama, any Hugging Face GGUF, LM Studio, llama.cpp or vLLM."
 sidebarTitle: "Local models"
 icon: "microchip"
 ---
@@ -8,9 +8,78 @@ icon: "microchip"
 Point `model:` at a local server and model inference stays on your
 machine. Other steps in the workflow can still contact services, such as
 a URL fetch, an MCP server or a hosted model chosen for another task.
-This page is the ladder, from the one-command path to production servers.
+This page is the ladder, from the server built into `nika` to production
+servers.
 
-## 1. The one-command path: Ollama
+## 1. Built in: `nika model pull` and `nika model serve`
+
+The `nika` binary carries its own local inference: no daemon to install,
+one models folder (`~/.nika/models`).
+
+<Steps>
+  <Step title="Pull a GGUF from the Hugging Face Hub">
+    ```bash
+    nika model pull unsloth/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M
+    ```
+
+    The size prints before the download, and a file of 2 GiB or more asks
+    you to confirm (`--yes` for scripts). An interrupted pull resumes, and
+    `HF_TOKEN` authenticates gated repositories. The pull is a command you
+    run, not a workflow step, so no `permits:` block governs it.
+  </Step>
+  <Step title="Serve it">
+    ```bash
+    nika model serve --model unsloth/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M --model-id qwen3-4b
+    ```
+
+    A foreground, OpenAI-compatible server starts on `127.0.0.1:8712`:
+    loopback only, one generation at a time, `Ctrl-C` stops it. Its banner
+    prints the two lines a workflow needs.
+  </Step>
+  <Step title="Point a workflow at it">
+    In another terminal:
+
+    ```bash
+    export NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712
+    ```
+
+    ```yaml
+    model: llamacpp/qwen3-4b
+    ```
+
+    The served model rides the `llamacpp` provider, so the file needs no
+    new syntax.
+  </Step>
+</Steps>
+
+`nika model list` shows what is on disk and `nika model rm <owner/repo>`
+reclaims it.
+
+<Warning>
+  In 0.123.0 the built-in server loads **Qwen3-family GGUFs only**. A GGUF
+  of another family is refused when it loads; serve it with one of the
+  servers further down this page.
+</Warning>
+
+### Gear One: the pick `nika welcome` proposes
+
+`nika welcome` and `nika doctor` propose one local pull sized to your
+memory, under the name **Nika Gear One**. The pick is a table shipped in
+the binary:
+
+| Memory | Tier | `nika model pull …` | Download |
+|---|---|---|---|
+| 64 GB and more | workstation | `unsloth/Qwen3.8-27B-GGUF:UD-Q5_K_M` | 40 GB |
+| 24 GB and more | default | `unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M` | 16.5 GB |
+| 16 GB and more | standard | `unsloth/gemma-3-12b-it-GGUF:Q4_K_M` | 7.4 GB |
+| 8 GB and more | lite | `unsloth/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M` | 5.5 GB |
+
+None of these picks is marked verified in 0.123.0. The standard pick is a
+Gemma 3 model, which `nika model serve` cannot load: on a 16 to 23 GB
+machine, either pull the lite pick for the built-in server, or serve the
+Gemma file with llama.cpp's `llama-server` or LM Studio (below).
+
+## 2. The one-command path: Ollama
 
 Install [Ollama](https://ollama.com), then:
 
@@ -18,23 +87,25 @@ Install [Ollama](https://ollama.com), then:
 ollama pull qwen3.5:4b
 ```
 
-That's it. In any workflow (the same local default the engine scaffold
-and brew caveat teach):
+That's it. In any workflow (the same tag the Homebrew install suggests;
+the `nika init` scaffold starts smaller, with `ollama/qwen2.5:0.5b`):
 
 ```yaml
 model: ollama/qwen3.5:4b
 ```
 
-`nika doctor` confirms the wiring (it detects the running Ollama server and
-prints the exact fix if something is off).
+`nika doctor --ping` confirms the wiring: it connects to the local ports
+you configured and reads their model lists, without running a model.
 
 <Tip>
-  `qwen3.5:4b` is the first-run local default: small enough for most
-  laptops, good enough for structured extraction. Swap the tag for
-  anything in the [Ollama library](https://ollama.com/library):
-  `llama3.2`, `mistral`, `phi4`, larger Qwen variants. Rehearse with
-  `model: mock/echo` when you want zero daemon and zero keys — mock
-  simulates the model reply; it does not disable tools or effects.
+  `qwen3.5:4b` is small enough for most laptops and good enough for
+  structured extraction. It thinks before it answers, and the thinking
+  counts against `max_tokens`: size the ceiling for both, and if a run fails
+  `NIKA-INFER-004`, the thinking ate the budget. Swap the tag for anything in
+  the [Ollama library](https://ollama.com/library): `llama3.2`, `mistral`,
+  `phi4`, larger Qwen variants. Rehearse with `model: mock/echo` when you want
+  zero daemon and zero keys: mock simulates the model reply; it does not
+  disable tools or effects.
 </Tip>
 
 <video
@@ -51,9 +122,9 @@ prints the exact fix if something is off).
   <source src="/videos/nika-hero.webm" type="video/webm" />
   <source src="/videos/nika-hero.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**Audit first, then run on your own machine.** `nika check` clears a meeting-notes workflow before any model is called; then a local Ollama model (`ollama/llama3.2:3b`) turns a sample transcript into typed action items, written to `action-items.json` with a hash-chained trace. No provider key, no cloud call for the model. *Captured from the real CLI; the file is a shorter demo version of the [meeting actions](/examples/meeting-actions) example.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**Audit first, then run on your own machine.** `nika check` clears a meeting-notes workflow before any model is called; then a local Ollama model (`ollama/llama3.2:3b`) turns a sample transcript into typed action items, written to `action-items.json` with a hash-chained trace. No provider key, no cloud call for the model. *Captured from the real CLI: the check on nika 0.121.0, the local-model run on nika 0.109.2. The file is a shorter demo version of the [meeting actions](/examples/meeting-actions) example.*</p>
 
-## 2. Any Hugging Face GGUF, still one command
+## 3. Any Hugging Face GGUF through Ollama
 
 Ollama pulls directly from the Hugging Face Hub. Any public GGUF repo
 works, no account needed:
@@ -79,7 +150,7 @@ GB), `Q8_0` when you have RAM to spare, `Q2/Q3` only when memory is tight.
 The [Hub's GGUF filter](https://huggingface.co/models?library=gguf) lists
 every compatible repo.
 
-## 3. LM Studio: the visual browser
+## 4. LM Studio: the visual browser
 
 Prefer a GUI? [LM Studio](https://lmstudio.ai) browses Hugging Face,
 downloads models with a click, and serves an OpenAI-compatible endpoint.
@@ -89,42 +160,54 @@ Start its server, then:
 model: lmstudio/<the-model-id-shown-in-lm-studio>
 ```
 
-## 4. Servers: llama.cpp and vLLM
+## 5. Servers: llama.cpp and vLLM
 
 For shared machines and production:
 
 - [llama.cpp](https://github.com/ggml-org/llama.cpp) `llama-server` serves
-  any GGUF: `model: llamacpp/<model>`
+  a GGUF: `model: llamacpp/<model>`
 - [vLLM](https://docs.vllm.ai) serves full-precision Hub models at
   datacenter throughput: `model: vllm/<hub-repo-id>`
 
 Both speak the same OpenAI-compatible dialect; the prefix picks the
-provider, nothing else in the file changes.
+provider, nothing else in the file changes. `NIKA_<ID>_BASE_URL` (for
+example `NIKA_VLLM_BASE_URL`) points a provider at another host or port.
 
 ## Checking what's wired
 
 ```bash
-nika doctor
+nika doctor          # offline: keys by presence, the local providers, pulled models
+nika doctor --ping   # also connects to configured local ports and reads their model lists
 ```
 
-Doctor reports every provider (local servers detected, cloud keys present)
-with a fix-form per missing piece. The audit before a run prices local
-models at $0.000:
+Doctor prints a fix for each missing piece and never applies it. Then audit
+the file before a run:
 
 ```bash
 nika check my-workflow.nika
 ```
 
+A local model has no catalog price, so the cost line marks it **unpriced**,
+never `$0`:
+
+```text
+ ⚠  COST     bounded portion $0.0000 no total ceiling · 1 unpriced task · prompts, exec + mcp unpriced · prices 2026-10-12
+   summarize  ollama/qwen3.5:4b  UNBOUNDED — no catalog price (local model; spend not metered)
+```
+
+`--max-cost-usd` never blocks local or mock work: it bounds what the catalog
+can meter. [Cost honesty](/guides/cost-honesty) explains why.
+
 ## Thinking time is budgeted for
 
-A local thinking model legitimately needs minutes for one completion on
-consumer hardware — well past the 30s a cloud round-trip expects. Nika's
-provider deadlines are **per class**: local providers (`ollama`, `lmstudio`,
-`llamacpp`, `localai`, `vllm`) get **≥ 300s by default**, cloud providers
-30s. No 30s-everywhere default silently kills a local run mid-think.
+A local thinking model can need minutes for one completion on consumer
+hardware. When a task declares no `timeout:`, a buffered provider call gets
+**600 s**, local or cloud alike: the transport cannot tell a model that is
+thinking from a dead connection. A streaming call has no total deadline;
+the idle-read guard ends a stream that stays silent for 600 s.
 
-When a task needs more than the default, the task's own `timeout:` governs
-the provider deadline directly:
+When a task needs a different bound, its own `timeout:` governs the
+provider deadline directly:
 
 ```yaml
 deep_review:
@@ -133,8 +216,7 @@ deep_review:
     prompt: "Review this diff…"
 ```
 
-Full semantics (per-class defaults, the 600s silent-connection ceiling,
-streaming): [YAML reference · Timeouts](/reference/yaml-syntax#timeouts).
+Full semantics: [YAML reference · Timeouts](/reference/yaml-syntax#timeouts).
 
 ## Swapping between local and cloud
 
@@ -144,7 +226,7 @@ laptop and an API:
 ```yaml
 model: ollama/qwen3.5:4b         # local · unpriced · private
 # model: openai/gpt-4.1-mini     # cloud · pin a cataloged id
-# model: xai/grok-4
+# model: xai/grok-4.3            # cloud reasoning model · give it max_tokens of 256 or more
 # model: huggingface/…           # Hub-served
 # model: nvidia/…                # NIM
 ```
@@ -159,7 +241,7 @@ model: ollama/qwen3.5:4b         # local · unpriced · private
 
 <CardGroup cols={2}>
   <Card title="Providers" icon="server" href="/concepts/providers">
-    The full catalog and how one InferRequest speaks every dialect.
+    Model and access, the wires, and how one request reaches every provider.
   </Card>
   <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
     Five minutes from install to a checked, runnable file.
@@ -168,6 +250,6 @@ model: ollama/qwen3.5:4b         # local · unpriced · private
     Pick your default local model on a measured table, not vibes.
   </Card>
   <Card title="Cost honesty" icon="coins" href="/guides/cost-honesty">
-    Why a local run is unpriced — never « free » — and how floors work.
+    Why a local run is unpriced, never « free », and how floors work.
   </Card>
 </CardGroup>

@@ -87,14 +87,15 @@ page documents the split when a nested process room is intentional.
 ## Found and inspect
 
 ```sh
-nika init --project-file
+printf 'nika: my-project\n' > nika.yaml
 nika arm
 ```
 
-The init flag lays a commented starter and skips an existing file unless
-`--force` is explicit. `nika arm` validates the project file and its cadence
-grammar, reports its armed beats and schedules nothing. A direct run applies the
-same file's policy rungs through the normal project discovery path.
+A project file can be one line. `nika arm` validates the project file and its
+cadence grammar, reports its armed beats and schedules nothing. A direct run
+applies the same file's policy rungs through the normal project discovery
+path. `nika init` also writes a commented `nika.yaml`, among about 30 agent,
+editor and hook files ([the full list](/getting-started/agents#nika-init-teach-the-repo)).
 
 <Warning>
   Do not pass `nika.yaml` to `Nika.run()`. The SDK runs a

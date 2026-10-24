@@ -221,6 +221,41 @@ outputs:
 | `nika:json_diff` (RFC 6902) | `fresh` | [Builtins](/reference/builtins) |
 | `on_error: recover:` first-run | `previous` | [Error model](/reference/error-codes) |
 
+## Run it
+
+<Note>
+  **What it needs:** Network access to `github.com` for the feed, and a local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) for the digest.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try release-radar
+    ```
+
+    A mock model answers and nothing is written in your folder. Its network fetches still go out: a rehearsal replaces the model, not the tools. It stops at the `approve` gate, as a real run does.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `release-radar.nika` in a new folder. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check release-radar.nika
+    nika run release-radar.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run release-radar.nika
+    ```
+
+    The run writes the state file `out/release-radar.json`.
+
+    It asks at the `approve` gate before anything else runs. On a terminal you answer; in a script it pauses (exit 4) and prints the `--resume` line that continues it, or you answer up front with `--answer approve=true`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    Run it twice: the first run reports every entry as new and writes the state, the second reports only what shipped in between.
+  </Step>
+</Steps>
+
 ## Make it yours
 
 - Watch N dependencies: lift the feed URL into a list and `for_each` the fetch ([Competitor radar](/examples/competitor-radar) shows the leash).

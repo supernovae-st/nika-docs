@@ -1,20 +1,32 @@
 ---
 title: "12-gate admission"
-description: "Twelve gates every crate must pass before joining the Nika workspace. No exceptions, no late fixes."
+description: "The twelve gates a crate passes to be admitted to the engine workspace, and how pre-admission crates are tracked."
 sidebarTitle: "12-gate admission"
 icon: "check-double"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-A crate does not join the Nika workspace by being merged. It joins by
-**passing all twelve gates in the same commit**. No "we'll fix Gate 5
-later." No "the spec is obvious." A crate admission is one atomic commit.
+<Note>
+  This page is the engine's construction record. After 0.123 the engine is
+  maintained (security fixes, bug fixes, compatibility); no new crate
+  admissions are planned, and contributions focus on fixes
+  ([CONTRIBUTING](https://github.com/supernovae-st/nika/blob/main/CONTRIBUTING.md)).
+</Note>
+
+A crate is **admitted** when it passes all twelve gates, in one commit. No
+"we'll fix gate 5 later", no "the spec is obvious". Before that, a crate may
+live in the workspace as **pre-admission (WIP)**, listed in `Cargo.toml`
+under `[workspace.metadata.diamond] wip`, and some of those ship in the
+binary.
 
 <Info>
-  **Canonical source:** [`RUST_ENFORCEMENT.md`](https://github.com/supernovae-st/nika/blob/main/RUST_ENFORCEMENT.md) §12 Gates · checker `scripts/ci/check-crate-gates.sh` (machine-readable JSON output).
+  **Canonical source:** [ADR-003](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-003-12-gate-admission.md),
+  the gate table in [CONTRIBUTING.md](https://github.com/supernovae-st/nika/blob/main/CONTRIBUTING.md),
+  and the checker `scripts/ci/check-crate-gates.sh`.
 
-  **Live progress:** {STATUS.cratesAdmitted} crates admitted · {STATUS.wipCrates.length} WIP ({STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}) · projected horizon {STATUS.cratesTarget} (cap {STATUS.cratesCap}).
+  **At v{STATUS.version}:** {STATUS.cratesAdmitted} crates admitted ·
+  {STATUS.wipCrates.length} pre-admission ({STATUS.wipCrates.join(", ")}).
 </Info>
 
 ## The 12 gates
@@ -35,7 +47,9 @@ later." No "the spec is obvious." A crate admission is one atomic commit.
   <Step title="Gate 3: IMPL">
     Minimal implementation. Compiles with `cargo build --workspace`.
     Every test green with `cargo test --workspace --lib`. No `# TEMP`
-    without a removal plan. No `#[allow(dead_code)]`. No files &gt;1500 LOC.
+    without a removal plan. No `#[allow(dead_code)]`. Size walls (ADR-154):
+    2,500 lines per file and 25,000 production lines per crate, with
+    warnings at 1,500 and 15,000.
   </Step>
 
   <Step title="Gate 4: CLIPPY 0">
@@ -68,21 +82,22 @@ later." No "the spec is obvious." A crate admission is one atomic commit.
   </Step>
 
   <Step title="Gate 9: CANARY E2E">
-    A `.nika` canary workflow under `tests/canary-<crate>.nika`
-    exercises the crate end-to-end against the rest of the workspace.
-    Waivable for L0 foundation crates with no runtime surface.
+    A `.nika` canary workflow (`check-crate-gates.sh` looks for
+    `tests/canary/<crate>.nika`) exercises the crate end-to-end against the
+    rest of the workspace. The checker reports the gate as skipped when no
+    canary exists; it is waivable for L0 foundation crates with no runtime
+    surface.
   </Step>
 
   <Step title="Gate 10: PARITY LEGACY">
-    Golden test comparing output against the legacy v0.79 implementation
-    (read via `git show main:path/to/file.rs`). Flags behavior drift from
-    v0.79 for conscious review. Landing from Phase 5+.
+    Golden test comparing output against the legacy v0.79.3 implementation,
+    read from the `brouillon` branch (`git show brouillon:<path>`). Flags
+    behavior drift from v0.79 for conscious review.
   </Step>
 
   <Step title="Gate 11: REVIEW SWARM">
-    Three parallel agents review the PR: `spn-nika:code-reviewer` +
-    `spn-rust:rust-pro` + `feature-dev:code-reviewer`. Every P0 and P1
-    finding must be fixed in the same session before merge.
+    Three independent reviewers read the change in parallel. Every P0 and P1
+    finding must be fixed before merge.
   </Step>
 
   <Step title="Gate 12: ATOMIC COMMIT">
@@ -135,30 +150,24 @@ A gate is **genuinely not applicable** for some crate types:
 
 ## Admission cadence
 
-<Warning>
-  One crate at a time. No parallel admission. No "let's admit these 3
-  together." Each crate commit is atomic, bisectable, and reviewable in
-  isolation.
-</Warning>
-
-The engine-dev rhythm during the Diamond rewrite was **1 crate admission =
-1 commit**, with per-admission alpha tags on the 0.8x train. That cadence
-is historical — public releases are tagged engine versions (today
+During the Diamond rewrite, crates were admitted one at a time, one atomic,
+bisectable commit each, with per-admission alpha tags on the 0.8x train. That
+cadence is historical: public releases are tagged engine versions (today
 {STATUS.version}), not per-crate alphas.
 
 ## See also
 
 <CardGroup cols={2}>
   <Card title="Layer registry" icon="layer-group" href="/architecture/layers">
-    Six layers. Mechanical sort test to pick the right layer for a new crate.
+    The layers and the mechanical sort test for a new crate.
   </Card>
   <Card title="Forward-compat invariants" icon="shield-halved" href="/architecture/forward-compat-invariants">
-    Eight patterns. The public-API contract every admitted crate honors.
+    The public-API contract every admitted crate honors.
   </Card>
   <Card title="L0 foundation decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13 locked: the per-crate decisions that shaped today's L0.
+    The early decisions that shaped L0, and what became of them.
   </Card>
   <Card title="Constellation" icon="diagram-project" href="/reference/constellation">
-    Live progress: admitted, WIP, planned.
+    The map of admitted and pre-admission crates.
   </Card>
 </CardGroup>

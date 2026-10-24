@@ -282,6 +282,46 @@ outputs:
 | `fail_fast: false` + `recover: null` fan-in | `cards` → `deck` | [YAML syntax · `on_error`](/reference/yaml-syntax) |
 | typed synthesis over the filtered deck | `brief` | [The 4 verbs](/concepts/verbs) |
 
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the two sample documents.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try corpus-digest
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `corpus-digest.nika` in a new folder, then download the samples it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures/docs examples/fixtures/docs/guides
+    curl -fsSLo examples/fixtures/docs/quickstart.md "$FIXTURES/docs/quickstart.md"
+    curl -fsSLo examples/fixtures/docs/guides/deploying.md "$FIXTURES/docs/guides/deploying.md"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check corpus-digest.nika
+    nika run corpus-digest.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run corpus-digest.nika
+    ```
+
+    The run writes no file: the brief is its output, and `nika trace outputs` shows the deck of cards behind it.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    `--var question="…"` asks something else. To digest your own folder, change `const.corpus_root` and the matching `permits.fs.read` entry together (`NIKA-AUTH-007`).
+  </Step>
+</Steps>
+
 ## Make it yours
 
 - Point `const.corpus_root` and the matching `permits.fs.read` entry at

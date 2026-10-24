@@ -12,12 +12,17 @@ import { SDK, LocalContract } from "/snippets/_sdk-contract.mdx"
 Golden testing is an engine CLI operation:
 
 ```sh
-nika test workflows/release.nika
-nika test workflows/release.nika --update
+./node_modules/.bin/nika test workflows/release.nika --update   # pin the golden once
+./node_modules/.bin/nika test workflows/release.nika            # compare later runs against it
 ```
 
-The source SDK does not duplicate that command as a client method. Receipt
-verification is part of the SDK because it belongs to the run lifecycle.
+`nika test` runs the workflow on the mock provider and compares its typed
+`outputs:` with `<file>.golden.json`. `--case <name> --var key=value` pins one
+golden per case of a rule table ([Testing](/guides/testing)).
+
+The SDK does not duplicate that command as a client method: run it from
+`./node_modules/.bin/nika` in CI. Receipt verification is part of the SDK
+because it belongs to the run lifecycle.
 
 ```ts
 const run = await nika.run('workflows/release.nika')

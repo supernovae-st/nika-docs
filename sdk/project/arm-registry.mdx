@@ -30,16 +30,17 @@ arm:
 
 | Key | Requirement | Contract |
 |---|---|---|
-| `workflow` | Required | Repo-relative `*.nika` path |
-| `cadence` | Required | Readable schedule, TZ-prefixed cron, or `on-webhook` |
+| `workflow` | Required | Repo-relative `*.nika` path; each workflow is armed once |
+| `cadence` | Required | Its IANA zone first: five cron fields (`TZ=Europe/Paris 0 9 * * 1`), a French weekday and time (`TZ=Europe/Paris lundi 9h07`), an anchored interval (`TZ=Europe/Paris every 2 weeks from 2026-10-05 09:00`), or `on-webhook`, the one form with no zone. A scheduled cadence without a zone is refused |
 | `plafond` | Required | Positive per-tick USD ceiling |
-| `manqué` | Required | `rattraper` · `rattraper-une-fois` · `sauter` |
+| `manqué` | Required | `rattraper-une-fois` · `sauter` fire today; `rattraper` and `{ rattraper: N }` are accepted grammar that the 0.123.0 firer refuses at every fire (`policy_unsupported`) |
 | `où` | Optional | `local` by default · `cloud` as the declared remote locus |
 | `chevauchement` | Optional | `sauter` by default · `file` for serialized overlap |
 | `après_saut` | Optional | What follows an overlap skip |
 | `actif` · `raison` · `jusqu_au` | Together | Auditable suspension state |
 | `tolérance` · `décalage` | Optional | Declared tolerance and deterministic jitter lanes |
 | `par` | Optional | Declared human, not machine authorization |
+| `inputs` | Optional | Per-beat values for the workflow's declared `inputs:`, one scalar per key, coerced by the declared type; an undeclared key refuses before the claim |
 
 `plafond` and `manqué` have no default. Choosing them implicitly would choose
 who pays or whether missed work is duplicated or lost.
@@ -50,8 +51,30 @@ who pays or whether missed work is duplicated or lost.
 nika arm
 ```
 
-The report names each armed or suspended beat, its next slots, and whether a
+The report names each beat with its readiness, its next slots, and whether a
 sidecar proves a previous fire. It ends by stating that nothing was scheduled.
+Captured from `nika 0.123.0` with the beat above (the project path is
+shortened):
+
+```text
+1 beat in nika.yaml
+
+  [READY] workflows/daily-brief.nika · TZ=Europe/Paris 30 7 * * 1-5
+         · ready in the current configuration; OS activation not verified · authority not acquired
+         · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
+         par: operations — déclaré · non vérifié
+         → 2026-10-26 07:30 CET
+         → 2026-10-27 07:30 CET
+         → 2026-10-28 07:30 CET
+
+READY · UNREADY · DORMANT judge the current configuration only — never OS activation, acquired authority or the current window.
+nothing was scheduled — `nika arm` READS the file. The machine that fires them is the arming edge.
+```
+
+`[UNREADY]` names what would refuse every fire (an unsupported miss policy,
+for example), and `[DORMANT]` a suspended beat. `nika arm --json` emits the
+same report for programs. Some lines are in French only in 0.123.0
+([Known limits](/changelog/known-limits)).
 
 <div className="sdk-flight sdk-flight-compact">
   <span>DECLARATION IS NOT PROOF</span>
@@ -87,11 +110,12 @@ arm:
     manqué: sauter
     actif: false
     raison: maintenance fournisseur
-    jusqu_au: 2026-10-01
+    jusqu_au: 2026-12-01
 ```
 
 Deleting a row leaves no durable explanation. The suspension triple states
-that the beat is inactive, why, and until when — pick a real date; a past
+that the beat is inactive, why, and until when; `nika arm` reports it
+`[DORMANT]` with its reason and date. Pick a real future date: a past
 `jusqu_au` leaves the beat suspended with no explanation anyone believes.
 
 ## Continue

@@ -1,24 +1,34 @@
 ---
 title: "CEO Monday brief"
 sidebarTitle: "CEO Monday brief"
-description: "T4 epic · founders: market + engineering + KPIs synthesized, and the ping tells you what the run cost."
+description: "T4 epic · founders: market signal, engineering pulse and KPIs gathered in parallel behind one human decision, one dated brief."
 icon: "briefcase"
 ---
 
 > **T4 epic · founders / executives**: the flagship. Three branches
 > gather in parallel (web signal, repo pulse, the KPI sheet), jq does
-> the revenue arithmetic, a thinking model writes the brief, and
-> `nika:inspect view: cost` puts the run's own bill in the ping.
-> A workflow that reports what it cost you is a workflow you trust on
-> a schedule.
+> the revenue arithmetic, a local model writes the brief, and one human
+> decision at the root authorizes the whole run. It is also the smallest
+> complete example of the lethal trifecta: private numbers, untrusted
+> news and an outbound ping, held by that one gate.
 
 ## The job
 
 Monday needs one page: market, product, numbers, risks, the ONE
 decision. Assembling it eats an hour of founder time. This file
-assembles it before you wake: dated filename, summed revenue, and a
-webhook ping that interpolates `nika:inspect view: cost` — a local
-Ollama run is **unpriced**, not a fake `$0.14`.
+assembles it in one run: a dated filename, revenue summed by jq rather
+than guessed by a model, and an optional founders ping that says whether
+the brief landed.
+
+<Warning>
+  **Limit on macOS in 0.123.0.** The sandbox confines `exec: git` to the
+  workflow's declared filesystem boundary, which grants no read of `.git`
+  or of git's global configuration. The confined `git` exits with status
+  128, even inside a real repository, so `pulse` takes its
+  `recover:` value and the brief is told the engineering pulse is missing.
+  See
+  [Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos).
+</Warning>
 
 ## The shape
 
@@ -316,10 +326,19 @@ outputs:
     `nika:date` + an `extract:` slice (`day: ".[:10]"`) stamp the filename
     `briefs/2026-06-15-monday.md`. Never let a model guess the date.
   </Step>
-  <Step title="The run reports its own bill">
-    `nika:inspect view: cost` returns `{total_usd, by_task, by_provider}`.
-    The ping interpolates it. Cost-aware automation is automation you
-    can leave running.
+  <Step title="One decision at the root">
+    `approve` is a `nika:prompt` with no `default:`, and every effect
+    re-reads its answer (`when: ${{ with.go == true }}`): a « no » fetches,
+    reads and writes nothing. The boundary permits all three legs of the
+    lethal trifecta, so the human decision sits where it governs every one
+    of them ([Security](/concepts/security)).
+  </Step>
+  <Step title="The ping fires on every outcome">
+    `alert` rides `after: { save: terminal }` and reads
+    `${{ tasks.save.status }}`, so an armed ping reports a brief that
+    landed, failed or was declined. It uses `terminal` and not `unwind`:
+    a cleanup failure is only logged, and an alert that cannot fail loudly
+    is not an alert.
   </Step>
 </Steps>
 
@@ -327,15 +346,57 @@ outputs:
 
 | Construct | Where | Reference |
 |---|---|---|
-| 3-branch parallel gather | `news` · `pulse` · `kpi_raw` | [Workflows](/concepts/workflows) |
+| 3-branch parallel gather | `news` · `pulse` · `sheet` | [Workflows](/concepts/workflows) |
 | jq arithmetic (`add`) | `revenue` | [Builtins](/reference/builtins) |
-| `nika:inspect view: cost` | `bill` | [Builtins](/reference/builtins) |
+| root human gate (`nika:prompt`) | `approve` | [Builtins](/reference/builtins) |
 | `extract:` binding on a builtin | `stamp` | [Bindings](/concepts/bindings) |
+| `after: { save: terminal }` | `alert` | [Workflows](/concepts/workflows) |
+
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`), network access to `hn.algolia.com` for the market signal (offline, it recovers to a labelled stand-in), and the sample KPI sheet. The engineering pulse reads Git, which is refused on macOS in 0.123.0 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try ceo-monday-brief
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder. Its network fetches still go out: a rehearsal replaces the model, not the tools. It stops at the `approve` gate, as a real run does.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `ceo-monday-brief.nika` in a new folder, then download the sample it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/ceo-kpis.csv "$FIXTURES/ceo-kpis.csv"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check ceo-monday-brief.nika
+    nika run ceo-monday-brief.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run ceo-monday-brief.nika
+    ```
+
+    The run writes `briefs/<date>-monday.md`.
+
+    It asks at the `approve` gate before anything else runs. On a terminal you answer; in a script it pauses (exit 4) and prints the `--resume` line that continues it, or you answer up front with `--answer approve=true`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    The founders ping stays off unless you add `--var alert=true` with `FOUNDERS_WEBHOOK_URL` set; armed without it, the run fails at `alert` (`NIKA-VAR-001`).
+  </Step>
+</Steps>
 
 ## Make it yours
 
 - Add a fourth branch: support sentiment from [Support triage](/examples/support-triage)'s board file.
-- Keep a budget: follow `bill` with `nika:assert` on `total_usd < 1`. The brief refuses to overspend.
+- Keep a budget when you move the brief to a cloud model: run it with `--max-cost-usd`, and a run whose cost floor exceeds the cap refuses to start (`NIKA-1709`).
 - Archive the history: the dated files under `briefs/` are already your decision journal.
 
 <Card title="Back to all examples" icon="rocket" href="/examples/overview">

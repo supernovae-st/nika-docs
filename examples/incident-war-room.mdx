@@ -9,7 +9,7 @@ icon: "fire-extinguisher"
 > parallel, a typed timeline, then the honest part: `nika:wait` a settle
 > window, re-poll the status API, and `nika:assert` refuses to draft a
 > « resolved » postmortem while prod still burns. `after: { save: terminal }`
-> files the journal event and the ping NO MATTER WHAT.
+> sends the armed on-call ping NO MATTER WHAT happened to the draft.
 
 ## The job
 
@@ -18,6 +18,16 @@ nobody wants to start. This pipeline assembles the evidence, rebuilds
 the timeline as typed events, proves recovery, and leaves a draft
 (summary, impact, hypotheses, actions) in the incidents folder before
 the retro is scheduled.
+
+<Warning>
+  **Limit on macOS in 0.123.0.** The sandbox confines `exec: git` to the
+  workflow's declared filesystem boundary, which grants no read of `.git`
+  or of git's global configuration. The confined `git` exits with status
+  128, even inside a real repository, so `deploys` takes its
+  `recover:` value and the timeline is told the deploy log is unavailable.
+  See
+  [Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos).
+</Warning>
 
 ## The shape
 
@@ -327,20 +337,25 @@ outputs:
 
 <Steps>
   <Step title="Evidence gathers in one wave">
-    `logs` (structured capture), `status_history` (with retry: status
-    pages flap during incidents) and `runbook` share no deps: one
+    `deploys` (`git log` over the last `const.log_window`),
+    `status_history` (with `retry:`, because status pages flap during
+    incidents) and `runbook` wait only for the `approve` answer: one
     parallel wave, three sources.
   </Step>
   <Step title="Settle, recheck, PROVE">
-    `nika:wait duration: 60s` gives the system a settle window, the
-    re-poll reads `.current.state`, and the assert fails the run,
-    loudly, if it isn't `operational`. No optimistic postmortems.
+    `settle` waits `inputs.settle` (30 s by default) for the fix to
+    propagate, `recheck` re-polls `.current.state`, and `confirmed` fails
+    the run, loudly, unless it reads `operational`. No optimistic
+    postmortems. Offline, the re-poll recovers to `operational` so a
+    rehearsal can reach the draft; point `--var status_url=` at your status
+    API for the real check.
   </Step>
-  <Step title="the record always lands">
-    Whether `save` succeeds, fails or is cancelled, the `nika:notify`
-    ping fires on the `terminal` edge. Cleanup that must fail loudly
-    rides `terminal`, not `unwind` — unwind errors are logged and do
-    not propagate.
+  <Step title="The ping always reports">
+    Armed with `--var alert=true`, `alert` fires on the `terminal` edge of
+    `save`, whether the draft landed, failed or was cancelled, and its
+    message carries `${{ tasks.save.status }}`. A task that must fail loudly
+    rides `terminal`, not `unwind`: unwind errors are logged and do not
+    propagate.
   </Step>
 </Steps>
 
@@ -348,10 +363,51 @@ outputs:
 
 | Construct | Where | Reference |
 |---|---|---|
-| `capture: structured` | `logs` | [The 4 verbs](/concepts/verbs) |
+| `retry:` with exponential backoff and jitter | `status_history` | [YAML syntax](/reference/yaml-syntax) |
 | `nika:wait` | `settle` | [Builtins](/reference/builtins) |
 | `nika:assert` recovery gate | `confirmed` | [Builtins](/reference/builtins) |
 | `after: { save: terminal }` | `alert` | [Workflows](/concepts/workflows) |
+
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample runbook. The status endpoint is a placeholder that resolves nowhere, so both polls recover offline. The deploy log reads Git, which is refused on macOS in 0.123.0 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try incident-war-room
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder. It stops at the `approve` gate, as a real run does.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `incident-war-room.nika` in a new folder, then download the sample it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/checkout-api-runbook.md "$FIXTURES/checkout-api-runbook.md"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check incident-war-room.nika
+    nika run incident-war-room.nika --model mock/echo --var settle=2s   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run incident-war-room.nika
+    ```
+
+    The run writes `incidents/checkout-api-postmortem.md`.
+
+    It asks at the `approve` gate before anything else runs. On a terminal you answer; in a script it pauses (exit 4) and prints the `--resume` line that continues it, or you answer up front with `--answer approve=true`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    `--var status_url=…` points both polls at your status API. The on-call ping stays off unless you add `--var alert=true` with `ONCALL_WEBHOOK_URL` set.
+  </Step>
+</Steps>
 
 ## Make it yours
 
@@ -360,6 +416,6 @@ outputs:
 - Track MTTR over time: the always-fires `alert` stream is already your dataset.
 
 <Card title="Next · CEO Monday brief" icon="briefcase" href="/examples/ceo-monday-brief">
-  The closer: a three-branch gather, jq arithmetic, a thinking
-  synthesis, and a run that reports its own bill.
+  The closer: a three-branch gather, jq arithmetic, one human decision
+  at the root, and a ping that reports every outcome.
 </Card>

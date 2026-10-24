@@ -30,7 +30,9 @@
       "publishedAt": "2026-09-25T12:58:31Z",
       "url": "https://github.com/supernovae-st/nika/releases/tag/v0.121.0",
       "assetCount": 8,
-      "highlights": [],
+      "highlights": [
+        "A conversation from the request to an inspectable result."
+      ],
       "notesSha256": "b93586cf0db16e731569a8b68873bd215239859ee385a297fc7e3ec802b92b9f"
     },
     {

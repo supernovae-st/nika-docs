@@ -36,14 +36,30 @@ native run through the engine's own trace instead.
 ```ts
 interface NikaRunResult<Outputs> {
   id: NikaRunId
-  status: NikaRunStatus
+  status: NikaRunStatus             // 'queued' | 'running' | 'paused' | 'succeeded' | 'failed' | 'interrupted' | 'cancelled' | …
   transport: 'native-process' | 'http'
-  exitCode?: number
+  exitCode?: number                 // local engine exit code (0 · 1 · 3 · 4 · 130)
   outputs?: Outputs
   receipt?: NikaReceipt
-  error?: NikaMachineError
+  error?: NikaMachineError          // { code?, message?, task? }
   execution_id?: NikaExecutionId
   settlement?: NikaSettlement
+  evidence?: NikaJournalEvidence    // HTTP only: { status: 'mirror_lost', reason }; no released engine writes it yet
+  [key: string]: unknown
+}
+
+interface NikaSettlement {
+  status?: NikaRunStatus
+  cause?: 'normal' | 'human_gate' | 'task_failed' | 'output_contract' | 'budget' | 'operator' | 'refused' | (string & {})
+  elapsed_ms?: number
+  tasks?: NikaTaskTally             // total · ok · failed · recovered · skipped · cancelled · never_started
+  spend?: {
+    total_cost_usd?: number | null  // present only when a call metered real spend: never a made-up zero
+    priced_calls?: number
+    unpriced_calls?: number
+    qualifier?: 'priced' | 'partially_priced' | 'unpriced' | 'unmetered' | (string & {})
+  }
+  error?: NikaMachineError
   [key: string]: unknown
 }
 ```
@@ -76,9 +92,11 @@ interface NikaRunEvent<Outputs> {
 ```
 
 `engine.event` is the preservation door: every frame this SDK version does
-not know yet arrives there with its `raw` frame untouched — nothing is
-dropped, and no lifecycle meaning is invented for it. Keep a `default`
-branch in reducers; the set is additive. `run.sealed` is native-only.
+not name arrives there with its `raw` frame untouched; nothing is dropped,
+and no lifecycle meaning is invented for it. Keep a `default` branch in
+reducers; the set is additive. `run.sealed` names a `run_sealed` frame if an
+engine streams one; engine 0.123.0 writes the seal to the run's record only,
+so read `result.receipt.sealed` locally or `traceVerify(...).verdict`.
 
 ## Check and cancellation
 
@@ -126,8 +144,10 @@ type NikaReceipt = Readonly<Record<string, unknown>>
 
 interface NikaTraceVerifyResult {
   verified: boolean
-  verdict?: 'verified' | 'invalid' | 'unavailable' | (string & {})
-  reason?: string
+  verdict?: string   // local: 'verified' · 'invalid'
+                     // nika serve: 'ok' · 'sealed' · 'anchored' · 'replayed' (hold)
+                     //             'incomplete' · 'tampered' · 'broken' (do not) · 'unavailable'
+  reason?: string    // 'receipt_mismatch' · 'unsealed' · 'sealed' · 'trace_journal_unavailable' …
   trace_id?: string
   exitCode?: number
   output?: string
@@ -135,15 +155,21 @@ interface NikaTraceVerifyResult {
 }
 ```
 
-The native path answers `verified` or `invalid`; the resident answers
-`unavailable` while it has no trace-journal authority — a typed answer, not
-a 404.
+Locally the verdict is `verified`, or `invalid` (`reason: 'receipt_mismatch'`
+for an unsealed or edited record; no reason when the trace file cannot be
+read). Over HTTP it is the CLI verifier's tier in lower case: `ok` means intact
+but unsigned (`reason: 'unsealed'`), and `unavailable` means the server holds
+no journal for the job. The published declarations still list the verdict
+words in upper case and describe the HTTP answer as `unavailable`; engine
+0.123.0 answers as above. [Receipts](/sdk/runtime/receipts) has the measured
+table.
 
 ## Errors
 
 ```text
 NikaError
 ├── NikaConfigurationError
+├── NikaEngineUnavailable        // no engine for this host (code NIKA_ENGINE_UNAVAILABLE, platform, arch)
 ├── NikaTransportError
 │   ├── NikaProtocolError
 │   └── NikaObservationInterrupted
@@ -151,21 +177,18 @@ NikaError
 ├── NikaOperationError
 ├── NikaEventBufferOverflowError
 └── NikaRunOwnershipError
-
-NikaEngineUnavailable
 ```
 
-`NikaEngineUnavailable` is exported separately by binary resolution.
 `NikaObservationInterrupted` means this client lost its observation of a run
-that may still be running — an evidence state, never a settlement. Schedule
-types are exported for the exact CAS-backed resident schedule contract;
-inspect the merged source declarations for their additive engine-owned
-fields.
+that may still be running: an evidence state, never a settlement. Schedule
+types (`NikaScheduleOptions`, `NikaScheduleStatus`, `NikaScheduleApplyResult`)
+are exported for the revision-checked server schedule contract; their
+engine-owned fields are additive.
 
 <Accordion title="Which published source this page describes">
   <SourceContract sdk={SDK} />
 </Accordion>
 
-<Card title="Merged source types" icon="github" href={SDK.sourceCandidate}>
-  Review the source declarations at the pinned merged SDK commit.
+<Card title="Published type declarations (v0.123.0)" icon="github" href={SDK.sourceCandidate}>
+  Review the source of the published declarations.
 </Card>

@@ -6,15 +6,27 @@ icon: "rocket"
 ---
 
 > **T2 chain · engineering / devrel**: the release-day ritual as one
-> file: history in, a typed notes object out, the CHANGELOG updated
-> **in place** with `nika:edit`, the team pinged with the headline.
+> file: history in, a typed notes object out, a working copy of the
+> CHANGELOG edited **in place** with `nika:edit`, the team pinged with the
+> headline, all behind one human decision.
 
 ## The job
 
 Every release someone copy-pastes git log into a doc, rewrites it, pastes
 it into the CHANGELOG, then announces it. Four manual steps, four chances
-to drift. Here the git range is an input, the notes are a schema-typed
-object, and the announcement quotes the same headline the CHANGELOG got.
+to drift. Here the git range is one constant, a single gate asks before
+anything runs, the notes are a schema-typed object, and the announcement
+quotes the same headline the CHANGELOG got.
+
+<Warning>
+  **Limit on macOS in 0.123.0.** The sandbox confines `exec: git` to the
+  workflow's declared filesystem boundary, which grants no read of `.git`
+  or of git's global configuration. The confined `git` exits with status
+  128, even inside a real repository, so `history` takes its
+  `recover:` value and the notes are written from the sample log, not your
+  commits. See
+  [Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos).
+</Warning>
 
 ## The shape
 
@@ -211,18 +223,30 @@ outputs:
 ## How it works
 
 <Steps>
-  <Step title="The range is an input, not a hardcode">
-    `${{ inputs.since_tag }}..HEAD`: next release you change one input,
-    or pass it at run time.
+  <Step title="One gate before anything runs">
+    `approve` is a `nika:prompt` with no `default:`, at the root. `history`
+    and `existing` re-read its answer (`when: ${{ with.go == true }}`), so a
+    « no » reads nothing and writes nothing. The missing default is
+    deliberate: a default would disarm the decision this file exists to
+    gate.
+  </Step>
+  <Step title="The range is one constant">
+    `history` runs `git log ${{ const.since_tag }}..HEAD` as an argv list.
+    `since_tag` is a `const:`: the file owns it, so you edit
+    `const.since_tag` for the next release. `--var since_tag=…` is refused,
+    because the file declares only the `announce` input.
   </Step>
   <Step title="Typed notes · headline + breaking + body">
     The schema means `${{ tasks.notes.output.headline }}` is a real
     field downstream: in the CHANGELOG insert AND in the ping. One
     source, two consumers, no drift.
   </Step>
-  <Step title="Edit-in-place, not overwrite">
-    `nika:edit` finds the `# Changelog` heading and replaces it with
-    itself + the new section: the file's history stays intact below.
+  <Step title="Copy, then edit in place">
+    `existing` reads your changelog and `copy` writes it to
+    `out/CHANGELOG.md`. `nika:edit` then finds the `# Changelog` heading in
+    that copy and replaces it with itself plus the new section, so the
+    history below stays intact. An in-place builtin never touches a file the
+    workflow did not create, and you review the copy before it lands.
   </Step>
 </Steps>
 
@@ -230,15 +254,56 @@ outputs:
 
 | Construct | Where | Reference |
 |---|---|---|
-| `exec:` with input interpolation | `history` | [The 4 verbs](/concepts/verbs) |
+| `nika:prompt` gate at the root | `approve` | [Builtins](/reference/builtins) |
+| `exec:` argv with a `const:` interpolation | `history` | [The 4 verbs](/concepts/verbs) |
 | `infer.schema:` | `notes` | [The 4 verbs](/concepts/verbs) |
 | `nika:edit` find/replace | `changelog` | [Builtins](/reference/builtins) |
 | `nika:notify` + `secrets:` | `announce` | [Builtins](/reference/builtins) |
 
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample changelog. History comes from Git: outside a repository that has the `const.since_tag` tag, and on macOS in 0.123.0 in any case ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)), the sample log takes over.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try release-notes
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder. It stops at the `approve` gate, as a real run does.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `release-notes.nika` in a new folder, then download the sample it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/CHANGELOG.md "$FIXTURES/CHANGELOG.md"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check release-notes.nika
+    nika run release-notes.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run release-notes.nika
+    ```
+
+    The run writes the edited copy `out/CHANGELOG.md`.
+
+    It asks at the `approve` gate before anything else runs. On a terminal you answer; in a script it pauses (exit 4) and prints the `--resume` line that continues it, or you answer up front with `--answer approve=true`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    The team ping needs `--var announce=true` and `TEAM_WEBHOOK_URL`.
+  </Step>
+</Steps>
+
 ## Make it yours
 
-- Gate the announce behind a human: add a `nika:prompt` task between `changelog` and `announce`. The pattern is in [Invoice chaser](/examples/invoice-chaser).
-- Add `breaking:` to the ping when `size(tasks.notes.output.breaking) > 0`.
+- Flag breaking changes in the ping: bind `breaking: ${{ tasks.notes.output.breaking }}` in the task's `with:` and test `with.breaking != null && size(with.breaking) > 0`. A `tasks.*` reference written straight into `when:` is refused (`NIKA-VAR-021`).
 - Render a public version too: a second `infer` task with a "user-facing tone" prompt, writing `docs/changelog/`.
 
 <Card title="Next · SEO content brief" icon="magnifying-glass-chart" href="/examples/seo-content-brief">

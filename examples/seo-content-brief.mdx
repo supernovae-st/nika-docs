@@ -187,6 +187,39 @@ outputs:
 | CEL index access | `top_page.with` | [Workflows](/concepts/workflows) |
 | `create_dirs: true` | `save.args` | [Builtins](/reference/builtins) |
 
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`). Nothing else: the placeholder competitor host resolves nowhere and the recovered samples take over.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try seo-content-brief
+    ```
+
+    A mock model answers and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `seo-content-brief.nika` in a new folder. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check seo-content-brief.nika
+    nika run seo-content-brief.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run seo-content-brief.nika
+    ```
+
+    The run writes `out/briefs/<topic>.json`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    For a real brief, point `const.competitor_sitemap` at a real sitemap and add its host to `permits.net.http`. `--var topic=your-keyword` picks the target.
+  </Step>
+</Steps>
+
 ## Make it yours
 
 - Brief the top THREE pages instead of one: bind `top: ${{ tasks.map.top }}` in `with:` and fan out with `for_each: { items: ${{ with.top }} }`. The fan-out tier shows how ([Competitor radar](/examples/competitor-radar)).

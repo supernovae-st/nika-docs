@@ -75,10 +75,27 @@ The **manifest** carries the resolved request, per-image sha256 + dimensions,
 
 The **PNG itself** carries a `nika` tEXt chunk (tool, engine version,
 provider, model, prompt, seed) — so provenance survives `cp`, the practice
-ComfyUI and InvokeAI standardized. Read it back with any PNG tool:
+ComfyUI and InvokeAI standardized. Read it back with any PNG tool, for
+example `exiftool -a -G1 asset.png | grep -i nika`, or with this
+standard-library Python script (no package to install):
 
-```bash
-python3 -c "import png"  # or: exiftool asset.png | grep -i nika
+```python png-nika.py
+import struct, sys
+
+data = open(sys.argv[1], "rb").read()
+pos = 8                                    # skip the 8-byte PNG signature
+while pos < len(data):
+    length, kind = struct.unpack(">I4s", data[pos:pos + 8])
+    if kind == b"tEXt":
+        key, _, text = data[pos + 8:pos + 8 + length].partition(b"\0")
+        if key == b"nika":
+            print(text.decode("utf-8", "replace"))
+    pos += 12 + length                     # length + type + data + CRC
+```
+
+```text
+$ python3 png-nika.py out/image-mock-mock-image-1-0-a0828e59.png
+{"engine":"0.123.0","model":"mock-image-1","prompt":"a blue square","provider":"mock","seed":null,"tool":"nika:image_generate"}
 ```
 
 ## Content credentials (detect-and-preserve)

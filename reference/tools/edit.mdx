@@ -32,7 +32,9 @@ first N. `count:` MUST be a non-negative integer — a present non-integer
 replace-all default (that silent fall-through would over-edit the file · the
 intent-inversion footgun class). Throws ·
 `NIKA-BUILTIN-EDIT-001` (`find:` matched nothing: an edit that edits
-nothing is an authoring bug · `tool_error` · also a non-integer `count:`) ·
+nothing is an authoring bug · `tool_error` · also a non-integer `count:`,
+and an empty `find:`, refused before the file is read: it would match
+between every character and write the replacement between every byte) ·
 `-002` (IO failure).
 
 ## Related concepts
@@ -46,8 +48,8 @@ nothing is an authoring bug · `tool_error` · also a non-integer `count:`) ·
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/stdlib/builtins-v0.1.md#L175) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/stdlib/builtins-v0.1.md#L187) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/canon/builtins.yaml).
 
-Tool identity: `nika:edit`. Specification revision: `480f5b80cb77`.
+Tool identity: `nika:edit`. Specification revision: `6390b08eb979`.
 
 <Ecosystem />

@@ -11,6 +11,9 @@ mirror to keep in sync, which is the defect one layer up.
 
 The read is deliberately the STRANGER's: an empty working directory and a
 scratch HOME, so no wired editor and no exported key can change the answer.
+It reads `nika welcome`, the mirror the installation page teaches: on a
+terminal bare `nika` opens the Session instead, and only a pipe prints the
+mirror, so the bare form would gate a screen a person never sees.
 """
 
 import re
@@ -30,7 +33,7 @@ def read_first_command(nika: str) -> str:
     with tempfile.TemporaryDirectory() as home, tempfile.TemporaryDirectory() as work:
         env = {"HOME": home, "PATH": "/usr/bin:/bin", "TERM": "dumb", "NO_COLOR": "1"}
         screen = subprocess.run(
-            [nika], cwd=work, env=env, text=True, capture_output=True,
+            [nika, "welcome"], cwd=work, env=env, text=True, capture_output=True,
             check=True, timeout=10,
         ).stdout.splitlines()
     for i, line in enumerate(screen):

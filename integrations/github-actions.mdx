@@ -23,9 +23,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      # in real use, pin by full commit SHA with the release in a comment —
-      # the form Dependabot/Renovate bump: @<sha> # v1.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # in real use, pin the action by full commit SHA with the release in a
+      # comment, the form Dependabot/Renovate bump: @<sha> # v1.0.28
       - uses: supernovae-st/nika-action@v1
         with:
           workflow: flows/report.nika
@@ -75,7 +75,7 @@ live, so you can read a real sticky comment before adopting anything.
   <source src="/videos/pr-check-comment.webm" type="video/webm" />
   <source src="/videos/pr-check-comment.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**Every pull request gets a verdict.** The first push refers to a task that does not exist, and the comment names the finding (`NIKA-DAG-002`, *did you mean `assess`?*). The second push fixes that line, and the same comment turns clean and draws the graph. *Both comments are the action's own renderer run on `nika check --json` and `nika inspect`; the pull request page is an illustration.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**Every pull request gets a verdict.** The first push refers to a task that does not exist, and the comment names the finding (`NIKA-DAG-002`, *did you mean `assess`?*). The second push fixes that line, and the same comment turns clean and draws the graph. *Both comments are the action's own renderer run on `nika check --json` and `nika inspect` from nika 0.121.0; the pull request page is an illustration.*</p>
 
 > ✅ **nika check** — clean · `flows/report.nika` · 3 task(s) · 3 wave(s)
 > 💰 **cost floor ≥ $0.12** · ⚠ 1 unpriced task — never rendered as $0

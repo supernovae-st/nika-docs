@@ -1,0 +1,288 @@
+---
+title: "The terminal Session"
+description: "Describe a job in your own words; Nika proposes a checked workflow file, saves it only on yes, and runs it only when you ask."
+sidebarTitle: "Terminal Session"
+icon: "terminal"
+---
+
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
+Run `nika` with no arguments in a terminal and the Session opens. You
+describe an outcome in plain words; Nika turns it into a `.nika` workflow
+file, shows you what it will do and what it may touch, and waits. Saving and
+running are two separate decisions, and every run leaves a record you can
+inspect.
+
+| Step | You type | What happens |
+|---|---|---|
+| Describe | a sentence | Nika reads the request and the files it names |
+| Clarify | an answer | Nika asks only when a value it needs is unclear |
+| Review | `/show`, `/meaning`, or a change in words | The proposal shows its steps, its reach and its check result |
+| Save | `yes` | The exact reviewed bytes are written and checked; nothing runs |
+| Run | `run it` | The saved workflow runs once, under an announced spending ceiling |
+| Inspect | `/proof`, `/details` | What the run produced and recorded, and how the workflow was built |
+
+## Open it
+
+Start the Session from the folder you want to work in. That folder is the
+project root: Nika works only under it, reads the files your request names
+there, and proposes new files inside it.
+
+<Tabs>
+  <Tab title="Full screen">
+    ```bash
+    nika
+    ```
+
+    The terminal workspace: project, workflow inspection and conversation in
+    one screen. `F6` moves between regions, `Esc` returns to the message box,
+    `Alt+Enter` breaks a line and `Ctrl+T` switches between the full screen
+    and the inline view. `Ctrl+C` stops a preparation in progress; pressed
+    twice, it leaves the Session, like `/quit`.
+  </Tab>
+  <Tab title="Plain lines">
+    ```bash
+    nika --plain
+    ```
+
+    The same Session as plain lines, for screen readers, recordings and
+    scripts. `NIKA_TUI=0 nika` does the same, and `NIKA_TUI=inline nika`
+    keeps finished blocks in your terminal's scrollback.
+  </Tab>
+</Tabs>
+
+When its input or output is not a terminal (a pipe, a redirect, CI), bare
+`nika` prints the [welcome mirror](/getting-started/your-machine) and opens no
+Session. `/help` lists the commands and `/quit` closes the Session.
+
+## Choose an intelligence
+
+Nika needs a model to write a workflow its deterministic compiler cannot
+settle, or to answer a question in words. You choose it; Nika never picks a
+provider for you and never swaps your choice silently.
+
+The full-screen view shows an **Intelligence** panel with three seats:
+
+- **Author** writes and repairs your workflows.
+- **Decision** optionally judges the author's candidates; by default the
+  author decides alone.
+- **Run** is the model of the workflow's own AI steps, set by each workflow.
+
+`Other choice…` lists every connection this binary can use: API providers
+(with your key in the environment), agent apps you are signed into, and local
+engines such as Ollama, llama.cpp, LM Studio, LocalAI and vLLM. `/intelligence`
+changes the choice later and `/status` shows the project root, the chosen
+intelligence and where your context goes. Nika keeps the choice in
+`~/.nika/session-intelligence.json`.
+
+<Note>
+  On a machine with no choice recorded yet, the full-screen view asks for an
+  intelligence before it reads your first message, and keeps that message
+  until you choose. The plain view (`nika --plain`) asks only when a request
+  needs a model, so the walkthrough below runs there without any key.
+</Note>
+
+Provider keys come from your environment: Nika has no store for them.
+Export the one you use from your shell startup file, for example
+`export DEEPSEEK_API_KEY='…'`, and open a new terminal. `nika doctor` names the
+variable each provider reads. Local inference is unpriced, not free: Nika does
+not meter your machine's computation.
+
+## Walkthrough: filter a CSV, no key needed
+
+This request needs no model at all: the deterministic compiler settles it,
+and the workflow it writes computes its result without a model. Every line
+below was captured from `nika {STATUS.version}` in the plain view, on a
+machine with no key and no local model.
+
+<Steps>
+  <Step title="Make a folder with a small file">
+    ```bash
+    mkdir -p orders-demo/data && cd orders-demo
+    cat > data/orders.csv <<'EOF'
+    order_id,customer,status,amount
+    1001,Juniper Books,paid,18.00
+    1002,Kestrel Cafe,pending,9.50
+    1003,Linden Studio,paid,13.50
+    1004,Moss Supply,refunded,6.00
+    EOF
+    nika --plain
+    ```
+  </Step>
+  <Step title="Describe the job">
+    ```text
+    Read ./data/orders.csv, keep only the rows whose status is paid, and write them to ./out/paid.csv.
+    ```
+
+    Nika proposes a new file and shows what it will do. Nothing has run:
+
+    ```text
+    Nika proposes `compiled-workflow.nika`:
+    Does
+      1. read_source · reads a file
+      2. parse_source · converts a document
+      …
+      8. write_output · writes a file
+    Runs
+      when you ask (« run it ») · no schedule was asked
+    Can touch
+      external effects · none
+      human approval at run · none
+    …
+      check of these bytes · `compiled-workflow.nika` · clean ✔
+      when it runs:
+        · reads ./data/orders.csv
+        · writes ./out/paid.csv
+        · tools nika:assert · nika:convert · nika:jq · nika:read · nika:write
+        · model output estimate · $0 · no direct model task in these checked bytes
+    ```
+
+    `/show` prints the proposal's exact bytes; the filter is an ordinary jq
+    expression you can read and change. `/meaning` maps your request clause by
+    clause. A sentence that is neither yes, no nor a question is read as a
+    change, for example `write the paid rows to ./out/confirmed.csv instead`;
+    the revised proposal needs its own `yes`. `no` discards it.
+  </Step>
+  <Step title="Save it">
+    Type `yes`. Nika writes exactly the reviewed bytes, checks the file on
+    disk, and stops:
+
+    ```text
+    applied · wrote `compiled-workflow.nika`
+      check · `compiled-workflow.nika` · clean ✔
+    Saved · checked · not active · nothing has run
+      say « run it » to run it once (a ceiling is announced first)
+      from a terminal: `nika run compiled-workflow.nika`
+    ```
+  </Step>
+  <Step title="Run it once">
+    Type `run it`:
+
+    ```text
+    running `compiled-workflow.nika` once · ceiling $0.25
+    …
+    Done · `compiled-workflow.nika` · 32 ms · 8 tasks ran
+      produced · ./out/paid.csv (92 B)
+      read · ./data/orders.csv
+      cost · no model usage recorded
+      ceiling · $0.25 · the most this run was allowed to cost
+    ```
+
+    `out/paid.csv` holds the header and the two paid rows:
+
+    ```text
+    order_id,customer,status,amount
+    1001,Juniper Books,paid,18.00
+    1003,Linden Studio,paid,13.50
+    ```
+  </Step>
+  <Step title="Read what the record proves">
+    Type `/proof`:
+
+    ```text
+    Proof · `.nika/traces/<run>.ndjson` · what this journal records, hash-chained line by line
+      chain · OK — 36 events · chain intact · head fabb27f0…7d7d
+      seal · UNSEALED — no run_sealed frame: the run was not signed …
+      boundary · 10 permit check(s) · 10 allowed · 0 denied
+      written · ./out/paid.csv · 92 B · sha256 7cac63e6…89db · RE-READ: the file as it is now, not as it was written
+      …
+      does not prove · that the content is right (read it) · who wrote this journal …
+    ```
+
+    The run is `UNSEALED` because this machine has no run-signing key;
+    `NIKA_KEYCHAIN=off nika key init` once makes later runs `SEALED`
+    ([Seal your runs](/getting-started/installation#seal-your-runs)).
+  </Step>
+</Steps>
+
+With the same Nika version, request and input file, this path gives the same
+workflow and the same output bytes. The same compiler works without the
+Session:
+
+```bash
+nika compile 'Read ./data/orders.csv, keep only the rows whose status is paid, and write them to ./out/paid.csv.' paid-orders.nika
+nika check paid-orders.nika
+nika run paid-orders.nika
+nika trace verify
+```
+
+Ask for more, such as the paid rows plus their total in a second file, and the
+deterministic compiler no longer settles the request alone: Nika asks for an
+intelligence and writes the workflow with it. Review that proposal the same
+way. Before Nika proposes a workflow a model wrote, a verifier (your decision
+model, or else the author) compares it with your whole request, and Nika
+proposes nothing it has not accepted.
+
+## Save and Run stay separate
+
+- `yes` writes only the reviewed bytes and checks them. Saving never runs a
+  workflow.
+- `save & run`, while a proposal waits, saves it and then runs it once; the
+  two keep separate outcomes.
+- `run it` runs the saved workflow once, only when the file on disk checks
+  clean. Name a file and a ceiling to choose:
+  `run paid-orders.nika with a ceiling of 0.05`.
+- The ceiling is announced before the run starts: the amount you state,
+  otherwise `ceiling:` in the project's `nika.yaml`, otherwise USD 0.25. It
+  bounds the run's metered spend at catalog prices; it does not cover
+  authoring and it is not an invoice.
+- A required input without a default is asked for before the run. A run that
+  pauses at an approval step shows that step's question, and your answer
+  resumes the same run. Nothing answers for you.
+
+## Inspect the result
+
+After a run, the Session lists what it produced and read, the model usage it
+recorded and the path of its trace.
+
+- `/proof` shows what the trace records (chain, seal, boundary, written files)
+  and what it does not prove.
+- `/details` shows how the last workflow was built: the author and model,
+  calls, tokens and time.
+- Outside the Session, `nika trace verify` re-checks the latest trace.
+
+| Where | What |
+|---|---|
+| `<project>/<name>.nika` | the saved workflow |
+| `<project>/.nika/traces/` | run records |
+| `<project>/.nika/session-state.json` | the Session's record for this project |
+| `<project>/.nika/consents.ndjson` | which files each `yes` wrote |
+| `~/.nika/sessions/` | the conversation history, per project |
+| `~/.nika/session-intelligence.json` | your intelligence choice |
+
+Traces and history can contain the data a workflow read. Keep them out of
+version control unless you intend to publish them.
+
+## Close and come back
+
+`/quit` (or `/exit`) closes the Session. A proposal still waiting for your
+answer is kept: the next `nika` in the same folder offers `/restore`, which
+shows the original request and proposes the kept draft again, checked against
+the project as it is now. Restoring calls no model and writes nothing until
+you type `yes`. Earlier approvals and spending ceilings do not carry over.
+
+## Limits
+
+A clean check describes a file's structure and boundary; it does not prove
+that the workflow does what you meant or that a model's output is true. Some
+requests cannot be expressed yet: Nika then says what stopped it and writes
+nothing. [Known limits in 0.123](/changelog/known-limits) covers rehearsals on
+a copy, authoring time with large models, and the terminal's mix of English
+and French lines.
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Your first workflow" icon="play" href="/getting-started/first-workflow">
+    Write a `.nika` file by hand and learn each line.
+  </Card>
+  <Card title="Local models" icon="server" href="/guides/local-models">
+    Give the Session and your workflows a model on this machine.
+  </Card>
+  <Card title="Harness access" icon="plug" href="/guides/harness-access">
+    Use an agent app you are already signed into.
+  </Card>
+  <Card title="Traces" icon="link" href="/concepts/traces">
+    What a run record proves, and what it does not.
+  </Card>
+</CardGroup>

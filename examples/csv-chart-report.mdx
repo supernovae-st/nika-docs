@@ -8,8 +8,8 @@ icon: "chart-column"
 > **T2 chain · data → picture**: `nika:read` loads the CSV,
 > `nika:convert` types it into rows, `nika:jq` aggregates by region,
 > `nika:chart` renders the bar chart as a real image, and `nika:write`
-> assembles the markdown report around it. Five tasks, zero model
-> calls — the whole pipeline is deterministic data plumbing.
+> assembles the markdown report around it. Six tasks, zero model
+> calls: the whole pipeline is deterministic data plumbing.
 
 ## The job
 
@@ -156,23 +156,35 @@ outputs:
 
 ## Run it
 
-Rehearsal writes nothing:
+<Note>
+  **What it needs:** The sample sales CSV. No model, no key, no network.
+</Note>
 
-```bash
-nika try csv-chart-report
-```
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try csv-chart-report
+    ```
 
-To run a file you own, copy the YAML on this page to
-`csv-chart-report.nika`, then:
+    The sample files come with it and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `csv-chart-report.nika` in a new folder, then download the sample it reads:
 
-```bash
-nika check csv-chart-report.nika
-nika run csv-chart-report.nika
-open out/revenue-report.md
-```
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/sales.csv "$FIXTURES/sales.csv"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check csv-chart-report.nika
+    nika run csv-chart-report.nika
+    ```
 
-`nika compile` does not instantiate showcase jobs.
+    The run writes `out/revenue-report.md` and the chart beside it, `out/revenue-by-region.svg`.
 
-Swap the bundled sample for your own export by pointing
-`const.sales_csv` at it — the aggregation key and the chart spec are
-the only two lines to adapt.
+    To chart your own export (columns `region,revenue`), point `const.sales_csv` at it and move the read permit with it.
+  </Step>
+</Steps>

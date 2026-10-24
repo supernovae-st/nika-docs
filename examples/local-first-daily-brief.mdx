@@ -65,8 +65,8 @@ The static audit passes before a single token is spent — plan, types,
 tools, args, secret flows. One honest wrinkle to read, not fear:
 
 ```text
-⚠  COST   $0.0000 – $0.0000 FLOOR (unbounded tasks present)
-   brief  ollama/qwen3.5:4b  UNBOUNDED — no catalog price (local/unknown model)
+⚠  COST     bounded portion $0.0000 no total ceiling · 1 unpriced task · prompts, exec + mcp unpriced · prices 2026-10-12
+  brief  ollama/qwen3.5:4b  UNBOUNDED — no catalog price (local model; spend not metered)
 ```
 
 A local model has no list rate, so the engine says **unbounded** instead
@@ -80,31 +80,41 @@ Then:
 nika run daily-brief.nika
 ```
 
-Rehearse the shape first with `model: mock/echo` (simulation — tools
-still run; fetch still hits the network). Then swap the model. A real
-run of this exact file (historical capture 2026-07-09 · Apple Silicon,
-qwen3.5:4b):
+Rehearse the shape first with `--model mock/echo`: a rehearsal replaces
+the model, not the tools, so the fetch still reaches the network. On
+v0.123.0 the card reads:
 
 ```text
-✔  fetch  invoke · nika:fetch        762ms
-✔  brief  infer · ollama/qwen3.5:4b  48.0s
-── 2/2 done · ≥ $0.00 (1 unpriced) · elapsed 48.7s ─────────────
-  trace: .nika/traces/2026-07-09T22-54-50Z-e843.ndjson · 8 events · chain 394719d2…
+✔  fetch  invoke · nika:fetch · untrusted input from fetch  789ms
+✔  brief  infer · mock/echo · untrusted input from fetch  2ms
+2 tasks · 2 waves · 0 retries · 299 tok
+── 2/2 done · unpriced (1 call) · elapsed 0.8s ─────────────────
+  trace: .nika/traces/2026-10-24T14-50-51Z-e96b.ndjson · 10 events · chain 7d54a6c6…
 ```
+
+Then run it without `--model`: the `brief` line names
+`ollama/qwen3.5:4b`, the note is the model's five bullets, and the total
+still reads `unpriced`. A local model is never metered as `$0.00`.
 
 ## The receipt
 
 ```sh
-nika trace verify .nika/traces/<run>.ndjson   # path from the run card's trace: line
+nika trace verify   # the latest run in this folder; or pass the path the run printed
 ```
 
 ```text
-OK — 8 events · chain intact · head 394719d24361e1a6…
+OK — 10 events · chain intact · head 7d54a6c683e499ee40b4113060bba40a509aea1f2365b7b59f71377035820157
+  internally consistent (tamper-evident, not tamper-proof) — compare the head
+  against the one the run printed to close the loop
+UNSEALED — no run_sealed frame: the run was not signed …
 ```
 
 The trace is a hash chain: edit any event after the fact and `verify`
 exits non-zero. Your brief comes with proof of what ran, in what order,
-against which inputs — even offline.
+against which inputs, even offline. `UNSEALED` means no run-signing key
+signed this record: mint one once per machine with
+`NIKA_KEYCHAIN=off nika key init`, and later runs verify as `SEALED`
+([Seal your runs](/getting-started/installation#seal-your-runs)).
 
 ## Make it daily
 

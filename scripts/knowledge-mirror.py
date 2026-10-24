@@ -94,10 +94,12 @@ def render(snapshot):
             siblings=[s for s in c['siblings'] if s in known]
             if siblings:lines+=['\n**In the same object:** '+ ' · '.join(f'[{s}](/reference/language/words/{s})' for s in siblings)+'\n']
             lines+=[f'\n[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/{rev}/schemas/workflow.schema.json)\n']
+        if w['name']=='workflow':
+            lines.append('\nThe released 0.123.0 engine runs filesystem children only: a `registry:owner/name@version` target is refused at check (`NIKA-COMP-001`), and a first fetch of a registry coordinate is refused as well (`NIKA-REG-005`). Use the workflow file from the registry repository by path. See [Known limits](/changelog/known-limits#registry-coordinates-are-refused).\n')
         if w['examples']:
             ex=w['examples'][0];lines+=['## In a source template\n',f'Excerpt from `{ex["path"]}`, source lines {ex["startLine"]}–{ex["endLine"]}. This is a fragment, not a runnable workflow.\n','```yaml illustration',ex['excerpt'],'```']
             if 'required: true' in ex['excerpt'] and 'default:' in ex['excerpt']:
-                lines.append('\nThe pinned schema text says a `required` input is not satisfied by `default` (the caller must supply a value). Published CLI 0.120.1 still applies `default:` when the key is omitted. That is a source-versus-implementation discrepancy ([nika-spec#348](https://github.com/supernovae-st/nika-spec/issues/348)), not one law. Prefer `required: false` plus `default:` for knobs, and required without `default:` for caller-owned values (`NIKA-1708` at run).\n')
+                lines.append('\nThe pinned schema text says a `required` input is not satisfied by `default` (the caller must supply a value). The released 0.123.0 engine still applies `default:` when the key is omitted. That is a source-versus-implementation discrepancy ([nika-spec#348](https://github.com/supernovae-st/nika-spec/issues/348)), not one law. Prefer `required: false` plus `default:` for knobs, and required without `default:` for caller-owned values (`NIKA-1708` at run).\n')
             lines+=['\n### Templates containing this field\n','| Template | Source |','| --- | --- |']
             for e in w['examples']:lines.append(f'| `{e["path"]}` | [Line {e["line"]}](https://github.com/supernovae-st/nika-spec/blob/{rev}/{e["path"]}#L{e["line"]}) |')
             lines+=['\nThese are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).\n']

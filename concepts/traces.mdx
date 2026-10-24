@@ -5,6 +5,8 @@ sidebarTitle: "Traces"
 icon: "clock-rotate-left"
 ---
 
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
 You ran a workflow an hour ago. It worked (or it didn't), and now someone
 asks: *what exactly happened?* With most AI tooling the answer scrolled
 away. With Nika the run itself is a file: every event the engine emitted,
@@ -59,25 +61,28 @@ unique id, a nanosecond timestamp, a `kind`, and typed fields:
 - `workflow_completed`, or `workflow_failed`, or `workflow_paused`
   (a human gate is waiting — the trace carries the prompt payload)
 
-Here is a **historical** capture (2026-07, two-task `exec` workflow). The
-kinds are still the spine; do not treat the timestamps or ids as current
-engine output:
+A real journal from `nika 0.123.0`: the one-task `mock/echo` hello of the
+[SDK quickstart](/sdk/start/quickstart), with each event's `fields` abridged.
+Every line carries `chain`, the hash that links it to the line before:
 
 ```json
-{"id":{"uuid":"019f23fb-af22-76b0-a124-4fc91d3166e9"},"timestamp":1783015124770000000,"kind":"workflow_started","run":null,"correlation":null,"fields":[{"key":"workflow","value":"version-stamp"},{"key":"permits","value":"engine floor (no boundary declared)"}]}
-{"id":{"uuid":"019f23fb-af22-76b0-a124-4fd5aa792ff9"},"timestamp":1783015124770000000,"kind":"task_scheduled","run":null,"correlation":null,"fields":[{"key":"task","value":"stamp"}]}
-{"id":{"uuid":"019f23fb-af3d-7331-807d-3ec787e872c3"},"timestamp":1783015124797000000,"kind":"task_started","run":null,"correlation":null,"fields":[{"key":"task","value":"stamp"},{"key":"note","value":"exec · date"}]}
-{"id":{"uuid":"019f23fb-af3d-7331-807d-3ed6051694b4"},"timestamp":1783015124797000000,"kind":"task_completed","run":null,"correlation":null,"fields":[{"key":"task","value":"stamp"},{"key":"note","value":"exec · date"},{"key":"duration_ms","value":26}]}
-{"id":{"uuid":"019f23fb-af5a-70d3-a7e2-1cfd58fbaed3"},"timestamp":1783015124826000000,"kind":"workflow_completed","run":null,"correlation":null,"fields":[{"key":"workflow","value":"version-stamp"}]}
+{"id":{"uuid":"01a16da4-ef1f-74ad-9612-4c0e6339082c"},"timestamp":1792840888095000000,"kind":"workflow_started","execution":{"uuid":"01a16da4-ef10-75cb-97fa-e0bcc8945d3c"},"chain":"7466341540fd02fca9ec21937862176b7821a52495b86d81bb5f30d16c8462dc","fields":[{"key":"workflow","value":"hello"}]}
+{"id":{"uuid":"01a16da4-ef23-76bc-a7bc-432d9fb884ed"},"timestamp":1792840888099000000,"kind":"task_scheduled","execution":{"uuid":"01a16da4-ef10-75cb-97fa-e0bcc8945d3c"},"chain":"7fdea5da88635cf245dc1d3308448cb15b8a5e05f9cb0c66c5c1f9cd8f3c4978","fields":[{"key":"task","value":"greeting"}]}
+{"id":{"uuid":"01a16da4-ef28-7707-a8c1-1fb798ef20c6"},"timestamp":1792840888104000000,"kind":"task_started","execution":{"uuid":"01a16da4-ef10-75cb-97fa-e0bcc8945d3c"},"chain":"907d719542dd475a93bf1d2dbe0db8b0a9a36e09a1b059c01bd23c5dfd259595","fields":[{"key":"task","value":"greeting"}]}
+{"id":{"uuid":"01a16da4-ef29-708e-bd5c-ef46b9bf92bc"},"timestamp":1792840888105000000,"kind":"task_completed","execution":{"uuid":"01a16da4-ef10-75cb-97fa-e0bcc8945d3c"},"chain":"df29062d313b712b51bb43acceb3ef3f8d1b6d5454c6c3d390e0e72bf294374e","fields":[{"key":"task","value":"greeting"},{"key":"duration_ms","value":2}]}
+{"id":{"uuid":"01a16da4-ef29-708e-bd5c-ef47f97e094b"},"timestamp":1792840888105000000,"kind":"workflow_completed","execution":{"uuid":"01a16da4-ef10-75cb-97fa-e0bcc8945d3c"},"chain":"bf2bbdd2f5fbd5e2c1271bbd2703f3018e49e2537b06ddcc4756360b1e382d50","fields":[{"key":"workflow","value":"hello"}]}
 ```
+
+This run was not signed. On a machine with a run-signing key, a sixth line,
+`run_sealed`, closes the journal.
 
 The spine is not the whole vocabulary. Deeper kinds record retries
 (`task_retrying`), cancellation (`task_cancelled`,
 `workflow_cancelled`), money (`cost_incurred`), security checks
 (`permit_checked`), streaming (`infer_chunk`) and the agent loop
 (`agent_tools_selected`, `agent_budget_checkpoint`, and friends). The
-full event system, including the durability checkpoints that make runs
-resumable, is documented in [Concepts · Events](/concepts/events).
+{STATUS.eventKinds} event kinds of engine {STATUS.version} are listed in
+[Concepts · Events](/concepts/events).
 
 Real spend also rides the spine: a priced `task_completed` carries a
 `cost_usd` field next to its `tokens` — **absent** for mock and local
@@ -95,7 +100,8 @@ nika trace show     # print the final card only
 ```
 
 `replay` plays the recorded events through the same renderer that drew
-the original run: same storyboard, same timing, same verdict card.
+the original run: same storyboard and verdict card, with time compressed 6×
+by default (`--speed`).
 `show` skips the animation and prints the summary. Both are a
 **reading** of the file — they do not walk the hash chain.
 
@@ -128,7 +134,7 @@ edited, reordered, or dropped from the middle without breaking it.
   <source src="/videos/trace-proof.webm" type="video/webm" />
   <source src="/videos/trace-proof.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**Change one byte, and verify says where.** Each line of a run's trace carries the sha256 of the line before it. `nika trace verify` reads the chain back intact; in a copy with one byte of line 4 changed, it stops at line 5 with `BROKEN` and exit code 2. *A `mock/echo` rehearsal captured from the real CLI; the scan and the moving hashes are illustration.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**Change one byte, and verify says where.** Each line of a run's trace carries the sha256 of the line before it. `nika trace verify` reads the chain back intact; in a copy with one byte of line 4 changed, it stops at line 5 with `BROKEN` and exit code 2. *A `mock/echo` rehearsal captured from the real CLI on nika 0.121.0; the scan and the moving hashes are illustration.*</p>
 
 ```bash
 nika trace verify
@@ -139,8 +145,9 @@ highest tier honestly attained. That is the **proof**, distinct from
 `show` / `replay`: those inspect the recorded events; this command
 attests the sequence is intact. The tiers:
 
-- **CHAINED** — the links hold; the sequence is intact (`verify` prints
-  `OK — N events · chain intact` and the head to compare).
+- **OK** — the links hold; the sequence is intact (`verify` prints
+  `OK — N events · chain intact` and the head to compare). An unsigned run
+  stops here and says `UNSEALED`.
 - **SEALED** — a signature over the whole chain verifies against a
   custody key (the run was signed).
 - **ANCHORED** — a detached sidecar verifies **fully offline** against a
@@ -154,10 +161,18 @@ does not create one. A succeeded run can still be UNSEALED on a keyless
 machine. An intact chain is not proof that a human read the output, that
 an external API committed, or that the business goal was met.
 
-Three refusals name themselves rather than hide in a tier: a broken
-chain is `BROKEN at line N`, the first line whose recorded link no longer
-matches; a seal with lines appended after it is `TAMPERED` (forgery, never
-a crash); a sidecar that vouches for nothing is `ANCHOR FORGED`.
+Refusals name themselves rather than hide in a tier:
+
+| Verdict | Meaning | Exit |
+|---|---|---|
+| `BROKEN at line N` | the first line whose recorded link no longer matches | 2 |
+| `TAMPERED` (`SEAL BURIED`) | lines chained after the seal: appending needs only write access, so this is forgery, never a crash | 2 |
+| `SEAL FORGED` | the `run_sealed` signature does not verify against the key | 2 |
+| `ANCHOR FORGED` | an anchor sidecar that vouches for nothing | 2 |
+| `SEAL UNATTRIBUTABLE` | the seal names a key you do not hold: a missing input, not evidence of forgery | 3 |
+
+`--sealed` and `--anchored` make a missing tier an error (exit 3), and
+`--json` prints one machine document per trace (`verify_version: 1`).
 
 ## Why this matters
 

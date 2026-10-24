@@ -41,6 +41,12 @@ def utc(value):
 def highlights(body):
     """Use complete upstream change headings, not guessed or truncated summaries."""
     headings = re.findall(r"(?ms)^[-*] \*\*(.+?)\*\*", body)
+    if not headings:
+        # Notes without bulleted headings may lead their What section with one
+        # bold sentence; it is the author's own summary, never a guess.
+        what = re.search(r"(?ms)^## What[ \t]*\n(.*?)(?=^## |\Z)", body)
+        if what:
+            headings = re.findall(r"(?ms)^\*\*(.+?)\*\*", what.group(1))[:1]
     return [re.sub(r"\s+", " ", heading.replace('`', '')).strip()
             for heading in headings[:3]]
 

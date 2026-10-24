@@ -1,0 +1,125 @@
+---
+title: "Permits and admission"
+description: "A workflow declares what it may touch; the engine refuses anything outside it before the run starts. Read the boundary from your code."
+sidebarTitle: "Permits"
+icon: "shield-halved"
+---
+
+import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
+
+A workflow's `permits:` block lists what it may read, write, run and reach.
+It is default-deny engine policy: nothing in the SDK grants more, and the
+engine refuses a task that reaches past the boundary before anything starts.
+
+## A refused run
+
+`list-notes.nika` runs `ls` but declares `permits: {}`, zero authority:
+
+```yaml list-notes.nika
+nika: list-notes
+model: mock/echo
+permits: {}
+tasks:
+  list:
+    exec:
+      command: ["ls", "notes"]
+outputs:
+  files: ${{ tasks.list.output }}
+```
+
+```ts permits.mts
+import { Nika, NikaOperationError } from '@supernovae-st/nika'
+
+const nika = new Nika({ cwd: process.cwd() })
+
+// The audit on its own: findings are data.
+const report = await nika.check('list-notes.nika')
+console.log(report.clean, report.exitCode)
+for (const finding of (report.findings ?? []) as { code?: string; message?: string }[]) {
+  console.log(finding.code, finding.message)
+}
+
+// The run: refused at admission, so no run, event or trace exists.
+try {
+  await nika.run('list-notes.nika')
+} catch (error) {
+  if (error instanceof NikaOperationError && error.operation === 'run') {
+    console.log('refused', error.code, error.status)
+  } else throw error
+}
+```
+
+```text
+false 2
+NIKA-SEC-004 exec task under a boundary that forbids shells (task `list`) — fix: add "ls" to permits.exec
+refused NIKA-SEC-004 2
+```
+
+The finding names the repair. Replace `permits: {}` with exactly that grant,
+and the same calls succeed:
+
+```yaml
+permits:
+  exec: ["ls"]
+```
+
+`./node_modules/.bin/nika check list-notes.nika --infer-permits` drafts the
+tightest block for a file. An absent `permits:` block is refused the same way
+(`NIKA-AUTH-006`): zero authority, with no boundary to judge against.
+
+## Read the boundary before you run
+
+A local `check()` report carries the boundary the engine judged, so your
+application can apply its own policy before admitting a workflow, for
+example a reviewed allowlist of programs:
+
+```ts
+type Permits = { declared?: { exec?: string[]; fs?: { read?: string[]; write?: string[] } } }
+type Cost = { bounded_total_usd?: number; has_unbounded?: boolean }
+
+const report = await nika.check('list-notes.nika')
+const permits = report.permits as Permits
+const cost = report.cost as Cost
+const allowed = new Set(['ls'])
+
+const programs = permits.declared?.exec ?? []
+if (!report.clean || programs.some((p) => !allowed.has(p)) || cost.has_unbounded) {
+  throw new Error(`not admitted here: ${programs.join(', ')}`)
+}
+console.log('admitted:', programs, 'risk:', report.risk_grade)
+```
+
+| Report field | What to check |
+|---|---|
+| `permits.declared` | the file's `permits:`: programs (`exec`), paths (`fs.read`, `fs.write`), hosts (`net.http`), tools |
+| `permits.needed` | what the tasks actually reach |
+| `requirements` | the models, secrets (names, never values) and required inputs |
+| `cost` | the worst-case output ceiling, and whether any task is unbounded |
+| `risk_grade` | the engine's summary: `low`, `supervised`, `high` or `unbounded` |
+
+A report describes the bytes the engine read at that moment; `run()`
+re-admits the file's current content. If the file can change between the two
+calls, gate its integrity, or capture a snapshot first. The SDK types these
+fields as `unknown`: narrow them as above.
+
+## What the engine enforces at run time
+
+The check judges literal arguments. At run time the engine re-judges what the
+check could not know (computed paths, resolved programs, symlinks) and
+confines `exec:` children in the OS sandbox (Seatbelt on macOS, bubblewrap on
+Linux). A run that reaches past the boundary then fails with `NIKA-SEC-004`
+as result data. [Security](/concepts/security) describes every law, including
+the ones no `permits:` entry can open.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+</Accordion>
+
+<CardGroup cols={2}>
+  <Card title="Security model" icon="shield" href="/concepts/security">
+    Permits, taint, the order law and the lethal trifecta.
+  </Card>
+  <Card title="Security boundary" icon="lock" href="/sdk/operations/security">
+    The SDK's own seams: argv, tokens, secrets.
+  </Card>
+</CardGroup>

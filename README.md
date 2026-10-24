@@ -26,18 +26,23 @@
          alt="The loop the docs teach first: nika compile writes hello.nika, nika check audits it, nika run runs it and nika trace verify confirms its record" width="960">
   </a>
 </p>
-<p align="center"><sub>The loop the docs teach first: compile, check, run, verify. Real CLI output, offline, answered by the <code>mock/echo</code> rehearsal model.</sub></p>
+<p align="center"><sub>The loop the docs teach first: compile, check, run, verify. Real CLI output from nika 0.121.0, offline, answered by the <code>mock/echo</code> rehearsal model.</sub></p>
 
 ## What is Nika?
 
-Nika is an open-source AI workflow runtime. Define work in a `.nika`
-file, check it before execution, run it on your infrastructure, and inspect
-the outputs and execution record. You choose the models, tools and
-permissions. Local execution needs no Nika account or hosted service.
+Nika turns repeatable AI work into a small file you keep. Say what you want
+done and Nika writes it as a readable `.nika` workflow. Before anything runs,
+its check shows what the workflow will do, which models and tools it uses,
+what it may touch and what it can cost, without calling a model. You run it
+when you decide, with the model you choose, and every run leaves a
+tamper-evident record you can verify. No Nika account and no hosted service.
 
-| Define | Check | Run | Inspect |
+| 1 · Say it | 2 · Check it | 3 · Run it | 4 · Prove it |
 |:---:|:---:|:---:|:---:|
-| Write or review a versioned `.nika` file | `nika check` reports static findings | `nika run` executes under declared permissions | Read outputs and inspect the trace |
+| Describe the job; Nika writes a `.nika` file | `nika check` audits it before any model is called | `nika run` with the model you choose | `nika trace verify` checks the run's record |
+
+0.123 is the open-source reference release; the project is maintained with
+security fixes, bug fixes and compatibility work.
 
 Start with the [offline report](https://docs.nika.sh/introduction): actual
 calculation and a Markdown file, without an API key or a mock model.
@@ -55,6 +60,7 @@ exact expected outputs and explicit permissions.
 | You want to… | Read |
 |---|---|
 | Install Nika and get a first result | [Install Nika](https://docs.nika.sh/getting-started/installation) |
+| Describe a job in your own words | [The terminal Session](https://docs.nika.sh/getting-started/session) |
 | Write a workflow by hand, line by line | [Your first workflow](https://docs.nika.sh/getting-started/first-workflow) |
 | Run a workflow from your TypeScript app | [TypeScript quickstart](https://docs.nika.sh/sdk/start/quickstart) |
 | Start from a ready-made job | [Examples](https://docs.nika.sh/examples/overview) |
@@ -67,6 +73,8 @@ exact expected outputs and explicit permissions.
 
 Every clip below also plays on the docs page that explains it, where its
 caption says what is captured from the real CLI and what is illustrated.
+They were captured on nika 0.121.0; the local-model run of the meeting-notes
+workflow, which two of them show, was captured on nika 0.109.2.
 
 ### Nika catches the mistake before anything runs
 
@@ -76,7 +84,7 @@ caption says what is captured from the real CLI and what is illustrated.
          alt="nika check finding two mistakes in a workflow, the fix, then the clean re-check" width="860">
   </a>
 </p>
-<p align="center"><sub><code>nika check</code> finds two mistakes, the fix lands, and the re-check is clean. Nothing runs and no token is spent · plays on <a href="https://docs.nika.sh/guides/troubleshooting">Troubleshooting</a></sub></p>
+<p align="center"><sub><code>nika check</code> finds two mistakes, the fix lands, and the re-check is clean. Nothing runs and no token is spent · captured on nika 0.121.0 · plays on <a href="https://docs.nika.sh/guides/troubleshooting">Troubleshooting</a></sub></p>
 
 ### The file is the boundary
 
@@ -86,7 +94,7 @@ caption says what is captured from the real CLI and what is illustrated.
          alt="A workflow's permits drawn as a map; the check refuses the task that reaches outside them, and the widened boundary passes" width="860">
   </a>
 </p>
-<p align="center"><sub>A workflow lists what it may read, write and reach in <code>permits:</code>. The check refuses the task that reaches past it · plays on <a href="https://docs.nika.sh/concepts/security">Security model</a></sub></p>
+<p align="center"><sub>A workflow lists what it may read, write and reach in <code>permits:</code>. The check refuses the task that reaches past it · captured on nika 0.121.0 · plays on <a href="https://docs.nika.sh/concepts/security">Security model</a></sub></p>
 
 ### A request you retype every week becomes a file
 
@@ -96,7 +104,7 @@ caption says what is captured from the real CLI and what is illustrated.
          alt="A request retyped into a chat every Monday, kept instead as meeting-actions.nika, a file that runs" width="860">
   </a>
 </p>
-<p align="center"><sub>Chat is for trying; a <code>.nika</code> file is for keeping: the same request, written once and run again · plays on <a href="https://docs.nika.sh/concepts/how-nika-compares">How Nika compares</a></sub></p>
+<p align="center"><sub>Chat is for trying; a <code>.nika</code> file is for keeping: the same request, written once and run again · check captured on nika 0.121.0, local-model run on nika 0.109.2 · plays on <a href="https://docs.nika.sh/concepts/how-nika-compares">How Nika compares</a></sub></p>
 
 More clips, each on the page it explains:
 ▶ [A workflow is a graph](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/dag-execution.optimized.gif) ([Workflows](https://docs.nika.sh/concepts/workflows)) ·
@@ -181,10 +189,17 @@ flowchart LR
 
 Clips are rendered in the engine repository from captured CLI output
 (see [`media/`](https://github.com/supernovae-st/nika/tree/main/media)).
-Never edit an export by hand: change the clip there and render it again.
+The SDK clips (`sdk-*`) are rendered in the
+[SDK repository](https://github.com/supernovae-st/nika-client) from the
+published npm package; its `media/README.md` says how each one is recorded
+and checked. Never edit an export by hand: change the clip in its repository
+and render it again.
 
 1. **Copy the files.** `media/videos/NAME.webm` and `NAME.mp4` go to
-   `videos/`; `media/posters/NAME.png` goes to `images/posters/`.
+   `videos/`; `media/posters/NAME.png` goes to `images/posters/`. An SDK
+   clip has no WebM: copy `media/videos/NAME.mp4` and its still,
+   `media/stills/NAME.png`, as the poster, and give its `<video>` one
+   `<source>`.
 2. **Review them for a public audience**, then add each file's SHA-256 to
    `scripts/public-assets.json` (`sha256sum videos/NAME.* images/posters/NAME.png`).
    The publication audit refuses media it has not seen.
@@ -215,7 +230,10 @@ Never edit an export by hand: change the clip there and render it again.
 > [!NOTE]
 > One clip per page keeps pages light. `controls` lets a reader pause the
 > loop; `aria-label` names the video for screen readers and `alt` is what
-> `mint a11y` checks. Keep each file well under 20 MB, the Mintlify
+> `mint a11y` checks. The SDK pages drop `autoPlay` and `loop` and add
+> `preload="none"`: their recordings show code to read, so the poster stays
+> until the reader presses play, which also respects a reduced-motion
+> preference. Keep each file well under 20 MB, the Mintlify
 > preview's limit. A page that still waits for its clip carries an MDX
 > comment, `{/* motion: … */}`: `grep -rn "motion:" --include=*.mdx .`
 > lists them.
@@ -268,14 +286,12 @@ maintained by hand, and they are not evidence about the released binary.
 
 - **Headings** in sentence case, never title case.
 - **Voice:** direct, technical, AGPL-proud, never try-hard.
-- **Vocabulary** (locked): "organ", not "module"; "admitted", not "added";
-  "grew", not "shipped"; "chrysalis", not "beta". "Emerge" is kept for the
-  1.0 release.
+- **Vocabulary**: say what a reader can do with the released binary; name
+  the version a capture comes from; never promise a future release.
 - **The butterfly** 🦋 appears once, in the closing line of
   `introduction.mdx`; never in navigation, chrome or headings.
 - **Brand assets** (`images/logo-{light,dark}.svg`, `images/favicon.svg`)
-  come from the Nika brand kit ([nika.sh/brand](https://nika.sh/brand/nika-logo-dark.svg),
-  usage rules in [BRAND.md](https://github.com/supernovae-st/nika.sh/blob/main/BRAND.md)).
+  come from the Nika brand kit at [nika.sh/brand](https://nika.sh/brand).
   Sync them from the kit; never retune their colors here.
 
 </details>
@@ -359,7 +375,7 @@ response times.
 | 🦋 | [nika](https://github.com/supernovae-st/nika) | The engine and CLI: write, check, run and verify AI workflows |
 | 📖 | **[nika-docs](https://github.com/supernovae-st/nika-docs)** | **The documentation, live at [docs.nika.sh](https://docs.nika.sh)** |
 | 📜 | [nika-spec](https://github.com/supernovae-st/nika-spec) | The language specification and the suite that proves an engine follows it |
-| 🧩 | [nika-vscode](https://github.com/supernovae-st/nika-vscode) | The editor extension: your workflow as a live graph, errors as you type |
+| 🧩 | [nika-vscode](https://github.com/supernovae-st/nika-vscode) | The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema |
 | 🟦 | [nika-client](https://github.com/supernovae-st/nika-client) | Run and verify workflows from TypeScript |
 | ✅ | [nika-action](https://github.com/supernovae-st/nika-action) | A GitHub Action that posts a `nika check` verdict on your pull requests |
 | 🚀 | [nika-actions-starter](https://github.com/supernovae-st/nika-actions-starter) | A ready template: workflows, editor setup and CI from the first push |

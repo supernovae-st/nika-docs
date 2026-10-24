@@ -116,29 +116,43 @@ outputs:
    is one of the engine's named modes; misspell it (`bayer`) and
    `nika check` answers with the whole legal set instead of guessing.
    The checker teaches the vocabulary before the run spends a cycle.
-2. **A fan-out that can produce nothing still binds** — the collect
-   step guards with `${{ tasks.stylize.output != null ? … : [] }}`
+2. **A fan-out that can produce nothing still binds** — the `rendered`
+   output guards with `${{ tasks.stylize.output != null ? … : [] }}`
    (quoted, because a bare CEL ternary contains `:` and YAML would
-   claim it). An empty folder degrades to an empty manifest, not a
-   crash.
+   claim it). An empty folder degrades to an empty list, not a crash.
 
 ## Run it
 
-Rehearsal writes nothing:
+<Note>
+  **What it needs:** The two sample PNG files. No model, no key, no network.
+</Note>
 
-```bash
-nika try image-fx-batch
-```
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try image-fx-batch
+    ```
 
-To run a file you own: copy the YAML on this page to `fx.nika`, point
-`const.photos` at an **existing** directory of PNG files, then:
+    The sample files come with it and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `image-fx-batch.nika` in a new folder, then download the samples it reads:
 
-```bash
-nika check fx.nika
-nika run fx.nika
-ls out/darkroom/
-```
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures/photos
+    curl -fsSLo examples/fixtures/photos/sunset-01.png "$FIXTURES/photos/sunset-01.png"
+    curl -fsSLo examples/fixtures/photos/harbour-02.png "$FIXTURES/photos/harbour-02.png"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check image-fx-batch.nika
+    nika run image-fx-batch.nika
+    ```
 
-`nika compile` does not instantiate this showcase slug and does not plant
-sample photos. `nika compile --list` names exact skeletons; only a Ready
-candidate plus an explicit destination writes.
+    The run writes one stylized PNG per photo under `out/darkroom/`.
+
+    To stylize your own folder, edit `const.photos` and the matching `permits.fs.read` entry together: a permit is a literal and cannot follow the constant (`NIKA-AUTH-007`), and a folder outside it is refused at run (`NIKA-SEC-004`).
+  </Step>
+</Steps>

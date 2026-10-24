@@ -12,13 +12,14 @@ icon: "bolt"
 > numbers stay comparable.
 
 <Note>
-**Status** · the doctrine and the data rail ship today — the model
-catalog carries sourced energy facts (schema `@1.3`, absence over
-guess). On released 0.120.1, `nika check` already prints an `ENERGY`
-line (usually `unpriced` when no sourced Wh figure exists — never
-`0 Wh`). The `--max-energy-wh` block-before-spend gate is specified by
-[NEP-0018](https://github.com/supernovae-st/nika-spec/blob/main/governance/nep-0018-energy-honesty.md)
-(Draft) and is **not** a flag on this binary yet.
+**What 0.123.0 does.** `nika check` prints an `ENERGY` line beside `COST`.
+When the catalog holds a sourced figure for a task's model and the task
+declares `max_tokens`, the line is a bounded worst-case ceiling in
+watt-hours; otherwise the task is named as unpriced or uncapped, never
+`0 Wh`. Energy is a reading, not a gate: there is no `--max-energy-wh`
+flag, and [`--max-cost-usd`](/guides/cost-honesty) is the only spend gate.
+The normative rules are the spend-honesty law of
+[spec 07 · conformance](https://github.com/supernovae-st/nika-spec/blob/main/spec/07-conformance.md).
 </Note>
 
 ## The vocabulary
@@ -33,23 +34,51 @@ with the same semantics:
 | **UNBOUNDED** | a task whose energy has no provable limit, with the WHY (`no max_tokens declared` — you can fix that one) |
 | **unpriced** | tokens will be spent but no sourced figure exists for the model — local models live here **by design** |
 
+## What the check prints
+
+A task on a model with a sourced figure, capped at 1,000 output tokens:
+
+```text
+ ✔ COST     $0.0006 – $0.0006 worst-case output ceiling · prompts, exec + mcp unpriced · prices 2026-10-12
+   summarize  groq/openai/gpt-oss-120b  ≤1000 tk  $0.0006
+ ✔ ENERGY   ≤ 0.011 Wh worst-case OUTPUT ceiling · gpu scope · 1 of 1 tasks measured · prompts unpriced
+   summarize  groq/openai/gpt-oss-120b  ≤1000 tk  ≤ 0.011 Wh  (independent-measured · gpu · 2025-12)
+```
+
+The same task without `max_tokens` has no ceiling to prove, so the line
+names it instead of guessing:
+
+```text
+ ⚠  ENERGY   no total energy ceiling · 0 of 1 tasks measured · 1 uncapped · never 0 Wh (NEP-0018)
+```
+
+A model with no sourced figure reads `unpriced — no sourced Wh figure for
+any task model · never 0 Wh`, and a local model adds that it draws your
+watts. The same reading rides `nika check --json` (the `energy` object, with
+a subtotal per scope class) and the one-line header of `nika inspect`.
+
 ## A fact, not a vibe
 
-An energy figure enters the catalog as a five-field fact or not at all:
+An energy figure enters the catalog as a five-field fact or not at all.
+This row is the one behind the reading above, as `nika` 0.123.0 ships it:
 
 ```toml
-energy = { wh_per_mtok_out = 42.0,
+[[rules]]
+provider = "groq"
+model_pattern = "openai/gpt-oss-120b"
+# … prices and limits …
+energy = { wh_per_mtok_out = 11.0,
            provenance = "independent-measured",
            scope = "gpu",
-           source = "ml.energy leaderboard v3.0 · H100 · vLLM · conversation workload (arXiv 2505.06371)",
+           source = "ml.energy leaderboard Dec 2025 · B200 · vLLM · problem-solving · 0.0397 J/token (arXiv 2505.06371)",
            measured_at = "2025-12" }
 ```
 
-That row is real — the first sourced figure in the catalog
-(`groq / qwen/qwen3-32b`). Open-weight models are the measurable
-frontier: a third party can put them on a bench. Closed APIs stay
-**unpriced** until a vendor discloses or an independent methodology
-covers them — that asymmetry is honest, and the catalog keeps it.
+Open-weight models are the measurable frontier: a third party can put them
+on a bench, and every sourced figure in the 0.123.0 catalog is one of them.
+Closed APIs stay **unpriced** until a vendor discloses or an independent
+methodology covers them — that asymmetry is honest, and the catalog keeps
+it.
 
 Two axes make two honest numbers comparable:
 
@@ -60,7 +89,8 @@ Two axes make two honest numbers comparable:
 - **`scope`** — what it covers: `gpu` (accelerator only) · `device`
   (whole host) · `fleet` (host + idle + datacenter PUE). A GPU-only
   figure is roughly **half** a fleet figure for the same model: without
-  this axis, two truthful numbers are silently incomparable.
+  this axis, two truthful numbers are silently incomparable, so the check
+  sums each scope class separately and never adds them together.
 
 And the unit is per million **output** tokens (`wh_per_mtok_out`)
 because decode dominates measured inference energy (≥96% in the
@@ -73,24 +103,12 @@ number with nearly-free prefill and reward long prompts.
 your wall, an unmeasured cloud call draws from someone's datacenter.
 The catalog refuses a zero at build time — the null is the **absent**
 fact, and an absent fact renders **unpriced**, exactly as an unpriced
-model renders on the cost side. If you have never seen an energy number
-in a Nika surface, that is the feature: no number was provable, so no
-number was shown.
-
-## What NEP-0018 still adds
-
-The `ENERGY` reading beside `COST` already renders on 0.120.1 (unpriced
-when no sourced figure exists). Still specified, not yet a CLI flag:
-
-- bounded `≤ N Wh` totals with the scope axis named, every uncapped
-  task named with its reason, mixed scopes never silently summed;
-- energy aggregation in `nika:inspect` under the same markers;
-- `--max-energy-wh` — a block-before-spend gate symmetric to
-  [`--max-cost-usd`](/guides/cost-honesty): refusal, not remorse.
+model renders on the cost side. If you see no energy number for a task,
+that is the feature: no number was provable, so no number was shown.
 
 ## Why watt-hours, not CO₂e
 
 Carbon intensity varies by grid, hour and region — a gCO₂e constant
 hides a location assumption inside a number. Watt-hours are the
-measurable; a carbon projection needs YOUR grid factor as an explicit
-input, and may arrive later as exactly that. First the honest unit.
+measurable; a carbon projection would need your grid factor as an explicit
+input, and Nika does not take one. The honest unit comes first.

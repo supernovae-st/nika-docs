@@ -138,9 +138,11 @@ outputs:
     skips (and value edges pass the skip along as `null`).
   </Step>
   <Step title="The approval gate">
-    `nika:prompt` blocks until answered (CI can use `default:`). The
-    save binds the verdict (`approved: ${{ tasks.approve.output }}`)
-    and runs only `when: ${{ with.drafts != null && with.approved == true }}`.
+    `nika:prompt` asks at a terminal; with no terminal it takes its
+    `default: false`, so a script or a scheduler never sends anything by
+    accident. The save binds the verdict
+    (`approved: ${{ tasks.approve.output }}`) and runs only
+    `when: ${{ with.drafts != null && size(with.drafts) > 0 && with.approved == true }}`.
   </Step>
 </Steps>
 
@@ -152,6 +154,45 @@ outputs:
 | `nika:jq` filtering | `overdue` | [Builtins](/reference/builtins) |
 | CEL `size()` | `drafts.when` | [Workflows](/concepts/workflows) |
 | `nika:prompt` human gate | `approve` | [Builtins](/reference/builtins) |
+
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample ledger: three of its five rows are overdue, so the run reaches the gate.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try invoice-chaser
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `invoice-chaser.nika` in a new folder, then download the sample it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/invoices.csv "$FIXTURES/invoices.csv"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check invoice-chaser.nika
+    nika run invoice-chaser.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run invoice-chaser.nika
+    ```
+
+    The run writes `out/reminders-to-send.md`, once you approve.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    On a terminal the gate asks you. Piped, in CI or under a scheduler it takes `default: false` and skips the write.
+  </Step>
+</Steps>
 
 ## Make it yours
 

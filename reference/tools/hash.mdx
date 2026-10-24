@@ -21,14 +21,15 @@ This reference preserves the specification at the revision linked below. Source 
 
 ## Usage and behavior
 
-&gt; **Reference-engine availability at `6ac427c5e62dc450d1d2393e3eec169e9566f6a3`:**
-&gt; digest calls accept `content`, `algo` and `encoding`. The `op` argument,
-&gt; including explicit `op: hash`, and the `sign`/`verify` forms below are
-&gt; **spec-ahead of this engine pin**. Their normative contract is retained;
-&gt; these examples do not announce implementation availability.
+> **Reference-engine availability at `6ac427c5e62dc450d1d2393e3eec169e9566f6a3`:**
+> digest calls accept `content`, `algo` and `encoding`. The `op` argument,
+> including explicit `op: hash`, and the `sign`/`verify` forms below are
+> **spec-ahead of this engine pin**. Their normative contract is retained;
+> these examples do not announce implementation availability.
 
 ```yaml illustration
-invoke: { tool: "nika:hash", args: { algo: blake3, content: "${{ tasks.X.output }}", encoding: hex } }
+with: { report: "${{ tasks.X.output }}" }
+invoke: { tool: "nika:hash", args: { algo: blake3, content: "${{ with.report }}", encoding: hex } }
 
 # Normative op forms · spec-ahead at the engine pin named above
 invoke: { tool: "nika:hash", args: { op: sign,   content: "${{ with.manifest }}", key: "${{ secrets.release_key }}" } }
@@ -94,8 +95,8 @@ implying a green that does not exist).
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/stdlib/builtins-v0.1.md#L388) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/stdlib/builtins-v0.1.md#L408) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/canon/builtins.yaml).
 
-Tool identity: `nika:hash`. Specification revision: `480f5b80cb77`.
+Tool identity: `nika:hash`. Specification revision: `6390b08eb979`.
 
 <Ecosystem />

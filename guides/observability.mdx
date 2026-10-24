@@ -151,9 +151,11 @@ Each verb becomes a span (duration, tokens, the ADR-099 identity
 hashes). An `infer:` or `agent:` task also carries the **model** it ran
 on, in the standard [OpenTelemetry GenAI semantic
 conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/):
-`gen_ai.provider.name`, `gen_ai.request.model`, `gen_ai.response.model`
-— the current names, so any GenAI-aware viewer (Grafana, Langfuse,
-Phoenix) reads which model produced which output with no translation.
+`gen_ai.provider.name`, `gen_ai.request.model`, `gen_ai.response.model`,
+`gen_ai.response.id`, `gen_ai.usage.input_tokens`,
+`gen_ai.usage.output_tokens` and `gen_ai.workflow.name` — the current
+names, so any GenAI-aware viewer (Grafana, Langfuse, Phoenix) reads which
+model produced which output with no translation.
 Drag the file into the Jaeger UI (≥ 1.60), or POST the lines to any
 OTLP/HTTP endpoint. Task outputs stay **local** by default;
 `--include-content` widens the exported file to carry them as span
@@ -164,10 +166,9 @@ the journal — it never re-runs anything.
   Because the model, provider, tokens, cost, and status ride every run's
   own trace, **your runs are your own analytics store** — query them with
   `jq`, feed them to any OTel-native eval tool, on files you own, with no
-  vendor and no cloud. (A first-class `--format dataset` export for
-  fine-tuning / eval sets is on the roadmap — it waits on a content-policy
-  decision, since a training set needs the input prompts a trace does not
-  capture by default.)
+  vendor and no cloud. There is no dataset export for fine-tuning or eval
+  sets in 0.123: a training set needs the input prompts, which a trace
+  does not capture by default.
 </Info>
 
 ## Terminals & CI

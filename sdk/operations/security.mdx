@@ -17,22 +17,38 @@ The SDK carries types and transport. The engine remains the policy enforcer.
   <span>PROCESS BOUNDARY · ONE ARGV VALUE</span>
   <pre tabIndex={0}>{`unsafe  shell("nika run " + path)
 
-safe    spawn("nika", ["run", path, "--json"])
-                              └── never shell-parsed`}</pre>
+safe    spawn("/abs/path/to/nika", ["run", path, "--json"])
+                                        └── never shell-parsed`}</pre>
 </div>
 
-Local `Nika` transport never wraps workflow paths in a shell string.
+The local transport spawns the resolved absolute engine path with an argv
+array and never wraps a workflow path in a shell string. A bare `nika` would
+make the operating system search `PATH`, so `bin` and `NIKA_BIN` must be
+absolute.
 
 ## Admit authority before execution
 
 ```ts
+const reviewedPrograms = new Set(['git', 'ls']) // your policy, reviewed
+const secretsAllowedHere = false
+
 const report = await nika.check(file)
+if (!report.clean) throw new Error('workflow is not admitted here')
 
-if (!report.clean) {
-  throw new Error('workflow is not admitted here')
+// Narrow the engine-owned fields your policy reads; the SDK types them as unknown.
+const permits = report.permits as { declared?: { exec?: string[] } }
+const cost = report.cost as { bounded_total_usd?: number; has_unbounded?: boolean }
+const requirements = report.requirements as { secrets?: unknown[] }
+
+if ((permits.declared?.exec ?? []).some((program) => !reviewedPrograms.has(program))) {
+  throw new Error('an unreviewed program is permitted')
 }
-
-authorizeEngineReport(report)
+if (cost.has_unbounded || (cost.bounded_total_usd ?? 0) > 0.25) {
+  throw new Error('the cost ceiling is above this route\'s budget')
+}
+if ((requirements.secrets ?? []).length > 0 && !secretsAllowedHere) {
+  throw new Error('this route does not hand out secrets')
+}
 
 const run = await nika.run(file, {
   maxCostUsd: 0.25,
@@ -78,8 +94,8 @@ logging and delivery secrets outside the Nika transport.
 | Boundary | Owner |
 |---|---|
 | Workflow grammar and permits | Engine |
-| Process argv and cancellation verb | One SDK |
-| HTTP admission timeout and bounded event views | One SDK |
+| Process argv and cancellation verb | SDK |
+| HTTP admission timeout and bounded event views | SDK |
 | Secret storage and identity | Deployment |
 | Artifact destination and retention | Application |
 

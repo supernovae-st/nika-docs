@@ -181,6 +181,45 @@ outputs:
 | `nika:assert` vs `when:` | `gate` | [Builtins](/reference/builtins) |
 | verbatim-quote schema | `clauses` | [The 4 verbs](/concepts/verbs) |
 
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample contract. No network at all: the file declares none.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try contract-guard
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `contract-guard.nika` in a new folder, then download the sample it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/contract.md "$FIXTURES/contract.md"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check contract-guard.nika
+    nika run contract-guard.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run contract-guard.nika
+    ```
+
+    The run writes `out/risk-memo.md`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    To review your own contract, pass `--var contract_path=./yours.md` and add that path to `permits.fs.read`, or the read is refused (`NIKA-SEC-004`).
+  </Step>
+</Steps>
+
 ## Make it yours
 
 - Compare against your clause playbook: `nika:read` the playbook + a second `infer` that flags deviations.

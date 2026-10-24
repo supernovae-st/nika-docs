@@ -5,6 +5,8 @@ sidebarTitle: "Docker AI workflow"
 icon: "docker"
 ---
 
+import { STATUS } from "/snippets/_status-snapshot.mdx";
+
 Ops work is where « the agent ran a command » stops being acceptable and
 « the file says exactly which commands, and the runtime enforces it »
 starts to matter. This guide builds a Docker health report the audited
@@ -12,9 +14,8 @@ way: two pinned `docker` reads, one local model, one kept artifact.
 
 ## The whole workflow
 
-Checked clean against `nika 0.120.1` (`9d554c84c` · `nika check` exit 0 ·
-permits declared · 0 hints). The run card below is a dated capture from
-2026-07-08; re-run on your machine for a current journal:
+`nika check` passes it on `nika {STATUS.version}` (exit 0 · permits
+declared · 0 hints). Save it as `docker-health-report.nika`:
 
 ```yaml
 # EXEC LEDGER ·
@@ -80,9 +81,8 @@ Write `shell: "docker ps | grep Up"` and `nika check` refuses to bless
 the boundary:
 
 ```text
-✖ PERMITS  [exec] task `ps` · a shell-string command cannot be verified
-           against a `permits.exec` program allowlist (a pipeline can
-           launch any program) — use the array form
+ ✖ PERMITS  [NIKA-SEC-004 · exec] task `ps` · a shell-string command cannot be verified against a `permits.exec` program allowlist (a pipeline can launch any program) — use the array form
+ ↳ HINT     [native-first/006] `grep` has an exact native form — a recursive regex search is `nika:grep` — returns `{path,line,match}` sorted, already structured
 ```
 
 That refusal is the feature. A shell string can smuggle any program
@@ -94,23 +94,30 @@ belong in `extract:` bindings and `nika:jq` instead.
 ## What the audit says before a token is spent
 
 ```text
-✔ PLAN     3 wave(s) · 4 task(s) · max parallelism 2
-     wave 1 ps (exec · docker) · df (exec · docker)
-     wave 2 diagnose (infer · ollama/qwen3.5:4b)
-     wave 3 keep (invoke · nika:write)
-⚠ COST     $0.0000 – $0.0000 FLOOR (unbounded tasks present)
-  diagnose  ollama/qwen3.5:4b  UNBOUNDED — no catalog price (local/unknown model)
-✔ PERMITS  body fits the declared boundary
-✔ audited · 4 task(s) · 3 wave(s) · permits declared · est ≥$0.0000 · 0 hints
+nika check · docker-health-report.nika
+ ✔ PLAN     3 waves · 4 tasks · max parallelism 2
+      wave 1 ps (exec · docker) · df (exec · docker)
+      wave 2 diagnose (infer · ollama/qwen3.5:4b)
+      wave 3 keep (invoke · nika:write)
+ ✔ ACCESS   ollama/qwen3.5:4b → ollama (local · local · declared) · present · liveness judged at run
+ ⚠  COST     bounded portion $0.0000 no total ceiling · 1 unpriced task · prompts, exec + mcp unpriced · prices 2026-10-12
+   diagnose  ollama/qwen3.5:4b  UNBOUNDED — no catalog price (local model; spend not metered)
+ ✔ ORDER    no exec: sits downstream of a net-effecting task · unauthored content never reaches a shell
+ ✔ PERMITS  literal + const: args fit the boundary · computed programs, paths + symlinks are the RUN's verdict · exec outside the fs bounds
+ ⚠ audited · 4 tasks · 3 waves · permits exec:docker tools:nika:write write:./docker-health.md · est unbounded · 1 unpriced task · 0 hints · risk unbounded — no dollar meter for a local/unknown model · cap a cloud seat on the run: `nika run <file> --max-cost-usd <usd>`
+ layers · valid ✔ · access ready ✔ · capacity fit ✔ · run ready ✔
 ```
+
+<sub>Captured from `nika {STATUS.version}`; the rows that only say ✔ for checks this file does not exercise are left out.</sub>
 
 Two things worth noticing:
 
 - The two `docker` reads run **in parallel** (wave 1) — the scheduler
   proved it from the `with:` bindings, nobody ordered it.
 - The cost line practices the honesty rule: a local model is **unpriced
-  compute, not « free »** — the report says FLOOR and names why, it never
-  rounds unknown to $0.
+  compute, not « free »** — the report says the total has no ceiling and
+  names why (no catalog price for a local model); it never rounds unknown
+  to $0.
 
 ## Run it
 
@@ -118,22 +125,15 @@ Two things worth noticing:
 nika run docker-health-report.nika
 ```
 
-Captured verbatim (Apple-silicon laptop · Docker Desktop · a small local
-thinking model — the two-minute `infer` is the model, not the engine):
+With the Docker daemon up and a local model served, the card lists the two
+`docker` reads side by side (`∥`, the same wave), then the model call, which
+takes as long as your model needs, then the write. The total reads
+**unpriced**, never `$0.00`: nothing in the catalog can meter a model on your
+own machine. Rehearse the whole file first with
+`nika run docker-health-report.nika --model mock/echo`: the `docker` reads run
+for real and the mock echoes the prompt instead of calling a model.
 
-```text
-🦋 nika · docker-health-report · 4 tasks
-   permits ✓ declared boundary · default-deny
-
-✔  ps        exec · docker              108ms ∥
-✔  df        exec · docker              561ms ∥
-✔  diagnose  infer · ollama/qwen3.5:4b  2m16s
-✔  keep      invoke · nika:write          2ms
-── 4/4 done · $0.00 · elapsed 137.3s ───────────────────────────
-  trace: .nika/traces/2026-07-08T12-43-02Z-d3f3.ndjson · 14 events · chain 5667b30f53baf619227324e70871de71
-```
-
-`docker-health.md` now holds the model's prose, and the run left a
+`docker-health.md` then holds the model's prose, and the run left a
 hash-chained journal you can prove later:
 
 ```bash
@@ -144,18 +144,24 @@ nika trace verify .nika/traces/<run>.ndjson
 
 The failure is part of the design. With Docker stopped, the same run
 fails **honestly and early** — the model is never called, nothing is
-spent, and the card hands over:
+spent, and the card hands over. Captured on `nika {STATUS.version}`:
 
 ```text
-✖  ps        exec · docker              167ms ∥
-⊘  diagnose  blocked · upstream failed
-⊘  keep      blocked · upstream failed
-── 4/4 done · $0.00 · elapsed 0.2s ─────────────────────────────
+$ nika run docker-health-report.nika --model mock/echo
+  🦋 nika · docker-health-report · 4 tasks
+     permits ✓ declared boundary · exec outside the fs bounds
 
-✖ NIKA-EXEC-001 · command exited with status 1: failed to connect to the
-  docker API at unix:///…/docker.sock; check if the path is correct and
-  if the daemon is running
-  fix: nika explain NIKA-EXEC-001
+  ✖  ps        exec · docker · untrusted input from ps  111ms
+  ✖  df        exec · docker · untrusted input from df  107ms ∥
+  ⊘  diagnose  blocked · ps settled failed · no binding here admits that
+  ⊘  keep      blocked · diagnose settled blocked · no binding here admits that
+  4 tasks · 3 waves · 0 retries
+  ── 4/4 done · 2 failed · 2 blocked · unmetered · elapsed 0.1s ──
+    wrote .nika/traces
+
+  ✖ NIKA-EXEC-001 · command exited with status 1: failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running: dial unix /var/run/docker.sock: connect: no such file or directory
+
+    fix: nika explain NIKA-EXEC-001
 ```
 
 ## Take it further

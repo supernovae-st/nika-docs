@@ -30,15 +30,31 @@ interface NikaCheckResult {
 }
 ```
 
-Findings are report data. Configuration, engine resolution, transport and
-protocol failures throw typed errors. Keep application policy outside the SDK:
-inspect engine-owned fields your pinned engine documents, and preserve unknown
-fields when storing or forwarding the report.
+A local check returns the engine's whole report (`report_version: 1`): the
+same audit `nika check --json` prints. The fields an application usually
+reads, measured on engine 0.123.0:
+
+| Field | What it holds |
+|---|---|
+| `clean` · `exitCode` | the verdict: `true` and `0`, or `false` and `2` with findings |
+| `findings[]` | each finding's `code`, `gate`, `task`, `message` and `severity` |
+| `verdicts` | the four layers `nika check` prints: valid, access ready, capacity fit, run ready |
+| `permits` | `declared` (the file's `permits:`), `needed` (what its tasks reach) and `partial` |
+| `cost` | `bounded_total_usd`, `min_path_total_usd`, `has_unbounded` and per-task rows |
+| `requirements` | the models, secrets and required inputs the run needs |
+| `risk_grade` | the engine's summary grade (`low`, `supervised`, `high`, `unbounded`) |
+
+The SDK types these fields as `unknown`: narrow them in your code. Findings
+are report data; configuration, engine resolution, transport and protocol
+failures throw typed errors. Keep application policy outside the SDK, and
+preserve unknown fields when storing or forwarding the report.
+[Permits and admission](/sdk/runtime/permits) shows a complete policy check.
 
 <Warning>
-  The source SDK exposes no separate dry-run-plan method. Do not manufacture
-  a TypeScript plan contract from engine output. Use `check()` for SDK
-  admission and the engine CLI when an operator needs CLI-specific planning.
+  The SDK has no separate dry-run-plan method. Do not manufacture a
+  TypeScript plan contract from engine output. Use `check()` for admission
+  and `nika run <file> --dry-run --json` (`plan_version: 1`) when an operator
+  needs the CLI's plan.
 </Warning>
 
 Remote checks intentionally reject the local-only `model` and `nativeStrict`

@@ -240,6 +240,47 @@ outputs:
 | schema enums + evidence | `screened` | [The 4 verbs](/concepts/verbs) |
 | jq deterministic ranking | `ranked` · `shortlist` | [Builtins](/reference/builtins) |
 
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the three sample CVs. No network: the file grants none.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try resume-screener
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `resume-screener.nika` in a new folder, then download the samples it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures/cvs
+    curl -fsSLo examples/fixtures/cvs/awa-diallo.md "$FIXTURES/cvs/awa-diallo.md"
+    curl -fsSLo examples/fixtures/cvs/priya-raman.md "$FIXTURES/cvs/priya-raman.md"
+    curl -fsSLo examples/fixtures/cvs/tomas-lindqvist.md "$FIXTURES/cvs/tomas-lindqvist.md"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check resume-screener.nika
+    nika run resume-screener.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run resume-screener.nika
+    ```
+
+    The run writes `hiring/shortlist-brief.md`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    To screen your own folder, change `const.cv_glob` and the matching `permits.fs.read` entries together (`NIKA-AUTH-007`).
+  </Step>
+</Steps>
+
 ## Make it yours
 
 - Anonymize first: a pre-pass `infer` that strips names/photos before scoring. Bias mitigation in one task.

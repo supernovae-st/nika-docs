@@ -19,35 +19,42 @@ Three surfaces sound like servers but accept different clients.
 <ProjectContract />
 <RemoteContract sdk={SDK} />
 
-## Candidate OpenAPI routes
+## Released OpenAPI routes (0.123.0, default server)
 
 | Method and path | Contract |
 |---|---|
 | `GET /health` | unauthenticated health and supported capabilities |
 | `GET /v1/openapi.json` | authenticated contract document |
 | `POST /v1/check` | compact admission acknowledgement or typed workflow refusal |
-| `POST /v1/compile` | stateless authoring: a candidate and a source-only check preview; creates no job, writes no file, contacts no provider |
+| `POST /v1/compile` | stateless authoring: a candidate and a source-only check preview; creates no job and writes no file. Deterministic by default; on a server started with `--authoring-model`, a caller may opt in to one provider round (`/health` lists `compileNativeV2`, and `GET /v1/openapi.json` then also describes `CompileRequestV2`) |
 | `POST /v1/jobs` | idempotent admission |
 | `GET /v1/jobs/{id}` | durable job projection |
 | `GET /v1/jobs/{id}/status` | current status |
 | `GET /v1/jobs/{id}/events` | SSE event stream |
 | `POST /v1/jobs/{id}/cancel` | cancellation action; 202 remains pending, 200 returns a completed observation |
-| `GET /v1/jobs/{id}/trace/verify` | typed verification diagnostic |
+| `GET /v1/jobs/{id}/trace/verify` | the CLI verifier's verdict on the journal the server wrote for that job |
 | `GET /v1/workflows` | contained names |
 | `GET /v1/workflows/{name}` | path-free metadata |
 | `GET /v1/schedules/{id}` | schedule status |
 | `PUT /v1/schedules/{id}` | CAS-backed schedule apply |
 
 The contract has no `POST /v1/run`, job-list, artifact, schedule-list,
-schedule-delete, trigger or backfill routes. Remote trace verification
-currently resolves a typed `unavailable` verdict because the server has no
-path-free journal authority; the diagnostic route itself is live.
+schedule-delete, trigger or backfill routes. `GET /v1/jobs/{id}/trace/verify`
+answers in the CLI's words, lower case: `ok` (intact, unsigned), `sealed`,
+`anchored` and `replayed` hold; `incomplete`, `tampered` and `broken` do not;
+`unavailable` means the server holds no journal for that job.
 
 ```sh
 nika serve --bind 127.0.0.1:18765 \
   --workflows ./workflows \
   --token-file .nika/serve.token
 ```
+
+Useful flags beyond these three: `--state-root <dir>` (job state, default
+`.nika/serve`), `--run-cost-ceiling <USD|none>` (per-job spend cap, default
+1 USD), `--allow-remote` (acknowledge a non-loopback `--bind`; TLS belongs to
+a reverse proxy) and `--authoring-model <provider/name>` (seat provider
+authoring for `POST /v1/compile`). `nika serve --help` lists every flag.
 
 ## Local application path
 
@@ -68,18 +75,23 @@ standalone engine CLI releases independently.
 ## Local model path
 
 ```sh
-nika model serve --model Qwen/Qwen3-0.6B-GGUF
+nika model pull unsloth/Qwen3-4B-Instruct-2507-GGUF   # downloads into ~/.nika/models; prints the size first
+nika model serve --model unsloth/Qwen3-4B-Instruct-2507-GGUF
 ```
 
-The engine calls this inference endpoint as a provider. Application code does
-not submit workflow jobs to it.
+`nika model serve` loads only models it has pulled (or a `.gguf` path), of
+the Qwen3 family in 0.123.0, and serves them on `127.0.0.1:8712`. A workflow
+reaches it as a local provider: export
+`NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712` and use
+`model: llamacpp/<model id>`, as the banner prints. Application code does not
+submit workflow jobs to it.
 
 <CardGroup cols={2}>
   <Card title="Resident server" icon="clock" href="/sdk/operations/resident-server">
     Operate the default firer and opt-in HTTP door.
   </Card>
   <Card title="Remote client" icon="satellite-dish" href="/sdk/remote/client">
-    Configure the matching One SDK transport.
+    Configure the matching SDK transport.
   </Card>
   <Card title="Local models" icon="microchip" href="/guides/local-models">
     Run inference on your own machine.

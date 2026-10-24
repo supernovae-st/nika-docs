@@ -70,7 +70,7 @@ outputs:
   LocalAI/Ollama/sd.cpp server, `NIKA_IMAGE_LOCAL_URL`), `gemini`
   (`GEMINI_API_KEY`), `openai` (`OPENAI_API_KEY`) or `xai` (`XAI_API_KEY`);
   keys and the local URL are engine-configured, never workflow args.
-- **`permits.fs.write` is the contract** — `./assets/og/**` is the ONLY
+- **`permits.fs.write` is the contract** — `out/og/**` is the ONLY
   place assets may land; a templated `output_dir` that escapes it fails
   `NIKA-SEC-004` before any byte is written. `nika check --infer-permits`
   writes this block for you.
@@ -85,22 +85,29 @@ outputs:
 
 ## Run it
 
-Rehearsal writes nothing:
+<Note>
+  **What it needs:** Nothing: `provider: mock` renders real, decodable PNG files offline, with no key.
+</Note>
 
-```sh
-nika try og-images
-```
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try og-images
+    ```
 
-To run a file you own, copy the YAML on this page to `og-images.nika`,
-then:
+    Nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `og-images.nika` in a new folder. It reads no sample file.
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check og-images.nika
+    nika run og-images.nika
+    ```
 
-```sh
-nika check og-images.nika
-nika run og-images.nika
-ls assets/og/
-```
+    The run writes two PNG variants and their provenance manifest under `out/og/`.
 
-`nika compile` does not instantiate showcase jobs.
-
-Flip the provider line and re-run when you want real renders — the rest
-of the file does not change.
+    For real renders, change the provider line: `local` (with `NIKA_IMAGE_LOCAL_URL`), `gemini`, `openai` or `xai` (with its key). The rest of the file does not change.
+  </Step>
+</Steps>

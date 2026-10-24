@@ -299,10 +299,12 @@ outputs:
     operations, not a text diff. Empty patch = healthy prod = total
     silence.
   </Step>
-  <Step title="Evidence travels with the alert">
-    The blake3 fingerprint of the live config rides in the alert AND in
-    the `nika:emit` journal event. When you investigate later, you know
-    exactly which state fired.
+  <Step title="Evidence lands in the journal">
+    The blake3 fingerprint of the live bytes, taken before they are parsed,
+    rides in the `config.drift.scan` event that `record` emits, next to the
+    patch and its paging subset. The alert carries no detail and points to
+    that event, so when you investigate later you know exactly which state
+    fired.
   </Step>
 </Steps>
 
@@ -314,6 +316,45 @@ outputs:
 | `nika:json_diff` (RFC 6902) | `drift` | [Builtins](/reference/builtins) |
 | `nika:hash` blake3 | `fingerprint` | [Builtins](/reference/builtins) |
 | `nika:emit` machine events | `record` | [Events](/concepts/events) |
+
+## Run it
+
+<Note>
+  **What it needs:** Nothing to rehearse: the default endpoint resolves nowhere, the fetch recovers, and the pipeline runs against the sample baseline. A real watch needs a local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) for the explanation.
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try config-drift-sentinel
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `config-drift-sentinel.nika` in a new folder, then download the sample it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/config-baseline.json "$FIXTURES/config-baseline.json"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check config-drift-sentinel.nika
+    nika run config-drift-sentinel.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run config-drift-sentinel.nika
+    ```
+
+    The run writes no file: it emits a `config.drift.scan` event and pages only for paging-class drift.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    To watch a real service, pass `--var config_url=https://…`, add that host to `permits.net.http`, and set `ONCALL_WEBHOOK_URL` to a webhook on `hooks.slack.com`.
+  </Step>
+</Steps>
 
 ## Make it yours
 

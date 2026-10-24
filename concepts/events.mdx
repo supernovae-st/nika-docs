@@ -1,267 +1,152 @@
 ---
 title: "Events"
-description: "Typed execution events and the kernel's metrics, trace, billing and audit interfaces."
+description: "The typed events a run emits, the journal they are chained into, the --json stream, and OTLP export."
 sidebarTitle: "Events"
 icon: "signal"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-An executing Nika workflow emits a structured stream of **events**.
-From an app, `run.events()` on `@supernovae-st/nika@0.123.0` yields
-normalized kinds; from the CLI, `nika run file.nika --json` prints one
-NDJSON object per line. The last line of a settled run is `run_settled`.
-`traceVerify` / `nika trace verify` then read the journal that already
-exists — they do not seal a run, rerun it, or prove the job was correct.
+An executing workflow emits a stream of typed **events**: a run starting, a
+task scheduled, started, completed or failed, a permit checked, a cost
+incurred. Every event is hash-chained into the run's journal under
+`.nika/traces/`, the record `nika trace verify` checks. The same events reach
+you three ways:
 
-The observability surface has **five sibling channels** inside the
-engine. Kernel trait names below are the implementation contract, not
-something a workflow author imports:
+| Surface | What you get |
+|---|---|
+| `nika run file.nika --json` | one JSON object per event on stdout, ending with a `run_settled` frame |
+| The run's journal (`.nika/traces/<run>.ndjson`) | every event, hash-chained; a signed run ends with `run_sealed` |
+| The TypeScript SDK (`run.events()`) | a normalized lifecycle vocabulary (`run.started`, `task.completed`…), with the engine frame on `event.raw` ([SDK events](/sdk/runtime/events)) |
+| `nika trace export <trace>` | the recorded journal as OpenTelemetry spans (OTLP/JSON lines) |
 
-| Channel | Trait | Semantics |
-|---|---|---|
-| Events | `EventSink` | Structured telemetry. **May be sampled or dropped** under load. |
-| Metrics | `MetricsExporter` | Counters / histograms. Aggregated, low-cardinality. |
-| Traces | `TracerProvider` | W3C-compatible spans. Sampled per-head. |
-| Billing | `BillingSink` | Token + cost ledger. **Never dropped, never sampled.** |
-| Audit | `AuditSink` | Append-only, persist-or-fail. Compliance (GDPR, EU AI Act, Shield). |
+Nothing in the journal can be edited, reordered or dropped from the middle
+without breaking its chain. Events describe what happened; the
+[result](/sdk/runtime/results) of a run, and its settlement, remain the source
+of truth for how it ended.
 
-<Info>
-  `nika run --json` streams the local event lane today. The kernel traits
-  (`EventSink`, `AuditSink`, `BillingSink`, `MetricsExporter`, and
-  `TracerProvider`) separate the observability interfaces. The resident
-  exposes job lifecycle events over SSE, and `nika trace export` projects a
-  recorded journal to OTLP/JSON lines. Available evidence depends on execution
-  and recording; admitting a job does not guarantee a complete trace.
-</Info>
+## The event shape
 
-## `Event` shape
+Each line of `nika run --json` and of the journal is one event. A real
+`task_completed` line from a `mock/echo` run on `nika 0.123.0`, abridged:
 
-```rust
-#[non_exhaustive]
-pub struct Event {
-    pub id: EventId,                    // ULID
-    pub run_id: RunId,                  // ULID of the current run
-    pub trace_id: Option<TraceId>,      // W3C trace context
-    pub kind: String,                   // e.g. "task.started"
-    pub timestamp_ms: u64,              // Unix epoch milliseconds
-    pub payload: serde_json::Value,     // kind-specific fields
+```json
+{
+  "id": { "uuid": "01a16da4-ef29-708e-bd5c-ef46b9bf92bc" },
+  "timestamp": 1792840888105000000,
+  "kind": "task_completed",
+  "run": null,
+  "execution": { "uuid": "01a16da4-ef10-75cb-97fa-e0bcc8945d3c" },
+  "correlation": null,
+  "chain": "df29062d313b712b51bb43acceb3ef3f8d1b6d5454c6c3d390e0e72bf294374e",
+  "fields": [
+    { "key": "task", "value": "greeting" },
+    { "key": "duration_ms", "value": 2 },
+    { "key": "tokens_in", "value": 6 },
+    { "key": "tokens_out", "value": 8 },
+    { "key": "model", "value": "mock/echo" },
+    { "key": "provider", "value": "mock" },
+    { "key": "cost_unpriced", "value": "mock_provider" },
+    { "key": "output", "value": "\"mock(echo) · Say hello from the Nika SDK.\"" }
+  ]
 }
 ```
 
-Source: `crates/nika-kernel/src/infra/event_sink.rs`. Every event shares
-`id`, `run_id`, `kind`, and `timestamp_ms`; `payload` shape depends on
-the `kind` discriminator.
+| Key | Meaning |
+|---|---|
+| `id` | the event's UUIDv7 |
+| `timestamp` | nanoseconds since the Unix epoch |
+| `kind` | the event kind, in snake_case (below) |
+| `execution` | the engine's id for this execution |
+| `chain` | the hash that links this event to the previous one |
+| `fields` | the kind-specific facts, as key/value pairs |
 
-## `EventSink` trait (L0.5)
-
-```rust
-#[trait_variant::make(EventSinkDyn: Send)]
-pub trait EventSink: Send + Sync + crate::sealed::Sealed {
-    async fn emit(&self, event: Event) -> Result<(), NikaError>;
-}
-```
-
-**Cancel-safety contract** (from the source): impls MUST NOT maintain
-cross-emission state. Dropping a future mid-emit is semantically
-identical to a sampled-away event. Batched sinks flush on a separate
-task that owns the batch: the `emit` call itself is atomic or
-all-nothing.
-
-The trait is `Sealed` (ADR-014): external crates cannot implement it
-directly; they route through the workspace-controlled adapter path.
+The type is `nika_event::Event`, in the engine's
+[`nika-event` crate](https://github.com/supernovae-st/nika/tree/v0.123.0/crates/nika-event).
+`nika run --json` ends with a `run_settled` frame that is not a journal event:
+it carries the run's `status`, `cause`, `tasks`, `spend`, `outputs` and
+`receipt` together.
 
 ## Event kinds
 
-Every kind is emitted from **exactly one call site** in the codebase
-(INV-024). No ambiguous duplicates: if you see `infer.chunk` on the
-wire, you know exactly which crate produced it.
+Engine {STATUS.version} emits {STATUS.eventKinds} kinds. Most runs only produce the first two groups.
 
-### Workflow-level
+| Group | Kinds |
+|---|---|
+| Workflow | `workflow_started` · `workflow_completed` · `workflow_failed` · `workflow_cancelled` · `workflow_paused` |
+| Task | `task_scheduled` · `task_started` · `task_completed` · `task_items` · `task_failed` · `task_skipped` · `task_retrying` · `task_recovered` · `task_cancelled` · `task_cache_hit` |
+| Verbs, cost and permits | `verb_invoked` · `tool_invoked` · `checkpoint_written` · `cost_incurred` · `infer_chunk` · `permit_checked` |
+| Agent | `agent_tools_selected` · `agent_nudge` · `agent_stalled` · `agent_compose_checked` · `agent_budget_checkpoint` · `agent_image_observed` |
+| Seal, approval and taint | `run_sealed` · `declassify` · `approval_decided` |
+| Memory | `memory_entry_rejected` · `memory_rejections_summary` |
+| Notify and quarantine | `notify_delivered` · `notify_failed` · `quarantine_recorded` |
 
-- `workflow.started`: a run begins.
-- `workflow.completed`: run ends, with status.
-- `workflow.skipped`: the run was gated off before any task started.
+A few that explain themselves in practice:
 
-### Task-level
+- `task_failed` carries the typed error (`code`, message, whether it is
+  transient), the shape `on_error:` routes on.
+- `task_cache_hit` marks a task a `--resume` run skipped because a journaled
+  success matched it.
+- `permit_checked` records a boundary decision the engine made at run time.
+- `workflow_paused` records a human gate holding the run; `approval_decided`
+  records the answer that resumed it.
+- `run_sealed` is the last line of a signed journal: the signature over the
+  chain head.
 
-- `task.started`: a task begins executing.
-- `task.completed`: a task ends successfully.
-- `task.failed`: a task errored out; payload carries the typed error (`code` · `category` · `transient` · the spec error shape). On the wire the engine's event slugs are snake_case (`task_failed`). The dot-form here is the documentation vocabulary.
-- `task.skipped`: the task's `when:` evaluated to false (or its empty
-  `for_each` collection skipped it).
-- `task.cancelled`: the task never ran because its default gate became
-  unsatisfiable (an upstream failed) or the run was cancelled (a normal
-  terminal state under gate-based propagation).
-- `task.retry`: a retry attempt begins (emitted before `task.started` of the retry).
+The kind set grows additively: tolerate kinds you do not know.
 
-### Verb-level
-
-From `nika-kernel::provider::InferEvent`:
-
-- `infer.delta`: streaming text chunk (`Delta { text }`).
-- `infer.tool_use_start`: agent called a tool (`ToolUseStart { id, name }`).
-- `infer.tool_use_delta`: streaming partial JSON input (`ToolUseDelta { id, partial_json }`).
-- `infer.thinking`: extended thinking chunk (`Thinking { text }`).
-- `infer.usage`: token usage update (`Usage(TokenUsage)`).
-- `infer.done`: stream completed (`Done { stop_reason, request_id, finish_reason_raw }`).
-
-From the other verbs:
-
-- `fetch.request`: HTTP request sent.
-- `fetch.response`: HTTP response received.
-- `exec.output`: a line of stdout/stderr.
-- `invoke.call`: tool invoked.
-- `invoke.result`: tool returned.
-- `agent.iteration`: one loop turn completed.
-
-### Meta
-
-- `checkpoint`: serializable snapshot (`AgentCheckpoint`, used for resume).
-- `taint.violation`: binding crossed a taint boundary (mirrors `AuditRecord::TaintViolation`).
-- `budget.warning`: nearing a `BudgetDirective` ceiling.
-- `budget.exceeded`: budget hard-stop triggered.
-
-## OTel `GenAI` semconv bridge (Q13)
-
-Every `InferRequest` and `InferResponse` carries a `GenAiAttrs` struct
-that maps directly to the OpenTelemetry `gen_ai.*` semantic conventions:
-
-```rust
-#[non_exhaustive]
-pub struct GenAiAttrs {
-    pub system: GenAiSystem,             // anthropic | open_ai | google | …
-    pub operation: GenAiOperation,       // chat | embedding | image_generation | …
-    pub response_id: Option<String>,     // gen_ai.response.id
-    pub response_model: Option<String>,  // gen_ai.response.model
-    pub encoding_formats: Vec<String>,   // gen_ai.request.encoding_formats
-    pub conversation_id: Option<String>, // gen_ai.conversation.id
-    pub agent_id: Option<String>,        // gen_ai.agent.id
-    pub agent_name: Option<String>,      // gen_ai.agent.name
-}
-```
-
-Source: `crates/nika-kernel/src/ai/genai.rs`. This enforces
-**cross-provider parity** (Pre-launch Gate 2): no provider can silently
-drop an attribute the kernel exports. When Nika emits an `infer.done`
-event, the `payload.gen_ai` block is identical in shape across all
-{STATUS.providers} providers.
-
-Cross-link: [OTel GenAI spec](https://opentelemetry.io/docs/specs/semconv/gen-ai/).
-
-## `AuditSink`: the fifth channel (Q12)
-
-`AuditSink` is **separate** from `EventSink`. Audit records are
-**append-only, persist-or-fail**: they MUST persist durably (fsync on a
-local log, synchronous HTTP POST to an append-only endpoint) before the
-trait method returns `Ok`. Buffering in memory is forbidden by contract.
-
-```rust
-#[non_exhaustive]
-pub enum AuditRecord {
-    CapabilityOverride { tenant_id, capability, reason },
-    TaintViolation    { tenant_id, path, severity },
-    CanaryLeaked      { tenant_id, canary_id },
-    BudgetExhausted   { tenant_id, dimension, cap, observed },
-    PolicyDenied      { tenant_id, rule_id, target },
-    KeyUsed           { tenant_id, key_id },
-    SecretRedacted    { tenant_id, location },
-    Extension         { ns, name, payload },   // forward-compat escape hatch
-}
-```
-
-Every variant carries a `TenantId` for multi-tenant routing. `Extension`
-is the forward-compat path (ADR-028): new categories land there first
-and get promoted to a first-class variant once the namespace stabilises.
-
-Severity is separate: `Info`, `Warn`, `Critical`. A `TaintViolation`
-with `Severity::Critical` should kill the run; a `CapabilityOverride`
-with `Severity::Info` is an operator trail, not a failure.
-
-<Note>
-  `AuditSink` replaced an earlier `ObservabilitySink` design during the
-  Q12 L0.5 architecture sweep (locked 2026-04-16, see
-  `docs/architecture/l0-l05-architecture-decisions.md`). The separation
-  matters: telemetry is best-effort; audit is compliance. Different
-  persistence guarantees, different failure modes, different sinks.
-</Note>
-
-## `BillingSink`: the ledger (separate trait)
-
-Token + cost accounting uses its own trait because it has different
-dropping semantics than `EventSink`. Billing records are **never
-dropped**. Implementations persist on every call and surface failures
-to the caller, who kills the run if persistence fails (revenue
-integrity > workflow liveness).
-
-See `nika-kernel::infra::billing::BillingSink` + ADR-028 §4.
-
-## Telemetry seams (ADR-035)
-
-Two reservations on the trace layer make the kernel OTel-ready without
-breaking any v0.8x caller:
-
-1. `SpanGuard.parent_span_id: Option<SpanId>`, an explicit parent link so
-   nested spans can be stitched into a tree without a thread-local
-   stack (which tokio's multi-thread runtime breaks).
-2. `SpanRef { trace_id, span_id }`, a copyable handle that propagates
-   span identity across `tokio::mpsc` boundaries and spawned tasks
-   without cloning the full `SpanGuard`.
-
-Both land as additive, `#[non_exhaustive]` extensions. In a future minor they
-bridge zero-copy into OTel's `SpanContext` when
-`nika-observability-otel` admits.
-
-## Enable the stream
+## Read the stream
 
 ```bash
-nika run workflow.nika --json             # stdout NDJSON
-nika run workflow.nika --json > run.log   # file
-nika trace export <path>                  # OTLP/JSON lines from a recorded journal
+nika run workflow.nika --json               # NDJSON on stdout
+nika run workflow.nika --json > run.ndjson  # keep a copy
+nika trace show                             # the latest run's final card
+nika trace export .nika/traces/<run>.ndjson # OTLP/JSON lines next to the trace
 ```
 
-The CLI JSON lane is live on the released binary. `nika serve --bind`
-exposes authenticated job lifecycle over HTTP for a resident; `nika trace
-export` projects a recorded journal to OTLP/JSON lines. Admitting a job
-does not guarantee a complete trace — available evidence depends on
-execution and recording. From TypeScript, iterate `run.events()` then
-await `run.result()`; see [SDK runtime events](/sdk/runtime/events).
+`nika trace export` writes `<run>.otlp.jsonl` beside the journal: one span
+per task, ready for any OTLP/HTTP collector (`:4318/v1/traces`) or the Jaeger
+UI. Model calls carry the OpenTelemetry GenAI semantic-convention attributes
+`gen_ai.provider.name`, `gen_ai.request.model`, `gen_ai.response.id`,
+`gen_ai.response.model`, `gen_ai.usage.input_tokens`,
+`gen_ai.usage.output_tokens` and `gen_ai.workflow.name`, alongside Nika's own
+`nika.*` attributes (task id and hashes, tokens, permits, the chain head).
+See the [OTel GenAI conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/).
 
-## Why five channels, not one
+Over HTTP, `nika serve --bind` streams each job's lifecycle as server-sent
+events (`execution.started`, `execution.settled`…), not the per-task journal
+events. From TypeScript, iterate `run.events()`, then await `run.result()`.
 
-Because they have incompatible guarantees:
+## Kernel interfaces (for engine implementers)
 
-- **Events** want volume + sampling. Dropping is fine.
-- **Metrics** want aggregation + low cardinality. Pre-aggregated.
-- **Traces** want causal structure + head sampling.
-- **Billing** wants durability + no drops. Every token metered.
-- **Audit** wants persist-or-fail + append-only. Compliance contract.
+The engine kernel also declares observability interfaces for alternative
+engines and future adapters: `MetricsExporter`, `TracerProvider`,
+`BillingSink`, `AuditSink` and `SecretResolver`. Engine 0.123.0 ships no
+production implementation of them: they exist as test doubles only. What a
+0.123.0 run gives you is the journal, the `--json` stream, the cost fields on
+task events (`cost_incurred`, `task_completed`) and `nika trace export`.
 
-Forcing them through one sink loses either the sampling headroom (makes
-the hot path slow) or the compliance contract (drops records under
-load, fails the audit).
+## Related decisions
 
-## Related ADRs
-
-- **ADR-021**: YAML envelope. `EventSink` emits events that correlate
-  to tasks inside `spec.tasks`, tagged with the workflow's `metadata.name`.
-- **ADR-028**: forward-compat reservation policy. `Extension` variants
-  in `AuditRecord` + `StopReason::Unknown(String)` in `InferResponse`.
-- **ADR-035**: telemetry seams (SpanGuard parent + SpanRef).
+- **ADR-113**: the nine-key envelope; `workflow_started` carries the
+  workflow's name.
+- **ADR-028**: forward-compatibility reservations, such as
+  `StopReason::Unknown(String)` in an inference response.
+- **ADR-035**: the telemetry seams (`SpanGuard` parent, `SpanRef`).
 
 ## Read next
 
 <CardGroup cols={2}>
-  <Card title="Event source" icon="file-code" href="https://github.com/supernovae-st/nika/blob/main/crates/nika-event">
-    The `nika-event` crate: every kind + payload schema in source.
+  <Card title="Traces" icon="link" href="/concepts/traces">
+    The hash-chained journal these events form, and how to verify it.
   </Card>
-  <Card title="Providers" icon="server" href="/concepts/providers">
-    How the unified `InferEvent` stream maps to {STATUS.providers} providers.
+  <Card title="SDK events" icon="wave-pulse" href="/sdk/runtime/events">
+    The normalized vocabulary `run.events()` yields.
+  </Card>
+  <Card title="Observability" icon="chart-line" href="/guides/observability">
+    Ship the stream to your own tools.
   </Card>
   <Card title="Bindings" icon="link" href="/concepts/bindings">
-    Reading `tasks.<id>.events` from other tasks.
-  </Card>
-  <Card title="Architecture" icon="layer-group" href="/concepts/architecture">
-    L0.5 kernel traits the observability channels live in.
+    How values move between tasks.
   </Card>
 </CardGroup>

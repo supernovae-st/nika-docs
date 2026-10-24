@@ -156,25 +156,39 @@ this time".
 
 ## Run it
 
-Rehearsal writes nothing:
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample episode transcript.
+</Note>
 
-```bash
-nika try transcript-shownotes
-```
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try transcript-shownotes
+    ```
 
-To run a file you own, copy the YAML on this page to
-`transcript-shownotes.nika`, pull a local model if you want a real
-answer, then:
+    A mock model answers, the sample files come with it, and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `transcript-shownotes.nika` in a new folder, then download the sample it reads:
 
-```bash
-ollama pull qwen3.5:4b
-nika check transcript-shownotes.nika
-nika run transcript-shownotes.nika
-open out/show-notes.md
-```
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/episode-transcript.txt "$FIXTURES/episode-transcript.txt"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check transcript-shownotes.nika
+    nika run transcript-shownotes.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run transcript-shownotes.nika
+    ```
 
-`nika compile` does not instantiate showcase jobs.
+    The run writes `out/show-notes.md`.
 
-Feed it any meeting transcript instead: the schema does not care
-whether the speakers were recording a podcast or arguing about a
-roadmap.
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+
+    Feed it any meeting transcript instead: point `const.transcript` at it and move the read permit with it.
+  </Step>
+</Steps>

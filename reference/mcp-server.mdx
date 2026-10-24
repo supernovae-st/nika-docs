@@ -1,6 +1,6 @@
 ---
 title: "Nika as an MCP server"
-description: "The read-only oracle: 9 validate-and-learn tools over stdio. Agents inspect freely; execution stays on the CLI, where the budget flags and traces live."
+description: "The read-only oracle: validate-and-learn tools over stdio or Streamable HTTP. Agents inspect freely; execution stays on the CLI, where the budget flags and traces live."
 sidebarTitle: "MCP server"
 icon: "plug"
 ---
@@ -12,9 +12,9 @@ server every wired client talks to. Its contract is one sentence:
 > and teaches; running a workflow stays on the CLI, where `--max-cost-usd`,
 > the permits boundary and the trace file live.
 
-The released binary serves **stdio** by default. Streamable HTTP also
-ships on 0.120.1: `nika mcp --transport http` (POST JSON-RPC,
-origin-gated, loopback on port 8123 by default). Widening `--bind`
+The binary serves **stdio** by default. Streamable HTTP ships too:
+`nika mcp --transport http` (POST JSON-RPC, origin-gated, loopback on port
+8123 by default; `NIKA_MCP_TOKEN` is the bearer a proxy in front can use). Widening `--bind`
 beyond loopback is on you: put TLS + auth in front first. Either
 transport, there is no write tool and no way to make the oracle execute
 anything. That is the design, not a gap: generation and repair belong to
@@ -31,12 +31,13 @@ uses the same two fields:
 { "command": "nika", "args": ["mcp"] }
 ```
 
-`nika wire <client>` writes this stanza into the right config file.
-Targets on the released binary include cursor · vscode · windsurf ·
-claude · claude-desktop · codex · gemini · qwen · opencode · hermes ·
-zed · continue · cline · lmstudio · junie · grok · kimi (and
-`detected` / `all`). For any other MCP-capable client, paste the stanza
-into its server config — see [per-client wiring](/integrations/mcp-clients).
+`nika wire <client>` writes this stanza into the right config file. The
+targets are cursor · vscode · windsurf · claude · claude-desktop · cline ·
+codex · continue · zed · opencode · hermes · gemini · qwen · lmstudio ·
+junie · grok · antigravity · kimi · kiro · copilot · amp, plus `detected`
+(the clients this machine shows; preview it with `--dry-run`) and `all`.
+For any other MCP-capable client, paste the stanza into its server config:
+see [per-client wiring](/integrations/mcp-clients).
 
 ## The 9 tools
 
@@ -44,11 +45,11 @@ Projected from the live wire (`tools/list`), never hand-counted:
 
 | tool | what it answers |
 |---|---|
-| `nika_check` | Statically audit a workflow (schema · DAG · CEL · effects · permits · cost) **before** running it — findings, or a clean bill. |
+| `nika_check` | Statically audit a workflow (schema · DAG · CEL · effects · permits · cost) **before** running it: findings, or a clean bill. `fix: true` applies the `nika check --fix` repairs in memory and returns the repaired source for the caller to write back; `native_strict` (on by default) fails on native-first hints; `verbose` returns the full verdict even when clean. |
 | `nika_explain` | Teach one `NIKA-XXXX` error code: cause, category, and the fix form. |
 | `nika_schema` | The embedded JSON Schema for `*.nika` — the structural contract an agent authors against. |
-| `nika_examples` | Browse the embedded runnable examples; with a `slug`, that example's full source. |
-| `nika_template` | The canonical workflow skeletons (chain · gate-and-act · fanout · …); with a `name`, that skeleton's source — copy it, never invent structure. |
+| `nika_examples` | Browse the embedded runnable examples; with a `slug`, that example's full source; with `builtin` (`nika:jq` or `jq`), the examples that call that tool. |
+| `nika_template` | The canonical workflow skeletons (chain · gate-and-act · fanout · …); with a `name`, that skeleton's source, and with `filled: true` its paired filled lesson. Copy it, never invent structure. |
 | `nika_canon` | The spec canon SSOT (`canon.yaml`) — the locked counts and names. Cite it, never a remembered number. |
 | `nika_catalog` | The embedded provider/model catalog — models, capabilities, context windows, API-key env vars. |
 | `nika_tools` | The embedded builtin-tool catalog — every `nika:*` tool with its model-facing JSON Schema. |

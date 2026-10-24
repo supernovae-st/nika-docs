@@ -26,9 +26,9 @@ invoke:
   tool: "nika:wait"
   args:
     duration: "5s"                  # RELATIVE · Go-duration string ("500ms"/"30s"/"5m"/"1h30m")
-    # OR (mutually exclusive · exactly-one-of) ·
-    until: "2026-05-23T09:00:00Z"   # ABSOLUTE · ISO 8601 timestamp · MAY be CEL expression
-    timeout: "1h"                   # OPTIONAL · cap for absolute wait (until: only)
+    # OR, exactly one of the two (both is NIKA-BUILTIN-001) ·
+    # until: "2026-05-23T09:00:00Z" # ABSOLUTE · ISO 8601 timestamp · MAY be CEL expression
+    # timeout: "1h"                 # OPTIONAL · cap for absolute wait (until: only)
 ```
 Temporal pause · ONE builtin · 2 modes (relative `duration:` XOR absolute `until:` · exactly-one-of validated at parse time).
 
@@ -49,8 +49,8 @@ Throws · `NIKA-BUILTIN-WAIT-001` on absolute timeout · `-002` if the timestamp
 
 ## Contract provenance
 
-[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/stdlib/builtins-v0.1.md#L129) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/480f5b80cb77faabf97f6db9e04d84713250f24d/canon/builtins.yaml).
+[Read the pinned specification](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/stdlib/builtins-v0.1.md#L141) · [Canonical registry](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/canon/builtins.yaml).
 
-Tool identity: `nika:wait`. Specification revision: `480f5b80cb77`.
+Tool identity: `nika:wait`. Specification revision: `6390b08eb979`.
 
 <Ecosystem />

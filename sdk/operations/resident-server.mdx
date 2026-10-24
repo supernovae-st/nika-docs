@@ -17,9 +17,9 @@ beat at the same firing law as `nika arm fire`. That default process is not
 HTTP.
 
 `--bind` + `--workflows` + `--token-file` on the **same verb** opens
-authenticated HTTP. The pinned OpenAPI includes jobs, job SSE, cancellation,
-trace diagnostics, workflow discovery and schedule read/write. Artifact routes,
-job listing and `POST /v1/run` are absent. `--once` and `--dry` cannot bind a
+authenticated HTTP. The released OpenAPI includes jobs, job SSE, cancellation,
+trace verification, workflow discovery and schedule read/write. It has no
+artifact, job-list or `POST /v1/run` route. `--once` and `--dry` cannot bind a
 listener.
 
 <Warning>
@@ -30,19 +30,21 @@ listener.
 ## Rehearse each operating mode
 
 ```sh
-nika serve --dry
-nika serve --once
-nika serve
+nika arm                 # list the beats and their next slots
+nika serve --dry --once  # print what would fire now, run nothing, exit
+nika serve --once        # fire what is due once, then exit
+nika serve               # stay resident and wait for the next slot
 ```
 
 | Mode | Behavior |
 |---|---|
-| `--dry` | Preview calendar-due beats, run and record nothing |
-| `--once` | Perform one due sweep, then exit |
-| no mode | Remain resident and wait for the next slot |
+| `--dry` | Runs nothing; prints `would fire <label> · slot …` for each beat due now. Without `--once` it stays resident |
+| `--once` | Performs one due sweep, then exits |
+| no mode | Stays resident and waits for the next slot |
 
 `--dry` is intentionally narrower than a real fire. It does not take the beat
-lock or apply the complete missed-run, overlap, cost and execution policy.
+lock or apply the complete missed-run, overlap, cost and execution policy. Use
+`nika arm` to see upcoming slots.
 
 ## Reload without losing the last good registry
 
@@ -97,7 +99,9 @@ nika serve --bind 127.0.0.1:18765 \
   --token-file .nika/serve.token
 ```
 
-Listen line (measured): `nika serve · listening http://127.0.0.1:18765 · GET /health`.
+The listen line (measured on 0.123.0) starts with
+`nika serve · listening http://127.0.0.1:18765 · GET /health` and goes on to
+list the authenticated routes.
 
 `--workflows <dir>` scopes the served registry (0.118): the listing, the
 metadata route and the schedules see only the workflows under that directory,

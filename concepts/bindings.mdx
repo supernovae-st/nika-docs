@@ -14,10 +14,9 @@ bindings, task records) and substitutes into the field. What's inside
 same expression language GitHub Actions and Kubernetes admission
 policies use. Nika does not invent a DSL.
 
-The parser preserves both forms of every templatable field through the
-AST: either a literal value or a `Templatable::Template(String)` holding
-the unresolved expression. See
-`crates/nika-schema/src/types/templatable.rs` for the exact types.
+The parser keeps both forms of every templatable field: a literal value, or
+a template island holding the unresolved expression. Templates are parsed by
+the engine's `nika-tmpl` crate and evaluated as CEL by `nika-cel`.
 
 <Info>
   **Two expression layers, locked by the spec:** [CEL](https://cel.dev)
@@ -35,7 +34,7 @@ the unresolved expression. See
 ${{ <expression> }}
 ```
 
-Four examples, each a valid `Templatable::Template`:
+Four examples, each a valid template:
 
 ```yaml
 prompt: "${{ inputs.target }}"
@@ -59,7 +58,7 @@ closed family (`${{ params.X }}` and friends) refuses `NIKA-VALUES-003`.
 |---|---|---|
 | `inputs.*` | Typed workflow inputs, declared in the envelope `inputs:` block — supplied by the caller at launch, or by the entry's own `default:` (a deployment knob is an input with a default) | `inputs.target` |
 | `const.*` | Named constants declared in `const:` — a fixed value baked into the file | `const.output_dir` |
-| `secrets.*` | Vault/env/file-backed secret references (masked in logs) | `secrets.api_key` |
+| `secrets.*` | Masked references to an environment or file store (`source: env` · `source: file`), masked in logs | `secrets.api_key` |
 | `with.*` | The task's **data boundary** — per-task `with:` block; each `tasks.*` reference in a value declares a typed edge, the body reads the binding | `with.model_family` |
 | `tasks.<name>.output` | The result record of a completed task (`.output` · `.status` · `.error` · `.duration_ms` · named bindings) — **boundary surfaces only** (see below) | `tasks.greet.output` |
 | `run.*` | The facts of this run, set by the engine and never declared or supplied. A closed set: `run.scheduled_for` (the instant the run serves, RFC 3339 UTC) and `run.missed` (the slots a catch-up covers, or `null`) | `run.scheduled_for` |
@@ -86,7 +85,8 @@ miette diagnostic pointing at the exact byte range.
 
 The `tasks` namespace is **boundary-only**. A `${{ tasks.X.* }}` reference
 is legal in exactly five places: `with:` values (the binding IS the edge ·
-`${{ group.<name> }}` is the plural, fan-in door) · `after:` keys (the entry
+`${{ group.<name> }}` is the plural, fan-in door: see
+[group](/concepts/workflows#fan-in-group)) · `after:` keys (the entry
 names the producer) · `on_error.recover:` (a fallback reads a settled
 record) · an `unwind` task's body (cleanup reads the **producer it unwinds**,
 and only that one) · workflow `outputs:` (the run's exports read the settled
@@ -136,10 +136,8 @@ tasks:
       prompt: "Iteration ${{ item }}"
 ```
 
-Type-checking is the analyzer's job, live today in `nika check`
-(every deep output reference is validated against its declared shape). The parser's
-`Templatable<T>` carries `T` as a phantom type so downstream stages
-can't conflate `Templatable<u32>` with `Templatable<bool>`.
+Type-checking is the analyzer's job, live in `nika check`: every deep output
+reference is validated against its declared shape before anything runs.
 
 ## Taint tracking
 
@@ -157,9 +155,9 @@ Integrity is orthogonal to confidentiality: a secret is *trusted* (the
 author put it there) and *confidential* (it must not leak). One untrusted
 operand taints the whole interpolation.
 
-Passing tainted data to a *privileged sink* (notably `exec.command`)
-without an explicit sanitizer raises a `NIKA-SEC`-family error (the
-runtime taint layer · [security model](/concepts/security)):
+Content fetched from the network never reaches a shell, whatever the
+channel: an `exec:` task downstream of a `nika:fetch` (or `nika:notify`) task
+is refused at check by the order law (`NIKA-SEC-015`), even through `stdin:`.
 
 ```yaml
 pull_user_input:
@@ -172,20 +170,29 @@ run_it:
   with:
     comment: ${{ tasks.pull_user_input.output }}
   exec:
-    command: ["${{ with.comment }}"]   # NIKA-SEC taint violation · tainted data as the program
+    command: ["${{ with.comment }}"]   # NIKA-SEC-015 · fetched content never reaches a shell
 ```
 
-Fix: never interpolate tainted data into the command position; pass it
-as data instead:
+Fix: do the work in a builtin, never a shell. Under
+`permits: { tools: ["nika:fetch", "nika:write"], fs: { write: ["./comment.txt"] } }`:
 
 ```yaml
-run_it:
+save_it:
   with:
     comment: ${{ tasks.pull_user_input.output }}
-  exec:
-    command: ["tee", "/tmp/comment.txt"]
-    stdin: "${{ with.comment }}"   # data channel, not code channel
+  invoke:
+    tool: nika:write
+    args:
+      path: ./comment.txt
+      content: "${{ with.comment }}"
 ```
+
+For a caller's `inputs` or a model's answer, argv elements or `stdin:` are
+the safe channels (each argv element is substituted on its own, with no
+shell to break out of); the resolved program must still match
+`permits.exec` (`NIKA-SEC-004` at run otherwise). The
+[security model](/concepts/security#exec-the-order-law-nika-sec-015)
+describes the order law.
 
 Taint is a property of **data**, not of a principal (T3:A design from
 `InferResponse.trust_level`). Cross-link: ADR-014 (sealed kernel
@@ -203,7 +210,10 @@ What's inside `${{ }}` is the **v0.1 CEL subset**
 | Comparison | `==` `!=` `<` `<=` `>` `>=` |
 | Boolean | `&&` `\|\|` `!` |
 | Membership | `status in ['success', 'skipped']` |
-| Size | `size(items) > 0` · the one v0.1 function, the empty-check idiom |
+| Size | `size(items) > 0` · `items.size()`, the empty-check idiom |
+| Presence | `has(inputs.style)` |
+| String tests | `with.title.startsWith('Fix')` · `.contains('bug')` · `.endsWith('.md')` |
+| Conditional | `has(inputs.style) ? inputs.style : 'brief'` |
 | Literals | `true` · `42` · `3.14` · `'str'` · `null` |
 | Grouping | `( … )` |
 
@@ -224,8 +234,11 @@ digest:
       expression: ".items | map(.title) | join(\"\\n\")"   # jq · transform
 ```
 
-CEL macros and string functions are reserved for later minors: growth
-is additive, never breaking.
+`matches()`, the list macros (`all()`, `exists()`) and arithmetic are not in
+the subset (`NIKA-VAR-005` names the functions that are): use `nika:jq` or
+`nika:assert` for that work. In YAML, quote an expression that contains
+`: `, such as a conditional, so the YAML parser keeps it whole:
+`prompt: "${{ has(inputs.style) ? inputs.style : 'be concise' }}"`.
 
 ## Multi-line
 
@@ -274,7 +287,8 @@ declaration site and the usage site.
 
 ## What bindings are **not**
 
-- ❌ Not a scripting language. No loops, no conditionals inside `${{ }}`.
+- ❌ Not a scripting language. No statements or loops inside `${{ }}`; the
+  only conditional is the `? :` expression.
 - ❌ Not arbitrary JavaScript / Python eval. No dynamic code.
 - ❌ Not Jinja2 / Liquid in full: `for` and `if` blocks are **not**
   supported inside expressions.
@@ -292,9 +306,9 @@ analyzer and renderable by any graph surface — `nika inspect <file>
   binding error points at the exact byte range in the source file.
 - **ADR-014**: sealed kernel traits. The resolver runs at L3 and never
   crosses into arbitrary user-provided evaluator code.
-- **ADR-021**: YAML envelope convention. `${{ }}` bindings appear
-  inside the nine-key document (or inside reusable skill / agent
-  documents) and resolve against the same scope shape.
+- **ADR-113**: the nine-key envelope; the workflow's identity moves onto
+  `nika:`. `${{ }}` bindings resolve against the same scope shape in every
+  document.
 
 ## Read next
 

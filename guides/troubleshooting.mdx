@@ -17,13 +17,13 @@ import { CANON } from "/snippets/_canon.mdx";
     compatibility; a grammar change ships with its `nika check --fix`
     migration.
   </Accordion>
-  <Accordion title="Why is the language v1 but the engine pre-1.0?" icon="code-branch">
+  <Accordion title="How are the language and the engine versioned?" icon="code-branch">
     Two independent axes. The **language** is versioned by the spec and
-    changes only with a migration the binary applies (`nika check --fix`);
-    after 1.0 it is additive only. The **engine** follows real
-    semver: 0.123 is its open-source reference release, now in maintenance
-    (the [roadmap](/changelog/roadmap) keeps the earlier long-range gates as
-    history).
+    changes only with a migration the binary applies (`nika check --fix`)
+    and a refusal that names the move. The **engine** follows semver: 0.123
+    is its open-source reference release, maintained with security fixes,
+    bug fixes and compatibility (the [roadmap](/changelog/roadmap) keeps the
+    earlier long-range plans as history).
     Same model as SQL or GraphQL: the contract is stable, implementations
     iterate.
   </Accordion>
@@ -35,8 +35,10 @@ import { CANON } from "/snippets/_canon.mdx";
   </Accordion>
   <Accordion title="Which providers work offline?" icon="server">
     {CANON.providersLocal} local runtimes (Ollama · LM Studio · llama.cpp
-    · LocalAI · vLLM). Point `model: ollama/llama3.2:3b` at your machine and
-    the **infer** step stays on the machine. "Zero cloud" is about model
+    · LocalAI · vLLM), plus the server built into `nika` itself
+    ([`nika model serve`](/guides/local-models)). Point
+    `model: ollama/llama3.2:3b` at your machine and the **infer** step stays
+    on the machine. "Zero cloud" is about model
     inference: `nika:fetch`, MCP, and other declared tools can still
     call the network if `permits` allow them. `mock/echo` infers with
     nothing at all.
@@ -74,7 +76,7 @@ import { CANON } from "/snippets/_canon.mdx";
   <source src="/videos/static-check-fix.webm" type="video/webm" />
   <source src="/videos/static-check-fix.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**Caught before anything runs.** `nika check` stops a pull-request reviewer on two mistakes: a misspelled task name, with the right one suggested, and a value read outside the task's `with:` boundary (`NIKA-VAR-021`, in the table below). Each finding names its fix; after the fix, the same check says the file is ready to run. *Output captured from the real CLI.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**Caught before anything runs.** `nika check` stops a pull-request reviewer on two mistakes: a misspelled task name, with the right one suggested, and a value read outside the task's `with:` boundary (`NIKA-VAR-021`, in the table below). Each finding names its fix; after the fix, the same check says the file is ready to run. *Output captured from the real CLI on nika 0.121.0.*</p>
 
 Every failure is a typed structure with a stable code and a `transient`
 flag ([error model](/reference/error-codes)). The frequent ones:
@@ -88,15 +90,17 @@ flag ([error model](/reference/error-codes)). The frequent ones:
 | « no boundary declared » on a workflow that touches something | `NIKA-AUTH-006` | An absent `permits:` block declares ZERO authority, not a free pass. Run `nika check --infer-permits` — it prints the tightest block the body needs, ready to paste. |
 | provider call fails once then works | `NIKA-PROVIDER` (`transient: true`) | The engine retries with backoff per your `retry:`. Declare it instead of wrapping logic. |
 | fetch refuses a URL | `NIKA-SEC` | SSRF defense: private networks and cloud metadata are blocked by default ([security model](/concepts/security)). |
-| command blocked in exec | `NIKA-SEC-001` | Shell-mode blocklist hit: pass tainted data via `stdin:`/`args:`, never interpolated into `command:`. |
+| command blocked in exec | `NIKA-SEC-001` | Either the always-on exec floor (a destructive or privilege pattern, whatever `permits:` says), or the OS sandbox denied the confined program something: check `permits.fs` for the files it opens. Pass data as argv elements (`exec: { command: [prog, "${{ with.x }}"] }`) or through `stdin:`, never a `shell:` string. Under `nika test` every command is refused by design: the test plane simulates the model, not effects. |
 | agent never finishes | `NIKA-AGENT` | Budgets are mandatory leashes: `max_turns` + `max_tokens_total`, and the loop ends with `nika:done`. |
 
 ## When it breaks, in order
 
 <Steps>
   <Step title="Read the code, not the message">
-    `NIKA-<NAMESPACE>-<NNN>` is stable and greppable. The
-    [catalog](/reference/error-codes) gives the namespace's contract.
+    `NIKA-<NAMESPACE>-<NNN>`, or a numeric runtime code such as
+    `NIKA-1709`, is stable and greppable, and `nika explain <code>` teaches
+    it. The [catalog](/reference/error-codes) gives the namespace's
+    contract.
   </Step>
   <Step title="Check transient">
     `transient: true` → retry can help (declare `retry:` with backoff).

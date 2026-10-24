@@ -6,9 +6,9 @@ icon: "rotate-right"
 ---
 
 A long run dies at task 7 of 9 — laptop lid, a provider hiccup, a kill.
-(Ctrl-C is not a death since 0.118: the run cancels at its next wave
-boundary, in-flight work completes and is counted, the trace seals with
-`workflow_cancelled` and `--resume` picks up from it like any other.)
+(Ctrl-C is not a death: in-flight work settles and is counted, unstarted
+tasks are cancelled, the trace seals with `workflow_cancelled`, the run exits
+130, and `--resume` picks up from it like any other.)
 With most tools that is 7 tasks of tokens re-spent. With Nika the run's
 own trace is the checkpoint: **`--resume` re-executes the workflow,
 skipping every task whose recorded work is still valid** (ADR-099).
@@ -78,6 +78,7 @@ Resume from the file you just wrote:
 
 ```text
 $ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson
+rehearsal: mock/echo answers by echoing the prompt — not a real answer · a real one: `--model <provider/model>` with its key, or `--access <seat>` (nika doctor lists them)
   🦋 nika · release-notes · 3 tasks
      permits ✓ declared boundary · exec outside the fs bounds
 
@@ -88,7 +89,7 @@ $ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson
   ── 3/3 done · unmetered · elapsed 0.0s ─────────────────────────
     wrote .nika/traces
   explore: nika run release-notes.nika --json > run.ndjson · nika trace outputs run.ndjson
-    trace: .nika/traces/2026-09-28T21-59-33Z-fcf8.ndjson · 8 events · chain 35900cd2bad5935e1e810b6e7c585409c93a3e012578260e5dc81baa04286b2b
+    trace: .nika/traces/2026-10-24T14-41-33Z-7f92.ndjson · 8 events · chain 06df5663424624864947af11390e8fe1b3ca45a875d9475c7fd96ca604ad89b3
 
   resumed · 3 skipped (cache hit) · 0 ran live
 ```
@@ -149,12 +150,13 @@ upstream tasks still cache-hit:
 
 ```text
 $ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson --from draft
+rehearsal: mock/echo answers by echoing the prompt — not a real answer · a real one: `--model <provider/model>` with its key, or `--access <seat>` (nika doctor lists them)
   🦋 nika · release-notes · 3 tasks
      permits ✓ declared boundary · exec outside the fs bounds
 
   ↷  collect  cache hit (resume)
   ✔  draft    infer · mock/echo · untrusted input from collect  0ms
-  ✔  stamp    exec · printf · untrusted input from stamp  5ms
+  ✔  stamp    exec · printf · untrusted input from stamp  9ms
   3 tasks · 3 waves · 0 retries · 10 tok
   ── 3/3 done · unpriced (1 call) · elapsed 0.0s ─────────────────
     wrote .nika/traces
@@ -162,7 +164,7 @@ $ nika run release-notes.nika --resume .nika/traces/release-notes.ndjson --from 
     see it whole: nika trace outputs
     rehearsal · a mock model echoed the prompt — not a real answer
   explore: nika run release-notes.nika --json > run.ndjson · nika trace outputs run.ndjson
-    trace: .nika/traces/2026-09-28T21-59-33Z-8ee7.ndjson · 12 events · chain 01c65fdb4f8ba032b84352c5c43d11f6fe0d864c98b72ec4ae539eff2ca8d940
+    trace: .nika/traces/2026-10-24T14-41-38Z-11c8.ndjson · 12 events · chain 9b58dd4428449b29161cea04aac7a7eb55f61e861b5fb201217de9a545c36289
 
   resumed · 1 skipped (cache hit) · 2 ran live
 ```
@@ -203,7 +205,7 @@ code **4**, and the frame prints the exact resume line (your
   <source src="/videos/approval-gate.webm" type="video/webm" />
   <source src="/videos/approval-gate.mp4" type="video/mp4" />
 </video>
-<p className="mt-2 text-sm text-center opacity-80">**Nothing ships without a yes.** At a terminal, the `gated-ship.nika` below asks `Ship this build to production? [y/N]`, and `y` lets `ship` run. Where nobody can answer, as in CI, the same run pauses durably, exits 4 and prints the one line that resumes it. Run that line: `build` is a cache hit, the answer rides in `--answer approve=true`, and `ship` runs. *Every terminal line is captured from the real CLI, offline and with no model; the door, its light, the keypress, the paste and the CI frame are illustration.*</p>
+<p className="mt-2 text-sm text-center opacity-80">**Nothing ships without a yes.** At a terminal, the `gated-ship.nika` below asks `Ship this build to production? [y/N]`, and `y` lets `ship` run. Where nobody can answer, as in CI, the same run pauses durably, exits 4 and prints the one line that resumes it. Run that line: `build` is a cache hit, the answer rides in `--answer approve=true`, and `ship` runs. *Every terminal line is captured from the real CLI on nika 0.121.0, offline and with no model; the door, its light, the keypress, the paste and the CI frame are illustration.*</p>
 
 ```yaml gated-ship.nika
 # Build, ask a human, ship only on yes.
@@ -239,17 +241,29 @@ nika run gated-ship.nika --json > .nika/traces/gated-ship.ndjson
 echo $?   # 4 · paused — not a failure, but non-zero so `&& next` stops here
 ```
 
-The paused trace carries everything needed to pick the run back up —
-hours later, on the same machine, by a different process:
+The paused trace carries everything needed to pick the run back up, on
+the same machine, by a different process:
 
-```json the workflow_paused event (one line of the trace · reformatted)
+```json the workflow_paused event (one line of the trace · reformatted · trimmed)
 {"kind": "workflow_paused", "fields": [
   {"key": "workflow", "value": "gated-ship"},
   {"key": "task",     "value": "approve"},
   {"key": "mode",     "value": "confirm"},
   {"key": "note",     "value": "awaiting a `nika:prompt` answer — resume with `--resume <trace> --answer <task>=<value>`"},
-  {"key": "message",  "value": "Ship this build to production?"}]}
+  {"key": "message",  "value": "Ship this build to production?"},
+  {"key": "approval_minted_at_ms", "value": 1792852902444},
+  {"key": "approval_ttl_seconds",  "value": 900},
+  {"key": "status",   "value": "paused"},
+  {"key": "cause",    "value": "human_gate"}]}
 ```
+
+<Warning>
+  **An answer binds only within 15 minutes of the pause.** Each approval is
+  a fresh-consent ticket (`approval_ttl_seconds: 900`). Resume later with
+  `--answer` and the stale answer is not bound: the gate asks again, the run
+  pauses again (exit 4) and prints a **new** trace path. Answer that new
+  pause within 15 minutes, or pre-answer at launch with `--answer`.
+</Warning>
 
 Resume with the answer bound to the task id via `--answer` (repeatable):
 
@@ -260,12 +274,12 @@ $ nika run gated-ship.nika --resume .nika/traces/gated-ship.ndjson --answer appr
 
   ↷  build    cache hit (resume)
   ✔  approve  invoke · nika:prompt  0ms
-  ✔  ship     exec · printf · untrusted input from ship  6ms
+  ✔  ship     exec · printf · untrusted input from ship  8ms
   3 tasks · 3 waves · 0 retries
   ── 3/3 done · unmetered · elapsed 0.0s ─────────────────────────
     wrote .nika/traces
   explore: nika run gated-ship.nika --json > run.ndjson · nika trace outputs run.ndjson
-    trace: .nika/traces/2026-09-28T21-59-13Z-d1fd.ndjson · 14 events · chain 99aa4f466ff647340c1636b86d13644d6bf5b64fce469eadc8dd7c9ac9c83b5c
+    trace: .nika/traces/2026-10-24T14-41-46Z-365b.ndjson · 14 events · chain 913b840f94ec7bd8623185cfb239fb36aecd4bf307d1b49a471e1230c0f7ecd2
 
   resumed · 1 skipped (cache hit) · 2 ran live
 ```
@@ -277,8 +291,36 @@ string, `choice` one of the declared choices. Like `--var`, the value
 parses as JSON when it parses.
 
 Resumed **without** an answer, a `--json` run pauses again — idempotent,
-exit 4 every time, so a poller can retry harmlessly. Resumed
-interactively (a human at the terminal), the prompt simply asks.
+exit 4 every time, so a poller can retry harmlessly. A poller that relays
+a human's answer must resume from the newest trace each pause prints and
+deliver the answer within 15 minutes of that pause; past the window the
+gate asks again, as above. Resumed interactively (a human at the
+terminal), the prompt simply asks.
+
+A late answer, captured on 0.123.0: a second paused run, journaled as
+`gated-late.ndjson`, answered fifteen minutes and forty seconds after its
+pause:
+
+```text
+$ nika run gated-ship.nika --resume .nika/traces/gated-late.ndjson --answer approve=true
+  🦋 nika · gated-ship · 3 tasks
+     permits ✓ declared boundary · exec outside the fs bounds
+
+  ↷  build    cache hit (resume)
+  3 tasks · 3 waves · 0 retries
+  ── 1/3 done · unmetered · elapsed 0.0s ─────────────────────────
+    wrote .nika/traces
+
+  ◇ paused · awaiting an answer for `approve`
+    answer: nika run --answer approve=true FILE  (boolean true/false, not yes)
+  explore: nika run gated-ship.nika --json > run.ndjson · nika trace outputs run.ndjson
+    trace: .nika/traces/2026-10-24T14-57-36Z-5cdd.ndjson · 6 events · chain 7dcc81726d3a356014a541bae0ba75b02d354da4d31a157c36d498b60d3b42fc
+    resume: nika run gated-ship.nika --resume .nika/traces/2026-10-24T14-57-36Z-5cdd.ndjson --answer approve=true · or false
+
+  resumed · 1 skipped (cache hit) · 0 ran live
+```
+
+Run the printed `resume:` line within 15 minutes and `ship` runs.
 
 ## Exit codes
 
@@ -286,9 +328,10 @@ interactively (a human at the terminal), the prompt simply asks.
 |---|---|
 | `0` | Run completed |
 | `1` | Run executed and a task failed unrecovered |
-| `2` | Validation findings — the file never ran |
-| `3` | Environment error (also: unknown `--var` / `--from` key) |
-| `4` | **Paused** on a human gate — resume with `--resume <trace> --answer <task>=<value>` |
+| `2` | Validation findings — the file never ran (also: a trace whose chain is broken) |
+| `3` | Environment error (also: unknown `--var` / `--from` key, a trace written by another project) |
+| `4` | **Paused** on a human gate — resume with `--resume <trace> --answer <task>=<value>` within 15 minutes of the pause |
+| `130` | Cancelled by the operator (Ctrl-C · SIGTERM) — the trace is sealed and resumable |
 
 ## Related
 
@@ -320,8 +363,8 @@ The design has a lineage, and naming it beats pretending novelty:
 
 ## A trace is not a bearer artifact
 
-Since 0.118 the opening frame binds the trace to the project that wrote
-it (`project_root_fingerprint`). `--resume` judges that binding FIRST: a
+The opening frame binds the trace to the project that wrote it
+(`project_root_fingerprint`). `--resume` judges that binding FIRST: a
 trace copied from another project refuses with exit `3` and one typed line
 on the `--json` stream — « a trace is not a bearer artifact: resume it from
 the project that wrote it, or run the workflow afresh here ». An older trace

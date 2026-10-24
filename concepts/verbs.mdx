@@ -6,17 +6,19 @@ icon: "play"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
+import { CANON } from "/snippets/_canon.mdx";
 
 A Nika workflow is a list of **tasks**. Each task picks exactly one of
 **four verbs** (`infer`, `exec`, `invoke`, `agent`) and
 supplies its required fields. The set is closed: the parser's verb
-dispatcher is exhaustive at compile time, so adding a fifth verb is a
-schema-version bump, not a patch release.
+dispatcher is exhaustive at compile time, so a fifth verb would be a change
+to the language specification, not a patch release.
 
 <Info>
-  All four verbs execute end-to-end today: every snippet on this page is
-  runnable with `nika run` at v{STATUS.version}. Verb grammar is frozen by
-  the workflow language envelope: these four, forever.
+  All four verbs execute end-to-end on v{STATUS.version}. The snippets on
+  this page are task fragments: put one under `tasks:` in a complete file
+  with its `permits:` to run it. The verb set is part of the language
+  specification and closed at four.
 </Info>
 
 ## Why four?
@@ -36,9 +38,9 @@ was a special case of one of these four, or workflow-level machinery
 (dependencies, `for_each`, `when`) that lives on the task envelope,
 not as a new verb.
 
-The vNext families stay on the same tool — uploads are `multipart:`, forms are
-`form:`, and a bounded site crawl is `traverse:` (crawl is an *intention*, fetch
-is the primitive):
+Uploads, forms and crawls stay on the same tool: uploads are `multipart:`,
+forms are `form:`, and a bounded site crawl is `traverse:` (crawl is an
+*intention*, fetch is the primitive):
 
 ```yaml
 crawl_site:
@@ -115,8 +117,12 @@ build or deployment.
   capture modes, **except `capture: structured`**, where the exit code
   is data (`output.exit_code` · the task succeeds and the workflow
   branches on it). Untrusted values ride argv elements (each substituted
-  independently, no shell to break out of) or `stdin:` — never a
-  `shell:` string.
+  independently, no shell to break out of) or `stdin:`, never a
+  `shell:` string. Content from `nika:fetch` (or downstream of
+  `nika:notify`) may not reach any `exec:` task at all, whatever the
+  channel: `NIKA-SEC-015`, the order law
+  ([Security](/concepts/security#exec-the-order-law-nika-sec-015)).
+  Transform it with a builtin such as `nika:jq` instead.
 
 Cross-link: [`ShellExecutor` trait](/architecture/layers#layer-table) (L0.5 kernel contract).
 
@@ -171,19 +177,24 @@ instead of two.
 
 - Output is **tainted** by default (external input is untrusted, T3:A).
 - Transient statuses (429, 5xx) are retried per `retry:` on the task.
-- Authentication headers never appear in events: they pass through
-  `SecretResolver` + `AuditSink::SecretRedacted`.
+- Authentication headers never appear in events: the runtime masks secret
+  values before an event is written.
 
-See the [builtins catalog](/reference/constellation) for `nika:fetch`'s
-full argument schema (extract modes, session, cache).
+See [`nika:fetch`](/reference/tools/fetch) for its full argument schema
+(`mode`, `jq`, `selector`, `headers`, `body`, `form`, `multipart`,
+`traverse`, `response`).
 
 ## `invoke`: call a builtin or MCP tool
 
-Calls a builtin (`nika:` namespace) or a tool/resource exposed by a
-connected **Model Context Protocol** server. MCP server aliases are
-declared in the workflow's `mcp:` block.
+Calls a builtin (`nika:` namespace), a tool exposed by a connected **Model
+Context Protocol** server, or another workflow. MCP servers are declared in
+the project's `.nika/mcp_servers.json`, never in a workflow file: an
+undeclared server is `NIKA-INVOKE-001`, and `nika mcp approve <server>`
+pins its tools before a run may call them.
 
-**Required**: `tool` (string · `nika:<path>` for a builtin OR `mcp:<server>/<tool>` for an MCP tool).
+**Required**: exactly one of `tool` (`nika:<name>` for a builtin, or
+`mcp:<server>/<tool>`) or `workflow` (a filesystem child workflow, see
+[Composition](/concepts/workflows#composition-one-workflow-calls-another)).
 **Optional**: `args` (object · tool-specific schema). Task-level `timeout:` applies (not a verb field).
 
 ```yaml
@@ -197,9 +208,9 @@ search_vectordb:
       top_k: 5
 ```
 
-The MCP server `chroma` is configured in the engine's MCP server registry
-(engine config · out of scope of the workflow file). Builtins use the
-`nika:` namespace, e.g. `tool: "nika:read"`.
+The MCP server `chroma` is configured in the project's MCP registry
+(`.nika/mcp_servers.json`), out of scope of the workflow file. Builtins use
+the `nika:` namespace, e.g. `tool: "nika:read"`.
 
 Routing goes through `ToolExecutor` + `ToolExecute::execute(ToolCall)`
 at L0.5, the same trait the `agent` verb uses to dispatch in-loop
@@ -207,8 +218,8 @@ tool calls (`crates/nika-kernel/src/runtime/tool_executor.rs`).
 
 ## `infer`: LLM inference
 
-Single-shot call to a language model. One `InferRequest` shape covers
-all {STATUS.providers} providers in the catalog.
+Single-shot call to a language model. One `InferRequest` shape covers the
+{CANON.providers} providers this binary wires.
 
 **Required**: `prompt` (string).
 **Optional**: `system` (string), `model` (`<provider>/<name>` · overrides the
@@ -239,11 +250,14 @@ summarize:
 
 **Invariants** (from `nika-kernel::provider::Provider`):
 
-- Unified `InferRequest` (INV-017): one DTO · per-provider wire dialects below (3 implemented today: anthropic · gemini · openai-compat, the dialect that carries most of the 16-provider catalog · plus mock).
-- Capability rules ([{STATUS.capabilityRules} rules](/reference/capabilities))
-  run **before** dispatch. Sending `tools` to a model whose capability
-  rule says `tool_calling = false` fails with a typed validation error
-  before the network round-trip.
+- Unified `InferRequest` (INV-017): one DTO, three wire dialects
+  (anthropic · gemini · openai-compat, the dialect that carries most of the
+  {CANON.providers} wired providers) plus mock.
+- [Capability rules](/reference/capabilities) are consulted **before**
+  dispatch, first matching rule wins: the token-limit parameter a model
+  takes, whether it reasons, its modalities and supported parameters.
+  `nika check` reports a reasoning model whose `max_tokens` leaves no room
+  for its answer, before the network round-trip.
 - Every provider emits the same `InferEvent` stream: `Delta`,
   `ToolUseStart`, `ToolUseDelta`, `Thinking`, `Usage`, `Done`.
 
@@ -279,11 +293,8 @@ investigate:
 
 **Invariants** (from `nika-kernel::runtime::agent`):
 
-- The loop is budget-bounded. The LANGUAGE contract (`max_turns` ·
-  `max_tokens_total` · spec 02-verbs) is what workflows declare; the
-  engine's `AgentLoopConfig` carries `max_turns` today plus its
-  planning/reflection/compression knobs. `max_tokens_total` wires in
-  with the runtime milestone.
+- The loop is budget-bounded by `max_turns` and `max_tokens_total`
+  (spec 02-verbs); both are enforced.
   A ceiling hit is a **typed failure** (`NIKA-AGENT-001` /
   `NIKA-AGENT-002` · `budget_error`) with the last assistant message
   preserved in `error.details.partial_output`. Recover it explicitly
@@ -302,27 +313,23 @@ Cross-link: [`AgentLoopConfig`](/architecture/layers#layer-table) · ADR-016 (ca
 ## Verb selection is exhaustive
 
 The `nika-schema` parser enforces "exactly one verb key per task" at
-compile time: the `Verb` enum in
-`crates/nika-schema/src/parser/tasks.rs` has four variants, and the
-action builder has exactly four match arms. Adding a fifth verb
-requires:
+compile time: `RawAction` in `crates/nika-schema/src/raw/action.rs` has four
+variants (`Infer`, `Exec`, `Invoke`, `Agent`), and the action builder has
+exactly four match arms. A fifth verb would require:
 
-1. Extending `RawAction` + the `Verb` enum.
-2. Wiring a new action builder arm.
-3. Bumping `SchemaVersion` (currently `v1`).
-4. Running all 12 admission gates on the consuming L2 verb crate.
+1. A change to the language specification (spec 02-verbs).
+2. Extending `RawAction` and wiring a new action builder arm.
+3. A new L2 verb crate passing all 12 admission gates.
 
 This is the single hardest number in the Nika grammar to change. We'd
 rather say no.
 
 <Info>
-  **Implementation status.** Current verb executors ship as design-only
-  kernel traits; the four L2 verb crates (`nika-verb-infer`,
-  `nika-verb-exec`, `nika-verb-invoke`, `nika-verb-agent`) are all
-  admitted and execute end-to-end (see
-  [Constellation](/reference/constellation)). `fetch` is not a verb
-  crate: it is the `nika:fetch` builtin reached through `invoke`. The verb
-  grammar is locked and shipped (`nika-schema`).
+  **Implementation status.** The four L2 verb crates (`nika-verb-infer`,
+  `nika-verb-exec`, `nika-verb-invoke`, `nika-verb-agent`) are admitted and
+  execute end-to-end (see [Constellation](/reference/constellation)).
+  `fetch` is not a verb crate: it is the `nika:fetch` builtin reached through
+  `invoke`. The verb grammar ships in `nika-schema`.
 </Info>
 
 ## Read next
@@ -335,7 +342,7 @@ rather say no.
     How values flow between tasks.
   </Card>
   <Card title="Providers" icon="server" href="/concepts/providers">
-    The {STATUS.providers}-provider catalog behind `infer` and `agent`.
+    The {CANON.providers} wired providers behind `infer` and `agent`.
   </Card>
   <Card title="Events" icon="signal" href="/concepts/events">
     Every verb emits typed events.

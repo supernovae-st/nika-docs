@@ -1,6 +1,6 @@
 ---
 title: "TypeScript quickstart"
-description: "Install the SDK, run a workflow with the bundled engine and inspect its result."
+description: "Install the SDK, run a workflow with the bundled engine, read its typed result and verify its receipt."
 sidebarTitle: "Quickstart"
 icon: "play"
 ---
@@ -8,153 +8,187 @@ icon: "play"
 import { SDK, SourceContract, LocalContract } from "/snippets/_sdk-contract.mdx"
 
 Five minutes from zero to a typed workflow result inside your own app:
-install the package, save one file, run it, read the outputs.
+install the package, save one file, run it, read the outputs, verify the
+record.
 
-Requires Node.js 22+ on macOS or Linux (arm64/x64). No server, no global
-CLI, no provider key — this example runs on the package's bundled engine
-and the mock provider.
+You need Node.js 22 or newer on macOS (arm64, x64) or Linux with glibc (x64,
+arm64). No server, no global CLI and no provider key: this example runs on the
+engine the package bundles, with the offline `mock/echo` model. On Alpine
+(musl) or Windows there is no bundled engine: `new Nika()` throws
+`NikaEngineUnavailable`, so point `bin` or `NIKA_BIN` at a compatible engine,
+or connect to a [`nika serve`](/sdk/remote/serve-quickstart).
 
-## 1. Install in your application
+<Steps>
+  <Step title="Install the package">
+    ```sh
+    npm install @supernovae-st/nika@0.123.0
+    ./node_modules/.bin/nika --version
+    ```
 
-```sh
-npm install @supernovae-st/nika@0.123.0
-npm ls @supernovae-st/nika
-```
+    npm brings the engine for your platform as an optional dependency: keep
+    optional dependencies enabled. The second line prints
+    `nika 0.123.0 (0bfde3765)`, the engine your code will drive.
+  </Step>
+  <Step title="Let the engine seal your runs (once per machine)">
+    ```sh
+    NIKA_KEYCHAIN=off ./node_modules/.bin/nika key init
+    ```
 
-Pin the published package. Keep optional dependencies enabled: they provide
-the native payload for your supported platform (macOS and Linux, arm64 and
-x64 — there is no Windows payload). An explicit `bin` or `NIKA_BIN` overrides
-that payload; omit both for this first run. The
-[local client](/sdk/local/client) explains binary resolution and
-compatibility errors.
+    This writes a run-signing key pair to `~/.nika/keys/` (mode `0600`). That
+    is where the engine your app starts and `nika serve` read it, on macOS and
+    on Linux: neither opens an OS keychain. With it, the engine signs each
+    run's record and `traceVerify(receipt)` answers `verified`. Skip it and
+    runs still succeed, unsigned. Keep `NIKA_KEYCHAIN=off`: without it,
+    `nika key init` refuses on a Linux terminal (its `--force` puts the key in
+    the desktop's Secret Service, where neither looks) and on a Mac whose
+    keychain holds a key from Nika 0.122 or older, which 0.123.0 can neither
+    read nor copy. In CI, point `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` at
+    a key pair you provide.
+  </Step>
+  <Step title="Save a workflow">
+    Create `hello.nika` in the application directory:
 
-## 2. Save a workflow
+    ```yaml hello.nika
+    nika: hello
+    model: mock/echo
+    permits: {}
+    tasks:
+      greeting:
+        infer:
+          prompt: "Say hello from the Nika SDK."
+          max_tokens: 32
+    outputs:
+      greeting: ${{ tasks.greeting.output }}
+    ```
 
-Create `hello.nika` in the application directory:
+    `mock/echo` is the engine's offline rehearsal model: it echoes the prompt
+    back, prefixed `mock(echo) ·`, with no key and no network. `permits: {}`
+    grants the workflow no file, network, command or tool access.
+  </Step>
+  <Step title="Run it from TypeScript">
+    Save `demo.mts` next to the workflow:
 
-```yaml
-nika: hello-sdk
-model: mock/echo
-permits: {}
-tasks:
-  greet:
-    infer:
-      prompt: "Hello, Nika"
-      max_tokens: 32
-outputs:
-  greeting: ${{ tasks.greet.output }}
-```
+    ```ts demo.mts
+    import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
 
-`mock/echo` is a **local simulation**: the engine echoes the prompt back
-(prefixed `mock(echo) ·`) and calls no network LLM. It is a rehearsal for
-the mechanics, not intelligence. Choosing a mock model for an arbitrary
-workflow does not disable that workflow's tools or permissions. A project
-`nika.yaml` is optional for this example; the executable source is
-`hello.nika`.
+    const nika = new Nika({ cwd: process.cwd() })
 
-## 3. Run it
+    // The engine checks the file first: a workflow it refuses throws here and never starts.
+    const run = await nika.run<{ greeting: string }>('hello.nika', { maxCostUsd: 0 })
+    const result = await run.result()
 
-{/* motion: this quickstart from a terminal: npm install, save hello.nika and demo.mjs, node demo.mjs admits, runs and prints the typed greeting, then the receipt's scope */}
+    // A failed or paused run is data you read, not an exception.
+    if (!isNikaRunSucceeded(result) || !result.receipt) {
+      console.error(result.status, result.error?.code, result.error?.message)
+      process.exit(1)
+    }
+    console.log(result.outputs?.greeting)
 
-Save `demo.mjs` next to the workflow:
+    // Ask the engine to verify the run's tamper-evident record.
+    const proof = await nika.traceVerify(result.receipt)
+    console.log(proof.verified ? 'receipt verified' : `not verified: ${proof.reason}`)
+    ```
 
-```js
-import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
+    ```sh
+    node demo.mts
+    ```
 
-const nika = new Nika({ cwd: process.cwd() })
+    ```text
+    mock(echo) · Say hello from the Nika SDK.
+    receipt verified
+    ```
 
-// run() admits the file first — a workflow that fails admission throws
-// here, before any run handle exists.
-const run = await nika.run('hello.nika', { maxCostUsd: 0 })
+    Node.js 22.18 or newer runs the `.mts` file as is. On an older 22.x, name
+    it `demo.mjs` and drop `<{ greeting: string }>`.
+  </Step>
+</Steps>
 
-// result() is the sole settlement. An admitted workflow that fails resolves
-// with status 'failed' — it does not throw, so try/catch alone will miss it.
-const result = await run.result()
+That is the whole loop: one file, one call, one typed result, one verified
+record. Change the prompt in `hello.nika` and run again: the echo follows the
+file.
 
-if (result.status === 'paused') {
-  // a human gate holds the run — not a success, not a failure
-  console.error('run paused; resume with nika run --resume')
-  process.exit(4)
-}
-if (!isNikaRunSucceeded(result)) {
-  console.error(result.status, result.error)
-  process.exit(1)
-}
-console.log(result.outputs.greeting) // mock(echo) · Hello, Nika
-```
+<Note>
+  **Seeing `not verified: receipt_mismatch`?** The run succeeded, but the
+  engine found no run-signing key in `~/.nika/keys/`, so the record is
+  unsealed. Do step 2, then run the demo again. On Linux, a key that
+  `nika key init --force` put in the Secret Service can be copied there
+  instead, from a terminal: `./node_modules/.bin/nika key align`.
+</Note>
 
-```sh
-node demo.mjs
-```
+## What `maxCostUsd: 0` does
 
-Expected output — the mock prefixes its rehearsal answer:
+`maxCostUsd` caps what this run may spend on metered models, at the catalog's
+list prices. Before anything runs, a cost floor above the cap makes `run()`
+throw `NikaOperationError` with code `NIKA-1709`, and a cloud model the
+catalog cannot price makes it throw with code `run_refused`
+(`price unknown: …`): nothing is called and nothing is spent. During a run,
+the call that crosses the cap completes and counts, nothing new starts, and the
+result is `failed` with `NIKA-1704`. Local and `mock/echo` models are never
+blocked. When you switch `model:` to a paid cloud model, raise `maxCostUsd` to
+the budget you accept. [Spend caps](/sdk/runtime/spend) has the details.
 
-```text
-mock(echo) · Hello, Nika
-```
+## Watch the events, after or during the run
 
-That is the whole first loop: one file, one call, one typed result.
-**Challenge:** change the prompt in `hello.nika` and rerun — the echo
-follows the file, no other change needed.
+A run keeps its events, so you can read them after the result:
 
-### Then: audit, watch, verify
-
-The same lifecycle opens three deeper doors when you need them. Events
-need a *live* run — the first one already settled, so start a fresh one:
-
-```js
-// 1. Static admission on its own — authoring and CI. A red check never
-//    becomes a run.
-const report = await nika.check('hello.nika', { nativeStrict: true })
-if (!report.clean) process.exit(2)
-
-// 2. Live events while a fresh run executes.
-const secondRun = await nika.run('hello.nika', { maxCostUsd: 0 })
-for await (const event of secondRun.events()) {
+```ts
+for await (const event of run.events()) {
   console.log(event.kind, event.task ?? '', event.status ?? '')
 }
-const secondResult = await secondRun.result()
-
-// 3. Verify the receipt that run wrote.
-if (secondResult.receipt) {
-  console.log(await nika.traceVerify(secondResult.receipt))
-}
 ```
 
-On the published package the event stream reads `run.started` →
-`task.scheduled` → `task.started` → `task.completed` → `engine.event`
-(the engine's own `workflow_completed` frame) → `run.settled`
-(`succeeded`) — six events for this one-task workflow. `run.events()`
-yields SDK lifecycle kinds such as `task.started`; the engine protocol
-frame lives on `event.raw`.
+```text
+run.started
+task.scheduled greeting
+task.started greeting
+task.completed greeting
+engine.event
+run.settled  succeeded
+```
 
-Passing inputs from code is literal: `nika.run('greet.nika', { inputs: { name: 'Ada', limit: 2 } })`
-binds typed values. A string `'2'` for an integer input is refused with
-`NikaOperationError` (`input_type_mismatch`), an unknown key with
-`unknown_input`, and a missing required input with `NIKA-1708` — the type
-contract is enforced at the door.
+Six events for this one-task workflow on the local engine; `engine.event`
+carries the engine's own `workflow_completed` frame on `event.raw`. Iterate
+`run.events()` before awaiting `run.result()` to watch them live instead.
+[Run events](/sdk/runtime/events) explains the vocabulary and why a server run
+yields fewer.
 
-## 4. Read the proof's scope
+## Audit without running
 
-Pass an engine-issued receipt to `traceVerify(receipt)` unchanged.
-Verification reads the journal the run already wrote — it does not
-re-execute the workflow, and it does not re-infer a model answer. Two
-outcomes are separate:
+`run()` already checks the file, so you never need `check()` first. Use it to
+show the audit on its own, in CI or an editor:
 
-| Outcome | Meaning |
-|---|---|
-| **Run succeeded** | The workflow settled `succeeded`; `result.outputs` are real. |
-| **Receipt sealed + verified** | The journal's hash chain is intact **and** a run-signing key on this machine sealed it. |
+```ts
+const report = await nika.check('hello.nika', { nativeStrict: true })
+console.log(report.clean, report.exitCode) // true 0
+```
 
-One inspected case to know: this mock fixture on a keyless machine (a
-fresh `HOME` with no run-signing key) produced an intact but **unsealed**
-journal, where `traceVerify` returned `verified: false` with reason
-`receipt_mismatch` while the run itself succeeded — a missing signature,
-not a failed workflow and not corruption. Do not generalize one fixture's
-outcome to every install: read the returned reason and details. A trace
-does not prove that an external recipient read a message or that a
-business goal was achieved — verification is tamper-evidence, not a
-correctness guarantee.
+## Pass your app's data
+
+`inputs` fills the workflow's declared `inputs:` with literal JSON values:
+
+```ts
+const run = await nika.run('greet.nika', { inputs: { name: 'Ada', limit: 2 } })
+```
+
+The engine type-checks them before any run exists: a string `'2'` for an
+integer input is refused with `NikaOperationError` (`input_type_mismatch`), an
+undeclared key with `unknown_input`, and a missing required input with
+`NIKA-1708`. Values stay literal: `'@env:HOME'` is the text `@env:HOME`, never
+an environment lookup. Keep secrets out of `inputs`.
+
+## What a verified receipt proves
+
+`traceVerify(receipt)` reads the record the run already wrote. It does not
+re-execute the workflow or re-ask a model.
+
+| Fact | How you know | What it does not mean |
+|---|---|---|
+| **Admitted** | `run()` resolved with a `NikaRun` | that the run succeeded |
+| **Succeeded** | `isNikaRunSucceeded(result)`; `result.outputs` are real | that the record is sealed |
+| **Verified** | `traceVerify(receipt)` returns `{ verified: true, verdict: 'verified' }` | that the output is correct, or that a person read it |
+
+A record is tamper-evident, not tamper-proof: verification shows it is intact
+and matches the receipt. [Receipts](/sdk/runtime/receipts) covers both doors.
 
 ## Next
 
@@ -164,16 +198,16 @@ correctness guarantee.
 </Accordion>
 
 <CardGroup cols={2}>
+  <Card title="How the SDK works" icon="diagram-project" href="/sdk/how-it-works">
+    The two doors, the lifecycle and who owns what.
+  </Card>
   <Card title="Project setup" icon="folder-tree" href="/sdk/start/project-setup">
-    Add project policy and organize workflows when your application needs them.
+    Organize workflows, project policy and runtime state.
   </Card>
-  <Card title="Local client" icon="terminal" href="/sdk/local/client">
-    Understand payload selection and the local transport.
+  <Card title="Run and cancel" icon="circle-play" href="/sdk/local/run-and-cancel">
+    Observe, settle and stop a run.
   </Card>
-  <Card title="Run lifecycle" icon="circle-play" href="/sdk/local/run-and-cancel">
-    Separate observation, terminal settlement and cancellation.
-  </Card>
-  <Card title="Remote client" icon="satellite-dish" href="/sdk/remote/client">
-    Select authenticated HTTP with the same facade.
+  <Card title="Server quickstart" icon="server" href="/sdk/remote/serve-quickstart">
+    The same methods against your own nika serve.
   </Card>
 </CardGroup>

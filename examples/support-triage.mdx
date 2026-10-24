@@ -181,6 +181,43 @@ outputs:
 | `nika:uuid` v7 | `batch` | [Builtins](/reference/builtins) |
 | conditional `notify` | `escalate` | [Workflows](/concepts/workflows) |
 
+## Run it
+
+<Note>
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample queue. `ONCALL_WEBHOOK_URL` matters only on the escalation path: the sample carries an outage ticket, so a real model opens that gate, and an unset variable then fails loudly (`NIKA-VAR-001`).
+</Note>
+
+<Steps>
+  <Step title="Rehearse it">
+    ```bash
+    nika try support-triage
+    ```
+
+    A mock model answers, the sample files come with it, and nothing is written in your folder.
+  </Step>
+  <Step title="Get your own copy">
+    Save the file above as `support-triage.nika` in a new folder, then download the sample it reads:
+
+    ```bash
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    mkdir -p examples/fixtures
+    curl -fsSLo examples/fixtures/support-queue.json "$FIXTURES/support-queue.json"
+    ```
+  </Step>
+  <Step title="Check it, then run it">
+    ```bash
+    nika check support-triage.nika
+    nika run support-triage.nika --model mock/echo   # a mock model, no key
+    ollama pull qwen3.5:4b   # once, for the real run
+    nika run support-triage.nika
+    ```
+
+    The run writes the board `out/triage-<batch id>.json`.
+
+    Any other model works: pass `--model <provider>/<name>` with its key, and cap a cloud model with `--max-cost-usd`.
+  </Step>
+</Steps>
+
 ## Make it yours
 
 - Push the first replies as DRAFTS into your helpdesk via its API (`nika:fetch method: POST`): humans still hit send.

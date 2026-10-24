@@ -1,0 +1,211 @@
+---
+title: "Server quickstart"
+description: "Start nika serve with a private token, then run, observe and verify a workflow over HTTP with the same Nika client."
+sidebarTitle: "Server quickstart"
+icon: "server"
+---
+
+import { SDK, SourceContract, RemoteContract } from "/snippets/_sdk-contract.mdx"
+
+`nika serve --bind` is the same engine running as a server: it holds durable
+jobs and schedules, and your application reaches it over HTTP. This page
+starts one on your machine and drives it with the client from the
+[quickstart](/sdk/start/quickstart). Every step was run with
+`@supernovae-st/nika@0.123.0` and its bundled engine.
+
+<Steps>
+  <Step title="Make a project with one workflow">
+    The server refuses to start outside a project, and a project file is one
+    line. In the folder where you installed the package:
+
+    ```sh
+    printf 'nika: my-project\n' > nika.yaml
+    mkdir -p workflows
+    ```
+
+    Save the quickstart's workflow as `workflows/hello.nika`:
+
+    ```yaml hello.nika
+    nika: hello
+    model: mock/echo
+    permits: {}
+    tasks:
+      greeting:
+        infer:
+          prompt: "Say hello from the Nika SDK."
+          max_tokens: 32
+    outputs:
+      greeting: ${{ tasks.greeting.output }}
+    ```
+  </Step>
+  <Step title="Mint a private token">
+    The server reads its bearer token from a file and refuses one that is not
+    mode `0600`:
+
+    ```sh
+    mkdir -p .nika
+    umask 077 && openssl rand -hex 24 > .nika/serve.token && chmod 600 .nika/serve.token
+    ```
+
+    The token never appears on a command line. Keep `.nika/` out of source
+    control.
+  </Step>
+  <Step title="Start the server">
+    ```sh
+    ./node_modules/.bin/nika serve \
+      --bind 127.0.0.1:8787 \
+      --workflows ./workflows \
+      --token-file .nika/serve.token
+    ```
+
+    It stays in the foreground and prints one line that starts with
+    `nika serve · listening http://127.0.0.1:8787 · GET /health` and lists the
+    routes it answers. Job state goes to `.nika/serve/` (`--state-root`
+    chooses another place). Leave it running and open a second terminal in
+    the same folder.
+  </Step>
+  <Step title="Run the workflow over HTTP">
+    Save `remote.mts`:
+
+    ```ts remote.mts
+    import { readFile } from 'node:fs/promises'
+    import { Nika, isNikaRunSucceeded } from '@supernovae-st/nika'
+
+    const token = (await readFile('.nika/serve.token', 'utf8')).trim()
+    const nika = new Nika({
+      url: 'http://127.0.0.1:8787',
+      token,
+      allowInsecureHttp: true, // plain HTTP, accepted only to a loopback host
+    })
+
+    console.log(await nika.listWorkflows()) // [ 'workflows/hello.nika' ]
+
+    // A served name is the workflow's path from the project root.
+    const run = await nika.run<{ greeting: string }>('workflows/hello.nika', {
+      idempotencyKey: `hello-${Date.now()}`, // store it before the call; reuse it on retry
+    })
+    for await (const event of run.events()) console.log(event.sequence, event.kind, event.status)
+
+    const result = await run.result()
+    if (!isNikaRunSucceeded(result) || !result.receipt) throw new Error(`job ended ${result.status}`)
+    console.log(run.id, result.outputs?.greeting)
+
+    const proof = await nika.traceVerify(result.receipt)
+    console.log(proof.verified, proof.verdict, proof.reason)
+    ```
+
+    ```sh
+    node remote.mts
+    ```
+
+    ```text
+    [ 'workflows/hello.nika' ]
+    1 run.started running
+    2 run.settled succeeded
+    277e5b29-301a-4366-b1a5-00d89a93d14e mock(echo) · Say hello from the Nika SDK.
+    true ok unsealed
+    ```
+
+    `run.id` is the server's durable job id: the one to store. `ok unsealed`
+    means the record is intact but the server has no run-signing key; with a
+    key in the server's `~/.nika/keys/`, the verdict is `sealed`.
+  </Step>
+  <Step title="Stop it">
+    `Ctrl+C` (or `SIGTERM`) stops new admissions, then lets running and queued
+    jobs finish for up to 30 seconds. A restart with the same `--state-root`
+    resumes queued jobs; a job interrupted by the shutdown is not retried.
+  </Step>
+</Steps>
+
+## What changes from the local engine
+
+After the constructor, the code reads the same, with four differences you
+just met:
+
+- **Workflows by served name.** `workflows/hello.nika` is the workflow's path
+  from the project root (the folder that holds `nika.yaml`), whatever
+  `--workflows` says. A short name such as `hello.nika` answers `not_found`
+  (404). `listWorkflows()` returns the exact names.
+- **An idempotency key per job.** `run()` over HTTP requires one. Retry a
+  request whose response was lost with the same key and you get the same job,
+  not a second one.
+- **Two events, not six.** The server streams `run.started` and the
+  settlement, with an `event.sequence` cursor, and no per-task events.
+- **No per-run `maxCostUsd` or `model`.** The server caps every job at 1 USD
+  by default (`--run-cost-ceiling`); see [Spend caps](/sdk/runtime/spend).
+
+<video
+  controls
+  muted
+  playsInline
+  preload="none"
+  className="w-full aspect-video rounded-xl"
+  poster="/images/posters/sdk-remote.png"
+  aria-label="A terminal writes a one-line nika.yaml, mints a token into .nika/serve.token with umask 077, keeps .nika/ out of git, mints a signing key and starts nika serve --bind 127.0.0.1:8787 --workflows . --token-file .nika/serve.token in the background, and curl /health reports engine 0.123.0 and machine protocol 2; node remote.mts prints served hello.nika, check clean, a job id, #1 run.started running, #2 run.settled succeeded, the greeting, verify verified · sealed, retry the same job: it did not run twice, and bad token 401 unauthorized"
+  alt="A terminal writes a one-line nika.yaml, mints a token into .nika/serve.token with umask 077, keeps .nika/ out of git, mints a signing key and starts nika serve --bind 127.0.0.1:8787 --workflows . --token-file .nika/serve.token in the background, and curl /health reports engine 0.123.0 and machine protocol 2; node remote.mts prints served hello.nika, check clean, a job id, #1 run.started running, #2 run.settled succeeded, the greeting, verify verified · sealed, retry the same job: it did not run twice, and bad token 401 unauthorized"
+>
+  <source src="/videos/sdk-remote.mp4" type="video/mp4" />
+</video>
+<p className="mt-2 text-sm text-center opacity-80">**The same client against `nika serve`, set up as the [SDK README on GitHub](https://github.com/supernovae-st/nika-client#readme) does it.** Unlike the steps above, `hello.nika` stays at the project root, so the server starts with `--workflows .` and serves it as `hello.nika`; the server runs in the background of the same terminal; and `NIKA_KEYCHAIN=off nika key init` gives it a signing key, so the verdict is `sealed`, not `ok`. `/health` reports engine `0.123.0` and machine protocol `2`. The client, built with `new Nika({ url, token, allowInsecureHttp: true })`, lists and checks the served workflow, runs it with an idempotency key, receives the two sequenced events, reads `verified · sealed`, gets the same job back when it retries with the same key, and a typed `401` for a wrong token. The token is never printed. *Recorded in a terminal from `@supernovae-st/nika` 0.123.0 and `nika serve` 0.123.0 on loopback; the run is a `mock/echo` rehearsal, with no provider key.*</p>
+
+<Accordion title="Transcript: every screen of the recording, in order">
+  ```text
+  $ test -f nika.yaml || printf 'nika: my-project\n' > nika.yaml
+  $ mkdir -p .nika && (umask 077 && openssl rand -hex 24 > .nika/serve.token)
+  $ printf '.nika/\n' >> .gitignore        # traces, job state and the token stay out of git
+  $ NIKA_KEYCHAIN=off ./node_modules/.bin/nika key init   # the server signs each job's record
+  run-signing key minted · fingerprint 9d7d19293f10bb9a
+    every run on this machine now seals its journal (verify: nika trace verify <file>)
+  $ ./node_modules/.bin/nika serve --bind 127.0.0.1:8787 --workflows . --token-file .nika/serve.token > serve.log
+  2>&1 &
+  [1] 77688
+  $ curl -s 127.0.0.1:8787/health | jq -c '{engineVersion, machineProtocolVersion}'
+  {"engineVersion":"0.123.0","machineProtocolVersion":2}
+  $
+
+  ── screen cleared ──
+
+  $ node remote.mts
+  served   hello.nika
+  check    clean
+  job      67da7ec9-eba2-4a2f-ad8c-62faab9166d5
+    #1 run.started running
+    #2 run.settled succeeded
+  result   succeeded · mock(echo) · Say hello from the Nika SDK.
+  verify   verified · sealed (the server's verdict on its own journal)
+  retry    the same job: it did not run twice
+  bad token 401 unauthorized
+  $ kill %1
+  $
+  [1]  + done       ./node_modules/.bin/nika serve --bind 127.0.0.1:8787 --workflows .   >  2>&1
+  $
+  ```
+</Accordion>
+
+## Serve other machines
+
+Plain HTTP is accepted only to a loopback host (`localhost`, `127.0.0.0/8`,
+`[::1]`), and only with `allowInsecureHttp: true`. To serve other machines,
+start the server with `--allow-remote` behind a reverse proxy that terminates
+TLS (the server does not), and connect with `https://`. Authentication is
+unchanged.
+
+<Accordion title="Which version is this?">
+  <SourceContract sdk={SDK} />
+  <RemoteContract sdk={SDK} />
+</Accordion>
+
+<CardGroup cols={2}>
+  <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
+    Idempotency, recovery after a restart, status and cancellation.
+  </Card>
+  <Card title="Schedules" icon="calendar" href="/sdk/remote/schedules">
+    Declare a cadence on the server and change it by revision.
+  </Card>
+  <Card title="Server surfaces" icon="server" href="/sdk/operations/server-surfaces">
+    Every route the released server answers.
+  </Card>
+  <Card title="Server runbook" icon="clipboard-check" href="/sdk/operations/server-runbook">
+    Supervise, probe and investigate a resident.
+  </Card>
+</CardGroup>

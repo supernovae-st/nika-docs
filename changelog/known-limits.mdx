@@ -1,6 +1,6 @@
 ---
 title: "Known limits in 0.123"
-description: "What the 0.123 release does not do yet, in plain words, with a way to work with each limit."
+description: "What the 0.123 release does not do, in plain words, with a way to work with each limit."
 sidebarTitle: "Known limits"
 icon: "triangle-exclamation"
 ---
@@ -53,11 +53,139 @@ commands and their effects are the same in both languages.
 
 ## The VS Code extension stays at 0.120
 
-The editor extension (`supernovae.nika` on the VS Code Marketplace) remains on
-its 0.120 release and was not qualified with 0.123. Its diagnostics come from
-the engine it runs (`nika lsp`), so point its `nika.server.path` setting at
-your installed binary. If the editor and the command line disagree, trust
+The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema
+([Editor setup](/getting-started/editors)). The extension
+(`supernovae.nika` on the VS Code Marketplace and Open VSX) remains on its
+0.120 release. If you keep it, point its `nika.server.path` setting at your
+installed binary, and if the editor and the command line disagree, trust
 `nika check`.
+
+## Git inside a workflow is refused on macOS
+
+An `exec:` task runs inside the workflow's declared `fs` boundary, and on
+macOS the Seatbelt sandbox holds `git` to that boundary too. The sandbox
+denies git the repository's `.git` directory unless the boundary grants it,
+and it also denies git's global configuration (`~/.gitconfig`). `git log`,
+`git diff` and the like exit 128, and in a typical setup the task fails with
+`NIKA-SEC-001` ("seatbelt refused the confined process", naming the denied
+`.gitconfig` when one exists). Which code you see depends on the git that runs
+and on its configuration: Homebrew's git with no global configuration to read
+reports `fatal: not a git repository` instead, and the task fails with
+`NIKA-EXEC-001`. `NIKA_SANDBOX=off` does not change this: the setting only
+matters on a host without a sandbox backend, and macOS always has one.
+
+Granting `./.git/**` in `permits.fs.read` lets `git` read the history only
+when git has no global configuration to read: with a `~/.gitconfig`, the step
+still fails with `NIKA-SEC-001`. In a workflow where git's output then
+reaches another effect, such as a file write, that grant completes the
+lethal trifecta (`NIKA-SEC-009`), and `nika check` refuses it unless a
+blocking `invoke: nika:prompt` gates every path to that effect. The examples
+that read git history
+([standup digest](/examples/standup-digest),
+[PR review fan-out](/examples/pr-review-fanout),
+[release notes](/examples/release-notes),
+[CEO Monday brief](/examples/ceo-monday-brief) and
+[incident war room](/examples/incident-war-room)) keep the narrow boundary:
+on macOS their git step fails and they continue with their labelled fallback
+(for example "Git history unavailable"; release notes uses a sample log)
+instead of your history.
+
+## Registry coordinates are refused
+
+`nika check registry:owner/name` and `nika run registry:owner/name` stop on
+a first fetch with `NIKA-REG-005`: the public registry index answers in
+schema 2, this release reads schema 1, and the engine refuses a shape it
+cannot vet. A workflow that calls a registry child
+(`invoke: { workflow: "registry:owner/name@version" }`) is refused at check
+with `NIKA-COMP-001`: only filesystem children run.
+
+To use a registry workflow, fetch it with the registry's own script, then
+work with the local file:
+
+```bash
+git clone https://github.com/supernovae-st/nika-registry
+python3 -m pip install pyyaml                          # get.py needs Python 3.11+ and PyYAML
+python3 nika-registry/scripts/get.py meeting-actions   # fetch the pinned bytes, verify their sha256, audit
+nika check meeting-actions.nika
+```
+
+`get.py --list` shows what the registry holds. The script writes the workflow
+into the current directory; run it there, or call it from a parent workflow
+by path (`invoke: { workflow: ./meeting-actions.nika }`). Install PyYAML in a
+virtual environment if your Python refuses system-wide packages.
+
+Without the script, take the file directly: each registry entry
+(`registry/workflows/<publisher>/<name>/<version>.toml`) names its source
+file under `[source]` (repository, revision, path) and its digest under
+`[integrity]`. Download that file at that revision, compare its SHA-256 with
+the entry, and check it with `nika check`. This is a compatibility defect of
+the 0.123.0 registry reader, the kind of fix maintenance releases carry;
+until one ships, work from the local file.
+
+## Project files are checked, not run
+
+A `prompt:`, `system:` or `schema:` written as `{ file: ./path }` passes
+`nika check`, but its layers line ends with
+`run ready X - project files: checked here, but a run does not carry them yet`,
+and `nika run` refuses the workflow before any task (`NIKA-FILE-002`).
+Write the text or the schema inline in the workflow instead.
+
+## Approval answers expire after 15 minutes
+
+A `nika:prompt` gate pauses the run (exit `4`) and prints the trace to resume
+from. An answer binds only within 15 minutes of the pause. Resume later with
+`--resume <trace> --answer <task>=<value>` and the gate asks again: the run
+pauses once more (exit `4`) with a new trace path. Answer that pause within
+15 minutes, or pre-answer the gate when you start the run
+(`nika run <file> --answer <task>=<value>`). [Resume](/guides/resume) covers
+pausing and resuming.
+
+## The built-in model server loads Qwen3 files only
+
+`nika model serve` loads Qwen3-family GGUF files; a file of another family
+is refused when it loads. The local pick `nika welcome` proposes on a 16 to
+23 GB machine (Nika Gear One, standard tier) is a Gemma 3 file, so the
+built-in server cannot serve it: pull the lite pick
+(`unsloth/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M`) for the built-in server, or
+serve the Gemma file with llama.cpp's `llama-server`, LM Studio or Ollama
+([Local models](/guides/local-models)). None of the Gear One picks is marked
+verified in 0.123.0.
+
+## The TypeScript SDK
+
+- **No engine for Windows or musl Linux.** `@supernovae-st/nika` brings its
+  engine as an optional dependency for macOS (arm64, x64) and glibc Linux
+  (x64, arm64). On Windows, or a musl distribution such as Alpine, there is
+  none and the client throws `NikaEngineUnavailable`. Use a glibc image (for
+  example `node:22-bookworm-slim`), point `NIKA_BIN` at a compatible engine
+  by absolute path, or connect to a `nika serve` by URL.
+- **Node.js 22 or newer.** On an older Node, npm only warns (`EBADENGINE`)
+  and installs the package without its engine.
+- **Runs your app starts are sealed only with key files.** Engines the SDK
+  starts, and `nika serve`, never open an OS keychain: they sign with
+  `~/.nika/keys/` or the explicit `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE`
+  pair. Mint the key as files with `NIKA_KEYCHAIN=off nika key init`
+  ([The run-signing key and the OS keychain](#the-run-signing-key-and-the-os-keychain)).
+
+## The run-signing key and the OS keychain
+
+On macOS, 0.123.0 never opens the keychain, even from a terminal, and
+`nika doctor` says `the keychain is not opened by this ad-hoc build` even for
+the signed release. Its run-signing key lives in files under
+`~/.nika/keys/`. A run-key that Nika 0.122 or older stored in the keychain
+can be neither read nor copied: while it is there, `nika key init` refuses,
+and the repair it names, `nika key align`, exits with
+`this process does not open the keychain`.
+
+On Linux, `nika` run from a terminal also uses the desktop's Secret Service,
+and 0.123.0 cannot tell whether it already holds a run-key, so a plain
+`nika key init` refuses with `run-signing key material already exists`, even
+on a new machine.
+
+On both, `NIKA_KEYCHAIN=off nika key init` mints the key as files, where the
+CLI, the engines the SDK starts and `nika serve` all read it. On a Mac with
+an old keychain key, that is a new signing identity beside it
+([Seal your runs](/getting-started/installation#seal-your-runs)).
 
 ## Scheduled runs need your keys in an env file
 

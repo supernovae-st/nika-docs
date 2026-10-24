@@ -70,8 +70,6 @@ outputs:
 
 ## The golden lifecycle
 
-{/* motion: nika test with no golden yet (it teaches, exit 3), --update pinning triage.nika.golden.json, then a schema change drifting with a per-path diff (exit 1) */}
-
 First run — no golden exists yet, so `nika test` teaches instead of
 guessing (exit 3):
 
@@ -85,6 +83,8 @@ nika test · no golden yet for triage.nika
 
   create it:   nika test triage.nika --update
   then commit: triage.nika.golden.json
+  a rule table: one case per `--case <name>` (its own golden) · bind
+  its inputs with `--var KEY=VALUE`
 ```
 
 Create it with `--update`, review it once, commit it:
@@ -128,43 +128,40 @@ A [`nika:decide`](/reference/builtins#the-decision-bundle) bundle is a rubric
 with consequences, so it wants a corpus, not one happy path. The kernel
 enforces the bundle's own laws, but a fixture's `class` is only a label:
 nothing asserts that a `positive` fixture actually recommends. `nika test` is
-how you assert it today.
+how you assert it.
 
-The pattern that works: **the rule lives once, the cases live one per file.**
+The pattern that works: **the rule lives once, each case is a named golden.**
+One workflow takes the case's facts as `inputs:`; `--case <name>` pins its
+golden as `<file>.<name>.golden.json`, and `--var` binds that case's inputs.
 
 ```text
 decisions/
-  refund.bundle.json                            ← the rule · one owned artifact
-  refund-fresh-returned.nika               ← one case
-  refund-fresh-returned.nika.golden.json   ← its pinned outcome
-  refund-stale-returned.nika
-  refund-fresh-unreturned.nika
-  ...
+  refund.bundle.json                         ← the rule · one owned artifact
+  refund.nika                                ← the case runner · facts in, outcome out
+  refund.nika.fresh-returned.golden.json     ← one pinned outcome per case
+  refund.nika.stale-returned.golden.json
+  refund.nika.fresh-unreturned.golden.json
 ```
 
-Each case is a small workflow: an evidence snapshot in `const:`, the kernel in
-the middle, the outcome out. No model, no network, no clock, so the only thing
-under test is the rule.
+The workflow builds the evidence snapshot from its inputs, runs the kernel and
+returns the outcome. No model, no network, no clock: the only thing under test
+is the rule.
 
-```yaml refund-fresh-returned.nika
-nika: refund-fresh-returned
+```yaml refund.nika
+# One refund rule, a whole table of cases: each case binds its own inputs.
+nika: refund
 
 permits:
   fs: { read: ["./refund.bundle.json"] }
   tools: ["nika:decide"]
 
-const:
-  snapshot:
-    t: "2026-09-02T09:00:00Z"
-    evidence:
-      - { key: days_since_purchase, value: 5, source: orders-db,
-          observed_at: "2026-09-02T09:00:00Z", digest: d1,
-          confidentiality: internal, integrity: verified,
-          quality: { freshness: fresh, completeness: complete, independence_group: orders } }
-      - { key: item_returned, value: true, source: warehouse,
-          observed_at: "2026-09-02T09:00:00Z", digest: d2,
-          confidentiality: internal, integrity: verified,
-          quality: { freshness: fresh, completeness: complete, independence_group: warehouse } }
+inputs:
+  days:
+    type: integer
+    required: true
+  returned:
+    type: bool
+    required: true
 
 tasks:
   decide:
@@ -172,41 +169,92 @@ tasks:
       tool: "nika:decide"
       args:
         bundle: "./refund.bundle.json"
-        evidence: ${{ const.snapshot }}
+        evidence:
+          t: "2026-09-02T09:00:00Z"
+          evidence:
+            - { key: days_since_purchase, value: "${{ inputs.days }}", source: orders-db,
+                observed_at: "2026-09-02T09:00:00Z", digest: d1,
+                confidentiality: internal, integrity: verified,
+                quality: { freshness: fresh, completeness: complete, independence_group: orders } }
+            - { key: item_returned, value: "${{ inputs.returned }}", source: warehouse,
+                observed_at: "2026-09-02T09:00:00Z", digest: d2,
+                confidentiality: internal, integrity: verified,
+                quality: { freshness: fresh, completeness: complete, independence_group: warehouse } }
 
 outputs:
   outcome: ${{ tasks.decide.output.outcome }}
 ```
 
-Pin it once, read the outcome, commit both files:
+<Accordion title="refund.bundle.json · the rule the cases prove" icon="scale-balanced">
+  A refund within 30 days scores 6000 basis points, a returned item 4000, and
+  the bundle recommends at 8000. Its own fixtures carry the mandatory
+  contradictory case.
 
-```text
-$ nika test refund-fresh-returned.nika --update
-✔ golden written · refund-fresh-returned.nika.golden.json
-  review it once, commit it — `nika test` now guards this workflow
+  ```json refund.bundle.json
+  {
+    "decision_bundle_format": 1,
+    "manifest": { "id": "refund-eligibility", "version": "1.0.0", "owner": "acme-support", "license": "Apache-2.0" },
+    "evidence_schema": {
+      "days_since_purchase": { "type": "integer", "required": true, "sources": ["orders-db"], "integrity": "verified" },
+      "item_returned": { "type": "bool", "required": true, "sources": ["warehouse"], "integrity": "verified" }
+    },
+    "transforms": {
+      "within_window": { "kind": "bucket", "min": 0, "max": 365, "edges": [31], "values": [10000, 0] },
+      "returned_step": { "kind": "bucket", "min": 0, "max": 1, "edges": [1], "values": [0, 10000] }
+    },
+    "rules": {
+      "dimensions": {
+        "refund_eligibility": {
+          "terms": [
+            { "evidence": "days_since_purchase", "transform": "within_window", "weight_bp": 6000, "monotonicity": "decreases" },
+            { "evidence": "item_returned", "transform": "returned_step", "weight_bp": 4000, "monotonicity": "increases" }
+          ]
+        }
+      },
+      "thresholds": [ { "dimension": "refund_eligibility", "recommend_gte_bp": 8000 } ]
+    },
+    "governance": { "never_automatic": [] },
+    "fixtures": [
+      { "name": "fresh-returned", "class": "positive", "evidence": { "days_since_purchase": 5, "item_returned": true } },
+      { "name": "stale-unreturned", "class": "negative", "evidence": { "days_since_purchase": 90, "item_returned": false } },
+      { "name": "fresh-unreturned", "class": "ambiguous", "evidence": { "days_since_purchase": 5, "item_returned": false } },
+      { "name": "missing-return", "class": "contradictory", "evidence": { "days_since_purchase": 5 } }
+    ]
+  }
+  ```
+</Accordion>
+
+Pin each case once, read its outcome, commit the goldens:
+
+```bash
+nika test refund.nika --case fresh-returned   --var days=5  --var returned=true  --update
+nika test refund.nika --case stale-returned   --var days=90 --var returned=true  --update
+nika test refund.nika --case fresh-unreturned --var days=5  --var returned=false --update
 ```
 
-```json refund-fresh-returned.nika.golden.json
+```json refund.nika.fresh-returned.golden.json
 {
   "outcome": "recommend"
 }
 ```
 
-The rule is now guarded. Change **one character** in the shared bundle, a
-weight of `6000` that becomes `600`, and every case that leaned on it goes red
-at once, naming the flip:
+The other two pin `"defer"`: a stale purchase and an item still out both fall
+below the threshold. The rule is now guarded. Change **one character** in the
+shared bundle, a weight of `6000` that becomes `600`, and every case that
+leaned on it goes red, naming the flip:
 
 ```text
-$ nika test refund-fresh-returned.nika
-✖ outputs drifted from the golden · refund-fresh-returned.nika.golden.json
+$ nika test refund.nika --case fresh-returned --var days=5 --var returned=true
+✖ outputs drifted from the golden · refund.nika.fresh-returned.golden.json
   ~ outputs.outcome · golden "recommend" → run "defer"
 
-  intended? re-baseline: nika test refund-fresh-returned.nika --update
+  intended? re-baseline: nika test refund.nika --update
 ```
 
 That line is the point. Not "a test failed" but *this rule used to recommend
-this case and now defers*. If the flip was intended, re-baseline and let the
-golden diff carry it into review, which is where a rubric change belongs.
+this case and now defers*. If the flip was intended, re-run that case's line
+with `--update` and let the golden diff carry it into review, which is where a
+rubric change belongs.
 
 <Tip>
   Keep the golden narrow. Pinning `outcome` (or the outcome plus one
@@ -216,19 +264,27 @@ golden diff carry it into review, which is where a rubric change belongs.
   flip that matters.
 </Tip>
 
-### Two limits, stated plainly
+### What to know about cases
 
-- **`nika test` takes no `--var`.** Its flags are `--update` · `--answer` ·
-  `--color` · `--hyperlink` · `--plain` · `--ascii`. One file is one input, so
-  a ten-case corpus is ten small files sharing one bundle. That is more files
-  than a parameterised table would be, and it is also ten reviewable goldens.
+- **`--var` needs `--case`.** A bound value needs a golden of its own, so
+  `nika test refund.nika --var days=5` without a case name exits 3 and says
+  so. A file with no `--case` keeps the single `<file>.golden.json`.
+- **A case is a command line.** The golden records the outcome, not the
+  inputs that produced it, so keep each case's line in a script beside the
+  workflow (`decisions/cases.sh`, without `--update`) and run that script in
+  CI. One small workflow per case, with its
+  facts in `const:`, remains a valid layout when you prefer files to lines.
+- **Pin the instant with `--at`.** `--at <RFC 3339 instant>` places the run
+  at that time, and `${{ run.scheduled_for }}` reads it, as in a run fired for
+  that slot. Without `--at` that value is the current time, so a golden that
+  pins it drifts on the next run.
 - **Under the mock, the model leg is a constant.** `nika test` swaps every
   `infer:` to the mock provider, which synthesizes a schema-conformant value.
   A case that runs `infer:` then `nika:decide` therefore proves the *law*, and
   proves nothing about the *extraction*: the facts were handed to it. Keep the
-  model out of the case files, pin the evidence in `const:`, and prove the
-  rubric. Extraction quality is a separate exercise against real seats, where
-  it costs money and is worth what it costs.
+  model out of the cases, bind the evidence as inputs, and prove the rubric.
+  Extraction quality is a separate exercise against real models, where it
+  costs money and is worth what it costs.
 
 ## Exit codes · the CI contract
 
@@ -237,7 +293,7 @@ golden diff carry it into review, which is where a rubric change belongs.
 | `0` | Outputs match the golden (or `--update` pinned one) |
 | `1` | The mock run failed, or outputs drifted from the golden |
 | `2` | The file has validation findings (`nika check` would fail — fix those first) |
-| `3` | No golden yet (create with `--update`), or environment error |
+| `3` | No golden yet (create with `--update`), the file is missing, or `--var` without `--case` |
 
 `nika test` refuses to run a dirty file the same way `nika run` does: a
 workflow with check findings exits 2 before anything executes.
@@ -252,6 +308,7 @@ Offline and deterministic means no keys in CI, no flakes, no spend:
     for wf in workflows/*.nika; do
       nika test "$wf"
     done
+    sh decisions/cases.sh    # the rule table: one `nika test --case … --var …` line per case
 ```
 
 Commit the `*.golden.json` files in the same directory as the workflows

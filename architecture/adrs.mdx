@@ -1,6 +1,6 @@
 ---
 title: "ADR index"
-description: "The Architecture Decision Record index — every significant engineering decision in Nika Diamond, versioned + auditable. Live counts derive from the status snapshot."
+description: "The Architecture Decision Record index: every significant engineering decision behind the Nika engine, versioned and auditable."
 sidebarTitle: "ADR index"
 icon: "scroll"
 ---
@@ -9,14 +9,18 @@ import { STATUS } from "/snippets/_status-snapshot.mdx";
 
 Every significant engineering decision in Nika Diamond lives as an ADR,
 a short markdown file in [`docs/adr/`](https://github.com/supernovae-st/nika/tree/main/docs/adr)
-with status, date, context, decision, consequences. **{STATUS.adrs} total**:
-{STATUS.adrsAccepted} Accepted, {STATUS.adrsProposed} Proposed.
+with status, date, context, decision, consequences. At v{STATUS.version}:
+**{STATUS.adrs} records**: {STATUS.adrsAccepted} accepted,
+{STATUS.adrsProposed} proposed, {STATUS.adrsSuperseded} superseded and
+{STATUS.adrsRejected} rejected. After 0.123 the engine is maintained, and the
+proposed records stay as the record of open designs, not as a plan.
 
 <Info>
-  **Canonical source:** [`docs/adr/index.json`](https://github.com/supernovae-st/nika/blob/main/docs/adr/index.json)
-  (machine-readable) + [`docs/adr/README.md`](https://github.com/supernovae-st/nika/blob/main/docs/adr/README.md)
-  (human index). One file per ADR, immutable once Accepted (superseded
-  rather than edited).
+  **Canonical source:** [`docs/adr/index.json`](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/index.json)
+  (machine-readable) + [`docs/adr/README.md`](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/README.md)
+  (human index). One file per ADR. An accepted ADR changes only by an
+  amendment (a later ADR names it in its frontmatter `amends:` list) or by a
+  superseding ADR.
 </Info>
 
 ## At a glance
@@ -33,7 +37,10 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
   </Card>
 </CardGroup>
 
-## By theme
+## Foundation ADRs by theme (001–035)
+
+The first 35 records set the engine's foundations. The full list follows in
+[Every record](#every-record).
 
 <AccordionGroup>
   <Accordion title="Meta / Process (5)" icon="gavel">
@@ -42,7 +49,7 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
     | ID | Title | Status |
     |---|---|---|
     | [ADR-001](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-001-diamond-orphan-branch.md) | Diamond orphan branch rewrite instead of iterative refactor | ✅ Accepted |
-    | [ADR-002](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-002-forever-v0x.md) | Real semver toward 1.0: 0.91.0 release-candidate, 1.0 public API lock when gates are green | 🔄 amended (D-2026-06-20-N1) |
+    | [ADR-002](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-002-forever-v0x.md) | Forever v0.x, no v1.0 target (amended on 2026-06-20 to real semver). Since 0.123 the project is maintained; no 1.0 release is planned | ✅ Accepted |
     | [ADR-003](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-003-12-gate-admission.md) | 12-gate crate admission protocol | ✅ Accepted |
     | [ADR-009](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-009-adr-process.md) | ADR process and hook discipline | ✅ Accepted |
     | [ADR-011](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-011-cargo-xtask.md) | cargo xtask as canonical automation surface | ✅ Accepted |
@@ -53,10 +60,10 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-004](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-004-context-window-sized-crates.md) | Context-window-sized crate architecture | ✅ Accepted |
+    | [ADR-004](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-004-context-window-sized-crates.md) | Context-window-sized crate architecture (size walls amended by ADR-154) | ✅ Accepted |
     | [ADR-006](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-006-layered-kernel-isp-traits.md) | Layered architecture with kernel ISP atomic traits + `trait_variant` | ✅ Accepted |
     | [ADR-022](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-022-foundation-crate-layout-v081.md) | Foundation crate layout v0.81: 14 crates, `publish = false` | ✅ Accepted |
-    | [ADR-023](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-023-file-modularity-discipline.md) | File modularity: 800 LOC warn / 1500 fail / 3000 fail-with-ADR | ✅ Accepted |
+    | [ADR-023](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-023-file-modularity-discipline.md) | File modularity discipline; its limits are amended by ADR-154: 2,500 lines per file and 25,000 per crate, warnings at 1,500 and 15,000 | ✅ Accepted |
     | [ADR-026](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-026-workspace-toml-ssot.md) | `workspace.toml` single source of truth + auto-generated `crate.md` | ✅ Accepted |
     | [ADR-027](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-027-strict-l0-tiers-cargo-timings.md) | Strict L0 sublayer tiers + max 3 sibling deps | ✅ Accepted |
   </Accordion>
@@ -136,18 +143,140 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
     | [ADR-034](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-034-l05-kernel-traits-expansion.md) | L0.5 kernel traits expansion: 6 new traits scoped to v0.81+ | ✅ Accepted |
   </Accordion>
 
-  <Accordion title="Proposed: under review (5)" icon="clock">
-    Seed-level reservations ahead of their implementing crates.
+  <Accordion title="Reservations (5)" icon="clock">
+    Seed-level type reservations made ahead of the crates that would use
+    them.
 
     | ID | Title | Status |
     |---|---|---|
-    | [ADR-029](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-029-embedding-spec-reservation.md) | EmbeddingSpec value-type reservation (memory subsystem seed) | 🕒 Proposed |
-    | [ADR-030](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-030-memory-frame-trust.md) | `MemoryFrameRef.trust` reservation (Shield gate seed) | 🕒 Proposed |
-    | [ADR-031](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-031-recall-query-tenant-keyspace.md) | `RecallQuery.tenant` reservation (multi-tenant keyspace seed) | 🕒 Proposed |
-    | [ADR-032](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-032-wasm-plugin-context.md) | `WasmPluginError::OutOfFuel` + `Trap` + `PluginCallContext` reservation | 🕒 Proposed |
-    | [ADR-035](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-035-telemetry-seams.md) | Telemetry seams: `SpanGuard.parent_span_id` + `SpanRef` (OTel-ready) | 🕒 Proposed |
+    | [ADR-029](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-029-embedding-spec-reservation.md) | EmbeddingSpec value-type reservation (memory subsystem seed) | ✅ Accepted |
+    | [ADR-030](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-030-memory-frame-trust.md) | `MemoryFrameRef.trust` reservation | ✅ Accepted |
+    | [ADR-031](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-031-recall-query-tenant-keyspace.md) | `RecallQuery.tenant` reservation (keyspace seed) | ✅ Accepted |
+    | [ADR-032](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-032-wasm-plugin-context.md) | `WasmPluginError::OutOfFuel` + `Trap` + `PluginCallContext` reservation | ✅ Accepted |
+    | [ADR-035](https://github.com/supernovae-st/nika/blob/main/docs/adr/adr-035-telemetry-seams.md) | Telemetry seams: `SpanGuard.parent_span_id` + `SpanRef` (OTel-ready) | ✅ Accepted |
   </Accordion>
 </AccordionGroup>
+
+## Every record
+
+<Accordion title="All records at v0.123.0, from docs/adr/index.json" icon="list">
+    | ID | Title | Status |
+    |---|---|---|
+    | [ADR-001](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-001-diamond-orphan-branch.md) | Diamond orphan branch rewrite instead of iterative refactor | ✅ Accepted |
+    | [ADR-002](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-002-forever-v0x.md) | Forever v0.x -- no v1.0 target | ✅ Accepted |
+    | [ADR-003](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-003-12-gate-admission.md) | 12-gate crate admission protocol | ✅ Accepted |
+    | [ADR-004](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-004-context-window-sized-crates.md) | Context-window-sized crate architecture | ✅ Accepted |
+    | [ADR-005](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-005-error-hierarchy.md) | Trait-based error hierarchy with NikaErrorCode and Box&lt;dyn&gt; | ✅ Accepted |
+    | [ADR-006](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-006-layered-kernel-isp-traits.md) | Layered architecture with kernel ISP atomic traits and trait_variant | ✅ Accepted |
+    | [ADR-007](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-007-forward-compat-invariants.md) | Forward-compat invariants with non_exhaustive, new(), and pre-planted hooks | ✅ Accepted |
+    | [ADR-008](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-008-toml-driven-catalog.md) | TOML-driven catalog with build-time codegen and perfect-hash lookup | ✅ Accepted |
+    | [ADR-009](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-009-adr-process.md) | ADR process and hook discipline (meta) | ✅ Accepted |
+    | [ADR-010](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-010-miette-diagnostic-layer.md) | miette as the L4 diagnostic presentation layer | ✅ Accepted |
+    | [ADR-011](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-011-cargo-xtask.md) | cargo xtask as canonical automation surface | ✅ Accepted |
+    | [ADR-012](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-012-typestate-runtime.md) | Typestate for nika-runtime workflow lifecycle | ✅ Accepted |
+    | [ADR-013](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-013-loom-concurrency-verification.md) | Loom-based concurrency verification for L0.5 and L3 | ✅ Accepted |
+    | [ADR-014](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-014-sealed-kernel-traits.md) | Sealed kernel traits with explicit adapter registration | ✅ Accepted |
+    | [ADR-015](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-015-expect-test-inline-snapshots.md) | expect-test for inline snapshot assertions on rendered output | ✅ Accepted |
+    | [ADR-016](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-016-cancellation-model.md) | Cancellation model: future-drop primary, CancelCtx cooperative module | ✅ Accepted |
+    | [ADR-017](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-017-streaming-policy.md) | Streaming policy: bounded mpsc(32), ReceiverStream at kernel boundary | ✅ Accepted |
+    | [ADR-018](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-018-runtime-sync-primitives.md) | Runtime + sync primitives: single Tokio rt, parking_lot default | ✅ Accepted |
+    | [ADR-019](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-019-retry-timeout-ownership.md) | Retry + timeout ownership: stratified by layer | ✅ Accepted |
+    | [ADR-020](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-020-wasm-plugin-boundary.md) | WASM plugin boundary + Sandbox: trait stubs now, dual timeout later | ✅ Accepted |
+    | [ADR-021](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-021-yaml-envelope-convention.md) | YAML envelope convention: apiVersion + kind + metadata + spec, multi-doc, 9 doc kinds | ♻️ Superseded by ADR-082 |
+    | [ADR-022](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-022-foundation-crate-layout-v081.md) | Foundation crate layout v0.81: 14 crates, publish = false, 5 renames + extracts | ✅ Accepted |
+    | [ADR-023](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-023-file-modularity-discipline.md) | File modularity discipline: 800 LOC warn / 1500 fail / 3000 fail-with-LOC-EXEMPT-allowlist | ✅ Accepted |
+    | [ADR-024](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-024-sota-rust-patterns.md) | Adopt SOTA Rust patterns: bon Builder, Arc&lt;str&gt;, camino, sealed module, strum, public-api | ✅ Accepted |
+    | [ADR-025](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-025-per-crate-semver-release-plz.md) | Per-crate semver via release-plz (publishable crates only) | ✅ Accepted |
+    | [ADR-026](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-026-workspace-toml-ssot.md) | workspace.toml single source of truth + auto-generated crate.md | ✅ Accepted |
+    | [ADR-027](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-027-strict-l0-tiers-cargo-timings.md) | Strict L0 sublayer tiers + max 3 sibling deps + cargo timings per-crate budget | ✅ Accepted |
+    | [ADR-028](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-028-forward-compat-reservation-policy.md) | Forward-compat API-type reservation (amended — feature scheduling dropped) | ✅ Accepted |
+    | [ADR-029](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-029-embedding-spec-reservation.md) | EmbeddingSpec value-type reservation (Cortex seed) | ✅ Accepted |
+    | [ADR-030](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-030-memory-frame-trust.md) | MemoryFrameRef.trust reservation (Shield gate seed) | ✅ Accepted |
+    | [ADR-031](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-031-recall-query-tenant-keyspace.md) | RecallQuery.tenant reservation (multi-tenant keyspace seed) | ✅ Accepted |
+    | [ADR-032](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-032-wasm-plugin-context.md) | WasmPluginError OutOfFuel + Trap + PluginCallContext reservation | ✅ Accepted |
+    | [ADR-033](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-033-l0-foundational-types.md) | L0 foundational types: Cost, UUIDv7, TrustLevel, TokenUsage evolution | ✅ Accepted |
+    | [ADR-034](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-034-l05-kernel-traits-expansion.md) | L0.5 kernel traits expansion: 6 new traits scoped to v0.81+ additions | ✅ Accepted |
+    | [ADR-035](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-035-telemetry-seams.md) | Telemetry seams: SpanGuard parent_span_id + SpanRef (OTel-ready) | ✅ Accepted |
+    | [ADR-036](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-036-msrv-policy-stub.md) | MSRV policy: rust-toolchain.toml SSOT + N-2 stable cadence (stub) | 🕒 Proposed |
+    | [ADR-037](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-037-bottom-up-diamond-progression.md) | Bottom-up diamond progression (no feature-milestone defer) | ✅ Accepted |
+    | [ADR-038](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-038-nika-bm25-admission.md) | Admit nika-bm25 as the first L1 memory satellite (CRAFT-from-scratch BM25 scorer) | ✅ Accepted |
+    | [ADR-039](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-039-streaming-memory-recall.md) | Streaming MemoryRecall for lazy fusion · recall_stream() | 🕒 Proposed |
+    | [ADR-040](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-040-memory-cargo-feature-matrix.md) | Cargo feature matrix for nika-memory · zero-cost modularity | 🕒 Proposed |
+    | [ADR-041](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-041-type-state-memory-orchestrator.md) | Type-state lifecycle for nika-memory orchestrator | 🕒 Proposed |
+    | [ADR-042](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-042-autodesc-minimal-full-split.md) | Autodesc MINIMAL/FULL split · forcing-function moat at W4 | 🕒 Proposed |
+    | [ADR-078](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-078-memoryrecall-self-shape.md) | MemoryRecall &self satellite contract + &mut self orchestrator pool (Option D) | 🕒 Proposed |
+    | [ADR-079](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-079-capabilities-phantom-type.md) | Capabilities&lt;E: EffectSet&gt; phantom-type kernel · compile-time effect refusal (Option C hybrid) | 🕒 Proposed |
+    | [ADR-080](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-080-mcp-stdio-cve-sandbox.md) | MCP STDIO transport vulnerability-class sandbox canon · 5-layer mitigation (post phantom-CVE audit) | 🕒 Proposed |
+    | [ADR-081](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-081-l1-effect-crate-guard-contract.md) | L1 effect-crate guard contract · 7 security guards as forever crate-admission criteria | 🕒 Proposed |
+    | [ADR-082](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-082-envelope-nika-v1-single-version-marker.md) | Workflow envelope: single version marker `nika: v1` (supersedes K8s apiVersion form) | ♻️ Superseded by ADR-113 |
+    | [ADR-083](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-083-l1-computer-use-cross-platform-doctrine.md) | L1 computer-use effect crates · cross-platform doctrine (macOS + Linux prio · Windows + all) | ✅ Accepted |
+    | [ADR-084](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-084-nika-catalog-spec-26-reconciliation.md) | nika-catalog builtin set · reconciliation to spec 26 (42→26 stdlib collapse + json_merge cut) | ✅ Accepted |
+    | [ADR-085](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-085-spec-schema-oneof-bridge-to-schemars-codegen.md) | spec/workflow.schema.json invoke.tool oneOf · interim hand-derived bridge to engine schemars codegen | ✅ Accepted |
+    | [ADR-086](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-086-builtin-rams-sweep-convert-universal-multi-format.md) | builtin Rams sweep · nika:csv_to_json → nika:convert universal multi-format · less but better | ✅ Accepted |
+    | [ADR-087](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-087-nika-wait-temporal-collapse.md) | nika:sleep + nika:wait_until → nika:wait · temporal-control Rams collapse | ✅ Accepted |
+    | [ADR-088](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-088-nika-inspect-introspection-collapse.md) | nika:cost + records + dag_info + threads → nika:inspect · introspection Rams collapse | ✅ Accepted |
+    | [ADR-089](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-089-json-diff-jq-subsume-rejected.md) | nika:json_diff jq-subsume feasibility · REJECTED · keep RFC-6902 Patch as canonical output format | ⛔ Rejected |
+    | [ADR-090](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-090-structural-doctrine-enforcement.md) | Structural doctrine enforcement — gates project the SSOT | ✅ Accepted |
+    | [ADR-091](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-091-nika-infer-local-candle-sidecar.md) | Sovereign local inference · nika-infer-local · pure-Rust candle sidecar, OpenAI-compat reuse, no rig / no mistral.rs | ✅ Accepted |
+    | [ADR-092](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-092-nika-check-program-analysis-ladder.md) | Make nika check a verifier, not a linter — the static-analysis ladder on a unified flow IR | 🕒 Proposed |
+    | [ADR-093](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-093-infer-local-http-server-tiny-http.md) | nika-infer-local HTTP server · tiny_http for the v1 sidecar endpoint | ✅ Accepted |
+    | [ADR-094](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-094-nika-pck-registry-architecture.md) | nika-pck · content-addressed sharing — identity decentralized, discovery a forkable index, trust in the artifact | ✅ Accepted |
+    | [ADR-095](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-095-exec-security-architecture.md) | exec verb security architecture · layered defense-in-depth (permits = declaration, 3 layers enforce) | ✅ Accepted |
+    | [ADR-096](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-096-agent-loop-intelligence.md) | The agent-loop intelligence layer — routing, stall guard, compose, telemetry | ✅ Accepted |
+    | [ADR-097](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-097-parallel-intra-turn-dispatch.md) | Parallel intra-turn tool dispatch — concurrent resolve, request-order fold | ✅ Accepted |
+    | [ADR-098](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-098-underspecified-schema-json-mode-fallback.md) | Underspecified schemas fall back to native JSON mode + local validation | 🕒 Proposed |
+    | [ADR-099](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-099-durable-lite-run-resume.md) | Durable-lite run resume — the trace IS the checkpoint | ✅ Accepted |
+    | [ADR-100](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-100-trace-retention.md) | Trace retention — bounded by default, never silently, never a pending gate | ✅ Accepted |
+    | [ADR-105](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-105-image-generate-builtin.md) | nika:image_generate — the Media builtin rides a dedicated image plane | ✅ Accepted |
+    | [ADR-106](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-106-nika-add-registry-client.md) | nika add — the registry client verb (resolve · verify · install) | 🕒 Proposed |
+    | [ADR-107](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-107-nika-check-wasm-admission.md) | Admit nika-check-wasm — the static half of nika check, compiled to the browser | ✅ Accepted |
+    | [ADR-108](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-108-nika-proof-split.md) | Split the spec-15 proof primitives out of nika-runtime into nika-proof (L0) | ✅ Accepted |
+    | [ADR-109](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-109-composition-proof-receipt.md) | Publish the composition proof receipt — what this engine may claim on spec 14 | ✅ Accepted |
+    | [ADR-110](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-110-nika-cli-host-member-split.md) | nika-cli size-cap member split: the host plane descends to nika-cli-host | ✅ Accepted |
+    | [ADR-111](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-111-outbound-pause-delivery.md) | Deliver the pause event outward — operator-configured CloudEvents webhook | ✅ Accepted |
+    | [ADR-112](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-112-trace-as-dataset.md) | Trace-as-dataset — OTel GenAI semconv now, input-capture before the SFT export | 🕒 Proposed |
+    | [ADR-113](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-113-envelope-identity-on-nika.md) | The envelope's identity moves onto `nika:` — the version slot dies, losslessly | ✅ Accepted |
+    | [ADR-114](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-114-nika-cadence-admission.md) | `nika-cadence` — the pure arming domain, at L0 | ✅ Accepted |
+    | [ADR-115](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-115-nika-check-analyzer-member-split.md) | nika-check size-cap member split: the analysis substrate descends to nika-check-analyzer | ✅ Accepted |
+    | [ADR-116](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-116-nika-serve-resident-firer.md) | nika serve v0 was a local-only resident firer | ♻️ Superseded by ADR-117 |
+    | [ADR-117](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-117-nika-serve-network-boundary.md) | admit nika serve network access behind explicit authority | ✅ Accepted |
+    | [ADR-118](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-118-nika-arm-custody-library.md) | admit nika-arm as the shared ARM custody library | ✅ Accepted |
+    | [ADR-119](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-119-durable-remote-job-state.md) | make remote job admission durable before transport | ✅ Accepted |
+    | [ADR-120](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-120-service-execution-driver-split.md) | descend the shared service execution driver out of nika-runtime | ✅ Accepted |
+    | [ADR-121](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-121-nika-dataflow-member-split.md) | nika-runtime size-cap member split: the run's dataflow descends to nika-dataflow | ✅ Accepted |
+    | [ADR-122](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-122-execution-access-plan-authority.md) | One access plan is the execution authority: resolved once, executed as resolved | ✅ Accepted |
+    | [ADR-123](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-123-layered-check-verdicts.md) | check answers four questions: VALID · ACCESS READY · CAPACITY FIT · RUN READY, and run refuses what check refuses | ✅ Accepted |
+    | [ADR-124](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-124-one-oracle-facade.md) | one typed oracle facade: the CLI verb, the MCP tool and the session read the same audit | ✅ Accepted |
+    | [ADR-125](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-125-native-session-runtime.md) | the native session is a grounded host runtime over the installed engine, never a workflow | ✅ Accepted |
+    | [ADR-126](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-126-project-changes-from-the-session.md) | project changes from the session: one typed change set, preview == apply, consent outside the model | ✅ Accepted |
+    | [ADR-127](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-127-nika-runtime-laws-member-split.md) | nika-runtime size-cap member split: the run's laws descend to nika-runtime-laws | ✅ Accepted |
+    | [ADR-128](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-128-one-run-settlement.md) | The run's settlement is built once by the runtime and projected by every door | ✅ Accepted |
+    | [ADR-129](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-129-run-state-is-not-evidence-state.md) | Run state and evidence state are distinct: the writer's lease, the INCOMPLETE exit, the resident's interrupted | ✅ Accepted |
+    | [ADR-130](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-130-one-vocabulary-one-owner.md) | One vocabulary, one owner: the task-record twin dies, the resident's status projects the settlement, copied spellings are pinned | ✅ Accepted |
+    | [ADR-131](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-131-the-residents-job-door-is-public.md) | The resident's job door is public: admission by served name, digests as optional integrity assertions, the engine as the one producer | ✅ Accepted |
+    | [ADR-132](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-132-identity-idempotency-protocol.md) | Identity, idempotency and protocol: what a duplicate human action yields, and the resident's writer stamp | ✅ Accepted |
+    | [ADR-133](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-133-the-session-machine-is-portable.md) | The session machine is portable: typed outcomes, proposal and gate identities, hosts that judge by identity | ✅ Accepted |
+    | [ADR-134](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-134-trust-is-a-rung-never-a-word.md) | Trust is a rung, never a word: declared · discovered · observed on every access lane | ✅ Accepted |
+    | [ADR-135](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-135-the-public-executable-is-born-nika.md) | The public executable is born nika: one bin target with the public name, no packaging rename, no second executable | ✅ Accepted |
+    | [ADR-136](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-136-serve-inbound-event-binding.md) | A Serve inbound event binding is a schedule with a second credential on one route family, admitted through the same job door | 🕒 Proposed |
+    | [ADR-137](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-137-nika-onboard-member-split-nika-compile.md) | nika-onboard size-cap member split: the Compile core descends to nika-compile | ✅ Accepted |
+    | [ADR-138](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-138-nika-compile-member-split-nika-compile-reader.md) | nika-compile size-cap member split: the frozen reader descends to nika-compile-reader | ✅ Accepted |
+    | [ADR-139](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-139-terminal-renderer-inline-first-one-owner.md) | The terminal renderer: Ratatui, inline-first, one owner of the terminal | 🕒 Proposed |
+    | [ADR-140](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-140-nika-compile-cognition.md) | nika-compile size-cap member split: the seats' doors ascend to nika-compile-cognition | ✅ Accepted |
+    | [ADR-141](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-141-nika-compile-reader-member-split-nika-compile-fidelity.md) | nika-compile-reader size-cap member split: the candidate laws ascend to nika-compile-fidelity | ✅ Accepted |
+    | [ADR-142](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-142-nika-compile-member-split-nika-compile-trigger.md) | nika-compile size-cap member split: the trigger reading ascends to nika-compile-trigger | ✅ Accepted |
+    | [ADR-143](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-143-nika-tui-view-member-split.md) | nika-tui size-cap member split: the viewers of the object in view descend to nika-tui-view | ✅ Accepted |
+    | [ADR-144](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-144-nika-session-change-member-split.md) | nika-session size-cap member split: the change set, its review, its outcome and the consent record descend to nika-session-change | ✅ Accepted |
+    | [ADR-145](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-145-nika-compile-clauses-member-split.md) | nika-compile-clauses size-cap member: how one clause of a request reads ascends from the reader, the verifier and the core's surface | ✅ Accepted |
+    | [ADR-146](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-146-nika-compile-seats-member-split.md) | nika-compile-cognition size-cap member split: the decision seats and the rehearsal port descend to nika-compile-seats | ✅ Accepted |
+    | [ADR-147](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-147-nika-compile-seats-composer-and-document-operations.md) | Descend the candidate composer and the document operations to nika-compile-seats | 🕒 Proposed |
+    | [ADR-148](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-148-nika-session-host-session-over-a-wire.md) | The Session over a wire: nika-session-host keeps the actual runtime behind a native machine door and HTTP routes | 🕒 Proposed |
+    | [ADR-149](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-149-nika-compile-fidelity-member-split-nika-compile-behavior.md) | nika-compile-fidelity size-cap member split: the behavioural contract and its judge descend to nika-compile-behavior | ✅ Accepted |
+    | [ADR-150](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-150-nika-session-intelligence-member-split.md) | nika-session size-cap member split: the intelligence, its reasoners, the line router and the authoring door descend to nika-session-intelligence | ✅ Accepted |
+    | [ADR-152](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-152-nika-compile-seats-authority-descent.md) | nika-compile-cognition size cap: the authority over a seat's requests descends to nika-compile-seats | ✅ Accepted |
+    | [ADR-153](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-153-nika-session-agent.md) | nika-session-agent: the conversation the Session's selected intelligence leads | ✅ Accepted |
+    | [ADR-154](https://github.com/supernovae-st/nika/blob/v0.123.0/docs/adr/adr-154-size-walls-25000-crate-2500-file.md) | Size walls: 25,000 production lines per crate and 2,500 lines per file, warnings at 15,000 and 1,500 | ✅ Accepted |
+</Accordion>
 
 ## How ADRs work
 
@@ -165,20 +294,21 @@ with status, date, context, decision, consequences. **{STATUS.adrs} total**:
     Rejected. The ADR index (`docs/adr/index.json`) is auto-regenerated.
   </Step>
   <Step title="Accept">
-    Once Accepted, the ADR is **immutable**. Any revision happens via a
-    new ADR that `supersedes:` the old one. This keeps decision history
-    auditable: `git log` tells you when and why a given rule came in.
+    Once accepted, an ADR changes only in two recorded ways: a later ADR
+    **amends** it (listed in that ADR's `amends:`, with a banner in the
+    amended file), or a new ADR **supersedes** it. `git log` tells you when
+    and why a given rule came in.
   </Step>
   <Step title="Supersede">
     Rare, but when a decision proves wrong, a new Accepted ADR
     supersedes it. The superseded ADR stays in the tree with
-    `status: superseded` and `superseded_by:`. It has happened once so
-    far: **ADR-021** (the K8s-style `apiVersion` envelope) was superseded
-    by **ADR-082**, which locked a single version marker · a decision
-    **ADR-113** (2026-08-13) then overtook by moving the envelope's
-    identity onto `nika:` itself (the version slot died, the value is the
-    file's name). One ADR is also Rejected outright (**ADR-089**) and kept
-    in the tree as the record of a road not taken.
+    `status: superseded` and `superseded_by:`. Three supersessions exist:
+    **ADR-021** (the K8s-style `apiVersion` envelope) by **ADR-082** (a
+    single version marker), **ADR-082** by **ADR-113** (2026-08-13: the
+    envelope's identity moves onto `nika:` itself, the version slot dies),
+    and **ADR-116** (the first local-only `nika serve`) by **ADR-117**. One
+    ADR is rejected outright (**ADR-089**) and kept in the tree as the
+    record of a road not taken.
   </Step>
 </Steps>
 
@@ -188,18 +318,19 @@ Every ADR carries rich metadata in both its frontmatter and `index.json`:
 
 | Field | Purpose |
 |---|---|
-| `id` | `ADR-NNN` · assigned in ascending order, never reused. Not gap-free: ranges are reserved in blocks, so the tree currently runs `ADR-001`..`ADR-106` with 043-077 and 101-104 unallocated |
+| `id` | `ADR-NNN` · assigned in ascending order, never reused. Not gap-free: ranges are reserved in blocks, so at v0.123.0 the tree runs `ADR-001`..`ADR-154` with 043-077, 101-104 and 151 unallocated |
 | `title` | One-line decision summary |
 | `status` | `Proposed` / `Accepted` / `Rejected` / `Superseded` |
 | `date` | ISO date of last status change |
 | `tags` | Free-form (e.g., `architecture`, `runtime`, `forward-compat`) |
 | `affects_crates` | List of crate names the decision constrains |
-| `affects_layers` | `L0`..`L5` · which layers feel the effect |
+| `affects_layers` | `L0`..`L5` · which layers feel the effect (L5 is reserved, not built) |
 | `supersedes` | IDs this ADR replaces |
 | `superseded_by` | ID that replaces this ADR |
 | `related` | Sibling ADRs in the same design arc |
 | `requires` | Prerequisite ADRs (this one makes no sense without them) |
 | `enables` | Downstream ADRs this one unlocks |
+| `amends` | Accepted ADRs this one amends in place, in the frontmatter only: `index.json` has no `amends` key (ADR-154 amends ADR-004, ADR-023 and ADR-143) |
 
 ## Gate 12 integration
 
@@ -215,10 +346,10 @@ Every ADR carries rich metadata in both its frontmatter and `index.json`:
 
 <CardGroup cols={2}>
   <Card title="Forward-compat invariants" icon="shield-halved" href="/architecture/forward-compat-invariants">
-    The 8 patterns that keep most ADRs additive.
+    The patterns that keep most ADRs additive.
   </Card>
   <Card title="L0 decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13: the foundation decisions that became ADRs 033, 034 + others.
+    The foundation decisions behind ADRs 033, 034 and others.
   </Card>
   <Card title="12-gate admission" icon="check-double" href="/architecture/admission">
     Gate 12 requires ADR alignment for breaking change.

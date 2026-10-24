@@ -28,7 +28,15 @@ servers survive. The same block by hand:
 ## The rest of the VS Code surface
 
 - The [marketplace extension](https://marketplace.visualstudio.com/items?itemName=supernovae.nika)
-  — LSP, DAG canvas, preflight.
+  — DAG canvas, preflight and diagnostics from the `nika lsp` it runs.
+
+  <Warning>
+    The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema
+    ([editor setup](/getting-started/editors)). If you keep the extension, set
+    its `nika.server.path` setting to your installed `nika`, and if the
+    editor and the command line disagree, trust `nika check`
+    ([known limits](/changelog/known-limits)).
+  </Warning>
 - `nika init` writes `.github/copilot-instructions.md` and the
   `.vscode/settings.json` schema mapping (validation + completion in any
   YAML-aware editor).

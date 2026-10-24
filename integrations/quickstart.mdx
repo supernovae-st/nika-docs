@@ -23,9 +23,12 @@ nika --version && nika doctor          # doctor prints exact fixes, never mutate
 No key needed yet — `mock/echo` and local providers run without one.
 
 Driving Nika from Node instead of a shell? That is a different door:
-`npm install @supernovae-st/nika@0.123.0` does **not** put `nika` on
-`PATH`. Follow [SDK quickstart](/sdk/start/quickstart) (`run()` admits,
-`run.result()` settles, `run.events()` yields normalized kinds).
+`npm install @supernovae-st/nika@0.123.0` inside a project bundles the
+engine for your app and gives you `./node_modules/.bin/nika`, but does not
+add `nika` to your `PATH`. Do not type `npx nika` outside such a project:
+the unscoped npm name `nika` belongs to an unrelated package. Follow the
+[SDK quickstart](/sdk/start/quickstart) (`run()` admits, `run.result()`
+settles, `run.events()` yields normalized kinds).
 
 ## Minute 2-5 · teach the repo
 
@@ -35,10 +38,15 @@ nika init
 
 One command writes the agent surface: `AGENTS.md` (read natively by Codex,
 Claude Code, Cursor, OpenCode, Hermes, Jules and every AGENTS.md-aware
-tool), `CLAUDE.md`, the Cursor rule, the Copilot instructions, the
-repo-level [agent skill](https://agentskills.io), and the `.vscode` schema
-wiring.
-Idempotent — existing files are skipped.
+tool), `CLAUDE.md`, the Cursor rules and subagents, the Copilot
+instructions, the repo-level [agent skill](https://agentskills.io), the
+`.vscode` schema wiring, a commented `nika.yaml` and a starter workflow. It
+also writes project MCP configs (`.mcp.json`, `.cursor/mcp.json`,
+`.agents/mcp_config.json`) and Claude Code and Cursor hooks: shell scripts
+those clients run at session start, after an edit and before a shell
+command. Read them before you commit them
+([every file `nika init` writes](/getting-started/agents#nika-init-teach-the-repo)).
+Existing files are skipped.
 
 ## Minute 5-7 · wire the oracle
 
@@ -47,7 +55,8 @@ nika wire detected --dry-run   # preview what this machine shows
 nika wire detected             # or one client: cursor · vscode · claude ·
                                # claude-desktop · codex · gemini · qwen ·
                                # opencode · hermes · zed · continue · cline ·
-                               # lmstudio · junie · grok · kimi · …
+                               # lmstudio · junie · grok · kimi · antigravity ·
+                               # kiro · copilot · amp · windsurf
 ```
 
 `nika wire --help` lists every target on this binary. Clients with no
@@ -67,8 +76,8 @@ stay questions; no file is written), answers them with repeatable
 `--answer KEY=JSON_LITERAL`, writes a Ready destination, audits
 (`nika check` — plan, cost floor, permits, **before** any token is
 spent), runs offline (`--model mock/echo`), and the receipts land in
-`.nika/traces/` (`nika trace verify .nika/traces/<run>.ndjson` → exit 0
-— the run card prints the path on its `trace:` line).
+`.nika/traces/` (`nika trace verify` → exit 0: bare, it reads the latest
+trace; the run card prints each trace's path on its `trace:` line).
 
 ## Then: CI receipts
 
