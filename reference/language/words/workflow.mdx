@@ -25,6 +25,9 @@ Compose another workflow (spec 14) · a STATIC target: a filesystem path OR regi
 
 [Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/schemas/workflow.schema.json)
 
+
+The released 0.123.0 engine runs filesystem children only: a `registry:owner/name@version` target is refused at check (`NIKA-COMP-001`), and a first fetch of a registry coordinate is refused as well (`NIKA-REG-005`). Use the workflow file from the registry repository by path. See [Known limits](/changelog/known-limits#registry-coordinates-are-refused).
+
 ## Examples
 
 No matching source-template occurrence is recorded in this projection. [Write a workflow](/guides/templates) or consult the schema declaration above.
