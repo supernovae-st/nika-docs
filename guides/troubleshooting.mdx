@@ -12,16 +12,18 @@ import { CANON } from "/snippets/_canon.mdx";
 <AccordionGroup>
   <Accordion title="Can I run Nika today?" icon="play">
     Yes. Install the latest tagged release with Homebrew or `install.sh`,
-    then run `nika check` and `nika run` locally. The engine is still
-    pre-1.0 and hardening toward the 1.0 launch; a grammar change before
-    1.0 ships with its `nika check --fix` migration.
+    then run `nika check` and `nika run` locally. 0.123 is the open-source
+    reference release, maintained with security fixes, bug fixes and
+    compatibility; a grammar change ships with its `nika check --fix`
+    migration.
   </Accordion>
   <Accordion title="Why is the language v1 but the engine pre-1.0?" icon="code-branch">
     Two independent axes. The **language** is versioned by the spec and
     changes only with a migration the binary applies (`nika check --fix`);
     after 1.0 it is additive only. The **engine** follows real
-    semver toward 1.0 (public tags are the 0.12x line today, then `1.0.0`
-    when the [gates](/changelog/roadmap) are green).
+    semver: 0.123 is its open-source reference release, now in maintenance
+    (the [roadmap](/changelog/roadmap) keeps the earlier long-range gates as
+    history).
     Same model as SQL or GraphQL: the contract is stable, implementations
     iterate.
   </Accordion>
