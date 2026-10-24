@@ -84,12 +84,14 @@ others. A provider is the combination of three small traits, `ProviderInfer`
 (one call), `ProviderStream` (a streamed call) and `ProviderMeta` (its name
 and capabilities), sealed so only the workspace implements the whole.
 
-Every wire lives in one crate, `nika-providers`, which speaks three API
-dialects plus the mock:
+Every wire lives in one crate, `nika-providers`. The catalog records three
+API dialects (`openai-chat`, `anthropic`, `gemini`); at run time Ollama gets
+its own native wire:
 
-| Dialect | Providers in 0.123.0 | Notes |
+| Wire | Providers in 0.123.0 | Notes |
 |---|---|---|
-| `openai-chat` | openai · scaleway · mistral · groq · deepseek · xai · huggingface · openrouter · moonshot · nvidia · ollama · lmstudio · llamacpp · localai · vllm | OpenAI's `/v1/chat/completions` shape, with a per-provider base URL and auth header |
+| `openai-chat` | mistral · scaleway · openai · deepseek · xai · groq · openrouter · huggingface · nvidia · moonshot · lmstudio · llamacpp · localai · vllm | OpenAI's `/v1/chat/completions` shape, with a per-provider base URL and auth header. A request with tools to OpenAI's own endpoint uses its Responses API |
+| Ollama native | ollama | Ollama's `/api/chat`, which keeps Ollama's own context guards |
 | `anthropic` | anthropic | the native Messages API: tool use, extended thinking |
 | `gemini` | gemini | the native `generateContent` API, structured output via `response_schema` |
 | mock | mock | offline; synthesizes a conformant instance for a schema |

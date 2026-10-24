@@ -1,224 +1,157 @@
 ---
 title: "Crate constellation"
-description: "Visual map of every Nika Diamond crate across six layers. Live admission status. The architecture grows additively across 1.x minors, toward a projected horizon."
+description: "Visual map of the Nika engine crates across its layers, as of the 0.123 reference release: which are admitted and which ship before admission."
 sidebarTitle: "Constellation"
 icon: "diagram-project"
 ---
 
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 
-This page is the **engine crate map**, not the product getting-started
-path. The released binary already includes `nika serve`, `nika mcp`,
-`nika lsp` and the CLI. The published TypeScript SDK is
-`@supernovae-st/nika` — a separate repository from any planned Rust
-`nika-sdk` crate on the graph below.
+This page is the **engine crate map**, not the getting-started path. You run
+one `nika` binary; it already contains the CLI, the Session, `nika serve`,
+`nika mcp`, `nika lsp` and `nika dap`. The TypeScript SDK is not a crate: it
+is the npm package `@supernovae-st/nika`, in its own repository.
 
-Nika's engine grows additively across 1.x minors, organized across six
-layers. Today **{STATUS.cratesAdmitted} crates are admitted** and
-{STATUS.wipCrates.length} are WIP
-({STATUS.wipCrates.length ? STATUS.wipCrates.join(", ") : "none"}), against a
-projected horizon of **{STATUS.cratesTarget} crates** (hard cap
-{STATUS.cratesCap}, per ADR-037). The horizon is a projection, never a gate:
-crates are admitted when they pass the 12 gates, not to reach a number.
-The remaining crates are future 1.x expansion, not required for the first-run
-CLI/LSP/MCP path. Nodes marked 🧭 on the graph are crate-layout
-reservations; do not read them as "this command has not shipped."
+At v{STATUS.version} the engine is a Rust workspace of
+**{STATUS.cratesWorkspace} crates** across the layers L0, L0.5, L1, L1.5, L2,
+L3 and L4. **{STATUS.cratesAdmitted} are admitted** past the twelve
+[admission gates](/architecture/admission); {STATUS.wipCrates.length} are
+pre-admission ({STATUS.wipCrates.join(", ")}). Pre-admission crates are in
+the released binary, the Session, the terminal workspace and `nika serve`
+among them, while they work toward the gates. The workspace cap is
+{STATUS.cratesCap} crates (ADR-037). After 0.123 the engine is maintained:
+security fixes, bug fixes and compatibility, with no new crate planned.
 
 <Tip>
-  Live state: [`/reference/status`](/reference/status). Layer model:
-  [`/architecture/layers`](/architecture/layers). Admission process:
-  [`/architecture/admission`](/architecture/admission).
+  Layer model and enforcement: [Layers](/architecture/layers). Admission
+  process: [Admission](/architecture/admission). The source of truth is the
+  `[workspace.metadata.diamond]` table of the engine's
+  [`Cargo.toml` at v0.123.0](https://github.com/supernovae-st/nika/blob/v0.123.0/Cargo.toml).
 </Tip>
 
-## Full dependency graph
+## The map
 
 ```mermaid
 %%{init: {'theme':'dark','themeVariables':{'background':'transparent','mainBkg':'transparent'}}}%%
 flowchart TB
-  classDef admitted fill:#22c55e,color:#000,stroke:#16a34a,font-weight:bold
-  classDef wip fill:#f59e0b,color:#000,stroke:#d97706,font-weight:bold
-  classDef planned fill:#1e293b,color:#94a3b8,stroke:#475569,stroke-dasharray:4
-  classDef binary fill:#a78bfa,color:#000,stroke:#7c3aed,font-weight:bold
-
-  subgraph L5["L5 · binary"]
-    NIKA["nika ✅"]:::admitted
-  end
+  classDef admitted fill:#22c55e,color:#000,stroke:#16a34a
+  classDef wip fill:#f59e0b,color:#000,stroke:#d97706
 
   subgraph L4["L4 · interfaces"]
-    CLI["nika-cli ✅"]:::admitted
-    SERVE["nika-serve 🧭"]:::planned
-    MCP["nika-mcp ✅"]:::admitted
-    LSP["nika-lsp ✅"]:::admitted
-    SDK["nika-sdk 🧭"]:::planned
-    CV["nika-catalog-verify ✅"]:::admitted
+    CLI["nika-cli · -host · -host-typesafe<br/>the nika binary"]:::admitted
+    SESSION["nika-session · -agent · -change<br/>-host · -intelligence"]:::wip
+    TUI["nika-tui · nika-tui-view"]:::wip
+    TUICORE["nika-tui-core"]:::admitted
+    SERVE["nika-serve"]:::wip
+    COMPILE["nika-compile · -reader · -behavior · -clauses<br/>-cognition · -fidelity · -seats · -trigger"]:::admitted
+    TOOLS["nika-mcp · nika-lsp · nika-dap"]:::admitted
+    READ["nika-trace · nika-display · nika-arm"]:::admitted
+    MISC["nika-onboard · -knowledge · nika-models<br/>nika-catalog-verify · nika-check-wasm"]:::admitted
   end
 
   subgraph L3["L3 · runtime"]
-    RT["nika-runtime ✅"]:::admitted
-    SH["nika-shield 🧭"]:::planned
+    RT["nika-runtime · nika-runtime-laws"]:::admitted
+    EXEC["nika-execution · nika-service-execution"]:::wip
   end
 
-  subgraph L2["L2 · verbs + services"]
-    VE["nika-verb-exec ✅"]:::admitted
-    VF["nika:fetch builtin ✅"]:::admitted
-    VI["nika-verb-invoke ✅"]:::admitted
-    VIF["nika-verb-infer ✅"]:::admitted
-    VA["nika-verb-agent ✅"]:::admitted
-    PCK["nika-pck 🧭"]:::planned
-    OBS["nika-observability 🧭"]:::planned
-    BGH["nika-builtin-github 🧭"]:::planned
-    BCL["nika-builtin-cloud 🧭"]:::planned
-    BWS["nika-builtin-workspace 🧭"]:::planned
+  subgraph L2["L2 · verbs"]
+    VERBS["nika-verb-infer · -exec · -invoke · -agent"]:::admitted
+    REG["nika-registry-client"]:::admitted
+  end
+
+  subgraph L15["L1.5 · providers and builtins"]
+    PROV["nika-providers · nika-providers-access"]:::admitted
+    BUILTIN["nika-builtin · nika-extract"]:::admitted
+    LOCAL["nika-infer-local"]:::admitted
   end
 
   subgraph L1["L1 · effects"]
-    FS["nika-fs ✅"]:::admitted
-    HTTP["nika-http ✅"]:::admitted
-    PROC["nika-exec-runner ✅"]:::admitted
-    GIT["nika-git 🧭"]:::planned
-    KEYS["nika-keys-* 🧭"]:::planned
-    PROV["nika-providers ✅"]:::admitted
-    PREG["nika-pck-registry 🧭"]:::planned
-    PSTR["nika-pck-store 🧭"]:::planned
+    IO["nika-fs · nika-http · nika-exec-runner<br/>nika-clock · nika-secret · nika-blob"]:::admitted
+    SANDBOX["nika-sandbox-seatbelt · nika-sandbox-landlock"]:::admitted
+    DESK["nika-screen · nika-ocr · nika-a11y<br/>nika-input · nika-browser"]:::admitted
+    BM25["nika-bm25"]:::admitted
+    L1WIP["nika-harness · nika-store · nika-fx"]:::wip
   end
 
-  subgraph L05["L0.5 · kernel"]
-    K["nika-kernel ✅"]:::admitted
-    KM["nika-kernel-mock ✅"]:::admitted
+  subgraph L05["L0.5 · kernel traits"]
+    K["nika-kernel · -core · -ai · -runtime · -plugin"]:::admitted
+    KM["nika-kernel-mock"]:::admitted
   end
 
   subgraph L0["L0 · foundation"]
-    T["nika-types ✅"]:::admitted
-    E["nika-error ✅"]:::admitted
-    C["nika-catalog ✅"]:::admitted
-    CG["nika-catalog-codegen ✅"]:::admitted
-    S["nika-schema ✅"]:::admitted
-    EV["nika-event ✅"]:::admitted
-    BN["nika-binding 🧭"]:::planned
-    TR["nika-transform 🧭"]:::planned
-    PM["nika-pck-manifest 🧭"]:::planned
+    TYPES["nika-types · nika-error · nika-event<br/>nika-source · nika-vocab"]:::admitted
+    LANG["nika-schema · nika-check · nika-check-analyzer<br/>nika-lints · nika-migrate · nika-graph"]:::admitted
+    EXPR["nika-tmpl · nika-cel · nika-dataflow · nika-cap"]:::admitted
+    CAT["nika-catalog · nika-catalog-codegen · nika-pack<br/>nika-pck-manifest · nika-cadence"]:::admitted
+    L0WIP["nika-chart · nika-proof"]:::wip
   end
 
-  T --> E
-  T --> C
-  T --> K
-  E --> K
-  C --> K
-  C --> CV
-  S --> CV
-  K --> KM
-  K --> FS
-  K --> HTTP
-  K --> PROC
-  K --> GIT
-  K --> KEYS
-  K --> PROV
-  FS --> VE
-  HTTP --> VF
-  PROV --> VIF
-  VE --> RT
-  VF --> RT
-  VI --> RT
-  VIF --> RT
-  VA --> RT
-  RT --> CLI
-  RT --> SERVE
-  CLI --> NIKA
+  CLI --> SESSION
+  CLI --> SERVE
+  CLI --> RT
+  SERVE --> EXEC
+  RT --> VERBS
+  RT --> SANDBOX
+  VERBS --> PROV
+  PROV --> L1WIP
+  RT --> IO
+  IO --> K
+  K --> TYPES
+  RT --> LANG
 ```
 
-<sub>✅ admitted (12 gates green) · 🟡 WIP · 🧭 planned. Colors by state: green admitted, amber WIP, slate planned, purple binary root. Arrows read "depends on": all point downward.</sub>
+<sub>Green: admitted (twelve gates green). Amber: pre-admission, shipping in the binary. Each arrow is a real dependency at v0.123.0, a few of many: every workspace dependency points down a layer or stays within one, and `check-layering.sh` fails the build on an upward one.</sub>
 
-## Layer breakdown
+## Layer by layer
 
-| Layer | Admitted | WIP | Planned | Notes |
-|---|---|---|---|---|
-| **L0** | nika-types, nika-error, nika-catalog, nika-catalog-codegen, nika-schema, nika-event | — | binding, transform, pck-manifest | Pure sync, zero I/O. |
-| **L0.5** | nika-kernel (facade), nika-kernel-core, nika-kernel-ai, nika-kernel-runtime, nika-kernel-plugin, nika-kernel-mock | — | — | Trait definitions (4-way split + facade hub) + mock companion. Async OK |
-| **L1** | nika-fs, nika-http, nika-exec-runner, nika-clock, nika-providers | — | git, keys-\*, pck-registry, pck-store, memory satellites | Effect impls. Each declares capability axes |
-| **L2** | nika-verb-infer, nika-verb-exec, nika-verb-invoke, nika-verb-agent, nika-builtin | — | pck, observability, builtin-{github,cloud,workspace} | Verbs + domain services (`fetch` is the `nika:fetch` builtin, not a verb crate) |
-| **L3** | nika-runtime | — | shield, wasm-host (v0.100), sandbox (v0.100) | Runtime + policy |
-| **L4** | nika-catalog-verify, nika-cli, nika-mcp, nika-lsp | — | serve, sdk | Interfaces, libraries |
-| **L5** | nika | — | — | The public binary surface |
+| Layer | Admitted | Pre-admission | What lives here |
+|---|---|---|---|
+| **L4** | nika-cli, nika-cli-host, nika-cli-host-typesafe, nika-compile and its seven members (-behavior, -clauses, -cognition, -fidelity, -reader, -seats, -trigger), nika-tui-core, nika-mcp, nika-lsp, nika-dap, nika-trace, nika-display, nika-arm, nika-onboard, nika-onboard-knowledge, nika-models, nika-catalog-verify, nika-check-wasm | nika-session, nika-session-agent, nika-session-change, nika-session-host, nika-session-intelligence, nika-tui, nika-tui-view, nika-serve | Every surface a person, tool or program talks to: the verb tree, `nika compile`, the Session and its terminal workspace, the HTTP server, MCP, LSP, DAP, the trace reader, local model management |
+| **L3** | nika-runtime, nika-runtime-laws | nika-execution, nika-service-execution | Wave-ordered execution of a checked workflow and the run's laws; owned-byte execution admission and the shared driver `nika serve` uses |
+| **L2** | nika-verb-infer, nika-verb-exec, nika-verb-invoke, nika-verb-agent, nika-registry-client | — | The four verbs, and the registry client behind `registry:` coordinates |
+| **L1.5** | nika-providers, nika-providers-access, nika-builtin, nika-extract, nika-infer-local | — | Provider wires and access paths, the `nika:*` builtins, `nika:fetch` extract modes, `nika model serve` |
+| **L1** | nika-fs, nika-http, nika-exec-runner, nika-clock, nika-secret, nika-blob, nika-sandbox-seatbelt, nika-sandbox-landlock, nika-screen, nika-ocr, nika-a11y, nika-input, nika-browser, nika-bm25 | nika-harness, nika-store, nika-fx | Effects: files, HTTP, processes, the OS sandboxes, the clock, secrets, content-addressed blobs, computer-use effects, the agent-app (ACP) client, memory primitives, image effects |
+| **L0.5** | nika-kernel, nika-kernel-core, nika-kernel-ai, nika-kernel-runtime, nika-kernel-plugin, nika-kernel-mock | — | The trait contracts every effect implements, and their deterministic test doubles |
+| **L0** | nika-types, nika-error, nika-event, nika-source, nika-vocab, nika-schema, nika-check, nika-check-analyzer, nika-lints, nika-migrate, nika-graph, nika-tmpl, nika-cel, nika-dataflow, nika-cap, nika-catalog, nika-catalog-codegen, nika-pack, nika-pck-manifest, nika-cadence | nika-chart, nika-proof | Pure, synchronous, zero I/O: the parser and the checker, templates and CEL, the permits boundary as data, the catalogs, the embedded language pack, the cadence calculator |
 
-## Memory and retrieval satellites
+There is no L5 crate: the public executable is built from `nika-cli`
+(ADR-135).
 
-Memory and retrieval are organized as **10 L1 satellite crates**, reached
-through the `MemoryStore` + `EmbeddingProvider` trait reservations already in
-`nika-kernel`. They are counted separately from the {STATUS.cratesTarget}
-crate horizon. There is no orchestrator crate and no whole-subsystem gate: each
-capability meets its own release acceptance when it ships. The former
-Connectome umbrella, with its planned `nika-connectome` orchestrator and its
-"whole before 1.0" condition, was retired on 2026-10-08 (see the
-[roadmap](/changelog/roadmap)).
+## Memory and retrieval
 
-<AccordionGroup>
-  <Accordion title="L1 satellites (10)" icon="satellite-dish">
-    - `nika-hnsw`, approximate nearest neighbor (HNSW index)
-    - `nika-bm25`, sparse full-text ranking
-    - `nika-rrf`, reciprocal-rank fusion (hybrid search)
-    - `nika-rerank`, local reranking for precision
-    - `nika-fsrs`, Free Spaced Repetition Scheduler (memory decay)
-    - `nika-rdfs-reasoner`, RDFS inference for knowledge triples
-    - `nika-temporal`, time-aware recency + decay
-    - `nika-graph-algos`, graph traversal (shortest-path, community)
-    - `nika-autodesc-minimal`, provenance-attached auto-description
-    - `nika-autodesc-full`, schema-evolving auto-description
-  </Accordion>
-</AccordionGroup>
+Two memory crates are in the 0.123.0 workspace: `nika-bm25` (lexical
+scoring, admitted) and `nika-store` (signed writes and verified recall,
+pre-admission). The other retrieval crates of the original design (vector
+index, rank fusion, reranking, spaced repetition, reasoning) are names, not
+planned work: there is no orchestrator crate and no whole-subsystem gate.
 
-## Admission queue (historical 0.8x)
+## Admission history
 
-This order records how the Diamond rewrite admitted crates. It is **not**
-a current product roadmap — `nika-schema`, the four verbs, `nika-cli`,
-`nika-mcp`, `nika-lsp` and the `nika` binary already ship. Keep it as
-the original sequence (Q5, rev.2):
-
-<Steps>
-  <Step title="Round 3: nika-catalog-codegen">
-    Extract TOML → Rust codegen to its own L0 crate. Independent of other
-    crates; unblocks faster iteration on catalog data.
-  </Step>
-  <Step title="Round 4: nika-schema">
-    Complete parser + DAG + ariadne diagnostics. Unblocks verb crates
-    (they need to parse `.nika` step shapes).
-  </Step>
-  <Step title="Round 5: nika-event + nika-transform">
-    Event envelope + 65 transforms. Can run in parallel.
-  </Step>
-  <Step title="Round 6: nika-binding + nika-pck-manifest">
-    Template engine + package manifest. Binding depends on transform.
-  </Step>
-  <Step title="Rounds 7-10: verbs">
-    One verb per round: infer → exec → invoke → agent (fetch is the
-    `nika:fetch` builtin under `invoke`, not a verb crate).
-  </Step>
-  <Step title="Rounds 11-15: effects + runtime">
-    L1 effect crates (fs, http, process, keys, provider-\*) and L3 runtime.
-  </Step>
-  <Step title="Rounds 16+: interfaces + binary">
-    L4 cli / serve / mcp / lsp / sdk and the L5 `nika` binary.
-  </Step>
-</Steps>
+The original plan (decision Q5) admitted the L0 foundation first, then one
+verb per round (infer, exec, invoke, agent), then the effects and the
+runtime, then the interfaces. Part of it was never built: there is no
+`nika-binding` or `nika-transform` crate, because templates live in
+`nika-tmpl`, expressions in `nika-cel` and transformation is jq
+([L0 decisions](/architecture/l0-decisions)).
 
 <Note>
-  No hard timeline per admission round. Real semver toward 1.0: quality
-  over speed. Each admission = 1 atomic commit, on the tagged 0.9x train
-  (`1.0.0-rc.N` when the release-candidate window opens).
+  The admission rounds are the historical order of the Diamond rewrite. Each
+  admission was one atomic commit; after 0.123 no admission round is planned.
 </Note>
 
 ## See also
 
 <CardGroup cols={2}>
   <Card title="Live state" icon="gauge" href="/reference/status">
-    HEAD, tests, hygiene: the drift-proof snapshot.
+    The version, the engine commit and the catalog, read from the binary.
   </Card>
   <Card title="Layer registry" icon="layer-group" href="/architecture/layers">
-    Six layers, mechanical sort test, security axes.
+    The layers, the mechanical sort test and the enforcement scripts.
   </Card>
-  <Card title="12-gate admission" icon="check-double" href="/architecture/admission">
-    How a crate earns a seat at the workspace.
+  <Card title="Twelve-gate admission" icon="check-double" href="/architecture/admission">
+    How a crate earns its seat in the workspace.
   </Card>
   <Card title="L0 foundation decisions" icon="list-check" href="/architecture/l0-decisions">
-    Q1-Q13 decisions that shaped today's L0 layout.
+    The early decisions and what became of them.
   </Card>
 </CardGroup>

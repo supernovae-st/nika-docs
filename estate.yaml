@@ -181,7 +181,7 @@ files:
   note: "the errors-categories, errors-codes and errors-namespaces blocks are projected from nika-spec canon/diagnostics/registry.yaml; edit the registry and re-project, never hand-edit those blocks; this repo's gate does not independently re-derive them"
 - path: "reference/mcp-catalog.mdx"
   class: authored
-  sha256: a6d9f648f4bc064b3f722e6003889beaaf756f080faf2404a9227c1c4c2ae223
+  sha256: d58fca5c26b2c9d79e57cf9b0f493e134f52d8a888cfdabe7bcf039fff625aba
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
   note: "the body carries authored catalog and category counts with a dated snapshot, not an in-repo projection; the engine's served MCP tool-count check does not prove the separate server-catalog cardinality"
 - path: "scripts/count-drift-gate.py"
@@ -271,7 +271,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 292
-  aggregate_sha256: 330a947314c2ae7e893c61692364324b2151e0609978b5c0cd7be41e22ff756c
+  aggregate_sha256: 2fb4ef91e08088650f6bf3a7b07f6cf54396d5cfb2aab8eee5527d254c86a137
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

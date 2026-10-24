@@ -1,6 +1,6 @@
 ---
 title: "Providers catalog"
-description: "Every LLM provider Nika knows about: the canonical stdlib catalog, local and hosted, plus API dialects and environment variables."
+description: "Every provider the released binary drives, local and cloud, with its environment variable, default model and wire, and the catalog records it cannot drive."
 sidebarTitle: "Providers catalog"
 icon: "server"
 ---
@@ -8,19 +8,21 @@ icon: "server"
 import { STATUS } from "/snippets/_status-snapshot.mdx";
 import { CANON } from "/snippets/_canon.mdx";
 
-Nika's stdlib v0.1 ships **{CANON.providers} canonical providers**:
-{CANON.providersLocal} local / self-hosted runners, {CANON.providersCloud}
-cloud APIs, and {CANON.providersTest} deterministic mock. You select one with
-a single `model: <provider>/<name>` field. **Your choice** · a local provider
-keeps inference on your machine; a cloud provider runs only when selected.
+The language names **{CANON.providers} canonical providers**:
+{CANON.providersLocal} local servers, {CANON.providersCloud} cloud APIs and
+{CANON.providersTest} deterministic mock. The {STATUS.version} binary drives
+exactly those. You select one with a single `model: <provider>/<name>` field.
+**Your choice:** a local provider keeps inference on your machine; a cloud
+provider runs only when a workflow names it.
 
 <Info>
-  **Canonical source:** [`stdlib/providers-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md)
-  in the spec (counts from `canon.yaml`). The engine additionally carries an
-  extended catalog of {STATUS.providers} TOML records
-  ([`crates/nika-catalog/data/llm-providers.toml`](https://github.com/supernovae-st/nika/blob/main/crates/nika-catalog/data/llm-providers.toml))
-  used for capability metadata. Anything outside the canonical catalog routes
-  through the `openai` + `base_url` escape hatch, not its own prefix.
+  **Canonical source:** [`stdlib/providers-v0.1.md`](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/stdlib/providers-v0.1.md)
+  in the specification the binary embeds. The engine's catalog
+  ([`llm-providers.toml` at v0.123.0](https://github.com/supernovae-st/nika/blob/v0.123.0/crates/nika-catalog/data/llm-providers.toml))
+  holds {STATUS.providers} records: `nika catalog` lists the
+  {STATUS.providers - CANON.providers} it cannot drive under **CATALOG ONLY**,
+  and `nika check` refuses them. Every table below matches
+  `nika catalog --json` on v{STATUS.version}.
 </Info>
 
 ## Overview
@@ -29,8 +31,8 @@ keeps inference on your machine; a cloud provider runs only when selected.
   <Card title="Providers" icon="server">
     **{CANON.providers}** canonical: {CANON.providersLocal} local · {CANON.providersCloud} cloud · {CANON.providersTest} mock
   </Card>
-  <Card title="API dialects" icon="plug">
-    **3**: openai-chat (the 5 local + most cloud) · anthropic · gemini
+  <Card title="Wires" icon="plug">
+    `openai-chat` for most · Ollama native · `anthropic` · `gemini` · mock
   </Card>
   <Card title="Capability rules" icon="grid">
     **{STATUS.capabilityRules}** in `model-capabilities.toml`
@@ -40,108 +42,122 @@ keeps inference on your machine; a cloud provider runs only when selected.
 ## How to pick a provider
 
 <Steps>
-  <Step title="Pick your trust model">
-    Local / self-hosted (Ollama / LM Studio / llama.cpp / LocalAI / vLLM): zero key, no inference egress. Frontier cloud (OpenAI / xAI / Qwen / Kimi / Anthropic / Google). EU cloud (Mistral). Aggregator (OpenRouter). Each has different residency and compliance trade-offs.
+  <Step title="Pick where inference runs">
+    A local server (Ollama, LM Studio, llama.cpp, LocalAI, vLLM, or Nika's own
+    `nika model serve`) needs no key and sends nothing off the machine. A cloud
+    API runs on your key, with that vendor's residency and compliance terms:
+    Mistral and Scaleway are EU providers; OpenRouter and Hugging Face route
+    many vendors' models under one key.
   </Step>
-  <Step title="Check the `api_dialect`">
-    All 5 local providers + most cloud providers speak `openai-chat`: same request shape, differing base URL. `anthropic` and `gemini` have native dialects.
+  <Step title="See what this machine has">
+    `nika doctor` reports each provider key as set or unset, never its value.
+    `nika doctor --ping` also connects to the configured local servers and
+    reads their model lists.
   </Step>
-  <Step title="Verify the backend is reachable">
-    Local providers need their server running (e.g. the Ollama daemon on `localhost:11434`) and no key. Cloud providers declare an `env_var` (e.g., `OPENAI_API_KEY`). `nika doctor` checks provider readiness before run.
+  <Step title="Pick the model">
+    Each provider declares a default and a cheap model (below).
+    `nika catalog --json` lists every model with its context window, output
+    cap and capabilities; the [capability rules](/reference/capabilities)
+    decide its token-limit parameter, reasoning, modalities and JSON mode.
   </Step>
-  <Step title="Pick default vs cheap model">
-    Every provider declares both. `default_model` is the capable tier; `cheap_model` is the cost-optimized tier. Capability rules in `model-capabilities.toml` determine which models support vision / tools / streaming / structured output.
+  <Step title="Check before you run">
+    `nika check` prints a **MODELS** line (the model resolves in this build)
+    and an **ACCESS** line (this machine has a path to it), without calling
+    the model.
   </Step>
 </Steps>
 
 ## By category
 
-Local/open-weight first, then cloud — featured
-order: OpenAI · xAI · Qwen · Kimi (Moonshot) · Hugging Face · NVIDIA,
-then the rest alphabetically.
+Local first, then cloud in the canon's presentation order.
 
 <Tabs>
-  <Tab title="Local / self-hosted (5)">
-    | ID | Name | Dialect | Env var | Example model |
-    |---|---|---|---|---|
-    | `ollama` | Ollama daemon (`localhost:11434`) | `openai-chat` | `(none)` | `qwen3.5:4b` |
-    | `llamacpp` | llama.cpp `llama-server` (`localhost:8080/v1`) | `openai-chat` | `(none)` | `qwen2.5-7b-instruct` |
-    | `vllm` | vLLM OpenAI server (`localhost:8000/v1`) | `openai-chat` | `(none)` | `meta-llama-3.1-70b-instruct` |
-    | `lmstudio` | LM Studio (`localhost:1234/v1`) | `openai-chat` | `(none)` | `qwen2.5-14b-instruct` |
-    | `localai` | LocalAI (`localhost:8080/v1`) | `openai-chat` | `(none)` | `llama-3.1-8b-instruct` |
+  <Tab title={`Local (${CANON.providersLocal})`}>
+    | ID | Server · default endpoint | Default model |
+    |---|---|---|
+    | `ollama` | Ollama · `127.0.0.1:11434` (its native `/api/chat`) | `qwen3.5:4b` (cheap `llama3.2:3b`) |
+    | `lmstudio` | LM Studio · `127.0.0.1:1234/v1` | `qwen3.5-4b` |
+    | `llamacpp` | llama.cpp `llama-server` · `127.0.0.1:8080/v1` | `default` (the loaded GGUF; the id is free-form) |
+    | `localai` | LocalAI · `127.0.0.1:8080/v1` | `default` |
+    | `vllm` | vLLM · `127.0.0.1:8000/v1` | `Qwen/Qwen3-8B` |
+
+    No key. `NIKA_<ID>_BASE_URL` points one at another host or port
+    (`host`, `host:port` or a full URL; a bare host keeps the default port),
+    and Ollama also honors `OLLAMA_HOST`. llama.cpp and LocalAI share port
+    8080 by default: running both needs one override.
 
     <Tip>
-      **Local inference.** No API key, no cloud egress:
-      `model: ollama/qwen3.5:4b` runs offline / air-gapped. Any other
-      OpenAI-compatible local server (Jan · llamafile · KoboldCpp) routes
-      through the `openai` + `base_url` escape hatch.
+      **Built-in local inference.** `nika model serve` starts an
+      OpenAI-compatible server on `127.0.0.1:8712` (Qwen3-family models in
+      0.123.0). A workflow reaches it as `llamacpp/<model id>` with
+      `NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712`. See
+      [Local models](/guides/local-models).
     </Tip>
   </Tab>
 
-  <Tab title={`Cloud (${CANON.providersCloud} canonical)`}>
-    | ID | Name | Dialect | Env var | Default model |
-    |---|---|---|---|---|
-    | `openai` | OpenAI | `openai-chat` | `OPENAI_API_KEY` | `gpt-5.2` |
-    | `xai` | xAI Grok | `openai-chat` | `XAI_API_KEY` | `grok-3` |
-    | `qwen` † | Qwen (Alibaba DashScope) | `openai-chat` | `DASHSCOPE_API_KEY` | `qwen-max` |
-    | `moonshot` | Moonshot AI (Kimi · frontier open-weight) | `openai-chat` | `MOONSHOT_API_KEY` | `kimi-k2` |
-    | `huggingface` | Hugging Face Inference Providers (100+ open-weight · 18 backends) | `openai-chat` | `HF_TOKEN` | `Qwen/Qwen3.5-397B-A17B:fastest` |
-    | `nvidia` | NVIDIA API (Nemotron 3 · NIM self-hostable) | `openai-chat` | `NVIDIA_API_KEY` | `nvidia/nemotron-3-super-120b-a12b` |
-    | `anthropic` | Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-4-6` |
-    | `deepseek` | DeepSeek | `openai-chat` | `DEEPSEEK_API_KEY` | `deepseek-chat` |
-    | `gemini` | Google Gemini | `gemini` | `GEMINI_API_KEY` | `gemini-2.5-flash` |
-    | `groq` | Groq (fastest open-weight) | `openai-chat` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` |
-    | `mistral` | Mistral AI (EU · sovereign-leaning) | `openai-chat` | `MISTRAL_API_KEY` | `mistral-large-latest` |
-    | `openrouter` | OpenRouter gateway | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4-6` |
-    | `scaleway` | Scaleway Generative APIs | `openai-chat` | `SCALEWAY_API_KEY` | `deepseek-v4-flash-0731` |
+  <Tab title={`Cloud (${CANON.providersCloud})`}>
+    | ID | Name | Wire | Env var | Default model | Cheap model |
+    |---|---|---|---|---|---|
+    | `mistral` | Mistral AI | `openai-chat` | `MISTRAL_API_KEY` | `mistral-large-latest` | `mistral-small-latest` |
+    | `scaleway` | Scaleway Generative APIs | `openai-chat` | `SCALEWAY_API_KEY` | `deepseek-v4-flash-0731` | `deepseek-v4-flash-0731` |
+    | `anthropic` | Anthropic | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` | `claude-haiku-5-5` |
+    | `openai` | OpenAI | `openai-chat` | `OPENAI_API_KEY` | `gpt-6.1-sol` | `gpt-6-luna` |
+    | `gemini` | Google Gemini | `gemini` | `GEMINI_API_KEY` | `gemini-2.5-flash` | `gemini-3.1-flash-lite` |
+    | `deepseek` | DeepSeek | `openai-chat` | `DEEPSEEK_API_KEY` | `deepseek-flash` | `deepseek-flash` |
+    | `xai` | xAI | `openai-chat` | `XAI_API_KEY` | `grok-4.7` | `grok-4.3` |
+    | `groq` | Groq | `openai-chat` | `GROQ_API_KEY` | `openai/gpt-oss-120b` | `openai/gpt-oss-20b` |
+    | `openrouter` | OpenRouter | `openai-chat` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4.6` | `anthropic/claude-haiku-4.5` |
+    | `huggingface` | Hugging Face Inference Providers | `openai-chat` | `HF_TOKEN` | `Qwen/Qwen3.5-397B-A17B:fastest` | `Qwen/Qwen3.5-9B:cheapest` |
+    | `nvidia` | NVIDIA API | `openai-chat` | `NVIDIA_API_KEY` | `nvidia/nemotron-3-super-120b-a12b` | `nvidia/nemotron-3-nano-30b-a3b` |
+    | `moonshot` | Moonshot (Kimi) | `openai-chat` | `MOONSHOT_API_KEY` | `kimi-k2` | `kimi-k2` |
 
-    † `qwen` ships in the engine's extended catalog (one of the
-    {STATUS.providers} TOML records), outside the {CANON.providersCloud}
-    canonical cloud IDs.
+    `NIKA_<ID>_API_KEY` (for example `NIKA_MISTRAL_API_KEY`) wins over the
+    vendor variable. A model id the catalog does not list still resolves
+    under a wired provider; `nika check` notes that it cannot price it.
 
     <Tip>
-      Keys live in `${{ secrets.* }}` / env vars, never inline in the
-      workflow. OpenRouter aggregates ~200 models under one key
-      (`openrouter/<vendor>/<model>`); Hugging Face routes 100+ open models
-      across 18 backends under one `HF_TOKEN`. Use either to experiment
-      across vendors without per-vendor keys.
+      **Any other OpenAI-compatible endpoint.** Set `NIKA_OPENAI_BASE_URL` to
+      the server's complete endpoint and `NIKA_OPENAI_API_KEY` to its key, and
+      keep `model: openai/<name>`. A workflow file has no `base_url:` field.
     </Tip>
   </Tab>
 
   <Tab title="Test (1)">
-    | ID | Name | Dialect | Env var | Default model |
-    |---|---|---|---|---|
-    | `mock` | Mock provider | custom | `(none)` | `echo` (deterministic) |
+    | ID | Models | Env var |
+    |---|---|---|
+    | `mock` | `mock/echo` · `mock/mock-default` | none |
 
     <Note>
-      **Mock** ships with every install for deterministic tests:
-      `model: mock/echo` returns the prompt verbatim, zero network, zero
-      entropy. The canonical examples + CI rely on it.
+      **Mock** ships with every install: it echoes the prompt with no network
+      and no key, and synthesizes a conformant value for a `schema:`. The
+      canonical examples, `nika try` and `nika test` rely on it. A mock model
+      does not make real tools or effects mock: an `exec:` or a `nika:write`
+      still runs.
     </Note>
   </Tab>
 </Tabs>
 
-## Full alphabetical list
+## Catalog only
 
 <AccordionGroup>
-  <Accordion title={`The ${CANON.providers} canonical spec v0.1 IDs (sorted)`} icon="list">
-    `anthropic` · `deepseek` · `gemini` · `groq` · `huggingface` ·
-    `llamacpp` · `lmstudio` · `localai` · `mistral` · `mock` · `moonshot` ·
-    `nvidia` · `ollama` · `openai` · `openrouter` · `scaleway` · `vllm` · `xai`
+  <Accordion title="Records this build cannot drive" icon="list">
+    `ai21` · `azure` · `bedrock` · `cerebras` · `cloudflare` · `cohere` ·
+    `databricks` · `deepinfra` · `fireworks` · `hyperbolic` · `minimax` ·
+    `native` · `perplexity` · `qwen` · `replicate` · `sambanova` ·
+    `together` · `vertex` · `voyage` · `writer` · `zhipu`
 
-    {CANON.providers} total: {CANON.providersLocal} local · {CANON.providersCloud} cloud ·
-    {CANON.providersTest} test · matches `canon.yaml` in the spec repo. The
-    engine's extended capability catalog ({STATUS.providers} TOML records)
-    is an implementation detail: extended IDs are reached via the
-    `openai` + `base_url` escape hatch, never their own prefix.
+    They are records, not routes: `nika check` refuses a model under any of
+    them, and `nika catalog` prints them under **CATALOG ONLY**. Reach an
+    OpenAI-compatible one through `NIKA_OPENAI_BASE_URL` as above.
   </Accordion>
 </AccordionGroup>
 
-## Example: invoke a provider
+## Example: a local model with a cloud fallback
 
 <CodeGroup>
 ```yaml workflow.nika
 nika: multi-provider
+permits: {}
 
 tasks:
   primary:
@@ -149,41 +165,46 @@ tasks:
     infer:
       model: ollama/qwen3.5:4b               # local · zero key
       prompt: "Explain linear algebra in one sentence."
+      max_tokens: 200
 
   fallback:
     with:
       problem: ${{ tasks.primary.error }}   # failure-observation edge · a skip carries its preserved error
     when: "${{ with.problem != null }}"     # local read of the binding
     infer:
-      model: openai/gpt-5.2
+      model: mistral/mistral-small-latest
       prompt: "Explain linear algebra in one sentence."
+      max_tokens: 200
+
+outputs:
+  local: ${{ tasks.primary.output }}       # null when the local model failed
+  cloud: ${{ tasks.fallback.output }}      # null when it did not need to run
 ```
 
 ```bash Required env
 ollama pull qwen3.5:4b          # local primary · no key
-export OPENAI_API_KEY=...       # cloud fallback only
-nika run workflow.nika
+export MISTRAL_API_KEY=...      # cloud fallback only
+nika check workflow.nika
+nika run workflow.nika --max-cost-usd 0.05
 ```
 </CodeGroup>
 
-<Info>
-  `infer:` is live in v{STATUS.version}. Run `nika doctor` first to see
-  which provider keys or local servers are available without printing secrets.
-</Info>
+A task names one model: there is no `fallback:` field. The second task runs
+only when the first one failed, and `--max-cost-usd` bounds the metered spend.
 
 ## See also
 
 <CardGroup cols={2}>
   <Card title="Capability rules" icon="grid" href="/reference/capabilities">
-    The {STATUS.capabilityRules} rules that govern which models support which features.
+    The {STATUS.capabilityRules} rules that decide what each model accepts.
   </Card>
   <Card title="Concepts · Providers" icon="server" href="/concepts/providers">
-    How provider routing works at runtime.
+    Model and access, the wires, structured output.
+  </Card>
+  <Card title="Local models" icon="microchip" href="/guides/local-models">
+    Run every step on your own machine.
   </Card>
   <Card title="Error codes" icon="triangle-exclamation" href="/reference/error-codes">
-    `NIKA-1xx` provider errors.
-  </Card>
-  <Card title="Schema" icon="file-code" href="/reference/schema">
-    Workflow envelope, `.nika` top-level keys.
+    `NIKA-INFER-*` for model calls, `NIKA-1800` for no ready access path.
   </Card>
 </CardGroup>

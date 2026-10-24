@@ -40,14 +40,18 @@ See [editor setup](/getting-started/editors) for per-IDE instructions.
 ```bash
 nika check workflow.nika                 # validates against the current contract
 nika check workflow.nika --native-strict # fail remaining native-first hints
+nika spec --schema                       # the workflow schema this binary enforces
+nika spec --schema --project             # the schema of the project file, nika.yaml
 ```
+
+The published URL serves the schema for editors; `nika spec --schema` prints
+the exact one your binary enforces, and `nika check` remains the judge.
 
 ## Versioning policy
 
 - The envelope carries **no version marker** — the mark is the name.
 - Minor additions (a new optional field, a new builtin) are **additive**.
-- A grammar change before 1.0 ships with its migration (`nika check --fix`)
-  and a refusal that names the move (the pre-1.0 stability contract);
-  after engine 1.0.0 the grammar is additive only.
+- A grammar change ships with its `nika check --fix` migration and a refusal
+  that names the move; 0.123 maintenance releases keep the grammar additive.
 - Anti-pattern: `nika: v1` + `workflow: { id }` — the previous envelope
   (through 0.108); `nika check --fix` moves the id onto `nika:`.

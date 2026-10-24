@@ -22,10 +22,10 @@ model: <provider>/<name>     # optional · default model for infer/agent tasks
 # the three value authorities · one role each · no other value namespace exists
 inputs: { ... }              # optional · TYPED · the caller supplies at launch · ${{ inputs.* }}
 const:  { ... }              # optional · fixed in the file · never caller-supplied · ${{ const.* }}
-secrets: { ... }             # optional · vault/env/file references · masked · ${{ secrets.* }}
+secrets: { ... }             # optional · env or file references · masked · ${{ secrets.* }}
 
 permits: { ... }             # optional KEY · but ABSENT = zero authority (see below)
-run: { ... }                 # optional · the run's entropy + clock declaration
+run: { ... }                 # optional · entropy · clock · access (via · protocol · fallback) · reasoning (effort)
 
 tasks: { ... }               # required · non-empty MAP · the key IS the task id
 
@@ -35,7 +35,7 @@ outputs: { ... }             # optional · the workflow's return value
 Nine keys, closed. `nika:` is the type discriminant **and** the identity: a
 `tasks:` key makes the document a workflow, its absence makes it a project
 file (`nika.yaml`, whose mark is `nika: <project-name>` — a kebab-case
-identity, the same line `nika init --project-file` writes), and the filename
+identity, the same line `nika init` writes), and the filename
 carries no verdict — a registry blob, an HTTP body, a stdin pipe (`nika check -`)
 must say what they are by their bytes alone. `nika: v1` on a project file is
 the retired schema tag (the reader refuses it: the tag became the name).
@@ -50,9 +50,9 @@ The family is closed — a value-namespace read outside it is `NIKA-VALUES-003`.
 
 | Authority | Who supplies it | Shape | Integrity |
 |---|---|---|---|
-| `inputs:` | the **caller**, at launch (`--var k=v` · an MCP `nika.run_workflow` argument) — a deployment knob is an input with a `default:` | `{ type, required?, default?, description? }` · `type:` required | untrusted |
+| `inputs:` | the **caller**, at launch (`--var k=v` · `--inputs-json -` · the SDK's `inputs` · a `nika serve` job) — a deployment knob is an input with a `default:` | `{ type, required?, default?, description? }` · `type:` required | untrusted |
 | `const:` | the **file** · immutable across the run, never caller-supplied | a bare literal, or `{ type, value }` | trusted |
-| `secrets:` | a **governed store** · masked everywhere | `{ source: vault\|env\|file, key\|path, egress? }` | trusted |
+| `secrets:` | a **governed store** · masked everywhere | `{ source: env\|file, key\|path, egress? }` · `source: vault` passes check but is not resolvable at run in 0.123.0 (`NIKA-1702`) | trusted |
 
 ```yaml
 inputs:
@@ -106,7 +106,11 @@ run:
 ```
 
 Every source of randomness and time is declared, never ambient. Absent, the
-run behaves as `entropy: ambient` + `clock: system`. The two dimensions
+run behaves as `entropy: ambient` + `clock: system`. `run:` also declares the
+access contract a run expects (`access: { via, protocol, fallback }`) and a
+reasoning effort (`reasoning: { effort }`); see
+[access](/reference/language/words/access) and
+[reasoning](/reference/language/words/reasoning). The two dimensions
 couple: only `ambient × system` and `none | seeded × virtual` are legal —
 byte-identical journals need deterministic time as much as deterministic
 randomness. A declared contradiction refuses at parse (`NIKA-PARSE-026` ·
@@ -247,9 +251,11 @@ reference outside the boundary — in a verb body, `when:`, or `for_each:` —
 is `NIKA-VAR-021` with a machine-applicable fix (hoist into `with:`).
 
 The `after:` predicate set is **closed**: `success` · `failure` · `skipped` ·
-`terminal` (`terminal` admits any settled state, cancelled included). Anything
-else is `NIKA-DAG-005`; the participial spellings `succeeded` and `failed` are
-dead forms and refuse with their respelling, which `nika check --fix` applies.
+`terminal` · `unwind` (`terminal` admits any settled state, cancelled
+included; `unwind` runs a cleanup task once after a producer that started,
+whatever its outcome). Anything else is `NIKA-DAG-005`; the participial
+spellings `succeeded` and `failed` are dead forms and refuse with their
+respelling, which `nika check --fix` applies.
 
 The full per-field semantics live in the spec:
 [03 · The flow](https://github.com/supernovae-st/nika-spec/blob/main/spec/03-dag.md).
@@ -274,28 +280,14 @@ deep_review:
     prompt: "Review this diff…"
 ```
 
-When **no** `timeout:` is declared, the provider deadline defaults per
-provider **class**:
-
-| Class | Providers | Default deadline |
-|---|---|---|
-| Local | `ollama` · `lmstudio` · `llamacpp` · `localai` · `vllm` | **≥ 300s** |
-| Cloud | `openai` · `xai` · `qwen` · `moonshot` · `anthropic` · `openrouter` · `groq` · `deepseek` · `gemini` · `mistral` | 30s |
-
-A local model routinely needs minutes for one completion on consumer
-hardware — a 30s-everywhere default would silently kill every serious
-local-inference workflow before the model finishes thinking. The class is keyed
-on the **canonical provider id**: a `base_url` override never flips it.
-
-Two honest bounds ride the transport (pinned by the engine's wire tests):
-
-- **600s ceiling on a fully-silent connection.** A non-streaming completion
-  delivers zero bytes while the model computes, so the transport cannot tell
-  *thinking* from *dead*. A longer `timeout:` still bounds the task, but only
-  a connection that starts delivering can use it.
-- **Streaming rides only an explicit budget.** A declared `timeout:` bounds a
-  streaming request; when none is declared, the idle-read guard reaps a
-  *stalled* stream instead of capping a healthy one.
+When **no** `timeout:` is declared, a buffered (non-streaming) provider call
+gets **600s**, local or cloud alike: the transport cannot tell a model that is
+thinking from a dead connection, and the former shorter defaults (30s for
+cloud, 300s for local) cut legitimate slow answers. A streaming call carries
+only an explicit budget: without one, the idle-read guard reaps a stream that
+stays silent for 600s instead of capping a healthy one. A declared `timeout:`
+bounds both, and the timeout message names the deadline met
+(`NIKA-INFER-001`; `NIKA-TIMEOUT-001` when the task clock runs out first).
 
 Normative home: [stdlib · providers §Transport deadline](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md).
 
@@ -317,9 +309,8 @@ It's 100% machine-authoritative. This doc is a readable summary.
 
 The envelope carries **no version marker**: `nika: <identifier>` is the mark
 and the name, and there is nothing to bump. Minor additions (a new optional
-field, a new builtin) are **additive**; a grammar change before 1.0 ships
-with its migration in `nika check --fix` and its refusal naming the move
-(the pre-1.0 stability contract) · after engine 1.0.0 the grammar is
-additive only. The project file `nika.yaml` carries no `tasks:` and names
-the project (`nika: my-project`); `nika: v1` there is a retired schema tag,
-not an identity.
+field, a new builtin) are **additive**; a grammar change ships with its
+migration in `nika check --fix` and a refusal naming the move. 0.123
+maintenance releases keep the grammar additive. The project file `nika.yaml`
+carries no `tasks:` and names the project (`nika: my-project`); `nika: v1`
+there is a retired schema tag, not an identity.
