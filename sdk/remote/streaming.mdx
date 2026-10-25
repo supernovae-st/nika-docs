@@ -20,7 +20,7 @@ for await (const event of run.events({ bufferSize: 64 })) {
 the application understands, preserve the sequence, and use `run.result()`
 for terminal truth. The untouched protocol frame is on `event.raw`.
 
-A `nika serve` 0.123.0 job streams two lifecycle events: `run.started`
+A `nika serve` 0.123.1 job streams two lifecycle events: `run.started`
 (`execution.started`), then `run.settled` (`execution.settled`, or
 `execution.cancelled` / `execution.refused`) or `run.waiting` for a paused
 job. There are no per-task events over HTTP, and the SDK never invents one;
@@ -58,7 +58,7 @@ The HTTP adapter uses the persisted cursor for SSE continuity. The application
 owns when a sequence is durable.
 
 A `paused` settlement closes the stream and resolves `run.result()` with
-`status: 'paused'`. In 0.123.0 the server has no route to answer the gate, so
+`status: 'paused'`. In 0.123.1 the server has no route to answer the gate, so
 the job stays paused ([Jobs](/sdk/remote/jobs#recover-after-a-process-restart)).
 Replaying or attaching after the settlement event was consumed still reads
 the full stored settlement. Stopping a stream or attaching to a job never

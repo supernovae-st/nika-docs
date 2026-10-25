@@ -19,7 +19,7 @@ Three surfaces sound like servers but accept different clients.
 <ProjectContract />
 <RemoteContract sdk={SDK} />
 
-## Released OpenAPI routes (0.123.0, default server)
+## Released OpenAPI routes (0.123.1, default server)
 
 | Method and path | Contract |
 |---|---|
@@ -69,7 +69,7 @@ const result = await run.result()
 ```
 
 This path needs no resident server. These examples target the published
-`@supernovae-st/nika@0.123.0` npm package (bundled engine 0.123.0). The
+`@supernovae-st/nika@0.123.1` npm package (bundled engine 0.123.1). The
 standalone engine CLI releases independently.
 
 ## Local model path
@@ -80,7 +80,7 @@ nika model serve --model unsloth/Qwen3-4B-Instruct-2507-GGUF
 ```
 
 `nika model serve` loads only models it has pulled (or a `.gguf` path), of
-the Qwen3 family in 0.123.0, and serves them on `127.0.0.1:8712`. A workflow
+the Qwen3 family in 0.123.1, and serves them on `127.0.0.1:8712`. A workflow
 reaches it as a local provider: export
 `NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712` and use
 `model: llamacpp/<model id>`, as the banner prints. Application code does not

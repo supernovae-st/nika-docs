@@ -81,7 +81,7 @@ terminal event. Only a server job id is durable: a local `run.id` is a
 throwaway id, and `attachRun()` refuses it.
 
 <Warning>
-  **A paused job stays paused.** In 0.123.0, `nika serve` has no route to
+  **A paused job stays paused.** In 0.123.1, `nika serve` has no route to
   answer a human gate: a job that reaches a `nika:prompt` without a
   `default:` settles `paused` (a `run.waiting` event), no request resumes it,
   and cancelling it answers `already_settled`. For served workflows, give
