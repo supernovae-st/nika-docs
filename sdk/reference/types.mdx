@@ -95,7 +95,7 @@ interface NikaRunEvent<Outputs> {
 not name arrives there with its `raw` frame untouched; nothing is dropped,
 and no lifecycle meaning is invented for it. Keep a `default` branch in
 reducers; the set is additive. `run.sealed` names a `run_sealed` frame if an
-engine streams one; engine 0.123.0 writes the seal to the run's record only,
+engine streams one; engine 0.123.1 writes the seal to the run's record only,
 so read `result.receipt.sealed` locally or `traceVerify(...).verdict`.
 
 ## Check and cancellation
@@ -147,6 +147,7 @@ interface NikaTraceVerifyResult {
   verdict?: string   // local: 'verified' · 'invalid'
                      // nika serve: 'ok' · 'sealed' · 'anchored' · 'replayed' (hold)
                      //             'incomplete' · 'tampered' · 'broken' (do not) · 'unavailable'
+                     //             refusals: 'unchained' · 'empty' · 'unreadable' · 'refused' · 'line-over-long' · 'unknown'
   reason?: string    // 'receipt_mismatch' · 'unsealed' · 'sealed' · 'trace_journal_unavailable' …
   trace_id?: string
   exitCode?: number
@@ -159,10 +160,11 @@ Locally the verdict is `verified`, or `invalid` (`reason: 'receipt_mismatch'`
 for an unsealed or edited record; no reason when the trace file cannot be
 read). Over HTTP it is the CLI verifier's tier in lower case: `ok` means intact
 but unsigned (`reason: 'unsealed'`), and `unavailable` means the server holds
-no journal for the job. The published declarations still list the verdict
-words in upper case and describe the HTTP answer as `unavailable`; engine
-0.123.0 answers as above. [Receipts](/sdk/runtime/receipts) has the measured
-table.
+no journal for the job. The published 0.123.1 declarations list the same
+words, with the CLI verifier's refusal classes (`unchained` · `empty` ·
+`unreadable` · `refused` · `line-over-long` · `unknown`), and over HTTP a
+verdict that holds always carries its seal tier as `reason` (`sealed` or
+`unsealed`). [Receipts](/sdk/runtime/receipts) has the measured table.
 
 ## Errors
 
@@ -189,6 +191,6 @@ engine-owned fields are additive.
   <SourceContract sdk={SDK} />
 </Accordion>
 
-<Card title="Published type declarations (v0.123.0)" icon="github" href={SDK.sourceCandidate}>
+<Card title="Published type declarations (v0.123.1)" icon="github" href={SDK.sourceCandidate}>
   Review the source of the published declarations.
 </Card>
