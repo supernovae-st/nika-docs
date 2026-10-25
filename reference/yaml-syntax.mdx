@@ -52,7 +52,7 @@ The family is closed — a value-namespace read outside it is `NIKA-VALUES-003`.
 |---|---|---|---|
 | `inputs:` | the **caller**, at launch (`--var k=v` · `--inputs-json -` · the SDK's `inputs` · a `nika serve` job) — a deployment knob is an input with a `default:` | `{ type, required?, default?, description? }` · `type:` required | untrusted |
 | `const:` | the **file** · immutable across the run, never caller-supplied | a bare literal, or `{ type, value }` | trusted |
-| `secrets:` | a **governed store** · masked everywhere | `{ source: env\|file, key\|path, egress? }` · `source: vault` passes check but fails at run in 0.123.0 with `NIKA-VAR-001` (unresolved `secrets.<name>`; the check's hint calls it `NIKA-1702`) | trusted |
+| `secrets:` | a **governed store** · masked everywhere | `{ source: env\|file, key\|path, egress? }` · `source: vault` is withdrawn from the contract: in 0.123.1 it passes check with a hint naming `NIKA-VAR-001` and fails at run with it (unresolved `secrets.<name>`) | trusted |
 
 ```yaml
 inputs:

@@ -49,20 +49,21 @@ nika check hello.nika   # static audit — before a single token is spent
 nika run hello.nika
 ```
 
-Captured from `nika 0.123.0` on a fresh machine, offline. The audit ends
+Captured from `nika 0.123.1` on a fresh machine, offline. The audit ends
 fully green (`audited · 1 task · 1 wave · permits {} · est out ≤$0.0000 · 0
 hints · risk low`, then `layers · valid ✔ · access ready ✔ · capacity fit ✔ ·
 run ready ✔`), and the run prints:
 
 ```text
-  ✔  greet  infer · mock/echo  2ms
+  ✔  greet  infer · mock/echo  3ms
   1 task · 1 wave · 0 retries · 9 tok
   ── 1/1 done · unpriced (1 call) · elapsed 0.0s ─────────────────
     wrote .nika/traces
     said "mock(echo) · Say hello to a new user, brief…"
     see it whole: nika trace outputs
     rehearsal · a mock model echoed the prompt — not a real answer
-    trace: .nika/traces/2026-10-24T10-44-20Z-e0ad.ndjson · 5 events · chain 6b6f6d4e…
+  explore: nika run hello.nika --json > run.ndjson · nika trace outputs run.ndjson
+    trace: .nika/traces/2026-10-25T11-48-15Z-d0f5.ndjson · 5 events · chain 9ad6d842…
 ```
 
 `nika check` catches broken references, missing dependencies and schema
@@ -76,10 +77,11 @@ nika trace verify
 ```
 
 ```text
-OK — 5 events · chain intact · head 6b6f6d4ebc8fe1297af1267bde6df02553547c994b2cd43deaae53cd28141098
+OK — 5 events · chain intact · head 9ad6d842614fc0136921dc3fa14fe97c2d58acb953e96bd1ecbae1fd68467020
   internally consistent (tamper-evident, not tamper-proof) — compare the head
   against the one the run printed to close the loop
-UNSEALED — no run_sealed frame: the run was not signed (no signing key at run time · a run killed before its seal · or a journal cut after it) …
+UNSEALED — no run_sealed frame: the run was not signed (no signing key at run time · a run killed before its seal · or a journal cut after it) — a run key (`nika key init`) makes later runs seal · `--sealed` requires the tier
+…
 ```
 
 The chain is intact, but the run is `UNSEALED`: this machine has no
@@ -129,7 +131,7 @@ explains the variable and where the key is stored.
 </AccordionGroup>
 
 Measured CLI **0.120.1** plates (condensed, not a live recording); the
-refusal is unchanged in 0.123.0. Press play: nothing autoplays.
+refusal is unchanged in 0.123.1. Press play: nothing autoplays.
 
 <video
   controls
@@ -225,7 +227,7 @@ provider's native structured-output mode where the [capability
 rules](/reference/capabilities) allow it) and validates the reply against
 your schema before passing it on. The mock validates too — it synthesizes
 a conformant instance, so this exact file runs offline. Captured from
-`nika 0.123.0` (`nika run names.nika --output json`):
+`nika 0.123.1` (`nika run names.nika --output json`):
 
 ```json
 {"names":["mock","mock","mock"]}
@@ -243,7 +245,7 @@ guarantee covers shape, not outcome.
 
 This short recorded demonstration turns synthetic notes into an action
 list using `xai/grok-3-mini`, on CLI 0.120.1 with condensed timing. The
-0.123.0 catalog no longer lists that model: to reproduce it, pick a model
+0.123.1 catalog no longer lists that model: to reproduce it, pick a model
 `nika catalog` lists, for example `xai/grok-4.3` (a reasoning model, so give
 it `max_tokens` of at least 256) with your `XAI_API_KEY`.
 

@@ -170,9 +170,12 @@ Refusals name themselves rather than hide in a tier:
 | `SEAL FORGED` | the `run_sealed` signature does not verify against the key | 2 |
 | `ANCHOR FORGED` | an anchor sidecar that vouches for nothing | 2 |
 | `SEAL UNATTRIBUTABLE` | the seal names a key you do not hold: a missing input, not evidence of forgery | 3 |
+| `INCOMPLETE` | the journal never reached a terminal frame (a run in flight, or a writer that died): the chain attests every complete line, not the run's outcome | 5 |
 
-`--sealed` and `--anchored` make a missing tier an error (exit 3), and
-`--json` prints one machine document per trace (`verify_version: 1`).
+`--sealed` and `--anchored` make a missing tier an error (exit 3), a
+`--replay` divergence is exit 2, and `--json` prints one machine document
+per trace (`verify_version: 1`). `nika trace verify --help` lists the same
+exits.
 
 ## Why this matters
 

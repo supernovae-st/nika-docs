@@ -38,7 +38,7 @@ ceiling: 0.50            # the run default when a beat says nothing; a beat alwa
 
 arm:
   - workflow: workflows/nightly-report.nika
-    cadence: "TZ=Europe/Paris 45 22 * * *"
+    cadence: "TZ=Australia/Sydney 45 22 * * *"
     plafond: 0.20
     manqué: rattraper-une-fois
     chevauchement: sauter
@@ -57,30 +57,33 @@ arm:
 | `cadence` | yes | The IANA zone first, then five cron fields (`"TZ=Europe/Paris 30 7 * * *"`), a French weekday and time (`"TZ=Europe/Paris lundi 9h07"`) or an anchored interval (`"TZ=Europe/Paris every 2 weeks from 2026-10-05 09:00"`); or `on-webhook`, the one form without a zone. The zone resolves against the embedded tzdb, never the host's, and a scheduled cadence without one is refused (`cadence.tz-missing`) |
 | `plafond` | yes | The spend ceiling of each fire in USD (`--max-cost-usd`), above zero. It has no default: choosing for the operator would be choosing who pays |
 | `manqué` | yes | What a missed slot becomes when the firer comes back (table below). No default either |
-| `chevauchement` | no | A new slot while the previous fire still runs: `sauter` (skip it, the default) or `file` (queue it). `remplacer` is accepted by the registry and refused by the 0.123.0 firer |
-| `après_saut` | no | When the beat resumes after a skipped slot: `prochain-créneau` (the default). `à-complétion` is accepted by the registry and refused by the 0.123.0 firer |
+| `chevauchement` | no | A new slot while the previous fire still runs: `sauter` (skip it, the default) or `file` (queue it). `remplacer` is accepted by the registry and refused by the 0.123.1 firer |
+| `après_saut` | no | When the beat resumes after a skipped slot: `prochain-créneau` (the default). `à-complétion` is accepted by the registry and refused by the 0.123.1 firer |
 | `où` | no | `local` (the default) or `cloud`. A `cloud` beat stays in the registry and every fire on this machine skips it |
 | `actif` + `raison` + `jusqu_au` | together | The suspension triple: `actif: false` needs the reason and an ISO date. The beat sleeps until that date, then fires again. **Deleting the line does not disarm**; the triple does |
 | `inputs` | no | The `--var KEY=VALUE` pairs every fire binds, one scalar per key, coerced by the workflow's declared types. A key the workflow does not declare makes the beat `UNREADY` (`input_refused`) |
 | `tolérance` | no | An (m,k)-firm skip tolerance (`3/4`). The report shows it; the firer does not enforce it |
-| `décalage` | no | `hash`, a deterministic offset derived from the workflow path. Accepted by the registry and refused by the 0.123.0 firer |
+| `décalage` | no | `hash`, a deterministic offset derived from the workflow path. Accepted by the registry and refused by the 0.123.1 firer |
 | `par` | no | Who armed the beat, verbatim. It proves nothing by itself: the machine's key is what authorizes, and a merge arms nothing |
 
 The set is closed: any other key, such as `signature:` or `budget:`, is
 refused (`project.unknown-key`) and `nika arm` exits `2`.
 
 A beat that uses a refused policy is reported `UNREADY` with the reason, and
-both firers refuse to fire it. Change the policy, or suspend the beat with the
-triple.
+`nika arm fire`, the OS units that call it and a `nika serve --once` sweep
+refuse to fire it. The two catch-up policies, `rattraper` and
+`{ rattraper: N }`, are the exception the refusal names (« `nika serve`
+keeps it »): the resident `nika serve` fires such a beat. Otherwise change the
+policy, or suspend the beat with the triple.
 
 ### The miss policies (`manqué:`)
 
-| Value | What a silence does | In 0.123.0 |
+| Value | What a silence does | In 0.123.1 |
 |---|---|---|
 | `rattraper-une-fois` | Fire one catch-up run that answers for the whole silence | fires |
 | `sauter` | Never catch up: a skip is an event, never an execution | fires |
-| `rattraper` | Fire the latest missed slot once | refused by the firer |
-| `{ rattraper: N }` | Fire up to the N latest missed slots, one run each, oldest first | refused by the firer |
+| `rattraper` | Fire the latest missed slot once | refused by `nika arm fire`; the resident `nika serve` keeps it |
+| `{ rattraper: N }` | Fire up to the N latest missed slots, one run each, oldest first | refused by `nika arm fire`; the resident `nika serve` keeps it |
 
 ## `nika arm`: the report
 
@@ -91,12 +94,12 @@ reports what is ready, what fired and what fires next. It schedules nothing:
 $ nika arm
 4 beats in /home/alice/project/nika.yaml
 
-  [READY] workflows/nightly-report.nika · TZ=Europe/Paris 45 22 * * *
+  [READY] workflows/nightly-report.nika · TZ=Australia/Sydney 45 22 * * *
          · ready in the current configuration; OS activation not verified · authority not acquired
-         ✓ PROUVÉ (génération + créneau · ni projet ni hôte) · fired · 2026-10-24T20:45:20.16053Z · slot 2026-10-24T20:45:00Z · gen cdc9c273 · état succeeded · 0 sauts / 1 tir
-         → 2026-10-25 22:45 CET
-         → 2026-10-26 22:45 CET
-         → 2026-10-27 22:45 CET
+         ✓ PROUVÉ (génération + créneau · ni projet ni hôte) · fired · 2026-10-25T11:45:20.747596Z · slot 2026-10-25T11:45:00Z · gen 3558bb75 · état succeeded · 0 sauts / 1 tir
+         → 2026-10-26 22:45 AEDT
+         → 2026-10-27 22:45 AEDT
+         → 2026-10-28 22:45 AEDT
 
   [READY] workflows/on-event.nika · on-webhook
          ? cadence on-webhook: its event route fires it, never the clock (not observed)
@@ -105,7 +108,7 @@ $ nika arm
          → no upcoming slot (a webhook beat fires on its event)
 
   [UNREADY] workflows/weekly.nika · TZ=Europe/Paris every 2 weeks from 2026-10-05 09:00
-         ✗ manqué: { rattraper: N } is not supported by this firer (arrives with serve v0.2): every fire refuses (policy_unsupported)
+         ✗ manqué: { rattraper: N } is not supported by this firer: every fire refuses · `nika serve` keeps it (policy_unsupported)
          · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
          → 2026-11-02 09:00 CET
          → 2026-11-16 09:00 CET
@@ -119,7 +122,7 @@ READY · UNREADY · DORMANT judge the current configuration only — never OS ac
 nothing was scheduled — `nika arm` READS the file. The machine that fires them is the arming edge.
 ```
 
-<sub>Captured from nika 0.123.0 right after the fire below, with the wall clock, at the beat's real 22:45 slot; only the project path is replaced. The French phrases are the binary's own wording.</sub>
+<sub>Captured from nika 0.123.1 right after the fire below, with the wall clock, at the beat's real 22:45 slot in Sydney (11:45 UTC); only the project path is replaced. The French phrases are the binary's own wording.</sub>
 
 | State | Meaning |
 |---|---|
@@ -143,12 +146,14 @@ refusal teaches the fix.
 
 ```text
 $ nika arm fire nightly-report
-fired nightly-report · slot 2026-10-24T20:45:00Z · exit 0 · trace .nika/traces/2026-10-24T20-45-20Z-88a6.ndjson
+fired nightly-report · slot 2026-10-25T11:45:00Z · exit 0 · trace .nika/traces/2026-10-25T11-45-21Z-e685.ndjson
 ```
 
 One function applies the on-time window, the miss policy, the overlap lock,
 the per-fire ceiling and the firing record; the emitted OS units and
-`nika serve` both end there, so the policy lives in one place. The label is
+`nika serve` both end there, so the policy lives in one place. The resident
+`nika serve` also keeps the two catch-up policies this firer refuses
+(`rattraper` and `{ rattraper: N }`). The label is
 the workflow file's name without its extension (`workflows/doctor.nika` →
 `doctor`); a collision takes `-2`, `-3` in file order.
 
@@ -209,7 +214,7 @@ reading the registry; add `--write` to install it:
 | `--write` | Write the unit files instead of printing them |
 | `--beat <label>` | Emit the unit of one beat only |
 | `--out <dir>` | The directory the units are written to |
-| `--mode user\|system` | `user` (the default). `system` is refused in 0.123.0 |
+| `--mode user\|system` | `user` (the default). `system` is refused in 0.123.1 (« la portée root n'est pas émise », exit `2`): units go to the operator's session (LaunchAgents · systemd --user) |
 | `--env-file <file>` | The env file the unit loads: provider keys live there, never in the unit |
 | `--nika-bin <path>` | The nika binary the unit invokes |
 
@@ -224,7 +229,9 @@ is refused, and so is `--json` with `--emit`: `--json` reports readiness only.
 ## `nika serve`: the resident firer
 
 Where no OS scheduler exists (a container, a bare server, a VM you own), the
-resident loop ends at the same firer as an emitted unit:
+resident loop ends at the same firer as an emitted unit. It also keeps the
+catch-up policies `rattraper` and `{ rattraper: N }`, which a `--once` sweep
+refuses like `nika arm fire`:
 
 ```text
 $ nika serve --once          # one sweep: fire every due beat, then exit

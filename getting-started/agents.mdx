@@ -26,8 +26,8 @@ agent loop below is for the editor/CLI door.
 ## `nika init`: teach the repo
 
 `nika init` founds a repository for agents and editors. Existing files are
-skipped (`.gitignore` is the one file it updates in place, adding the traces
-line); `--force` overwrites. On a terminal it asks a few questions;
+skipped (`.gitignore` is the one file it updates in place, adding its ignore
+lines); `--force` overwrites. On a terminal it asks a few questions;
 `--yes` accepts every default, and pipes and CI never prompt. In an empty
 folder, `nika init --yes` writes these files:
 
@@ -46,7 +46,7 @@ folder, `nika init --yes` writes these files:
 | `.vscode/settings.json` | Maps `*.nika` to YAML and to the workflow JSON Schema |
 | `nika.yaml` | The [project file](/sdk/project/nika-yaml), its settings commented until you edit them |
 | `workflows/01-hello.nika` · `workflows/README.md` | A starter workflow and an index |
-| `.gitignore` | Adds `.nika/traces/` (run records hold the data a run read) |
+| `.gitignore` | Adds `.nika/traces/` (run records hold the data a run read), `.nika/serve.token` (the `nika serve` HTTP token, a credential) and `.nika/serve/` (its job state). A repository founded before 0.123.1 keeps its old section: add the two `serve` lines by hand |
 
 <Warning>
   The hooks are shell scripts that Claude Code and Cursor run inside your
@@ -59,14 +59,17 @@ folder, `nika init --yes` writes these files:
 
 Flags shape the scaffold: `--recipe agentic|starter|ship|content|minimal`
 chooses a workflow set, `--example <slug>` founds the project from one
-embedded example (any slug from bare `nika try`), and `--wire <clients>` also
-runs `nika wire` for those clients afterwards.
+embedded example (any slug from bare `nika try`) together with what its lesson
+reads: the fixtures under `examples/fixtures/` and the children it invokes,
+beside it in `workflows/`, each listed as a `created` row and never written
+over an existing file. `--wire <clients>` also runs `nika wire` for those
+clients afterwards.
 
 ## Or: install the plugin (Codex · Claude Code)
 
 Codex and Claude Code users can skip per-repo setup entirely: the
 [nika-plugins](https://github.com/supernovae-st/nika-plugins) repository
-publishes one plugin (version 0.123.0) for both ecosystems: 4 skills, 3
+publishes one plugin (version 0.123.1) for both ecosystems: 4 skills, 3
 subagents, 2 rules, 6 slash commands (`check` · `compile` · `doctor` ·
 `explain` · `permits` · `trace`), 3 hooks (one dialect: Codex speaks Claude
 Code's hook contract) **and** the read-only MCP oracle:

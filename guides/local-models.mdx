@@ -56,7 +56,7 @@ one models folder (`~/.nika/models`).
 reclaims it.
 
 <Warning>
-  In 0.123.0 the built-in server loads **Qwen3-family GGUFs only**. A GGUF
+  In 0.123.1 the built-in server loads **Qwen3-family GGUFs only**. A GGUF
   of another family is refused when it loads; serve it with one of the
   servers further down this page.
 </Warning>
@@ -74,7 +74,7 @@ the binary:
 | 16 GB and more | standard | `unsloth/gemma-3-12b-it-GGUF:Q4_K_M` | 7.4 GB |
 | 8 GB and more | lite | `unsloth/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M` | 5.5 GB |
 
-None of these picks is marked verified in 0.123.0. The standard pick is a
+None of these picks is marked verified in 0.123.1. The standard pick is a
 Gemma 3 model, which `nika model serve` cannot load: on a 16 to 23 GB
 machine, either pull the lite pick for the built-in server, or serve the
 Gemma file with llama.cpp's `llama-server` or LM Studio (below).

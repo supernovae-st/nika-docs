@@ -209,7 +209,7 @@ outputs:
     Save the file above as `localization-factory.nika` in a new folder, then download the samples it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures/docs examples/fixtures/docs/guides
     curl -fsSLo examples/fixtures/docs/quickstart.md "$FIXTURES/docs/quickstart.md"
     curl -fsSLo examples/fixtures/docs/guides/deploying.md "$FIXTURES/docs/guides/deploying.md"
@@ -235,7 +235,7 @@ outputs:
 
 - All your locales: wrap the lang in a list and run per locale, or lift `const.lang` to a typed required input and call the workflow per language.
 - Glossary discipline: interpolate your terminology table into the translate prompt so product names never drift.
-- Only what changed: replace `glob` with `exec: { command: [git, diff, --name-only] }` (argv form, with `exec: ["git"]` in `permits`) and translate the delta, as [PR review fan-out](/examples/pr-review-fanout) does. On macOS in 0.123.0 the sandbox refuses that Git read ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+- Only what changed: replace `glob` with `exec: { command: [git, diff, --name-only] }` (argv form, with `exec: ["git"]` in `permits`) and translate the delta, as [PR review fan-out](/examples/pr-review-fanout) does. On macOS in 0.123.1 the sandbox refuses that Git read ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
 
 <Card title="Next · Config drift sentinel" icon="shield-halved" href="/examples/config-drift-sentinel">
   RFC 7396 merge-patch + RFC 6902 diff: jq decides, the model only
