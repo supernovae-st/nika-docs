@@ -3,6 +3,19 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.123.1",
+      "name": "v0.123.1",
+      "publishedAt": "2026-10-25T11:12:44Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.123.1",
+      "assetCount": 8,
+      "highlights": [
+        "The repository's documents describe the released 0.123.0 and its maintenance.",
+        "The AGENTS.md that nika init writes no longer says the shipped binary cannot serve models.",
+        "nika arm --emit --mode system states its limit instead of a coming release."
+      ],
+      "notesSha256": "b23a4f472b218a694f66a4e1dbef664364d63f549df892a6a3d2241a421b3f1c"
+    },
+    {
       "tag": "v0.123.0",
       "name": "v0.123.0",
       "publishedAt": "2026-10-23T22:12:05Z",
