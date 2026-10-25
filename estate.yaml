@@ -70,7 +70,7 @@ files:
     - "https://www.gnu.org/licenses/agpl-3.0.txt (GNU AGPL-3.0, verbatim)"
 - path: "README.md"
   class: authored
-  sha256: a9b7bc316cc813a2178dbd88e5b16068b25a4aa80bf743f4bb773bcb3917ddb1
+  sha256: 8e0f647c77ee29a3b61d4c9e0527cf9e7f36bffe5bdcc9b330629e0763b135d9
   evidence: "prose entry surface · no generation marker"
 - path: "SECURITY.md"
   class: authored
@@ -279,7 +279,7 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 2c1fc8fece7a3151e984002ea787dccad1f3b0bc9cafbfe719b3bcd07915a1c8
+  sha256: 7c83f3e2362e02973cb3198d0ac89887eb40e0e8fc34782fdfedc24a3ee7df2c
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 - path: "snippets/data/releases.json"
@@ -296,7 +296,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 293
-  aggregate_sha256: 2049d6e2a1eadbb476be4d3fd488b312edd3f8d59886a75a0710f6414194715a
+  aggregate_sha256: df3922a81a03331de36437eb6c426b9b76eb382fd223e4e05e50fa04018423ad
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored

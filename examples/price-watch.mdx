@@ -113,10 +113,10 @@ outputs:
   </Step>
   <Step title="The webhook stays secret">
     `secrets:` declares an env-backed reference (`source: env`; `file` is
-    the other store 0.123.0 resolves, and a `vault` source passes check but
-    fails at run with `NIKA-VAR-001`, an unresolved `secrets.<name>`; the
-    check's hint calls it `NIKA-1702`). The URL is masked in logs:
-    `${{ secrets.alerts_webhook }}` never appears in a trace.
+    the other store 0.123.1 resolves). A `vault` source is withdrawn from the
+    contract: the check stays green with a hint that names `NIKA-VAR-001`,
+    and the run fails with it, an unresolved `secrets.<name>`. The URL is
+    masked in logs: `${{ secrets.alerts_webhook }}` never appears in a trace.
   </Step>
 </Steps>
 

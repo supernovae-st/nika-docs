@@ -20,7 +20,7 @@ the timeline as typed events, proves recovery, and leaves a draft
 the retro is scheduled.
 
 <Warning>
-  **Limit on macOS in 0.123.0.** The sandbox confines `exec: git` to the
+  **Limit on macOS in 0.123.1.** The sandbox confines `exec: git` to the
   workflow's declared filesystem boundary, which grants no read of `.git`
   or of git's global configuration. The confined `git` exits with status
   128, even inside a real repository, so `deploys` takes its
@@ -371,7 +371,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample runbook. The status endpoint is a placeholder that resolves nowhere, so both polls recover offline. The deploy log reads Git, which is refused on macOS in 0.123.0 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample runbook. The status endpoint is a placeholder that resolves nowhere, so both polls recover offline. The deploy log reads Git, which is refused on macOS in 0.123.1 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
 </Note>
 
 <Steps>
@@ -386,7 +386,7 @@ outputs:
     Save the file above as `incident-war-room.nika` in a new folder, then download the sample it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures
     curl -fsSLo examples/fixtures/checkout-api-runbook.md "$FIXTURES/checkout-api-runbook.md"
     ```

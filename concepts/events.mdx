@@ -121,9 +121,9 @@ events. From TypeScript, iterate `run.events()`, then await `run.result()`.
 
 The engine kernel also declares observability interfaces for alternative
 engines and future adapters: `MetricsExporter`, `TracerProvider`,
-`BillingSink`, `AuditSink` and `SecretResolver`. Engine 0.123.0 ships no
+`BillingSink`, `AuditSink` and `SecretResolver`. Engine 0.123.1 ships no
 production implementation of them: they exist as test doubles only. What a
-0.123.0 run gives you is the journal, the `--json` stream, the cost fields on
+0.123.1 run gives you is the journal, the `--json` stream, the cost fields on
 task events (`cost_incurred`, `task_completed`) and `nika trace export`.
 
 ## Related decisions

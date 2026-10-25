@@ -15,7 +15,7 @@ stopped at the commit, with the same named finding and fix the CLI gives you
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/supernovae-st/nika
-    rev: v0.123.0       # pin a tagged release
+    rev: v0.123.1       # pin a tagged release
     hooks:
       - id: nika-check
 ```
@@ -51,7 +51,7 @@ hook takes. Any install lane works:
 ```bash
 brew install supernovae-st/tap/nika                                  # macOS / Linux
 cargo binstall --git https://github.com/supernovae-st/nika nika-cli   # prebuilt release
-nix profile install github:supernovae-st/nika/v0.123.0                # flake, pinned to the release
+nix profile install github:supernovae-st/nika/v0.123.1                # flake, pinned to the release
 ```
 
 Staged files are passed in one argv and audited in one call; each file gets

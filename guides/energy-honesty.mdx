@@ -12,7 +12,7 @@ icon: "bolt"
 > numbers stay comparable.
 
 <Note>
-**What 0.123.0 does.** `nika check` prints an `ENERGY` line beside `COST`.
+**What 0.123.1 does.** `nika check` prints an `ENERGY` line beside `COST`.
 When the catalog holds a sourced figure for a task's model and the task
 declares `max_tokens`, the line is a bounded worst-case ceiling in
 watt-hours; otherwise the task is named as unpriced or uncapped, never
@@ -60,7 +60,7 @@ a subtotal per scope class) and the one-line header of `nika inspect`.
 ## A fact, not a vibe
 
 An energy figure enters the catalog as a five-field fact or not at all.
-This row is the one behind the reading above, as `nika` 0.123.0 ships it:
+This row is the one behind the reading above, as `nika` 0.123.1 ships it:
 
 ```toml
 [[rules]]
@@ -75,7 +75,7 @@ energy = { wh_per_mtok_out = 11.0,
 ```
 
 Open-weight models are the measurable frontier: a third party can put them
-on a bench, and every sourced figure in the 0.123.0 catalog is one of them.
+on a bench, and every sourced figure in the 0.123.1 catalog is one of them.
 Closed APIs stay **unpriced** until a vendor discloses or an independent
 methodology covers them — that asymmetry is honest, and the catalog keeps
 it.

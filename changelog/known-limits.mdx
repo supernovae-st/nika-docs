@@ -119,8 +119,7 @@ Without the script, take the file directly: each registry entry
 file under `[source]` (repository, revision, path) and its digest under
 `[integrity]`. Download that file at that revision, compare its SHA-256 with
 the entry, and check it with `nika check`. This is a compatibility defect of
-the 0.123.0 registry reader, the kind of fix maintenance releases carry;
-until one ships, work from the local file.
+the registry reader, still present in 0.123.1: work from the local file.
 
 ## Project files are checked, not run
 
@@ -149,7 +148,7 @@ built-in server cannot serve it: pull the lite pick
 (`unsloth/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M`) for the built-in server, or
 serve the Gemma file with llama.cpp's `llama-server`, LM Studio or Ollama
 ([Local models](/guides/local-models)). None of the Gear One picks is marked
-verified in 0.123.0.
+verified in 0.123.1.
 
 ## The TypeScript SDK
 
@@ -169,7 +168,7 @@ verified in 0.123.0.
 
 ## The run-signing key and the OS keychain
 
-On macOS, 0.123.0 never opens the keychain, even from a terminal, and
+On macOS, 0.123.1 never opens the keychain, even from a terminal, and
 `nika doctor` says `the keychain is not opened by this ad-hoc build` even for
 the signed release. Its run-signing key lives in files under
 `~/.nika/keys/`. A run-key that Nika 0.122 or older stored in the keychain
@@ -178,7 +177,7 @@ and the repair it names, `nika key align`, exits with
 `this process does not open the keychain`.
 
 On Linux, `nika` run from a terminal also uses the desktop's Secret Service,
-and 0.123.0 cannot tell whether it already holds a run-key, so a plain
+and 0.123.1 cannot tell whether it already holds a run-key, so a plain
 `nika key init` refuses with `run-signing key material already exists`, even
 on a new machine.
 

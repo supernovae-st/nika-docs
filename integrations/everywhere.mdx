@@ -21,9 +21,9 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 | **Release tarballs** | per-platform binaries + `SHA256SUMS` + SLSA provenance (`multiple.intoto.jsonl`): verify before you trust | [Verify a download](/getting-started/installation#verify-a-download) |
 | **`install.sh`** | one-command install from the site | [Installation guide](/getting-started/installation) |
 | **npm** | `npm install -g @supernovae-st/nika` (Node.js 22+, macOS or glibc Linux): the `nika` command plus the TypeScript SDK; inside a project, `./node_modules/.bin/nika` | [Installation](/getting-started/installation) |
-| **Container image** | `docker run --rm ghcr.io/supernovae-st/nika:0.123.0 --version` (linux/amd64 · linux/arm64, entrypoint `nika`); mount a project with `docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.123.0 check flow.nika` | [Installation](/getting-started/installation) |
+| **Container image** | `docker run --rm ghcr.io/supernovae-st/nika:0.123.1 --version` (linux/amd64 · linux/arm64, entrypoint `nika`); mount a project with `docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.123.1 check flow.nika` | [Installation](/getting-started/installation) |
 | **cargo binstall** | the prebuilt release tarball, no compile (`cargo binstall --git https://github.com/supernovae-st/nika nika-cli`) | [Installation](/getting-started/installation) |
-| **nix flake** | `nix run github:supernovae-st/nika/v0.123.0` builds that release tag, store-cached (the bare `github:supernovae-st/nika` builds `main`, which can be ahead of the release) | [Installation](/getting-started/installation) |
+| **nix flake** | `nix run github:supernovae-st/nika/v0.123.1` builds that release tag, store-cached (the bare `github:supernovae-st/nika` builds `main`, which can be ahead of the release) | [Installation](/getting-started/installation) |
 | **GitHub CLI extension** | `gh extension install supernovae-st/gh-nika` → `gh nika check/run` — pass-through to a PATH `nika`, else a one-time checksum-verified release fetch (Actions runners · Codespaces) | [gh-nika](https://github.com/supernovae-st/gh-nika) |
 | **MCP oracle Dockerfile (kit)** | the read-only oracle in a container you build (`integrations/mcp/Dockerfile` in the kit) | [nika-plugins kit](https://github.com/supernovae-st/nika-plugins) |
 
@@ -120,8 +120,8 @@ execution, no mutation, by design** ([threat model](https://github.com/supernova
 |---|---|---|
 | **TypeScript SDK** | `@supernovae-st/nika@0.123.0` — one typed facade (`check` · `compile` · `run` · `run.events()` · `run.result()` · `traceVerify`) · Apache-2.0. `traceVerify` reads existing evidence; it does not seal, rerun, or prove the job was correct. | [SDK overview](/sdk/overview) · [source](https://github.com/supernovae-st/nika-client) |
 | **Language spec** | the `.nika` contract — Apache-2.0, runtime-agnostic | [nika-spec](https://github.com/supernovae-st/nika-spec) |
-| **Registry** | CI-re-proven workflow artifacts (hash + oracle + engine cert). In 0.123.0 a `registry:owner/name` coordinate is refused (`NIKA-REG-005`: the public index is schema 2, this engine reads schema 1): clone the registry and run `python3 scripts/get.py <name>` (Python 3.11+ with PyYAML), which fetches the pinned bytes and verifies their sha256, then `nika check` the local file | [nika-registry](https://github.com/supernovae-st/nika-registry) · [Known limits](/changelog/known-limits#registry-coordinates-are-refused) |
-| **Local inference lane** | `nika model pull <owner/repo[:QUANT]>` downloads a GGUF into `~/.nika/models`, then `nika model serve --model <id>` starts an OpenAI-compatible server on `127.0.0.1:8712` (Qwen3-family models in 0.123.0) that a workflow reaches as `llamacpp/<id>` with `NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712` · `list`/`rm` manage the disk | [Local models](/guides/local-models) · [CLI reference](/reference/cli) |
+| **Registry** | CI-re-proven workflow artifacts (hash + oracle + engine cert). In 0.123.1 a `registry:owner/name` coordinate is refused (`NIKA-REG-005`: the public index is schema 2, this engine reads schema 1): clone the registry and run `python3 scripts/get.py <name>` (Python 3.11+ with PyYAML), which fetches the pinned bytes and verifies their sha256, then `nika check` the local file | [nika-registry](https://github.com/supernovae-st/nika-registry) · [Known limits](/changelog/known-limits#registry-coordinates-are-refused) |
+| **Local inference lane** | `nika model pull <owner/repo[:QUANT]>` downloads a GGUF into `~/.nika/models`, then `nika model serve --model <id>` starts an OpenAI-compatible server on `127.0.0.1:8712` (Qwen3-family models in 0.123.1) that a workflow reaches as `llamacpp/<id>` with `NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712` · `list`/`rm` manage the disk | [Local models](/guides/local-models) · [CLI reference](/reference/cli) |
 
 ## Where Nika is listed
 
@@ -143,7 +143,7 @@ New to agentic workflows as a concept?
 explains the workflow taxonomy (chaining, routing, parallelization,
 orchestrator and workers, evaluator and optimizer) with diagrams. Read it for
 the ideas only: the files in its `patterns-as-code` folder use a retired file
-suffix and the retired envelope (`nika: v1`, `vars:`), and 0.123.0 refuses
+suffix and the retired envelope (`nika: v1`, `vars:`), and 0.123.1 refuses
 them. For patterns that run, use `nika try`, which lists the
 worked path and the jobs and rehearses any of them offline, and the
 [examples](/examples/overview).

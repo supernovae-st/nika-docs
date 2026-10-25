@@ -21,8 +21,8 @@
 </p>
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/full-loop.optimized.gif">
-    <img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/full-loop.optimized.gif"
+  <a href="https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/full-loop.optimized.gif">
+    <img src="https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/full-loop.optimized.gif"
          alt="The loop the docs teach first: nika compile writes hello.nika, nika check audits it, nika run runs it and nika trace verify confirms its record" width="960">
   </a>
 </p>
@@ -79,8 +79,8 @@ workflow, which two of them show, was captured on nika 0.109.2.
 ### Nika catches the mistake before anything runs
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/static-check-fix.optimized.gif">
-    <img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/static-check-fix.optimized.gif"
+  <a href="https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/static-check-fix.optimized.gif">
+    <img src="https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/static-check-fix.optimized.gif"
          alt="nika check finding two mistakes in a workflow, the fix, then the clean re-check" width="860">
   </a>
 </p>
@@ -89,8 +89,8 @@ workflow, which two of them show, was captured on nika 0.109.2.
 ### The file is the boundary
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/permits-audit.optimized.gif">
-    <img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/permits-audit.optimized.gif"
+  <a href="https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/permits-audit.optimized.gif">
+    <img src="https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/permits-audit.optimized.gif"
          alt="A workflow's permits drawn as a map; the check refuses the task that reaches outside them, and the widened boundary passes" width="860">
   </a>
 </p>
@@ -99,19 +99,19 @@ workflow, which two of them show, was captured on nika 0.109.2.
 ### A request you retype every week becomes a file
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/chat-to-workflow.optimized.gif">
-    <img src="https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/chat-to-workflow.optimized.gif"
+  <a href="https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/chat-to-workflow.optimized.gif">
+    <img src="https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/chat-to-workflow.optimized.gif"
          alt="A request retyped into a chat every Monday, kept instead as meeting-actions.nika, a file that runs" width="860">
   </a>
 </p>
 <p align="center"><sub>Chat is for trying; a <code>.nika</code> file is for keeping: the same request, written once and run again · check captured on nika 0.121.0, local-model run on nika 0.109.2 · plays on <a href="https://docs.nika.sh/concepts/how-nika-compares">How Nika compares</a></sub></p>
 
 More clips, each on the page it explains:
-▶ [A workflow is a graph](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/dag-execution.optimized.gif) ([Workflows](https://docs.nika.sh/concepts/workflows)) ·
-▶ [The audit, as you type](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/editor-diagnostics.optimized.gif) ([Editor setup](https://docs.nika.sh/getting-started/editors)) ·
-▶ [Start from a ready-made job](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/workflow-gallery.optimized.gif) ([Examples](https://docs.nika.sh/examples/overview)) ·
-▶ [An audit, then a run on a local model](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/nika-hero.optimized.gif) ([Introduction](https://docs.nika.sh/introduction)) ·
-▶ [A failure planned for](https://raw.githubusercontent.com/supernovae-st/nika/main/media/gifs/on-error-recover.optimized.gif) ([Patterns](https://docs.nika.sh/guides/patterns)).
+▶ [A workflow is a graph](https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/dag-execution.optimized.gif) ([Workflows](https://docs.nika.sh/concepts/workflows)) ·
+▶ [The audit, as you type](https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/editor-diagnostics.optimized.gif) ([Editor setup](https://docs.nika.sh/getting-started/editors)) ·
+▶ [Start from a ready-made job](https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/workflow-gallery.optimized.gif) ([Examples](https://docs.nika.sh/examples/overview)) ·
+▶ [An audit, then a run on a local model](https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/nika-hero.optimized.gif) ([Introduction](https://docs.nika.sh/introduction)) ·
+▶ [A failure planned for](https://raw.githubusercontent.com/supernovae-st/nika/v0.123.0/media/gifs/on-error-recover.optimized.gif) ([Patterns](https://docs.nika.sh/guides/patterns)).
 
 ## Preview the docs on your machine
 
