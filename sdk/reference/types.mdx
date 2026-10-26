@@ -149,7 +149,7 @@ non-null `candidate` is a preview, never a result to run or save.
 interface NikaArtifactManifest {
   receipt: NikaReceipt              // the job's own, chain head included: the SDK checked it
   verdict: 'sealed' | 'anchored' | (string & {})
-  max_artifact_bytes: number        // the server's download bound (256 MiB by default)
+  max_artifact_bytes: number        // the server's download bound (256 MiB; no flag changes it)
   truncated: boolean                // more than the 1,024 listed entries exist
   artifacts: NikaArtifact[]         // in journal order; a file written twice appears once
   [key: string]: unknown
@@ -173,7 +173,7 @@ interface NikaArtifactDownload {
   readonly sha256: string
   readonly mime: string
   readonly artifact?: NikaArtifact  // absent only for a name past a truncated manifest
-  readonly stream: ReadableStream<Uint8Array>  // node:stream/web; closes only once proven
+  readonly stream: import('node:stream/web').ReadableStream<Uint8Array>  // closes only once proven
 }
 
 interface NikaArtifactsOptions { signal?: AbortSignal }

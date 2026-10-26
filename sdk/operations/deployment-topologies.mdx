@@ -69,9 +69,10 @@ call (`NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712`, then
 
 `nika serve --bind` is not `nika model serve`, and it is not bare `nika serve`.
 The pinned OpenAPI exposes cancellation as an action; the runtime's
-settlement determines the result. A settled job's artifacts download from its
-sealed journal ([Outputs and artifacts](/sdk/remote/artifacts)). Job listing
-and `POST /v1/run` remain absent.
+settlement determines the result. A settled job's artifacts, listed from its
+sealed journal, download over the same door
+([Outputs and artifacts](/sdk/remote/artifacts)). Job listing and
+`POST /v1/run` remain absent.
 
 ## Architecture view
 

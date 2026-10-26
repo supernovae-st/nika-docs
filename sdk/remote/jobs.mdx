@@ -36,8 +36,9 @@ refused with `NikaCompatibilityError` (`capability: 'runOptions'`) because
 their request envelopes do not exist. A snapshot of a local file carries no
 pin either: `access` beside one is refused (`capability: 'snapshotAccess'`).
 A fresh `randomUUID()` per retry defeats the contract: the key is what lets
-the server return the original job instead of starting a second one. Keys cover the whole `--state-root` and do not expire,
-so never reuse one for another operation.
+the server return the original job instead of starting a second one. Keys
+cover the whole `--state-root` and do not expire, so never reuse one for
+another operation.
 
 ## Spend on the server
 

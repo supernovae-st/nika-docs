@@ -43,11 +43,12 @@ Three surfaces sound like servers but accept different clients.
 The contract has no `POST /v1/run`, job-list, schedule-list, schedule-delete,
 trigger or backfill routes, and no artifact upload or deletion.
 `GET /v1/jobs/{id}/trace/verify` answers in the CLI's words, lower case: `ok`
-(intact, unsigned), `sealed`, `anchored` and `replayed` hold; `incomplete`,
-`tampered` and `broken` do not; `unavailable` means the server holds no
-journal for that job. Both artifact routes answer only for a settled job whose
-journal verifies sealed: [Outputs and artifacts](/sdk/remote/artifacts) covers
-the client side, and the
+(intact, but unsigned or sealed with a key the server does not weigh: `reason`
+reads `unsealed` or `unattributable`), `sealed`, `anchored` and `replayed`
+hold; `incomplete`, `tampered` and `broken` do not; `unavailable` means the
+server holds no journal for that job. Both artifact routes answer only for a
+settled job whose journal verifies sealed:
+[Outputs and artifacts](/sdk/remote/artifacts) covers the client side, and the
 [server runbook](/sdk/operations/server-runbook#artifact-downloads) what the
 door exposes.
 

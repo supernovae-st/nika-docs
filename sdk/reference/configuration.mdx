@@ -127,9 +127,9 @@ const run = await nika.run('triage.nika', { access: 'mock' })
 | | Local engine | `nika serve` |
 |---|---|---|
 | Sent as | one argv element, `--access=<pin>` | `access` beside a served name (`JobByName.access`, `CheckByName.access`) |
-| A pin the engine refuses (`NIKA-1802` unknown or retired, `NIKA-1801` unusable for the model) | `run.result()` settles `failed` with that `error.code`, `settlement.cause` `refused`, `exitCode` 3 | the job is admitted, then settles `failed` with that code and no `settlement` |
+| A pin the engine refuses (`NIKA-1802` unknown or retired, `NIKA-1801` no path for the model under that pin, `NIKA-1803` a harness seat whose CLI cannot run here, `NIKA-1800` no access path left at admission) | `run.result()` settles `failed` with that `error.code`, `settlement.cause` `refused`, `exitCode` 3 | the job is admitted, then settles `failed` with that code and no `settlement` |
 | An empty or blank pin | the same, `NIKA-1802` | `run()` rejects: `NikaOperationError`, `NIKA-1802`, status 422 |
-| `check({ access })` | judges the access plan: a refused pin keeps `clean: true`, with `verdicts.access_ready: false` and the refusal in `verdicts.blockers` | source-only: acknowledges any non-empty pin, and answers an empty one `clean: false` with `NIKA-1802` |
+| `check({ access })` | judges the access plan: a refused pin keeps `clean: true`, with `verdicts.access_ready: false` and the refusal in `verdicts.blockers` | source-only: acknowledges any pin that is not empty or blank, and answers an empty or blank one `clean: false` with `NIKA-1802` |
 | A local file (`./flow.nika`) | the pin applies | refused before any capture: a snapshot carries no pin (`NikaCompatibilityError`, `capability: 'snapshotAccess'`) |
 
 The SDK itself refuses only a value neither door can carry unchanged, before

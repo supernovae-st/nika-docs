@@ -55,14 +55,19 @@ tasks:
 ```
 
 Saved as `workflows/chart.nika` on a server started with
-`--workflows ./workflows`, it runs by its served name, and its settled job
+`--workflows ./workflows` (the [server quickstart](/sdk/remote/serve-quickstart)
+sets one up on loopback), it runs by its served name, and its settled job
 lists the SVG:
 
 ```ts
 import { createWriteStream } from 'node:fs'
-import { rename } from 'node:fs/promises'
+import { readFile, rename } from 'node:fs/promises'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
+import { Nika } from '@supernovae-st/nika'
+
+const token = (await readFile('.nika/serve.token', 'utf8')).trim()
+const nika = new Nika({ url: 'http://127.0.0.1:8787', token, allowInsecureHttp: true })
 
 const run = await nika.run('workflows/chart.nika', { idempotencyKey: 'chart-2026-10-26' })
 await run.result() // artifacts are served once the job has settled
@@ -131,19 +136,25 @@ checks the bytes a third time on arrival:
 
 ## Refusals
 
-Every refusal of the two routes is a `NikaOperationError` with the server's
+A refusal of the two routes is a `NikaOperationError` with the server's
 `code`, its HTTP `status`, and `operation` `artifacts`, `downloadArtifact` or
 `readArtifact`:
 
 | `code` | Status | Meaning |
 |---|---|---|
+| `job_not_found` | 404 | no job by that id in this server's state root |
 | `job_not_settled` | 409 | queued, running or paused |
 | `artifact_journal_unavailable` | 409 | no journal records the job: its receipt names no chain head (an interrupted run), or no journal by its identity exists |
 | `artifact_journal_unverified` | 409 | the journal is unsealed, edited, or sealed with a run key the server does not know |
 | `artifact_not_found` | 404 | no entry by that name in the manifest |
 | `artifact_changed` | 409 | the bytes at the recorded place no longer match the journal |
-| `artifact_too_large` | 403 | larger than the server's `max_artifact_bytes` (256 MiB by default); it stays listed |
+| `artifact_too_large` | 403 | larger than the server's `max_artifact_bytes` (256 MiB; no flag changes it); it stays listed |
 | `artifact_capacity` | 503 | every artifact slot is busy; retry shortly |
+| `store_busy` | 503 | the job store is busy; retry shortly |
+
+The server's document also declares `401` (no or a wrong Bearer token), `500`
+(`internal_error`: the server could not read the journal or the file) and, on
+the manifest route, `408` (the request deadline).
 
 Two refusals happen before any request, with `NikaCompatibilityError`
 (`capability: 'artifacts'`): a server whose `/health` does not list

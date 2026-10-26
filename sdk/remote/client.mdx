@@ -84,7 +84,8 @@ when capture succeeds, the resident must acknowledge that exact snapshot
 before the SDK returns it. Remote checks reject `model` and `nativeStrict`
 overrides because the HTTP request has no envelope for them. `access` rides a
 served name (`CheckByName.access`): the server's check is source-only and
-evaluates no access plan, so it acknowledges any non-empty pin.
+evaluates no access plan, so it acknowledges any pin that is not empty or
+blank.
 
 <Accordion title="Which published source this page describes">
   <SourceContract sdk={SDK} />
