@@ -76,9 +76,9 @@ Read it from the top:
   hand. Its providers are the ones this build can drive:
   {CANON.providersLocal} local servers and {CANON.providersCloud} cloud APIs,
   without `mock`. The specification names {CANON.providers}
-  providers, counting `mock`, the offline rehearsal provider. `nika catalog`
-  lists {STATUS.providers} entries and marks the ones this build cannot drive
-  as catalog only; `nika check` refuses those.
+  providers, counting `mock`, the rehearsal provider that makes no model
+  call. `nika catalog` lists {STATUS.providers} entries and marks the ones
+  this build cannot drive as catalog only; `nika check` refuses those.
 - **The five-line workflow is real**: an engine test pins that it checks
   clean. It appears only while your workspace has no workflow.
 
@@ -220,7 +220,7 @@ nika wire cursor               # or one client by name
 
 <CardGroup cols={2}>
   <Card title="First workflow" icon="play" href="/getting-started/first-workflow">
-    Your first run needs none of the keys above: `mock/echo` is offline.
+    Your first run needs none of the keys above: `mock/echo` needs no key and makes no model call.
   </Card>
   <Card title="Local models" icon="server" href="/guides/local-models">
     Turn the `local` or `sidecar` row into a working, keyless inference path.
