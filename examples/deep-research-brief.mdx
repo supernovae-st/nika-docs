@@ -211,7 +211,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** Nothing to rehearse: under `--model mock/echo` the whole file, agent loop included, runs offline. Real research needs a model that calls tools and network access to the hosts in `permits.net.http`.
+  **What it needs:** Nothing to rehearse: under `--model mock/echo` the whole file, agent loop included, runs on the mock model with zero keys and no model call. The mock replaces the model, not the network: the agent's `nika:fetch` stays granted for the hosts in `permits.net.http`. Real research needs a model that calls tools and network access to the hosts in `permits.net.http`.
 </Note>
 
 <Steps>
