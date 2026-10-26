@@ -12,10 +12,10 @@ A task names its model as `<provider>/<name>`. The language specification
 names **{CANON.providers} canonical providers**
 ([spec catalog](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md)),
 and the 0.123.1 binary drives exactly those: {CANON.providersLocal} local
-servers, {CANON.providersCloud} cloud APIs, and `mock`, the offline rehearsal
-provider. The engine's catalog records {STATUS.providers} entries:
-`nika catalog` lists the ones this build cannot drive under **CATALOG ONLY**,
-and `nika check` refuses them.
+servers, {CANON.providersCloud} cloud APIs, and `mock`, the rehearsal
+provider that makes no model call. The engine's catalog records
+{STATUS.providers} entries: `nika catalog` lists the ones this build cannot
+drive under **CATALOG ONLY**, and `nika check` refuses them.
 
 <Tip>
   **Every provider with its environment variable and default model:**
@@ -63,7 +63,7 @@ intelligence. **The access path** picks how Nika reaches it:
 | `local` | a server on this machine: Ollama, LM Studio, llama.cpp, LocalAI, vLLM, or Nika's own `nika model serve` |
 | `api` | the provider's API, with your key from the environment (`MISTRAL_API_KEY`, `NIKA_MISTRAL_API_KEY`…) |
 | `harness` | an agent app you are signed into: `claude-code` · `codex` · `copilot` · `gemini-cli` · `grok-build` · `kimi-code` · `opencode` · `qwen-code` |
-| `mock` | the offline rehearsal |
+| `mock` | the rehearsal model: no key and no model call; the run's other effects stay real |
 
 Every `nika check` prints an **ACCESS** line and a final
 `access ready ✔ | ✖` layer: whether this machine has a path to each model
