@@ -232,8 +232,11 @@ depends on the platform:
   terminal, copies that key to `~/.nika/keys/`.
 
 In CI, point `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` at a key pair you
-provide. Without any key, runs still succeed and `nika trace verify` reports
-them `UNSEALED`.
+provide, both set: `nika key init` mints it there, and every run signs with it.
+Set the same two variables where you verify: `nika trace verify` then
+attributes those journals without `--key`, and a `nika serve` started with them
+verifies its jobs' journals the same way. Without any key, runs still succeed
+and `nika trace verify` reports them `UNSEALED`.
 
 ## Platforms
 
