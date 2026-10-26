@@ -112,6 +112,7 @@ tasks:
       map_top: ${{ tasks.map.top }}
       top_page: ${{ tasks.top_page.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 3000                 # think block + the brief JSON
       prompt: |
         Topic to rank for · ${{ inputs.topic }}
@@ -199,7 +200,7 @@ outputs:
     nika try seo-content-brief
     ```
 
-    A mock model answers and nothing is written in your folder.
+    A mock model answers and nothing is written in your folder. Before it runs, `nika try` names the hosts a step may reach: `may reach: competitor.example.com — the mock replaces the model, not the network`.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `seo-content-brief.nika` in a new folder. It reads no sample file.

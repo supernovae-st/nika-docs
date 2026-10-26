@@ -17,10 +17,10 @@ the date from a builtin (not from the model's imagination), and writes
 the three standup bullets in your tone. When Git fails or is refused, the
 workflow records “Git history unavailable” and tells the model to invent
 no commit facts. This is distinct from an empty successful log, and on
-macOS in 0.123.1 it is the default outcome:
+macOS in 0.123.2 it is the default outcome:
 
 <Warning>
-  **Limit on macOS in 0.123.1.** The sandbox confines `exec: git` to the
+  **Limit on macOS in 0.123.2.** The sandbox confines `exec: git` to the
   workflow's declared filesystem boundary, which grants no read of `.git`
   or of git's global configuration. The confined `git` exits with status
   128, even inside a real repository, so `history` takes its
@@ -53,7 +53,7 @@ flowchart LR
 ```yaml standup-digest.nika
 nika: standup-digest
 
-model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (a fast one-liner job)
+model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b-versatile (a fast one-liner job)
 
 permits:
   exec: ["git"]              # the ONE program this workflow may run
@@ -78,6 +78,7 @@ tasks:
       today: ${{ tasks.today.output }}
       history: ${{ tasks.history.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 400          # a standup note is short · the ceiling says so
       prompt: |
         Date · ${{ with.today }}
@@ -139,7 +140,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`), run from a Git repository you work in. Git is refused on macOS in 0.123.1, so there the note says history is unavailable ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`), run from a Git repository you work in. Git is refused on macOS in 0.123.2, so there the note says history is unavailable ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
 </Note>
 
 <Steps>

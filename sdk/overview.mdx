@@ -14,7 +14,7 @@ state. The Nika engine owns parsing, admission, execution, policy, events,
 receipts and traces, and the engine comes inside the npm package.
 
 ```sh
-npm install @supernovae-st/nika@0.123.1
+npm install @supernovae-st/nika@0.123.2
 ```
 
 The first integration is two calls, admit and settle:
@@ -95,11 +95,12 @@ the two doors line by line.
 | Read live status | `run.status()` | HTTP only |
 | Discover workflows | `listWorkflows()` · `workflow(name)` | HTTP only |
 | Manage one schedule | [`schedule()` · `scheduleStatus()`](/sdk/remote/schedules) | HTTP only |
+| Download what a job produced | [`run.artifacts()` · `run.readArtifact()` · `run.downloadArtifact()`](/sdk/remote/artifacts) | HTTP only |
 
 `run()` returns a handle only after admission; the handle is not a result.
 Events are optional to render; `run.result()` is the run's one ending,
 including a pause at a human gate. Locally, a paused run resumes from the
-command line; `nika serve` 0.123.1 has no route to answer the gate.
+command line; `nika serve` 0.123.2 has no route to answer the gate.
 Configuration, compatibility, transport and protocol failures throw typed
 [errors](/sdk/runtime/errors).
 

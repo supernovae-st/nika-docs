@@ -87,6 +87,7 @@ tasks:
 
   plan:
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 400              # planning is short · cap it and the cost report is a ceiling
       prompt: "Break '${{ inputs.topic }}' into 4 sharp research queries · no overlap."
       schema:
@@ -140,6 +141,7 @@ tasks:
       findings: ${{ tasks.investigate.output.findings }}
       sources: ${{ tasks.investigate.output.sources }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2000
       prompt: |
         Findings · ${{ with.findings }}
@@ -209,7 +211,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** Nothing to rehearse: under `--model mock/echo` the whole file, agent loop included, runs offline. Real research needs a model that calls tools and network access to the hosts in `permits.net.http`.
+  **What it needs:** Nothing to rehearse: under `--model mock/echo` the whole file, agent loop included, runs on the mock model with zero keys and no model call. The mock replaces the model, not the network: the agent's `nika:fetch` stays granted for the hosts in `permits.net.http`. Real research needs a model that calls tools and network access to the hosts in `permits.net.http`.
 </Note>
 
 <Steps>
@@ -218,7 +220,7 @@ outputs:
     nika try deep-research-brief
     ```
 
-    A mock model answers and nothing is written in your folder.
+    A mock model answers and nothing is written in your folder. Before it runs, `nika try` names the hosts a step may reach: `may reach: arxiv.org · export.arxiv.org · en.wikipedia.org · hn.algolia.com — the mock replaces the model, not the network`.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `deep-research-brief.nika` in a new folder. It reads no sample file.

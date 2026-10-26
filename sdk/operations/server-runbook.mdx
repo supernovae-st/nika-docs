@@ -80,6 +80,69 @@ Treat process liveness and workload success separately. A resident loop can be
 healthy while one workflow fails, and a completed `--once` sweep can exit zero
 after an individual beat failed or paused.
 
+## Artifact downloads
+
+With `--bind`, the server also serves what a settled job produced, and
+`/health` lists `artifacts`. `GET /v1/jobs/{id}/artifacts` lists the files the
+job's sealed journal records (saved inside the project by `nika:chart`,
+`nika:image_generate`, `nika:tts_generate` or `nika:image_fx`, and the images
+an agent's harness sent), and `GET /v1/jobs/{id}/artifacts/{name}` streams
+one. Decide what that door exposes before you open it:
+
+- **Who can read what.** Any caller holding the token and a job's id can
+  download those files from any settled job the state root holds. The server
+  opens a file at its recorded place below the project root and refuses a
+  symbolic link at any component. It lists no file under the project's
+  `.nika` (an agent image is served from its blob there), and no file the
+  journal records without a digest (what `nika:write` and `nika:edit` wrote).
+  A request names a manifest entry, never a path.
+- **Sealed journals only.** The routes judge the job's journal with the
+  verifier `nika trace verify` runs, and serve nothing unless it is sealed,
+  intact and headed by the job's receipt (`409 artifact_journal_unverified`).
+  A server without a run key still lists `artifacts` and answers that `409`
+  for every job.
+- **Bounds.** One artifact is served up to 256 MiB; a larger one stays listed
+  and its download answers `403 artifact_too_large`. A manifest lists at most
+  1,024 entries. At most four journal verifications or pre-download hash
+  passes run at once (`503 artifact_capacity`). A download is not bounded by
+  the request deadline; the connection limit bounds streams.
+- **Retention.** The routes add no store and delete nothing. A job stays
+  downloadable while its journal and its files stay as recorded: a file
+  changed since the run answers `409 artifact_changed`, and the server never
+  serves other bytes in its place.
+- **Re-serving.** The bytes come with `Content-Disposition: attachment`,
+  `X-Content-Type-Options: nosniff`, `Content-Security-Policy: sandbox` and
+  `Cache-Control: no-store`. Keep them when a proxy or your application serves
+  the file again: an SVG can carry script.
+
+### Give the server a run key
+
+Mint the key as files, as the user the server runs as, before the jobs you
+want to download from:
+
+```sh
+NIKA_KEYCHAIN=off nika key init
+```
+
+The pair goes to `~/.nika/keys/`. To keep it elsewhere, name both files, for
+`nika key init` and then for `nika serve` (in a unit, put both variables in
+its `EnvironmentFile`):
+
+```sh
+export NIKA_RUN_KEY_FILE=/etc/nika/run-signing.key
+export NIKA_RUN_PUB_FILE=/etc/nika/run-signing.pub
+NIKA_KEYCHAIN=off nika key init
+mkdir -p .nika
+umask 077 && openssl rand -hex 24 > .nika/serve.token && chmod 600 .nika/serve.token
+nika serve --bind 127.0.0.1:8787 --workflows ./workflows --token-file .nika/serve.token
+```
+
+The server seals each job with that pair, and weighs the public keys in the
+order it signs: the pair's public half, then `~/.nika/keys/run-signing.pub`,
+then the retired-key ledger. `GET /v1/jobs/{id}/trace/verify` then reads
+`sealed` and the artifact routes serve the job. `nika trace verify` run with
+the same two variables set attributes those journals without `--key`.
+
 ## Deploy a project change
 
 <Steps>
@@ -133,6 +196,8 @@ and investigate the external system before replaying.
 - A `nika.yaml` whose beats all read `READY` in `nika arm --json`.
 - Provider secrets outside source and generated units.
 - Durable `project/.nika/` storage with chosen retention and access.
+- A run key as files (`~/.nika/keys/` or the explicit pair) when runs must
+  verify sealed or an HTTP door serves artifacts.
 - Captured stdout decision lines and stderr diagnostics.
 - SIGTERM delivery with enough time for the active firing boundary to settle.
 - An incident path from decision to ledger to verified trace.

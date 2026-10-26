@@ -20,7 +20,7 @@ the timeline as typed events, proves recovery, and leaves a draft
 the retro is scheduled.
 
 <Warning>
-  **Limit on macOS in 0.123.1.** The sandbox confines `exec: git` to the
+  **Limit on macOS in 0.123.2.** The sandbox confines `exec: git` to the
   workflow's declared filesystem boundary, which grants no read of `.git`
   or of git's global configuration. The confined `git` exits with status
   128, even inside a real repository, so `deploys` takes its
@@ -188,7 +188,7 @@ tasks:
       backoff_strategy: exponential
       jitter: true
     on_error:
-      recover: []                 # offline · no history to reconstruct from
+      recover: []                 # the poll failed · no history to reconstruct from
 
   runbook:
     with:
@@ -206,6 +206,7 @@ tasks:
       runbook: ${{ tasks.runbook.output }}
     when: ${{ with.runbook != null && size(with.runbook) > 0 }}   # « no » at the gate (null) or an empty answer · nothing to reconstruct
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 1500
       prompt: |
         Deploys in the window ·
@@ -257,9 +258,10 @@ tasks:
         jq: ".current.state"
     on_error:
       # The rehearsal's stand-in says the service came back, so the green path
-      # is the one you see offline. Point --var status_url at a real endpoint
-      # and anything other than « operational » blocks the draft below — that
-      # refusal is the designed path, not a bug in the file.
+      # is the one you see while the placeholder resolves nowhere. Point
+      # --var status_url at a real endpoint and anything other than
+      # « operational » blocks the draft below — that refusal is the designed
+      # path, not a bug in the file.
       recover: "operational"
 
   confirmed:
@@ -278,6 +280,7 @@ tasks:
     after:
       confirmed: success             # state, no data · recovery proven or no draft
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2000
       prompt: |
         Timeline · ${{ with.events }}
@@ -371,7 +374,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample runbook. The status endpoint is a placeholder that resolves nowhere, so both polls recover offline. The deploy log reads Git, which is refused on macOS in 0.123.1 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample runbook. The status endpoint is a placeholder that resolves nowhere, so both polls recover offline. The deploy log reads Git, which is refused on macOS in 0.123.2 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
 </Note>
 
 <Steps>
@@ -380,13 +383,13 @@ outputs:
     nika try incident-war-room
     ```
 
-    A mock model answers, the sample files come with it, and nothing is written in your folder. It stops at the `approve` gate, as a real run does.
+    A mock model answers, the sample files come with it, and nothing is written in your folder. Before it runs, `nika try` names the hosts a step may reach: `may reach: status.internal.example.com · hooks.slack.com — the mock replaces the model, not the network`. It stops at the `approve` gate, as a real run does.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `incident-war-room.nika` in a new folder, then download the sample it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.2/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures
     curl -fsSLo examples/fixtures/checkout-api-runbook.md "$FIXTURES/checkout-api-runbook.md"
     ```

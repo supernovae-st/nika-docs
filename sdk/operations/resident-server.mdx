@@ -18,9 +18,9 @@ HTTP.
 
 `--bind` + `--workflows` + `--token-file` on the **same verb** opens
 authenticated HTTP. The released OpenAPI includes jobs, job SSE, cancellation,
-trace verification, workflow discovery and schedule read/write. It has no
-artifact, job-list or `POST /v1/run` route. `--once` and `--dry` cannot bind a
-listener.
+trace verification, the download of a settled job's artifacts, workflow
+discovery and schedule read/write. It has no job-list or `POST /v1/run` route.
+`--once` and `--dry` cannot bind a listener.
 
 <Warning>
   Bare `nika serve` is the ARM firer, not HTTP. The HTTP door is opt-in
@@ -110,9 +110,11 @@ schedule naming a workflow outside it is refused with the teaching. Executed
 HTTP workflows use the runtime journal under the project's `.nika/traces/`.
 The runtime writes and seals the evidence; `nika trace verify` checks what
 was written. A refusal before execution can have no journal, and missing or
-incomplete evidence is distinct from a failed run. A cancellation request is
-an action: the runtime's eventual settlement, not the HTTP request alone,
-determines the result.
+incomplete evidence is distinct from a failed run. The artifact routes serve
+only from a sealed journal: give the resident a run key as files first
+([Server runbook](/sdk/operations/server-runbook#give-the-server-a-run-key)).
+A cancellation request is an action: the runtime's eventual settlement, not
+the HTTP request alone, determines the result.
 
 `POST /v1/jobs` and `POST /v1/check` take two forms (0.118):
 `{"workflow": "<name>"}` for a workflow the served registry lists — the

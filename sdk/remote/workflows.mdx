@@ -21,7 +21,7 @@ for (const name of names) {
 `listWorkflows()` returns the served names, each the workflow's path from the
 project root (`workflows/release.nika`). `workflow(name)` confirms that a
 served name exists: it returns `{ workflow }` and answers `not_found` (404)
-otherwise. In 0.123.1 the metadata is closed to that one field: the server
+otherwise. In 0.123.2 the metadata is closed to that one field: the server
 exposes no declared inputs or description over HTTP.
 
 The client has no pagination, reload or raw-source methods. The server

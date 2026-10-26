@@ -26,6 +26,7 @@ interface NikaCheckResult {
   report_version?: number
   clean?: boolean
   exitCode?: number
+  verdicts?: NikaCheckVerdicts   // valid · access_ready · capacity_fit · run_ready · blockers
   [key: string]: unknown
 }
 ```
@@ -44,7 +45,20 @@ reads, measured on engine 0.123.0:
 | `requirements` | the models, secrets and required inputs the run needs |
 | `risk_grade` | the engine's summary grade (`low`, `supervised`, `high`, `unbounded`) |
 
-The SDK types these fields as `unknown`: narrow them in your code. Findings
+Pass `access` to judge the access plan under a pin, as `nika check --access`
+does:
+
+```ts
+const pinned = await nika.check('workflows/release.nika', { access: 'mock' })
+console.log(pinned.clean, pinned.verdicts?.access_ready, pinned.verdicts?.blockers)
+```
+
+A pin the engine refuses keeps `clean: true` (the file holds) with
+`verdicts.access_ready: false`, and `verdicts.blockers` names the refusal in
+the engine's words ([Access pins](/sdk/reference/configuration#access-pins)).
+
+Apart from `clean`, `exitCode` and `verdicts`, the SDK types these fields as
+`unknown`: narrow them in your code. Findings
 are report data; configuration, engine resolution, transport and protocol
 failures throw typed errors. Keep application policy outside the SDK, and
 preserve unknown fields when storing or forwarding the report.

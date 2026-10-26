@@ -55,8 +55,11 @@ const loopback = new Nika({
 ```
 
 `requestTimeout` bounds HTTP admission. `fetch`, `eventBufferSize` and
-`machineBufferBytes` are the other transport seams. The SDK does not expose
-automatic retry or concurrency policy as constructor options.
+`machineBufferBytes` are the other transport seams. `machineBufferBytes`
+bounds one SSE frame or JSON document; its 16 MiB default is the server's own
+job-store bound, so it holds every result the server settles. Neither bounds an
+artifact download. The SDK does not expose automatic retry or concurrency
+policy as constructor options.
 
 ## Check a served name
 
@@ -79,7 +82,10 @@ findings. Authentication, transport and protocol failures still throw.
 An explicit local-path check retains the local engine's full check report;
 when capture succeeds, the resident must acknowledge that exact snapshot
 before the SDK returns it. Remote checks reject `model` and `nativeStrict`
-overrides because the HTTP request has no envelope for them.
+overrides because the HTTP request has no envelope for them. `access` rides a
+served name (`CheckByName.access`): the server's check is source-only and
+evaluates no access plan, so it acknowledges any pin that is not empty or
+blank.
 
 <Accordion title="Which published source this page describes">
   <SourceContract sdk={SDK} />

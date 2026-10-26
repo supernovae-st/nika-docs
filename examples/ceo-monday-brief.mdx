@@ -21,7 +21,7 @@ than guessed by a model, and an optional founders ping that says whether
 the brief landed.
 
 <Warning>
-  **Limit on macOS in 0.123.1.** The sandbox confines `exec: git` to the
+  **Limit on macOS in 0.123.2.** The sandbox confines `exec: git` to the
   workflow's declared filesystem boundary, which grants no read of `.git`
   or of git's global configuration. The confined `git` exits with status
   128, even inside a real repository, so `pulse` takes its
@@ -164,10 +164,11 @@ tasks:
         mode: jq
         jq: ".hits[:10] | map(.title)"
     on_error:
-      # The honest dry run · offline the host resolves nowhere and this literal
-      # takes over, so the join below is exercised on both paths with the same
-      # binding. It is labelled in the brief so nobody mistakes it for signal.
-      recover: ["(offline rehearsal · no market signal was fetched)"]
+      # The honest stand-in · when the fetch fails (no network, a failing
+      # search) this literal takes over, so the join below is exercised on
+      # both paths with the same binding. It is labelled in the brief so
+      # nobody mistakes it for signal.
+      recover: ["(stand-in · no market signal was fetched)"]
 
   # ── branch 2 · engineering pulse ──
   pulse:
@@ -241,6 +242,7 @@ tasks:
       revenue: ${{ tasks.revenue.output }}
     when: ${{ with.go == true }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 1200               # the cost report becomes a ceiling, not UNBOUNDED
       prompt: |
         Market signal · ${{ with.news }}
@@ -355,7 +357,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`), network access to `hn.algolia.com` for the market signal (offline, it recovers to a labelled stand-in), and the sample KPI sheet. The engineering pulse reads Git, which is refused on macOS in 0.123.1 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`), network access to `hn.algolia.com` for the market signal (offline, it recovers to a labelled stand-in), and the sample KPI sheet. The engineering pulse reads Git, which is refused on macOS in 0.123.2 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
 </Note>
 
 <Steps>
@@ -364,13 +366,13 @@ outputs:
     nika try ceo-monday-brief
     ```
 
-    A mock model answers, the sample files come with it, and nothing is written in your folder. Its network fetches still go out: a rehearsal replaces the model, not the tools. It stops at the `approve` gate, as a real run does.
+    A mock model answers, the sample files come with it, and nothing is written in your folder. Its network fetches still go out: a rehearsal replaces the model, not the tools. Before it runs, `nika try` names those hosts: `may reach: hn.algolia.com · hooks.slack.com — the mock replaces the model, not the network`. It stops at the `approve` gate, as a real run does.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `ceo-monday-brief.nika` in a new folder, then download the sample it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.2/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures
     curl -fsSLo examples/fixtures/ceo-kpis.csv "$FIXTURES/ceo-kpis.csv"
     ```

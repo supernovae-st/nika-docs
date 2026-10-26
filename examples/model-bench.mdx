@@ -47,7 +47,7 @@ nika: model-bench
 # this file never calls: every contender pins its own `infer.model:` below,
 # and the bench IS the seats. The absence is load-bearing honesty: with no
 # default to override, nothing can claim the mock rehearsal previews this
-# file (measured · the offline rescue tip fires only for a file that HAS
+# file (measured · the mock-preview rescue tip fires only for a file that HAS
 # an envelope model to swap).
 
 const:
@@ -68,18 +68,21 @@ tasks:
     infer:
       model: ollama/qwen2.5:14b # the quality bar · the seat to beat
       prompt: "${{ const.question }}"
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 600
 
   ask_challenger:
     infer:
       model: ollama/llama3.2:3b # another family · same size class
       prompt: "${{ const.question }}"
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 600
 
   ask_tiny:
     infer:
       model: ollama/qwen2.5:0.5b # the "is small enough?" probe
       prompt: "${{ const.question }}"
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 600
 
   tabulate:
@@ -150,7 +153,7 @@ bench is FOR:
 ## Run it
 
 <Note>
-  **What it needs:** [Ollama](https://ollama.com) with the three contenders pulled (`qwen2.5:14b`, `llama3.2:3b`, `qwen2.5:0.5b`). There is no offline rehearsal: each task pins its own model, `--model` replaces only a workflow's default model, and this file has none, so `nika try model-bench` needs the same three models.
+  **What it needs:** [Ollama](https://ollama.com) with the three contenders pulled (`qwen2.5:14b`, `llama3.2:3b`, `qwen2.5:0.5b`). There is no mock rehearsal: each task pins its own model, `--model` replaces only a workflow's default model, and this file has none, so `nika try model-bench` needs the same three models.
 </Note>
 
 <Steps>

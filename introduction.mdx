@@ -126,9 +126,9 @@ application. The SDK starts its bundled engine directly; no server is needed.
 typed, tracker-ready action items. It defaults to a local model
 (`ollama/qwen3.5:4b`, no provider key, your own compute); point it at a
 cloud provider and `nika check` prices the run before anything executes.
-`nika try meeting-actions` rehearses it offline, and the page lists what a
-real run needs. Same file shape as above; the model and tools change, the
-lifecycle does not.
+`nika try meeting-actions` rehearses it on the mock model, with no key and no
+model call, and the page lists what a real run needs. Same file shape as
+above; the model and tools change, the lifecycle does not.
 
 ## What just happened, one concept at a time
 
@@ -163,8 +163,9 @@ lifecycle does not.
     tightest block for you.
   </Accordion>
   <Accordion title="What changes if I switch the model?" icon="circle-question">
-    One line. `mock/echo` rehearses offline, `ollama/llama3.2:3b` runs
-    locally, and cloud providers take their environment key. The file, the
+    One line. `mock/echo` rehearses with no key and no model call (tools and
+    fetches stay real), `ollama/llama3.2:3b` runs locally, and cloud providers
+    take their environment key. The file, the
     check and the record keep the same shape; `nika check` re-prices the run
     for the new model, and asks for a larger `max_tokens` when a reasoning
     model needs room to think.

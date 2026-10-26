@@ -77,13 +77,13 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
     entrypoint:
 
     ```bash
-    docker run --rm ghcr.io/supernovae-st/nika:0.123.1 --version
-    docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.123.1 check flow.nika
-    docker run -i --rm ghcr.io/supernovae-st/nika:0.123.1 mcp
+    docker run --rm ghcr.io/supernovae-st/nika:0.123.2 --version
+    docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.123.2 check flow.nika
+    docker run -i --rm ghcr.io/supernovae-st/nika:0.123.2 mcp
     ```
 
     The image carries the base shell and coreutils, nothing more; build your
-    own image `FROM ghcr.io/supernovae-st/nika:0.123.1` when a workflow runs
+    own image `FROM ghcr.io/supernovae-st/nika:0.123.2` when a workflow runs
     heavier tools. It has no bubblewrap, so a workflow that declares
     `permits:` and runs `exec:` refuses to start there (`NIKA-1710`, see
     [Servers and headless Linux](#servers-and-headless-linux)) unless you
@@ -103,8 +103,8 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
 
   <Tab title="Nix">
     ```bash
-    nix run github:supernovae-st/nika/v0.123.1 -- --version
-    nix profile install github:supernovae-st/nika/v0.123.1
+    nix run github:supernovae-st/nika/v0.123.2 -- --version
+    nix profile install github:supernovae-st/nika/v0.123.2
     ```
 
     Builds the release tag with the repository's `flake.nix`: the first run
@@ -114,7 +114,7 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
 
   <Tab title="From source">
     ```bash
-    git clone --branch v0.123.1 https://github.com/supernovae-st/nika.git
+    git clone --branch v0.123.2 https://github.com/supernovae-st/nika.git
     cd nika
     cargo install --locked --path crates/nika-cli
     nika --version
@@ -215,7 +215,7 @@ terminal, the engines your applications start through the
 `NIKA_KEYCHAIN=off` skips only the keychain. Without it, `nika key init`
 depends on the platform:
 
-- **macOS.** 0.123.1 opens no keychain, even from a terminal: `nika doctor`
+- **macOS.** 0.123.2 opens no keychain, even from a terminal: `nika doctor`
   says `the keychain is not opened by this ad-hoc build`, even for the signed
   release. A plain `nika key init` writes the same files, unless the keychain
   holds a run-key that Nika 0.122 or older stored there. Then it refuses, and
@@ -224,16 +224,19 @@ depends on the platform:
   `nika key init` mints a new key as files, a new signing identity beside the
   old keychain key.
 - **Linux.** Run from a terminal, `nika` also uses the desktop's Secret
-  Service, and 0.123.1 cannot tell whether it already holds a run-key. A
+  Service, and 0.123.2 cannot tell whether it already holds a run-key. A
   plain `nika key init` therefore refuses with
   `run-signing key material already exists`, even on a new machine. On a
   desktop, its `--force` stores the key in the Secret Service only, where SDK
   engines and `nika serve` never look; `nika key align`, run once from a
   terminal, copies that key to `~/.nika/keys/`.
 
-In CI, point `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` at a key pair you
-provide. Without any key, runs still succeed and `nika trace verify` reports
-them `UNSEALED`.
+In CI, set both `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` to two paths:
+`nika key init` mints the pair there (or place a pair you already hold), and
+every run signs with it. Set the same two variables where you verify:
+`nika trace verify` then attributes those journals without `--key`, and a
+`nika serve` started with them verifies its jobs' journals the same way. Without any key, runs still succeed
+and `nika trace verify` reports them `UNSEALED`.
 
 ## Platforms
 
@@ -294,8 +297,8 @@ shows you chose it. An unknown value refuses to start (`NIKA-1711`).
   build provenance. Download one archive and the checksum file:
 
   ```bash
-  gh release download v0.123.1 --repo supernovae-st/nika \
-    -p 'nika-macos-arm64-0.123.1.tar.gz' -p SHA256SUMS
+  gh release download v0.123.2 --repo supernovae-st/nika \
+    -p 'nika-macos-arm64-0.123.2.tar.gz' -p SHA256SUMS
   ```
 
   Then check what you hold, in up to three independent ways:
@@ -305,13 +308,13 @@ shows you chose it. An unknown value refuses to start (`NIKA-1711`).
   shasum -a 256 -c SHA256SUMS --ignore-missing     # Linux: sha256sum -c SHA256SUMS --ignore-missing
 
   # 2 · GitHub build attestation for this exact archive
-  gh attestation verify nika-macos-arm64-0.123.1.tar.gz --repo supernovae-st/nika
+  gh attestation verify nika-macos-arm64-0.123.2.tar.gz --repo supernovae-st/nika
 
   # 3 · SLSA provenance, verifiable offline
-  gh release download v0.123.1 --repo supernovae-st/nika -p multiple.intoto.jsonl
-  slsa-verifier verify-artifact nika-macos-arm64-0.123.1.tar.gz \
+  gh release download v0.123.2 --repo supernovae-st/nika -p multiple.intoto.jsonl
+  slsa-verifier verify-artifact nika-macos-arm64-0.123.2.tar.gz \
     --provenance-path multiple.intoto.jsonl \
-    --source-uri github.com/supernovae-st/nika --source-tag v0.123.1
+    --source-uri github.com/supernovae-st/nika --source-tag v0.123.2
   ```
 
   Replace `macos-arm64` with `macos-x64`, `linux-x64` or `linux-arm64` for
@@ -394,7 +397,7 @@ rm ~/.nika/bin/nika                          # install script without Homebrew
 npm uninstall -g @supernovae-st/nika         # npm
 rm ~/.cargo/bin/nika                         # cargo binstall or cargo install
 nix profile remove nika                      # Nix (see `nix profile list` for the name)
-docker image rm ghcr.io/supernovae-st/nika:0.123.1   # container
+docker image rm ghcr.io/supernovae-st/nika:0.123.2   # container
 ```
 
 Then, if you want no trace left, remove Nika's state:

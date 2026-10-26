@@ -44,7 +44,7 @@ flowchart LR
 ```yaml invoice-chaser.nika
 nika: invoice-chaser
 
-model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (drafting is a fast-model job)
+model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b-versatile (drafting is a fast-model job)
 
 const:
   ledger_csv: "examples/fixtures/invoices.csv"
@@ -88,6 +88,7 @@ tasks:
       overdue: ${{ tasks.overdue.output }}
     when: ${{ size(with.overdue) > 0 }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 900       # a ceiling makes the cost report a number, not UNBOUNDED
       prompt: |
         Draft one short, polite payment reminder email per overdue invoice ·
@@ -173,7 +174,7 @@ outputs:
     Save the file above as `invoice-chaser.nika` in a new folder, then download the sample it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.2/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures
     curl -fsSLo examples/fixtures/invoices.csv "$FIXTURES/invoices.csv"
     ```

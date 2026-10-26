@@ -203,6 +203,7 @@ tasks:
       cutoff: ${{ tasks.cutoff_day.output }}
     when: ${{ size(with.readable) > 0 }}   # a quiet week costs nothing
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 1500                     # one page · a ceiling, not a hope
       prompt: |
         These are the pages a competitor published or changed since
@@ -298,7 +299,7 @@ outputs:
     nika try competitor-radar
     ```
 
-    A mock model answers and nothing is written in your folder. Its network fetches still go out: a rehearsal replaces the model, not the tools.
+    A mock model answers and nothing is written in your folder. Its network fetches still go out: a rehearsal replaces the model, not the tools. Before it runs, `nika try` names those hosts: `may reach: nika.sh — the mock replaces the model, not the network`.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `competitor-radar.nika` in a new folder. It reads no sample file.

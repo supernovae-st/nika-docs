@@ -23,7 +23,7 @@ nika --version && nika doctor          # doctor prints exact fixes, never mutate
 No key needed yet — `mock/echo` and local providers run without one.
 
 Driving Nika from Node instead of a shell? That is a different door:
-`npm install @supernovae-st/nika@0.123.1` inside a project bundles the
+`npm install @supernovae-st/nika@0.123.2` inside a project bundles the
 engine for your app and gives you `./node_modules/.bin/nika`, but does not
 add `nika` to your `PATH`. Do not type `npx nika` outside such a project:
 the unscoped npm name `nika` belongs to an unrelated package. Follow the
@@ -75,9 +75,10 @@ The agent previews (`nika compile chain --json` — incomplete questions
 stay questions; no file is written), answers them with repeatable
 `--answer KEY=JSON_LITERAL`, writes a Ready destination, audits
 (`nika check` — plan, cost floor, permits, **before** any token is
-spent), runs offline (`--model mock/echo`), and the receipts land in
-`.nika/traces/` (`nika trace verify` → exit 0: bare, it reads the latest
-trace; the run card prints each trace's path on its `trace:` line).
+spent), runs on the mock model (`--model mock/echo`: no key, no model
+call), and the receipts land in `.nika/traces/` (`nika trace verify` →
+exit 0: bare, it reads the latest trace; the run card prints each trace's
+path on its `trace:` line).
 
 ## Then: CI receipts
 

@@ -19,7 +19,7 @@ READ and nothing else, in parallel, four at a time. A deterministic
 final REVIEW.md ends with a verdict.
 
 <Warning>
-  **Limit on macOS in 0.123.1.** The sandbox confines `exec: git` to the
+  **Limit on macOS in 0.123.2.** The sandbox confines `exec: git` to the
   workflow's declared filesystem boundary, which grants no read of `.git`
   or of git's global configuration. The confined `git` exits with status
   128, even inside a real repository, so `changed` takes its
@@ -113,7 +113,10 @@ tasks:
   # it), and each root CONSUMES the answer affirmatively (NEP-0020 — a
   # bare `after:` admits the refusal: it settles success with value
   # false). Under `--answer approve=true` the CI one-pass answers it here.
-  # The one [headless-prompt] hint is the price of a real gate — pay it here.
+  # The gate declares no `default:` on purpose: a default would answer for
+  # the human it exists to ask. The one hint `nika check` prints, [consent]
+  # on `save`, is the checker unable to prove the answer reaches the write
+  # through `summary`; it does, through `todo_sweep`, so a « no » closes it.
   approve:
     invoke:
       tool: "nika:prompt"
@@ -167,6 +170,9 @@ tasks:
   reviews:
     with:
       files: ${{ tasks.files.output }}
+    # « no » at the gate skips `files` (null), and a fan-out over null fails
+    # (NIKA-VAR-006): the swarm closes instead.
+    when: ${{ with.files != null }}
     for_each:
       items: ${{ with.files }}
       max_parallel: 4                    # four reviewers in flight · not forty
@@ -206,7 +212,8 @@ tasks:
 
   # The fan-in.
   #   `. // []`      · a clean diff SKIPS the swarm (an empty for_each resolves
-  #                    null), and the fan-in has to survive its own good news.
+  #                    null), and so does a « no » at the gate: the fan-in has
+  #                    to survive its own good news.
   #   `select(. != null)` · the reviewers that recovered leave here, by value.
   #   `.findings[] + {file}` · flatten [[finding]] → [finding], each carrying
   #                    the file it came from.
@@ -233,6 +240,7 @@ tasks:
       todo_sweep: ${{ tasks.todo_sweep.output }}
     when: ${{ with.todo_sweep != null && size(with.todo_sweep) > 0 }}  # skipped (null) or an empty sweep · no page to write
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2500                 # a review page · not the whole diff back
       prompt: |
         Changed files, or the notice that the diff was unavailable ·
@@ -298,7 +306,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** A Git repository with changes under `./src` and a `const.base_ref` that exists, plus a local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`). Git is refused on macOS in 0.123.1, so there the diff is reported unavailable and no agent runs ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+  **What it needs:** A Git repository with changes under `./src` and a `const.base_ref` that exists, plus a local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`). Git is refused on macOS in 0.123.2, so there the diff is reported unavailable and no agent runs ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
 </Note>
 
 <Steps>

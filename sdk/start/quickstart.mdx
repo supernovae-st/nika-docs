@@ -13,7 +13,8 @@ record.
 
 You need Node.js 22 or newer on macOS (arm64, x64) or Linux with glibc (x64,
 arm64). No server, no global CLI and no provider key: this example runs on the
-engine the package bundles, with the offline `mock/echo` model. On Alpine
+engine the package bundles, with the `mock/echo` model, which makes no model
+call. On Alpine
 (musl) or Windows there is no bundled engine: `new Nika()` throws
 `NikaEngineUnavailable`, so point `bin` or `NIKA_BIN` at a compatible engine,
 or connect to a [`nika serve`](/sdk/remote/serve-quickstart).
@@ -21,13 +22,14 @@ or connect to a [`nika serve`](/sdk/remote/serve-quickstart).
 <Steps>
   <Step title="Install the package">
     ```sh
-    npm install @supernovae-st/nika@0.123.1
+    npm install @supernovae-st/nika@0.123.2
     ./node_modules/.bin/nika --version
     ```
 
     npm brings the engine for your platform as an optional dependency: keep
     optional dependencies enabled. The second line prints
-    `nika 0.123.1 (cc7b51964)`, the engine your code will drive.
+    `nika <version> (<build>)`: the bundled engine, at the package's version,
+    the engine your code will drive.
   </Step>
   <Step title="Let the engine seal your runs (once per machine)">
     ```sh
@@ -41,7 +43,7 @@ or connect to a [`nika serve`](/sdk/remote/serve-quickstart).
     runs still succeed, unsigned. Keep `NIKA_KEYCHAIN=off`: without it,
     `nika key init` refuses on a Linux terminal (its `--force` puts the key in
     the desktop's Secret Service, where neither looks) and on a Mac whose
-    keychain holds a key from Nika 0.122 or older, which 0.123.1 can neither
+    keychain holds a key from Nika 0.122 or older, which 0.123.2 can neither
     read nor copy. In CI, point `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` at
     a key pair you provide.
   </Step>
@@ -61,8 +63,8 @@ or connect to a [`nika serve`](/sdk/remote/serve-quickstart).
       greeting: ${{ tasks.greeting.output }}
     ```
 
-    `mock/echo` is the engine's offline rehearsal model: it echoes the prompt
-    back, prefixed `mock(echo) ·`, with no key and no network. `permits: {}`
+    `mock/echo` is the engine's rehearsal model: it echoes the prompt back,
+    prefixed `mock(echo) ·`, with no key and no model call. `permits: {}`
     grants the workflow no file, network, command or tool access.
   </Step>
   <Step title="Run it from TypeScript">

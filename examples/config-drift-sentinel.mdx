@@ -224,6 +224,7 @@ tasks:
     on_error:
       recover: "(explanation unavailable · the model call failed · the raw patch is attached)"
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 3000                  # think block + three bullets · a ceiling, not a hope
       prompt: |
         This RFC 6902 patch is UNSANCTIONED config drift in production ·
@@ -329,13 +330,13 @@ outputs:
     nika try config-drift-sentinel
     ```
 
-    A mock model answers, the sample files come with it, and nothing is written in your folder.
+    A mock model answers, the sample files come with it, and nothing is written in your folder. Before it runs, `nika try` names the hosts a step may reach: `may reach: api.internal.example.com · hooks.slack.com — the mock replaces the model, not the network`.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `config-drift-sentinel.nika` in a new folder, then download the sample it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.2/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures
     curl -fsSLo examples/fixtures/config-baseline.json "$FIXTURES/config-baseline.json"
     ```

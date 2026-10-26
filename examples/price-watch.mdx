@@ -73,11 +73,12 @@ tasks:
       price: ".price"
       name: ".name"
     on_error:
-      # Offline rehearsal · a sample ABOVE the target, so the gate below stays
-      # closed and the dry run ends green with the alert skipped. The alert
-      # path is therefore NOT exercised offline — which is exactly why the
+      # Rehearsal stand-in · the placeholder host resolves nowhere, so this
+      # sample ABOVE the target takes over: the gate below stays closed and
+      # the dry run ends green with the alert skipped. The alert path is
+      # therefore NOT exercised by the rehearsal — which is exactly why the
       # `net:` bound above has to be right by reading, not by running.
-      recover: { price: 949, name: "MacBook Air (offline sample)" }
+      recover: { price: 949, name: "MacBook Air (rehearsal sample)" }
 
   alert:
     with:
@@ -113,7 +114,7 @@ outputs:
   </Step>
   <Step title="The webhook stays secret">
     `secrets:` declares an env-backed reference (`source: env`; `file` is
-    the other store 0.123.1 resolves). A `vault` source is withdrawn from the
+    the other store 0.123.2 resolves). A `vault` source is withdrawn from the
     contract: the check stays green with a hint that names `NIKA-VAR-001`,
     and the run fails with it, an unresolved `secrets.<name>`. The URL is
     masked in logs: `${{ secrets.alerts_webhook }}` never appears in a trace.
@@ -141,7 +142,7 @@ outputs:
     nika try price-watch
     ```
 
-    Nothing is written in your folder.
+    Nothing is written in your folder. Before it runs, `nika try` names the hosts a step may reach: `may reach: api.shop.example.com · hooks.slack.com — the mock replaces the model, not the network`.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `price-watch.nika` in a new folder. It reads no sample file.

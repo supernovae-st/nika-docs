@@ -76,6 +76,7 @@ tasks:
 
         Transcript ·
         ${{ with.raw }}
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 3000   # think block + the show-notes JSON
       schema:
         type: object
@@ -172,7 +173,7 @@ this time".
     Save the file above as `transcript-shownotes.nika` in a new folder, then download the sample it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.2/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures
     curl -fsSLo examples/fixtures/episode-transcript.txt "$FIXTURES/episode-transcript.txt"
     ```

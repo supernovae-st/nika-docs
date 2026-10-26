@@ -16,6 +16,9 @@ interface NikaRun<Outputs extends Record<string, unknown> = Record<string, unkno
   readonly result: () => Promise<NikaRunResult<Outputs>>
   readonly status: () => Promise<NikaRunStatus>      // resident-owned; native rejects (NikaCompatibilityError)
   readonly cancel: () => Promise<NikaCancelResult>   // idempotent; acceptance is not a result
+  readonly artifacts: (options?: NikaArtifactsOptions) => Promise<NikaArtifactManifest>  // server only
+  readonly downloadArtifact: (artifact: string | NikaArtifact, options?: NikaArtifactDownloadOptions) => Promise<NikaArtifactDownload>
+  readonly readArtifact: (artifact: string | NikaArtifact, options?: NikaArtifactReadOptions) => Promise<Uint8Array>
   readonly done: Promise<NikaRunResult<Outputs>>     // compatibility alias of result()
 }
 ```
@@ -95,16 +98,19 @@ interface NikaRunEvent<Outputs> {
 not name arrives there with its `raw` frame untouched; nothing is dropped,
 and no lifecycle meaning is invented for it. Keep a `default` branch in
 reducers; the set is additive. `run.sealed` names a `run_sealed` frame if an
-engine streams one; engine 0.123.1 writes the seal to the run's record only,
+engine streams one; engine 0.123.2 writes the seal to the run's record only,
 so read `result.receipt.sealed` locally or `traceVerify(...).verdict`.
 
 ## Check and cancellation
 
 `NikaCheckResult` is an open engine projection. A local check carries the
-findings report and process `exitCode`. A served-name HTTP check carries
-`clean: true` plus `status`, `snapshot_digest`, `root` and `units`, or
-`clean: false` with a typed refusal in `error`; it does not invent a local
-findings report or exit code.
+findings report, process `exitCode` and `verdicts`, typed `NikaCheckVerdicts`
+(`valid` · `access_ready` · `capacity_fit` · `run_ready` · `blockers`): under
+`check({ access })` a pin the engine refuses keeps `clean: true` with
+`verdicts.access_ready: false` and the refusal in `verdicts.blockers`. A
+served-name HTTP check carries `clean: true` plus `status`, `snapshot_digest`,
+`root` and `units`, or `clean: false` with a typed refusal in `error`; it does
+not invent a local findings report or exit code.
 
 `NikaCancelResult` describes action acceptance: `cancelled` (settled on the
 reply), `already_settled`, or `cancellation_requested` — execution continues
@@ -137,6 +143,72 @@ both. `incomplete` and `refused` are data: the SDK throws only on transport,
 protocol, compatibility and engine-stamped failures. Under `incomplete`, a
 non-null `candidate` is a preview, never a result to run or save.
 
+## Artifacts
+
+```ts
+interface NikaArtifactManifest {
+  receipt: NikaReceipt              // the job's own, chain head included: the SDK checked it
+  verdict: 'sealed' | 'anchored'    // the sealed journal's tier: any other word is refused
+  max_artifact_bytes: number        // the server's download bound (256 MiB; no flag changes it)
+  truncated: boolean                // more than the 1,024 listed entries exist
+  artifacts: NikaArtifact[]         // in journal order; a file written twice appears once
+  [key: string]: unknown
+}
+
+interface NikaArtifact {
+  name: string                      // 'file/<path>' or 'agent_image/<n>.<ext>': a key, never a path
+  kind: 'file' | 'agent_image' | (string & {})
+  path?: string                     // a file's contained project path; absent for an agent image
+  size: number                      // recorded bytes
+  sha256: string                    // recorded SHA-256, 64 lowercase hex
+  mime: string
+  task?: string
+  event_id: string
+  [key: string]: unknown
+}
+
+interface NikaArtifactDownload {
+  readonly name: string
+  readonly size: number             // what the stream is proven against
+  readonly sha256: string
+  readonly mime: string
+  readonly artifact?: NikaArtifact  // absent only for a name past a truncated manifest
+  readonly stream: import('node:stream/web').ReadableStream<Uint8Array>  // closes only once proven
+}
+
+interface NikaArtifactsOptions { signal?: AbortSignal }
+interface NikaArtifactDownloadOptions { signal?: AbortSignal }
+interface NikaArtifactReadOptions extends NikaArtifactDownloadOptions {
+  maxBytes?: number                 // default 16 MiB; a larger artifact is refused before its download
+}
+```
+
+A server's manifest is checked field by field: the `verdict` is `sealed` or
+`anchored`, names are unique, sizes are byte counts, digests are SHA-256 and
+a file's `path` is contained; any other key rides through. The `path` check
+is lexical and POSIX, the server's own, so it does not make a path safe to
+join under a local directory on every system: to write an artifact under
+yours, resolve the joined path, check that it stays inside, and open it
+exclusively (`wx`). The download stream errors with `NikaProtocolError` for
+bytes that are not the recorded ones, `NikaOperationError` for a server
+refusal on a retry (`artifact_changed`), and `NikaTransportError` for a
+download that stayed incomplete or was aborted.
+[Outputs and artifacts](/sdk/remote/artifacts) shows them in use.
+
+## Access pins
+
+```ts
+type NikaAccessPin =
+  | 'local' | 'mock' | 'harness' | 'oauth' | 'api'
+  | 'claude-code' | 'codex' | 'copilot' | 'gemini-cli'
+  | 'grok-build' | 'kimi-code' | 'opencode' | 'qwen-code'
+  | (string & {})
+```
+
+The words aid completion without closing the set: the engine, never the SDK,
+judges a pin. `run({ access })` and `check({ access })` take one
+([Configuration](/sdk/reference/configuration#access-pins)).
+
 ## Proof
 
 ```ts
@@ -160,7 +232,7 @@ Locally the verdict is `verified`, or `invalid` (`reason: 'receipt_mismatch'`
 for an unsealed or edited record; no reason when the trace file cannot be
 read). Over HTTP it is the CLI verifier's tier in lower case: `ok` means intact
 but unsigned (`reason: 'unsealed'`), and `unavailable` means the server holds
-no journal for the job. The published 0.123.1 declarations list the same
+no journal for the job. The published 0.123.2 declarations list the same
 words, with the CLI verifier's refusal classes (`unchained` · `empty` ·
 `unreadable` · `refused` · `line-over-long` · `unknown`), and over HTTP a
 verdict that holds always carries its seal tier as `reason` (`sealed` or
@@ -191,6 +263,6 @@ engine-owned fields are additive.
   <SourceContract sdk={SDK} />
 </Accordion>
 
-<Card title="Published type declarations (v0.123.1)" icon="github" href={SDK.sourceCandidate}>
+<Card title="Published type declarations (v0.123.2)" icon="github" href={SDK.sourceCandidate}>
   Review the source of the published declarations.
 </Card>

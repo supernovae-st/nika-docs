@@ -1,6 +1,6 @@
 ---
 title: "SDK configuration"
-description: "Constructor, remote and per-operation options of @supernovae-st/nika 0.123.1."
+description: "Constructor, remote and per-operation options of @supernovae-st/nika 0.123.2."
 sidebarTitle: "Configuration"
 icon: "sliders"
 ---
@@ -14,9 +14,21 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 ```ts
 interface NikaSharedConfig {
   eventBufferSize?: number      // default 4096 (256 up to 0.118.7); also the largest per-view bufferSize
-  machineBufferBytes?: number   // default 64 KiB: one engine frame or diagnostic
+  machineBufferBytes?: number   // default 16 MiB: one engine frame, JSON document or report
 }
 ```
+
+`machineBufferBytes` bounds what the SDK holds of one machine frame (a local
+engine's stdout line, a server's SSE event), one JSON document a server
+answers, one captured engine report, and the engine diagnostics a result
+keeps. Its default, 16 MiB, is the bound of a `nika serve` job store, which
+refuses rather than truncates a result that would outgrow it: every result a
+server settles reaches `run.result()` and `attachRun()` under the default.
+A local engine bounds no frame, so a local result above 16 MiB needs a larger
+value. Past the bound the SDK rejects with a `NikaProtocolError` that names
+the option and the size to set; on a server the job keeps its result, and a
+client with a larger bound reads it again with `attachRun()`. Artifact
+downloads are not bounded by it.
 
 ## Local by default
 
@@ -56,6 +68,7 @@ directly to the resident and do not require either local source or a binary.
 interface NikaCheckOptions {
   model?: string
   nativeStrict?: boolean
+  access?: NikaAccessPin                       // judge the access plan under this pin
   signal?: AbortSignal
 }
 
@@ -63,6 +76,7 @@ interface NikaRunOptions {
   inputs?: Record<string, unknown>             // literal typed values: the app channel
   vars?: Record<string, string | number | boolean>  // deprecated: native --var operator channel
   model?: string                               // local only: replaces the envelope model, not task pins
+  access?: NikaAccessPin                       // the engine's access pin, on both doors
   maxCostUsd?: number                          // local only: the run's metered-spend cap, in USD
   idempotencyKey?: string                      // required for HTTP admission; refused locally
 }
@@ -93,13 +107,43 @@ the engine reads `@env:NAME` from its own environment and coerces text to
 the declared type, so it cannot carry literal API values and has no HTTP
 form. Combining `vars` with `inputs` rejects `run()`.
 
+## Access pins
+
+`model:` picks the intelligence; `access` picks the path the engine takes to
+it, the value `nika run --access` and `nika check --access` take: an access
+class (`local`, `mock`, `harness`, `oauth`, `api`) or a harness seat
+(`claude-code`, `codex`, `copilot`, `gemini-cli`, `grok-build`, `kimi-code`,
+`opencode`, `qwen-code`). `NikaAccessPin` lists those words for completion and
+takes any string: the engine judges a pin and never substitutes another path
+or model.
+
+```ts
+const report = await nika.check('triage.nika', { access: 'mock' })
+console.log(report.verdicts?.access_ready, report.verdicts?.blockers)
+
+const run = await nika.run('triage.nika', { access: 'mock' })
+```
+
+| | Local engine | `nika serve` |
+|---|---|---|
+| Sent as | one argv element, `--access=<pin>` | `access` beside a served name (`JobByName.access`, `CheckByName.access`) |
+| A pin the engine refuses (`NIKA-1802` unknown or retired, `NIKA-1801` no path for the model under that pin, `NIKA-1803` a harness seat whose CLI cannot run here, `NIKA-1800` no access path left at admission) | `run.result()` settles `failed` with that `error.code`, `settlement.cause` `refused`, `exitCode` 3 | the job is admitted, then settles `failed` with that code and no `settlement` |
+| An empty or blank pin | the same, `NIKA-1802` | `run()` rejects: `NikaOperationError`, `NIKA-1802`, status 422 |
+| `check({ access })` | judges the access plan: a refused pin keeps `clean: true`, with `verdicts.access_ready: false` and the refusal in `verdicts.blockers` | source-only: acknowledges any pin that is not empty or blank, and answers an empty or blank one `clean: false` with `NIKA-1802` |
+| A local file (`./flow.nika`) | the pin applies | refused before any capture: a snapshot carries no pin (`NikaCompatibilityError`, `capability: 'snapshotAccess'`) |
+
+The SDK itself refuses only a value neither door can carry unchanged, before
+anything starts: a non-string, a NUL byte or a lone surrogate
+(`NikaConfigurationError`). Over HTTP the pin is part of the request bytes an
+idempotency key binds: retry with the same pin.
+
 Remote `check` refuses `model` and `nativeStrict`. Remote `run` requires
 `idempotencyKey` (reuse the same key and request after an uncertain
-response) and refuses `vars`, `model` and `maxCostUsd` with
-`NikaCompatibilityError`; the server applies its own spending ceiling
-([Spend caps](/sdk/runtime/spend)). Signals stop a request or observer; only
-`run.cancel()` requests cancellation of admitted work; `run.result()` carries
-the actual outcome.
+response), takes `access` with a served name, and refuses `vars`, `model` and
+`maxCostUsd` with `NikaCompatibilityError`; the server applies its own
+spending ceiling ([Spend caps](/sdk/runtime/spend)). Signals stop a request
+or observer; only `run.cancel()` requests cancellation of admitted work;
+`run.result()` carries the actual outcome.
 
 <CardGroup cols={2}>
   <Card title="Method index" icon="list" href="/sdk/reference/methods">

@@ -89,6 +89,17 @@ Bearer tokens belong in governed environment or workload identity plumbing,
 not source. The SDK exposes no logger or webhook verifier; keep application
 logging and delivery secrets outside the Nika transport.
 
+The token also downloads artifacts: any holder who knows a settled job's id
+can read the files that job's sealed journal records, the project files a
+builtin saved and the images an agent's harness sent. The server serves only
+bytes that still match the journal, and the SDK checks them again on arrival,
+but the content is still whatever the workflow produced. Treat a downloaded
+file as untrusted input, and keep the server's
+`Content-Security-Policy: sandbox`, `nosniff` and `attachment` headers if your
+application serves it again.
+[Server runbook](/sdk/operations/server-runbook#artifact-downloads) lists what
+the routes expose.
+
 ## Threat boundaries
 
 | Boundary | Owner |
@@ -97,7 +108,10 @@ logging and delivery secrets outside the Nika transport.
 | Process argv and cancellation verb | SDK |
 | HTTP admission timeout and bounded event views | SDK |
 | Secret storage and identity | Deployment |
-| Artifact destination and retention | Application |
+| Artifact download: settled jobs, sealed journal, recorded bytes only | Engine (`nika serve`) |
+| Artifact bytes re-checked on arrival | SDK |
+| Run-signing key custody on the server | Deployment |
+| Artifact destination and retention after download | Application |
 
 ## Continue
 

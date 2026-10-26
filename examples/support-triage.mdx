@@ -47,7 +47,7 @@ nika: support-triage
 # The house seat — a THINKING model: the think block and the JSON both count
 # against `max_tokens` (engine#428), so the triage ceiling below covers the
 # reasoning AND the board, not the board alone.
-model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (triage wants speed)
+model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b-versatile (triage wants speed)
 
 const:
   queue_path: "examples/fixtures/support-queue.json"
@@ -89,6 +89,7 @@ tasks:
     with:
       queue: ${{ tasks.queue.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 4000                 # think block + the whole queue in one call · a ceiling, not UNBOUNDED
       prompt: |
         Triage every ticket in this queue ·
@@ -193,13 +194,13 @@ outputs:
     nika try support-triage
     ```
 
-    A mock model answers, the sample files come with it, and nothing is written in your folder.
+    A mock model answers, the sample files come with it, and nothing is written in your folder. Before it runs, `nika try` names the hosts a step may reach: `may reach: hooks.slack.com — the mock replaces the model, not the network`.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `support-triage.nika` in a new folder, then download the sample it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.2/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures
     curl -fsSLo examples/fixtures/support-queue.json "$FIXTURES/support-queue.json"
     ```

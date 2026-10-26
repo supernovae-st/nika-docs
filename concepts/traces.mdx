@@ -149,7 +149,13 @@ attests the sequence is intact. The tiers:
   `OK — N events · chain intact` and the head to compare). An unsigned run
   stops here and says `UNSEALED`.
 - **SEALED** — a signature over the whole chain verifies against a
-  custody key (the run was signed).
+  custody key (the run was signed). `verify` weighs the public keys in the
+  order a run signs, the keychain aside, after `--key`: the public half of
+  the explicit `NIKA_RUN_KEY_FILE` · `NIKA_RUN_PUB_FILE` pair, when both
+  variables are set, then `~/.nika/keys/run-signing.pub`, then the
+  retired-key ledger (`~/.nika/keys/retired.pub`). A journal sealed with an
+  explicit pair therefore verifies without `--key` wherever the same two
+  variables are set.
 - **ANCHORED** — a detached sidecar verifies **fully offline** against a
   public transparency log entry + an RFC 3161 timestamp (`nika trace
   anchor` is the opt-in network act that mints it).
@@ -169,7 +175,7 @@ Refusals name themselves rather than hide in a tier:
 | `TAMPERED` (`SEAL BURIED`) | lines chained after the seal: appending needs only write access, so this is forgery, never a crash | 2 |
 | `SEAL FORGED` | the `run_sealed` signature does not verify against the key | 2 |
 | `ANCHOR FORGED` | an anchor sidecar that vouches for nothing | 2 |
-| `SEAL UNATTRIBUTABLE` | the seal names a key you do not hold: a missing input, not evidence of forgery | 3 |
+| `SEAL UNATTRIBUTABLE` | the seal names a key none of those candidates carries: a missing input, not evidence of forgery. Pass `--key <file.pub>` (on the signing machine, `nika key trust` prints that public key), or set the pair the run was sealed with | 3 |
 | `INCOMPLETE` | the journal never reached a terminal frame (a run in flight, or a writer that died): the chain attests every complete line, not the run's outcome | 5 |
 
 `--sealed` and `--anchored` make a missing tier an error (exit 3), a

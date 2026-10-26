@@ -132,6 +132,7 @@ tasks:
     on_error:
       recover: null
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 1200                 # a rubric row, not an essay
       prompt: |
         Role · ${{ const.role }}
@@ -185,6 +186,7 @@ tasks:
       shortlist: ${{ tasks.shortlist.output }}
     when: ${{ size(with.shortlist) > 0 }}   # nobody cleared the bar · spend nothing
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2000
       prompt: |
         Write the screening brief for these shortlisted candidates ·
@@ -258,7 +260,7 @@ outputs:
     Save the file above as `resume-screener.nika` in a new folder, then download the samples it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.1/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.2/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures/cvs
     curl -fsSLo examples/fixtures/cvs/awa-diallo.md "$FIXTURES/cvs/awa-diallo.md"
     curl -fsSLo examples/fixtures/cvs/priya-raman.md "$FIXTURES/cvs/priya-raman.md"
