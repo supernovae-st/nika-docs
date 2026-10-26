@@ -44,7 +44,7 @@ flowchart LR
 ```yaml social-repurpose.nika
 nika: social-repurpose
 
-model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large or any provider
+model: ollama/qwen3.5:4b   # local · zero key · swap for mistral/mistral-large-latest or any provider
 
 const:
   # The sample post ships with the repo. Point this at your own and move the
@@ -68,6 +68,7 @@ tasks:
     with:
       post: ${{ tasks.post.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 700
       prompt: "Turn this post into a 6-tweet thread · keep the voice · ${{ with.post }}"
 
@@ -75,6 +76,7 @@ tasks:
     with:
       post: ${{ tasks.post.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 500
       prompt: "Rewrite this post for LinkedIn · hook first · ${{ with.post }}"
 
@@ -82,6 +84,7 @@ tasks:
     with:
       post: ${{ tasks.post.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 200
       prompt: "Write a 3-sentence newsletter blurb for this post · ${{ with.post }}"
 

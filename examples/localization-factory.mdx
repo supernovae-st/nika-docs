@@ -46,7 +46,7 @@ flowchart LR
 ```yaml localization-factory.nika
 nika: localization-factory
 
-model: ollama/qwen3.5:4b   # local default · swap for mistral/mistral-large (EU model for EU locales)
+model: ollama/qwen3.5:4b   # local default · swap for mistral/mistral-large-latest (EU model for EU locales)
 
 const:
   lang: "fr"
@@ -117,6 +117,7 @@ tasks:
     on_error:
       recover: null                    # null holds the index open so the zip below stays aligned
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 4000                 # a doc page, not a book · the cost ceiling is a real number
       prompt: |
         Translate to ${{ const.lang }} · keep the markdown structure, leave

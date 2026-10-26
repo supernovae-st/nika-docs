@@ -53,7 +53,7 @@ flowchart LR
 ```yaml standup-digest.nika
 nika: standup-digest
 
-model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b (a fast one-liner job)
+model: ollama/qwen3.5:4b   # local · zero key · swap for groq/llama-3.3-70b-versatile (a fast one-liner job)
 
 permits:
   exec: ["git"]              # the ONE program this workflow may run
@@ -78,6 +78,7 @@ tasks:
       today: ${{ tasks.today.output }}
       history: ${{ tasks.history.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 400          # a standup note is short · the ceiling says so
       prompt: |
         Date · ${{ with.today }}

@@ -164,10 +164,11 @@ tasks:
         mode: jq
         jq: ".hits[:10] | map(.title)"
     on_error:
-      # The honest dry run · offline the host resolves nowhere and this literal
-      # takes over, so the join below is exercised on both paths with the same
-      # binding. It is labelled in the brief so nobody mistakes it for signal.
-      recover: ["(offline rehearsal · no market signal was fetched)"]
+      # The honest stand-in · when the fetch fails (no network, a failing
+      # search) this literal takes over, so the join below is exercised on
+      # both paths with the same binding. It is labelled in the brief so
+      # nobody mistakes it for signal.
+      recover: ["(stand-in · no market signal was fetched)"]
 
   # ── branch 2 · engineering pulse ──
   pulse:
@@ -241,6 +242,7 @@ tasks:
       revenue: ${{ tasks.revenue.output }}
     when: ${{ with.go == true }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 1200               # the cost report becomes a ceiling, not UNBOUNDED
       prompt: |
         Market signal · ${{ with.news }}

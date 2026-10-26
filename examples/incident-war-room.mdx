@@ -188,7 +188,7 @@ tasks:
       backoff_strategy: exponential
       jitter: true
     on_error:
-      recover: []                 # offline · no history to reconstruct from
+      recover: []                 # the poll failed · no history to reconstruct from
 
   runbook:
     with:
@@ -206,6 +206,7 @@ tasks:
       runbook: ${{ tasks.runbook.output }}
     when: ${{ with.runbook != null && size(with.runbook) > 0 }}   # « no » at the gate (null) or an empty answer · nothing to reconstruct
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 1500
       prompt: |
         Deploys in the window ·
@@ -257,9 +258,10 @@ tasks:
         jq: ".current.state"
     on_error:
       # The rehearsal's stand-in says the service came back, so the green path
-      # is the one you see offline. Point --var status_url at a real endpoint
-      # and anything other than « operational » blocks the draft below — that
-      # refusal is the designed path, not a bug in the file.
+      # is the one you see while the placeholder resolves nowhere. Point
+      # --var status_url at a real endpoint and anything other than
+      # « operational » blocks the draft below — that refusal is the designed
+      # path, not a bug in the file.
       recover: "operational"
 
   confirmed:
@@ -278,6 +280,7 @@ tasks:
     after:
       confirmed: success             # state, no data · recovery proven or no draft
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2000
       prompt: |
         Timeline · ${{ with.events }}

@@ -74,9 +74,10 @@ The default shape for « take real data, produce words, save them ».
 ```yaml chain.nika skeleton
 nika: chain-template       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 const:
@@ -113,6 +114,7 @@ tasks:
     with:
       gather: ${{ tasks.gather.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 800               # SLOT: the spend ceiling · sized for the SEAT, not the answer
       # The marker below is a VALUE, not a comment. The parser drops
       # comments, so a `# SLOT:` line could never make `check` refuse —
@@ -185,8 +187,9 @@ tasks:
     extract:
       value: ".value"               # SLOT: the jq path to the watched field
     on_error:
-      # Offline rehearsal · a sample UNDER the threshold — the gate stays
-      # closed, the skeleton runs green before you wire the real source.
+      # Rehearsal stand-in · the placeholder host resolves nowhere, so a sample
+      # UNDER the threshold takes over — the gate stays closed, the skeleton
+      # runs green before you wire the real source.
       recover: { value: 42 }
 
   act:
@@ -215,9 +218,10 @@ The same work for every item of a runtime collection, fully leashed.
 ```yaml fanout.nika skeleton
 nika: fanout-template       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 run:
@@ -292,6 +296,7 @@ tasks:
     on_error:
       recover: null                 # a failed item yields null at its index · the batch lives
     infer:                          # SLOT: the per-item job (any verb)
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2000              # SLOT: the per-ITEM ceiling · think + answer · multiply by the fan width
       # The marker below is a VALUE, not a comment. The parser drops
       # comments, so a `# SLOT:` line could never make `check` refuse —
@@ -339,6 +344,7 @@ tasks:
     with:
       survivors: ${{ tasks.survivors.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 3000              # SLOT: the fan-in ceiling · think + answer
       # SLOT: the fan-in · the survivors array (failed items filtered). Keep
       # slot markers out of the block below — it is prompt TEXT, not YAML.
@@ -418,7 +424,7 @@ tasks:
         mode: jq
         jq: ".records"
     on_error:
-      recover: []                   # offline rehearsal · an empty batch, the delta stays quiet
+      recover: []                   # the fetch failed · an empty batch, the delta stays quiet
 
   delta:
     with:                           # the bindings ARE the edges · previous + fresh → delta
@@ -470,9 +476,10 @@ validate the typed result. Never ship an unleashed agent.
 ```yaml agent-loop.nika skeleton
 nika: agent-loop-template       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 inputs:
@@ -499,6 +506,7 @@ tasks:
       # it emits the first brace, and a ceiling that cuts it off mid-thought
       # fails NIKA-INFER-002 ("no JSON value found · the reply was cut off at
       # the token limit"). Measured — 400 starves qwen3.5:4b on this prompt.
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2000
       schema:
         type: object
@@ -717,9 +725,10 @@ Understand a site from a URL: bounded `traverse:` crawl → one typed brief → 
 ```yaml website-brief.nika skeleton
 nika: website-brief-template       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 const:
@@ -742,14 +751,16 @@ tasks:
         url: "${{ const.site_url }}"
         traverse: { max_pages: 5 }  # SLOT: crawl bound · 1..=25 (robots honored)
     on_error:
-      # Offline rehearsal · a literal standing in for the crawl digest, so the
-      # brief step runs with no network at all. Delete once the site is real.
+      # Rehearsal stand-in · when the crawl fails (no network, a dead host),
+      # this literal stands in for the crawl digest so the brief step still
+      # runs. Delete once the site is real.
       recover: "REHEARSAL DIGEST · Example Co · a small tool company · plain blue and white pages · buttons, a pricing table, one logo."
 
   brief:
     with:
       crawl_site: ${{ tasks.crawl_site.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 1200
       # SLOT: the one model job · what should the brief capture? Keep slot
       # markers out of the block below — it is prompt TEXT, not YAML, so a
@@ -802,9 +813,10 @@ Generate assets from a brief: typed creative direction → `nika:image_generate`
 ```yaml media-asset-pack.nika skeleton
 nika: media-asset-pack-template       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 const:
@@ -827,6 +839,7 @@ permits:                            # the blast radius · default-deny once pres
 tasks:
   brief:
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 600
       # SLOT: the creative direction · style · constraints. Keep slot markers
       # out of the block below — it is prompt TEXT, not YAML, so a stray
@@ -951,7 +964,7 @@ tasks:
         mode: jq
         jq: "{ id: .id, url: .url }"   # SLOT: the fields downstream needs
     on_error:
-      # Offline rehearsal, NARROWED to the one thing it may forgive: the key is
+      # The rehearsal, NARROWED to the one thing it may forgive: the key is
       # not configured. A `secrets:` entry whose env var is unset fails
       # NIKA-VAR-001 before any byte leaves (measured on 0.118.7 · the run
       # settles « 1 recovered » on that code) — that absence IS the rehearsal
@@ -986,9 +999,10 @@ The audited-ops shape: read a system's real state via a pinned CLI (argv-array e
 ```yaml docker-report.nika skeleton
 nika: docker-report-template       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 permits:                            # the blast radius · default-deny once present
@@ -1026,6 +1040,7 @@ tasks:
       ps: ${{ tasks.ps.output }}
       df: ${{ tasks.df.output }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2000              # SLOT: the spend ceiling for this call · think block + report
       # SLOT: what should the model DO with the readings? Keep slot markers out
       # of the block below — everything indented under `prompt: |` is prompt
@@ -1225,6 +1240,7 @@ tasks:
       prompt: '${{ const.brief }}
 
         Item: ${{ item }}'
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2048
       schema:
         type: object
@@ -1249,9 +1265,10 @@ Typed facts → evidence → decision → queue.
 ```yaml classify-and-route.nika skeleton
 nika: classify-and-route       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 const:
@@ -1313,6 +1330,7 @@ permits:
 tasks:
   extract_facts:
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 300                # SLOT: classification spend ceiling
       prompt: |
         Extract the urgency fact from this request. Use 1 only for an active
@@ -1383,9 +1401,10 @@ Canonicalize corpus → retrieve → answer or abstain.
 ```yaml corpus-qa.nika skeleton
 nika: corpus-qa       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 const:
@@ -1466,6 +1485,7 @@ tasks:
       hits: ${{ tasks.retrieve.output }}
     when: ${{ size(with.hits) > 0 }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 500                # SLOT: answer spend ceiling
       prompt: |
         Answer from these passages only and cite their ids.
@@ -1587,9 +1607,10 @@ Source text → anchored facts → nonempty proof.
 ```yaml document-to-fields.nika skeleton
 nika: document-to-fields       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 const:
@@ -1631,6 +1652,7 @@ tasks:
     after:
       document_nonempty: success
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 600                # SLOT: extraction spend ceiling
       prompt: |
         Extract only facts explicitly present in this document. For every
@@ -1686,9 +1708,10 @@ Draft → two fixed critique/revision rounds.
 ```yaml evaluate-and-optimize.nika skeleton
 nika: evaluate-and-optimize       # SLOT: kebab-case workflow id
 
-# This skeleton keeps its authored offline model. Creating a workflow does
+# This skeleton keeps its authored mock model. Creating a workflow does
 # not select a paid provider from ambient credentials. Choose a different
-# model explicitly for a real run; `--model mock/echo` remains offline.
+# model explicitly for a real run; `--model mock/echo` rehearses on the mock
+# model: zero keys, no model call; a fetch step still reaches its host.
 model: mock/echo
 
 const:
@@ -1699,6 +1722,7 @@ permits: {}
 tasks:
   draft:
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 300               # SLOT: the draft ceiling · sized for the SEAT (see CEILINGS)
       prompt: "Draft this deliverable: ${{ const.brief }}"
       schema:
@@ -1712,7 +1736,8 @@ tasks:
     with:
       candidate: ${{ tasks.draft.output.text }}
     infer:
-      max_tokens: 400               # SLOT: the critique ceiling · a reasoning seat's floor is 256 here (measured)
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
+      max_tokens: 400               # SLOT: the critique ceiling · check refuses a reasoning seat under 256 (measured)
       prompt: |
         Critique this candidate against the brief. Name one concrete repair.
         Brief: ${{ const.brief }}
@@ -1730,6 +1755,7 @@ tasks:
       candidate: ${{ tasks.draft.output.text }}
       repair: ${{ tasks.evaluate_1.output.repair }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 300               # SLOT: the revision ceiling · sized for the SEAT
       prompt: |
         Revise the candidate using the repair, without changing the brief.
@@ -1746,6 +1772,7 @@ tasks:
     with:
       candidate: ${{ tasks.optimize_1.output.text }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 400               # SLOT: idem · the same floor applies
       prompt: |
         Critique this revision against the same brief. Name one final repair.
@@ -1764,6 +1791,7 @@ tasks:
       candidate: ${{ tasks.optimize_1.output.text }}
       repair: ${{ tasks.evaluate_2.output.repair }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 300               # SLOT: the final revision ceiling · sized for the SEAT
       prompt: |
         Produce the final revision using the last repair.
@@ -1780,6 +1808,7 @@ tasks:
     with:
       candidate: ${{ tasks.optimize_2.output.text }}
     infer:
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 400               # SLOT: the score-only ceiling · the same floor applies
       prompt: |
         Score the final candidate against the brief. Evaluate the candidate
@@ -1873,6 +1902,7 @@ tasks:
     timeout: 30s
     infer:
       prompt: 'Review clarity and missing explanations. Document: ${{ const.document }}'
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2048
       schema:
         type: object
@@ -1894,6 +1924,7 @@ tasks:
     timeout: 30s
     infer:
       prompt: 'Review unsupported claims and internal contradictions. Document: ${{ const.document }}'
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2048
       schema:
         type: object
@@ -2022,6 +2053,7 @@ tasks:
       prompt: '${{ const.instruction }}
 
         Allowed fields only: ${{ with.public }}'
+      # a reasoning model needs 16384 here, or a documented run.reasoning.effort: low
       max_tokens: 2048
       schema:
         type: object
