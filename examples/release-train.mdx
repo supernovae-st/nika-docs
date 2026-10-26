@@ -390,7 +390,7 @@ outputs:
     nika try release-train
     ```
 
-    The rehearsal brings its own release files, writes nothing in your folder and stops at the `conductor` gate, as a real run does.
+    The rehearsal brings its own release files, writes nothing in your folder and stops at the `conductor` gate, as a real run does. Before it runs, `nika try` names the hosts a step may reach: `may reach: api.example.com — the mock replaces the model, not the network`.
   </Step>
   <Step title="Get your own copy">
     Save the file above as `release-train.nika`. To try it outside a real release, create the three files its gates read:

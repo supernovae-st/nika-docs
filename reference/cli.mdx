@@ -21,7 +21,7 @@ import { CANON } from "/snippets/_canon.mdx";
 | `nika` (no arguments, on a terminal) | Opens the [terminal Session](/getting-started/session): describe an outcome, review the proposed `.nika` file, `yes` saves it, `run it` runs it. `nika --plain` gives the same Session as plain lines; piped, bare `nika` prints the `welcome` mirror |
 | `nika <file>.nika` | The file is the command: the same as `nika run <file>.nika` |
 | `nika welcome [--json] [--deep]` | The mirror: what this binary contains, what this machine has (editors, local servers, key presence), and the next line to type. Offline, always exit 0. `--deep` audits every workflow in the workspace and folds recent runs |
-| `nika try [slug]` | See a canonical workflow work: an offline `mock/echo` rehearsal in a temporary folder, nothing written. Bare `nika try` lists the path and the jobs; `--all` lists everything; `--model` runs one on a real model |
+| `nika try [slug]` | See a canonical workflow work: a `mock/echo` rehearsal in a temporary folder, nothing written. The mock replaces the model (zero keys, no model call), not the network: a step that fetches still reaches its host, and `nika try` prints `may reach: <hosts>` first. Bare `nika try` lists the path and the jobs; `--all` lists everything; `--model` runs one on a real model |
 | `nika compile [intent] [dest]` | Write a workflow from an exact skeleton (`--list`), a bounded intent or a conservative edit (`--base` + `--change`). No destination previews; only a ready result with a destination writes (`--force` replaces). `--json` prints the result and its questions, `--answer KEY=JSON_LITERAL` answers one, `--authoring-model <provider/name>` lets a model you choose author free intent |
 | `nika init [dir]` | Found a repository for agents and editors: `AGENTS.md`, `CLAUDE.md`, `NIKA.md`, the `.agents/skills` authoring skill, Cursor rules and subagents, project MCP configs, Claude Code and Cursor hooks, `.vscode/settings.json`, a commented `nika.yaml` and `workflows/01-hello.nika` ([the full list](/getting-started/agents#nika-init-teach-the-repo)). `--recipe`, `--example`, `--wire`, `--yes`, `--force` |
 | `nika list` | Every `.nika` workflow below the current directory, one relative path per line |
@@ -42,7 +42,7 @@ import { CANON } from "/snippets/_canon.mdx";
 | `nika sign <file>` | Sign a workflow file: mints `<file>.minisig`; `--check` verifies it. `nika run --require-signature` refuses an unsigned file |
 | `nika trace <command>` | Read a run's record (below) |
 | `nika arm` | Read the project's `arm:` registry and print each beat's readiness and next slots, scheduling nothing. `fire` fires one due beat, `migrate` upgrades old sidecars into the chained ledger, `disarm` teaches the disarm gesture; `--emit launchd\|systemd` writes the OS units; `--json` for programs ([`nika arm` reference](/reference/arm)) |
-| `nika serve` | The resident firer of the `arm:` registry. `--once` fires what is due once and exits; `--dry` runs nothing and prints each beat due now, and stays resident unless combined with `--once`. With `--bind`, `--workflows` and `--token-file` it also serves authenticated HTTP: jobs, SSE, cancellation, trace verification, workflows, schedules, compile and OpenAPI. `--state-root`, `--run-cost-ceiling` (1 USD per job by default), `--allow-remote`, `--authoring-model`, `--sessions` (the Session under `/v1/sessions`), `--cost-review` ([Server surfaces](/sdk/operations/server-surfaces)) |
+| `nika serve` | The resident firer of the `arm:` registry. `--once` fires what is due once and exits; `--dry` runs nothing and prints each beat due now, and stays resident unless combined with `--once`. With `--bind`, `--workflows` and `--token-file` it also serves authenticated HTTP: jobs, SSE, cancellation, trace verification, a settled job's artifacts, workflows, schedules, compile and OpenAPI. `--state-root`, `--run-cost-ceiling` (1 USD per job by default), `--allow-remote`, `--authoring-model`, `--sessions` (the Session under `/v1/sessions`), `--cost-review` ([Server surfaces](/sdk/operations/server-surfaces)) |
 | `nika completions <shell>` | Generate shell completions for bash, zsh, fish, elvish or powershell ([setup](/getting-started/installation#shell-completions)) |
 | `nika guard` | The judge behind the agent hooks `nika init` installs: reads a hook payload or a command line, audits every `nika run` it finds, and answers allow or deny without executing anything. Agents never type it |
 
@@ -74,7 +74,7 @@ With no path, they read the workspace's latest trace under `.nika/traces/`.
 |---|---|
 | `--max-cost-usd <USD>` | The run's budget over metered spend. A cost floor above it refuses to start (exit 2, `NIKA-1709`); the call that crosses it mid-run completes, then the run fails `NIKA-1704`. Local and mock models are never blocked. `nika guard` denies a priced run without it. A cloud model the catalog cannot price is refused before any call, with or without the flag (exit 3, `price unknown: …`, no `NIKA-` code), unless an interactive terminal run confirms its one-time cost review; `--max-cost-usd 0` refuses it there too |
 | `--access <class\|seat>` | Pin the access path: a class (`local`, `mock`, `harness`, `oauth`, `api`) or a harness seat (`claude-code`, `codex`, `copilot`, `gemini-cli`, `grok-build`, `kimi-code`, `opencode`, `qwen-code`). An unsatisfied pin refuses and never substitutes |
-| `--model <provider/name>` | Replace the workflow's default `model:` only; task pins and child workflows keep theirs. `--model mock/echo` rehearses offline |
+| `--model <provider/name>` | Replace the workflow's default `model:` only; task pins and child workflows keep theirs. `--model mock/echo` puts the mock, which makes no call, in that default's place; pinned tasks, child workflows and the run's other effects stay real, and a fetch still reaches its host |
 | `--var key=value` | Set an `inputs:` value (repeatable): overrides a `default:`, satisfies `required: true`, parsed as JSON when it parses, unknown keys refused |
 | `--inputs-json -` | Bind literal JSON inputs from stdin (an object, at most 1 MiB): no coercion, no `@env` lookup |
 | `--output json` | Print the typed `outputs:` as one JSON object on stdout |
@@ -95,7 +95,7 @@ With no path, they read the workspace's latest trace under `.nika/traces/`.
 | Flag | What it does |
 |---|---|
 | `--json` | The machine report (`report_version: 1`): `clean`, `verdicts.{valid, access_ready, capacity_fit, run_ready, blockers}`, findings, permits, cost, requirements, `risk_grade` ([Machine surfaces](/reference/machine-surfaces)) |
-| `--fix` | Apply the typed rename repairs (retired fields, misspelled tools and tasks) and audit again |
+| `--fix` | Apply the machine-applicable repairs, then audit again: near-miss renames (field, tool, arg, reference), `with:` hoists (`NIKA-VAR-021`) and retired-form migrations (`needs:`, `depends_on`, `vars:`, a string `exec:`). Other findings stay yours |
 | `--infer-permits` | Print the tightest `permits:` block the file needs |
 | `--native-strict` | Fail while any `native-first` hint remains (an `exec:` a builtin probably covers) |
 | `--profile advisory\|operational` | `operational` fails a risk grade of High or above, and an unready access path |
@@ -138,7 +138,7 @@ is opt-in.
 | `NIKA_IMAGE_LOCAL_URL` · `NIKA_TTS_LOCAL_URL` | Base URL of a local OpenAI-compatible image or speech server |
 | `NIKA_SANDBOX` | `auto` (default), `require` or `off` (an attested waiver) ([Servers](/getting-started/installation#servers-and-headless-linux)) |
 | `NIKA_KEYCHAIN` | `off` keeps the run-signing key out of the OS keychain (key files in `~/.nika/keys/`) |
-| `NIKA_RUN_KEY_FILE` · `NIKA_RUN_PUB_FILE` | An explicit run-signing key pair, for CI |
+| `NIKA_RUN_KEY_FILE` · `NIKA_RUN_PUB_FILE` | An explicit run-signing key pair, for CI or a server, both set: runs seal with it, and `nika trace verify` and `nika serve` weigh its public half first (after `--key`) |
 | `NIKA_TRACE_KEEP` · `NIKA_TRACE_MAX_AGE_DAYS` · `NIKA_TRACE_BUDGET_MB` | Trace retention: traces kept per workflow, maximum age, total size |
 | `NIKA_NO_TRACE_FILE` | Any non-empty value skips the run journal for every run |
 | `NIKA_TUI` | `0` opens the Session as plain lines; `inline` keeps finished blocks in your scrollback |

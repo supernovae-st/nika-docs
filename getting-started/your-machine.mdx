@@ -172,7 +172,8 @@ note.
 
 The `local` row says the providers need a running server; `--ping` checks
 whether one is there. Each probe connects to the default loopback port (300 ms
-cap), then asks the server for its model list with one bounded `GET`:
+cap), then asks the server for its model list with one bounded `GET` of
+`/v1/models`. Here Ollama is running with no model pulled:
 
 ```text
 $ nika doctor --ping
@@ -181,9 +182,15 @@ $ nika doctor --ping
 ⚠ ping       llamacpp — nothing listening on 127.0.0.1:8080
 ⚠ ping       localai — nothing listening on 127.0.0.1:8080
 ⚠ ping       vllm — nothing listening on 127.0.0.1:8000
-⚠ models     ollama — protocol/model availability unverified · model-list HTTP status 404; redirects are not followed
+⚠ models     ollama — compatible model list · no model advertised
 …
 ```
+
+An open port is not taken for an engine on its own: a server that answers a
+web page instead of an API reads
+`accepts connections … but answers a page, not an API … — not a model server`,
+a `401` or `403` reads `key-protected`, and a `404` reads
+`no /v1/models route` (the `nika model serve` sidecar has none).
 
 One reachable server with a model is a fully local inference path: no key, no
 cloud, no account. [Local models](/guides/local-models) sets one up.
