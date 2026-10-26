@@ -100,7 +100,10 @@ file/out/totals.svg image/svg+xml 3669
   `agent_image/1.png` comes from the manifest. Pass it, or the entry itself,
   to `downloadArtifact()` or `readArtifact()`; an entry saves the package a
   manifest request. The manifest carries the job's `receipt`, chain head
-  included, and the package checks that it is the job's own.
+  included, and the package checks that it is the job's own. A file's
+  `path` passes a lexical, POSIX containment check only: to save the file
+  under a local directory, resolve the joined path, check that it stays
+  inside, and open it exclusively (`wx`).
 - **Settled jobs only.** A queued, running or paused job answers
   `job_not_settled`: await `run.result()` first. An interrupted run never
   sealed its journal, so its job answers `artifact_journal_unavailable`.

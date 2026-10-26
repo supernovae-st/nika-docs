@@ -158,7 +158,7 @@ note.
 | `binary` | The engine is self-contained: spec, schema, examples and templates are embedded. |
 | `access` | The access classes `--access` accepts, and the agent apps (harness seats) this build can drive. |
 | `sandbox` | The sandbox this host has (Seatbelt on macOS, bubblewrap on Linux). A `permits:` file with `exec:` does not start on a host that cannot confine it (`NIKA-1710`). |
-| `run-key` | Whether runs will be signed. Captured without a terminal, as above, it says `the keychain is not opened without a terminal`; in a macOS terminal it says `the keychain is not opened by this ad-hoc build`, even for the signed release: 0.123.1 never opens the keychain on macOS. `NIKA_KEYCHAIN=off nika key init` mints the key every process reads ([Seal your runs](/getting-started/installation#seal-your-runs)). |
+| `run-key` | Whether runs will be signed. Captured without a terminal, as above, it says `the keychain is not opened without a terminal`; in a macOS terminal it says `the keychain is not opened by this ad-hoc build`, even for the signed release: 0.123.2 never opens the keychain on macOS. `NIKA_KEYCHAIN=off nika key init` mints the key every process reads ([Seal your runs](/getting-started/installation#seal-your-runs)). |
 | `sidecar` · `models` | Nika's built-in local inference, and whether a model is pulled for it. |
 | `traces` | Run-record retention under `.nika/traces/`: the last N per workflow, an age cap, a size budget, each with its environment override. |
 | `registry` | The agent clients the binary knows, how many `nika wire` can write, how many this machine was probed for. |

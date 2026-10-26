@@ -42,9 +42,9 @@ Two laws govern it:
 
 1. **No `permits:` block → zero authority**, not an unrestricted floor.
    Hardened defaults (SSRF, shell blocklist, secret masking) still apply,
-   and they do **not** grant exec, net, fs, or tools. On 0.123.1,
-   `exec: ["printf", "hello"]` with no `permits:` is `NIKA-AUTH-006` at
-   check, exit 2. Spec 01-envelope · LAW-AUTH-0324.
+   and they do **not** grant exec, net, fs, or tools. On 0.123.2,
+   `exec: { command: ["printf", "hello"] }` with no `permits:` is
+   `NIKA-AUTH-006` at check, exit 2. Spec 01-envelope · LAW-AUTH-0324.
 2. **Any `permits:` block → default-deny for the whole file.** Anything
    not listed is refused. A task reaching beyond the boundary is caught
    by `nika check` (`NIKA-SEC-004` or `NIKA-AUTH-006`, with the exact
@@ -92,7 +92,7 @@ verbatim from the engine (`nika-http`):
     the **only** SSRF carve-out is an exact `permits.net.http` literal —
     the closed set `localhost`, a `127.x.y.z` v4 literal, or `::1` /
     `[::1]`. Clearing is exact-host: a permitted `localhost` does **not**
-    clear `127.0.0.1` (on 0.123.1, that grant with a fetch to
+    clear `127.0.0.1` (on 0.123.2, that grant with a fetch to
     `127.0.0.1` is `NIKA-SEC-005` at check; an exact `127.0.0.1` grant
     passes);
     a public name that resolves to loopback stays refused; RFC1918 /

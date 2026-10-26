@@ -279,7 +279,7 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: 9023dc52440ceed2d9a2e4b3f3cee17404f38cffef11f848d699d551453ff21c
+  sha256: 760a3942b6adce483a0ae6ba8630d7203804d933d892400355f41f66964a50b9
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 - path: "snippets/data/releases.json"
@@ -296,7 +296,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 293
-  aggregate_sha256: 0ba74210ffe8ad161f3bbdfd8776b2b0c601c15b8475748202e684dc449ab492
+  aggregate_sha256: c664ff23b361166b88837a69df65f9468851901f3fbb79bfabffba16c659bfac
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -325,7 +325,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: b5d26c20685dbc025a673ba3ccaffa1cb4150f1c072b18a48abc5804dcf3dd96
+  aggregate_sha256: 7334831a51e0afe2aaea9416cd2deddcd989fd5482dccfba99246daf1c1a1da9
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:

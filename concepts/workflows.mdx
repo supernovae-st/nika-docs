@@ -69,7 +69,7 @@ comment), so a version number the author types would carry no information.
   RDF / conformance tooling, but the author never types a URL.
 
 A `.nika` file holds **one** workflow. Do not separate several with `---`:
-0.123.1 reads only the first document and ignores the rest without a
+0.123.2 reads only the first document and ignores the rest without a
 warning, even an invalid one.
 
 ## Anatomy of a workflow
@@ -478,7 +478,7 @@ nika run brief-with-stats.nika --var topic="local-first AI"
 - **Static target** — `workflow:` is a static filesystem path. A
   `${{ }}`-templated target is refused (`NIKA-COMP-001`): a call graph you
   cannot draw before the run is a call graph you cannot bound. A
-  `registry:` child is refused the same way in 0.123.1
+  `registry:` child is refused the same way in 0.123.2
   ([Known limits](/changelog/known-limits)).
 - **Typed call** — the parent's `args:` must fit the child's `inputs:`, and
   what the parent declares in `returns:` must fit the child's `outputs:`
@@ -516,7 +516,7 @@ caller can pass is declared in `inputs:`:
 - **A supplied value overrides a declared `default:`.** `--var bullets=5`
   wins over `default: 3` for this run.
 - **It satisfies `required: true`.** A required input with no default must
-  be supplied at launch. On 0.123.1, `nika check` stays clean and
+  be supplied at launch. On 0.123.2, `nika check` stays clean and
   prints `HINT [inputs] required input(s) with no default · pass at run
   time: --var name=…`. `nika run` refuses before any task:
   `NIKA-1708 · missing required inputs` (exit 3). The SDK throws

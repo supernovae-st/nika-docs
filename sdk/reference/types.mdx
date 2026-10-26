@@ -148,7 +148,7 @@ non-null `candidate` is a preview, never a result to run or save.
 ```ts
 interface NikaArtifactManifest {
   receipt: NikaReceipt              // the job's own, chain head included: the SDK checked it
-  verdict: 'sealed' | 'anchored' | (string & {})
+  verdict: 'sealed' | 'anchored'    // the sealed journal's tier: any other word is refused
   max_artifact_bytes: number        // the server's download bound (256 MiB; no flag changes it)
   truncated: boolean                // more than the 1,024 listed entries exist
   artifacts: NikaArtifact[]         // in journal order; a file written twice appears once
@@ -183,9 +183,13 @@ interface NikaArtifactReadOptions extends NikaArtifactDownloadOptions {
 }
 ```
 
-A server's manifest is checked field by field: names are unique, sizes are
-byte counts, digests are SHA-256 and a file's `path` is contained; any other
-key rides through. The download stream errors with `NikaProtocolError` for
+A server's manifest is checked field by field: the `verdict` is `sealed` or
+`anchored`, names are unique, sizes are byte counts, digests are SHA-256 and
+a file's `path` is contained; any other key rides through. The `path` check
+is lexical and POSIX, the server's own, so it does not make a path safe to
+join under a local directory on every system: to write an artifact under
+yours, resolve the joined path, check that it stays inside, and open it
+exclusively (`wx`). The download stream errors with `NikaProtocolError` for
 bytes that are not the recorded ones, `NikaOperationError` for a server
 refusal on a retry (`artifact_changed`), and `NikaTransportError` for a
 download that stayed incomplete or was aborted.

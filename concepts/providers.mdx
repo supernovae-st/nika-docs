@@ -11,7 +11,7 @@ import { CANON } from "/snippets/_canon.mdx";
 A task names its model as `<provider>/<name>`. The language specification
 names **{CANON.providers} canonical providers**
 ([spec catalog](https://github.com/supernovae-st/nika-spec/blob/main/stdlib/providers-v0.1.md)),
-and the 0.123.1 binary drives exactly those: {CANON.providersLocal} local
+and the 0.123.2 binary drives exactly those: {CANON.providersLocal} local
 servers, {CANON.providersCloud} cloud APIs, and `mock`, the rehearsal
 provider that makes no model call. The engine's catalog records
 {STATUS.providers} entries: `nika catalog` lists the ones this build cannot
@@ -88,7 +88,7 @@ Every wire lives in one crate, `nika-providers`. The catalog records three
 API dialects (`openai-chat`, `anthropic`, `gemini`); at run time Ollama gets
 its own native wire:
 
-| Wire | Providers in 0.123.1 | Notes |
+| Wire | Providers in 0.123.2 | Notes |
 |---|---|---|
 | `openai-chat` | mistral · scaleway · openai · deepseek · xai · groq · openrouter · huggingface · nvidia · moonshot · lmstudio · llamacpp · localai · vllm | OpenAI's `/v1/chat/completions` shape, with a per-provider base URL and auth header. A request with tools to OpenAI's own endpoint uses its Responses API |
 | Ollama native | ollama | Ollama's `/api/chat`, which keeps Ollama's own context guards |
@@ -104,9 +104,9 @@ complete endpoint and `NIKA_<ID>_API_KEY` its key, and the file keeps
 <Note>
   **Built-in local inference.** `nika model pull` downloads a GGUF model and
   `nika model serve` starts an OpenAI-compatible server on `127.0.0.1:8712`
-  (Qwen3-family models in 0.123.1); a workflow reaches it as
+  (Qwen3-family models in 0.123.2); a workflow reaches it as
   `llamacpp/<model id>` with `NIKA_LLAMACPP_BASE_URL` set. The `native/`
-  catalog id is not wired in 0.123.1. See [Local models](/guides/local-models).
+  catalog id is not wired in 0.123.2. See [Local models](/guides/local-models).
 </Note>
 
 ## Capability rules
