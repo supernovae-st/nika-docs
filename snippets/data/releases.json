@@ -3,6 +3,19 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.123.2",
+      "name": "v0.123.2",
+      "publishedAt": "2026-10-26T09:53:57Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.123.2",
+      "assetCount": 8,
+      "highlights": [
+        "nika serve downloads the artifacts a settled job's sealed journal records.",
+        "crypto-bigint moves from the yanked 0.7.6 to 0.7.9.",
+        "The SDK guard reads what the published @supernovae-st/nika 0.123.1 closes."
+      ],
+      "notesSha256": "352361d2f6080d578e3bb783cba2ba209dedea33880cc8509bffae5e6b11b852"
+    },
+    {
       "tag": "v0.123.1",
       "name": "v0.123.1",
       "publishedAt": "2026-10-25T11:12:44Z",
