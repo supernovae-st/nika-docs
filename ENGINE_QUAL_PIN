@@ -3,4 +3,4 @@
 # judge and are not this file. Qualification builds nika from this exact
 # commit and runs oracle-sweep / arm plants against that binary.
 # Bump deliberately when the engine worker publishes a new SHA.
-9792436c6dccdffed08d2916c0fb668becc1da90
+a03fc0fba4190de15713bac3d9f1620643538af4
