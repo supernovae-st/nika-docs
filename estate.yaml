@@ -325,7 +325,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: 7334831a51e0afe2aaea9416cd2deddcd989fd5482dccfba99246daf1c1a1da9
+  aggregate_sha256: a9f66840dfa5da8ff0d4bef2333bfbb57141f4f8b3ddcbcd0aa9c04d0fa71923
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:
