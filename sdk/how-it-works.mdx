@@ -132,6 +132,14 @@ Measured with `@supernovae-st/nika` 0.123.0 and its bundled engine, and
 | `schedule()`, `listWorkflows()` | refused | the server's schedules and served workflows |
 | `compile()` | deterministic; `authoringModel` seats a model | deterministic; a model round needs a server started with `--authoring-model` |
 
+Since 0.123.2, `run()` and `check()` also take `access`, the engine's access
+pin, on both doors: a served name carries it as `JobByName.access` or
+`CheckByName.access`, and a snapshot of a local file refuses it. On a server
+only, `run.artifacts()`, `run.readArtifact()` and `run.downloadArtifact()`
+return the files a settled job's sealed journal records; a local run's files
+are where its workflow wrote them
+([Outputs and artifacts](/sdk/remote/artifacts)).
+
 ## Your first run, either door
 
 The [quickstart](/sdk/start/quickstart) runs one workflow on the local engine

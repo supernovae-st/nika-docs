@@ -19,7 +19,7 @@ Three surfaces sound like servers but accept different clients.
 <ProjectContract />
 <RemoteContract sdk={SDK} />
 
-## Released OpenAPI routes (0.123.1, default server)
+## Released OpenAPI routes (0.123.2, default server)
 
 | Method and path | Contract |
 |---|---|
@@ -33,16 +33,23 @@ Three surfaces sound like servers but accept different clients.
 | `GET /v1/jobs/{id}/events` | SSE event stream |
 | `POST /v1/jobs/{id}/cancel` | cancellation action; 202 remains pending, 200 returns a completed observation |
 | `GET /v1/jobs/{id}/trace/verify` | the CLI verifier's verdict on the journal the server wrote for that job |
+| `GET /v1/jobs/{id}/artifacts` | a settled job's artifact manifest, read from its sealed journal and bound to its receipt |
+| `GET /v1/jobs/{id}/artifacts/{name}` | one artifact's bytes, streamed and checked against the size and SHA-256 its journal records |
 | `GET /v1/workflows` | contained names |
 | `GET /v1/workflows/{name}` | path-free metadata |
 | `GET /v1/schedules/{id}` | schedule status |
 | `PUT /v1/schedules/{id}` | CAS-backed schedule apply |
 
-The contract has no `POST /v1/run`, job-list, artifact, schedule-list,
-schedule-delete, trigger or backfill routes. `GET /v1/jobs/{id}/trace/verify`
-answers in the CLI's words, lower case: `ok` (intact, unsigned), `sealed`,
-`anchored` and `replayed` hold; `incomplete`, `tampered` and `broken` do not;
-`unavailable` means the server holds no journal for that job.
+The contract has no `POST /v1/run`, job-list, schedule-list, schedule-delete,
+trigger or backfill routes, and no artifact upload or deletion.
+`GET /v1/jobs/{id}/trace/verify` answers in the CLI's words, lower case: `ok`
+(intact, unsigned), `sealed`, `anchored` and `replayed` hold; `incomplete`,
+`tampered` and `broken` do not; `unavailable` means the server holds no
+journal for that job. Both artifact routes answer only for a settled job whose
+journal verifies sealed: [Outputs and artifacts](/sdk/remote/artifacts) covers
+the client side, and the
+[server runbook](/sdk/operations/server-runbook#artifact-downloads) what the
+door exposes.
 
 ```sh
 nika serve --bind 127.0.0.1:18765 \
@@ -69,7 +76,7 @@ const result = await run.result()
 ```
 
 This path needs no resident server. These examples target the published
-`@supernovae-st/nika@0.123.1` npm package (bundled engine 0.123.1). The
+`@supernovae-st/nika@0.123.2` npm package (bundled engine 0.123.2). The
 standalone engine CLI releases independently.
 
 ## Local model path
@@ -80,7 +87,7 @@ nika model serve --model unsloth/Qwen3-4B-Instruct-2507-GGUF
 ```
 
 `nika model serve` loads only models it has pulled (or a `.gguf` path), of
-the Qwen3 family in 0.123.1, and serves them on `127.0.0.1:8712`. A workflow
+the Qwen3 family in 0.123.2, and serves them on `127.0.0.1:8712`. A workflow
 reaches it as a local provider: export
 `NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712` and use
 `model: llamacpp/<model id>`, as the banner prints. Application code does not

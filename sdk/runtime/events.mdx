@@ -48,8 +48,11 @@ one-task `hello.nika`, measured on 0.123.0:
 | Local engine | six: `run.started` → `task.scheduled` → `task.started` → `task.completed` → `engine.event` (the engine's `workflow_completed`) → `run.settled` (`succeeded`) |
 | `nika serve` | two: `run.started` → `run.settled` (`succeeded`). The server streams no per-task frame, and the SDK never invents one |
 
-A failing task adds `task.failed` locally (with `event.error`), and the
-settlement reads `failed`. A human gate ends the stream with `run.waiting`
+A server job admitted with a non-empty `inputs` map opens with one more, an
+`engine.event` for the server's `execution.queued` frame (sequence 1, with no
+`status`; the frame's `queued` stays on `event.raw.status`). A failing task
+adds `task.failed` locally (with `event.error`), and the settlement reads
+`failed`. A human gate ends the stream with `run.waiting`
 (`paused`) on both doors. Longer workflows emit more: never assert a fixed
 count, and build a server-side progress view from `run.started`, the final
 event and `run.status()`.
@@ -133,9 +136,9 @@ event and `run.status()`.
 | `run.settled` | `run_settled` carrying `succeeded`, `failed` or `cancelled` | `execution.settled` (or `execution.cancelled`, `execution.refused`) carrying the final status |
 | `run.interrupted` | `workflow_interrupted` | `execution.interrupted` |
 | `run.sealed` | a `run_sealed` frame, if an engine streams one | none |
-| `engine.event` | every other frame (`workflow_completed`, `permit_checked`…) | every other frame |
+| `engine.event` | every other frame (`workflow_completed`, `permit_checked`…) | every other frame: `execution.queued` (a job admitted with inputs), a future kind |
 
-`run.sealed` names a frame engine 0.123.1 does not stream: it writes the seal
+`run.sealed` names a frame engine 0.123.2 does not stream: it writes the seal
 to the run's record only. Read `result.receipt.sealed` locally, or
 [`traceVerify(receipt)`](/sdk/runtime/receipts), to know whether a run is sealed.
 

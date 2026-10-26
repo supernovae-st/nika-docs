@@ -29,12 +29,14 @@ project root, not from `--workflows`. An explicit local path such as
 sends those captured bytes; a snapshot freezes inputs, so `inputs` is refused
 on that form.
 
-Remote run options accept `idempotencyKey` and, where the server advertises
-`jobInputs`, literal `inputs`. `vars`, `model` and `maxCostUsd` are refused
-with `NikaCompatibilityError` (`capability: 'runOptions'`) because their
-request envelopes do not exist. A fresh `randomUUID()` per retry defeats the
-contract: the key is what lets the server return the original job instead of
-starting a second one. Keys cover the whole `--state-root` and do not expire,
+Remote run options accept `idempotencyKey`, `access` (the job's access pin,
+sent as `JobByName.access` beside a served name) and, where the server
+advertises `jobInputs`, literal `inputs`. `vars`, `model` and `maxCostUsd` are
+refused with `NikaCompatibilityError` (`capability: 'runOptions'`) because
+their request envelopes do not exist. A snapshot of a local file carries no
+pin either: `access` beside one is refused (`capability: 'snapshotAccess'`).
+A fresh `randomUUID()` per retry defeats the contract: the key is what lets
+the server return the original job instead of starting a second one. Keys cover the whole `--state-root` and do not expire,
 so never reuse one for another operation.
 
 ## Spend on the server
@@ -56,6 +58,12 @@ for await (const event of run.events()) {
 
 const result = await run.result()
 ```
+
+The default `machineBufferBytes`, 16 MiB, is the bound of the server's own job
+store, so every result the server settles reaches `run.result()`. A client
+configured with a smaller bound is refused with a `NikaProtocolError` that
+names the size to set; the job keeps its result, and `attachRun()` with a
+larger bound reads it again.
 
 ## Recover after a process restart
 
@@ -81,7 +89,7 @@ terminal event. Only a server job id is durable: a local `run.id` is a
 throwaway id, and `attachRun()` refuses it.
 
 <Warning>
-  **A paused job stays paused.** In 0.123.1, `nika serve` has no route to
+  **A paused job stays paused.** In 0.123.2, `nika serve` has no route to
   answer a human gate: a job that reaches a `nika:prompt` without a
   `default:` settles `paused` (a `run.waiting` event), no request resumes it,
   and cancelling it answers `already_settled`. For served workflows, give
@@ -106,6 +114,22 @@ job cancelled before its execution started settles `cancelled` on the reply
 itself (`200`), and a job that already ended answers `accepted: false`,
 `status: 'already_settled'`. The API has no job-list route, so application
 indexes remain application-owned.
+
+## Download what it produced
+
+Once the job has settled, `run.artifacts()` lists the files its sealed journal
+records, and `run.readArtifact()` or `run.downloadArtifact()` returns their
+bytes, proven against the recorded size and SHA-256. A handle from
+`attachRun()` has the same methods, so a recovered job's files stay
+reachable by its id:
+
+```ts
+const recovered = await nika.attachRun(saved.jobId)
+const { artifacts } = await recovered.artifacts()
+```
+
+[Outputs and artifacts](/sdk/remote/artifacts) covers what is listed, what a
+download proves and its refusals.
 
 <CardGroup cols={2}>
   <Card title="SSE streaming" icon="wave-pulse" href="/sdk/remote/streaming">

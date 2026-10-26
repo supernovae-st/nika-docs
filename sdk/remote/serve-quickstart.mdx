@@ -108,7 +108,10 @@ starts one on your machine and drives it with the client from the
 
     `run.id` is the server's durable job id: the one to store. `ok unsealed`
     means the record is intact but the server has no run-signing key; with a
-    key in the server's `~/.nika/keys/`, the verdict is `sealed`.
+    key in the server's `~/.nika/keys/`, or the explicit `NIKA_RUN_KEY_FILE`
+    and `NIKA_RUN_PUB_FILE` pair the server was started with, the verdict is
+    `sealed`, and a sealed job's [artifacts](/sdk/remote/artifacts) can be
+    downloaded.
   </Step>
   <Step title="Stop it">
     `Ctrl+C` (or `SIGTERM`) stops new admissions, then lets running and queued

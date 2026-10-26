@@ -1,6 +1,6 @@
 ---
 title: "Outputs and artifacts"
-description: "Use run outputs honestly while artifact HTTP routes remain absent."
+description: "Read a run's outputs, and download the files a settled server job produced, each proven against its sealed journal."
 sidebarTitle: "Outputs and artifacts"
 icon: "box-archive"
 ---
@@ -9,9 +9,13 @@ import { SDK, RemoteContract } from "/snippets/_sdk-contract.mdx"
 
 <RemoteContract sdk={SDK} />
 
-The pinned OpenAPI has no artifact list, download or streaming route, and One
-SDK exposes no artifact methods. Do not construct URLs or convenience methods
-that the server does not advertise.
+A run hands back two kinds of result. Its `outputs:` arrive on the settlement
+event and on `run.result()`. The files it saved stay where the workflow wrote
+them: on a `nika serve` job, the server lists the ones the job's sealed journal
+records and serves their bytes, so your application gets a chart, an image or
+an audio file without base64 in `outputs` and without a second store.
+
+## Outputs
 
 Engine-owned outputs arrive on events and the terminal result:
 
@@ -31,14 +35,150 @@ await persistOutputs(run.id, result.outputs)
 shape. Validate it at the application boundary before mapping it into business
 state.
 
-When a workflow writes files, the engine owns their placement and authority.
-`nika serve` 0.123.1 has no route to retrieve them: return what your
-application needs through the workflow's `outputs:`, or have the workflow
-write to a store your application controls.
+## Artifacts of a server job
+
+This served workflow saves one chart:
+
+```yaml chart.nika
+nika: chart
+permits:
+  fs: { write: ["out/totals.svg"] }
+  tools: ["nika:chart"]
+tasks:
+  draw:
+    invoke:
+      tool: "nika:chart"
+      args:
+        data: [{ region: "north", total: 10 }, { region: "south", total: 4 }]
+        chart: { type: bar, x: region, y: total }
+        out: "out/totals.svg"
+```
+
+Saved as `workflows/chart.nika` on a server started with
+`--workflows ./workflows`, it runs by its served name, and its settled job
+lists the SVG:
+
+```ts
+import { createWriteStream } from 'node:fs'
+import { rename } from 'node:fs/promises'
+import { Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
+
+const run = await nika.run('workflows/chart.nika', { idempotencyKey: 'chart-2026-10-26' })
+await run.result() // artifacts are served once the job has settled
+
+const manifest = await run.artifacts()
+for (const artifact of manifest.artifacts) console.log(artifact.name, artifact.mime, artifact.size)
+
+// The whole bytes, proven before they resolve (16 MiB at most by default).
+const svg = await run.readArtifact(manifest.artifacts[0]!)
+
+// Or a stream: write it under a temporary name, keep the file once the stream closed.
+const download = await run.downloadArtifact('file/out/totals.svg')
+await pipeline(Readable.fromWeb(download.stream), createWriteStream('totals.svg.part'))
+await rename('totals.svg.part', 'totals.svg')
+```
+
+```text
+file/out/totals.svg image/svg+xml 3669
+```
+
+- **What is listed.** The files `nika:chart`, `nika:image_generate`,
+  `nika:tts_generate` and `nika:image_fx` saved inside the server's project,
+  and the images an agent's harness sent, which the server keeps. Each entry
+  has a `name`, its `kind` (`file` or `agent_image`), a file's `path`, the
+  recorded `size` and `sha256`, its `mime`, the `task` and the journal
+  `event_id`. What `nika:write` and `nika:edit` wrote is not listed: their
+  journal frame records no digest. To serve a file, save it with one of the
+  four builtins.
+- **A name is a key, never a path.** `file/out/totals.svg` or
+  `agent_image/1.png` comes from the manifest. Pass it, or the entry itself,
+  to `downloadArtifact()` or `readArtifact()`; an entry saves the package a
+  manifest request. The manifest carries the job's `receipt`, chain head
+  included, and the package checks that it is the job's own.
+- **Settled jobs only.** A queued, running or paused job answers
+  `job_not_settled`: await `run.result()` first. An interrupted run never
+  sealed its journal, so its job answers `artifact_journal_unavailable`.
+- **A sealed journal only.** The server serves nothing from a journal that is
+  not sealed, intact and headed by the receipt's `chain_head`
+  (`artifact_journal_unverified`). Give the server a run key before the jobs
+  you want to download from: [Server runbook](/sdk/operations/server-runbook#artifact-downloads)
+  shows both ways.
+
+## What a download proves
+
+The server reads the whole file against its journal record before the first
+byte leaves, then checks every chunk again while it streams. The package
+checks the bytes a third time on arrival:
+
+- `downloadArtifact()` resolves once the response carries the recorded size
+  (`Content-Length`) and digest (`Nika-Artifact-Sha256`). Its `stream` hashes
+  each chunk, holds the last one back, and closes only once exactly the
+  recorded size hashed to the recorded SHA-256. Otherwise it errors, and what
+  you wrote is not the artifact, which is why the example writes a temporary
+  file first.
+- `readArtifact()` resolves only with proven bytes, and refuses an artifact
+  larger than `maxBytes` (16 MiB by default) with `NikaConfigurationError`
+  before downloading it: stream that one instead.
+- A body cut short is requested again, up to 3 more times; the server has no
+  range requests, so each attempt is the whole artifact, and its first bytes
+  must hash as before. A file that changed since the run answers
+  `artifact_changed`: the server never serves other bytes as the recorded
+  ones.
+- Neither `machineBufferBytes` nor `requestTimeout` bounds a download. Stop it
+  with `signal`, or cancel the stream; an unread stream holds its connection
+  open.
+
+## Refusals
+
+Every refusal of the two routes is a `NikaOperationError` with the server's
+`code`, its HTTP `status`, and `operation` `artifacts`, `downloadArtifact` or
+`readArtifact`:
+
+| `code` | Status | Meaning |
+|---|---|---|
+| `job_not_settled` | 409 | queued, running or paused |
+| `artifact_journal_unavailable` | 409 | no journal records the job: its receipt names no chain head (an interrupted run), or no journal by its identity exists |
+| `artifact_journal_unverified` | 409 | the journal is unsealed, edited, or sealed with a run key the server does not know |
+| `artifact_not_found` | 404 | no entry by that name in the manifest |
+| `artifact_changed` | 409 | the bytes at the recorded place no longer match the journal |
+| `artifact_too_large` | 403 | larger than the server's `max_artifact_bytes` (256 MiB by default); it stays listed |
+| `artifact_capacity` | 503 | every artifact slot is busy; retry shortly |
+
+Two refusals happen before any request, with `NikaCompatibilityError`
+(`capability: 'artifacts'`): a server whose `/health` does not list
+`artifacts`, and a local run.
+
+## A local run
+
+A local run has no artifact manifest: its files are where its workflow wrote
+them, under the client's `cwd`, and the three methods reject with
+`NikaCompatibilityError`. Read those files directly, or return what your
+application needs through the workflow's `outputs:`.
+
+## Without the SDK
+
+Both routes take the server's Bearer token. `{name}` is an entry's `name`,
+with its `/` sent as is or as `%2F`:
+
+```sh
+TOKEN="$(cat .nika/serve.token)"
+curl -s -H "Authorization: Bearer $TOKEN" \
+  http://127.0.0.1:8787/v1/jobs/<id>/artifacts
+curl -s -H "Authorization: Bearer $TOKEN" -o totals.svg \
+  http://127.0.0.1:8787/v1/jobs/<id>/artifacts/file/out/totals.svg
+```
+
+The bytes come with `Content-Type` (the entry's `mime`), `Content-Length`,
+`Nika-Artifact-Sha256`, `Content-Disposition: attachment`,
+`X-Content-Type-Options: nosniff`, `Content-Security-Policy: sandbox` and
+`Cache-Control: no-store`. A body shorter than its `Content-Length` is an
+incomplete download: retry it. The server's own `GET /v1/openapi.json`
+declares both routes, their headers and their refusals.
 
 <CardGroup cols={2}>
   <Card title="Jobs" icon="list-check" href="/sdk/remote/jobs">
-    Keep outputs attached to the run identity.
+    Keep outputs and artifacts attached to the run identity.
   </Card>
   <Card title="Receipts" icon="link" href="/sdk/runtime/receipts">
     Store proof beside the terminal result.

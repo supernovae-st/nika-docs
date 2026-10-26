@@ -1,6 +1,6 @@
 ---
 title: "SDK method index"
-description: "Every method of @supernovae-st/nika 0.123.1, what it returns, and which transport serves it."
+description: "Every method of @supernovae-st/nika 0.123.2, what it returns, and which transport serves it."
 sidebarTitle: "Method index"
 icon: "list"
 ---
@@ -18,6 +18,9 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 | `run.result()` | `Promise<NikaRunResult>` | yes | yes |
 | `run.cancel()` | `Promise<NikaCancelResult>` | yes | yes |
 | `run.status()` | `Promise<NikaRunStatus>` | no | yes |
+| `run.artifacts(options?)` | `Promise<NikaArtifactManifest>` | no | yes: a settled job's manifest ([Outputs and artifacts](/sdk/remote/artifacts)) |
+| `run.downloadArtifact(artifact, options?)` | `Promise<NikaArtifactDownload>` | no | yes: a stream that closes once its bytes are proven |
+| `run.readArtifact(artifact, options?)` | `Promise<Uint8Array>` | no | yes: the proven bytes, up to `maxBytes` (16 MiB by default) |
 | `traceVerify(receipt, options?)` | `Promise<NikaTraceVerifyResult>` | yes | yes: the server's verdict on its journal (`ok`, `sealed`…; `unavailable` when it holds none) |
 | `attachRun(id, options?)` | `Promise<NikaRun>` | no | yes |
 | `listWorkflows()` | `Promise<readonly string[]>` | no | yes |
@@ -29,7 +32,10 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 `check()` returns the engine's local findings report, or the server's typed
 acknowledgement or refusal for a served name. `run.cancel()` may acknowledge a
 pending request; it never replaces `run.result()`. Methods that need a server
-throw `NikaCompatibilityError` on the local transport. The run-handle methods
+throw `NikaCompatibilityError` on the local transport. The three artifact
+methods reject the same way, before any request, on a server whose `/health`
+does not list `artifacts`; `attachRun()` handles have them too, and `artifact`
+is a manifest `name` or the entry itself. The run-handle methods
 are bound to their run; only the deprecated facade wrappers
 (`nika.events(run)`, `nika.cancel(run)`, `nika.status(run)`) check that a run
 belongs to this client, with `NikaRunOwnershipError`.
@@ -43,7 +49,7 @@ on a server that lists `compileNativeV2`, or `authoringModel` on a local
 engine. `nextCompileRequest(request, outcome, answers)` builds the next round
 from the outcome's questions, and `isNikaCompileHeld(outcome)` tells a
 candidate the verifier held, a preview never to run. The package's
-[compile guide](https://github.com/supernovae-st/nika-client/blob/v0.123.1/docs/compile.md)
+[compile guide](https://github.com/supernovae-st/nika-client/blob/v0.123.2/docs/compile.md)
 covers both doors.
 
 <Accordion title="Compatibility aliases">
@@ -54,7 +60,8 @@ covers both doors.
 </Accordion>
 
 The facade intentionally has no version, plan, buffered-run, golden-test,
-health, webhook, artifact or environment-constructor convenience methods.
+health, webhook or environment-constructor convenience methods. A run's
+artifacts are read through its handle, never by a URL your code builds.
 
 <CardGroup cols={2}>
   <Card title="Configuration" icon="sliders" href="/sdk/reference/configuration">

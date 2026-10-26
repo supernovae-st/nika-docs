@@ -143,8 +143,15 @@ Over HTTP, a refusal the server types as `{ error: { code, message } }`
 becomes a `NikaOperationError` whose `status` is the **HTTP status** (`404`
 not found, `409` conflict, `412` stale schedule revision, `422` refused) and
 whose `code` is the server's (`not_found`, `idempotency_conflict`,
-`schedule_conflict`, a stamped `NIKA-…` admission code). Messages carry no
+`schedule_conflict`, a stamped `NIKA-…` admission code). The artifact
+methods add theirs (`job_not_settled`, `artifact_journal_unverified`,
+`artifact_changed`, `403` `artifact_too_large`, `503` `artifact_capacity`…),
+with `operation` `artifacts`, `downloadArtifact` or `readArtifact`
+([Outputs and artifacts](/sdk/remote/artifacts#refusals)). Messages carry no
 paths, and a reflected bearer token is redacted.
+
+A frame or document larger than `machineBufferBytes` (16 MiB by default) is a
+`NikaProtocolError` whose message names the option and the size to set.
 
 ## The error tree
 

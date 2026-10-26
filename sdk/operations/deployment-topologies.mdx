@@ -17,7 +17,7 @@ what protocol crosses the process edge.
 
 | Need | Use | Status | Boundary |
 |---|---|---|---|
-| Product code starts a workflow | local `Nika` | Published npm 0.123.1 (bundled engine) | native process |
+| Product code starts a workflow | local `Nika` | Published npm 0.123.2 (bundled engine) | native process |
 | The project clock starts work | `nika serve` (no `--bind`) | Live | `nika.yaml arm[]` to the resident firer |
 | An application admits jobs over HTTP | `Nika` + `nika serve --bind` | Published SDK · released engine | Bearer + OpenAPI · cancellation requests an action |
 | The host scheduler starts work | `nika arm --emit` | Live | launchd or systemd to `nika arm fire` |
@@ -69,8 +69,9 @@ call (`NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712`, then
 
 `nika serve --bind` is not `nika model serve`, and it is not bare `nika serve`.
 The pinned OpenAPI exposes cancellation as an action; the runtime's
-settlement determines the result. Artifact routes, job listing and
-`POST /v1/run` remain absent.
+settlement determines the result. A settled job's artifacts download from its
+sealed journal ([Outputs and artifacts](/sdk/remote/artifacts)). Job listing
+and `POST /v1/run` remain absent.
 
 ## Architecture view
 
@@ -80,7 +81,7 @@ settlement determines the result. Artifact routes, job listing and
 
 nika.yaml ──── nika serve / OS ─────────── arm fire              [ LIVE ]
 
-nika serve --bind ── Bearer ── jobs / SSE / cancel / workflows    [ LIVE · no run route or artifacts ]
+nika serve --bind ── Bearer ── jobs / SSE / cancel / workflows    [ LIVE · artifacts · no run route ]
 
 nika engine ── OpenAI-compatible loopback ─ model serve          [ LIVE ]`}</pre>
 </div>
