@@ -21,7 +21,7 @@ than guessed by a model, and an optional founders ping that says whether
 the brief landed.
 
 <Warning>
-  **Limit on macOS in 0.123.2.** The sandbox confines `exec: git` to the
+  **Limit on macOS in 0.124.0.** The sandbox confines `exec: git` to the
   workflow's declared filesystem boundary, which grants no read of `.git`
   or of git's global configuration. The confined `git` exits with status
   128, even inside a real repository, so `pulse` takes its
@@ -357,7 +357,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`), network access to `hn.algolia.com` for the market signal (offline, it recovers to a labelled stand-in), and the sample KPI sheet. The engineering pulse reads Git, which is refused on macOS in 0.123.2 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`), network access to `hn.algolia.com` for the market signal (offline, it recovers to a labelled stand-in), and the sample KPI sheet. The engineering pulse reads Git, which is refused on macOS in 0.124.0 ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
 </Note>
 
 <Steps>

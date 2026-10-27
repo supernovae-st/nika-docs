@@ -5,9 +5,6 @@ sidebarTitle: "Known limits"
 icon: "triangle-exclamation"
 ---
 
-{/* TODO(release 0.124.0): re-verify every limit on this page against the
-    released v0.124.0 binary before merging. */}
-
 These are the known limits of Nika 0.124. Each one says what happens and what
 you can do about it today. They describe this release, not a promise about the
 next one: the [roadmap](/changelog/roadmap) covers direction, and
@@ -184,8 +181,11 @@ secret reaches a model only through an `egress:` rule you declare on it
   `openai`.
 - **Quarantined files of a failed run** are named on standard error only, not
   in the `--json` output.
-- **A model the catalog does not list, under a cap,** stops the run with exit
-  `3` and no error code in the `--json` envelope (`code: null`).
+- **A model chosen at run that the catalog does not list, under a cap,** (a
+  `model:` templated from an input, for example) stops the run before any
+  provider call with exit `3` and no error code in the `--json` envelope
+  (`code: null`). A literal `model:` the catalog does not list is refused at
+  launch with `NIKA-1709`.
 - **`nika serve` artifacts.** Files that a `for_each` task saves are missing
   from a job's artifact list; read them from the run's output directory.
 - **OpenRouter under a cap.** An unattended run under a cap, such as a beat,

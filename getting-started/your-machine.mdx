@@ -18,13 +18,9 @@ short mirror, `nika doctor` the full diagnosis with a fix line for each gap.
 nika welcome
 ```
 
-{/* TODO(release 0.124.0): re-capture this mirror and the doctor report below
-    on the released v0.124.0 binary: `this binary` now opens with the running
-    binary's version, commit, installer and path, and doctor gains the
-    `running` and `path` rows. */}
-
-Captured from `nika 0.123.1` in an empty folder on a machine with no keys, no
-configuration and no editor wired. The workspace path is shortened to `~/demo`.
+Captured from `nika 0.124.0`, installed where the install script puts it,
+in an empty folder `~/demo` on a machine with no keys, no configuration and
+no editor wired.
 
 ```text
 Say it once. Keep it as a file.
@@ -37,7 +33,7 @@ this hardware · 18 GB · Gear One standard (7.4 GB)
 Next:
   nika compile hello hello.nika
 
-🦋 nika 0.123.1 — Intent as Code. The workflow language for AI.
+🦋 nika 0.124.0 — Intent as Code. The workflow language for AI.
    one file · 4 verbs · one binary · audited BEFORE it runs
    every run records a tamper-evident, hash-chained trace
 
@@ -46,11 +42,11 @@ this machine
              6 unwired · one command each → nika wire cursor
   local      5 keyless engines supported · none probed → nika doctor --ping
   state      installed · no inference path — proof → nika try 01-hello
-  workspace  ~/demo
-             git ✗ · no workflows yet · agents not briefed → nika init
+  workspace  ~/demo · git ✗ · no workflows yet · agents not briefed → nika init
 
 this binary
-  4 verbs · 29 builtins · 17 providers · 62 examples · 22 templates
+  v0.124.0 (866ed914b) · installer: install.sh · ~/.nika/bin/nika
+  4 verbs · 30 builtins · 17 providers · 63 examples · 22 templates
   17 wired in this build (5 local · 12 cloud · plus mock)
 
 a whole workflow is one file
@@ -117,12 +113,15 @@ Three rules shape the report:
 
 ## A fresh machine, honestly
 
-Captured from `nika 0.123.1` without a terminal, with an empty `HOME` and no
-agent app installed, the whole report:
+Captured from `nika 0.124.0` without a terminal, on a fresh `HOME` that holds
+only the binary, with no agent app installed: the whole report, with the
+binary's path shortened to `~/.nika/bin/nika`.
 
 ```text
-✔ 12 ok · 29 warn · 0 fail
-✔ binary     v0.123.1 · self-contained (spec v1 embedded)
+✔ 14 ok · 29 warn · 0 fail
+✔ binary     v0.124.0 · self-contained (spec v1 embedded)
+✔ running    ~/.nika/bin/nika · nika 0.124.0 (866ed914b) · installer: install.sh
+✔ path       this binary is the first `nika` on PATH
 ✔ lsp        available via `nika lsp` (editor language server)
 ✔ traces     keep 10 per workflow · max age 30d · budget 256MB (NIKA_TRACE_KEEP · NIKA_TRACE_MAX_AGE_DAYS · NIKA_TRACE_BUDGET_MB)
 ✔ mcp        available via `nika mcp` (9 read-only tools · nika_check through nika_tools)
@@ -138,7 +137,7 @@ agent app installed, the whole report:
   fix: nika doctor --ping   # probe local ports and model lists (offline otherwise)
 ✔ image      mock ready · local backend unset · NIKA_IMAGE_LOCAL_URL (engine fallback http://localhost:8080 · unprobed) · no cloud image key set
 ✔ tts        mock ready · local backend unset · NIKA_TTS_LOCAL_URL (engine fallback http://localhost:8080 · unprobed) · no cloud speech key set
-✔ pricing    728 price rules · 11 providers priced · snapshot 2026-10-12 · 13 days old · abd9babb167a88e4 · list rates (public catalog)
+✔ pricing    728 price rules · 11 providers priced · snapshot 2026-10-12 · 15 days old · abd9babb167a88e4 · list rates (public catalog)
 ⚠ runtime    gemini-cli — Gemini CLI · not installed · `--access gemini-cli`
   fix: install Gemini CLI itself · then `--access gemini-cli`
 ⚠ runtime    qwen-code — Qwen Code · not installed · `--access qwen-code`
@@ -169,7 +168,7 @@ note.
 | `running` · `path` | Which `nika` is running: its resolved path, version, commit and installer (`install.sh`, `homebrew`, `npm-global`, `npm-payload`, `cargo`, `nix`, `release-dir`, `source-build`, or `unknown`), and what typing `nika` runs. Every other `nika` on `PATH` gets a row with the version it reports, and a warning with a repair hint when it is another build; a removal is suggested only for a known install layout. Each copy is asked `--version` under a two-second deadline, from `/` and with no credential in its environment: one that hangs reads unknown, one that fails warns, neither is fatal. `--json` adds `running`, `others[]` and `others_truncated`. |
 | `access` | The access classes `--access` accepts, and the agent apps (harness seats) this build can drive. |
 | `sandbox` | The sandbox this host has (Seatbelt on macOS, bubblewrap on Linux). A `permits:` file with `exec:` does not start on a host that cannot confine it (`NIKA-1710`). |
-| `run-key` | Whether runs will be signed. Captured without a terminal, as above, it says `the keychain is not opened without a terminal`; in a macOS terminal it says `the keychain is not opened by this ad-hoc build`, even for the signed release: 0.123.2 never opens the keychain on macOS. `NIKA_KEYCHAIN=off nika key init` mints the key every process reads ([Seal your runs](/getting-started/installation#seal-your-runs)). |
+| `run-key` | Whether runs will be signed. Captured without a terminal, as above, it says `the keychain is not opened without a terminal`; in a macOS terminal it says `the keychain is not opened by this ad-hoc build`, even for the signed release: 0.124.0 never opens the keychain on macOS. `NIKA_KEYCHAIN=off nika key init` mints the key every process reads ([Seal your runs](/getting-started/installation#seal-your-runs)). |
 | `sidecar` · `models` | Nika's built-in local inference, and whether a model is pulled for it. |
 | `traces` | Run-record retention under `.nika/traces/`: the last N per workflow, an age cap, a size budget, each with its environment override. |
 | `registry` | The agent clients the binary knows, how many `nika wire` can write, how many this machine was probed for. |

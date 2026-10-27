@@ -237,7 +237,7 @@ $ nika run launch-kit.nika --max-cost-usd 1
 NIKA-1709 · refusing to start: no catalog price for task `narration` (nika:tts_generate on `openai`, `gpt-4o-mini-tts`) — --max-cost-usd $1.000000 cannot bound unknown spend (`nika check` lists it UNPRICED under COST). The cap comes from --max-cost-usd, the project `ceiling:` or a beat's `plafond:`. Use a model the catalog prices (images: openai `gpt-image-2`, `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare`, gemini `gemini-3.1-flash-image`, `gemini-3-pro-image`, `gemini-2.5-flash-image`, `gemini-3.1-flash-lite-image` or `gemini-nano-banana-2.1`, or any `xai` model; speech: openai `tts-1` or `tts-1-hd`, elevenlabs `eleven_v4`, `eleven_v4_turbo`, `eleven_v3`, `eleven_v3_conversational`, `eleven_multilingual_v2`, `eleven_flash_v2_5`, `eleven_flash_v2`, `eleven_turbo_v2_5` or `eleven_turbo_v2`), the keyless `system` voice for speech, or `local` / `mock`. Only a run with no cap at all (never a beat) makes this call, and its settlement counts it unpriced.
 ```
 
-<sub>Both captured offline from the 0.124.0 candidate, with no provider key.</sub>
+<sub>Both captured offline from nika 0.124.0, with no provider key.</sub>
 
 `nika check --json` lists the same rows under `cost.media`, and the refusals
 a cap would raise under `failure_plan`: `unpriced_media_cap` for a call the
