@@ -155,9 +155,9 @@ the size the budget judged from the header is always the size decoded.
 
 ## Compose several images into one
 
-`nika:image_compose` is the third pixel builtin: it lays 1 to 64 PNG files
-out as one image, a contact sheet (`grid`), a side-by-side (`row`) or a stack
-(`column`). Like `image_fx` it is pure pixel work, with no provider, no
+`nika:image_compose` is `image_fx`'s sibling for layout: it lays 1 to 64 PNG
+files out as one image, a contact sheet (`grid`), a side-by-side (`row`) or a
+stack (`column`). Like `image_fx` it is pure pixel work, with no provider, no
 network and no clock, so identical input bytes and args give identical PNG
 bytes, and the `image_compose/v1` recipe (each input's sha256 and size, the
 resolved layout) rides the artifact. A contact sheet no longer needs an

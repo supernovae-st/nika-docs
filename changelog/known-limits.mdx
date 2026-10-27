@@ -50,8 +50,8 @@ then fed back to the model).
   never a priced figure that leaves it out.
 
 Two kinds of spend stay outside the meter: a media call that fails after its
-provider request records no spend, and a `local` media endpoint is counted as
-local work even when it points at a paid host.
+provider request records no spend, and a `local` media endpoint stays
+unmetered even when it points at a paid host.
 
 ## Some image reads are judged only at run
 
@@ -102,8 +102,9 @@ side, the summed input pixels, each scaled cell and the canvas.
 `nika check` follows a declared secret to every effect it reaches, but not
 through a model: a model that received a secret can repeat it in its answer,
 and that answer is not tracked as secret (NIK-102). The SECRETS rung says so
-(`model echo untracked`). Send a model only the secrets its task needs, with
-an `egress:` rule that names that task.
+(`model echo untracked`). Send a model only the secrets its task needs: a
+secret reaches a model only through an `egress:` rule you declare on it
+(`egress: [{ to: "infer" }]`).
 
 ## Other open limits
 
