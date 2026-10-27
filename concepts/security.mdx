@@ -15,9 +15,6 @@ typed `NIKA-SEC-*` error your workflow can read, not a stack trace.
 
 ## The threat model in one table
 
-{/* TODO(0.124.0 V-1 merge): re-check the `vision:` row of this table against
-    the merged supernovae-st/nika#1851. */}
-
 | You write | The attacker controls | The defense |
 |---|---|---|
 | `invoke: nika:fetch` | the URL (or a page that redirects) | 3-layer SSRF floor, on by default (`NIKA-SEC-005`) |
@@ -54,9 +51,6 @@ Two laws govern it:
    not listed is refused. A task reaching beyond the boundary is caught
    by `nika check` (`NIKA-SEC-004` or `NIKA-AUTH-006`, with the exact
    fix) and again at run time.
-
-{/* TODO(0.124.0 V-1 merge): re-check this paragraph against the merged
-    supernovae-st/nika#1851. */}
 
 A file whose bytes reach a model provider is a read like any other. An
 `infer:` task's `vision:` image with `source: file` is admitted only by
@@ -317,9 +311,6 @@ A check of the source alone (an editor, the MCP `nika_check` tool) reads no
 child: its trifecta judges the parent's own tasks only. `NIKA-DRIFT-001` no
 longer advises removing a grant a child needs (its program, its tools, the
 files and hosts its own `permits:` lets it reach).
-
-{/* TODO(0.124.0 V-1 merge): re-check this paragraph against the merged
-    supernovae-st/nika#1851. */}
 
 An `infer:` task's `vision:` entries are followed too. A vision read of a file
 an untrusted writer left counts in the file channel, untrusted content that

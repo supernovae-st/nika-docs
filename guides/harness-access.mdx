@@ -248,10 +248,6 @@ halftone:
   `nika check` names it as a blocker and the run refuses it: there,
   `nika:image_generate` makes the images.
 
-{/* TODO(0.124.0 V-1 merge): re-check the save bullet above (the four-image
-    bound and the computed save path) against the merged
-    supernovae-st/nika#1851. */}
-
 A `schema:` on a seated `agent:` task is validated by Nika on the final
 message, and the validated object becomes the output (`message` under
 `images:`). There is no repair turn on a seat, because a new session would
@@ -277,10 +273,6 @@ turn and carries:
   cannot be read fails with the read's own code (`NIKA-BUILTIN-READ-001` when
   no file is there, `NIKA-BUILTIN-READ-002` otherwise)
   ([Verbs](/concepts/verbs#vision-files-are-reads)).
-
-{/* TODO(0.124.0 V-1 merge): re-check the vision bullet above, and the
-    sentence on the vision files of the direct route below, against the
-    merged supernovae-st/nika#1851. */}
 
 Over ACP, a seat cannot carry `temperature`, `max_tokens`, an enabled
 `thinking` budget or a `vision:` URL on an `infer:` task (Nika does not fetch
