@@ -21,6 +21,8 @@ typed `NIKA-SEC-*` error your workflow can read, not a stack trace.
 | `exec:` | argument values flowing from upstream tasks | shell floor (`NIKA-SEC-001`) + `permits.exec` allowlist + the order law (`NIKA-SEC-015`) |
 | `agent:` / tool use | the fetched content the model reads | agent tools whitelist (`NIKA-SEC-002`) + permit re-gate on tainted arguments (`NIKA-SEC-004`) + lethal-trifecta check with its human gate (`NIKA-SEC-009`) |
 | `secrets.*` bindings | log access | masked before events are written; a secret reaching a sink without `egress:` is refused (`NIKA-SEC-006`) |
+| `invoke: workflow:` (a child workflow) | content that crosses into or out of the child | the trifecta and the consent law judge each call as the tasks its child stands for (`NIKA-SEC-009` · `NIKA-SEC-014`) |
+| `infer:` with `vision:` files | which file's bytes reach the provider | a `source: file` image is a read inside `permits.fs.read`, judged before it is opened (`NIKA-AUTH-006` · `NIKA-SEC-004`) |
 
 ## Permits — declare the blast radius
 
@@ -49,6 +51,19 @@ Two laws govern it:
    not listed is refused. A task reaching beyond the boundary is caught
    by `nika check` (`NIKA-SEC-004` or `NIKA-AUTH-006`, with the exact
    fix) and again at run time.
+
+{/* TODO(release 0.124.0): re-check this paragraph against nika-spec#400
+    and its engine PR once they merge. */}
+
+A file whose bytes reach a model provider is a read like any other. An
+`infer:` task's `vision:` image with `source: file` is admitted only by
+`permits.fs.read`, judged before the file is opened, on an API route and on
+an agent application's seat alike: `NIKA-AUTH-006` under an absent block,
+`NIKA-SEC-004` outside a declared one. A literal path, or a whole bare
+`const` reference, is judged at check and listed by `--infer-permits`; any
+other form is judged at run on its rendered value. A `source: url` image is
+not an fs effect: the provider fetches it and Nika never does, so it needs no
+`fs` or `net.http` grant, and `permits: {}` admits it.
 
 <video
   autoPlay
@@ -238,13 +253,60 @@ whatever the model decides:
 | Permit re-gate | a tainted argument that resolves outside `permits:` at run time | `NIKA-SEC-004` |
 | SSRF floor | a fetch into loopback, private, link-local or metadata space | `NIKA-SEC-005` |
 | Secret flow | a secret reaching a sink with no matching `egress:` entry | `NIKA-SEC-006` |
-| Lethal trifecta | a boundary that grants private reads, untrusted ingress (a fetch, an MCP tool, an agent that can reach one) and external egress, where the untrusted content reaches the egress and no blocking `nika:prompt` gate dominates it | `NIKA-SEC-009` |
+| Lethal trifecta | a boundary that grants private reads, untrusted ingress (a fetch, an MCP tool, an agent that can reach one) and external egress, where the untrusted content reaches the egress (directly, through a file a builtin reads back, or through a child workflow) and no blocking `nika:prompt` gate dominates it | `NIKA-SEC-009` |
+| Affirmative consent | a confirm gate (`nika:prompt`) in front of an egress, a child workflow call included, with a route that a « no » answer does not close | `NIKA-SEC-014` |
 | Order law | fetched or notified content reaching any `exec:` task | `NIKA-SEC-015` |
 | Recursion bound | a self-launching workflow, or nested runs past the depth limit | `NIKA-SEC-003` |
 
 Every failure is a [typed error](/reference/error-codes) with a stable code
 and a `transient` flag; `on_error:` can act on it. The catalog lists the full
 `NIKA-SEC` namespace.
+
+## The trifecta across files and child workflows
+
+The trifecta and the consent law follow untrusted content wherever it
+travels, not only along one file's direct edges:
+
+- **Through a file.** When a task saves untrusted content to a file, a
+  builtin that reads that path carries the content on: `nika:read`,
+  `nika:grep` (its default root `.` included), `nika:glob`, `nika:edit`, a
+  `nika:decide` bundle, the files `nika:image_fx`, `nika:chart` and
+  `nika:image_generate` read, and a `nika:fetch` multipart upload. With a
+  literal write path the order does not matter: a read in the writer's own
+  wave, or before it in the run (the next run reads the file), counts too.
+  Paths compare lexically and case-blind, a templated path may be any file,
+  and a read whose path cannot reach the written one stays clean.
+- **Through a child workflow.** `nika check` and `nika run` judge an
+  `invoke: workflow:` call as the tasks its child stands for, through every
+  workflow below it. The call brings untrusted content in when content its
+  child fetches, runs or receives from an MCP tool or an agent reaches the
+  child's outputs or a file it writes. It is an egress when untrusted content
+  reaches an egress inside it: the child's own, the call's arguments, or a
+  file written before the call that a child `exec:` reads. The parent is
+  refused unless a blocking `nika:prompt` of its own dominates the path; a
+  gate inside the child is not credited to the caller. A child the check
+  cannot read, parse or resolve counts as all of these. The finding names the
+  child task behind the call, and `nika check --json` lists every direct call
+  under `composed_calls`.
+- **Consent in front of a child.** A confirm gate placed before a child
+  workflow call must stop the child's effect on a « no », as for an inline
+  egress: every route from the gate to the call must close on the refusal
+  (`NIKA-SEC-014`), and the finding names the call. A confirm gate inside the
+  child owns the effect behind it. When the only gate before the effect is
+  one inside the child that the check cannot decide from the caller (a
+  `when:` on an input the caller may bind to its answer), the call gets the
+  advisory hint instead of the refusal.
+- **The run re-judges the calls.** The runtime re-derives the trifecta over
+  the child calls the check report resolved. A call the report does not list
+  for its task and target counts as unresolved, and the run refuses it with
+  `NIKA-1707`, naming it, so a program that pairs its own check with the
+  runtime cannot run a fetching child into an ungated egress.
+  `nika run --task` re-checks the kept tasks with their children.
+
+A check of the source alone (an editor, the MCP `nika_check` tool) reads no
+child: its trifecta judges the parent's own tasks only. `NIKA-DRIFT-001` no
+longer advises removing a grant a child needs (its program, its tools, the
+files and hosts its own `permits:` lets it reach).
 
 ## Secrets
 
@@ -271,10 +333,13 @@ reaches any sink without a matching `egress:` entry is refused
 
 **security@supernovae.studio** (please not via public issues).
 Acknowledgement ≤72h, triage ≤7 days, disclosure ≤90 days. Security fixes
-land on 0.123.x patch releases and on `main`; versions older than 0.123 are
+land on 0.124.x patch releases and on `main`; versions older than 0.124 are
 unsupported, so upgrade before reporting. Full policy, disclosure process and
 the out-of-scope list:
 [SECURITY.md](https://github.com/supernovae-st/nika/blob/main/SECURITY.md).
+
+{/* TODO(release 0.124.0): match the supported-versions decision in the
+    engine's SECURITY.md (the 0.123.x row) once the release PR settles it. */}
 
 ## See also
 

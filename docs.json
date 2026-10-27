@@ -364,6 +364,7 @@
               "examples/model-bench",
               "examples/release-radar",
               "examples/csv-chart-report",
+              "examples/image-compose-sheet",
               "examples/transcript-shownotes",
               "examples/bookmark-triage"
             ]

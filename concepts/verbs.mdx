@@ -225,7 +225,7 @@ Single-shot call to a language model. One `InferRequest` shape covers the
 **Optional**: `system` (string), `model` (`<provider>/<name>` · overrides the
 workflow default), `temperature` (0.0–2.0), `max_tokens` (u32), `schema`
 (JSON Schema · structured output), `thinking` (`{ enabled, budget_tokens }`),
-`vision` (image inputs).
+`vision` (image inputs · [a file is a read](#vision-files-are-reads)).
 
 ```yaml
 summarize:
@@ -263,6 +263,37 @@ summarize:
 
 Cross-link: [Providers](/concepts/providers) · [`Provider` trait](/architecture/layers#layer-table) · ADR-035 (telemetry seams).
 
+### Vision files are reads
+
+{/* TODO(release 0.124.0): re-check this subsection against nika-spec#400
+    and its engine PR once they merge. */}
+
+`vision:` lists the images sent with the prompt. Each entry is
+`{ source: file, path: <path> }`, an image file Nika reads, or
+`{ source: url, url: <url> }`, an image the provider fetches:
+
+```yaml
+describe:
+  infer:
+    prompt: "Describe the flow this diagram shows"
+    max_tokens: 400
+    vision:
+      - source: file
+        path: "./diagrams/flow.png"            # read by Nika · its bytes reach the provider
+      - source: url
+        url: "https://example.com/legend.png"  # fetched by the provider · never by Nika
+```
+
+A `source: file` image is a read inside `permits.fs.read`, here
+`permits: { fs: { read: ["./diagrams/**"] } }`, judged before the file is
+opened: `NIKA-AUTH-006` under an absent `permits:` block, `NIKA-SEC-004`
+outside the grant. A literal path, or a whole bare `const` reference, is
+judged at check and listed by `nika check --infer-permits`; any other form is
+judged at run on its rendered value. A `source: url` entry is not an fs
+effect: Nika never fetches it, so it needs no `fs` or `net.http` grant. On an
+agent application's seat, `vision:` files ride as image blocks under the same
+rule ([Harness access](/guides/harness-access#images-and-structured-answers-on-a-seat)).
+
 ## `agent`: multi-turn loop with tools
 
 A model-driven loop: the agent calls tools, observes results, iterates
@@ -272,7 +303,15 @@ until a completion signal fires or a budget exhausts.
 **Optional**: `system` (string), `model` (`<provider>/<name>`), `tools`
 (whitelist · glob patterns · **default-deny**), `max_turns` (u32 · default 10),
 `max_tokens_total` (u32 · cumulative token budget), `temperature` (0.0–2.0),
-`schema` (JSON Schema · validates the final message).
+`schema` (JSON Schema · validates the final message), `images` (an agent
+application's images, on a harness seat only).
+
+On a [harness seat](/guides/harness-access#images-and-structured-answers-on-a-seat)
+(an agent application you are signed into), an `agent:` task can declare
+`images:`: its `.output` becomes `{ message, images }`, and
+`images: { save: <path> }` writes each received image through `nika:write`,
+inside `permits.fs.write`. An API or local model refuses `images:`; there,
+`nika:image_generate` makes the images.
 
 ```yaml
 investigate:

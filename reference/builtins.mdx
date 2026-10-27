@@ -380,14 +380,15 @@ budget_check:
     args: { view: cost }
 ```
 
-## Media (4)
+## Media (5)
 
 | Builtin | What it does |
 |---|---|
 | [`nika:chart`](/reference/tools/chart) | **Deterministic chart rendering** from rows + a semantic spec (`bar` · `line` · `area_band` · `scatter` · `heatmap`): a byte-identical SVG lands at `out:` (permit-gated write) and its sha256 rides the outputs as a trace-chain receipt. Pure compute + one write — no network, no clock, re-runs idempotent; optional Vega-Lite sibling via `compile_to:`. Full guide: [Charts](/guides/charts). |
 | [`nika:image_generate`](/reference/tools/image_generate) | Provider-backed image **generation and editing** as an *asset pipeline*: renders land under a declared `output_dir:` (rides `permits.fs.write`), and `mode: edit` sources are read permit-gated (`permits.fs.read` — the mirror boundary); outputs and a provenance manifest carry paths + dimensions + sha256, and an edit records its `source_images` — **image bytes never ride workflow outputs**. Providers (v1.1 · local inference first): `local` (any OpenAI-images-compatible self-hosted server — LocalAI · Ollama · sd.cpp · SGLang · vLLM-Omni · base URL via `NIKA_IMAGE_LOCAL_URL`) · `openai` (`gpt-image-2`) · `gemini` (`gemini-3.1-flash-image`) · `xai` (`grok-imagine-image`) · `mock` (offline, deterministic, zero keys). Full guide: [Image generation](/guides/image-generation) — local server quickstart · editing · cookbook · honesty rules. |
-| [`nika:tts_generate`](/reference/tools/tts_generate) | Speech synthesis on the same asset-pipeline contract (full guide: [Speech generation](/guides/speech-generation)): ONE audio file lands under `output_dir:` (permit-gated), output + manifest carry path + sha256 + `duration_ms` (wav-exact, mp3 honestly null) — **audio bytes never ride outputs**. Providers (local inference first): `local` (any OpenAI-speech-compatible server — LocalAI · Kokoro-FastAPI · Speaches — via `NIKA_TTS_LOCAL_URL`) · `openai` (`gpt-4o-mini-tts`) · `elevenlabs` (`ELEVENLABS_API_KEY`) · `mock` (real deterministic WAV, offline). Teaching shape: `17-tts-self`. |
+| [`nika:tts_generate`](/reference/tools/tts_generate) | Speech synthesis on the same asset-pipeline contract (full guide: [Speech generation](/guides/speech-generation)): ONE audio file lands under `output_dir:` (permit-gated), output + manifest carry path + sha256 + `duration_ms` (wav-exact, mp3 honestly null) — **audio bytes never ride outputs**. Providers (local inference first): `local` (any OpenAI-speech-compatible server — LocalAI · Kokoro-FastAPI · Speaches — via `NIKA_TTS_LOCAL_URL`) · `system` (the host's own synthesizer, macOS `say` or Linux `espeak-ng`: no key, no network, no `permits.exec`; its cost is unpriced local work) · `openai` (`gpt-4o-mini-tts`) · `elevenlabs` (`ELEVENLABS_API_KEY`) · `mock` (real deterministic WAV, offline). Teaching shape: `17-tts-self`. |
 | [`nika:image_fx`](/reference/tools/image_fx) | **Deterministic artistic effects** on a PNG — dither (bayer · blue-noise · ign · floyd_steinberg · atkinson · jjn) · palette mapping (Oklab) · duotone · pixelate · halftone · grain · vignette · chromatic aberration · scanlines · glitch · ascii (png/text/ansi). Zero providers, zero network: **byte-identical output forever** for identical `(input, args)` — the artifact's sha256 joins the trace chain, re-render IS the tamper check, and the full recipe (contract tag `image_fx/v1` · input sha256 · seed · ops) rides the PNG itself as a `nika` tEXt chunk. `input:` read + `out:` write both ride `permits.fs`. Full guide: [Image effects](/guides/image-effects) — the receipts story · op table · cookbook. |
+| [`nika:image_compose`](/reference/tools/image_compose) | **Deterministic composition**: 1 to 64 PNG inputs become one PNG, laid out as a `grid` (columns and rows derived from the count when absent), a `row` or a `column`. Each image keeps its own size (`scale: none`), is fitted into its cell with the aspect kept (`fit`), or is scaled and center-cropped to fill it (`fill`), with `gap`, `padding` and a `background` color. Pure pixel work, like `image_fx`: no provider, no network, **byte-identical output** for identical `(input bytes, args)`, the `image_compose/v1` recipe rides the PNG, and the output carries path, sha256, width and height, never bytes. Every input is an `fs.read` that `nika check` judges, and `out:` an `fs.write`. Caps on each input's side, the summed pixels, each scaled cell and the canvas are judged from the PNG headers before any decompression. Full guide: [Image effects](/guides/image-effects#compose-several-images-into-one). |
 
 ```yaml
 hero:
@@ -408,6 +409,18 @@ hero:
   constants — `permits.net.http` does not govern them (exactly like
   `infer:`); `permits.tools` and `permits.fs` do.
 </Warning>
+
+{/* TODO(release 0.124.0): re-check this note against
+    supernovae-st/nika#1846 once it merges. */}
+
+<Note>
+  **Paid media under a cost cap.** `nika:image_generate` and `nika:tts_generate`
+  bill their provider. Under `--max-cost-usd`, a project `ceiling:` or a beat's
+  `plafond:`, a call the catalog can price is floored and metered, and a call it
+  cannot price is refused before any request (`NIKA-1709`). `local`, `mock`
+  and the `system` voice bill no provider. See
+  [Cost honesty](/guides/cost-honesty#paid-media-priced-refused-or-unpriced).
+</Note>
 
 ## Design rules the set obeys
 

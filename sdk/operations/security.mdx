@@ -91,7 +91,8 @@ logging and delivery secrets outside the Nika transport.
 
 The token also downloads artifacts: any holder who knows a settled job's id
 can read the files that job's sealed journal records, the project files a
-builtin saved and the images an agent's harness sent. The server serves only
+builtin saved, the images an agent's harness sent and the files an `agent:`
+task saved from them. The server serves only
 bytes that still match the journal, and the SDK checks them again on arrival,
 but the content is still whatever the workflow produced. Treat a downloaded
 file as untrusted input, and keep the server's

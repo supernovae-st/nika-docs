@@ -21,9 +21,16 @@ two kinds of codes on top of it:
 
 - **Runtime codes** `NIKA-<NNNN>`: `17xx` for admission and budget
   (`NIKA-1708` a missing required input, `NIKA-1709` a cost floor above the
-  budget, `NIKA-1704` a budget stop mid-run) and `18xx` for access
-  (`NIKA-1800` no ready access path, `NIKA-1801` an unsatisfied `--access`
-  pin). `nika explain NIKA-1709` teaches each one.
+  budget, or paid media the catalog cannot price under a cap, `NIKA-1704` a
+  budget stop mid-run, `NIKA-1707` a run whose check report did not resolve
+  a child workflow call) and `18xx` for access (`NIKA-1800` no ready access
+  path, `NIKA-1801` an unsatisfied `--access` pin, `NIKA-1804` and
+  `NIKA-1805` a turn an agent application reported as failed, transient or
+  not, `NIKA-1806` a pause on an agent application's question).
+  `nika explain NIKA-1709` teaches each one.
+
+{/* TODO(release 0.124.0): re-check the NIKA-1709 paid-media clause against
+    supernovae-st/nika#1846 once it merges. */}
 - **Engine-specific codes** that the message itself explains, such as
   `NIKA-MCP-003` and `NIKA-MCP-006` (an MCP tool whose definition changed
   since its pin, a server with no pinned tools: `nika mcp approve <server>`)

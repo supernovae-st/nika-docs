@@ -20,7 +20,7 @@ Every cost surface speaks the same four words:
 | **floor** | the cheapest path's cost — every `when:` gate closed, every call first-try at its declared `max_tokens`: what a budget must cover before a run may start, not the least you will be billed | the `--max-cost-usd` refusal (`unavoidable cost floor`) · `explain` (`≥ … cheapest path`) |
 | **ceiling** | the worst case for the model's **output** tokens at catalog prices — the prompt's input tokens, `exec:` and MCP calls are outside it, and the rung says so | `check` COST rung once every task is bounded (`worst-case output ceiling`) · `explain` (`≤ … worst case`) |
 | **UNBOUNDED** | a task whose spend has no provable limit, with the WHY | `check` per-task rows |
-| **unpriced** | tokens were spent but no catalog price exists (local · unknown model) | run totals (`unpriced (N calls)`, or `(N unpriced)` beside a metered total) · `explain` |
+| **unpriced** | tokens were spent, or a paid media call ran, but no catalog price exists (local · unknown model · unpriced media) | run totals (`unpriced (N calls)`, or `(N unpriced)` beside a metered total) · `explain` |
 
 A task goes UNBOUNDED in one of three ways, and its row names which
 one:
@@ -105,6 +105,44 @@ same numbers in beginner words —
 - The flag itself is guarded: a non-finite value (`NaN`, `inf`) is
   rejected at parse time — a budget that cannot compare is not a budget.
 
+## Paid media: priced, refused or unpriced
+
+{/* TODO(release 0.124.0): re-check this section against
+    supernovae-st/nika#1846 once it merges: the priced and
+    still-refused models, the refusal codes, the COST rung wording and the
+    failure_plan key. */}
+
+An image or speech builtin bills its provider the way a model call does, so
+the same doctrine holds: a media call is priced from the catalog, or it is
+unpriced, never `$0.00`.
+
+- **Priced.** OpenAI `gpt-image-2` and the Gemini image models, OpenAI
+  `tts-1` and `tts-1-hd`, ElevenLabs speech and xAI images carry a public list
+  price in the catalog. The cap floors each call at launch, and the run meters
+  what it spends.
+- **Unpriced paid media.** OpenAI's default voice `gpt-4o-mini-tts`,
+  `gpt-image-1.5`, `gpt-image-1-mini` and any model id the catalog does not
+  list bill a provider Nika cannot price. Under a cap they are refused before
+  any request: `NIKA-1709` at launch, or `NIKA-1704` just before the request
+  when only the run decides the provider or model, or when an `agent:` calls
+  the builtin through its tools (the refusal goes back to the model and
+  nothing is sent). Without a cap they run and count as unpriced calls, so the
+  total reads `unpriced`, or `partially_priced` beside priced spend. A child
+  workflow's unpriced calls reach its parent's total.
+- **Local work.** `local` and `mock` media, and the keyless
+  `provider: system` voice, bill no provider. The system voice runs under any
+  cap and reports its cost as unpriced local work
+  (`cost_unpriced: local_model`), like a local model. `nika:image_fx`,
+  `nika:chart` and `nika:image_compose` are local pixel work, not paid media.
+
+`nika check` names each paid media call on the COST rung: priced, `UNPRICED`,
+or `DECIDED AT RUN` when a template or an agent's tools choose the provider,
+including the media a composed child calls. Its `--json` lists the cap
+refusal under `failure_plan` as `unpriced_media_cap`. A beat always runs under
+its `plafond:` and a project `ceiling:` caps a plain `nika run`, so both refuse
+unpriced paid media: `nika arm` shows such a beat `UNREADY` with `NIKA-1709`
+([Arming a project](/reference/arm)).
+
 ## After the run: the totals stay honest
 
 Every run ends with a totals line that never turns an unknown price
@@ -116,8 +154,9 @@ workflow ends:
 ```
 
 Its one call is unpriced, so the total is a word, not a number. A run
-that calls no model says `unmetered`. When priced and unpriced
-calls share a run, the total reads `≥ $… (N unpriced)`: the `≥` is
+that calls no model, no paid media and no keyless voice says `unmetered`.
+When priced and unpriced calls share a run, the total reads
+`≥ $… (N unpriced)`: the `≥` is
 printed **because** an unpriced call rode the run. Per-task spend rides
 the trace itself (`cost_usd` on the terminal events), so
 `nika trace show` and the run report read the recorded ledger — never a

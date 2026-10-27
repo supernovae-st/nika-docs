@@ -487,15 +487,22 @@ nika run brief-with-stats.nika --var topic="local-first AI"
 - **Zero implicit authority** — a child never gains a capability its parent
   lacks (`NIKA-COMP-002`).
 - **Acyclic** — a static cycle or self-launch is refused (`NIKA-COMP-003`).
+- **Judged through the call** — the lethal trifecta (`NIKA-SEC-009`) and the
+  consent law (`NIKA-SEC-014`) judge a call as the tasks its child stands
+  for: a parent that reads private data and sends it out through a child is
+  refused unless a blocking `nika:prompt` of its own gates the path, and a
+  child the check cannot resolve counts as doing all of it
+  ([Security](/concepts/security#the-trifecta-across-files-and-child-workflows)).
 
 <Warning>
   **The parent's `permits:` must cover the child's effects.** Authority flows
   down, never up: the child above invokes `nika:jq`, so the parent declares
-  `nika:jq` too — drop it and the check fails `NIKA-COMP-002`. On that parent
-  `nika check` also prints an advisory `NIKA-DRIFT-001` hint saying the entry
-  "admits no tool the body invokes" — it is counting only the parent's *own*
-  tasks. Under composition the entry is load-bearing: keep it. The hint is
-  advisory and does not fail the check.
+  `nika:jq` too — drop it and the check fails `NIKA-COMP-002`. `nika check`
+  reads the child, so it counts that entry as used: `NIKA-DRIFT-001` never
+  tells you to remove a grant a child needs (its program, its tools, the files
+  and hosts its own `permits:` lets it reach). A check of the source alone (an
+  editor, the MCP `nika_check` tool) reads no child, and its `NIKA-DRIFT-001`
+  makes no `permits:` claim on a file that calls one.
 </Warning>
 
 Each child keeps its **own** hash-chained trace; the parent's trace records

@@ -8,11 +8,12 @@ lands under a permit-gated `output_dir:`, sha256-named, manifest beside it,
 and **audio bytes never ride workflow outputs** — tasks pass a path and a
 hash, not megabytes of base64.
 
-## The four providers
+## The five providers
 
 | provider | default model | default voice | what to know |
 | --- | --- | --- | --- |
 | `local` | `tts-1` | `alloy` | The local inference path: any OpenAI-speech-compatible server — LocalAI (`:8080`, also ElevenLabs-compatible upstream), Kokoro-FastAPI, Speaches, openedai-speech. One wire: `POST {base}/v1/audio/speech` → raw bytes. Never inferred from `model:`. |
+| `system` | `say` (macOS) · `espeak-ng` (Linux) | `default` (the host's own) | The host's own synthesizer: no key, no network, no server. Nika starts it itself, so no `permits.exec`. Renders WAV. Never inferred from `model:`. [Below](#speak-with-no-key-provider-system). |
 | `openai` | `gpt-4o-mini-tts` | `alloy` | Sync, seconds-class. `speed:` 0.25–4.0 native. |
 | `elevenlabs` | `eleven_multilingual_v2` | Rachel's id | `voice:` is a **voice id** (find them in your voice library) — ids ride the URL path, so the engine restricts them to the id alphabet. `speed:` is warned-dropped. |
 | `mock` | `mock-tts-1` | `sine` | A real, playable, deterministic 16 kHz WAV — zero network, zero keys. CI runs the pipeline offline. |
@@ -20,7 +21,7 @@ hash, not megabytes of base64.
 Keys and the local URL are **engine config, never workflow args**:
 `OPENAI_API_KEY` / `ELEVENLABS_API_KEY` (or `NIKA_`-prefixed),
 `NIKA_TTS_LOCAL_URL` (+ optional `NIKA_TTS_LOCAL_API_KEY`). `nika doctor`
-prints a `tts` line naming what's wired.
+prints a `tts` line naming what's wired. The `system` voice needs neither.
 
 ## Quickstart
 
@@ -48,12 +49,57 @@ out/
 └── speech-local-tts-1-a0584738-….manifest.json
 ```
 
+## Speak with no key: `provider: system`
+
+Real speech, offline, with nothing to install on a Mac: `provider: system`
+uses the host's own synthesizer, macOS `/usr/bin/say` or Linux `espeak-ng`
+(found in an absolute directory of the engine's `PATH`).
+
+```yaml
+nika: narrate-offline
+permits:
+  fs: { write: ["./out/**"] }
+  tools: ["nika:tts_generate"]
+tasks:
+  speak:
+    invoke:
+      tool: "nika:tts_generate"
+      args:
+        provider: system            # macOS say · Linux espeak-ng · no key, no network
+        text: "Local first. Honest always. That is the whole design."
+        output_dir: "./out"
+outputs:
+  audio: ${{ tasks.speak.output.audio.path }}
+```
+
+- **Nika starts the program itself**, as part of the builtin: the workflow
+  needs no `permits.exec`, and `nika check` names the program in its plan.
+  Each start is journaled as a `permit_checked` frame on the `builtin` plane.
+  The WAV still lands under `output_dir:` through `permits.fs.write`.
+- **The text is spoken as text.** It reaches the synthesizer on standard
+  input, and every `[[` (which `say` reads as an embedded command and
+  `espeak-ng` as phonemes) is broken by a space, so a script cannot mute the
+  file. The audio is capped at 64 MiB.
+- **No model choice.** The model is the program (`say` or `espeak-ng`); any
+  other `model:` is refused at check and at run. `voice:` is a host voice
+  name (`say -v '?'` lists them on a Mac) and must be installed: a missing
+  voice fails the call rather than reading with the default one.
+- **No fallback.** A host with no synthesizer fails
+  `NIKA-BUILTIN-TTS_GENERATE-002`, naming what is missing; Nika never
+  switches to another provider.
+- **Unpriced, never free.** The voice bills no provider, so its cost is
+  reported as unpriced local work (`cost_usd: null` with
+  `cost_unpriced: local_model`), the way a local model's is. It runs under
+  any cost cap.
+
 ## Honesty rules
 
 - **The extension follows the bytes.** WAV `RIFF…WAVE` and MP3 headers are
   sniffed; a mislabel is a `format_mismatch:` warning, a non-audio payload
   is a hard error — never a corrupt file on disk.
-- **Duration is exact or absent.** WAV `duration_ms` is pure header math;
+- **Duration is exact or absent.** WAV `duration_ms` is pure header math
+  over the bytes actually present, so a streamed WAV whose header still
+  carries a placeholder size reports its real length;
   MP3 duration is honestly `null` rather than a frame-walking guess.
 - **`text:` caps at 4096 chars** (the strictest wire's limit, held
   portably) — fan longer scripts out with `for_each` over paragraphs.
@@ -64,6 +110,20 @@ out/
   `watermark_declared` is a catalog fact: `elevenlabs` →
   `"synthid (provider-declared · not byte-verified)"`, every other
   provider → `null` — no such declaration, honestly absent.
+
+## Paid speech under a cost cap
+
+{/* TODO(release 0.124.0): re-check this section against
+    supernovae-st/nika#1846 once it merges. */}
+
+OpenAI `tts-1` and `tts-1-hd` and ElevenLabs speech have a public list price
+in the catalog: under `--max-cost-usd`, a project `ceiling:` or a beat's
+`plafond:`, they are floored at launch and metered. OpenAI's default voice,
+`gpt-4o-mini-tts`, has no price Nika can apply, so a capped run refuses it
+before any request (`NIKA-1709`). Set `model: tts-1` (or `tts-1-hd`), use
+ElevenLabs, or speak with `provider: system`, `local` or `mock`, which bill
+no provider. Without a cap the call runs and is counted as unpriced
+([Cost honesty](/guides/cost-honesty#paid-media-priced-refused-or-unpriced)).
 
 ## Cookbook (proven against live APIs)
 

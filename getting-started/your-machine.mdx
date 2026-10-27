@@ -18,6 +18,11 @@ short mirror, `nika doctor` the full diagnosis with a fix line for each gap.
 nika welcome
 ```
 
+{/* TODO(release 0.124.0): re-capture this mirror and the doctor report below
+    on the released v0.124.0 binary: `this binary` now opens with the running
+    binary's version, commit, installer and path, and doctor gains the
+    `running` and `path` rows. */}
+
 Captured from `nika 0.123.1` in an empty folder on a machine with no keys, no
 configuration and no editor wired. The workspace path is shortened to `~/demo`.
 
@@ -65,15 +70,20 @@ Read it from the top:
   memory that `nika model pull` downloads and that needs no API key: here a
   7.4 GB Gemma 3 12B file for an 18 GB machine. Local inference is unpriced,
   not free: it runs on your hardware. Other rows appear when Nika detects a
-  signed-in agent app or a provider key. See
+  signed-in agent app or a provider key. A key's row reads
+  `OPENAI_API_KEY is set · not checked until the first call`: nothing here
+  calls the provider, so a revoked key only shows on that first call. See
   [Local models](/guides/local-models#gear-one-the-pick-nika-welcome-proposes)
   for the sizes, and the one limit of serving them.
 - **`Next:`** is the line to type now: <code>{STATUS.firstCommand}</code>
   writes a starter file offline, without any key or model call.
 - **`this machine`** names each gap and the command that closes it, never a
   vendor to buy from.
-- **`this binary`** is derived from the embedded language pack, never typed by
-  hand. Its providers are the ones this build can drive:
+- **`this binary`** opens with the binary that is running: its version and
+  commit, the installer it came from and its path. When another `nika` on your
+  `PATH` differs from it, a second line says so and sends you to
+  `nika doctor`. The counts below it are derived from the embedded language
+  pack, never typed by hand. Its providers are the ones this build can drive:
   {CANON.providersLocal} local servers and {CANON.providersCloud} cloud APIs,
   without `mock`. The specification names {CANON.providers}
   providers, counting `mock`, the rehearsal provider that makes no model
@@ -156,6 +166,7 @@ note.
 | Row | What it tells you |
 |---|---|
 | `binary` | The engine is self-contained: spec, schema, examples and templates are embedded. |
+| `running` · `path` | Which `nika` is running: its resolved path, version, commit and installer (`install.sh`, `homebrew`, `npm-global`, `npm-payload`, `cargo`, `nix`, `release-dir`, `source-build`, or `unknown`), and what typing `nika` runs. Every other `nika` on `PATH` gets a row with the version it reports, and a warning with a repair hint when it is another build; a removal is suggested only for a known install layout. Each copy is asked `--version` under a two-second deadline, from `/` and with no credential in its environment: one that hangs reads unknown, one that fails warns, neither is fatal. `--json` adds `running`, `others[]` and `others_truncated`. |
 | `access` | The access classes `--access` accepts, and the agent apps (harness seats) this build can drive. |
 | `sandbox` | The sandbox this host has (Seatbelt on macOS, bubblewrap on Linux). A `permits:` file with `exec:` does not start on a host that cannot confine it (`NIKA-1710`). |
 | `run-key` | Whether runs will be signed. Captured without a terminal, as above, it says `the keychain is not opened without a terminal`; in a macOS terminal it says `the keychain is not opened by this ad-hoc build`, even for the signed release: 0.123.2 never opens the keychain on macOS. `NIKA_KEYCHAIN=off nika key init` mints the key every process reads ([Seal your runs](/getting-started/installation#seal-your-runs)). |

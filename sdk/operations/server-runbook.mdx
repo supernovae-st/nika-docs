@@ -85,8 +85,9 @@ after an individual beat failed or paused.
 With `--bind`, the server also serves what a settled job produced, and
 `/health` lists `artifacts`. `GET /v1/jobs/{id}/artifacts` lists the files the
 job's sealed journal records (saved inside the project by `nika:chart`,
-`nika:image_generate`, `nika:tts_generate` or `nika:image_fx`, and the images
-an agent's harness sent), and `GET /v1/jobs/{id}/artifacts/{name}` streams
+`nika:image_generate`, `nika:tts_generate`, `nika:image_fx` or
+`nika:image_compose`, the images an agent's harness sent, and the files an
+`agent:` task saved from them), and `GET /v1/jobs/{id}/artifacts/{name}` streams
 one. Decide what that door exposes before you open it:
 
 - **Who can read what.** Any caller holding the token and a job's id can

@@ -55,7 +55,7 @@ arm:
 |---|---|---|
 | `workflow` | yes | The workflow to fire: a `*.nika` path relative to the project root |
 | `cadence` | yes | The IANA zone first, then five cron fields (`"TZ=Europe/Paris 30 7 * * *"`), a French weekday and time (`"TZ=Europe/Paris lundi 9h07"`) or an anchored interval (`"TZ=Europe/Paris every 2 weeks from 2026-10-05 09:00"`); or `on-webhook`, the one form without a zone. The zone resolves against the embedded tzdb, never the host's, and a scheduled cadence without one is refused (`cadence.tz-missing`) |
-| `plafond` | yes | The spend ceiling of each fire in USD (`--max-cost-usd`), above zero. It has no default: choosing for the operator would be choosing who pays |
+| `plafond` | yes | The spend ceiling of each fire in USD (`--max-cost-usd`), above zero. It has no default: choosing for the operator would be choosing who pays. Under it, an image or speech call the catalog cannot price is refused ([paid media](/guides/cost-honesty#paid-media-priced-refused-or-unpriced)) |
 | `manqué` | yes | What a missed slot becomes when the firer comes back (table below). No default either |
 | `chevauchement` | no | A new slot while the previous fire still runs: `sauter` (skip it, the default) or `file` (queue it). `remplacer` is accepted by the registry and refused by the 0.123.2 firer |
 | `après_saut` | no | When the beat resumes after a skipped slot: `prochain-créneau` (the default). `à-complétion` is accepted by the registry and refused by the 0.123.2 firer |
@@ -68,6 +68,9 @@ arm:
 
 The set is closed: any other key, such as `signature:` or `budget:`, is
 refused (`project.unknown-key`) and `nika arm` exits `2`.
+
+{/* TODO(release 0.124.0): re-check the `plafond` row and the `UNREADY`
+    row against supernovae-st/nika#1846 once it merges. */}
 
 A beat that uses a refused policy is reported `UNREADY` with the reason, and
 `nika arm fire`, the OS units that call it and a `nika serve --once` sweep
@@ -127,7 +130,7 @@ nothing was scheduled — `nika arm` READS the file. The machine that fires them
 | State | Meaning |
 |---|---|
 | `READY` | The beat's workflow, inputs, model and cost admission hold in the current configuration. It does not prove that an OS unit is installed or that the next fire will succeed |
-| `UNREADY` | A blocker, named on a `✗` line: a refused policy, an undeclared input, a workflow that does not check. Every fire would refuse |
+| `UNREADY` | A blocker, named on a `✗` line: a refused policy, an undeclared input, a workflow that does not check, or paid media the catalog cannot price under the beat's `plafond:` (`NIKA-1709`). Every fire would refuse |
 | `DORMANT` | Suspended with the triple; no slot is computed |
 
 The proof line separates **PROUVÉ** (a recorded fire, read from the beat's
@@ -244,6 +247,20 @@ $ nika serve                 # stay resident and fire each beat at its slot
 apply the missed-run, overlap, cost or execution policy, so `would fire` is
 not a promise that the real firer will run. To see upcoming slots, use
 `nika arm`.
+
+In a project whose `nika.yaml` arms nothing, `--once` and `--dry` print the
+sentence `nika arm` prints, then the `--bind` command and the token recipe for
+running workflows over HTTP, and exit `0`:
+
+```text
+$ nika serve --once
+nothing armed — /home/alice/project/nika.yaml carries no `arm:` entry
+  workflows run on demand over HTTP: nika serve --bind 127.0.0.1:<port> --workflows workflows --token-file .nika/serve.token
+  mint the token first: umask 077 && mkdir -p .nika && openssl rand -hex 24 > .nika/serve.token && chmod 600 .nika/serve.token
+```
+
+A resident `nika serve` prints the same lines once on stderr and keeps
+watching `nika.yaml`, so a beat you arm later still fires.
 
 Startup, registry, clock and loop failures exit `1`. Once the loop runs, each
 beat's result is carried by its stdout line and ledger; a completed `--once`

@@ -52,6 +52,7 @@ the exact one your binary enforces, and `nika check` remains the judge.
 - The envelope carries **no version marker** — the mark is the name.
 - Minor additions (a new optional field, a new builtin) are **additive**.
 - A grammar change ships with its `nika check --fix` migration and a refusal
-  that names the move; 0.123 maintenance releases keep the grammar additive.
+  that names the move. 0.124 adds `images:` (an `agent:` task on a harness
+  seat) and `nika:image_compose` additively.
 - Anti-pattern: `nika: v1` + `workflow: { id }` — the previous envelope
   (through 0.108); `nika check --fix` moves the id onto `nika:`.
