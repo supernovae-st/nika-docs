@@ -80,7 +80,8 @@ run. Read `isNikaRunSucceeded(result)` before treating it as success.
 ```ts
 type NikaRunEventKind =
   | 'run.started' | 'task.scheduled' | 'task.started' | 'task.completed'
-  | 'task.failed' | 'run.waiting' | 'run.settled' | 'run.interrupted'
+  | 'task.failed' | 'task.skipped' | 'task.cancelled' | 'task.cache_hit'
+  | 'run.waiting' | 'run.settled' | 'run.interrupted'
   | 'run.sealed' | 'engine.event'
 
 interface NikaRunEvent<Outputs> {
@@ -107,8 +108,11 @@ so read `result.receipt.sealed` locally or `traceVerify(...).verdict`.
 findings report, process `exitCode` and `verdicts`, typed `NikaCheckVerdicts`
 (`valid` · `access_ready` · `capacity_fit` · `run_ready` · `blockers`): under
 `check({ access })` a pin the engine refuses keeps `clean: true` with
-`verdicts.access_ready: false` and the refusal in `verdicts.blockers`. A
-served-name HTTP check carries `clean: true` plus `status`, `snapshot_digest`,
+`verdicts.access_ready: false` and the refusal in `verdicts.blockers`. Each
+finding (`NikaCheckFinding`) that names a part of the file carries `span`, a
+`NikaSourceSpan` (`{ start, end }`): byte offsets into the workflow file,
+`start` inclusive and `end` exclusive. From engine 0.124 a parse refusal
+carries one too. A served-name HTTP check carries `clean: true` plus `status`, `snapshot_digest`,
 `root` and `units`, or `clean: false` with a typed refusal in `error`; it does
 not invent a local findings report or exit code.
 
@@ -232,7 +236,7 @@ Locally the verdict is `verified`, or `invalid` (`reason: 'receipt_mismatch'`
 for an unsealed or edited record; no reason when the trace file cannot be
 read). Over HTTP it is the CLI verifier's tier in lower case: `ok` means intact
 but unsigned (`reason: 'unsealed'`), and `unavailable` means the server holds
-no journal for the job. The published 0.123.2 declarations list the same
+no journal for the job. The published 0.124.0 declarations list the same
 words, with the CLI verifier's refusal classes (`unchained` · `empty` ·
 `unreadable` · `refused` · `line-over-long` · `unknown`), and over HTTP a
 verdict that holds always carries its seal tier as `reason` (`sealed` or
@@ -263,6 +267,6 @@ engine-owned fields are additive.
   <SourceContract sdk={SDK} />
 </Accordion>
 
-<Card title="Published type declarations (v0.123.2)" icon="github" href={SDK.sourceCandidate}>
+<Card title="Published type declarations (v0.124.0)" icon="github" href={SDK.sourceCandidate}>
   Review the source of the published declarations.
 </Card>

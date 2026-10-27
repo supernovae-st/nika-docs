@@ -22,7 +22,7 @@ or connect to a [`nika serve`](/sdk/remote/serve-quickstart).
 <Steps>
   <Step title="Install the package">
     ```sh
-    npm install @supernovae-st/nika@0.123.2
+    npm install @supernovae-st/nika@0.124.0
     ./node_modules/.bin/nika --version
     ```
 
@@ -43,7 +43,7 @@ or connect to a [`nika serve`](/sdk/remote/serve-quickstart).
     runs still succeed, unsigned. Keep `NIKA_KEYCHAIN=off`: without it,
     `nika key init` refuses on a Linux terminal (its `--force` puts the key in
     the desktop's Secret Service, where neither looks) and on a Mac whose
-    keychain holds a key from Nika 0.122 or older, which 0.123.2 can neither
+    keychain holds a key from Nika 0.122 or older, which 0.124.0 can neither
     read nor copy. In CI, point `NIKA_RUN_KEY_FILE` and `NIKA_RUN_PUB_FILE` at
     a key pair you provide.
   </Step>
