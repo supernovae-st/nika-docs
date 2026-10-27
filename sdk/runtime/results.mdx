@@ -106,7 +106,7 @@ never derived from an exit code:
 | `cause` | why it ended: `normal`, `human_gate`, `task_failed`, `output_contract`, `budget`, `operator`, `refused` |
 | `elapsed_ms` | wall time of the run |
 | `tasks` | the tally: `total`, `ok`, `failed`, `recovered`, `skipped`, `cancelled`, `never_started` |
-| `spend.qualifier` | `priced`, `partially_priced`, `unpriced` (a local, mock or subscription model: never free) or `unmetered` (no metered call) |
+| `spend.qualifier` | `priced`, `partially_priced`, `unpriced` (a local, mock or subscription model, or a paid image or speech call the catalog cannot price: never free) or `unmetered` (no metered call) |
 | `spend.priced_calls` · `spend.unpriced_calls` | how many calls the catalog could and could not price |
 | `spend.total_cost_usd` | present only when a call metered real spend; an unknown cost is never reported as zero |
 | `error` | the failure of a `failed` settlement |

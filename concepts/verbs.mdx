@@ -265,8 +265,8 @@ Cross-link: [Providers](/concepts/providers) · [`Provider` trait](/architecture
 
 ### Vision files are reads
 
-{/* TODO(release 0.124.0): re-check this subsection against nika-spec#400
-    and its engine PR once they merge. */}
+{/* TODO(0.124.0 V-1 merge): re-check this subsection against the merged
+    supernovae-st/nika#1851. */}
 
 `vision:` lists the images sent with the prompt. Each entry is
 `{ source: file, path: <path> }`, an image file Nika reads, or
@@ -285,14 +285,34 @@ describe:
 ```
 
 A `source: file` image is a read inside `permits.fs.read`, here
-`permits: { fs: { read: ["./diagrams/**"] } }`, judged before the file is
-opened: `NIKA-AUTH-006` under an absent `permits:` block, `NIKA-SEC-004`
-outside the grant. A literal path, or a whole bare `const` reference, is
-judged at check and listed by `nika check --infer-permits`; any other form is
-judged at run on its rendered value. A `source: url` entry is not an fs
-effect: Nika never fetches it, so it needs no `fs` or `net.http` grant. On an
-agent application's seat, `vision:` files ride as image blocks under the same
-rule ([Harness access](/guides/harness-access#images-and-structured-answers-on-a-seat)).
+`permits: { fs: { read: ["./diagrams/**"] } }`, wherever the workflow runs:
+`nika run`, `nika serve`, a child workflow (under the child's grant met with
+its parent's), `nika test` and a rehearsal, which reads its own copy.
+
+- **At check,** a literal path, or a whole bare `const` reference, is judged
+  against the grant: `NIKA-AUTH-006` under an absent `permits:` block,
+  `NIKA-SEC-004` outside a declared one. `nika check --infer-permits` prints
+  the grant, and `NIKA-DRIFT-001` counts it as used. A path the run computes
+  is judged at run, except under a boundary whose `fs.read` grants no path at
+  all (no block, `permits: {}`, an empty list), where every path is outside
+  and `nika check` refuses it.
+- **At run,** Nika reads each file itself, through `nika:read`, before any
+  provider call: judged on its resolved path (symlinks and `..` resolved) and
+  again when it is opened. Outside the grant the task fails `NIKA-SEC-004`
+  with no provider call, and the journal records the denied read. A granted
+  file that cannot be read fails with the read's own code:
+  `NIKA-BUILTIN-READ-001` when no file is there, `NIKA-BUILTIN-READ-002`
+  otherwise.
+- **A vision entry is a sink.** A secret in a vision URL or path is refused
+  (`NIKA-SEC-006`) unless its `egress:` declares `{ to: "infer" }`, and
+  untrusted content that picks an entry reaches the task's answer, so the
+  lethal trifecta (`NIKA-SEC-009`) follows it.
+
+A `source: url` entry is not an fs effect: Nika never fetches it, so it needs
+no `fs` or `net.http` grant. On an agent application's seat over ACP,
+`vision:` files ride as image blocks under the same rule; a seat's direct
+one-shot route reads them, then drops them
+([Harness access](/guides/harness-access#images-and-structured-answers-on-a-seat)).
 
 ## `agent`: multi-turn loop with tools
 

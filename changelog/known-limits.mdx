@@ -6,11 +6,7 @@ icon: "triangle-exclamation"
 ---
 
 {/* TODO(release 0.124.0): re-verify every limit on this page against the
-    released v0.124.0 binary before merging. If the vision-read change
-    (nika-spec#400 and its engine PR) has not merged by the tag, add a
-    security limit here: an `infer:` `vision:` entry with `source: file`
-    reads its file without a `permits.fs.read` check, on API routes and on
-    ACP seats. */}
+    released v0.124.0 binary before merging. */}
 
 These are the known limits of Nika 0.124. Each one says what happens and what
 you can do about it today. They describe this release, not a promise about the
@@ -27,31 +23,56 @@ then, a video tool you install yourself can run from an `exec:` task, inside
 
 ## Paid media under a cost cap
 
-{/* TODO(release 0.124.0): re-check this section against
-    supernovae-st/nika#1846 once it merges: the priced models, the
-    still-refused ones, the refusal codes and the COST wording. */}
-
 A run under a cap (`--max-cost-usd`, the project's `ceiling:`, or a beat's
-`plafond:`, which every beat has) refuses an image or speech call the catalog
-cannot price, before any request is sent: `NIKA-1709` at launch, or
-`NIKA-1704` just before the request when only the run decides the provider or
-model, or when an `agent:` calls the builtin through its tools (the refusal is
-then fed back to the model).
+`plafond:`, which every beat has) bills image and speech calls from a dated
+price table and refuses the paid calls the table cannot price, before any
+request is sent ([Cost honesty](/guides/cost-honesty#paid-media-priced-refused-or-unpriced)
+has the table). In 0.123.2, OpenAI, Gemini and ElevenLabs media ran under a
+cap with no bound; xAI images were already floored and metered.
 
-- **Priced from public list prices, and metered:** OpenAI `gpt-image-2` and
-  the Gemini image models, OpenAI `tts-1` and `tts-1-hd`, and ElevenLabs
-  speech. xAI images keep their catalog price.
-- **Still refused under a cap:** OpenAI's default voice `gpt-4o-mini-tts`,
-  `gpt-image-1.5`, `gpt-image-1-mini`, and any model id the catalog does not
-  list. A beat that used one of them in 0.123 is now `UNREADY`.
-- **What to do:** pick a priced model, use the keyless `provider: system`
-  voice for speech, `local` or `mock`, or run without a cap. Without a cap
-  the call runs, and the run's total reads `unpriced` or `partially_priced`,
-  never a priced figure that leaves it out.
-
-Two kinds of spend stay outside the meter: a media call that fails after its
-provider request records no spend, and a `local` media endpoint stays
-unmetered even when it points at a paid host.
+- **Refused under any cap:** OpenAI's default voice `gpt-4o-mini-tts`,
+  `gpt-image-1.5`, `gpt-image-1-mini`, and any model id the table does not
+  list, such as `gemini-3-pro-image-preview` or `eleven_multilingual_v1`. A
+  beat that uses one of them is now `UNREADY`. Set `model: tts-1` or
+  `tts-1-hd`, a priced ElevenLabs model or `provider: system` for speech;
+  `gpt-image-2` (the default) or a GPT Image 2.5 model for images; or `local`
+  / `mock`. Without a cap the call runs, and the run's total reads `unpriced`
+  or `partially_priced`, never a priced figure that leaves it out.
+- **Refused at launch only under a zero cap:** `gpt-image-2.5-sunburst` and
+  `gpt-image-2.5-flare`, which have no price per image and are billed from the
+  usage they report, and speech whose text only the run renders, which is
+  judged on its rendered text just before its request.
+- **A floor is the least a call costs.** A capped call that bills more than
+  its floor (an image at `quality: auto`, thinking tokens) can cross the cap
+  by the difference, as a text call can.
+- **Each agent task and child workflow call judges alone.** Concurrent
+  `agent:` tasks and child workflow calls of one run (fan-out items, tasks of
+  one wave) each judge their media calls against their own snapshot of what
+  the cap leaves, as text calls in flight do. A child workflow's priced media
+  floor is not added to its parent's launch floor: the child's own launch
+  refuses the call before its request, after the parent's earlier tasks ran.
+- **Counted unpriced.** A request that may have left before the provider
+  answered (a refused connection), a call dropped in flight (a `fail_fast`
+  sibling, a `timeout:`) and a GPT Image 2.5 response that reports no usage
+  are counted unpriced. Once a paid call has billed without a figure, the
+  capped run refuses any later call billed only from its usage.
+- **List prices, read on one date.** The table bills each provider's public
+  list price as read on 2026-10-27: an ElevenLabs plan's prepaid characters
+  are not counted, so a cap can refuse speech your plan already covers, and a
+  few Gemini floors use the page's rounded price, up to $0.0003 above the
+  token bill. Prices change outside the engine: OpenAI shuts down
+  `gpt-image-1.5` and `gpt-image-1-mini` on 2026-12-01, and `tts-1`,
+  `tts-1-hd` and `gpt-4o-mini-tts` on 2027-01-06.
+- **Outside the meter:** a `local` media endpoint stays unmetered even when it
+  points at a paid host, and the `provider: system` voice is not yet counted
+  as unpriced local work when an `agent:` calls it through its tools.
+- **How it reads.** For an image request that leaves its size or quality
+  open, the COST row of `nika check` shows the cheapest listed row as its
+  `from` floor, while a response without usage is billed at the dearest. The
+  audited line's `est out ≤$…` still counts model output only, so a run whose
+  only spend is media reads `est out ≤$0.0000` beside its media rows. `nika arm`
+  prints the `NIKA-1709` code of an `UNREADY` beat twice and puts
+  `(budget_floor)` on a line of its own.
 
 ## Some image reads are judged only at run
 
@@ -62,16 +83,48 @@ judged only when the run reaches them. A check can pass a read that the run
 then refuses with `NIKA-SEC-004`: grant those paths in `permits.fs.read`
 yourself, and keep them literal so you can read the grant next to the task.
 
+## Vision files
+
+{/* TODO(0.124.0 V-1 merge): re-check this section against the merged
+    supernovae-st/nika#1851. */}
+
+An `infer:` task's `vision:` file is a read inside `permits.fs.read` on every
+route, and a workflow that sent one with no grant before 0.124 must now grant
+it: `nika check --infer-permits` prints the block
+([Verbs](/concepts/verbs#vision-files-are-reads)). What stays open:
+
+- A file refused only when the run opens it (a symlink changed after the
+  check) fails as a read, `NIKA-BUILTIN-READ-002` with the `NIKA-SEC-004`
+  sentence, not with `NIKA-SEC-004` itself. No provider call is made.
+- On an API route, a granted file that is not an image is sent as
+  `image/png`. Grant image files only.
+- A `vision:` URL is fetched by the provider, outside `permits.net`: a local
+  OpenAI-compatible server can fetch it from your machine.
+- The taint re-gate (`NIKA-AUTH-008`, an untrusted value whose resolved form
+  escapes a step's permit) does not cover vision paths. The run still judges
+  every vision path against `permits.fs.read`.
+- `nika check --infer-permits` does not collect `skills:` entries or
+  `{ file: }` project files: grant them yourself.
+
 ## Agent applications (harness seats)
 
-What a seat cannot carry is a `nika check` blocker, not a surprise at run:
-`temperature`, `max_tokens`, an enabled `thinking` budget, a `vision:` URL on
-an `infer:` task, and a `tools:` whitelist on an `agent:` task. Beyond that:
+Over ACP (`run.access.protocol: acp`), what a seat cannot carry on an
+`infer:` task is a `nika check` blocker, not a surprise at run: `temperature`,
+`max_tokens`, an enabled `thinking` budget and a `vision:` URL. A `tools:`
+whitelist on an `agent:` task is a blocker on every seat. Beyond that:
 
+- **The direct route drops fields without a word.** Without
+  `protocol: acp`, an `infer:` task on a seat runs as the application's
+  one-shot command (`codex exec`, `claude -p`). It neither sends nor refuses
+  `vision:`, `temperature`, `max_tokens` and `thinking`, and `nika check` does
+  not flag them: the model never sees the image. Declare `protocol: acp` for a
+  task that needs its `vision:` files, and an API route for one that needs
+  the sampling settings. `nika run --dry-run` does not apply the seat checks
+  either.
 - `images:` belongs to a task on a seat: an API or local model refuses it.
   Only the bytes a seat sends on the task's own session count, and
-  `images: { save: }` receives images from Codex only; on another application
-  it fails `NIKA-AGENT-007`.
+  `images: { save: }` receives images from Codex only: on another application
+  it passes `nika check` and fails `NIKA-AGENT-007` at run.
 - A `vision:` file sent to a seat must start with a PNG, JPEG, GIF or WebP
   signature.
 - On the Codex seat, token counts are journaled as 0, a task under
@@ -105,6 +158,24 @@ and that answer is not tracked as secret (NIK-102). The SECRETS rung says so
 (`model echo untracked`). Send a model only the secrets its task needs: a
 secret reaches a model only through an `egress:` rule you declare on it
 (`egress: [{ to: "infer" }]`).
+
+## What the security checks do not follow
+
+- **What a seat does without asking.** On a harness seat, `permits:` does not
+  bound what the application does on its own: Codex, for example, opens pages
+  with its hosted web tool even under `permits: {}`, calls the MCP tools
+  marked `readOnlyHint` (remote ones included) and applies your global
+  `~/.codex/AGENTS.md` and your Codex plugins.
+  [Harness access](/guides/harness-access#what-permits-does-not-cover) lists
+  what each seat still does.
+- **Files read by an agent's tools or an MCP tool.** The trifecta's file
+  channel (`NIKA-SEC-009`) does not follow a file read by a read builtin that
+  an `agent:` whitelist admits, or by an `mcp:` tool.
+- **Consent at run.** The run's re-check of a check report re-derives the
+  permits fit and the trifecta, not the consent law (`NIKA-SEC-014`).
+- **A check of the source alone** (an editor, the MCP `nika_check` tool) reads
+  no child workflow, so a refusal that comes through a child does not show
+  there. Run `nika check` on the file before you run it.
 
 ## Other open limits
 

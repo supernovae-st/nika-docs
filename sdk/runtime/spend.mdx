@@ -77,6 +77,11 @@ catalog's list prices.
   3 and the message starts `price unknown:`. The engine your app starts has
   no terminal to ask; `nika run` in an interactive terminal asks once for a
   cost review instead.
+- **Paid images and speech** are billed from the engine's dated media price
+  table. Under a cap, a paid media call the table cannot price, such as
+  OpenAI's default voice `gpt-4o-mini-tts`, is refused before the run starts
+  with `NIKA-1709`, as a floor above the cap is
+  ([Cost honesty](/guides/cost-honesty#paid-media-priced-refused-or-unpriced)).
 - **During the run.** The call that crosses the cap completes and counts,
   nothing new starts, unstarted tasks are cancelled, and `run.result()`
   resolves `failed` with `NIKA-1704` and no outputs.

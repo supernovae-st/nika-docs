@@ -228,21 +228,29 @@ halftone:
 - With `save:`, Nika writes the received bytes at that path through
   `nika:write`, inside `permits.fs.write` (`NIKA-SEC-004` outside it). A
   second image lands at `banner-2.png`, a third at `banner-3.png`, up to
-  four. Every path is judged before any file is written: `nika check` judges
-  all four for a literal path (grant the directory, or the four files
-  `--infer-permits` lists), and the run judges the received ones before the
-  first write. A task whose session delivered no image fails
-  `NIKA-AGENT-007` instead of succeeding with no file. `nika serve` lists the
-  saved file among the run's artifacts with the received digest.
+  four: only images whose bytes arrived count, and a save that received more
+  than four is refused before any file is written. Every path is judged
+  before any file is written: `nika check` judges all four for a literal path
+  (grant the directory, or the four files `--infer-permits` lists), refuses a
+  computed `save:` path when `permits.fs.write` grants no path at all, and the
+  run judges the received ones before the first write. A task whose session
+  delivered no image fails `NIKA-AGENT-007` instead of succeeding with no
+  file. `nika serve` lists the saved file among the run's artifacts with the
+  received digest.
 - A save is a write: two tasks that can run at the same time and save on one
   path, a `for_each` task that saves one path, or a save beside a
   `nika:write` of one of its files are refused (`NIKA-SEC-012`). Order them
   with `after:` or give each its own path.
 - Nika recognises the image tool of Codex. On another application,
-  `images: { save: }` receives nothing and fails `NIKA-AGENT-007`.
+  `images: { save: }` receives nothing: `nika check` does not block it, and
+  the run fails `NIKA-AGENT-007`.
 - `images:` belongs to a task on a seat. On an API or local model,
   `nika check` names it as a blocker and the run refuses it: there,
   `nika:image_generate` makes the images.
+
+{/* TODO(0.124.0 V-1 merge): re-check the save bullet above (the four-image
+    bound and the computed save path) against the merged
+    supernovae-st/nika#1851. */}
 
 A `schema:` on a seated `agent:` task is validated by Nika on the final
 message, and the validated object becomes the output (`message` under
@@ -262,19 +270,34 @@ turn and carries:
   image prompts at `initialize` (codex-acp and claude-agent-acp do). An
   application that does not is refused before the session starts, and so is
   a file whose bytes do not start with a PNG, JPEG, GIF or WebP signature.
-  A `vision:` file is a read inside `permits.fs.read`, judged before the file
-  is opened, as on an API route
+  As on an API route, a `vision:` file is a read inside `permits.fs.read`:
+  `nika check` judges a literal path, and the run judges every path on its
+  resolved form before the session starts (`NIKA-SEC-004` outside the grant,
+  `NIKA-AUTH-006` at check with no `permits:` block). A granted file that
+  cannot be read fails with the read's own code (`NIKA-BUILTIN-READ-001` when
+  no file is there, `NIKA-BUILTIN-READ-002` otherwise)
   ([Verbs](/concepts/verbs#vision-files-are-reads)).
 
-{/* TODO(release 0.124.0): re-check the vision bullet above against
-    nika-spec#400 and its engine PR once they merge. */}
+{/* TODO(0.124.0 V-1 merge): re-check the vision bullet above, and the
+    sentence on the vision files of the direct route below, against the
+    merged supernovae-st/nika#1851. */}
 
-A seat cannot carry `temperature`, `max_tokens`, an enabled `thinking`
-budget, a `vision:` URL on an `infer:` task (Nika does not fetch it) or a
-`tools:` whitelist on an `agent:` task. `nika check` names them as blockers
-instead of reporting the file run-ready, and the run refuses them before
-anything is sent. On a seated task, `check` also stops suggesting
-`max_tokens` or `max_tokens_total`.
+Over ACP, a seat cannot carry `temperature`, `max_tokens`, an enabled
+`thinking` budget or a `vision:` URL on an `infer:` task (Nika does not fetch
+it): `nika check` names them as blockers instead of reporting the file
+run-ready, and the run refuses them before anything is sent. On every seat, a
+`tools:` whitelist on an `agent:` task is a blocker too, and `check` stops
+suggesting `max_tokens` or `max_tokens_total` on a seated task.
+
+Without `run.access.protocol: acp`, an `infer:` task on a seat runs as the
+application's direct one-shot command (`codex exec`, `claude -p`). That route
+neither sends nor refuses `vision:`, `temperature`, `max_tokens` and
+`thinking`, and `nika check` does not flag them: the model never sees the
+image. The run still judges and reads the `vision:` files under
+`permits.fs.read`, then drops them. Declare `protocol: acp` on a task that
+needs its `vision:` files, and an API route on one that needs `temperature`,
+`max_tokens` or `thinking`. `nika run --dry-run` does not apply these seat
+checks.
 
 ## The honest receipt
 

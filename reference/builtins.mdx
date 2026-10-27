@@ -410,15 +410,17 @@ hero:
   `infer:`); `permits.tools` and `permits.fs` do.
 </Warning>
 
-{/* TODO(release 0.124.0): re-check this note against
-    supernovae-st/nika#1846 once it merges. */}
-
 <Note>
   **Paid media under a cost cap.** `nika:image_generate` and `nika:tts_generate`
-  bill their provider. Under `--max-cost-usd`, a project `ceiling:` or a beat's
-  `plafond:`, a call the catalog can price is floored and metered, and a call it
-  cannot price is refused before any request (`NIKA-1709`). `local`, `mock`
-  and the `system` voice bill no provider. See
+  bill their provider, and the engine bills them from a dated price table:
+  OpenAI `gpt-image-2`, `tts-1` and `tts-1-hd`, the Gemini image models and
+  ElevenLabs voices it lists, OpenAI's GPT Image 2.5 models from the usage they
+  report, and xAI images at the spend xAI reports. Under `--max-cost-usd`, a
+  project `ceiling:` or a beat's `plafond:`, a priced call is floored and
+  billed against the cap, and a paid call the table cannot price (OpenAI's
+  default voice `gpt-4o-mini-tts`, `gpt-image-1.5`, `gpt-image-1-mini`, an
+  unlisted model id) is refused before any request (`NIKA-1709`). `local`,
+  `mock` and the `system` voice bill no provider. See
   [Cost honesty](/guides/cost-honesty#paid-media-priced-refused-or-unpriced).
 </Note>
 

@@ -14,7 +14,7 @@ hash, not megabytes of base64.
 | --- | --- | --- | --- |
 | `local` | `tts-1` | `alloy` | The local inference path: any OpenAI-speech-compatible server — LocalAI (`:8080`, also ElevenLabs-compatible upstream), Kokoro-FastAPI, Speaches, openedai-speech. One wire: `POST {base}/v1/audio/speech` → raw bytes. Never inferred from `model:`. |
 | `system` | `say` (macOS) · `espeak-ng` (Linux) | `default` (the host's own) | The host's own synthesizer: no key, no network, no server. Nika starts it itself, so no `permits.exec`. Renders WAV. Never inferred from `model:`. [Below](#speak-with-no-key-provider-system). |
-| `openai` | `gpt-4o-mini-tts` | `alloy` | Sync, seconds-class. `speed:` 0.25–4.0 native. |
+| `openai` | `gpt-4o-mini-tts` | `alloy` | Sync, seconds-class. `speed:` 0.25–4.0 native. The default model has no price, so a capped run refuses it: set `model: tts-1` or `tts-1-hd` ([below](#paid-speech-under-a-cost-cap)). |
 | `elevenlabs` | `eleven_multilingual_v2` | Rachel's id | `voice:` is a **voice id** (find them in your voice library) — ids ride the URL path, so the engine restricts them to the id alphabet. `speed:` is warned-dropped. |
 | `mock` | `mock-tts-1` | `sine` | A real, playable, deterministic 16 kHz WAV — zero network, zero keys. CI runs the pipeline offline. |
 
@@ -113,17 +113,37 @@ outputs:
 
 ## Paid speech under a cost cap
 
-{/* TODO(release 0.124.0): re-check this section against
-    supernovae-st/nika#1846 once it merges. */}
+Paid speech is billed per character of the text sent, at the rates of the
+engine's dated price table (`cost_basis: catalog_rate_x_characters`, with the
+date of the rates in `cost_as_of`):
 
-OpenAI `tts-1` and `tts-1-hd` and ElevenLabs speech have a public list price
-in the catalog: under `--max-cost-usd`, a project `ceiling:` or a beat's
-`plafond:`, they are floored at launch and metered. OpenAI's default voice,
-`gpt-4o-mini-tts`, has no price Nika can apply, so a capped run refuses it
-before any request (`NIKA-1709`). Set `model: tts-1` (or `tts-1-hd`), use
-ElevenLabs, or speak with `provider: system`, `local` or `mock`, which bill
-no provider. Without a cap the call runs and is counted as unpriced
+| Provider | Model | USD per 1M characters |
+| --- | --- | --- |
+| `openai` | `tts-1` | 15 |
+| `openai` | `tts-1-hd` | 30 |
+| `elevenlabs` | `eleven_v4`, `eleven_v3`, `eleven_multilingual_v2` (the default) | 80 |
+| `elevenlabs` | `eleven_v4_turbo`, `eleven_v3_conversational`, `eleven_flash_v2_5`, `eleven_flash_v2`, `eleven_turbo_v2_5`, `eleven_turbo_v2` | 40 |
+
+Under `--max-cost-usd`, a project `ceiling:` or a beat's `plafond:`, a
+literal `text:` is floored at launch, and a text that only the run renders is
+judged on its rendered characters just before the request: `nika check`
+marks it `METERED — billed per character of the text the run renders`, and
+only a zero cap refuses it at launch. A call that fails after the provider
+answered keeps what it billed.
+
+OpenAI's default voice, `gpt-4o-mini-tts`, has no price Nika can apply:
+OpenAI prices it per token, and its speech response reports no usage. Nor
+does a model id the table does not list, such as `eleven_multilingual_v1`. A
+capped run refuses them before any request (`NIKA-1709`, or `NIKA-1704` when
+only the run decides the model), and `nika arm` shows a beat that uses them
+`UNREADY`. Set `model: tts-1` or `tts-1-hd`, use a priced ElevenLabs model, or
+speak with `provider: system`, `local` or `mock`, which bill no provider.
+Without a cap the call runs and is counted as unpriced
 ([Cost honesty](/guides/cost-honesty#paid-media-priced-refused-or-unpriced)).
+
+The table bills list prices: an ElevenLabs plan's prepaid characters are not
+counted, so a cap can refuse speech your plan already covers. OpenAI shuts
+down `tts-1`, `tts-1-hd` and `gpt-4o-mini-tts` on 2027-01-06.
 
 ## Cookbook (proven against live APIs)
 

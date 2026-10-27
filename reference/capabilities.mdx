@@ -112,7 +112,7 @@ What a rule can set:
 | Field | Type | Example |
 |---|---|---|
 | `token_limit_param` | enum | `max-tokens` · `max-completion-tokens` · `max-output-tokens`: the request parameter that carries `max_tokens` |
-| `supports_temperature` | bool | `false` for models that reject a temperature: `nika check` then refuses a `temperature:` on them, on Anthropic's API and on OpenAI's own (GPT-5, GPT-5 mini, GPT-5 nano and the o-series), instead of letting the provider answer HTTP 400 at run |
+| `supports_temperature` | bool | `false` for models that reject a temperature: `nika check` then refuses a `temperature:` on them, on Anthropic's API and on the `openai` provider for `gpt-5`, `gpt-5-mini`, `gpt-5-nano` and the o-series, instead of letting the provider answer HTTP 400 at run. Dated snapshot ids, `gpt-5.1` onward and OpenRouter routes are not covered yet ([Known limits](/changelog/known-limits#smaller-differences)) |
 | `supports_stop_sequences` | bool | `false` for models that reject stop sequences |
 | `supports_system_messages` | bool | `false` sends the system text as a developer message |
 | `reasoning` | bool | `true` for a reasoning model, whose thinking counts against its output cap |
