@@ -52,7 +52,12 @@ A server job admitted with a non-empty `inputs` map opens with one more, an
 `engine.event` for the server's `execution.queued` frame (sequence 1, with no
 `status`; the frame's `queued` stays on `event.raw.status`). A failing task
 adds `task.failed` locally (with `event.error`), and the settlement reads
-`failed`. A human gate ends the stream with `run.waiting`
+`failed`. Locally, a skipped task adds `task.skipped` (one skipped by
+`on_error: { skip: true }` keeps the error that made it skip on `event.raw`),
+a cancelled task adds `task.cancelled`, and a task that a resumed run
+(`nika run --resume`) reused adds `task.cache_hit`, with no `task.started`
+before it. These three carry `task`, never `error` or `status`; the package
+itself never passes `--resume`. A human gate ends the stream with `run.waiting`
 (`paused`) on both doors. Longer workflows emit more: never assert a fixed
 count, and build a server-side progress view from `run.started`, the final
 event and `run.status()`.
@@ -132,6 +137,7 @@ event and `run.status()`.
 |---|---|---|
 | `run.started` | `workflow_started` | `execution.started` |
 | `task.scheduled` · `task.started` · `task.completed` · `task.failed` | `task_scheduled` · `task_started` · `task_completed` · `task_failed` | none |
+| `task.skipped` · `task.cancelled` · `task.cache_hit` | `task_skipped` · `task_cancelled` · `task_cache_hit` | none |
 | `run.waiting` | `run_settled` carrying `paused` | `execution.settled` carrying `paused` |
 | `run.settled` | `run_settled` carrying `succeeded`, `failed` or `cancelled` | `execution.settled` (or `execution.cancelled`, `execution.refused`) carrying the final status |
 | `run.interrupted` | `workflow_interrupted` | `execution.interrupted` |
