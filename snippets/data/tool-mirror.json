@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d",
+  "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8",
   "inputs": {
     "canon/builtins.yaml": "1717de41ffc656db939f3fe74c0a6b8cf143ec5f9ed8692241584d50613221d6",
-    "stdlib/builtins-v0.1.md": "b6db11f7ff036ef2c6db619699be27f5c69223bf011e9dbe9207a67bbf37cd87"
+    "stdlib/builtins-v0.1.md": "87ad370b95cd985bd190cdc318f8c1cb1ce5416d8cf5c3a67d4b7bfe524ca706"
   },
   "entries": [
     {
@@ -14,9 +14,9 @@
       "legacyPaths": [
         "/language/stdlib/assert"
       ],
-      "sha256": "c741458cdb94497c67bf76e02ff3b102ad5005e9113a9e31fce34906af6a7c05",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L82",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "541afe80482d82a7a0866724162f4a97f6a7585569155be95a9969b4d91a53a6",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L82",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/chart",
@@ -26,9 +26,9 @@
       "legacyPaths": [
         "/language/stdlib/chart"
       ],
-      "sha256": "66542a356fe6972ad1401625e6b54d5a2202b21cce53abdbe2465dcc8419f792",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L697",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "a6eb443d8492de914c818eb3c1d17b06cb8310a8e7beb5d04cb708a5314bf520",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L697",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/compose",
@@ -38,9 +38,9 @@
       "legacyPaths": [
         "/language/stdlib/compose"
       ],
-      "sha256": "2f272b4f62f67ba51467923d463662970897e53390fc8980a517abf88c50b4e3",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L636",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "2f2d66a12250b169184c07b195f3fc3c03b4b009cd2ac0c58d75c127a3ced834",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L636",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/convert",
@@ -50,9 +50,9 @@
       "legacyPaths": [
         "/language/stdlib/convert"
       ],
-      "sha256": "13c2dbf821f97a66f449c04a4c11be5942f1a3feb28d46a19a67d22c87cf3ff9",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L357",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "c57a8357c9b5328a54637015590b8e874f19c2929ac73cadfeadf98ace73ffca",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L357",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/date",
@@ -62,9 +62,9 @@
       "legacyPaths": [
         "/language/stdlib/date"
       ],
-      "sha256": "60d7a9bdb6f67e818ee2d97fc5f919da3c7061bb3f3764e6bb004b105d8f6b21",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L401",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "21800b084bc96ff7ce4c0fa5682084c436d3cb0fd0095c604308c71fa75bba1e",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L401",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/decide",
@@ -74,9 +74,9 @@
       "legacyPaths": [
         "/language/stdlib/decide"
       ],
-      "sha256": "a54b27b2ecc75818d430215b09defe3a40219545bb46ee3c35f890a332915d33",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L390",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "1f0552dd231fe9c1c05be14b0c1301d299c180d63f2aa01c4e6bb9465313ccd4",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L390",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/done",
@@ -86,9 +86,9 @@
       "legacyPaths": [
         "/language/stdlib/done"
       ],
-      "sha256": "d3f4c501f3379defc7c44962b381c1fecae08c434f447b5a34eb423c8617f114",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L133",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "262ffcfdf80078fc1830e5c45c244a3a628edda69cd92c57b31f58f019b75cc8",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L133",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/edit",
@@ -98,9 +98,9 @@
       "legacyPaths": [
         "/language/stdlib/edit"
       ],
-      "sha256": "bebc5f2d0aecb0df0329211301602e5f02c99b665d937c8db3d29d17db579f54",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L187",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "0fc5f5fcf83d024b33c6a01a7dee2208e02910d47b6a10e965b73a00032537d5",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L187",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/emit",
@@ -110,9 +110,9 @@
       "legacyPaths": [
         "/language/stdlib/emit"
       ],
-      "sha256": "7c1443201c0247fbeaf477fd29941e22a063b7d98a55abc8cd9c928e54f84421",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L60",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "89ec02e54cc82cb44754ba3714482c7d8b3f348e67b7fa5af2b817a2948cdd35",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L60",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/fetch",
@@ -122,9 +122,9 @@
       "legacyPaths": [
         "/language/stdlib/fetch"
       ],
-      "sha256": "2bef9b903443a9d7d07b2ea4fc490f104e055cd78547c6d6147342fd91503f1a",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L475",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "c1b59547507b3d58173bbffac7d09cdb571769d1c72eaee50ab3b211736febe5",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L475",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/glob",
@@ -134,9 +134,9 @@
       "legacyPaths": [
         "/language/stdlib/glob"
       ],
-      "sha256": "d57845bb3396819c4485de340d5104cd8a020074a789db3e4a77fab931d4e72d",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L273",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "41bdc303e6adbdca1bde1b5af4775d858fd921a249e79a9664e8d4593e05f0fe",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L273",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/grep",
@@ -146,9 +146,9 @@
       "legacyPaths": [
         "/language/stdlib/grep"
       ],
-      "sha256": "cd86034e1a6154ef1c640a463973242bb7bbb0aa0d8429b7c5bb05aa977d3008",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L284",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "ac04e39bbdb31bc6c791f1d0665fe29f9ad1e929c355e14d5593a29e748a62d9",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L284",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/hash",
@@ -158,9 +158,9 @@
       "legacyPaths": [
         "/language/stdlib/hash"
       ],
-      "sha256": "bfd7f182868d655b232d98d94241be1741d81ba37e447978f8460e48fb95e293",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L408",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "3822ddfa7f7f47bda0cc42764b21952c25d1ab4bdd3f94c554295d0744040f9c",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L408",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/image_compose",
@@ -170,9 +170,9 @@
       "legacyPaths": [
         "/language/stdlib/image_compose"
       ],
-      "sha256": "c24725c6e02315c36c525c436d94619241689a118c8c7fb0de16a1b0a0d17447",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L962",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "a675645709ca163680950adcaf635706a8512361e9747bfd78793916b623d907",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L979",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/image_fx",
@@ -182,9 +182,9 @@
       "legacyPaths": [
         "/language/stdlib/image_fx"
       ],
-      "sha256": "cc159af8152e6875bdca800484b36ee3b34eee50ab8e9993f0061416d2cb0287",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L882",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "06730d3de44f3997115916423be5ff5ac17acd52e6f5c180dd60e8481fe9730c",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L899",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/image_generate",
@@ -194,9 +194,9 @@
       "legacyPaths": [
         "/language/stdlib/image_generate"
       ],
-      "sha256": "4e0907a63f00e5a2a2c467c51231c81e58b8f886994201be96d71e0acb1d2e84",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L737",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "2d7b75b829caf99329c8db60dec46fe701b51f9850e4bc33dbd2eeddea712cab",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L737",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/inspect",
@@ -206,9 +206,9 @@
       "legacyPaths": [
         "/language/stdlib/inspect"
       ],
-      "sha256": "6bbec4f22eeaccb2860be97f039af81382ca660b6fc049aa27a365a6e9927771",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L667",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "2a1493ca293904b18fec475b9e314e85f985a360c26efbb3d431956fb170b5f5",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L667",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/jq",
@@ -218,9 +218,9 @@
       "legacyPaths": [
         "/language/stdlib/jq"
       ],
-      "sha256": "04eb34096a2ad19ce67c98ac3fda077603ac2e556e290a707b33a6e520b24f81",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L313",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "a1572f0ef809c1e3ec4e583eac443f45815289be773b22c6345604bccfedf68e",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L313",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/json_diff",
@@ -230,9 +230,9 @@
       "legacyPaths": [
         "/language/stdlib/json_diff"
       ],
-      "sha256": "f934f504e515092f0d34731e7e8319fa5c512e0d8dea1d34b3641ecfab3dee03",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L338",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "07adf95b2bf376a79788eb8599cfa990ac432347ddc5de5b552570ead4dbec1e",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L338",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/json_merge_patch",
@@ -242,9 +242,9 @@
       "legacyPaths": [
         "/language/stdlib/json_merge_patch"
       ],
-      "sha256": "85a226d1b86ccb7deed2d96dc463af0fa553a127878aab124f9467b39cc84f20",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L351",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "8ecbe5622d2ed2185aa8a5023d94e016b4326f32fb5b2f637f0ea35dded05b92",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L351",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/log",
@@ -254,9 +254,9 @@
       "legacyPaths": [
         "/language/stdlib/log"
       ],
-      "sha256": "664f32fa34dea0263f48d1e61f0e46ad3ac44fd2969f50ebf49d540f82877acf",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L52",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "678e6add9b823b7ca80d5fb9453dbbb1f1921fe5e4e3af945ad3763b1f86d34c",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L52",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/notify",
@@ -266,9 +266,9 @@
       "legacyPaths": [
         "/language/stdlib/notify"
       ],
-      "sha256": "3c15a3f99fc9aaae35f1c72c80cad774ecf879d24e9c7e44c86a5cda13b6c5b4",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L613",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "60246ec6b8047b3b7a8db794a67d403f8b4147fa64c4f17cc245473df8c99c98",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L613",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/prompt",
@@ -278,9 +278,9 @@
       "legacyPaths": [
         "/language/stdlib/prompt"
       ],
-      "sha256": "904409608dfe813920c17042e63abd01e253087c8489083f041356ad405e0319",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L91",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "f81b374e73396815b503325bf93293a12744b9b1d5e7064b0dbc4c1ef3cd2a7e",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L91",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/read",
@@ -290,9 +290,9 @@
       "legacyPaths": [
         "/language/stdlib/read"
       ],
-      "sha256": "c831fe868a6c34ce3f1de95cb916368e97740711998c7a3b9407d2899b344921",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L161",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "b4aa081ab2b72caf174a6ded850007146e6b38a6285d19da8ae85ea42d005a24",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L161",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/remove_file",
@@ -302,9 +302,9 @@
       "legacyPaths": [
         "/language/stdlib/remove_file"
       ],
-      "sha256": "5e2b1f499fc2dd317e9eaf4985f760813dd1c3dbe671d29313e9148f56520254",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L204",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "d2694e59517e49bc3135e6bddfe71b574823f468651bbdb5255dea7d0e6cd942",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L204",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/tts_generate",
@@ -314,9 +314,9 @@
       "legacyPaths": [
         "/language/stdlib/tts_generate"
       ],
-      "sha256": "c498595630ac04083f248f81d3f8510c2f5ccff3e6539fb07fa843fdbe83c14a",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L1065",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "127e28ea5eb27d02ffc870abbbb6fe06cdc45ac20eda098332a72e96ebb6b0fd",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L1082",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/uuid",
@@ -326,9 +326,9 @@
       "legacyPaths": [
         "/language/stdlib/uuid"
       ],
-      "sha256": "3f75a3ade5582607d4f58f6eaa47116398e9bb6322e53f7fa0a4fa79fe3a220e",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L384",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "02703450a5f13e35ae041441a3ec6b50d2923eb546aa19eeb7f9def1e81bd1c7",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L384",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/validate",
@@ -338,9 +338,9 @@
       "legacyPaths": [
         "/language/stdlib/validate"
       ],
-      "sha256": "5cd5f2f0ce38b3eb173948ca9a6c67ce777127e53d5801a00bd20e3f1d2e667b",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L344",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "df51bbad52469d94ffda023b9873c8d34ee8175c410301c4160243662c839652",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L344",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/wait",
@@ -350,9 +350,9 @@
       "legacyPaths": [
         "/language/stdlib/wait"
       ],
-      "sha256": "a48036568952d546013a6d8e40b6262f517be212aa1b9512f6d1d213bda73006",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L141",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "809d0af2647217d928d8ffc1e3e5222c5e1f2a6ab74d8c651bb02cf72fefe9c8",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L141",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     },
     {
       "path": "reference/tools/write",
@@ -362,9 +362,9 @@
       "legacyPaths": [
         "/language/stdlib/write"
       ],
-      "sha256": "3270404e343e6967e9538f5d095f0f57480ba1b6a086dfcd44f1d298c781ad64",
-      "source": "https://github.com/supernovae-st/nika-spec/blob/ebc64482f8022af7d5eea71abd893d3a8562a87d/stdlib/builtins-v0.1.md#L173",
-      "revision": "ebc64482f8022af7d5eea71abd893d3a8562a87d"
+      "sha256": "6ca2a1b81d6abfa24ae7978f1fe562aa1436ffe4a2a77af915be905fc899d96d",
+      "source": "https://github.com/supernovae-st/nika-spec/blob/5cd95cd25c0ff453be266794a03666e5e3f2d7a8/stdlib/builtins-v0.1.md#L173",
+      "revision": "5cd95cd25c0ff453be266794a03666e5e3f2d7a8"
     }
   ]
 }
