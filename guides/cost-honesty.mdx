@@ -140,7 +140,7 @@ thinking output): `gemini-3.1-flash-image` 0.50 / 60 / 3, `gemini-3-pro-image`
 `gemini-3.1-flash-lite-image` 0.25 / 30 / 1.50 and `gemini-nano-banana-2.1`
 1.50 / 30 / 7.50. The ElevenLabs families follow its
 [models page](https://elevenlabs.io/docs/overview/models). xAI images keep
-the $0.02 floor per image they already had in 0.123.2, and their bill is the
+the `$0.02` floor per image they already had in 0.123.2, and their bill is the
 exact spend xAI reports.
 
 A request is priced the way its provider bills it. A Gemini size class is
@@ -148,8 +148,8 @@ A request is priced the way its provider bills it. A Gemini size class is
 longer edge, else 1K. The floor of `quality: auto` is the cheapest price
 listed for its size, and the floor of an unlisted size the cheapest at its
 quality. An image whose response reports no usage is billed at the dearest
-row the request leaves open: `quality: auto` with no `size:` bills $0.211 on
-`gpt-image-2`, never $0.005. Name the size and quality you mean.
+row the request leaves open: `quality: auto` with no `size:` bills `$0.211` on
+`gpt-image-2`, never `$0.005`. Name the size and quality you mean.
 
 ### What a capped run does
 

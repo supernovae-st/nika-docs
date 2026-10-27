@@ -144,8 +144,8 @@ times the usage the response reports (`cost_basis: catalog_rate_x_usage`), or
 the price per image times the images when no response reports usage
 (`catalog_price_x_images`), with the date of the rates in `cost_as_of`. An
 image whose response reports no usage is billed at the dearest row its
-request leaves open: `quality: auto` with no `size:` bills $0.211 on
-`gpt-image-2`, never the cheapest $0.005, so name the size and quality you
+request leaves open: `quality: auto` with no `size:` bills `$0.211` on
+`gpt-image-2`, never the cheapest `$0.005`, so name the size and quality you
 mean. Each response of a Gemini `n:` batch is billed on its own, and a render
 that fails after its provider billed (a later request of the batch, a decode,
 a save) keeps that spend.
@@ -164,7 +164,7 @@ Under a cost cap (`--max-cost-usd`, a project `ceiling:` or a beat's
 - `gpt-image-2.5-sunburst` and `gpt-image-2.5-flare` have no published price
   per image: they run billed from the usage they report (`METERED` in
   `nika check`), and only a zero cap refuses them.
-- xAI images keep their $0.02 floor per image and the spend xAI reports.
+- xAI images keep their `$0.02` floor per image and the spend xAI reports.
 - `gpt-image-1.5`, `gpt-image-1-mini` (which OpenAI shuts down on 2026-12-01)
   and any id the table does not list are refused before any request
   (`NIKA-1709`, or `NIKA-1704` when only the run decides the model): switch to
