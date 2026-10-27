@@ -1,14 +1,210 @@
 ---
-title: "Known limits in 0.123"
-description: "What the 0.123 release does not do, in plain words, with a way to work with each limit."
+title: "Known limits in 0.124"
+description: "What the 0.124 release does not do, in plain words, with a way to work with each limit."
 sidebarTitle: "Known limits"
 icon: "triangle-exclamation"
 ---
 
-These are the known limits of Nika 0.123. Each one says what happens and what
+These are the known limits of Nika 0.124. Each one says what happens and what
 you can do about it today. They describe this release, not a promise about the
 next one: the [roadmap](/changelog/roadmap) covers direction, and
 [releases](/changelog/releases) lists what each version changed.
+
+## No video yet
+
+0.124 builds images (`nika:image_generate`, `nika:image_fx`, and contact
+sheets with `nika:image_compose`) and narration (`nika:tts_generate`), but it
+does not assemble video. Native video assembly is planned for 0.125. Until
+then, a video tool you install yourself can run from an `exec:` task, inside
+`permits.exec` and the workflow's `fs` boundary.
+
+## Paid media under a cost cap
+
+A run under a cap (`--max-cost-usd`, the project's `ceiling:`, or a beat's
+`plafond:`, which every beat has) bills image and speech calls from a dated
+price table and refuses the paid calls the table cannot price, before any
+request is sent ([Cost honesty](/guides/cost-honesty#paid-media-priced-refused-or-unpriced)
+has the table). In 0.123.2, OpenAI, Gemini and ElevenLabs media ran under a
+cap with no bound; xAI images were already floored and metered.
+
+- **Refused under any cap:** OpenAI's default voice `gpt-4o-mini-tts`,
+  `gpt-image-1.5`, `gpt-image-1-mini`, and any model id the table does not
+  list, such as `gemini-3-pro-image-preview` or `eleven_multilingual_v1`. A
+  beat that uses one of them is now `UNREADY`. Set `model: tts-1` or
+  `tts-1-hd`, a priced ElevenLabs model or `provider: system` for speech;
+  `gpt-image-2` (the default) or a GPT Image 2.5 model for images; or `local`
+  / `mock`. Without a cap the call runs, and the run's total reads `unpriced`
+  or `partially_priced`, never a priced figure that leaves it out.
+- **Refused at launch only under a zero cap:** `gpt-image-2.5-sunburst` and
+  `gpt-image-2.5-flare`, which have no price per image and are billed from the
+  usage they report, and speech whose text only the run renders, which is
+  judged on its rendered text just before its request.
+- **A floor is the least a call costs.** A capped call that bills more than
+  its floor (an image at `quality: auto`, thinking tokens) can cross the cap
+  by the difference, as a text call can.
+- **Each agent task and child workflow call judges alone.** Concurrent
+  `agent:` tasks and child workflow calls of one run (fan-out items, tasks of
+  one wave) each judge their media calls against their own snapshot of what
+  the cap leaves, as text calls in flight do. A child workflow's priced media
+  floor is not added to its parent's launch floor: the child's own launch
+  refuses the call before its request, after the parent's earlier tasks ran.
+- **Counted unpriced.** A request that may have left before the provider
+  answered (a refused connection), a call dropped in flight (a `fail_fast`
+  sibling, a `timeout:`) and a GPT Image 2.5 response that reports no usage
+  are counted unpriced. Once a paid call has billed without a figure, the
+  capped run refuses any later call billed only from its usage.
+- **List prices, read on one date.** The table bills each provider's public
+  list price as read on 2026-10-27: an ElevenLabs plan's prepaid characters
+  are not counted, so a cap can refuse speech your plan already covers, and a
+  few Gemini floors use the page's rounded price, up to `$0.0003` above the
+  token bill. Prices change outside the engine: OpenAI shuts down
+  `gpt-image-1.5` and `gpt-image-1-mini` on 2026-12-01, and `tts-1`,
+  `tts-1-hd` and `gpt-4o-mini-tts` on 2027-01-06.
+- **Outside the meter:** a `local` media endpoint stays unmetered even when it
+  points at a paid host, and the `provider: system` voice is not yet counted
+  as unpriced local work when an `agent:` calls it through its tools.
+- **How it reads.** For an image request that leaves its size or quality
+  open, the COST row of `nika check` shows the cheapest listed row as its
+  `from` floor, while a response without usage is billed at the dearest. The
+  audited line's `est out ≤$…` still counts model output only, so a run whose
+  only spend is media reads `est out ≤$0.0000` beside its media rows. `nika arm`
+  prints the `NIKA-1709` code of an `UNREADY` beat twice and puts
+  `(budget_floor)` on a line of its own.
+
+## Some image reads are judged only at run
+
+`nika check` judges every input of `nika:image_compose` against
+`permits.fs.read`, but the `input:` of `nika:image_fx` and the `image:`,
+`images:` and `mask:` files of `nika:image_generate` with `mode: edit` are
+judged only when the run reaches them. A check can pass a read that the run
+then refuses with `NIKA-SEC-004`: grant those paths in `permits.fs.read`
+yourself, and keep them literal so you can read the grant next to the task.
+
+## Vision files
+
+An `infer:` task's `vision:` file is a read inside `permits.fs.read` on every
+route, and a workflow that sent one with no grant before 0.124 must now grant
+it: `nika check --infer-permits` prints the block
+([Verbs](/concepts/verbs#vision-files-are-reads)). What stays open:
+
+- A file refused only when the run opens it (a symlink changed after the
+  check) fails as a read, `NIKA-BUILTIN-READ-002` with the `NIKA-SEC-004`
+  sentence, not with `NIKA-SEC-004` itself. No provider call is made.
+- On an API route, a granted file that is not an image is sent as
+  `image/png`. Grant image files only.
+- A `vision:` URL is fetched by the provider, outside `permits.net`: a local
+  OpenAI-compatible server can fetch it from your machine.
+- The taint re-gate (`NIKA-AUTH-008`, an untrusted value whose resolved form
+  escapes a step's permit) does not cover vision paths. The run still judges
+  every vision path against `permits.fs.read`.
+- `nika check --infer-permits` does not collect `skills:` entries or
+  `{ file: }` project files: grant them yourself.
+
+## Agent applications (harness seats)
+
+Over ACP (`run.access.protocol: acp`), what a seat cannot carry on an
+`infer:` task is a `nika check` blocker, not a surprise at run: `temperature`,
+`max_tokens`, an enabled `thinking` budget and a `vision:` URL. A `tools:`
+whitelist on an `agent:` task is a blocker on every seat. Beyond that:
+
+- **The direct route drops fields without a word.** Without
+  `protocol: acp`, an `infer:` task on a seat runs as the application's
+  one-shot command (`codex exec`, `claude -p`). It neither sends nor refuses
+  `vision:`, `temperature`, `max_tokens` and `thinking`, and `nika check` does
+  not flag them: the model never sees the image. Declare `protocol: acp` for a
+  task that needs its `vision:` files, and an API route for one that needs
+  the sampling settings. `nika run --dry-run` does not apply the seat checks
+  either.
+- `images:` belongs to a task on a seat: an API or local model refuses it.
+  Only the bytes a seat sends on the task's own session count, and
+  `images: { save: }` receives images from Codex only: on another application
+  it passes `nika check` and fails `NIKA-AGENT-007` at run.
+- A `vision:` file sent to a seat must start with a PNG, JPEG, GIF or WebP
+  signature.
+- On the Codex seat, token counts are journaled as 0, a task under
+  `max_tokens_total` is costed at API rates (`nika check` no longer suggests
+  that cap on a seat), and the messages of a turn are joined with no
+  separator.
+- `nika check` can plan a `deepseek/…` `infer:` task onto the Codex seat: pin
+  the access you mean with `--access` or `run.access`.
+- A run paused on a seat's question is answered from the command line
+  (`nika run --resume <trace> --answer <task>=true`): `nika serve` does not
+  expose the question as a typed field, the SDK's events for it are untyped,
+  and the SDK's `run()` cannot answer a gate.
+- A child workflow's journal is not sealed, `nika:image_fx` can journal a
+  `deny` for its own output file, and a seat you pinned is labelled
+  `discovered` in the access report.
+
+## The keyless voice and contact sheets
+
+`nika:tts_generate` with `provider: system` needs macOS `/usr/bin/say`, or
+Linux `espeak-ng` in an absolute directory of the engine's `PATH`. A named
+voice must be installed on the host; there is no fallback to another
+provider, and the cost is reported as unpriced local work, never as free.
+`nika:image_compose` takes 1 to 64 PNG inputs, under caps on each input's
+side, the summed input pixels, each scaled cell and the canvas.
+
+## A model can repeat a secret it received
+
+`nika check` follows a declared secret to every effect it reaches, but not
+through a model: a model that received a secret can repeat it in its answer,
+and that answer is not tracked as secret (NIK-102). The SECRETS rung says so
+(`model echo untracked`). Send a model only the secrets its task needs: a
+secret reaches a model only through an `egress:` rule you declare on it
+(`egress: [{ to: "infer" }]`).
+
+## What the security checks do not follow
+
+- **What a seat does without asking.** On a harness seat, `permits:` does not
+  bound what the application does on its own: Codex, for example, opens pages
+  with its hosted web tool even under `permits: {}`, calls the MCP tools
+  marked `readOnlyHint` (remote ones included) and applies your global
+  `~/.codex/AGENTS.md` and your Codex plugins.
+  [Harness access](/guides/harness-access#what-permits-does-not-cover) lists
+  what each seat still does.
+- **Files read by an agent's tools or an MCP tool.** The trifecta's file
+  channel (`NIKA-SEC-009`) does not follow a file read by a read builtin that
+  an `agent:` whitelist admits, or by an `mcp:` tool.
+- **Consent at run.** The run's re-check of a check report re-derives the
+  permits fit and the trifecta, not the consent law (`NIKA-SEC-014`).
+- **A check of the source alone** (an editor, the MCP `nika_check` tool) reads
+  no child workflow, so a refusal that comes through a child does not show
+  there. Run `nika check` on the file before you run it.
+
+## Other open limits
+
+- **Resume after a file changed.** A resumed run (`--resume`) can reuse a
+  recorded result even when a file it read was rewritten at the same path
+  since. Run again from the start when an input file changed.
+- **Image edits on Gemini and xAI.** `nika:image_generate` with `mode: edit`
+  on `gemini` or `xai` passes `nika check` and fails at run. Edit with
+  `openai`.
+- **Quarantined files of a failed run** are named on standard error only, not
+  in the `--json` output.
+- **A model chosen at run that the catalog does not list, under a cap,** (a
+  `model:` templated from an input, for example) stops the run before any
+  provider call with exit `3` and no error code in the `--json` envelope
+  (`code: null`). A literal `model:` the catalog does not list is refused at
+  launch with `NIKA-1709`.
+- **`nika serve` artifacts.** Files that a `for_each` task saves are missing
+  from a job's artifact list; read them from the run's output directory.
+- **OpenRouter under a cap.** An unattended run under a cap, such as a beat,
+  can be refused on the OpenRouter route even though `nika check` prices the
+  workflow.
+- **The SDK's `access: 'codex'`** cannot name a protocol. Unless the file
+  declares `run.access.protocol: acp`, an `infer:` task pinned this way runs
+  as a direct Codex one-shot, with no reasoning-effort setting.
+
+## Smaller differences
+
+- **jq capture groups.** A capture group that takes no part in a match is
+  left out, where jq yields `null`.
+- **OpenAI fixed sampling.** `nika check` refuses a `temperature:` on
+  `openai/gpt-5`, `gpt-5-mini`, `gpt-5-nano` and the o-series, but does not
+  yet name the dated snapshot ids (`gpt-5-mini-2025-08-07`). OpenRouter routes
+  and `gpt-5.1` onward are unchanged.
+- **`nika explain`** does not know `NIKA-MCP-003` or `NIKA-MCP-006` (NIK-254).
+  The refusals themselves name the repair, `nika mcp approve <server>`.
 
 ## A rehearsal on a copy skips some steps
 
@@ -53,7 +249,7 @@ commands and their effects are the same in both languages.
 
 ## The VS Code extension stays at 0.120
 
-The editor extension, frozen at 0.120 and not qualified with 0.123: use `nika lsp` and the JSON Schema
+The editor extension, frozen at 0.120 and not qualified with 0.124: use `nika lsp` and the JSON Schema
 ([Editor setup](/getting-started/editors)). The extension
 (`supernovae.nika` on the VS Code Marketplace and Open VSX) remains on its
 0.120 release. If you keep it, point its `nika.server.path` setting at your
@@ -120,7 +316,7 @@ Without the script, take the file directly: each registry entry
 file under `[source]` (repository, revision, path) and its digest under
 `[integrity]`. Download that file at that revision, compare its SHA-256 with
 the entry, and check it with `nika check`. This is a compatibility defect of
-the registry reader, still present in 0.123.2: work from the local file.
+the registry reader, still present in 0.124: work from the local file.
 
 ## Project files are checked, not run
 
@@ -149,7 +345,7 @@ built-in server cannot serve it: pull the lite pick
 (`unsloth/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M`) for the built-in server, or
 serve the Gemma file with llama.cpp's `llama-server`, LM Studio or Ollama
 ([Local models](/guides/local-models)). None of the Gear One picks is marked
-verified in 0.123.2.
+verified in 0.124.
 
 ## The TypeScript SDK
 
@@ -169,7 +365,8 @@ verified in 0.123.2.
 
 ## The run-signing key and the OS keychain
 
-On macOS, 0.123.2 never opens the keychain, even from a terminal, and
+On macOS, Nika 0.123.0 and later never open the keychain, even from a
+terminal, and
 `nika doctor` says `the keychain is not opened by this ad-hoc build` even for
 the signed release. Its run-signing key lives in files under
 `~/.nika/keys/`. A run-key that Nika 0.122 or older stored in the keychain
@@ -178,7 +375,7 @@ and the repair it names, `nika key align`, exits with
 `this process does not open the keychain`.
 
 On Linux, `nika` run from a terminal also uses the desktop's Secret Service,
-and 0.123.2 cannot tell whether it already holds a run-key, so a plain
+and Nika cannot tell whether it already holds a run-key, so a plain
 `nika key init` refuses with `run-signing key material already exists`, even
 on a new machine.
 

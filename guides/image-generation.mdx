@@ -129,17 +129,47 @@ non-conformant per the spec:
 
 ## Real spend in the ledger
 
-xAI bills images in cost ticks — the engine converts them exactly and the
-render's cost rides the task line, the run total, and the manifest:
+xAI bills images in cost ticks — the engine converts them exactly
+(`cost_basis: provider_reported`) and the render's cost rides the task line,
+the run total, and the manifest:
 
 ```
 ✔  render  invoke · nika:image_generate  5.6s · $0.02
 ── 1/1 done · $0.02 · elapsed 5.6s ──────────────────
 ```
 
+OpenAI and Gemini renders are billed from the engine's dated price table
+([Cost honesty](/guides/cost-honesty#the-media-price-table)): the token rates
+times the usage the response reports (`cost_basis: catalog_rate_x_usage`), or
+the price per image times the images when no response reports usage
+(`catalog_price_x_images`), with the date of the rates in `cost_as_of`. An
+image whose response reports no usage is billed at the dearest row its
+request leaves open: `quality: auto` with no `size:` bills `$0.211` on
+`gpt-image-2`, never the cheapest `$0.005`, so name the size and quality you
+mean. Each response of a Gemini `n:` batch is billed on its own, and a render
+that fails after its provider billed (a later request of the batch, a decode,
+a save) keeps that spend.
+
 Any invoke tool reporting a top-level `cost_usd` in its structured output is
-metered the same way. Providers that don't report exact cost show `null` —
+metered the same way. A call with no price Nika can apply shows `null` —
 never an estimate dressed as truth.
+
+Under a cost cap (`--max-cost-usd`, a project `ceiling:` or a beat's
+`plafond:`):
+
+- `gpt-image-2` and the Gemini models the table prices
+  (`gemini-3.1-flash-image`, `gemini-3-pro-image`, `gemini-2.5-flash-image`,
+  `gemini-3.1-flash-lite-image` and `gemini-nano-banana-2.1`) are floored at
+  launch, their price per image times `n:`, and billed against the cap.
+- `gpt-image-2.5-sunburst` and `gpt-image-2.5-flare` have no published price
+  per image: they run billed from the usage they report (`METERED` in
+  `nika check`), and only a zero cap refuses them.
+- xAI images keep their `$0.02` floor per image and the spend xAI reports.
+- `gpt-image-1.5`, `gpt-image-1-mini` (which OpenAI shuts down on 2026-12-01)
+  and any id the table does not list are refused before any request
+  (`NIKA-1709`, or `NIKA-1704` when only the run decides the model): switch to
+  `gpt-image-2` or a 2.5 model. Without a cap they run and count as unpriced
+  ([Cost honesty](/guides/cost-honesty#paid-media-priced-refused-or-unpriced)).
 
 ## Cookbook (each proven end-to-end against live APIs)
 
@@ -223,7 +253,7 @@ returned MIME types, a provenance manifest records the resolved request,
 and result URLs are never fetched (that would reopen SSRF). Local inference
 is a first-class provider. The PNG can carry a `nika` tEXt chunk — the
 same informal provenance practice ComfyUI and InvokeAI use. The argument
-contract is in [builtins](/reference/builtins#media-4) and
+contract is in [builtins](/reference/builtins#media-5) and
 `nika catalog --tools`.
 
 ## Editing (`mode: edit`)

@@ -364,6 +364,7 @@
               "examples/model-bench",
               "examples/release-radar",
               "examples/csv-chart-report",
+              "examples/image-compose-sheet",
               "examples/transcript-shownotes",
               "examples/bookmark-triage"
             ]
@@ -478,11 +479,13 @@
                   "reference/language/words/enabled",
                   "reference/language/words/env",
                   "reference/language/words/file",
+                  "reference/language/words/images",
                   "reference/language/words/max_tokens",
                   "reference/language/words/max_tokens_total",
                   "reference/language/words/max_turns",
                   "reference/language/words/path",
                   "reference/language/words/prompt",
+                  "reference/language/words/save",
                   "reference/language/words/schema",
                   "reference/language/words/shell",
                   "reference/language/words/skills",
@@ -656,6 +659,7 @@
                 "group": "Media",
                 "pages": [
                   "reference/tools/chart",
+                  "reference/tools/image_compose",
                   "reference/tools/image_fx",
                   "reference/tools/image_generate",
                   "reference/tools/tts_generate"

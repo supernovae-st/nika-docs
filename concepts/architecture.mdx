@@ -90,7 +90,7 @@ composition root is not built.
     What a workflow may touch is declared in its `permits:` block and enforced
     at run time, with `exec:` children confined by the OS sandbox (Seatbelt on
     macOS, bubblewrap on Linux). Crates were also meant to declare capability
-    axes in a registry; no CI check enforces that vocabulary in 0.123.2. See
+    axes in a registry; no CI check enforces that vocabulary in 0.124.0. See
     [Security](/concepts/security).
   </Accordion>
 </AccordionGroup>
@@ -104,8 +104,8 @@ docs, a canary workflow, a review, and one atomic commit. Pre-admission crates
 can live in the workspace, and ship, while they work towards those gates;
 `Cargo.toml` lists them.
 
-After 0.123 the engine is maintained: security fixes, bug fixes and
-compatibility. No new crate admissions are planned.
+In the 0.124 line, work stays focused on maintenance, security and the
+media capabilities workflows need. No new crate admissions are planned.
 
 [The crate constellation →](/reference/constellation) · [Admission →](/architecture/admission)
 

@@ -84,10 +84,21 @@ Engine {STATUS.version} emits {STATUS.eventKinds} kinds. Most runs only produce 
 A few that explain themselves in practice:
 
 - `task_failed` carries the typed error (`code`, message, whether it is
-  transient), the shape `on_error:` routes on.
+  transient), the shape `on_error:` routes on. A turn an agent application
+  reports as failed on a [harness seat](/guides/harness-access) lands here,
+  as `NIKA-1804` (transient) or `NIKA-1805`, never as a `task_completed`
+  whose output is the error text.
 - `task_cache_hit` marks a task a `--resume` run skipped because a journaled
   success matched it.
 - `permit_checked` records a boundary decision the engine made at run time.
+  On a harness seat, one frame per permission the application asked names
+  its gate and the decision; a Codex command that asks to leave its sandbox
+  (`sandbox · command`) is always `escalate`, so the run pauses for you
+  whatever `permits.exec` grants. The keyless `provider: system` voice
+  journals its synthesizer start on the `builtin` plane.
+- `agent_image_observed` records each image a harness seat sent: the digest
+  and size of the received bytes, the path the application reported (never
+  opened) and, under `images: { save: }`, the `saved_path` Nika wrote.
 - `workflow_paused` records a human gate holding the run; `approval_decided`
   records the answer that resumed it.
 - `run_sealed` is the last line of a signed journal: the signature over the
@@ -121,9 +132,9 @@ events. From TypeScript, iterate `run.events()`, then await `run.result()`.
 
 The engine kernel also declares observability interfaces for alternative
 engines and future adapters: `MetricsExporter`, `TracerProvider`,
-`BillingSink`, `AuditSink` and `SecretResolver`. Engine 0.123.2 ships no
+`BillingSink`, `AuditSink` and `SecretResolver`. Engine 0.124.0 ships no
 production implementation of them: they exist as test doubles only. What a
-0.123.2 run gives you is the journal, the `--json` stream, the cost fields on
+0.124.0 run gives you is the journal, the `--json` stream, the cost fields on
 task events (`cost_incurred`, `task_completed`) and `nika trace export`.
 
 ## Related decisions

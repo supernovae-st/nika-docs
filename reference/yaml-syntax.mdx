@@ -52,7 +52,7 @@ The family is closed — a value-namespace read outside it is `NIKA-VALUES-003`.
 |---|---|---|---|
 | `inputs:` | the **caller**, at launch (`--var k=v` · `--inputs-json -` · the SDK's `inputs` · a `nika serve` job) — a deployment knob is an input with a `default:` | `{ type, required?, default?, description? }` · `type:` required | untrusted |
 | `const:` | the **file** · immutable across the run, never caller-supplied | a bare literal, or `{ type, value }` | trusted |
-| `secrets:` | a **governed store** · masked everywhere | `{ source: env\|file, key\|path, egress? }` · `source: vault` is withdrawn from the contract: in 0.123.2 it passes check with a hint naming `NIKA-VAR-001` and fails at run with it (unresolved `secrets.<name>`) | trusted |
+| `secrets:` | a **governed store** · masked everywhere | `{ source: env\|file, key\|path, egress? }` · `source: vault` is withdrawn from the contract: in 0.124.0 it passes check with a hint naming `NIKA-VAR-001` and fails at run with it (unresolved `secrets.<name>`) | trusted |
 
 ```yaml
 inputs:
@@ -310,7 +310,8 @@ It's 100% machine-authoritative. This doc is a readable summary.
 The envelope carries **no version marker**: `nika: <identifier>` is the mark
 and the name, and there is nothing to bump. Minor additions (a new optional
 field, a new builtin) are **additive**; a grammar change ships with its
-migration in `nika check --fix` and a refusal naming the move. 0.123
-maintenance releases keep the grammar additive. The project file `nika.yaml`
+migration in `nika check --fix` and a refusal naming the move. 0.124 adds
+`images:` (an `agent:` task on a harness seat) and `nika:image_compose`
+additively. The project file `nika.yaml`
 carries no `tasks:` and names the project (`nika: my-project`); `nika: v1`
 there is a retired schema tag, not an identity.

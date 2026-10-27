@@ -3,6 +3,19 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.124.0",
+      "name": "v0.124.0",
+      "publishedAt": "2026-10-27T21:48:49Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.124.0",
+      "assetCount": 8,
+      "highlights": [
+        "nika doctor and nika welcome name which nika is running.",
+        "An agent application's images are task values.",
+        "nika:image_compose assembles several PNG images into one."
+      ],
+      "notesSha256": "b83420f6b5f480dbc407d7e10039e4f646111bf0ab2923d0fc88e8532be93305"
+    },
+    {
       "tag": "v0.123.2",
       "name": "v0.123.2",
       "publishedAt": "2026-10-26T09:53:57Z",

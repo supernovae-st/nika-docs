@@ -20,7 +20,7 @@ Every cost surface speaks the same four words:
 | **floor** | the cheapest path's cost — every `when:` gate closed, every call first-try at its declared `max_tokens`: what a budget must cover before a run may start, not the least you will be billed | the `--max-cost-usd` refusal (`unavoidable cost floor`) · `explain` (`≥ … cheapest path`) |
 | **ceiling** | the worst case for the model's **output** tokens at catalog prices — the prompt's input tokens, `exec:` and MCP calls are outside it, and the rung says so | `check` COST rung once every task is bounded (`worst-case output ceiling`) · `explain` (`≤ … worst case`) |
 | **UNBOUNDED** | a task whose spend has no provable limit, with the WHY | `check` per-task rows |
-| **unpriced** | tokens were spent but no catalog price exists (local · unknown model) | run totals (`unpriced (N calls)`, or `(N unpriced)` beside a metered total) · `explain` |
+| **unpriced** | tokens were spent, or a paid media call ran, but no catalog price exists (local · unknown model · unpriced media) | run totals (`unpriced (N calls)`, or `(N unpriced)` beside a metered total) · `explain` |
 
 A task goes UNBOUNDED in one of three ways, and its row names which
 one:
@@ -105,6 +105,154 @@ same numbers in beginner words —
 - The flag itself is guarded: a non-finite value (`NaN`, `inf`) is
   rejected at parse time — a budget that cannot compare is not a budget.
 
+## Paid media: priced, refused or unpriced
+
+An image or speech builtin bills its provider the way a model call does, so
+the same doctrine holds: a media call is priced from a dated table, or it is
+unpriced, never `$0.00`.
+
+### The media price table
+
+The engine carries a price table for paid media, kept apart from the model
+catalog. Each row names a provider, a model, a unit, a rate in US dollars and
+the provider's public price page, read on the date the row carries. Every row
+in 0.124 is dated 2026-10-27 (standard tier, paid usage):
+
+| Provider | Model | Unit | Rate (USD) | Source |
+|---|---|---|---|---|
+| `openai` | `gpt-image-2` (default) | per image, 1024x1024: `low` / `medium` / `high` | 0.006 / 0.053 / 0.211 | [image generation guide](https://developers.openai.com/api/docs/guides/image-generation#calculating-costs) |
+| `openai` | `gpt-image-2` | per image, 1024x1536 or 1536x1024: `low` / `medium` / `high` | 0.005 / 0.041 / 0.165 | same |
+| `openai` | `gpt-image-2`, `gpt-image-2.5-sunburst`, `gpt-image-2.5-flare` | per 1M tokens: text input / image input / image output | 5 / 8 / 30 | [API pricing](https://developers.openai.com/api/docs/pricing) |
+| `openai` | `tts-1` | per 1M characters | 15 | same |
+| `openai` | `tts-1-hd` | per 1M characters | 30 | same |
+| `gemini` | `gemini-3.1-flash-image` (default) | per image, 0.5K / 1K / 2K / 4K | 0.045 / 0.067 / 0.101 / 0.151 | [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing) |
+| `gemini` | `gemini-3-pro-image` | per image, 1K / 2K / 4K | 0.134 / 0.134 / 0.24 | same |
+| `gemini` | `gemini-2.5-flash-image` | per image, up to 1024x1024 | 0.039 | same |
+| `gemini` | `gemini-3.1-flash-lite-image` | per image, 1K | 0.0336 | same |
+| `gemini` | `gemini-nano-banana-2.1` | per image, 1K / 2K / 4K | 0.0336 / 0.0504 / 0.113 | same |
+| `elevenlabs` | `eleven_v4`, `eleven_v3`, `eleven_multilingual_v2` (default) | per 1M characters | 80 | [ElevenLabs API pricing](https://elevenlabs.io/pricing/api) |
+| `elevenlabs` | `eleven_v4_turbo`, `eleven_v3_conversational`, `eleven_flash_v2_5`, `eleven_flash_v2`, `eleven_turbo_v2_5`, `eleven_turbo_v2` | per 1M characters | 40 | same |
+
+Each Gemini model also has the per-token rates of the same page, which bill
+the usage a response reports (per 1M tokens, input / image output / text and
+thinking output): `gemini-3.1-flash-image` 0.50 / 60 / 3, `gemini-3-pro-image`
+2 / 120 / 12, `gemini-2.5-flash-image` 0.30 / 30 / 2.50,
+`gemini-3.1-flash-lite-image` 0.25 / 30 / 1.50 and `gemini-nano-banana-2.1`
+1.50 / 30 / 7.50. The ElevenLabs families follow its
+[models page](https://elevenlabs.io/docs/overview/models). xAI images keep
+the `$0.02` floor per image they already had in 0.123.2, and their bill is the
+exact spend xAI reports.
+
+A request is priced the way its provider bills it. A Gemini size class is
+`provider_options.image_size`, else the class of an exact `size:` by its
+longer edge, else 1K. The floor of `quality: auto` is the cheapest price
+listed for its size, and the floor of an unlisted size the cheapest at its
+quality. An image whose response reports no usage is billed at the dearest
+row the request leaves open: `quality: auto` with no `size:` bills `$0.211` on
+`gpt-image-2`, never `$0.005`. Name the size and quality you mean.
+
+### What a capped run does
+
+Under a cap (`--max-cost-usd`, a project `ceiling:`, or a beat's `plafond:`,
+which every beat has):
+
+- **At launch,** a priced call with literal arguments adds its floor to the
+  run's cost floor: its price per image times `n:`, or its rate per character
+  times its text. A paid call the table cannot price is refused with
+  `NIKA-1709` before the run starts, and no request is sent: OpenAI's default
+  voice `gpt-4o-mini-tts` (OpenAI prices it per token, and its speech response
+  reports no usage), `gpt-image-1.5` and `gpt-image-1-mini` (which OpenAI shuts
+  down on 2026-12-01), and any model id the table does not list, in the
+  workflow itself or in a child or grandchild workflow it calls.
+- **Billed from usage only.** `gpt-image-2.5-sunburst` and
+  `gpt-image-2.5-flare` publish no price per image, and speech whose text only
+  the run renders has no length before the run. `nika check` marks both
+  `METERED`: they run under a cap, and only a zero cap refuses them at launch.
+- **Before every request,** the rendered call is judged against what the cap
+  leaves, less the floors of the paid media calls still in flight. A provider,
+  model, `quality:`, `size:`, `n:` or `text:` that only the run decides is
+  judged here: the call is refused with `NIKA-1704`, never retried, when the
+  table cannot price it or its floor exceeds what is left. An admitted call
+  holds its floor until it returns, so the items of a capped `for_each`,
+  parallel or not, cannot launch past the cap together.
+- **An `agent:`** judges each media call its tools make the same way, against
+  what its task's remainder leaves after the loop's own model turns and the
+  floors of its concurrent calls. A refused call goes back to the model, and
+  nothing is sent.
+
+Every call is billed, on its output and in its manifest: `cost_usd`, with
+`cost_basis` saying how (`catalog_rate_x_usage`: the token rates times the
+usage the provider reported; `catalog_price_x_images`: the price per image,
+when no response reports usage; `catalog_rate_x_characters`: the rate per
+character times the characters sent; `provider_reported`: xAI's own figure)
+and `cost_as_of`, the date of the rates. Each response of a Gemini `n:` batch
+is billed on its own. A call that fails after its provider billed keeps that
+spend: a batch whose later request fails keeps the bill of the images already
+rendered, and a render that fails after its answer keeps its bill. The run
+ledger debits it as it debits a model's, per attempt: a capped run stops
+mid-run (`NIKA-1704`) once media spend crosses the cap, and a retry is judged
+against what is left. The run's prologue records the table (`media_pricing`),
+and the cost replay of `nika trace verify` refuses a journal that recorded
+other rates.
+
+Without a cap, an unpriced paid call runs and is counted in
+`spend.unpriced_calls`: the total reads `unpriced`, or `partially_priced`
+beside priced spend, and a child workflow's unpriced calls reach its parent's
+total. A capped run counts some calls unpriced too: a request that broke after
+it left (the provider may have billed it), a call dropped in flight (a
+`fail_fast` sibling, a `timeout:`, a Stop; its floor stays consumed) and a
+GPT Image 2.5 response that reports no usage. Once a paid call has billed
+without a figure, the capped run refuses any later call billed only from its
+usage.
+
+`local` and `mock` media, and the keyless `provider: system` voice, bill no
+provider. The system voice runs under any cap and reports its cost as unpriced
+local work (`cost_unpriced: local_model`), like a local model. `nika:image_fx`,
+`nika:chart` and `nika:image_compose` are local pixel work, not paid media.
+
+### On the COST rung
+
+`nika check` gives each paid media call a row: its floor, the rate and unit
+that set it and the table's date, or `METERED`, `UNPRICED`, or
+`DECIDED AT RUN` when a template or an agent's tools choose the provider or
+the model. A composed child's calls get rows too. A workflow that renders a
+cover with `gpt-image-2` at `quality: low` and a poster with
+`gpt-image-2.5-flare`, then speaks one line with `tts-1` and the same line
+with OpenAI's default voice, reads:
+
+```text
+ ⚠  COST     no infer/agent tasks · 4 paid media calls, 1 unpriced · exec + mcp spend unpriced
+   cover  nika:image_generate · openai gpt-image-2  from $0.0060 · $0.006 per image (1024x1024, low) · prices 2026-10-27
+   poster  nika:image_generate · openai gpt-image-2.5-flare  METERED — billed from the usage it reports · $30 per 1M image output tokens · prices 2026-10-27
+   voice  nika:tts_generate · openai tts-1  from $0.0004 · $15 per 1M characters · prices 2026-10-27
+   narration  nika:tts_generate · openai gpt-4o-mini-tts  UNPRICED — no catalog price; any cost cap refuses it (NIKA-1709)
+```
+
+A `from` figure is the least the call can cost. Under any cap, the same
+workflow is refused before the run starts, and the refusal names every model
+the table prices:
+
+```text
+$ nika run launch-kit.nika --max-cost-usd 1
+NIKA-1709 · refusing to start: no catalog price for task `narration` (nika:tts_generate on `openai`, `gpt-4o-mini-tts`) — --max-cost-usd $1.000000 cannot bound unknown spend (`nika check` lists it UNPRICED under COST). The cap comes from --max-cost-usd, the project `ceiling:` or a beat's `plafond:`. Use a model the catalog prices (images: openai `gpt-image-2`, `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare`, gemini `gemini-3.1-flash-image`, `gemini-3-pro-image`, `gemini-2.5-flash-image`, `gemini-3.1-flash-lite-image` or `gemini-nano-banana-2.1`, or any `xai` model; speech: openai `tts-1` or `tts-1-hd`, elevenlabs `eleven_v4`, `eleven_v4_turbo`, `eleven_v3`, `eleven_v3_conversational`, `eleven_multilingual_v2`, `eleven_flash_v2_5`, `eleven_flash_v2`, `eleven_turbo_v2_5` or `eleven_turbo_v2`), the keyless `system` voice for speech, or `local` / `mock`. Only a run with no cap at all (never a beat) makes this call, and its settlement counts it unpriced.
+```
+
+<sub>Both captured offline from nika 0.124.0, with no provider key.</sub>
+
+`nika check --json` lists the same rows under `cost.media`, and the refusals
+a cap would raise under `failure_plan`: `unpriced_media_cap` for a call the
+table cannot price, `priced_image_over_cap` and `priced_speech_over_cap` for a
+priced floor that a smaller cap refuses, each with its task and a message
+naming the call.
+
+A beat always runs under its `plafond:`, and a project `ceiling:` caps a
+plain `nika run` that passes no `--max-cost-usd`, so both refuse unpriced paid
+media: `nika arm` shows such a beat `UNREADY` with `NIKA-1709`
+([Arming a project](/reference/arm)). A beat cannot drop its cap. Switch the
+call instead: `model: tts-1` or `tts-1-hd`, a priced ElevenLabs model or the
+`system` voice for speech, `gpt-image-2` or a GPT Image 2.5 model for images,
+or `local` / `mock`.
+
 ## After the run: the totals stay honest
 
 Every run ends with a totals line that never turns an unknown price
@@ -116,8 +264,9 @@ workflow ends:
 ```
 
 Its one call is unpriced, so the total is a word, not a number. A run
-that calls no model says `unmetered`. When priced and unpriced
-calls share a run, the total reads `≥ $… (N unpriced)`: the `≥` is
+that calls no model, no paid media and no keyless voice says `unmetered`.
+When priced and unpriced calls share a run, the total reads
+`≥ $… (N unpriced)`: the `≥` is
 printed **because** an unpriced call rode the run. Per-task spend rides
 the trace itself (`cost_usd` on the terminal events), so
 `nika trace show` and the run report read the recorded ledger — never a

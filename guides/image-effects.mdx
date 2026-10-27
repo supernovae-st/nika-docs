@@ -1,6 +1,6 @@
 ---
 title: "Image effects"
-description: "Deterministic artistic styling — dither, palettes, halftone, retro, glitch, ascii. Same input, same args, same bytes forever: the styled image becomes a receipt in the run's proof chain."
+description: "Deterministic artistic styling — dither, palettes, halftone, retro, glitch, ascii — and contact sheets. Same input, same args, same bytes forever: the styled image becomes a receipt in the run's proof chain."
 ---
 
 `nika:image_fx` is the deterministic sibling of
@@ -148,4 +148,93 @@ sha256'd like any other artifact.
 
 Errors are typed `NIKA-BUILTIN-IMAGE_FX-001..006` — invalid args · input read
 · unsupported format · decode · pixel budget · save — plus the boundary
-`NIKA-SEC-004` when a path resolves outside `permits.fs`.
+`NIKA-SEC-004` when a path resolves outside `permits.fs`. An input over 16384
+pixels on a side is the pixel budget (`-005`), and a PNG whose `IHDR` is not
+its first chunk, or that carries a second one, is refused as corrupt (`-004`):
+the size the budget judged from the header is always the size decoded.
+
+## Compose several images into one
+
+`nika:image_compose` is `image_fx`'s sibling for layout: it lays 1 to 64 PNG
+files out as one image, a contact sheet (`grid`), a side-by-side (`row`) or a
+stack (`column`). Like `image_fx` it is pure pixel work, with no provider, no
+network and no clock, so identical input bytes and args give identical PNG
+bytes, and the `image_compose/v1` recipe (each input's sha256 and size, the
+resolved layout) rides the artifact. A contact sheet no longer needs an
+image program run through `exec:`.
+
+```yaml
+nika: hero-sheet
+permits:
+  tools: ["nika:image_generate", "nika:image_fx", "nika:image_compose"]
+  fs:
+    read: ["out/**"]
+    write: ["out/**"]
+tasks:
+  generate:
+    invoke:
+      tool: "nika:image_generate"
+      args:
+        provider: mock            # offline dry-run · flip to local/openai/gemini/xai
+        prompt: "a monarch butterfly over a nebula"
+        output_dir: out
+        format: png
+  gameboy:
+    with:
+      src: ${{ tasks.generate.output.images[0].path }}
+    invoke:
+      tool: "nika:image_fx"
+      args:
+        input: "${{ with.src }}"
+        out: out/hero-gameboy.png
+        ops:
+          - resize: { width: 320 }
+          - dither: { mode: floyd_steinberg, palette: gameboy }
+  halftone:
+    with:
+      src: ${{ tasks.generate.output.images[0].path }}
+    invoke:
+      tool: "nika:image_fx"
+      args:
+        input: "${{ with.src }}"
+        out: out/hero-halftone.png
+        ops:
+          - resize: { width: 320 }
+          - halftone: { cell: 6, angle: 45 }
+  sheet:
+    after: { gameboy: success, halftone: success }   # it reads both files
+    invoke:
+      tool: "nika:image_compose"
+      args:
+        inputs:                   # ordered · 1 to 64 PNG files, each a read
+          - out/hero-gameboy.png
+          - out/hero-halftone.png
+        out: out/hero-sheet.png
+        layout: row               # grid (default) · row · column
+        scale: fit                # none (default) · fit · fill
+        cell: { width: 320, height: 200 }
+        gap: 8
+        padding: 16
+        background: "#10141c"
+outputs:
+  sheet: ${{ tasks.sheet.output.path }}
+```
+
+| Arg | What it does |
+|---|---|
+| `inputs` | The ordered PNG paths, placed row-major. Each is a read `nika check` judges against `permits.fs.read` (a literal path at check, a templated one at run) |
+| `out` | The `.png` artifact, a write inside `permits.fs.write` |
+| `layout` | `grid` (the default: columns and rows derived from the count, or set with `columns` and `rows`), `row` or `column` |
+| `scale` | `none` (each image at its own size), `fit` (scaled into its cell, aspect kept, letterboxed on `background`) or `fill` (scaled to cover its cell, then center-cropped) |
+| `cell` | `{ width, height }` for `fit` and `fill`; the default is the largest input box |
+| `gap` · `padding` · `background` | Pixels between cells, around the sheet, and the fill color (`#rrggbb` or `[r, g, b]`) |
+
+Every limit is judged from the PNG headers before any decompression: each
+input's side, the summed input pixels, each scaled cell and the canvas
+(`NIKA-BUILTIN-IMAGE_COMPOSE-005`). An input count outside 1 to 64 is an
+argument error (`-001`); the codes follow `image_fx`'s ladder, and
+`nika explain` teaches each one. Inputs are PNG only, as for `image_fx`. The
+output carries `path`, `sha256`, `width` and `height` (and each input's
+digest), never the bytes, and identical bytes already at `out:` are an
+idempotent skip (`skipped_existing`). The full contract is
+[`nika:image_compose`](/reference/tools/image_compose).

@@ -89,6 +89,25 @@ Real spend also rides the spine: a priced `task_completed` carries a
 runs (unpriced is honestly absent, never a fake `0`). Agent loops
 report the loop's accumulated tool spend as `tools_cost_usd`.
 
+### Harness tasks in the journal
+
+A task on an agent application you are signed into (a
+[harness seat](/guides/harness-access)) runs that application's own tools,
+so its journal records what Nika judged rather than each tool call:
+
+- one `permit_checked` per permission the application asked, with its gate
+  and the decision `allow`, `deny` or `escalate`. A Codex command that asks
+  to leave its sandbox reads `sandbox · command` and always escalates,
+  whatever `permits.exec` grants: the run pauses with the command and Codex's
+  reason on one sanitized line, and the task's decisions are journaled just
+  before `workflow_paused`;
+- a turn the application reports as failed (a rejected model, an exhausted
+  retry limit) as `task_failed` with `NIKA-1804` (transient, so `retry:` may
+  replay it) or `NIKA-1805`, never as a `task_completed` whose output is the
+  error text;
+- one `agent_image_observed` per image the seat sent, with the digest of the
+  received bytes and, under `images: { save: }`, the `saved_path` Nika wrote.
+
 ## Replay, never re-execute
 
 Two commands inspect a recorded run. With no path they read the

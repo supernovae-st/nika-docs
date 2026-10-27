@@ -1,6 +1,6 @@
 ---
 title: "Crate constellation"
-description: "Visual map of the Nika engine crates across its layers, as of the 0.123 reference release: which are admitted and which ship before admission."
+description: "Visual map of the Nika engine crates across its layers, as of the 0.124 release line: which are admitted and which ship before admission."
 sidebarTitle: "Constellation"
 icon: "diagram-project"
 ---
@@ -19,8 +19,9 @@ L3 and L4. **{STATUS.cratesAdmitted} are admitted** past the twelve
 pre-admission ({STATUS.wipCrates.join(", ")}). Pre-admission crates are in
 the released binary, the Session, the terminal workspace and `nika serve`
 among them, while they work toward the gates. The workspace cap is
-{STATUS.cratesCap} crates (ADR-037). After 0.123 the engine is maintained:
-security fixes, bug fixes and compatibility, with no new crate planned.
+{STATUS.cratesCap} crates (ADR-037). In the 0.124 line, work stays focused on
+maintenance, security and the media capabilities workflows need, with no new
+crate planned.
 
 <Tip>
   Layer model and enforcement: [Layers](/architecture/layers). Admission
@@ -136,7 +137,8 @@ runtime, then the interfaces. Part of it was never built: there is no
 
 <Note>
   The admission rounds are the historical order of the Diamond rewrite. Each
-  admission was one atomic commit; after 0.123 no admission round is planned.
+  admission was one atomic commit; no admission round is planned in the 0.124
+line.
 </Note>
 
 ## See also

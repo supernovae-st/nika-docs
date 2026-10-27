@@ -33,7 +33,7 @@ arm:
 | `workflow` | Required | Repo-relative `*.nika` path; each workflow is armed once |
 | `cadence` | Required | Its IANA zone first: five cron fields (`TZ=Europe/Paris 0 9 * * 1`), a French weekday and time (`TZ=Europe/Paris lundi 9h07`), an anchored interval (`TZ=Europe/Paris every 2 weeks from 2026-10-05 09:00`), or `on-webhook`, the one form with no zone. A scheduled cadence without a zone is refused |
 | `plafond` | Required | Positive per-tick USD ceiling |
-| `manqué` | Required | `rattraper-une-fois` · `sauter` fire today; `rattraper` and `{ rattraper: N }` are accepted grammar that `nika arm fire` refuses at every fire in 0.123.2 (`policy_unsupported`); the resident `nika serve` keeps them |
+| `manqué` | Required | `rattraper-une-fois` · `sauter` fire today; `rattraper` and `{ rattraper: N }` are accepted grammar that `nika arm fire` refuses at every fire in 0.124.0 (`policy_unsupported`); the resident `nika serve` keeps them |
 | `où` | Optional | `local` by default · `cloud` as the declared remote locus |
 | `chevauchement` | Optional | `sauter` by default · `file` for serialized overlap |
 | `après_saut` | Optional | What follows an overlap skip |
@@ -73,7 +73,7 @@ nothing was scheduled — `nika arm` READS the file. The machine that fires them
 
 `[UNREADY]` names what would refuse every fire (an unsupported miss policy,
 for example), and `[DORMANT]` a suspended beat. `nika arm --json` emits the
-same report for programs. Some lines are in French only in 0.123.2
+same report for programs. Some lines are in French only in 0.124.0
 ([Known limits](/changelog/known-limits)).
 
 <div className="sdk-flight sdk-flight-compact">
