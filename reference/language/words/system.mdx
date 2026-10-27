@@ -23,7 +23,7 @@ System prompt · the standing instruction, sent ahead of `prompt:` and unchanged
 **In the same object:** [max_tokens](/reference/language/words/max_tokens) · [model](/reference/language/words/model) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [temperature](/reference/language/words/temperature) · [thinking](/reference/language/words/thinking) · [vision](/reference/language/words/vision)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/3221d0f7f5665707c8e2db41c88117f31bc485ac/schemas/workflow.schema.json)
 
 ### agent
 
@@ -35,14 +35,14 @@ System prompt · the standing instruction, sent ahead of `prompt:` and unchanged
 | Schema location | `/$defs/agent/properties/system` |
 | $ref | `"#/$defs/promptText"` |
 
-**In the same object:** [max_tokens_total](/reference/language/words/max_tokens_total) · [max_turns](/reference/language/words/max_turns) · [model](/reference/language/words/model) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [skills](/reference/language/words/skills) · [temperature](/reference/language/words/temperature) · [tools](/reference/language/words/tools)
+**In the same object:** [images](/reference/language/words/images) · [max_tokens_total](/reference/language/words/max_tokens_total) · [max_turns](/reference/language/words/max_turns) · [model](/reference/language/words/model) · [prompt](/reference/language/words/prompt) · [schema](/reference/language/words/schema) · [skills](/reference/language/words/skills) · [temperature](/reference/language/words/temperature) · [tools](/reference/language/words/tools)
 
 
-[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/schemas/workflow.schema.json)
+[Schema source (use the pointer above)](https://github.com/supernovae-st/nika-spec/blob/3221d0f7f5665707c8e2db41c88117f31bc485ac/schemas/workflow.schema.json)
 
 ## In a source template
 
-Excerpt from `templates/agent-loop.nika`, source lines 81–90. This is a fragment, not a runnable workflow.
+Excerpt from `templates/agent-loop.nika`, source lines 82–91. This is a fragment, not a runnable workflow.
 
 ```yaml illustration
       # repair within its configured retry allowance and task budgets.
@@ -61,7 +61,7 @@ Excerpt from `templates/agent-loop.nika`, source lines 81–90. This is a fragme
 
 | Template | Source |
 | --- | --- |
-| `templates/agent-loop.nika` | [Line 84](https://github.com/supernovae-st/nika-spec/blob/6390b08eb9791ce49c63ee17f8466fab118cadb8/templates/agent-loop.nika#L84) |
+| `templates/agent-loop.nika` | [Line 85](https://github.com/supernovae-st/nika-spec/blob/3221d0f7f5665707c8e2db41c88117f31bc485ac/templates/agent-loop.nika#L85) |
 
 These are literal key occurrences in the source files, not an execution or conformance claim. [How to instantiate a template](/guides/templates).
 
@@ -69,6 +69,6 @@ These are literal key occurrences in the source files, not an execution or confo
 
 This page projects the named specification revision. Check [released engine status](/reference/status) and [the validation workflow](/guides/agent-authoring) before running a file. An optional field is not evidence that every engine supports every value.
 
-Canonical identity: `language:word:system`. Spec revision: [`6390b08eb979`](https://github.com/supernovae-st/nika-spec/tree/6390b08eb9791ce49c63ee17f8466fab118cadb8).
+Canonical identity: `language:word:system`. Spec revision: [`3221d0f7f566`](https://github.com/supernovae-st/nika-spec/tree/3221d0f7f5665707c8e2db41c88117f31bc485ac).
 
 [How documentation stays connected](/reference/knowledge-system).
