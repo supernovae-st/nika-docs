@@ -78,13 +78,13 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
     entrypoint:
 
     ```bash
-    docker run --rm ghcr.io/supernovae-st/nika:0.123.2 --version
-    docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.123.2 check flow.nika
-    docker run -i --rm ghcr.io/supernovae-st/nika:0.123.2 mcp
+    docker run --rm ghcr.io/supernovae-st/nika:0.124.0 --version
+    docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.124.0 check flow.nika
+    docker run -i --rm ghcr.io/supernovae-st/nika:0.124.0 mcp
     ```
 
     The image carries the base shell and coreutils, nothing more; build your
-    own image `FROM ghcr.io/supernovae-st/nika:0.123.2` when a workflow runs
+    own image `FROM ghcr.io/supernovae-st/nika:0.124.0` when a workflow runs
     heavier tools. It has no bubblewrap, so a workflow that declares
     `permits:` and runs `exec:` refuses to start there (`NIKA-1710`, see
     [Servers and headless Linux](#servers-and-headless-linux)) unless you
@@ -104,8 +104,8 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
 
   <Tab title="Nix">
     ```bash
-    nix run github:supernovae-st/nika/v0.123.2 -- --version
-    nix profile install github:supernovae-st/nika/v0.123.2
+    nix run github:supernovae-st/nika/v0.124.0 -- --version
+    nix profile install github:supernovae-st/nika/v0.124.0
     ```
 
     Builds the release tag with the repository's `flake.nix`: the first run
@@ -115,7 +115,7 @@ import { SDK } from "/snippets/_sdk-contract.mdx";
 
   <Tab title="From source">
     ```bash
-    git clone --branch v0.123.2 https://github.com/supernovae-st/nika.git
+    git clone --branch v0.124.0 https://github.com/supernovae-st/nika.git
     cd nika
     cargo install --locked --path crates/nika-cli
     nika --version
@@ -298,8 +298,8 @@ shows you chose it. An unknown value refuses to start (`NIKA-1711`).
   build provenance. Download one archive and the checksum file:
 
   ```bash
-  gh release download v0.123.2 --repo supernovae-st/nika \
-    -p 'nika-macos-arm64-0.123.2.tar.gz' -p SHA256SUMS
+  gh release download v0.124.0 --repo supernovae-st/nika \
+    -p 'nika-macos-arm64-0.124.0.tar.gz' -p SHA256SUMS
   ```
 
   Then check what you hold, in up to three independent ways:
@@ -309,13 +309,13 @@ shows you chose it. An unknown value refuses to start (`NIKA-1711`).
   shasum -a 256 -c SHA256SUMS --ignore-missing     # Linux: sha256sum -c SHA256SUMS --ignore-missing
 
   # 2 · GitHub build attestation for this exact archive
-  gh attestation verify nika-macos-arm64-0.123.2.tar.gz --repo supernovae-st/nika
+  gh attestation verify nika-macos-arm64-0.124.0.tar.gz --repo supernovae-st/nika
 
   # 3 · SLSA provenance, verifiable offline
-  gh release download v0.123.2 --repo supernovae-st/nika -p multiple.intoto.jsonl
-  slsa-verifier verify-artifact nika-macos-arm64-0.123.2.tar.gz \
+  gh release download v0.124.0 --repo supernovae-st/nika -p multiple.intoto.jsonl
+  slsa-verifier verify-artifact nika-macos-arm64-0.124.0.tar.gz \
     --provenance-path multiple.intoto.jsonl \
-    --source-uri github.com/supernovae-st/nika --source-tag v0.123.2
+    --source-uri github.com/supernovae-st/nika --source-tag v0.124.0
   ```
 
   Replace `macos-arm64` with `macos-x64`, `linux-x64` or `linux-arm64` for
@@ -398,7 +398,7 @@ rm ~/.nika/bin/nika                          # install script without Homebrew
 npm uninstall -g @supernovae-st/nika         # npm
 rm ~/.cargo/bin/nika                         # cargo binstall or cargo install
 nix profile remove nika                      # Nix (see `nix profile list` for the name)
-docker image rm ghcr.io/supernovae-st/nika:0.123.2   # container
+docker image rm ghcr.io/supernovae-st/nika:0.124.0   # container
 ```
 
 Then, if you want no trace left, remove Nika's state:

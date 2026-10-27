@@ -11,11 +11,6 @@ icon: "table-cells"
 > program to install, no network: the same photos give the same sheet, byte
 > for byte, on the same pinned engine.
 
-{/* TODO(release 0.124.0): move the fixture URL to the v0.124.0 tag with the
-    other example pages. The managed blocks below are in sync with nika-spec
-    5cd95cd; re-run showcase-projector.py --check if the tag's SPEC_PIN is
-    not 5cd95cd. */}
-
 ## The job
 
 A contact sheet used to mean a round trip through an image editor, or an
@@ -149,7 +144,7 @@ outputs:
     Save the file above as `image-compose-sheet.nika` in a new folder, then download the samples it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.123.2/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.124.0/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures/photos
     curl -fsSLo examples/fixtures/photos/sunset-01.png "$FIXTURES/photos/sunset-01.png"
     curl -fsSLo examples/fixtures/photos/harbour-02.png "$FIXTURES/photos/harbour-02.png"

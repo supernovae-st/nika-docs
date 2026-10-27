@@ -21,9 +21,9 @@ The one-liner everywhere: `brew install supernovae-st/tap/nika` — then
 | **Release tarballs** | per-platform binaries + `SHA256SUMS` + SLSA provenance (`multiple.intoto.jsonl`): verify before you trust | [Verify a download](/getting-started/installation#verify-a-download) |
 | **`install.sh`** | one-command install from the site | [Installation guide](/getting-started/installation) |
 | **npm** | `npm install -g @supernovae-st/nika` (Node.js 22+, macOS or glibc Linux): the `nika` command plus the TypeScript SDK; inside a project, `./node_modules/.bin/nika` | [Installation](/getting-started/installation) |
-| **Container image** | `docker run --rm ghcr.io/supernovae-st/nika:0.123.2 --version` (linux/amd64 · linux/arm64, entrypoint `nika`); mount a project with `docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.123.2 check flow.nika` | [Installation](/getting-started/installation) |
+| **Container image** | `docker run --rm ghcr.io/supernovae-st/nika:0.124.0 --version` (linux/amd64 · linux/arm64, entrypoint `nika`); mount a project with `docker run --rm -v "$PWD:/work" -w /work ghcr.io/supernovae-st/nika:0.124.0 check flow.nika` | [Installation](/getting-started/installation) |
 | **cargo binstall** | the prebuilt release tarball, no compile (`cargo binstall --git https://github.com/supernovae-st/nika nika-cli`) | [Installation](/getting-started/installation) |
-| **nix flake** | `nix run github:supernovae-st/nika/v0.123.2` builds that release tag, store-cached (the bare `github:supernovae-st/nika` builds `main`, which can be ahead of the release) | [Installation](/getting-started/installation) |
+| **nix flake** | `nix run github:supernovae-st/nika/v0.124.0` builds that release tag, store-cached (the bare `github:supernovae-st/nika` builds `main`, which can be ahead of the release) | [Installation](/getting-started/installation) |
 | **GitHub CLI extension** | `gh extension install supernovae-st/gh-nika` → `gh nika check/run` — pass-through to a PATH `nika`, else a one-time checksum-verified release fetch (Actions runners · Codespaces) | [gh-nika](https://github.com/supernovae-st/gh-nika) |
 | **MCP oracle Dockerfile (kit)** | the read-only oracle in a container you build (`integrations/mcp/Dockerfile` in the kit) | [nika-plugins kit](https://github.com/supernovae-st/nika-plugins) |
 
