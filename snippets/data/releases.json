@@ -3,6 +3,19 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.124.1",
+      "name": "v0.124.1",
+      "publishedAt": "2026-10-28T09:56:26Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.124.1",
+      "assetCount": 8,
+      "highlights": [
+        "The SDK guard reads what the published @supernovae-st/nika 0.124.0 closes.",
+        "nika check no longer says a mock rehearsal dials nothing.",
+        "A workflow saved with a byte-order mark is framed on the right line (#1608)."
+      ],
+      "notesSha256": "a818d3fe934234aaa78f470d54918e2fb7bf80727615781aeb940fb1475dd147"
+    },
+    {
       "tag": "v0.124.0",
       "name": "v0.124.0",
       "publishedAt": "2026-10-27T21:48:49Z",
