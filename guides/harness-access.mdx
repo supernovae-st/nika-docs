@@ -280,16 +280,40 @@ it): `nika check` names them as blockers instead of reporting the file
 run-ready, and the run refuses them before anything is sent. On every seat, a
 `tools:` whitelist on an `agent:` task is a blocker too, and `check` stops
 suggesting `max_tokens` or `max_tokens_total` on a seated task.
+`nika run --dry-run` refuses what the run's seat refuses, with the lines
+`nika check` blocks `run ready` on, and exits 2.
 
 Without `run.access.protocol: acp`, an `infer:` task on a seat runs as the
-application's direct one-shot command (`codex exec`, `claude -p`). That route
-neither sends nor refuses `vision:`, `temperature`, `max_tokens` and
-`thinking`, and `nika check` does not flag them: the model never sees the
-image. The run still judges and reads the `vision:` files under
-`permits.fs.read`, then drops them. Declare `protocol: acp` on a task that
-needs its `vision:` files, and an API route on one that needs `temperature`,
-`max_tokens` or `thinking`. `nika run --dry-run` does not apply these seat
-checks.
+application's direct one-shot command (`codex exec`, `claude -p`, and the
+one-shots of Grok Build and GitHub Copilot CLI). That command carries the
+prompt, the system prompt, the model and a `schema:` (except on Copilot),
+never an image, so a task with `vision:` is refused instead of running
+without its images: `nika check` blocks `run ready` with `NIKA-432`, and the
+run refuses the task before the seat starts, with nothing sent. The run still
+judges and reads the `vision:` files under `permits.fs.read` first. The check
+and the run name a route that carries the files:
+`run.access: { via: <seat>, protocol: acp }` when that seat's ACP one-shot
+also carries the rest of the task, and an API route first when the task sets
+what the ACP session refuses (`temperature`, `max_tokens`, an enabled
+`thinking` budget, a `vision:` URL), with those fields named:
+
+```text
+ layers · valid ✔ · access ready ✔ · capacity fit ✔ · run ready ✖ · seat · `look` is an infer: on `codex`'s direct one-shot, whose command carries the prompt, system, model and a `schema:`, never an image: the model would not see its `vision:`, so the run refuses it before anything is sent (NIKA-432) — declare an API route or drop `vision:`; `run.access: { via: codex, protocol: acp }` carries `vision:` files, not `max_tokens`
+```
+
+<sub>Captured offline from nika 0.124.1 with `--access codex`, a scripted
+`codex` standing in for the application.</sub>
+
+That task sets `max_tokens`, so the API route comes first. Without
+`max_tokens`, the same line ends on the ACP route:
+
+```text
+(NIKA-432) — declare `run.access: { via: codex, protocol: acp }` (its ACP one-shot carries `vision:` files), drop `vision:` or declare an API route
+```
+
+The direct route still neither sends nor refuses `temperature`, `max_tokens`
+and `thinking`, and `nika check` does not flag them: declare an API route on
+a task that needs them.
 
 ## The honest receipt
 

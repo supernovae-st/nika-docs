@@ -57,13 +57,13 @@ arm:
 | `cadence` | yes | The IANA zone first, then five cron fields (`"TZ=Europe/Paris 30 7 * * *"`), a French weekday and time (`"TZ=Europe/Paris lundi 9h07"`) or an anchored interval (`"TZ=Europe/Paris every 2 weeks from 2026-10-05 09:00"`); or `on-webhook`, the one form without a zone. The zone resolves against the embedded tzdb, never the host's, and a scheduled cadence without one is refused (`cadence.tz-missing`) |
 | `plafond` | yes | The spend ceiling of each fire in USD (`--max-cost-usd`), above zero. It has no default: choosing for the operator would be choosing who pays. Under it, paid images and speech are billed from a dated price table, and a call the table cannot price (OpenAI's default voice `gpt-4o-mini-tts`, `gpt-image-1.5`, `gpt-image-1-mini`, an unlisted model id) makes the beat `UNREADY` ([paid media](/guides/cost-honesty#paid-media-priced-refused-or-unpriced)) |
 | `manqué` | yes | What a missed slot becomes when the firer comes back (table below). No default either |
-| `chevauchement` | no | A new slot while the previous fire still runs: `sauter` (skip it, the default) or `file` (queue it). `remplacer` is accepted by the registry and refused by the 0.124.0 firer |
-| `après_saut` | no | When the beat resumes after a skipped slot: `prochain-créneau` (the default). `à-complétion` is accepted by the registry and refused by the 0.124.0 firer |
+| `chevauchement` | no | A new slot while the previous fire still runs: `sauter` (skip it, the default) or `file` (queue it). `remplacer` is accepted by the registry and refused by the 0.124.1 firer |
+| `après_saut` | no | When the beat resumes after a skipped slot: `prochain-créneau` (the default). `à-complétion` is accepted by the registry and refused by the 0.124.1 firer |
 | `où` | no | `local` (the default) or `cloud`. A `cloud` beat stays in the registry and every fire on this machine skips it |
 | `actif` + `raison` + `jusqu_au` | together | The suspension triple: `actif: false` needs the reason and an ISO date. The beat sleeps until that date, then fires again. **Deleting the line does not disarm**; the triple does |
 | `inputs` | no | The `--var KEY=VALUE` pairs every fire binds, one scalar per key, coerced by the workflow's declared types. A key the workflow does not declare makes the beat `UNREADY` (`input_refused`) |
 | `tolérance` | no | An (m,k)-firm skip tolerance (`3/4`). The report shows it; the firer does not enforce it |
-| `décalage` | no | `hash`, a deterministic offset derived from the workflow path. Accepted by the registry and refused by the 0.124.0 firer |
+| `décalage` | no | `hash`, a deterministic offset derived from the workflow path. Accepted by the registry and refused by the 0.124.1 firer |
 | `par` | no | Who armed the beat, verbatim. It proves nothing by itself: the machine's key is what authorizes, and a merge arms nothing |
 
 The set is closed: any other key, such as `signature:` or `budget:`, is
@@ -78,7 +78,7 @@ policy, or suspend the beat with the triple.
 
 ### The miss policies (`manqué:`)
 
-| Value | What a silence does | In 0.124.0 |
+| Value | What a silence does | In 0.124.1 |
 |---|---|---|
 | `rattraper-une-fois` | Fire one catch-up run that answers for the whole silence | fires |
 | `sauter` | Never catch up: a skip is an event, never an execution | fires |
@@ -142,12 +142,11 @@ call bills `gpt-4o-mini-tts`, which the price table cannot price:
 
 ```text
   [UNREADY] workflows/morning-voice.nika · TZ=Europe/Paris 30 7 * * *
-         ✗ NIKA-1709 · NIKA-1709 · refusing to start: no catalog price for task `speak` (nika:tts_generate on `openai`, `gpt-4o-mini-tts`) — --max-cost-usd $0.050000 cannot bound unknown spend (`nika check` lists it UNPRICED under COST). The cap comes from --max-cost-usd, the project `ceiling:` or a beat's `plafond:`. Use a model the catalog prices (images: openai `gpt-image-2`, `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare`, gemini `gemini-3.1-flash-image`, `gemini-3-pro-image`, `gemini-2.5-flash-image`, `gemini-3.1-flash-lite-image` or `gemini-nano-banana-2.1`, or any `xai` model; speech: openai `tts-1` or `tts-1-hd`, elevenlabs `eleven_v4`, `eleven_v4_turbo`, `eleven_v3`, `eleven_v3_conversational`, `eleven_multilingual_v2`, `eleven_flash_v2_5`, `eleven_flash_v2`, `eleven_turbo_v2_5` or `eleven_turbo_v2`), the keyless `system` voice for speech, or `local` / `mock`. Only a run with no cap at all (never a beat) makes this call, and its settlement counts it unpriced.
- (budget_floor)
+         ✗ NIKA-1709 · refusing to start: no catalog price for task `speak` (nika:tts_generate on `openai`, `gpt-4o-mini-tts`) — --max-cost-usd $0.050000 cannot bound unknown spend (`nika check` lists it UNPRICED under COST). The cap comes from --max-cost-usd, the project `ceiling:` or a beat's `plafond:`. Use a model the catalog prices (images: openai `gpt-image-2`, `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare`, gemini `gemini-3.1-flash-image`, `gemini-3-pro-image`, `gemini-2.5-flash-image`, `gemini-3.1-flash-lite-image` or `gemini-nano-banana-2.1`, or any `xai` model; speech: openai `tts-1` or `tts-1-hd`, elevenlabs `eleven_v4`, `eleven_v4_turbo`, `eleven_v3`, `eleven_v3_conversational`, `eleven_multilingual_v2`, `eleven_flash_v2_5`, `eleven_flash_v2`, `eleven_turbo_v2_5` or `eleven_turbo_v2`), the keyless `system` voice for speech, or `local` / `mock`. Only a run with no cap at all (never a beat) makes this call, and its settlement counts it unpriced. (budget_floor)
          · DÉCLARÉ — le registre le dit, la machine ne l'a jamais tiré
 ```
 
-<sub>Captured offline from nika 0.124.0, with no provider key; the code is printed twice, and `(budget_floor)` lands on a line of its own.</sub>
+<sub>Captured offline from nika 0.124.1, with no provider key. In `--json`, the blocker carries the code once on its own field, `kind: budget_floor`, and the sentence alone.</sub>
 
 A beat cannot drop its `plafond:`, so change the call: `model: tts-1` or
 `tts-1-hd`, a priced `elevenlabs` model, the keyless `provider: system` voice,
@@ -233,7 +232,7 @@ reading the registry; add `--write` to install it:
 | `--write` | Write the unit files instead of printing them |
 | `--beat <label>` | Emit the unit of one beat only |
 | `--out <dir>` | The directory the units are written to |
-| `--mode user\|system` | `user` (the default). `system` is refused in 0.124.0 (« la portée root n'est pas émise », exit `2`): units go to the operator's session (LaunchAgents · systemd --user) |
+| `--mode user\|system` | `user` (the default). `system` is refused in 0.124.1 (« la portée root n'est pas émise », exit `2`): units go to the operator's session (LaunchAgents · systemd --user) |
 | `--env-file <file>` | The env file the unit loads: provider keys live there, never in the unit |
 | `--nika-bin <path>` | The nika binary the unit invokes |
 

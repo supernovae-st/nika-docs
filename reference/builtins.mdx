@@ -358,7 +358,7 @@ route:
 | Builtin | What it does |
 |---|---|
 | [`nika:fetch`](/reference/tools/fetch) | HTTP request + content extraction: {CANON.extractModes} extract modes (`markdown` by default · `article` · `text` · `selector` · `jq` · `metadata` · `links` · `feed` · `sitemap` · `raw` passthrough) — plus `form:` (urlencoded), `multipart:` (file parts ride the `permits.fs` READ boundary · ≤32 MiB) and `traverse:` (bounded same-origin crawl · `max_pages` ≤ 25 · robots honored · the effect certificate counts every page). Fetching a URL is *calling a tool*, not a verb — and so is crawling: no `nika:crawl`. |
-| [`nika:notify`](/reference/tools/notify) | Send a notification. 0.124.0 accepts `channel: webhook` only (`slack` · `email` · `discord` · `sms` are reserved and refused, `NIKA-BUILTIN-NOTIFY-001`). Point `target:` at a Slack or Discord incoming webhook and the engine shapes the body that service reads (`{ text, mrkdwn: false }` for Slack, `{ content, allowed_mentions }` for Discord); any other target receives `{ message, severity, data? }`. |
+| [`nika:notify`](/reference/tools/notify) | Send a notification. 0.124.1 accepts `channel: webhook` only (`slack` · `email` · `discord` · `sms` are reserved and refused, `NIKA-BUILTIN-NOTIFY-001`). Point `target:` at a Slack or Discord incoming webhook and the engine shapes the body that service reads (`{ text, mrkdwn: false }` for Slack, `{ content, allowed_mentions }` for Discord); any other target receives `{ message, severity, data? }`. |
 
 <Warning>
   Engines MUST ship SSRF defense on `nika:fetch`: private-network and

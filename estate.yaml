@@ -201,7 +201,7 @@ files:
   evidence: "hand-written pre-push gate config (mint broken-links · link-audit · teach-parity · oracle-sweep)"
 - path: "reference/error-codes.mdx"
   class: authored
-  sha256: c4caf7dcb155339248edc0d673f860afa4240502fdc0c55c8523cfdb74f7cd20
+  sha256: c2f3b4deda09d3d54b3d886613839344280bd397c9ff68daf954db924b220715
   evidence: "mixed page: authored frontmatter and prose around errors-*:begin/end tables projected from the spec diagnostic registry by showcase-projector.py"
   note: "the errors-categories, errors-codes and errors-namespaces blocks are projected from nika-spec canon/diagnostics/registry.yaml; edit the registry and re-project, never hand-edit those blocks; this repo's gate does not independently re-derive them"
 - path: "reference/mcp-catalog.mdx"
@@ -279,7 +279,7 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: a7772addac00ea58f74fd1b5e0ef50119dfd380c3b41ceb57568d37bca4420f5
+  sha256: 162a2647aa7365974665295ca76e219042e5af80f8481cf8dad805130c04c8ce
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 - path: "snippets/data/releases.json"
@@ -296,7 +296,7 @@ patterns:
 - glob: "**.mdx"
   class: authored
   match_count: 297
-  aggregate_sha256: f712ba4469b955828d3088a0835d783998574efa5b89a449c8ae028c4504eb2b
+  aggregate_sha256: 731facace85040698495b921a340356a870c6cc5f98247fc4e3bb1311dce350a
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -325,7 +325,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: b328894184d3d97e7efe266ef1c97f3213ce38e3c1de33c18132dd7397edeade
+  aggregate_sha256: c34df524b70b7a8d10f6578bb7941b5a0319e961e55a1f9408f43a44c5cd3c52
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:

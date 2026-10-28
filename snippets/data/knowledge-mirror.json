@@ -447,7 +447,7 @@
       "sourcePointers": [
         "/properties/inputs"
       ],
-      "sha256": "46f4e44f962a215e706a2354928d4db4cb47915599a19382495d9ef780d6e4f2"
+      "sha256": "0818ab49956cd47df59721c1c598d911632ac0fcc627ebaf4c687f113159c2dc"
     },
     {
       "id": "language:word:integer",
@@ -661,7 +661,7 @@
         "/$defs/infer/properties/model",
         "/$defs/agent/properties/model"
       ],
-      "sha256": "285b01f2872580654a85058000eb64673c49e6c9128d08995d919fea722003ef"
+      "sha256": "ad805dca3b76dbe2659ea54b1d85899994c6de955eb01fb2cc85454f62f26c72"
     },
     {
       "id": "language:word:net",
@@ -851,7 +851,7 @@
       "sourcePointers": [
         "/properties/inputs/additionalProperties/properties/required"
       ],
-      "sha256": "bc5bb11e630bf6e132730cce9f761cb1dfa973946f3d7442aad3df621cb291ee"
+      "sha256": "29182580fbb90ed603e0c1e1615a1e30ed20293a16dbea6fbe7937bc8477c62f"
     },
     {
       "id": "language:word:retry",
@@ -1101,7 +1101,7 @@
         "/properties/const/additionalProperties/then/properties/type",
         "/properties/outputs/additionalProperties/anyOf/1/properties/type"
       ],
-      "sha256": "95de169da84a09bca453524ea3a4d5a2b6f31cacb14497ae2120531c3df3156e"
+      "sha256": "91e2aa0a94bd72b5c7449640ee4ff44eaa841ee3d275dffad537b38d7e2bc400"
     },
     {
       "id": "language:word:union",
@@ -1190,7 +1190,7 @@
       "sourcePointers": [
         "/$defs/invoke/properties/workflow"
       ],
-      "sha256": "fd2b110dd558369c5e1fb09063465152d016ff9bd38b24f642741d807f8b9c53"
+      "sha256": "2f6d74a7aae57f47bb39a98b89649360d9f1bfa3272a7528574e0ddf5c71ba5f"
     },
     {
       "id": "language:word:write",
