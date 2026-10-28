@@ -14,7 +14,7 @@ state. The Nika engine owns parsing, admission, execution, policy, events,
 receipts and traces, and the engine comes inside the npm package.
 
 ```sh
-npm install @supernovae-st/nika@0.124.0
+npm install @supernovae-st/nika@0.124.1
 ```
 
 The first integration is two calls, admit and settle:
@@ -100,7 +100,7 @@ the two doors line by line.
 `run()` returns a handle only after admission; the handle is not a result.
 Events are optional to render; `run.result()` is the run's one ending,
 including a pause at a human gate. Locally, a paused run resumes from the
-command line; `nika serve` 0.124.0 has no route to answer the gate.
+command line; `nika serve` 0.124.1 has no route to answer the gate.
 Configuration, compatibility, transport and protocol failures throw typed
 [errors](/sdk/runtime/errors).
 

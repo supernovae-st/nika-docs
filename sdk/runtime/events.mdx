@@ -144,7 +144,7 @@ event and `run.status()`.
 | `run.sealed` | a `run_sealed` frame, if an engine streams one | none |
 | `engine.event` | every other frame (`workflow_completed`, `permit_checked`…) | every other frame: `execution.queued` (a job admitted with inputs), a future kind |
 
-`run.sealed` names a frame engine 0.124.0 does not stream: it writes the seal
+`run.sealed` names a frame engine 0.124.1 does not stream: it writes the seal
 to the run's record only. Read `result.receipt.sealed` locally, or
 [`traceVerify(receipt)`](/sdk/runtime/receipts), to know whether a run is sealed.
 

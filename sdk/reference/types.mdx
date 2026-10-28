@@ -99,20 +99,25 @@ interface NikaRunEvent<Outputs> {
 not name arrives there with its `raw` frame untouched; nothing is dropped,
 and no lifecycle meaning is invented for it. Keep a `default` branch in
 reducers; the set is additive. `run.sealed` names a `run_sealed` frame if an
-engine streams one; engine 0.124.0 writes the seal to the run's record only,
+engine streams one; engine 0.124.1 writes the seal to the run's record only,
 so read `result.receipt.sealed` locally or `traceVerify(...).verdict`.
 
 ## Check and cancellation
 
 `NikaCheckResult` is an open engine projection. A local check carries the
 findings report, process `exitCode` and `verdicts`, typed `NikaCheckVerdicts`
-(`valid` · `access_ready` · `capacity_fit` · `run_ready` · `blockers`): under
-`check({ access })` a pin the engine refuses keeps `clean: true` with
-`verdicts.access_ready: false` and the refusal in `verdicts.blockers`. Each
-finding (`NikaCheckFinding`) that names a part of the file carries `span`, a
+(`valid` · `access_ready` · `capacity_fit` · `run_ready` · `blockers` ·
+`network_tasks`): under `check({ access })` a pin the engine refuses keeps
+`clean: true` with `verdicts.access_ready: false` and the refusal in
+`verdicts.blockers`. `access_ready` judges the model routes only; from engine
+0.124.1, `network_tasks` lists, sorted, the tasks whose own effects can still
+reach the network (a fetch or webhook to a real host, an MCP tool, a paid
+media call), which a `mock/echo` rehearsal does not stub. Each finding
+(`NikaCheckFinding`) that names a part of the file carries `span`, a
 `NikaSourceSpan` (`{ start, end }`): byte offsets into the workflow file,
 `start` inclusive and `end` exclusive. From engine 0.124 a parse refusal
-carries one too. A served-name HTTP check carries `clean: true` plus `status`, `snapshot_digest`,
+carries one too, and from 0.124.1 the offsets count a file's byte-order mark,
+as the file is saved. A served-name HTTP check carries `clean: true` plus `status`, `snapshot_digest`,
 `root` and `units`, or `clean: false` with a typed refusal in `error`; it does
 not invent a local findings report or exit code.
 
@@ -236,7 +241,7 @@ Locally the verdict is `verified`, or `invalid` (`reason: 'receipt_mismatch'`
 for an unsealed or edited record; no reason when the trace file cannot be
 read). Over HTTP it is the CLI verifier's tier in lower case: `ok` means intact
 but unsigned (`reason: 'unsealed'`), and `unavailable` means the server holds
-no journal for the job. The published 0.124.0 declarations list the same
+no journal for the job. The published 0.124.1 declarations list the same
 words, with the CLI verifier's refusal classes (`unchained` · `empty` ·
 `unreadable` · `refused` · `line-over-long` · `unknown`), and over HTTP a
 verdict that holds always carries its seal tier as `reason` (`sealed` or
@@ -267,6 +272,6 @@ engine-owned fields are additive.
   <SourceContract sdk={SDK} />
 </Accordion>
 
-<Card title="Published type declarations (v0.124.0)" icon="github" href={SDK.sourceCandidate}>
+<Card title="Published type declarations (v0.124.1)" icon="github" href={SDK.sourceCandidate}>
   Review the source of the published declarations.
 </Card>
