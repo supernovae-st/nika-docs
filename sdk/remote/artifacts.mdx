@@ -95,9 +95,11 @@ file/out/totals.svg image/svg+xml 3669
   (listed as a `file` with the digest of the received bytes). Each entry
   has a `name`, its `kind` (`file` or `agent_image`), a file's `path`, the
   recorded `size` and `sha256`, its `mime`, the `task` and the journal
-  `event_id`. What `nika:write` and `nika:edit` wrote is not listed: their
-  journal frame records no digest. To serve a file, save it with one of the
-  five builtins.
+  `event_id`. From engine 0.124.1 a `for_each` fan-out of one of these
+  builtins lists each item's file too, when every item settled ok; a fan-out
+  with a recovered or failed item lists none of its files. What `nika:write`
+  and `nika:edit` wrote is not listed: their journal frame records no digest.
+  To serve a file, save it with one of the five builtins.
 - **A name is a key, never a path.** `file/out/totals.svg` or
   `agent_image/1.png` comes from the manifest. Pass it, or the entry itself,
   to `downloadArtifact()` or `readArtifact()`; an entry saves the package a

@@ -26,7 +26,7 @@ interface NikaCheckResult {
   report_version?: number
   clean?: boolean
   exitCode?: number
-  verdicts?: NikaCheckVerdicts   // valid · access_ready · capacity_fit · run_ready · blockers
+  verdicts?: NikaCheckVerdicts   // valid · access_ready · capacity_fit · run_ready · blockers · network_tasks
   [key: string]: unknown
 }
 ```
@@ -39,7 +39,7 @@ reads, measured on engine 0.123.0:
 |---|---|
 | `clean` · `exitCode` | the verdict: `true` and `0`, or `false` and `2` with findings |
 | `findings[]` | each finding's `code`, `gate`, `task`, `message` and `severity` |
-| `verdicts` | the four layers `nika check` prints: valid, access ready, capacity fit, run ready |
+| `verdicts` | the four layers `nika check` prints: valid, access ready, capacity fit, run ready; `blockers`; and, from engine 0.124.1, `network_tasks`: the tasks whose own effects can still reach the network (a fetch or webhook to a real host, an MCP tool, a paid media call), which a `mock/echo` rehearsal does not stub |
 | `permits` | `declared` (the file's `permits:`), `needed` (what its tasks reach) and `partial` |
 | `cost` | `bounded_total_usd`, `min_path_total_usd`, `has_unbounded` and per-task rows |
 | `requirements` | the models, secrets and required inputs the run needs |
