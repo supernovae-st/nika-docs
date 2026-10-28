@@ -66,10 +66,15 @@ cap with no bound; xAI images were already floored and metered.
 - **How it reads.** For an image request that leaves its size or quality
   open, the COST row of `nika check` shows the cheapest listed row as its
   `from` floor, while a response without usage is billed at the dearest. The
-  audited line's `est out ≤$…` still counts model output only, so a run whose
-  only spend is media reads `est out ≤$0.0000` beside its media rows. `nika arm`
-  prints the `NIKA-1709` code of an `UNREADY` beat twice and puts
-  `(budget_floor)` on a line of its own.
+  COST rows list one line per media task with its per-call floor, and their
+  summary counts tasks. The audited line counts the calls: after
+  `est out ≤$…`, which is model output only, it adds the paid media calls and
+  the least they cost (`+ 3 paid media calls from $0.0016` for one `tts-1`
+  line over a literal three-item `for_each`), counted as the `--max-cost-usd`
+  launch floor counts them. A call behind a `when:` gate, over an expression
+  `for_each` or made by a child workflow is named as one only the run counts.
+  `nika inspect` still prints `$0.00` for a workflow whose only spend is paid
+  media.
 
 ## Some image reads are judged only at run
 
@@ -105,16 +110,17 @@ it: `nika check --infer-permits` prints the block
 Over ACP (`run.access.protocol: acp`), what a seat cannot carry on an
 `infer:` task is a `nika check` blocker, not a surprise at run: `temperature`,
 `max_tokens`, an enabled `thinking` budget and a `vision:` URL. A `tools:`
-whitelist on an `agent:` task is a blocker on every seat. Beyond that:
+whitelist on an `agent:` task is a blocker on every seat, and
+`nika run --dry-run` refuses the same seat blockers (exit 2). Beyond that:
 
-- **The direct route drops fields without a word.** Without
+- **The direct route drops the sampling settings without a word.** Without
   `protocol: acp`, an `infer:` task on a seat runs as the application's
-  one-shot command (`codex exec`, `claude -p`). It neither sends nor refuses
-  `vision:`, `temperature`, `max_tokens` and `thinking`, and `nika check` does
-  not flag them: the model never sees the image. Declare `protocol: acp` for a
-  task that needs its `vision:` files, and an API route for one that needs
-  the sampling settings. `nika run --dry-run` does not apply the seat checks
-  either.
+  one-shot command (`codex exec`, `claude -p`). Since 0.124.1 a `vision:` task
+  there is refused (`NIKA-432`, at check and before the seat starts), but
+  `temperature`, `max_tokens` and `thinking` are still neither sent nor
+  refused, and `nika check` does not flag them. Declare an API route for a
+  task that needs the sampling settings. The refused task's `vision:` files
+  are still read inside `permits.fs.read` first; nothing is sent.
 - `images:` belongs to a task on a seat: an API or local model refuses it.
   Only the bytes a seat sends on the task's own session count, and
   `images: { save: }` receives images from Codex only: on another application
@@ -188,8 +194,10 @@ secret reaches a model only through an `egress:` rule you declare on it
   `price unknown: …` and points to an interactive local `nika run`; a
   `model:` templated from an input is refused whatever the terminal, since
   only a literal `model:` can take that choice.
-- **`nika serve` artifacts.** Files that a `for_each` task saves are missing
-  from a job's artifact list; read them from the run's output directory.
+- **`nika serve` artifacts of a fan-out.** A job lists the files a `for_each`
+  task saved only when every item settled ok: a fan-out with a recovered or
+  failed item lists none of its files. Read those from the run's output
+  directory.
 - **OpenRouter under a cap.** An unattended run under a cap, such as a beat,
   can be refused on the OpenRouter route even though `nika check` prices the
   workflow.
@@ -205,8 +213,6 @@ secret reaches a model only through an `egress:` rule you declare on it
   `openai/gpt-5`, `gpt-5-mini`, `gpt-5-nano` and the o-series, but does not
   yet name the dated snapshot ids (`gpt-5-mini-2025-08-07`). OpenRouter routes
   and `gpt-5.1` onward are unchanged.
-- **`nika explain`** does not know `NIKA-MCP-003` or `NIKA-MCP-006` (NIK-254).
-  The refusals themselves name the repair, `nika mcp approve <server>`.
 
 ## A rehearsal on a copy skips some steps
 

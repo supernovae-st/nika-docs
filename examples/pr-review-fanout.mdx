@@ -19,7 +19,7 @@ READ and nothing else, in parallel, four at a time. A deterministic
 final REVIEW.md ends with a verdict.
 
 <Warning>
-  **Limit on macOS in 0.124.0.** The sandbox confines `exec: git` to the
+  **Limit on macOS in 0.124.1.** The sandbox confines `exec: git` to the
   workflow's declared filesystem boundary, which grants no read of `.git`
   or of git's global configuration. The confined `git` exits with status
   128, even inside a real repository, so `changed` takes its
@@ -306,7 +306,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** A Git repository with changes under `./src` and a `const.base_ref` that exists, plus a local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`). Git is refused on macOS in 0.124.0, so there the diff is reported unavailable and no agent runs ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
+  **What it needs:** A Git repository with changes under `./src` and a `const.base_ref` that exists, plus a local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`). Git is refused on macOS in 0.124.1, so there the diff is reported unavailable and no agent runs ([Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)).
 </Note>
 
 <Steps>

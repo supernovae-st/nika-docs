@@ -37,7 +37,7 @@ run it. Not `curl | sh`. Then check and run the file by its path like any
 other workflow.
 
 <Warning>
-  **The engine's `registry:` door is refused in 0.124.0.**
+  **The engine's `registry:` door is refused in 0.124.1.**
   `nika check registry:owner/name` and `nika run registry:…` stop at the
   first fetch with `NIKA-REG-005`: the public index speaks schema 2 and this
   engine reads schema 1. Use `get.py`, then the local file

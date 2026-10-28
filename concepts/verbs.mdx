@@ -307,8 +307,10 @@ its parent's), `nika test` and a rehearsal, which reads its own copy.
 
 A `source: url` entry is not an fs effect: Nika never fetches it, so it needs
 no `fs` or `net.http` grant. On an agent application's seat over ACP,
-`vision:` files ride as image blocks under the same rule; a seat's direct
-one-shot route reads them, then drops them
+`vision:` files ride as image blocks under the same rule. A seat's direct
+one-shot route carries no image, so a `vision:` task there is refused
+(`NIKA-432`: `nika check` blocks `run ready`, and the run refuses it before
+anything is sent), with a route that carries the files named
 ([Harness access](/guides/harness-access#images-and-structured-answers-on-a-seat)).
 
 ## `agent`: multi-turn loop with tools

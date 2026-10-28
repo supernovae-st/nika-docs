@@ -19,7 +19,7 @@ anything runs, the notes are a schema-typed object, and the announcement
 quotes the same headline the CHANGELOG got.
 
 <Warning>
-  **Limit on macOS in 0.124.0.** The sandbox confines `exec: git` to the
+  **Limit on macOS in 0.124.1.** The sandbox confines `exec: git` to the
   workflow's declared filesystem boundary, which grants no read of `.git`
   or of git's global configuration. The confined `git` exits with status
   128, even inside a real repository, so `history` recovers a notice that
@@ -291,7 +291,7 @@ outputs:
 ## Run it
 
 <Note>
-  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample changelog. History comes from Git: outside a repository that has the `const.since_tag` tag (and on macOS in 0.124.0 in any case, [Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)), `history` recovers a notice and no notes are drafted; add `--var rehearse=true` to rehearse the chain on the sample log.
+  **What it needs:** A local model ([Ollama](https://ollama.com) serving `qwen3.5:4b`) and the sample changelog. History comes from Git: outside a repository that has the `const.since_tag` tag (and on macOS in 0.124.1 in any case, [Known limits](/changelog/known-limits#git-inside-a-workflow-is-refused-on-macos)), `history` recovers a notice and no notes are drafted; add `--var rehearse=true` to rehearse the chain on the sample log.
 </Note>
 
 <Steps>
@@ -306,7 +306,7 @@ outputs:
     Save the file above as `release-notes.nika` in a new folder, then download the sample it reads:
 
     ```bash
-    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.124.0/crates/nika-pack/pack/examples/fixtures
+    FIXTURES=https://raw.githubusercontent.com/supernovae-st/nika/v0.124.1/crates/nika-pack/pack/examples/fixtures
     mkdir -p examples/fixtures
     curl -fsSLo examples/fixtures/CHANGELOG.md "$FIXTURES/CHANGELOG.md"
     ```
