@@ -1,6 +1,6 @@
 ---
 title: "SDK method index"
-description: "Every method of @supernovae-st/nika 0.124.1, what it returns, and which transport serves it."
+description: "Every method of @supernovae-st/nika 0.124.2, what it returns, and which transport serves it."
 sidebarTitle: "Method index"
 icon: "list"
 ---
@@ -49,8 +49,18 @@ on a server that lists `compileNativeV2`, or `authoringModel` on a local
 engine. `nextCompileRequest(request, outcome, answers)` builds the next round
 from the outcome's questions, and `isNikaCompileHeld(outcome)` tells a
 candidate the verifier held, a preview never to run. The package's
-[compile guide](https://github.com/supernovae-st/nika-client/blob/v0.124.1/docs/compile.md)
+[compile guide](https://github.com/supernovae-st/nika-client/blob/v0.124.2/docs/compile.md)
 covers both doors.
+
+Two functions read a frame instead of calling the engine. From 0.124.2,
+`readNikaAccessRequirement(event)` returns the access contract a workflow file
+declares (`NikaAccessRequirement`) and `readNikaAccessSelection(event)` the
+per-call receipt of what the route did with it (`NikaAccessSelection`). Both
+take a `NikaRunEvent` or the engine frame it wraps, return `undefined` when
+the frame carries no such row, and throw `NikaProtocolError` on a row that is
+present and malformed.
+[Read the access contract and its receipt](/sdk/runtime/events#read-the-access-contract-and-its-receipt)
+shows them on a run.
 
 <Accordion title="Compatibility aliases">
   `nika.events(run)`, `nika.cancel(run)`, `nika.status(run)` and `run.done`

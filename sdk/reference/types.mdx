@@ -99,7 +99,7 @@ interface NikaRunEvent<Outputs> {
 not name arrives there with its `raw` frame untouched; nothing is dropped,
 and no lifecycle meaning is invented for it. Keep a `default` branch in
 reducers; the set is additive. `run.sealed` names a `run_sealed` frame if an
-engine streams one; engine 0.124.1 writes the seal to the run's record only,
+engine streams one; engine 0.124.2 writes the seal to the run's record only,
 so read `result.receipt.sealed` locally or `traceVerify(...).verdict`.
 
 ## Check and cancellation
@@ -218,6 +218,80 @@ The words aid completion without closing the set: the engine, never the SDK,
 judges a pin. `run({ access })` and `check({ access })` take one
 ([Configuration](/sdk/reference/configuration#access-pins)).
 
+## Access contract and receipt
+
+From 0.124.2. What a workflow file declares under `run.access` and
+`run.reasoning`, and what one model call did with it:
+
+```ts
+type NikaServiceTier = 'standard' | 'fast' | (string & {})
+
+interface NikaAccessRequirement {
+  via?: string
+  protocol?: 'api' | 'acp' | (string & {})
+  fallback?: 'none' | (string & {})
+  service_tier?: NikaServiceTier
+  effort?: string
+  [key: string]: unknown
+}
+
+type NikaConfiguredSource =
+  | 'session_config' | 'confirmed_selection' | 'accepted_request'
+  | (string & {})
+
+interface NikaSelectedValue {
+  requested: string | null
+  option: string | null
+  transmitted: string | null
+  configured: string | null
+  configured_source: NikaConfiguredSource | null
+  [key: string]: unknown
+}
+
+interface NikaAttestedValue {
+  value: string | null
+  evidence: 'unknown' | (string & {})
+  [key: string]: unknown
+}
+
+interface NikaServiceTierEvidence {
+  requested: NikaServiceTier | null
+  option: string | null
+  offered: string[] | null
+  transmitted: string | null
+  configured: string | null
+  configured_source: NikaConfiguredSource | null
+  turn: NikaAttestedValue
+  effective: NikaAttestedValue
+  [key: string]: unknown
+}
+
+interface NikaAccessSelection {
+  schema: 'nika/access-selection@1' | (string & {})
+  protocol: 'api' | 'acp' | (string & {}) | null
+  model: NikaSelectedValue
+  effort: NikaSelectedValue
+  responder: {
+    model: string | null
+    evidence: 'api_response' | 'cli_reported' | 'unknown' | (string & {})
+    [key: string]: unknown
+  }
+  service_tier?: NikaServiceTierEvidence
+  changed_mid_turn?: string[]
+  [key: string]: unknown
+}
+```
+
+`null` means not applicable or not observed, never a copied value. A
+`configured` value is what the route reported after the selection:
+`session_config` when nothing was asked and the session stated its own,
+`confirmed_selection` when a value was sent and read back,
+`accepted_request` when the route took it without answering a configuration.
+`changed_mid_turn` lists a model, an effort or a tier the route itself moved
+during the turn. `readNikaAccessRequirement` and `readNikaAccessSelection`
+return these from a task's terminal frame
+([Run events](/sdk/runtime/events#read-the-access-contract-and-its-receipt)).
+
 ## Proof
 
 ```ts
@@ -241,7 +315,7 @@ Locally the verdict is `verified`, or `invalid` (`reason: 'receipt_mismatch'`
 for an unsealed or edited record; no reason when the trace file cannot be
 read). Over HTTP it is the CLI verifier's tier in lower case: `ok` means intact
 but unsigned (`reason: 'unsealed'`), and `unavailable` means the server holds
-no journal for the job. The published 0.124.1 declarations list the same
+no journal for the job. The published 0.124.2 declarations list the same
 words, with the CLI verifier's refusal classes (`unchained` · `empty` ·
 `unreadable` · `refused` · `line-over-long` · `unknown`), and over HTTP a
 verdict that holds always carries its seal tier as `reason` (`sealed` or
@@ -272,6 +346,6 @@ engine-owned fields are additive.
   <SourceContract sdk={SDK} />
 </Accordion>
 
-<Card title="Published type declarations (v0.124.1)" icon="github" href={SDK.sourceCandidate}>
+<Card title="Published type declarations (v0.124.2)" icon="github" href={SDK.sourceCandidate}>
   Review the source of the published declarations.
 </Card>
