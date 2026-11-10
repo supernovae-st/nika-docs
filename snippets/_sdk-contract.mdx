@@ -6,9 +6,9 @@
 export const SDK = {
   package: "@supernovae-st/nika",
   source: "https://github.com/supernovae-st/nika-client",
-  sourceVersion: "0.124.2",
-  sourceCandidate: "https://github.com/supernovae-st/nika-client/tree/v0.124.2",
-  engineCandidate: "https://github.com/supernovae-st/nika/releases/tag/v0.124.2",
+  sourceVersion: "0.124.3",
+  sourceCandidate: "https://github.com/supernovae-st/nika-client/tree/v0.124.3",
+  engineCandidate: "https://github.com/supernovae-st/nika/releases/tag/v0.124.3",
   site: "https://nika.sh/sdk",
 }
 
@@ -45,8 +45,9 @@ export const RemoteContract = ({ sdk }) => (
     {" "}<code>nika serve</code> {sdk.sourceVersion} covers jobs, SSE events,
     cancellation, trace verification, the artifacts a settled job's sealed
     journal records (behind <code>run.artifacts()</code>), workflow listing,
-    schedule read and write, and stateless authoring
-    (<code>POST /v1/compile</code>, behind <code>compile()</code>). It has no
+    schedule read and write, stateless authoring
+    (<code>POST /v1/compile</code>, behind <code>compile()</code>) and what a
+    workflow's declared ACP route offers (behind <code>accessOffer()</code>). It has no
     {" "}<code>POST /v1/run</code>, job-list, or schedule list, delete, trigger
     or backfill route. The server owns its engine version; check its
     compatibility separately from the bundled local engine.

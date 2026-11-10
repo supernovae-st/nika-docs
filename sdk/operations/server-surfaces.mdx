@@ -19,7 +19,7 @@ Three surfaces sound like servers but accept different clients.
 <ProjectContract />
 <RemoteContract sdk={SDK} />
 
-## Released OpenAPI routes (0.124.2, default server)
+## Released OpenAPI routes (0.124.3, default server)
 
 | Method and path | Contract |
 |---|---|
@@ -37,6 +37,7 @@ Three surfaces sound like servers but accept different clients.
 | `GET /v1/jobs/{id}/artifacts/{name}` | one artifact's bytes, streamed and checked against the size and SHA-256 its journal records |
 | `GET /v1/workflows` | contained names |
 | `GET /v1/workflows/{name}` | path-free metadata |
+| `GET /v1/access-offers/{name}` | what the sessions of that workflow's own declared ACP route offer now, read without a prompt (`/health` lists `accessSessionOffer`) |
 | `GET /v1/schedules/{id}` | schedule status |
 | `PUT /v1/schedules/{id}` | CAS-backed schedule apply |
 
@@ -64,6 +65,64 @@ Useful flags beyond these three: `--state-root <dir>` (job state, default
 a reverse proxy) and `--authoring-model <provider/name>` (seat provider
 authoring for `POST /v1/compile`). `nika serve --help` lists every flag.
 
+## Ask what a route offers
+
+A workflow file can declare how its model calls travel: `run.access` (`via`,
+`protocol`, `fallback`, `service_tier`) and `run.reasoning.effort`. A run
+learns what its session offers on the way to its prompt, and says so only when
+it refuses. From engine 0.124.3 a server can be asked first:
+
+```ts
+const offer = await nika.accessOffer('workflows/brief.nika')
+if (offer.status === 'not_applicable') {
+  console.log(offer.reason)            // the file selects no ACP sessions
+} else {
+  for (const route of offer.routes) {
+    if (route.status === 'unavailable') {
+      console.log(route.profile, route.code, route.reason)
+      continue
+    }
+    console.log(route.profile, route.model.status, route.effort?.offered, route.service_tier?.offered)
+  }
+}
+```
+
+- **The route is the file's.** The call names a served workflow and nothing
+  else. The server asks only when the file declares `run.access.via` under
+  `run.access.protocol: acp`; any other workflow answers
+  `status: 'not_applicable'` with the reason, and no session is opened.
+- **No prompt is sent.** The server opens each session as a run opens it,
+  selects the file's model for that session only, lists what the session has
+  for that model and ends it. `prompts_sent` is always `0`.
+- **One row per session shape and model.** `completion` is the route's
+  one-shot profile, which `infer:` tasks run under; `agent` is its agent
+  session, which `agent:` tasks run in. `tasks` names the tasks of each row.
+- **`effort.offered` is exact.** It holds the values a run accepts on
+  `run.reasoning.effort` for that model. `effort.current` is what a run that
+  declares no effort keeps on a session like this one. `service_tier.offered`
+  holds the language's words, `standard` and `fast`.
+- **A model the session does not list is a state, not an error.**
+  `model.status` is then `not_offered`, with the models it does list in
+  `model.offered`, and the efforts and tiers are `unobserved`.
+- **A session that gives no offer is a row.** `status: 'unavailable'` carries
+  the code a run would meet before its prompt (`NIKA-1803`, `NIKA-1804` or
+  `NIKA-1805`) and a reason.
+- **A row has a time.** `observed_at` and `fresh_until` say when it was read
+  and until when the server serves it again: 60 seconds, 15 when unavailable.
+  One reading runs at a time on the server, and a ninth concurrent request is
+  refused with `NikaOperationError` (`access_offer_busy`).
+
+The call has its own deadline, 100 seconds by default (`timeoutMs`), because a
+first reading opens a session per row, and `signal` stops it. It needs a
+server that lists `accessSessionOffer`: on another server, and on the local
+engine, it rejects with `NikaCompatibilityError` before any request.
+
+An offer authorizes nothing. A model, an effort or a tier can leave a route
+between the offer and the run: `run()` is admitted as before, and the run
+selects, reads back and refuses on its own session.
+[Harness access](/guides/harness-access#ask-a-served-route-what-it-offers)
+shows the document the server answers.
+
 ## Local application path
 
 <LocalContract sdk={SDK} />
@@ -77,7 +136,7 @@ const result = await run.result()
 ```
 
 This path needs no resident server. These examples target the published
-`@supernovae-st/nika@0.124.2` npm package (bundled engine 0.124.2). The
+`@supernovae-st/nika@0.124.3` npm package (bundled engine 0.124.3). The
 standalone engine CLI releases independently.
 
 ## Local model path
@@ -88,7 +147,7 @@ nika model serve --model unsloth/Qwen3-4B-Instruct-2507-GGUF
 ```
 
 `nika model serve` loads only models it has pulled (or a `.gguf` path), of
-the Qwen3 family in 0.124.2, and serves them on `127.0.0.1:8712`. A workflow
+the Qwen3 family in 0.124.3, and serves them on `127.0.0.1:8712`. A workflow
 reaches it as a local provider: export
 `NIKA_LLAMACPP_BASE_URL=http://127.0.0.1:8712` and use
 `model: llamacpp/<model id>`, as the banner prints. Application code does not
