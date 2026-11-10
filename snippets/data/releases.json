@@ -3,6 +3,17 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.124.3",
+      "name": "v0.124.3",
+      "publishedAt": "2026-11-10T21:26:40Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.124.3",
+      "assetCount": 8,
+      "highlights": [
+        "nika serve answers what a workflow's declared ACP route offers, without a prompt."
+      ],
+      "notesSha256": "1d40de5d9a62feb1983c5bf5fd106e666df978aba2e5dde1bfe38b397b430894"
+    },
+    {
       "tag": "v0.124.2",
       "name": "v0.124.2",
       "publishedAt": "2026-11-10T06:26:43Z",
