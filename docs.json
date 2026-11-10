@@ -540,6 +540,7 @@
                   "reference/language/words/protocol",
                   "reference/language/words/reasoning",
                   "reference/language/words/seeded",
+                  "reference/language/words/service_tier",
                   "reference/language/words/via"
                 ]
               },

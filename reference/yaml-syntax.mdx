@@ -52,7 +52,7 @@ The family is closed — a value-namespace read outside it is `NIKA-VALUES-003`.
 |---|---|---|---|
 | `inputs:` | the **caller**, at launch (`--var k=v` · `--inputs-json -` · the SDK's `inputs` · a `nika serve` job) — a deployment knob is an input with a `default:` | `{ type, required?, default?, description? }` · `type:` required | untrusted |
 | `const:` | the **file** · immutable across the run, never caller-supplied | a bare literal, or `{ type, value }` | trusted |
-| `secrets:` | a **governed store** · masked everywhere | `{ source: env\|file, key\|path, egress? }` · `source: vault` is withdrawn from the contract: in 0.124.1 it passes check with a hint naming `NIKA-VAR-001` and fails at run with it (unresolved `secrets.<name>`) | trusted |
+| `secrets:` | a **governed store** · masked everywhere | `{ source: env\|file, key\|path, egress? }` · `source: vault` is withdrawn from the contract: in 0.124.2 it passes check with a hint naming `NIKA-VAR-001` and fails at run with it (unresolved `secrets.<name>`) | trusted |
 
 ```yaml
 inputs:
@@ -107,9 +107,10 @@ run:
 
 Every source of randomness and time is declared, never ambient. Absent, the
 run behaves as `entropy: ambient` + `clock: system`. `run:` also declares the
-access contract a run expects (`access: { via, protocol, fallback }`) and a
-reasoning effort (`reasoning: { effort }`); see
-[access](/reference/language/words/access) and
+access contract a run expects
+(`access: { via, protocol, fallback, service_tier }`) and a reasoning effort
+(`reasoning: { effort }`); see [access](/reference/language/words/access),
+[service_tier](/reference/language/words/service_tier) and
 [reasoning](/reference/language/words/reasoning). The two dimensions
 couple: only `ambient × system` and `none | seeded × virtual` are legal —
 byte-identical journals need deterministic time as much as deterministic

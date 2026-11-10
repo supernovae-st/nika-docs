@@ -144,9 +144,62 @@ event and `run.status()`.
 | `run.sealed` | a `run_sealed` frame, if an engine streams one | none |
 | `engine.event` | every other frame (`workflow_completed`, `permit_checked`…) | every other frame: `execution.queued` (a job admitted with inputs), a future kind |
 
-`run.sealed` names a frame engine 0.124.1 does not stream: it writes the seal
+`run.sealed` names a frame engine 0.124.2 does not stream: it writes the seal
 to the run's record only. Read `result.receipt.sealed` locally, or
 [`traceVerify(receipt)`](/sdk/runtime/receipts), to know whether a run is sealed.
+
+## Read the access contract and its receipt
+
+A workflow file can declare how its model calls must travel: `run.access`
+(`via`, `protocol`, `fallback`, and from engine 0.124.2 `service_tier`) and
+`run.reasoning.effort`. On a local run, the terminal frame of each `infer:` or
+`agent:` task carries two rows about it, and from 0.124.2 two functions parse
+them:
+
+```ts
+import { readNikaAccessRequirement, readNikaAccessSelection } from '@supernovae-st/nika';
+
+for await (const event of run.events()) {
+  if (event.kind !== 'task.completed') continue;
+  const asked = readNikaAccessRequirement(event);   // { via, protocol, fallback, service_tier, effort }
+  const selection = readNikaAccessSelection(event); // nika/access-selection@1
+  if (!selection) continue;
+  console.log(event.task, selection.model.requested, selection.model.configured, selection.effort.configured);
+  const tier = selection.service_tier;
+  if (tier) console.log(tier.requested, tier.transmitted, tier.configured, tier.effective.evidence);
+}
+```
+
+- `readNikaAccessRequirement(event)` returns what the file asked, in the
+  file's words. A key the file leaves out is absent, never a default.
+- `readNikaAccessSelection(event)` returns what the route did with it. For
+  the model and for the effort it keeps four facts apart: `requested` (what
+  the file asked), `option` (the session option or request field it travelled
+  through), `transmitted` (the exact value sent) and `configured` (what the
+  route reported after the selection, with how it was learned in
+  `configured_source`). `responder` is the model the provider named in its
+  answer, when it names one.
+- `service_tier` is present only when the file declares a tier. Its
+  `requested` is the file's word (`standard` or `fast`); `offered`,
+  `transmitted` and `configured` are the route's own values (`off` and `on`
+  on codex-acp); `turn` and `effective` read
+  `{ value: null, evidence: 'unknown' }` on an ACP session, because no ACP
+  answer names the tier a turn carried or the tier that served it. An absent
+  block means the file asked for none, never `standard`.
+
+Both functions accept a `NikaRunEvent` or the engine frame it wraps. They
+return `undefined` when the frame carries no such row: a task that called no
+model, a file that declares no contract, or any frame from `nika serve`,
+which keeps these rows in the job's sealed journal and sends neither over
+HTTP. They throw `NikaProtocolError` on a row that is present and malformed.
+
+Before you run a file that declares `run.access.service_tier`, require the
+capability on the door you use: `accessServiceTier` in
+`supportedCapabilities` (`nika --sdk-identity` locally, `/health` on a
+server). An engine older than 0.124.2 refuses the key when it parses the
+file, and a server without the token answers 422 for it.
+[Ask a seat for its fast tier](/guides/harness-access#ask-a-seat-for-its-fast-tier)
+has the language side and what each refusal says.
 
 ## Rules for a reducer
 
