@@ -3,6 +3,19 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.124.2",
+      "name": "v0.124.2",
+      "publishedAt": "2026-11-10T06:26:43Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.124.2",
+      "assetCount": 8,
+      "highlights": [
+        "A workflow can ask its route for a service tier.",
+        "An ACP task starts its adapter once.",
+        "The embedded language pack follows nika-spec b4c692f."
+      ],
+      "notesSha256": "b5917f3e93e161ef18a861491ae2f0ca522d1ed2a314a24103637fa0e4b79d59"
+    },
+    {
       "tag": "v0.124.1",
       "name": "v0.124.1",
       "publishedAt": "2026-10-28T09:56:26Z",
