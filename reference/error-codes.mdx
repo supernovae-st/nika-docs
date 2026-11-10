@@ -25,10 +25,13 @@ two kinds of codes on top of it:
   call has no price under a cap, `NIKA-1704` a budget stop mid-run or a paid
   media call refused just before its request, `NIKA-1707` a run whose check
   report did not resolve a child workflow call) and `18xx` for access
-  (`NIKA-1800` no ready access path, `NIKA-1801` an unsatisfied `--access`
-  pin, `NIKA-1804` and `NIKA-1805` a turn an agent application reported as
-  failed, transient or not, `NIKA-1806` a pause on an agent application's
-  question). `nika explain NIKA-1709` teaches each one.
+  (`NIKA-1800` no ready access path, or a declared `run.access` selection its
+  route cannot carry, such as a `service_tier` outside the Codex seat over
+  ACP; `NIKA-1801` an unsatisfied `--access` pin; `NIKA-1804` and `NIKA-1805`
+  a turn an agent application reported as failed, transient or not, and
+  `NIKA-1805` also a `service_tier` the session cannot confirm before the
+  prompt; `NIKA-1806` a pause on an agent application's question).
+  `nika explain NIKA-1709` teaches each one.
 - **Engine-specific codes** outside the spec registry. The MCP pin refusals
   `NIKA-MCP-003` to `NIKA-MCP-006` (a server whose tools drifted from their
   pins, an untrusted `.nika/mcp_pins.json`, a server the OS sandbox cannot

@@ -89,6 +89,15 @@ Real spend also rides the spine: a priced `task_completed` carries a
 runs (unpriced is honestly absent, never a fake `0`). Agent loops
 report the loop's accumulated tool spend as `tools_cost_usd`.
 
+A file that declares `run.access` or `run.reasoning` also journals what it
+asked and what its route did. `access_requirement`, the declaration, rides
+`workflow_started` and the terminal event of each `infer:` or `agent:` task.
+`access_selection` rides that terminal event once the task reached its route:
+for the model, the effort and a declared service tier, the value asked, the
+value sent and the value read back, kept apart
+([Harness access](/guides/harness-access#what-the-receipt-says-about-the-tier)).
+A file that declares neither journals neither.
+
 ### Harness tasks in the journal
 
 A task on an agent application you are signed into (a

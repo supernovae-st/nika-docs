@@ -18,11 +18,11 @@ classes:
   testimonial: "captured evidence — fixtures, corpora, traces, receipts: proves behavior; neither shipped source nor regenerable output"
   foreign: "pointer to a third-party sovereign source"
 summary:
-  classified_files: 444
+  classified_files: 445
   file_rows: 51
   pattern_rows: 6
   by_class:
-    authored: 437
+    authored: 438
     authored-pin: 1
     generated: 4
     pinned-copy: 2
@@ -88,7 +88,7 @@ files:
     - "scripts/release_catalog.py"
 - path: "docs.json"
   class: authored
-  sha256: ad81d7cca632bfe651a1c685514d924b31b8854a4c746742f3245acb78d51800
+  sha256: e20eded2ae11ecfcbf1cb60252eba2c5b0e9d20f61a5308477b34666b8ab20bc
   evidence: "hand-written Mintlify config (nav + theme + metadata) · no generation marker"
   note: "theme colors follow the nika-spec design-tokens SSOT — advisory parity gate: gate.yml step 'docs.json theme parity vs the design-tokens SSOT (advisory)' (continue-on-error)"
 - path: "global.css"
@@ -201,7 +201,7 @@ files:
   evidence: "hand-written pre-push gate config (mint broken-links · link-audit · teach-parity · oracle-sweep)"
 - path: "reference/error-codes.mdx"
   class: authored
-  sha256: c2f3b4deda09d3d54b3d886613839344280bd397c9ff68daf954db924b220715
+  sha256: 2e92a55a01757c0f8d12a82a1c781c468d0a4a37730155ec665e06fbecb6de1c
   evidence: "mixed page: authored frontmatter and prose around errors-*:begin/end tables projected from the spec diagnostic registry by showcase-projector.py"
   note: "the errors-categories, errors-codes and errors-namespaces blocks are projected from nika-spec canon/diagnostics/registry.yaml; edit the registry and re-project, never hand-edit those blocks; this repo's gate does not independently re-derive them"
 - path: "reference/mcp-catalog.mdx"
@@ -279,7 +279,7 @@ files:
     - "supernovae-st/nika-spec examples/showcase/ (tier counts derive · never hand-typed)"
 - path: "snippets/_status-snapshot.mdx"
   class: authored
-  sha256: b7b4d4260ca1da77064a13ec6d0f81b3d42e1ced8ba5e4add846ea64e8418a1b
+  sha256: fa9dbda19ded80bf8a1503d7a51b36e6d37b741c8bb2db0a5b17b9b1be809ff0
   evidence: "its own MIXED PROVENANCE header: version, engineSha, providers, firstCommand and lastUpdated derive from one selected published release; remaining historical engine-main fields are hand-maintained"
   note: "lastUpdated is the selected release's publication date, not the projection date. count-drift-gate checks the provider count and first command against the installed binary. Historical engine-main counts are not re-proved by that gate or by engine hygiene vector 23, which cannot see this repo."
 - path: "snippets/data/releases.json"
@@ -295,8 +295,8 @@ files:
 patterns:
 - glob: "**.mdx"
   class: authored
-  match_count: 297
-  aggregate_sha256: f72037c1b92f3014d12f2814cad77c67240f3cab8314f90a789f3584e1b9d410
+  match_count: 298
+  aggregate_sha256: c667bdc8e1fdf8a2688141e90afe1cd2890200126b358e3d5e55d94c879fa0d7
   evidence: "hand-written MDX page (frontmatter + prose · no generation marker · volatile counts import the generated snippets per AGENTS.md rule 1)"
 - glob: "videos/**"
   class: authored
@@ -325,7 +325,7 @@ patterns:
 - glob: "**"
   class: authored
   match_count: 47
-  aggregate_sha256: c34df524b70b7a8d10f6578bb7941b5a0319e961e55a1f9408f43a44c5cd3c52
+  aggregate_sha256: ca05520252fc68878e93382e456803611a82856ef8513ba03edb9107015cc39d
   evidence: "no generation marker or known role found"
   note: "unverified-default"
 unverified:

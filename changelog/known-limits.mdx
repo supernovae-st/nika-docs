@@ -121,6 +121,16 @@ whitelist on an `agent:` task is a blocker on every seat, and
   refused, and `nika check` does not flag them. Declare an API route for a
   task that needs the sampling settings. The refused task's `vision:` files
   are still read inside `permits.fs.read` first; nothing is sent.
+- **A service tier rides one route.** `run.access.service_tier` (`standard`
+  or `fast`) is carried by the Codex seat over ACP, and held for codex-acp
+  1.13.1. An API or local route, another seat and an `infer:` task outside
+  `protocol: acp` refuse it before task 1 (`NIKA-1800`); another release of
+  the adapter, or a model whose session lists no speed option, refuses it
+  before the prompt (`NIKA-1805`). The receipt keeps what was asked, sent and
+  read back, and reads `unknown` for the tier a turn carried and the tier
+  that served it: no ACP answer names either. An editor whose `nika lsp` is
+  older than 0.124.2 refuses the key
+  ([Harness access](/guides/harness-access#ask-a-seat-for-its-fast-tier)).
 - `images:` belongs to a task on a seat: an API or local model refuses it.
   Only the bytes a seat sends on the task's own session count, and
   `images: { save: }` receives images from Codex only: on another application

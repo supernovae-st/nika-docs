@@ -63,6 +63,17 @@ anything runs. On every `agent:` task a seat will run, `nika check` also
 prints a `[harness]` hint: what `permits:` does not cover on that seat
 (`nika explain harness`).
 
+Codex, Claude Code, OpenCode and GitHub Copilot CLI name themselves on
+`initialize`, the first answer of an ACP session. A task on one of these
+seats starts the adapter once and judges that answer before `session/new`:
+the adapter's name, and its release against the seat's version pin. An
+adapter that does not answer within 30 seconds, exits before answering,
+answers as another program or sits outside its pin is unavailable
+(`NIKA-1803`) and is not retried. `nika doctor` asks
+`initialize` on its own to print the adapter's release, and the `ACCESS` row
+of `nika check` reads only whether the application is installed and signed
+in.
+
 ## What `permits:` covers on a harness seat
 
 On a harness seat, an `agent:` task runs the application's **own** tools: its
@@ -314,6 +325,137 @@ That task sets `max_tokens`, so the API route comes first. Without
 The direct route still neither sends nor refuses `temperature`, `max_tokens`
 and `thinking`, and `nika check` does not flag them: declare an API route on
 a task that needs them.
+
+## Ask a seat for its fast tier
+
+A workflow can ask its route how fast to serve, beside the model and the
+effort. `run.access.service_tier` takes two words, `standard` and `fast`:
+
+```yaml fast-brief.nika
+# Ask the Codex seat for its fast tier.
+nika: fast-brief
+model: openai/gpt-5.5
+run:
+  access:
+    via: codex
+    protocol: acp
+    fallback: none
+    service_tier: fast   # or: standard
+  reasoning:
+    effort: low
+permits: {}
+tasks:
+  brief:
+    infer:
+      prompt: "Summarize the release notes in five bullets."
+outputs:
+  brief: ${{ tasks.brief.output }}
+```
+
+It needs Codex installed and signed in, with its ACP adapter codex-acp 1.13.1.
+
+- **The two words are the language's.** `standard` is the route's regular
+  tier and `fast` its faster one, where the route offers one for the selected
+  model. A route's own value is not a word of the file: `service_tier: on` or
+  `priority` is refused at parse (`NIKA-PARSE-019`), and so is a `${{ }}`
+  template. The key belongs to `run.access`; a task cannot carry it.
+- **Leaving the key out is not `standard`.** Nika then sends no speed
+  selection, the session keeps its own tier, and the receipt records none.
+- **Only the Codex seat over ACP carries a tier.** Nika selects the model, the
+  effort, the tier and the session mode in that order, and reads the whole
+  selection back before the first prompt. `fast` is sent as codex-acp's
+  `fast-mode: on`, `standard` as `off`.
+- **The session decides whether the model offers a fast tier.** Codex lists
+  the option only for a model that supports one. When the option is missing,
+  or the read-back does not hold the value, the task fails `NIKA-1805` before
+  any prompt is sent. Nika never serves `fast` at the regular tier.
+- **The binding is held for codex-acp 1.13.1.** Another release of the
+  adapter refuses a declared tier until it is measured: install 1.13.1, or
+  remove the key.
+- **Every other route refuses the key before task 1** (`NIKA-1800`): an API
+  or local route, the mock, a seat with no measured speed control
+  (`claude-code` today), and an `infer:` task outside `protocol: acp`. An
+  `agent:` task always runs over ACP, so it carries the tier on the Codex seat
+  with or without `protocol: acp`.
+- A child workflow reads its own `run.access`: it does not inherit its
+  parent's tier.
+- A resumed run whose tier changed runs its `infer:` and `agent:` tasks again
+  instead of reusing their recorded results.
+
+`nika check` judges the route, not the offer. On a signed-in Codex seat it
+reports the file above run-ready, and the session judges the tier when the
+task starts. A route that cannot carry a tier is named on the `ACCESS` row
+and blocks `access ready` and `run ready`; `nika run` then refuses before any
+task, with exit 3. The mock shows it without a seat or a key:
+
+```text
+nika run: NIKA-1800 · `mock/echo` resolves to `mock` (mock) and no speed control is bound for that route, so `run.access.service_tier: standard` cannot be honored — declare an agent seat that offers one (`run.access.via: codex` with `protocol: acp`), or remove the key to keep the route's own tier (nothing ran)
+```
+
+<sub>Captured offline from nika 0.124.2: `nika run` on a `mock/echo` workflow
+that declares `run.access.service_tier: standard`.</sub>
+
+A session that lists no speed option for the model refuses at the task, and
+the run exits 1:
+
+```text
+  ✖ NIKA-1805 · infer harness: harness refused: the harness offers no `fast-mode` option for model `gpt-5.5`, so `run.access.service_tier: fast` cannot be applied — it advertises mode (mode) · model (model) · reasoning_effort (thought_level) (remove the key to keep the route's own tier; no prompt was sent)
+```
+
+<sub>Captured offline from nika 0.124.2 on `fast-brief.nika`, a scripted
+`codex-acp` standing in for the application and listing no `fast-mode`
+option.</sub>
+
+### What the receipt says about the tier
+
+A file that declares `run.access` or `run.reasoning` leaves two rows in the
+run's journal. `access_requirement` is what the file asked: the opening event
+and the terminal event of each `infer:` or `agent:` task carry it.
+`access_selection` is what the route did with it, on the terminal event of a
+task that reached its route: for the model and the effort, the value asked,
+the option it travelled through, the value sent and the value the session
+read back. With a declared tier, the selection gains a `service_tier` block.
+Read it from the run's `--json` stream, or from its trace file under
+`.nika/traces/`, which holds the same lines:
+
+```bash
+nika run fast-brief.nika --json > run.ndjson
+jq -c 'select(.kind == "task_completed") | .fields[] | select(.key == "access_selection") | .value | fromjson | .service_tier' run.ndjson
+```
+
+```json
+{"configured":"on","configured_source":"confirmed_selection","effective":{"evidence":"unknown","value":null},"offered":["off","on"],"option":"fast-mode","requested":"fast","transmitted":"on","turn":{"evidence":"unknown","value":null}}
+```
+
+<sub>Captured offline from nika 0.124.2, a scripted `codex-acp` standing in
+for the application: it answers as release 1.13.1 and lists a `fast-mode`
+option.</sub>
+
+| Fact | Field | What it holds |
+|---|---|---|
+| Requested | `requested` | the file's word, `standard` or `fast` |
+| Offered | `offered` | the values the route listed for its `option` when the tier was judged |
+| Transmitted | `transmitted` | the route's own value Nika sent: `on` or `off` on codex-acp |
+| Configured | `configured` | the value the session reported after the selection, with how it was learned in `configured_source` |
+| Carried on the turn | `turn` | `unknown`: no ACP answer names the tier a turn carried |
+| Effective | `effective` | `unknown`: no ACP answer names the tier that served it |
+
+A configured `on` is not proof that a turn ran on the fast tier. Codex applies
+a tier only while its own `fast_mode` feature is enabled, which
+`codex features list` shows on the seat, and what a fast turn counts against
+your plan is Codex's to say: the task still reads `billing: unknown`. Nika
+records the selection; it measures no speed and promises none.
+
+A job on `nika serve` keeps both rows in its journal and sends neither over
+HTTP. From TypeScript,
+[two readers](/sdk/runtime/events#read-the-access-contract-and-its-receipt)
+parse them on a local run.
+
+A program that admits workflows can ask the engine first: an engine that reads
+the key lists `accessServiceTier` in `supportedCapabilities`
+(`nika --sdk-identity`, and `GET /health` on a `nika serve`). An engine
+without the capability refuses the key when it parses the file, and so does an
+editor whose `nika lsp` is older than 0.124.2.
 
 ## The honest receipt
 
