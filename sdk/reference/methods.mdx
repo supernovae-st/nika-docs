@@ -1,6 +1,6 @@
 ---
 title: "SDK method index"
-description: "Every method of @supernovae-st/nika 0.124.2, what it returns, and which transport serves it."
+description: "Every method of @supernovae-st/nika 0.124.3, what it returns, and which transport serves it."
 sidebarTitle: "Method index"
 icon: "list"
 ---
@@ -25,6 +25,7 @@ import { SDK, SourceContract } from "/snippets/_sdk-contract.mdx"
 | `attachRun(id, options?)` | `Promise<NikaRun>` | no | yes |
 | `listWorkflows()` | `Promise<readonly string[]>` | no | yes |
 | `workflow(name)` | `Promise<NikaWorkflowMetadata>` | no | yes |
+| `accessOffer(workflow, options?)` | `Promise<NikaAccessOffer>` | no | yes: what the sessions of the file's declared ACP route offer now, read without a prompt ([Ask what a route offers](/sdk/operations/server-surfaces#ask-what-a-route-offers)) |
 | `schedule(workflow, options)` | `Promise<NikaScheduleApplyResult>` | no | yes ([Schedules](/sdk/remote/schedules)) |
 | `scheduleStatus(id)` | `Promise<NikaScheduleStatus>` | no | yes |
 
@@ -49,7 +50,7 @@ on a server that lists `compileNativeV2`, or `authoringModel` on a local
 engine. `nextCompileRequest(request, outcome, answers)` builds the next round
 from the outcome's questions, and `isNikaCompileHeld(outcome)` tells a
 candidate the verifier held, a preview never to run. The package's
-[compile guide](https://github.com/supernovae-st/nika-client/blob/v0.124.2/docs/compile.md)
+[compile guide](https://github.com/supernovae-st/nika-client/blob/v0.124.3/docs/compile.md)
 covers both doors.
 
 Two functions read a frame instead of calling the engine. From 0.124.2,
@@ -61,6 +62,13 @@ the frame carries no such row, and throw `NikaProtocolError` on a row that is
 present and malformed.
 [Read the access contract and its receipt](/sdk/runtime/events#read-the-access-contract-and-its-receipt)
 shows them on a run.
+
+From 0.124.3, `accessOffer(workflow)` asks a `nika serve` what the sessions
+of a served workflow's own declared ACP route offer now: the models, the
+exact reasoning efforts and the service tiers, read without a prompt. It
+needs a server whose `/health` lists `accessSessionOffer`; on another server,
+and on the local transport, it rejects with `NikaCompatibilityError` before
+any request. The answer authorizes nothing: `run()` is admitted as before.
 
 <Accordion title="Compatibility aliases">
   `nika.events(run)`, `nika.cancel(run)`, `nika.status(run)` and `run.done`

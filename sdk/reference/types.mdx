@@ -99,7 +99,7 @@ interface NikaRunEvent<Outputs> {
 not name arrives there with its `raw` frame untouched; nothing is dropped,
 and no lifecycle meaning is invented for it. Keep a `default` branch in
 reducers; the set is additive. `run.sealed` names a `run_sealed` frame if an
-engine streams one; engine 0.124.2 writes the seal to the run's record only,
+engine streams one; engine 0.124.3 writes the seal to the run's record only,
 so read `result.receipt.sealed` locally or `traceVerify(...).verdict`.
 
 ## Check and cancellation
@@ -292,6 +292,66 @@ during the turn. `readNikaAccessRequirement` and `readNikaAccessSelection`
 return these from a task's terminal frame
 ([Run events](/sdk/runtime/events#read-the-access-contract-and-its-receipt)).
 
+## Access offer
+
+From 0.124.3. What `accessOffer()` returns: the sessions of a served
+workflow's declared ACP route, read without a prompt
+([Ask what a route offers](/sdk/operations/server-surfaces#ask-what-a-route-offers)):
+
+```ts
+interface NikaAccessOfferListing {
+  status: 'offered' | 'not_offered' | 'unobserved'
+  option?: string
+  offered?: string[]
+  omitted?: number
+  current?: string
+  reason?: string
+}
+
+interface NikaAccessOfferRoute {
+  via: string
+  protocol: 'acp'
+  profile: 'completion' | 'agent'
+  tasks: string[]
+  status: 'observed' | 'unavailable'
+  observed_at: string
+  fresh_until: string
+  code?: string
+  reason?: string
+  adapter?: { name?: string; version?: string }
+  model: {
+    requested: string
+    status?: 'confirmed' | 'session_default' | 'legacy_list' | 'not_offered' | 'not_confirmed'
+    current?: string
+    offered?: string[]
+    omitted?: number
+  }
+  effort?: NikaAccessOfferListing
+  service_tier?: NikaAccessOfferListing
+}
+
+interface NikaAccessOffer {
+  schema: 'nika/access-offer@1'
+  workflow: string
+  status: 'read' | 'not_applicable'
+  reason?: string
+  declared?: NikaAccessRequirement
+  prompts_sent: 0
+  routes: NikaAccessOfferRoute[]
+  routes_omitted: number
+}
+
+interface NikaAccessOfferOptions {
+  signal?: AbortSignal
+  timeoutMs?: number
+}
+```
+
+The document is closed: the reader refuses an answer with a key or a word it
+does not know, with `NikaProtocolError`. An observed row carries its
+`model.status` and both listings. An unavailable row carries the `code` a run
+would meet before its prompt.
+
 ## Proof
 
 ```ts
@@ -315,7 +375,7 @@ Locally the verdict is `verified`, or `invalid` (`reason: 'receipt_mismatch'`
 for an unsealed or edited record; no reason when the trace file cannot be
 read). Over HTTP it is the CLI verifier's tier in lower case: `ok` means intact
 but unsigned (`reason: 'unsealed'`), and `unavailable` means the server holds
-no journal for the job. The published 0.124.2 declarations list the same
+no journal for the job. The published 0.124.3 declarations list the same
 words, with the CLI verifier's refusal classes (`unchained` · `empty` ·
 `unreadable` · `refused` · `line-over-long` · `unknown`), and over HTTP a
 verdict that holds always carries its seal tier as `reason` (`sealed` or
@@ -346,6 +406,6 @@ engine-owned fields are additive.
   <SourceContract sdk={SDK} />
 </Accordion>
 
-<Card title="Published type declarations (v0.124.2)" icon="github" href={SDK.sourceCandidate}>
+<Card title="Published type declarations (v0.124.3)" icon="github" href={SDK.sourceCandidate}>
   Review the source of the published declarations.
 </Card>
