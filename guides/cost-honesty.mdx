@@ -105,6 +105,17 @@ same numbers in beginner words —
 - The flag itself is guarded: a non-finite value (`NaN`, `inf`) is
   rejected at parse time — a budget that cannot compare is not a budget.
 
+## Repeated runs on an unpriced API route
+
+A server operator can authorize bounded runs without a fresh cost review
+each time, using `nika serve --cost-policy`. The rule names an exact
+unpriced API route and limits requests, output, request time and runs per
+window. Unknown prices remain unknown. With operator-declared prices,
+the declared worst case must fit every binding ceiling; without them,
+every USD ceiling must be absent. Read
+[Standing cost rules](/sdk/operations/standing-cost-policy) for startup
+syntax, supported routes, admission evidence and recovery.
+
 ## Paid media: priced, refused or unpriced
 
 An image or speech builtin bills its provider the way a model call does, so

@@ -56,6 +56,12 @@ Pin `WorkingDirectory` and `ExecStart`. Provider keys stay in the protected
 environment file. The project source and `.nika/` volume need only the access
 the workflows and evidence policy require.
 
+For unattended jobs on an API route the catalog cannot price, configure
+[standing cost rules](/sdk/operations/standing-cost-policy) in the service's
+startup command. Keep the project `.nika/` durable: its admission-window
+ledger is separate from `--state-root`. A rule bounds requests and run
+frequency; a USD ceiling still needs a known or operator-declared price.
+
 <Note>
   Units emitted by `nika arm --emit systemd` are per-beat timer bridges. They
   are not the service unit for the resident `nika serve` loop.

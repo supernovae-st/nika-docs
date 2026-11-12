@@ -1,0 +1,180 @@
+---
+title: "Standing cost rules"
+description: "Authorize bounded runs on an unpriced API route at server startup, with optional operator-declared prices."
+sidebarTitle: "Standing cost rules"
+icon: "scale-balanced"
+---
+
+import { STATUS } from "/snippets/_status-snapshot.mdx"
+
+`nika serve --cost-policy` lets the server operator authorize repeated runs
+on an exact API route the catalog cannot price. A covered run needs no
+one-time cost review. Requests, output, time and run frequency stay bounded;
+an unknown price stays unknown.
+
+This guide targets the standalone engine ({STATUS.version}). Read that
+engine's `nika serve --help`; an application package can bundle an older
+engine. A rule is server startup configuration, not a `.nika` field, job
+option, or permission a caller grants itself.
+
+## Start with an unpriced rule
+
+Follow the [server quickstart](/sdk/remote/serve-quickstart) to create the
+project, workflow directory and private token file. Configure provider
+credentials in the server's protected environment; the
+[provider catalog](/reference/providers-catalog) names the variables.
+
+For a served workflow using `scaleway/deepseek-v4-flash-0731`, this command
+allows at most one model request per run, 2048 output tokens per request,
+a 120-second request deadline, and 40 admitted runs in any 24-hour window:
+
+```sh
+nika serve --bind 127.0.0.1:8787 \
+  --workflows ./workflows \
+  --token-file .nika/serve.token \
+  --run-cost-ceiling none \
+  --cost-policy 'scaleway/deepseek-v4-flash-0731:requests=1,output-tokens=2048,timeout=120,runs=40/day'
+```
+
+The provider must support the route and the workflow must fit its rule.
+Starting the server does not run a workflow. Submit its served name through
+the usual job API, without a `cost_review` for a covered run.
+
+<Warning>
+  `--run-cost-ceiling none` explicitly removes the default 1 USD per-job
+  ceiling. Without a declared price, every USD ceiling binding the run must
+  be absent, including a project's `ceiling:`. A standing rule overrides no
+  ceiling. To keep a USD ceiling, declare prices instead.
+</Warning>
+
+## Syntax and bounds
+
+```text
+PROVIDER/MODEL:requests=N,output-tokens=N,timeout=SECONDS,runs=N/PERIOD
+```
+
+Repeat `--cost-policy` for distinct routes. Unknown keys, duplicate settings
+and duplicate routes are refused at startup.
+
+| Setting | Meaning and accepted range |
+| --- | --- |
+| `requests` | Maximum physical model requests per run, including authored retries and fan-out: 1–256. The full declared request bound must fit. |
+| `output-tokens` | Maximum output tokens per request: 1–8192. A workflow asking for more is refused. |
+| `timeout` | Maximum seconds per request: 1–120. This is not a whole-run deadline. |
+| `runs` | Admitted runs per rolling window: 1–100000. `PERIOD` is `minute`, `hour`, `day`, `week`, or seconds ending in `s`, from 60 to 2678400 seconds. A day means 86400 seconds, not a midnight reset. |
+| `request-bytes` | Optional maximum serialized request body: 1–1048576 bytes. Omitted, the admitted-request limit is 1048576 bytes. |
+| `input-usd`, `output-usd` | Optional operator-declared USD rates per million tokens. Supply both; each must be finite and between 0 and 1000000, with at least one positive. These are estimates, never a provider invoice. |
+
+A run must have exactly one unknown-cost model route, named by a rule.
+Multiple rules do not combine to admit several unknown-cost routes in one
+run. Matching binds the provider, resolved wire model and exact endpoint
+read at startup; it does not authorize another endpoint or fallback route.
+
+The released unknown-cost transport supports HTTPS OpenAI-compatible text
+routes only. It refuses unsupported adapters, malformed or noncanonical
+endpoints, and routes the catalog already prices. Subscription/ACP access,
+local inference, paid media and MCP tools gain no authority from this
+option. Workflow permits and other execution checks still apply.
+The admitted transport adds no automatic retries; retries authored in the
+workflow must fit the declared request bound.
+
+## Keep a USD ceiling with declared prices
+
+Append both price settings using rates checked for your provider account.
+For example, these are **illustrative rates, not a Scaleway quotation**:
+
+```text
+scaleway/deepseek-v4-flash-0731:requests=1,output-tokens=2048,timeout=120,runs=40/day,request-bytes=65536,input-usd=0.10,output-usd=0.40
+```
+
+Use that rule with a finite `--run-cost-ceiling`, instead of `none`. The
+engine compares the run's declared worst case at its request-size and
+output bounds, using those rates, with every binding ceiling. It refuses
+before dispatch if the amount does not fit. The rule is not itself a USD
+budget, and a declared price does not change the catalog.
+
+Schedules always carry a positive `maxCostUsd`. A scheduled run under a
+standing rule therefore needs declared prices and a worst case that fits
+its schedule and other ceilings. Removing the server default does not
+remove a schedule's ceiling.
+
+## Cost review and application controls
+
+`--cost-policy` does not require or enable `--cost-review`. Add
+`--cost-review` separately to offer one-time reviews for other eligible
+runs. `/health` then advertises `costReviewV1` and `costReviewV2` alongside
+`costStandingPolicyV1`.
+
+On a server offering both, a covered request to a cost-review endpoint
+answers `status: "not_required"` with `standing_policy`. That read reserves
+nothing and counts no run. Submit the same job without `cost_review`;
+admission checks coverage again when it runs. A changed workflow or newly
+full window can still refuse it. Version 1 of the review door does not
+preview coverage for fan-out or authored retries; use version 2 for those.
+
+A console's allowance for **manual approvals** is an application control,
+separate from the engine's `runs=N/PERIOD` bound. Setting that allowance to
+zero disables that application's one-time approval path, not runs under
+a standing rule. This flag changes no application's counter or UI setting.
+
+## Verify admission and spend separately
+
+Probe `/health` for `supportedCapabilities` containing
+`costStandingPolicyV1`, and read the server's
+authenticated `GET /v1/openapi.json` for its composed contract. A server
+without the capability has not advertised this feature.
+
+When a covered job settles, `settlement.cost_admission` records:
+
+- `schema: "nika/cost-admission@1"` and `authority: "standing_policy"`;
+- `price: "unknown"` or `"host_declared"`;
+- `choice.standing.policy`, the `scp-…` identity derived from the rule,
+  and its run-window bounds;
+- the admitted request limits, route and evidence for binding caps.
+
+This explains why the run was allowed. `settlement.spend` describes usage
+separately: an unpriced call never becomes zero dollars. A run that never
+reaches a runtime settlement may have no `cost_admission`; inspect its
+trace and cost journal instead. Receipt integrity is separate from
+admission authority.
+
+From the server's project directory, inspect unknown exposures:
+
+```sh
+nika trace cost --json
+```
+
+## Windows, recovery and refusals
+
+The project records admissions by route in `.nika/standing-cost-runs.json`,
+across restarts. A run that fails after admission still consumes a slot.
+Keep the project's `.nika/` durable alongside job state; `--state-root`
+alone is not a backup of this ledger. Serve one project under one policy:
+different window lengths can prune history a longer rule needs, and
+lengthening a rule cannot recover history a shorter rule already pruned.
+
+| Refusal | Action |
+| --- | --- |
+| Invalid rule or unsupported/priced route at startup | Correct the rule or use ordinary priced admission. A rule is never silently ignored. |
+| Run outside its request/output bounds, or another unknown route | Narrow the workflow or deliberately revise startup policy. |
+| USD ceiling without declared prices, or declared worst case above a ceiling | Declare checked rates and fit the bound, or explicitly remove an applicable optional ceiling. A schedule still needs its own. |
+| Window full | Wait until the oldest admission leaves the window. Restarting does not reset it. |
+| Unreadable ledger or unresolved previous exposure | Preserve records, inspect `nika trace cost --json`, and investigate the provider outcome. Do not delete state to manufacture a clear count. |
+
+`nika trace cost reconcile --help` explains recording an operator
+attestation after investigating an exposure. Reconciliation is not verified
+billing and authorizes no future run. An uncertain request is not proof of
+zero provider charges.
+
+## Change or remove a policy
+
+Changes require a server restart. Stop new submissions and let the resident
+drain with SIGTERM, preserving project and job state. Restart with revised
+flags, or remove `--cost-policy` to remove standing authority. Restore a
+finite `--run-cost-ceiling` if the old configuration used `none`. Keep
+`--cost-review` only if one-time reviews should remain available.
+
+Check the new process's `/health` and contract, then the next job's actual
+admission and outcome. Removing a rule does not cancel an already-running
+request or erase evidence. The [server runbook](/sdk/operations/server-runbook)
+covers supervision; [cost honesty](/guides/cost-honesty) explains pricing.

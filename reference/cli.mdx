@@ -46,6 +46,14 @@ import { CANON } from "/snippets/_canon.mdx";
 | `nika completions <shell>` | Generate shell completions for bash, zsh, fish, elvish or powershell ([setup](/getting-started/installation#shell-completions)) |
 | `nika guard` | The judge behind the agent hooks `nika init` installs: reads a hook payload or a command line, audits every `nika run` it finds, and answers allow or deny without executing anything. Agents never type it |
 
+## `nika serve` cost flags
+
+| Flag | What it does |
+| --- | --- |
+| `--run-cost-ceiling <USD\|none>` | Server default per-job ceiling, 1 USD unless explicitly disarmed with `none`. A standing rule does not override it. |
+| `--cost-review` | Enable the one-time review endpoints; advertised as `costReviewV1` and `costReviewV2`. Separate from a standing rule. |
+| `--cost-policy <RULE>` | Repeatable startup authorization for a named unpriced HTTPS OpenAI-compatible text route: `PROVIDER/MODEL:requests=N,output-tokens=N,timeout=SECONDS,runs=N/PERIOD`. Optional `request-bytes=N` and paired `input-usd=USD,output-usd=USD`. Covered runs need no per-run review; `/health` lists `costStandingPolicyV1`. Without declared prices, every binding USD ceiling must be absent; with them, the declared worst case must fit. See [Standing cost rules](/sdk/operations/standing-cost-policy) for bounds, schedules and recovery. |
+
 ## `nika trace` commands
 
 With no path, they read the workspace's latest trace under `.nika/traces/`.
