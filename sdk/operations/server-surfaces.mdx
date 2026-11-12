@@ -65,6 +65,14 @@ Useful flags beyond these three: `--state-root <dir>` (job state, default
 a reverse proxy) and `--authoring-model <provider/name>` (seat provider
 authoring for `POST /v1/compile`). `nika serve --help` lists every flag.
 
+The standalone engine also supports operator
+[standing cost rules](/sdk/operations/standing-cost-policy):
+`--cost-policy <RULE>` admits bounded runs on a named unpriced API route
+without one-time cost review (`costStandingPolicyV1`). It does not enable
+`--cost-review`, change the server's USD ceiling or authorize other tools.
+Read the running server's capabilities and OpenAPI document before using
+an optional surface; the npm package can bundle an older engine.
+
 ## Ask what a route offers
 
 A workflow file can declare how its model calls travel: `run.access` (`via`,

@@ -115,6 +115,14 @@ The server bounds spend itself:
 - A schedule carries its own `maxCostUsd`, which must be positive
   ([Schedules](/sdk/remote/schedules)).
 
+For an API route the catalog cannot price, the standalone server operator
+can configure a [standing cost rule](/sdk/operations/standing-cost-policy)
+with `--cost-policy`. Covered runs need no one-time review. Without
+operator-declared prices, every binding USD ceiling must be absent; with
+declared prices, the declared worst case must fit. The rule bounds requests,
+output, request time and runs per window; it never turns an unknown price
+into zero or overrides a ceiling.
+
 Catalog prices are estimates, not invoices: your provider meters and bills
 the calls. [Cost honesty](/guides/cost-honesty) explains how `nika check`
 reads them.

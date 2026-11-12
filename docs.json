@@ -312,6 +312,7 @@
               "sdk/operations/server-surfaces",
               "sdk/operations/resident-server",
               "sdk/operations/server-runbook",
+              "sdk/operations/standing-cost-policy",
               "sdk/operations/os-schedulers",
               "sdk/operations/deployment-topologies",
               "sdk/operations/security"
