@@ -3,6 +3,19 @@
   "repository": "supernovae-st/nika",
   "releases": [
     {
+      "tag": "v0.124.4",
+      "name": "v0.124.4",
+      "publishedAt": "2026-11-12T09:58:13Z",
+      "url": "https://github.com/supernovae-st/nika/releases/tag/v0.124.4",
+      "assetCount": 8,
+      "highlights": [
+        "nika serve --cost-policy admits runs on an unpriced route with no per-run cost review.",
+        "A silent adapter reads as unavailable whichever timer is observed first.",
+        "rustix is past its extended-attribute unsoundness advisory."
+      ],
+      "notesSha256": "cfd627104be6dc7a934390a47fc14ef0abe6917d1abed5488f3c2e45bfc3dbaa"
+    },
+    {
       "tag": "v0.124.3",
       "name": "v0.124.3",
       "publishedAt": "2026-11-10T21:26:40Z",
