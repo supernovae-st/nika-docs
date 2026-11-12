@@ -6,9 +6,9 @@
 export const SDK = {
   package: "@supernovae-st/nika",
   source: "https://github.com/supernovae-st/nika-client",
-  sourceVersion: "0.124.3",
-  sourceCandidate: "https://github.com/supernovae-st/nika-client/tree/v0.124.3",
-  engineCandidate: "https://github.com/supernovae-st/nika/releases/tag/v0.124.3",
+  sourceVersion: "0.124.4",
+  sourceCandidate: "https://github.com/supernovae-st/nika-client/tree/v0.124.4",
+  engineCandidate: "https://github.com/supernovae-st/nika/releases/tag/v0.124.4",
   site: "https://nika.sh/sdk",
 }
 
@@ -19,7 +19,9 @@ export const SourceContract = ({ sdk }) => (
     {" "}<a href={sdk.engineCandidate}>bundled engine</a>. A newer engine
     release or SDK main commit does not change an installed package. Use Node.js
     22 or newer, on macOS (arm64, x64) or Linux with glibc (x64, arm64); no
-    global Nika installation is required for local mode.
+    global Nika installation is required for local mode. Versioned transcripts,
+    recordings and measurements keep the release they were captured on;
+    selecting this package release does not re-run those examples.
   </Info>
 )
 
